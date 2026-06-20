@@ -830,6 +830,30 @@ int Settings::folderViewIconSize() {
 void Settings::setFolderViewIconSize(int value) {
     settings->settingsConf->setValue("folderViewIconSize", value);
 }
+
+int Settings::folderViewFontPointSize() {
+    int defaultSize = qMax(QApplication::font().pointSize() - 1, 8);
+    return qBound(6, settings->settingsConf->value("folderViewFontPointSize", defaultSize).toInt(), 48);
+}
+
+void Settings::setFolderViewFontPointSize(int value) {
+    settings->settingsConf->setValue("folderViewFontPointSize", qBound(6, value, 48));
+}
+
+QColor Settings::folderViewLabelBackgroundColor() {
+    QVariant value = settings->settingsConf->value("folderViewLabelBackgroundColor", settings->colorScheme().folderview_hc);
+    QColor color = value.value<QColor>();
+    if(!color.isValid())
+        color = QColor(value.toString());
+    if(!color.isValid())
+        color = settings->colorScheme().folderview_hc;
+    return color;
+}
+
+void Settings::setFolderViewLabelBackgroundColor(QColor color) {
+    if(color.isValid())
+        settings->settingsConf->setValue("folderViewLabelBackgroundColor", color);
+}
 //------------------------------------------------------------------------------
 bool Settings::expandImage() {
     return settings->settingsConf->value("expandImage", false).toBool();

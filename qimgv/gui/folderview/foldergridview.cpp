@@ -100,7 +100,7 @@ void FolderGridView::hide() {
 }
 
 void FolderGridView::setShowLabels(bool mode) {
-    ThumbnailStyle style = mode ? THUMB_NORMAL : THUMB_SIMPLE;
+    ThumbnailStyle style = mode ? THUMB_NORMAL_CENTERED : THUMB_SIMPLE;
     for(int i = 0; i < thumbnails.count(); i++)
         thumbnails.at(i)->setThumbStyle(style);
     updateLayout();
@@ -114,6 +114,19 @@ void FolderGridView::setShowInfo(bool mode) {
     updateLayout();
     fitSceneToContents();
     focusOnSelection();
+}
+
+void FolderGridView::setLabelFontPointSize(int size) {
+    for(int i = 0; i < thumbnails.count(); i++)
+        thumbnails.at(i)->setLabelFontPointSize(size);
+    updateLayout();
+    fitSceneToContents();
+    focusOnSelection();
+}
+
+void FolderGridView::setLabelBackgroundColor(const QColor &color) {
+    for(int i = 0; i < thumbnails.count(); i++)
+        thumbnails.at(i)->setLabelBackgroundColor(color);
 }
 
 void FolderGridView::focusOnSelection() {
@@ -301,9 +314,11 @@ ThumbnailWidget* FolderGridView::createThumbnailWidget() {
     widget->setFixedBackgroundRect(true);
     widget->setThumbnailTopMargin(4);
     widget->setCellHeightRatio(0.93);
-    ThumbnailStyle style = (settings->folderViewMode() == FV_SIMPLE) ? THUMB_SIMPLE : THUMB_NORMAL;
+    ThumbnailStyle style = (settings->folderViewMode() == FV_SIMPLE) ? THUMB_SIMPLE : THUMB_NORMAL_CENTERED;
     widget->setThumbStyle(style);
     widget->setShowInfo(settings->folderViewShowInfo());
+    widget->setLabelFontPointSize(settings->folderViewFontPointSize());
+    widget->setLabelBackgroundColor(settings->folderViewLabelBackgroundColor());
     widget->setThumbnailSize(this->mThumbnailSize); // TODO: constructor
     widget->setThumbnailAreaSize(folderGridThumbnailWidth(this->mThumbnailSize), this->mThumbnailSize);
     return widget;
@@ -397,7 +412,16 @@ void FolderGridView::wheelEvent(QWheelEvent *event) {
         else if(event->pixelDelta().y() < 0 || event->angleDelta().y() < 0)
             zoomOut();
     } else {
-        ThumbnailView::wheelEvent(event);
+        event->accept();
+        int delta = event->pixelDelta().y();
+        if(!delta)
+            delta = event->angleDelta().y();
+        if(!delta)
+            return;
+        if(settings->enableSmoothScroll())
+            scrollSmooth(delta, 0.85, 1.15, true);
+        else
+            scrollPrecise(delta);
     }
 }
 

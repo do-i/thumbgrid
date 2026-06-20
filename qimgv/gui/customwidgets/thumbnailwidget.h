@@ -56,6 +56,8 @@ public:
     void setFixedBackgroundRect(bool mode);
     void setThumbnailTopMargin(int margin);
     void setCellHeightRatio(qreal heightOverWidth);
+    void setLabelFontPointSize(int size);
+    void setLabelBackgroundColor(const QColor &color);
     int thumbnailSize();
     void reset();
     void unsetThumbnail();
@@ -65,9 +67,11 @@ protected:
     void drawThumbnail(QPainter* painter, const QPixmap *pixmap);
     void drawIcon(QPainter *painter, const QPixmap *pixmap);
     void drawHighlight(QPainter *painter);
+    void drawHighlightBorder(QPainter *painter);
     void drawHoverBg(QPainter *painter);
     void drawHoverHighlight(QPainter *painter);
     void drawLabel(QPainter *painter);
+    void drawThumbnailShadow(QPainter *painter, const QPixmap *pixmap);
     void drawDropHover(QPainter *painter);
     void drawSingleLineText(QPainter *painter, QRect rect, QString text, const QColor &color);
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event) override;
@@ -87,6 +91,7 @@ protected:
     int mThumbnailSize, mThumbnailWidth, mThumbnailHeight, mThumbnailTopMargin, padding, marginX, marginY, labelSpacing, textHeight;
     qreal mCellHeightRatio = 0.0;
     QRectF bgRect, mBoundingRect;
+    QColor mLabelBackgroundColor;
     QFont font, fontInfo;
     QRect drawRectCentered, nameRect, infoRect;
     qreal dpr = 1.0;

@@ -1238,6 +1238,10 @@ bool Core::loadPath(QString path) {
     QFileInfo fileInfo(path);
     if(fileInfo.isDir()) {
         state.directoryPath = QDir(path).absolutePath();
+        if(QDir::cleanPath(state.directoryPath) == QDir::cleanPath(QDir::rootPath())) {
+            mw->showMessage(tr("Cannot view root folder."), 2200);
+            return false;
+        }
     } else if(fileInfo.isFile()) {
         state.directoryPath = fileInfo.absolutePath();
         if(model->directoryPath() != state.directoryPath)
@@ -1309,6 +1313,10 @@ void Core::loadParentDir() {
         return;
     stopSlideshow();
     QFileInfo currentDir(model->directoryPath());
+    if(QDir::cleanPath(currentDir.absoluteFilePath()) == QDir::cleanPath(QDir::rootPath())) {
+        mw->showMessage(tr("Already at root folder."), 2200);
+        return;
+    }
     QFileInfo parentDir(currentDir.absolutePath());
     if(parentDir.exists() && parentDir.isReadable())
         loadPath(parentDir.absoluteFilePath());

@@ -56,6 +56,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->colorSelectorFullscreen->setDescription(tr("Fullscreen mode background"));
     ui->colorSelectorFolderview->setDescription(tr("FolderView background"));
     ui->colorSelectorFolderviewPanel->setDescription(tr("FolderView top panel"));
+    ui->folderViewLabelBackgroundColorSelector->setDescription(tr("Folder view filename background"));
     ui->colorSelectorText->setDescription(tr("Text color"));
     ui->colorSelectorWidget->setDescription(tr("Widget background"));
     ui->colorSelectorWidgetBorder->setDescription(tr("Widget border"));
@@ -234,6 +235,9 @@ void SettingsDialog::readSettings() {
     else
         ui->startInFolderViewCheckBox->setChecked(false);
     ui->folderViewTopBarCheckBox->setChecked(settings->folderViewTopBar());
+    ui->folderViewFontSizeSpinBox->setValue(settings->folderViewFontPointSize());
+    QColor folderViewLabelBackground = settings->folderViewLabelBackgroundColor();
+    ui->folderViewLabelBackgroundColorSelector->setColor(folderViewLabelBackground);
 
     if(settings->folderEndAction() == FOLDER_END_NO_ACTION)
         ui->folderEndNoAction->setChecked(true);
@@ -370,6 +374,8 @@ void SettingsDialog::saveSettings() {
     else
         settings->setDefaultViewMode(MODE_DOCUMENT);
     settings->setFolderViewTopBar(ui->folderViewTopBarCheckBox->isChecked());
+    settings->setFolderViewFontPointSize(ui->folderViewFontSizeSpinBox->value());
+    settings->setFolderViewLabelBackgroundColor(ui->folderViewLabelBackgroundColorSelector->color());
 
     if(ui->folderEndNoAction->isChecked())
         settings->setFolderEndAction(FOLDER_END_NO_ACTION);

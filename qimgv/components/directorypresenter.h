@@ -71,6 +71,7 @@ private:
     std::shared_ptr<Thumbnail> createParentDirThumbnail(int size);
     QList<QImage> dirPreviewImages(const QString &path, int targetSize) const;
     void drawDirPreview(QPixmap &pixmap, const QList<QImage> &images) const;
+    int realObjectCount() const;
     QString statusText() const;
     void emitStatusText();
 };
