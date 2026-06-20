@@ -68,6 +68,8 @@ private:
     bool hasParentDir() const;
     int parentOffset() const;
     QString parentDirPath() const;
-    std::shared_ptr<Thumbnail> createDirThumbnail(const QString &name, const QString &info, int size);
+    std::shared_ptr<Thumbnail> createDirThumbnail(const QString &path, const QString &name, const QString &info, int size);
     std::shared_ptr<Thumbnail> createParentDirThumbnail(int size);
+    QList<QImage> dirPreviewImages(const QString &path, int targetSize) const;
+    void drawDirPreview(QPixmap &pixmap, const QList<QImage> &images) const;
 };

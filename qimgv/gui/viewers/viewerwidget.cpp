@@ -603,7 +603,18 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
             }
         }
     }
-    actionManager->processEvent(event);
+    if(actionManager->processEvent(event))
+        return;
+    if(currentWidget == IMAGEVIEWER && event->modifiers() == Qt::NoModifier) {
+        if(event->key() == Qt::Key_Left) {
+            actionManager->invokeAction("prevImage");
+            return;
+        }
+        if(event->key() == Qt::Key_Right) {
+            actionManager->invokeAction("nextImage");
+            return;
+        }
+    }
 }
 
 void ViewerWidget::leaveEvent(QEvent *event) {

@@ -65,6 +65,7 @@ install_required_deps() {
             qtbase5-dev
             qttools5-dev
             qttools5-dev-tools
+            qt5-image-formats-plugins
             libqt5svg5-dev
         )
         confirm_install "apt-get" "${packages[@]}" || return 0
@@ -76,6 +77,7 @@ install_required_deps() {
             cmake
             pkgconf-pkg-config
             qt5-qtbase-devel
+            qt5-qtimageformats
             qt5-qtsvg-devel
             qt5-qttools-devel
         )
@@ -87,6 +89,7 @@ install_required_deps() {
             cmake
             pkgconf
             qt5-base
+            qt5-imageformats
             qt5-svg
             qt5-tools
         )
@@ -98,6 +101,7 @@ install_required_deps() {
             cmake
             pkg-config
             libqt5-qtbase-devel
+            libqt5-qtimageformats
             libqt5-qtsvg-devel
             libqt5-qttools-devel
         )
@@ -109,6 +113,7 @@ install_required_deps() {
             cmake
             pkgconf
             qt5-qtbase-dev
+            qt5-qtimageformats
             qt5-qtsvg-dev
             qt5-qttools-dev
         )
@@ -124,7 +129,7 @@ install_required_deps() {
         brew install "${packages[@]}"
     else
         printf 'No supported package manager found.\n' >&2
-        printf 'Install a C++ compiler, CMake, pkg-config, Qt Widgets, Qt Svg, Qt PrintSupport, and Qt LinguistTools.\n' >&2
+        printf 'Install a C++ compiler, CMake, pkg-config, Qt Widgets, Qt ImageFormats, Qt Svg, Qt PrintSupport, and Qt LinguistTools.\n' >&2
         return 1
     fi
 }

@@ -1,5 +1,7 @@
 ﻿#include "directorypresenter.h"
 #include <QDir>
+#include <QFileInfo>
+#include <QImageReader>
 
 DirectoryPresenter::DirectoryPresenter(QObject *parent) : QObject(parent), mShowDirs(false) {
     connect(&thumbnailer, &Thumbnailer::thumbnailReady, this, &DirectoryPresenter::onThumbnailReady);
@@ -220,7 +222,7 @@ void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool c
         if(i < 0)
             continue;
         if(i < model->dirCount()) {
-            view->setThumbnail(i + offset, createDirThumbnail(model->dirNameAt(i), "Folder", size));
+            view->setThumbnail(i + offset, createDirThumbnail(model->dirPathAt(i), model->dirNameAt(i), "Folder", size));
         } else {
             QString path = model->filePathAt(i - model->dirCount());
             thumbnailer.getThumbnailAsync(path, size, crop, force);
@@ -357,7 +359,7 @@ QString DirectoryPresenter::parentDirPath() const {
     return "";
 }
 
-std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString &name, const QString &info, int size) {
+std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString &path, const QString &name, const QString &info, int size) {
     QSvgRenderer svgRenderer;
     svgRenderer.load(QString(":/res/icons/common/other/folder32-scalable.svg"));
     int factor = (size * 0.90f) / svgRenderer.defaultSize().width();
@@ -368,8 +370,83 @@ std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString 
     pixPainter.end();
 
     ImageLib::recolor(*pixmap, settings->colorScheme().icons);
+    drawDirPreview(*pixmap, dirPreviewImages(path, size));
 
     return std::shared_ptr<Thumbnail>(new Thumbnail(name, info, size, std::shared_ptr<QPixmap>(pixmap)));
+}
+
+QList<QImage> DirectoryPresenter::dirPreviewImages(const QString &path, int targetSize) const {
+    QList<QImage> images;
+    QDir dir(path);
+    if(!dir.exists() || !dir.isReadable())
+        return images;
+
+    QDir::Filters filters = QDir::Files | QDir::Readable | QDir::NoDotAndDotDot;
+    if(settings->showHiddenFiles())
+        filters |= QDir::Hidden;
+
+    const int maxScannedEntries = 80;
+    int scanned = 0;
+    QFileInfoList entries = dir.entryInfoList(filters, QDir::Name | QDir::IgnoreCase);
+    for(const QFileInfo &entry : entries) {
+        if(scanned++ >= maxScannedEntries || images.count() >= 4)
+            break;
+
+        QImageReader reader(entry.absoluteFilePath());
+        if(!reader.canRead())
+            continue;
+
+        QSize originalSize = reader.size();
+        if(originalSize.isValid()) {
+            QSize scaledSize = originalSize.scaled(targetSize, targetSize, Qt::KeepAspectRatioByExpanding);
+            reader.setScaledSize(scaledSize);
+        }
+
+        QImage image = reader.read();
+        if(!image.isNull())
+            images << image;
+    }
+    return images;
+}
+
+void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &images) const {
+    if(images.isEmpty())
+        return;
+
+    int gutter = qMax(2, pixmap.width() / 28);
+    QRect previewRect(pixmap.width() * 0.16,
+                      pixmap.height() * 0.30,
+                      pixmap.width() * 0.69,
+                      pixmap.height() * 0.52);
+
+    int columns = images.count() == 1 ? 1 : 2;
+    int rows = images.count() <= 2 ? 1 : 2;
+    int cellWidth = (previewRect.width() - gutter * (columns - 1)) / columns;
+    int cellHeight = (previewRect.height() - gutter * (rows - 1)) / rows;
+    if(cellWidth <= 0 || cellHeight <= 0)
+        return;
+
+    QPainter painter(&pixmap);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    painter.setPen(QPen(settings->colorScheme().folderview, qMax(1, pixmap.width() / 42)));
+    painter.setBrush(Qt::NoBrush);
+
+    for(int i = 0; i < images.count(); i++) {
+        int row = i / columns;
+        int column = i % columns;
+        QRect cell(previewRect.left() + column * (cellWidth + gutter),
+                   previewRect.top() + row * (cellHeight + gutter),
+                   cellWidth,
+                   cellHeight);
+
+        QImage scaled = images.at(i).scaled(cell.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+        QRect source((scaled.width() - cell.width()) / 2,
+                     (scaled.height() - cell.height()) / 2,
+                     cell.width(),
+                     cell.height());
+        painter.drawImage(cell, scaled, source);
+        painter.drawRect(cell.adjusted(0, 0, -1, -1));
+    }
 }
 
 std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size) {
