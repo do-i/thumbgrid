@@ -13,10 +13,12 @@ FVOptionsPopup::FVOptionsPopup(QWidget *parent) :
     ui->viewSimpleButton->setText(QObject::tr("Simple"));
     ui->viewExtendedButton->setText(QObject::tr("Extended"));
     ui->viewFoldersButton->setText(QObject::tr("Extended + Folders"));
+    ui->showInfoButton->setText(QObject::tr("Show descriptions"));
 
     connect(ui->viewSimpleButton,   &ContextMenuItem::pressed, this, &FVOptionsPopup::selectSimpleView);
     connect(ui->viewExtendedButton, &ContextMenuItem::pressed, this, &FVOptionsPopup::selectExtendedView);
     connect(ui->viewFoldersButton,  &ContextMenuItem::pressed, this, &FVOptionsPopup::selectFoldersView);
+    connect(ui->showInfoButton,     &ContextMenuItem::pressed, this, &FVOptionsPopup::toggleShowInfo);
 
     // force size recalculation
     this->adjustSize();
@@ -50,6 +52,10 @@ void FVOptionsPopup::setFoldersView() {
     ui->viewFoldersButton->setIconPath(":res/icons/common/buttons/panel-small/add-new12.png");
 }
 
+void FVOptionsPopup::setShowInfo(bool mode) {
+    ui->showInfoButton->setIconPath(mode ? ":res/icons/common/buttons/panel-small/add-new12.png" : "");
+}
+
 void FVOptionsPopup::selectSimpleView() {
     setSimpleView();
     emit viewModeSelected(FV_SIMPLE);
@@ -63,6 +69,11 @@ void FVOptionsPopup::selectExtendedView() {
 void FVOptionsPopup::selectFoldersView() {
     setFoldersView();
     emit viewModeSelected(FV_EXT_FOLDERS);
+}
+
+void FVOptionsPopup::toggleShowInfo() {
+    settings->setFolderViewShowInfo(!settings->folderViewShowInfo());
+    settings->sendChangeNotification();
 }
 
 void FVOptionsPopup::paintEvent(QPaintEvent *event) {
@@ -91,6 +102,7 @@ void FVOptionsPopup::setViewMode(FolderViewMode mode) {
 
 void FVOptionsPopup::readSettings() {
     setViewMode(settings->folderViewMode());
+    setShowInfo(settings->folderViewShowInfo());
 }
 
 void FVOptionsPopup::showAt(QPoint pos) {

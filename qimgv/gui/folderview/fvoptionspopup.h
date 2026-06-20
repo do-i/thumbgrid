@@ -36,10 +36,12 @@ private slots:
     void selectSimpleView();
     void selectExtendedView();
     void selectFoldersView();
+    void toggleShowInfo();
 
 private:
     Ui::FVOptionsPopup *ui;
     void setViewMode(FolderViewMode mode);
+    void setShowInfo(bool mode);
     void setSimpleView();
     void setExtendedView();
     void setFoldersView();

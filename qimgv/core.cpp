@@ -64,6 +64,7 @@ void Core::initGui() {
 void Core::attachModel(DirectoryModel *_model) {
     model.reset(_model);
     thumbPanelPresenter.setModel(model);
+    folderViewPresenter.setShowParentDir(true);
     folderViewPresenter.setModel(model);
     bool showDirs = (settings->folderViewMode() == FV_EXT_FOLDERS);
     folderViewPresenter.setShowDirs(showDirs);
@@ -203,6 +204,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::print, this, &Core::print);
     connect(actionManager, &ActionManager::toggleFullscreenInfoBar, this, &Core::toggleFullscreenInfoBar);
     connect(actionManager, &ActionManager::pasteFile, this, &Core::openFromClipboard);
+    connect(actionManager, &ActionManager::toggleFolderViewTopBar, this, &Core::toggleFolderViewTopBar);
 }
 
 void Core::loadTranslation() {
@@ -421,8 +423,10 @@ void Core::reloadImage(QString filePath) {
 }
 
 void Core::enableFolderView() {
-    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+    if(mw->currentViewMode() == MODE_FOLDERVIEW) {
+        loadParentDir();
         return;
+    }
     stopSlideshow();
     mw->enableFolderView();
 }
@@ -432,7 +436,8 @@ void Core::enableDocumentView() {
         return;
     mw->enableDocumentView();
     if(model && model->fileCount() && state.currentFilePath == "") {
-        auto selected = folderViewPresenter.selectedPaths().first();
+        auto selection = folderViewPresenter.selectedPaths();
+        auto selected = selection.isEmpty() ? "" : selection.first();
         // if it is a directory - ignore and just open the first file
         if(model->containsFile(selected))
             loadPath(selected);
@@ -446,6 +451,11 @@ void Core::toggleFolderView() {
         enableDocumentView();
     else
         enableFolderView();
+}
+
+void Core::toggleFolderViewTopBar() {
+    settings->setFolderViewTopBar(!settings->folderViewTopBar());
+    settings->sendChangeNotification();
 }
 
 // TODO: also copy selection from folder view?
@@ -1080,9 +1090,10 @@ void Core::discardEdits() {
 QString Core::selectedPath() {
     if(!model)
         return "";
-    else if(mw->currentViewMode() == MODE_FOLDERVIEW)
-        return folderViewPresenter.selectedPaths().last();
-    else
+    else if(mw->currentViewMode() == MODE_FOLDERVIEW) {
+        auto selection = folderViewPresenter.selectedPaths();
+        return selection.isEmpty() ? "" : selection.last();
+    } else
         return state.currentFilePath;
 }
 

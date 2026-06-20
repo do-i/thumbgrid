@@ -102,6 +102,14 @@ void FolderGridView::setShowLabels(bool mode) {
     focusOnSelection();
 }
 
+void FolderGridView::setShowInfo(bool mode) {
+    for(int i = 0; i < thumbnails.count(); i++)
+        thumbnails.at(i)->setShowInfo(mode);
+    updateLayout();
+    fitSceneToContents();
+    focusOnSelection();
+}
+
 void FolderGridView::focusOnSelection() {
     if(!thumbnails.count() || lastSelected() == -1)
         return;
@@ -284,6 +292,7 @@ ThumbnailWidget* FolderGridView::createThumbnailWidget() {
     widget->setPadding(8);
     ThumbnailStyle style = (settings->folderViewMode() == FV_SIMPLE) ? THUMB_SIMPLE : THUMB_NORMAL;
     widget->setThumbStyle(style);
+    widget->setShowInfo(settings->folderViewShowInfo());
     widget->setThumbnailSize(this->mThumbnailSize); // TODO: constructor
     return widget;
 }

@@ -207,6 +207,8 @@ public:
     DefaultCropAction defaultCropAction();
     bool placesPanel();
     void setPlacesPanel(bool mode);
+    bool folderViewTopBar();
+    void setFolderViewTopBar(bool mode);
 
     QStringList bookmarks();
     void setBookmarks(QStringList paths);
@@ -251,6 +253,8 @@ public:
 
     FolderViewMode folderViewMode();
     void setFolderViewMode(FolderViewMode mode);
+    bool folderViewShowInfo();
+    void setFolderViewShowInfo(bool mode);
 
     const QMultiMap<QByteArray, QByteArray> videoFormats() const;
 

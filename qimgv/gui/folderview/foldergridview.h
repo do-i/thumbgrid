@@ -35,6 +35,7 @@ public slots:
     void zoomOut();
     void setThumbnailSize(int newSize);
     void setShowLabels(bool mode);
+    void setShowInfo(bool mode);
     virtual void focusOn(int index) override;
     virtual void focusOnSelection() override;
     virtual void setDragHover(int index) override;
