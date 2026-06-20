@@ -18,6 +18,7 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
     marginY(2),
     labelSpacing(9),
     textHeight(5),
+    mLabelBackgroundColor(settings->folderViewLabelBackgroundColor()),
     thumbStyle(THUMB_SIMPLE)
 {
     setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -26,6 +27,7 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
         setCacheMode(QGraphicsItem::DeviceCoordinateCache);
     setAcceptHoverEvents(true);
     font.setBold(false);
+    font.setPointSize(settings->folderViewFontPointSize());
     QFontMetrics fm(font);
     textHeight = fm.height();
 }
@@ -160,6 +162,28 @@ void ThumbnailWidget::setShowInfo(bool mode) {
         setupTextLayout();
         updateBackgroundRect();
         updateGeometry();
+        update();
+    }
+}
+
+void ThumbnailWidget::setLabelFontPointSize(int size) {
+    size = qBound(6, size, 48);
+    if(font.pointSize() != size) {
+        font.setPointSize(size);
+        QFontMetrics fm(font);
+        textHeight = fm.height();
+        updateBoundingRect();
+        updateThumbnailDrawPosition();
+        setupTextLayout();
+        updateBackgroundRect();
+        updateGeometry();
+        update();
+    }
+}
+
+void ThumbnailWidget::setLabelBackgroundColor(const QColor &color) {
+    if(color.isValid() && mLabelBackgroundColor != color) {
+        mLabelBackgroundColor = color;
         update();
     }
 }
@@ -312,6 +336,8 @@ void ThumbnailWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
     }
     if(isDropHovered())
         drawDropHover(painter);
+    if(isHighlighted())
+        drawHighlightBorder(painter);
 }
 
 void ThumbnailWidget::drawHighlight(QPainter *painter) {
@@ -321,11 +347,20 @@ void ThumbnailWidget::drawHighlight(QPainter *painter) {
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setOpacity(0.40f * op);
         painter->fillRect(bgRect, settings->colorScheme().accent);
+        painter->setOpacity(op);
+        painter->setRenderHints(hints);
+    }
+}
+
+void ThumbnailWidget::drawHighlightBorder(QPainter *painter) {
+    if(isHighlighted()) {
+        auto hints = painter->renderHints();
+        auto op = painter->opacity();
+        painter->setRenderHint(QPainter::Antialiasing);
         painter->setOpacity(0.70f * op);
         QPen pen(settings->colorScheme().accent, 2);
         painter->setPen(pen);
         painter->drawRect(bgRect.adjusted(1,1,-1,-1)); // 2px pen
-        //painter->drawRect(highlightRect.adjusted(0.5,0.5,-0.5,-0.5)); // 1px pen
         painter->setOpacity(op);
         painter->setRenderHints(hints);
     }
@@ -349,6 +384,7 @@ void ThumbnailWidget::drawHoverHighlight(QPainter *painter) {
 
 void ThumbnailWidget::drawLabel(QPainter *painter) {
     if(thumbnail) {
+        painter->fillRect(nameRect.adjusted(-4, -1, 4, 1), mLabelBackgroundColor);
         drawSingleLineText(painter, nameRect, thumbnail->name(), settings->colorScheme().text_hc2);
         if(mShowInfo) {
             auto op = painter->opacity();
@@ -411,9 +447,30 @@ void ThumbnailWidget::drawDropHover(QPainter *painter) {
 }
 
 void ThumbnailWidget::drawThumbnail(QPainter* painter, const QPixmap *pixmap) {
-    if(!thumbnail->hasAlphaChannel())
-        painter->fillRect(drawRectCentered.adjusted(3,3,3,3), QColor(0,0,0, 60));
+    drawThumbnailShadow(painter, pixmap);
     painter->drawPixmap(drawRectCentered, *pixmap);
+}
+
+void ThumbnailWidget::drawThumbnailShadow(QPainter *painter, const QPixmap *pixmap) {
+    auto op = painter->opacity();
+    if(thumbnail->hasAlphaChannel()) {
+        QPixmap shadow(*pixmap);
+        QPainter shadowPainter(&shadow);
+        shadowPainter.setCompositionMode(QPainter::CompositionMode_SourceIn);
+        shadowPainter.fillRect(shadow.rect(), QColor(0, 0, 0, 90));
+        shadowPainter.end();
+
+        painter->setOpacity(op * 0.32f);
+        painter->drawPixmap(drawRectCentered.translated(2, 3), shadow);
+        painter->setOpacity(op * 0.18f);
+        painter->drawPixmap(drawRectCentered.translated(0, 1), shadow);
+    } else {
+        painter->setOpacity(op * 0.34f);
+        painter->fillRect(drawRectCentered.translated(2, 3), QColor(0, 0, 0, 90));
+        painter->setOpacity(op * 0.16f);
+        painter->fillRect(drawRectCentered.translated(0, 1), QColor(0, 0, 0, 90));
+    }
+    painter->setOpacity(op);
 }
 
 void ThumbnailWidget::drawIcon(QPainter* painter, const QPixmap *pixmap) {
@@ -458,12 +515,11 @@ void ThumbnailWidget::updateThumbnailDrawPosition() {
             pixmapSize = thumbnail->pixmap()->size() / qApp->devicePixelRatio();
         else
             pixmapSize = thumbnail->pixmap()->size().scaled(mThumbnailSize, mThumbnailSize, Qt::KeepAspectRatio);
-        bool verticalFit = (pixmapSize.height() >= pixmapSize.width());
         topLeft.setX((width()  - pixmapSize.width())  / 2.0);
         if(thumbStyle == THUMB_SIMPLE)
             topLeft.setY((height() - pixmapSize.height()) / 2.0);
-        else if(thumbStyle == THUMB_NORMAL_CENTERED && !verticalFit)
-            topLeft.setY((height() - pixmapSize.height()) / 2.0 - textHeight);
+        else if(thumbStyle == THUMB_NORMAL_CENTERED)
+            topLeft.setY(padding + marginY + (mThumbnailHeight - pixmapSize.height()) / 2.0);
         else { // THUMB_NORMAL - snap thumbnail to the filename label
             int topAligned = padding + marginY + mThumbnailTopMargin;
             int bottomAligned = padding + marginY + mThumbnailHeight - pixmapSize.height();

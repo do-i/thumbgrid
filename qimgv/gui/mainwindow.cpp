@@ -877,7 +877,7 @@ void MW::onInfoUpdated() {
 
     QString windowTitle;
     if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
-        windowTitle = tr("Folder view");
+        windowTitle = info.directoryPath.isEmpty() ? tr("Folder view") : info.directoryPath;
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
         folderView->setStatusText(folderStatusText);
     } else if(info.fileName.isEmpty()) {
@@ -885,7 +885,7 @@ void MW::onInfoUpdated() {
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
         infoBarWindowed->setStatusText(tr("No file opened."));
     } else {
-        windowTitle = info.fileName;
+        windowTitle = info.filePath;
         if(settings->windowTitleExtendedInfo()) {
             windowTitle.prepend(posString + "  ");
             if(!resString.isEmpty())

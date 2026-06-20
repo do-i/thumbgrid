@@ -111,6 +111,8 @@ void FolderView::readSettings() {
     ui->thumbnailGrid->setThumbnailSize(settings->folderViewIconSize());
     ui->thumbnailGrid->setShowLabels((settings->folderViewMode() != FV_SIMPLE));
     ui->thumbnailGrid->setShowInfo(settings->folderViewShowInfo());
+    ui->thumbnailGrid->setLabelFontPointSize(settings->folderViewFontPointSize());
+    ui->thumbnailGrid->setLabelBackgroundColor(settings->folderViewLabelBackgroundColor());
     ui->topBar->setVisible(settings->folderViewTopBar());
     ui->togglePlacesPanelButton->setChecked(settings->placesPanel());
 

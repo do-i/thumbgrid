@@ -17,6 +17,29 @@ namespace {
         }
         return QString::number(value, 'f', 2) + " " + units.at(unit);
     }
+
+    QRect visibleAlphaBounds(const QImage &image) {
+        if(image.isNull())
+            return QRect();
+
+        int left = image.width();
+        int top = image.height();
+        int right = -1;
+        int bottom = -1;
+        for(int y = 0; y < image.height(); y++) {
+            for(int x = 0; x < image.width(); x++) {
+                if(image.pixelColor(x, y).alpha() == 0)
+                    continue;
+                left = qMin(left, x);
+                top = qMin(top, y);
+                right = qMax(right, x);
+                bottom = qMax(bottom, y);
+            }
+        }
+        if(right < left || bottom < top)
+            return QRect();
+        return QRect(QPoint(left, top), QPoint(right, bottom));
+    }
 }
 
 DirectoryPresenter::DirectoryPresenter(QObject *parent) : QObject(parent), mShowDirs(false) {
@@ -229,7 +252,6 @@ QString DirectoryPresenter::statusText() const {
     if(!view || !model)
         return "";
 
-    int objectCount = parentOffset() + (mShowDirs ? model->totalCount() : model->fileCount());
     QList<QString> paths = selectedPaths();
     qint64 selectedBytes = 0;
     QStringList selectedNames;
@@ -242,7 +264,7 @@ QString DirectoryPresenter::statusText() const {
         selectedDetails << info.fileName() + " " + formattedSize(info.size());
     }
 
-    QString text = QString::number(objectCount) + " object(s) / " +
+    QString text = QString::number(realObjectCount()) + " object(s) / " +
                    QString::number(paths.count()) + " object(s) selected";
     if(paths.count())
         text += " [" + formattedSize(selectedBytes) + "]";
@@ -305,7 +327,10 @@ void DirectoryPresenter::onItemActivated(int absoluteIndex) {
         return;
     int offset = parentOffset();
     if(absoluteIndex == 0 && offset) {
-        emit dirActivated(parentDirPath());
+        QString parentPath = parentDirPath();
+        if(parentPath.isEmpty() || parentPath == model->directoryPath())
+            return;
+        emit dirActivated(parentPath);
         return;
     }
     absoluteIndex -= offset;
@@ -408,6 +433,8 @@ bool DirectoryPresenter::hasParentDir() const {
     if(!mShowParentDir || !model || model->source() != SOURCE_DIRECTORY)
         return false;
     QDir dir(model->directoryPath());
+    if(QDir::cleanPath(dir.absolutePath()) == QDir::cleanPath(QDir::rootPath()))
+        return false;
     return dir.cdUp();
 }
 
@@ -419,9 +446,17 @@ QString DirectoryPresenter::parentDirPath() const {
     if(!model)
         return "";
     QDir dir(model->directoryPath());
+    if(QDir::cleanPath(dir.absolutePath()) == QDir::cleanPath(QDir::rootPath()))
+        return "";
     if(dir.cdUp())
         return dir.absolutePath();
     return "";
+}
+
+int DirectoryPresenter::realObjectCount() const {
+    if(!model)
+        return 0;
+    return mShowDirs ? model->totalCount() : model->fileCount();
 }
 
 std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString &path, const QString &name, const QString &info, int size) {
@@ -515,15 +550,20 @@ std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size
     QPixmap source(":/res/icons/common/buttons/panel/up16@2x.png");
     if(source.isNull())
         source = QPixmap(":/res/icons/common/buttons/panel/up16.png");
+    source.setDevicePixelRatio(1.0);
     ImageLib::recolor(source, settings->colorScheme().icons);
 
-    QPixmap *pixmap = new QPixmap(size, size);
+    QPixmap *pixmap = new QPixmap(qRound(size * 1.10f), qRound(size * 1.10f));
     pixmap->fill(Qt::transparent);
 
     QSize iconSize(size * 0.55f, size * 0.55f);
     QPixmap scaled = source.scaled(iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    scaled.setDevicePixelRatio(1.0);
+    QRect visibleBounds = visibleAlphaBounds(scaled.toImage());
+    QRectF bounds = visibleBounds.isValid() ? QRectF(visibleBounds) : QRectF(scaled.rect());
+    QPointF drawPos = QRectF(pixmap->rect()).center() - bounds.center();
     QPainter painter(pixmap);
-    painter.drawPixmap((size - scaled.width()) / 2, (size - scaled.height()) / 2, scaled);
+    painter.drawPixmap(drawPos, scaled);
     painter.end();
 
     return std::shared_ptr<Thumbnail>(new Thumbnail("..", "Parent folder", size, std::shared_ptr<QPixmap>(pixmap)));

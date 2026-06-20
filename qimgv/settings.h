@@ -170,6 +170,10 @@ public:
     void saveScripts(const QMap<QString, Script> &scripts);
     int folderViewIconSize();
     void setFolderViewIconSize(int value);
+    int folderViewFontPointSize();
+    void setFolderViewFontPointSize(int value);
+    QColor folderViewLabelBackgroundColor();
+    void setFolderViewLabelBackgroundColor(QColor color);
 
     bool firstRun();
     void setFirstRun(bool mode);
