@@ -471,7 +471,7 @@ std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString 
     ImageLib::recolor(*pixmap, settings->colorScheme().icons);
     drawDirPreview(*pixmap, dirPreviewImages(path, size));
 
-    return std::shared_ptr<Thumbnail>(new Thumbnail(name, info, size, std::shared_ptr<QPixmap>(pixmap)));
+    return std::shared_ptr<Thumbnail>(new Thumbnail(name, info, size, std::shared_ptr<QPixmap>(pixmap), false));
 }
 
 QList<QImage> DirectoryPresenter::dirPreviewImages(const QString &path, int targetSize) const {
@@ -566,5 +566,5 @@ std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size
     painter.drawPixmap(drawPos, scaled);
     painter.end();
 
-    return std::shared_ptr<Thumbnail>(new Thumbnail("..", "Parent folder", size, std::shared_ptr<QPixmap>(pixmap)));
+    return std::shared_ptr<Thumbnail>(new Thumbnail("..", "Parent folder", size, std::shared_ptr<QPixmap>(pixmap), false));
 }

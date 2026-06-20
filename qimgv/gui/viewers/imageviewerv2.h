@@ -168,8 +168,6 @@ private:
     ImageFocusPoint focusIn1to1;
     ScalingFilter mScalingFilter;
 
-    QPixmap *checkboard;
-
     void zoomAnchored(float newScale);
     void fitNormal();
     void fitWidth();

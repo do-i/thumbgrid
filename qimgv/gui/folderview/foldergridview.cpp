@@ -312,6 +312,8 @@ ThumbnailWidget* FolderGridView::createThumbnailWidget() {
     widget->setMargins(1,1);
     widget->setLabelSpacing(5);
     widget->setFixedBackgroundRect(true);
+    widget->setCellBorderVisible(true);
+    widget->setTransparencyGridVisible(true);
     widget->setThumbnailTopMargin(4);
     widget->setCellHeightRatio(0.93);
     ThumbnailStyle style = (settings->folderViewMode() == FV_SIMPLE) ? THUMB_SIMPLE : THUMB_NORMAL_CENTERED;

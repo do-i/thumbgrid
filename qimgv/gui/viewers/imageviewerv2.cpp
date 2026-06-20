@@ -1,4 +1,5 @@
 #include "imageviewerv2.h"
+#include "utils/imagelib.h"
 
 ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
     pixmap(nullptr),
@@ -56,8 +57,6 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
     scaleTimer = new QTimer(this);
     scaleTimer->setSingleShot(true);
     scaleTimer->setInterval(80);
-
-    checkboard = new QPixmap(":res/icons/common/other/checkerboard.png");
 
     lastTouchpadScroll.start();
 
@@ -703,7 +702,7 @@ void ImageViewerV2::drawBackground(QPainter *painter, const QRectF &rect) {
     QGraphicsView::drawBackground(painter, rect);
     if(!isDisplaying() || !transparencyGrid || !pixmap->hasAlphaChannel())
         return;
-    painter->drawTiledPixmap(pixmapItem.sceneBoundingRect(), *checkboard);
+    ImageLib::drawTransparencyGrid(painter, pixmapItem.sceneBoundingRect());
 }
 
 // simple pan behavior (cursor stops at the screen edges)

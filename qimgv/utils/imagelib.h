@@ -33,6 +33,7 @@ class ImageLib {
 
         static QImage *scaled_Qt(const QImage *source, QSize destSize, bool smooth);
         static QImage *scaled_Qt(std::shared_ptr<const QImage> source, QSize destSize, bool smooth);
+        static void drawTransparencyGrid(QPainter *painter, const QRectF &rect);
 
 #ifdef USE_OPENCV
         static QImage *scaled_CV(std::shared_ptr<const QImage> source, QSize destSize, cv::InterpolationFlags filter, int sharpen);
