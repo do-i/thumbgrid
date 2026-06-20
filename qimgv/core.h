@@ -166,6 +166,7 @@ private slots:
     void enableDocumentView();
     void enableFolderView();
     void toggleFolderView();
+    void toggleFolderViewTopBar();
     void toggleSlideshow();
     void onPlaybackFinished();
     void setFoldersDisplay(bool mode);

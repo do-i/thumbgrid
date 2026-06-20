@@ -233,6 +233,7 @@ void SettingsDialog::readSettings() {
         ui->startInFolderViewCheckBox->setChecked(true);
     else
         ui->startInFolderViewCheckBox->setChecked(false);
+    ui->folderViewTopBarCheckBox->setChecked(settings->folderViewTopBar());
 
     if(settings->folderEndAction() == FOLDER_END_NO_ACTION)
         ui->folderEndNoAction->setChecked(true);
@@ -368,6 +369,7 @@ void SettingsDialog::saveSettings() {
         settings->setDefaultViewMode(MODE_FOLDERVIEW);
     else
         settings->setDefaultViewMode(MODE_DOCUMENT);
+    settings->setFolderViewTopBar(ui->folderViewTopBarCheckBox->isChecked());
 
     if(ui->folderEndNoAction->isChecked())
         settings->setFolderEndAction(FOLDER_END_NO_ACTION);

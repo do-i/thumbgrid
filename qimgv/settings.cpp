@@ -465,6 +465,14 @@ void Settings::setFolderViewMode(FolderViewMode mode) {
     settings->settingsConf->setValue("folderViewMode", mode);
 }
 //------------------------------------------------------------------------------
+bool Settings::folderViewShowInfo() {
+    return settings->settingsConf->value("folderViewShowInfo", false).toBool();
+}
+
+void Settings::setFolderViewShowInfo(bool mode) {
+    settings->settingsConf->setValue("folderViewShowInfo", mode);
+}
+//------------------------------------------------------------------------------
 ThumbPanelStyle Settings::thumbPanelStyle() {
     int mode = settings->settingsConf->value("thumbPanelStyle", 1).toInt();
     if(mode < 0 || mode > 1)
@@ -751,6 +759,14 @@ bool Settings::placesPanel() {
 
 void Settings::setPlacesPanel(bool mode) {
     settings->stateConf->setValue("placesPanel", mode);
+}
+//------------------------------------------------------------------------------
+bool Settings::folderViewTopBar() {
+    return settings->settingsConf->value("folderViewTopBar", false).toBool();
+}
+
+void Settings::setFolderViewTopBar(bool mode) {
+    settings->settingsConf->setValue("folderViewTopBar", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanelBookmarksExpanded() {

@@ -7,6 +7,7 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
     highlighted(false),
     hovered(false),
     dropHovered(false),
+    mShowInfo(true),
     mThumbnailSize(100),
     padding(5),
     marginX(2),
@@ -84,6 +85,18 @@ void ThumbnailWidget::setThumbStyle(ThumbnailStyle _style) {
     }
 }
 
+void ThumbnailWidget::setShowInfo(bool mode) {
+    if(mShowInfo != mode) {
+        mShowInfo = mode;
+        updateBoundingRect();
+        updateThumbnailDrawPosition();
+        setupTextLayout();
+        updateBackgroundRect();
+        updateGeometry();
+        update();
+    }
+}
+
 void ThumbnailWidget::updateGeometry() {
     QGraphicsWidget::updateGeometry();
 }
@@ -122,7 +135,10 @@ void ThumbnailWidget::setupTextLayout() {
         nameRect = QRect(padding + marginX,
                           padding + marginY + mThumbnailSize + labelSpacing,
                           mThumbnailSize, textHeight);
-        infoRect = nameRect.adjusted(0, textHeight + 2, 0, textHeight + 2);
+        if(mShowInfo)
+            infoRect = nameRect.adjusted(0, textHeight + 2, 0, textHeight + 2);
+        else
+            infoRect = QRect();
     }
 }
 
@@ -172,7 +188,7 @@ void ThumbnailWidget::updateBoundingRect() {
                            mThumbnailSize + (padding + marginX) * 2,
                            mThumbnailSize + (padding + marginY) * 2);
     if(thumbStyle != THUMB_SIMPLE)
-        mBoundingRect.adjust(0, 0, 0, labelSpacing + textHeight * 2);
+        mBoundingRect.adjust(0, 0, 0, labelSpacing + textHeight * (mShowInfo ? 2 : 1));
 }
 
 qreal ThumbnailWidget::width() {
@@ -261,10 +277,12 @@ void ThumbnailWidget::drawHoverHighlight(QPainter *painter) {
 void ThumbnailWidget::drawLabel(QPainter *painter) {
     if(thumbnail) {
         drawSingleLineText(painter, nameRect, thumbnail->name(), settings->colorScheme().text_hc2);
-        auto op = painter->opacity();
-        painter->setOpacity(op * 0.62f);
-        drawSingleLineText(painter, infoRect, thumbnail->info(), settings->colorScheme().text_hc2);
-        painter->setOpacity(op);
+        if(mShowInfo) {
+            auto op = painter->opacity();
+            painter->setOpacity(op * 0.62f);
+            drawSingleLineText(painter, infoRect, thumbnail->info(), settings->colorScheme().text_hc2);
+            painter->setOpacity(op);
+        }
     }
 }
 

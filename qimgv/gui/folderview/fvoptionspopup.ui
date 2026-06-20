@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>210</width>
-    <height>120</height>
+    <height>146</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="minimumSize">
    <size>
     <width>210</width>
-    <height>120</height>
+    <height>146</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -88,6 +88,9 @@
    </item>
    <item>
     <widget class="ContextMenuItem" name="viewFoldersButton" native="true"/>
+   </item>
+   <item>
+    <widget class="ContextMenuItem" name="showInfoButton" native="true"/>
    </item>
   </layout>
  </widget>

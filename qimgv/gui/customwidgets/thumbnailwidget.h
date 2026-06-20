@@ -48,6 +48,7 @@ public:
     virtual QRectF geometry() const;
     QSizeF effectiveSizeHint(Qt::SizeHint which, const QSizeF &constraint = QSizeF()) const;
     void setThumbStyle(ThumbnailStyle _style);
+    void setShowInfo(bool mode);
     void setPadding(int _padding);
     void setMargins(int _marginX, int _marginY);
     int thumbnailSize();
@@ -76,7 +77,7 @@ protected:
     void updateDpr(qreal newDpr);
 
     std::shared_ptr<Thumbnail> thumbnail;
-    bool highlighted, hovered, dropHovered;
+    bool highlighted, hovered, dropHovered, mShowInfo;
     int mThumbnailSize, padding, marginX, marginY, labelSpacing, textHeight;
     QRectF bgRect, mBoundingRect;
     QFont font, fontInfo;

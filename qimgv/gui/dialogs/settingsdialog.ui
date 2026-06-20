@@ -481,6 +481,13 @@
                       </property>
                      </widget>
                     </item>
+                    <item>
+                     <widget class="QCheckBox" name="folderViewTopBarCheckBox">
+                      <property name="text">
+                       <string>Show folder view top bar</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                  </layout>
@@ -4068,7 +4075,7 @@
                </layout>
               </item>
               <item>
-               <widget class="QWidget" name="widget_31" native="true">
+               <widget class="QWidget" name="widget_trackpad_separator" native="true">
                 <property name="accessibleName">
                  <string notr="true">SLine</string>
                 </property>
