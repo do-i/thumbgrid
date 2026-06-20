@@ -21,6 +21,7 @@ public:
 
 public slots:
     void setInfo(QString position, QString fileName, QString info);
+    void setStatusText(QString text);
 protected:
     void paintEvent(QPaintEvent *event);
     void wheelEvent(QWheelEvent *event);

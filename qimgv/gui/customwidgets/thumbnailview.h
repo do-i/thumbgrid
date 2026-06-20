@@ -73,6 +73,7 @@ signals:
     void draggedToBookmarks(QList<int>) override;
     void draggedOver(int) override;
     void droppedInto(const QMimeData*, QObject*, int) override;
+    void selectionChanged();
 
 private:
     QTimer loadTimer;

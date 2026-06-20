@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gui/folderview/folderview.h"
+#include "gui/panels/infobar/infobarproxy.h"
 #include <QMutexLocker>
 
 struct FolderViewStateBuffer {
@@ -34,6 +35,8 @@ public slots:
     void addItem();
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
+    void setStatusText(QString text);
+    void setStatusFooterVisible(bool mode);
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -50,10 +53,14 @@ signals:
     void moveUrlsRequested(QList<QString>, QString path);
     void droppedInto(const QMimeData*, QObject*, int) override;
     void draggedOver(int) override;
+    void selectionChanged();
 
 private:
     std::shared_ptr<FolderView> folderView;
+    std::shared_ptr<InfoBarProxy> statusFooter;
     QVBoxLayout layout;
     FolderViewStateBuffer stateBuf;
     QMutex m;
+    QString statusText;
+    bool statusFooterVisible = false;
 };

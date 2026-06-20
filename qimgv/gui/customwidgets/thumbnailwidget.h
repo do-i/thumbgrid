@@ -55,6 +55,7 @@ public:
     void setThumbnailAreaSize(int width, int height);
     void setFixedBackgroundRect(bool mode);
     void setThumbnailTopMargin(int margin);
+    void setCellHeightRatio(qreal heightOverWidth);
     int thumbnailSize();
     void reset();
     void unsetThumbnail();
@@ -78,11 +79,13 @@ protected:
     bool isHovered();
     void updateBackgroundRect();
     void updateThumbnailDrawPosition();
+    void updateThumbnailHeightForCellRatio();
     void updateDpr(qreal newDpr);
 
     std::shared_ptr<Thumbnail> thumbnail;
     bool highlighted, hovered, dropHovered, mShowInfo, mFixedBackgroundRect;
     int mThumbnailSize, mThumbnailWidth, mThumbnailHeight, mThumbnailTopMargin, padding, marginX, marginY, labelSpacing, textHeight;
+    qreal mCellHeightRatio = 0.0;
     QRectF bgRect, mBoundingRect;
     QFont font, fontInfo;
     QRect drawRectCentered, nameRect, infoRect;

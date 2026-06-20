@@ -88,6 +88,7 @@ signals:
     void toggleLockZoom();
     void toggleLockView();
     void showScriptSettings();
+    void scaleChanged();
 
 public slots:
     bool showVideo(QString file);

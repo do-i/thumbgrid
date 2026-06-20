@@ -92,4 +92,5 @@ void Actions::init() {
     mActions.insert("toggleFullscreenInfoBar", QVersionNumber(1,0,0));
     mActions.insert("pasteFile", QVersionNumber(1,0,3));
     mActions.insert("toggleFolderViewTopBar", QVersionNumber(1,0,3));
+    mActions.insert("toggleStatusFooter", QVersionNumber(1,0,3));
 }

@@ -41,6 +41,7 @@ signals:
     void fileActivated(QString filePath);
     void draggedOut(QList<QString>);
     void droppedInto(QList<QString>, QString);
+    void statusTextChanged(QString text);
 
 public slots:
     void disconnectView();
@@ -53,6 +54,7 @@ private slots:
     void onItemActivated(int absoluteIndex);
     void onDraggedOut();
     void onDraggedOver(int index);
+    void onSelectionChanged();
 
     void onDroppedInto(const QMimeData *data, QObject *source, int targetIndex);
 private:
@@ -69,4 +71,6 @@ private:
     std::shared_ptr<Thumbnail> createParentDirThumbnail(int size);
     QList<QImage> dirPreviewImages(const QString &path, int targetSize) const;
     void drawDirPreview(QPixmap &pixmap, const QList<QImage> &images) const;
+    QString statusText() const;
+    void emitStatusText();
 };

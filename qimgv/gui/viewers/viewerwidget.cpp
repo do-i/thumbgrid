@@ -142,6 +142,7 @@ void ViewerWidget::disableVideoPlayer() {
 }
 
 void ViewerWidget::onScaleChanged(qreal scale) {
+    emit scaleChanged();
     if(!this->isVisible())
         return;
     if(scale != 1.0f) {

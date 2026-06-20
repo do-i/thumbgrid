@@ -135,6 +135,7 @@ private slots:
     void discardEdits();
     void toggleCropPanel();
     void toggleFullscreenInfoBar();
+    void toggleStatusFooter();
     void requestSavePath();
     void saveCurrentFile();
     void saveCurrentFileAs(QString);
