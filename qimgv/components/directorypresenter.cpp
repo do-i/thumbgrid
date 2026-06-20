@@ -362,11 +362,11 @@ QString DirectoryPresenter::parentDirPath() const {
 std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString &path, const QString &name, const QString &info, int size) {
     QSvgRenderer svgRenderer;
     svgRenderer.load(QString(":/res/icons/common/other/folder32-scalable.svg"));
-    int factor = (size * 0.90f) / svgRenderer.defaultSize().width();
-    QPixmap *pixmap = new QPixmap(svgRenderer.defaultSize() * factor);
+    QSize pixmapSize(qRound(size * 1.10f), qRound(size * 0.825f));
+    QPixmap *pixmap = new QPixmap(pixmapSize);
     pixmap->fill(Qt::transparent);
     QPainter pixPainter(pixmap);
-    svgRenderer.render(&pixPainter);
+    svgRenderer.render(&pixPainter, QRectF(QPointF(0, 0), pixmapSize));
     pixPainter.end();
 
     ImageLib::recolor(*pixmap, settings->colorScheme().icons);
@@ -413,11 +413,11 @@ void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &im
     if(images.isEmpty())
         return;
 
-    int gutter = qMax(2, pixmap.width() / 28);
-    QRect previewRect(pixmap.width() * 0.16,
-                      pixmap.height() * 0.30,
-                      pixmap.width() * 0.69,
-                      pixmap.height() * 0.52);
+    int gutter = qMax(2, pixmap.width() / 30);
+    QRect previewRect(pixmap.width() * 0.12,
+                      pixmap.height() * 0.29,
+                      pixmap.width() * 0.76,
+                      pixmap.height() * 0.53);
 
     int columns = images.count() == 1 ? 1 : 2;
     int rows = images.count() <= 2 ? 1 : 2;
@@ -428,8 +428,6 @@ void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &im
 
     QPainter painter(&pixmap);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
-    painter.setPen(QPen(settings->colorScheme().folderview, qMax(1, pixmap.width() / 42)));
-    painter.setBrush(Qt::NoBrush);
 
     for(int i = 0; i < images.count(); i++) {
         int row = i / columns;
@@ -445,7 +443,6 @@ void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &im
                      cell.width(),
                      cell.height());
         painter.drawImage(cell, scaled, source);
-        painter.drawRect(cell.adjusted(0, 0, -1, -1));
     }
 }
 
