@@ -8,9 +8,11 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
     hovered(false),
     dropHovered(false),
     mShowInfo(true),
+    mFixedBackgroundRect(false),
     mThumbnailSize(100),
     mThumbnailWidth(100),
     mThumbnailHeight(100),
+    mThumbnailTopMargin(0),
     padding(5),
     marginX(2),
     marginY(2),
@@ -87,6 +89,24 @@ void ThumbnailWidget::setLabelSpacing(int _labelSpacing) {
         setupTextLayout();
         updateBackgroundRect();
         updateGeometry();
+        update();
+    }
+}
+
+void ThumbnailWidget::setFixedBackgroundRect(bool mode) {
+    if(mFixedBackgroundRect != mode) {
+        mFixedBackgroundRect = mode;
+        updateBackgroundRect();
+        update();
+    }
+}
+
+void ThumbnailWidget::setThumbnailTopMargin(int margin) {
+    margin = qMax(0, margin);
+    if(mThumbnailTopMargin != margin) {
+        mThumbnailTopMargin = margin;
+        updateThumbnailDrawPosition();
+        updateBackgroundRect();
         update();
     }
 }
@@ -174,6 +194,11 @@ void ThumbnailWidget::setupTextLayout() {
 }
 
 void ThumbnailWidget::updateBackgroundRect() {
+    if(mFixedBackgroundRect) {
+        bgRect = boundingRect().adjusted(marginX, marginY, -marginX, -marginY);
+        return;
+    }
+
     bool verticalFit = (drawRectCentered.height() >= drawRectCentered.width());
     if(thumbStyle == THUMB_NORMAL && !verticalFit) {
         bgRect.setBottom(height() - marginY);
@@ -422,8 +447,11 @@ void ThumbnailWidget::updateThumbnailDrawPosition() {
             topLeft.setY((height() - pixmapSize.height()) / 2.0);
         else if(thumbStyle == THUMB_NORMAL_CENTERED && !verticalFit)
             topLeft.setY((height() - pixmapSize.height()) / 2.0 - textHeight);
-        else // THUMB_NORMAL - snap thumbnail to the filename label
-            topLeft.setY(padding + marginY + mThumbnailHeight - pixmapSize.height());
+        else { // THUMB_NORMAL - snap thumbnail to the filename label
+            int topAligned = padding + marginY + mThumbnailTopMargin;
+            int bottomAligned = padding + marginY + mThumbnailHeight - pixmapSize.height();
+            topLeft.setY(qMax(topAligned, bottomAligned));
+        }
         drawRectCentered = QRect(topLeft, pixmapSize);
     }
 }

@@ -414,10 +414,11 @@ void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &im
         return;
 
     int gutter = qMax(2, pixmap.width() / 30);
-    QRect previewRect(pixmap.width() * 0.12,
-                      pixmap.height() * 0.29,
-                      pixmap.width() * 0.76,
-                      pixmap.height() * 0.53);
+    int bodyTop = qRound(pixmap.height() * 0.125f);
+    QRect previewRect(gutter,
+                      bodyTop + gutter,
+                      pixmap.width() - gutter * 2,
+                      pixmap.height() - bodyTop - gutter * 2);
 
     int columns = images.count() == 1 ? 1 : 2;
     int rows = images.count() <= 2 ? 1 : 2;
