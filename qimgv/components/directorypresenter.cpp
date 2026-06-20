@@ -360,14 +360,13 @@ QString DirectoryPresenter::parentDirPath() const {
 }
 
 std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString &path, const QString &name, const QString &info, int size) {
-    QSvgRenderer svgRenderer;
-    svgRenderer.load(QString(":/res/icons/common/other/folder32-scalable.svg"));
-    QSize pixmapSize(qRound(size * 1.10f), qRound(size * 0.825f));
-    QPixmap *pixmap = new QPixmap(pixmapSize);
-    pixmap->fill(Qt::transparent);
-    QPainter pixPainter(pixmap);
-    svgRenderer.render(&pixPainter, QRectF(QPointF(0, 0), pixmapSize));
-    pixPainter.end();
+    QPixmap source(":/res/icons/common/other/folder.png");
+    if(source.isNull())
+        source = QPixmap(":/res/icons/common/other/folder96.png");
+
+    QSize pixmapSize(qRound(size * 1.10f),
+                     qRound(size * 1.10f * source.height() / static_cast<qreal>(source.width())));
+    QPixmap *pixmap = new QPixmap(source.scaled(pixmapSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
 
     ImageLib::recolor(*pixmap, settings->colorScheme().icons);
     drawDirPreview(*pixmap, dirPreviewImages(path, size));

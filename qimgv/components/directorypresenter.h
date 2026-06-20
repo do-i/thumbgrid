@@ -8,9 +8,6 @@
 #include "sharedresources.h"
 #include <QMimeData>
 
-//tmp
-#include <QtSvg/QSvgRenderer>
-
 class DirectoryPresenter : public QObject {
     Q_OBJECT
 public:
