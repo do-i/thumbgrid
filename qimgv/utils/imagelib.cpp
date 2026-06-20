@@ -8,6 +8,18 @@ void ImageLib::recolor(QPixmap &pixmap, QColor color) {
     p.drawRect(pixmap.rect());
 }
 
+void ImageLib::drawTransparencyGrid(QPainter *painter, const QRectF &rect) {
+    static const QPixmap pattern = []() {
+        QPixmap pixmap(16, 16);
+        pixmap.fill(QColor(242, 242, 242));
+        QPainter patternPainter(&pixmap);
+        patternPainter.fillRect(0, 0, 8, 8, QColor(218, 218, 218));
+        patternPainter.fillRect(8, 8, 8, 8, QColor(218, 218, 218));
+        return pixmap;
+    }();
+    painter->drawTiledPixmap(rect, pattern);
+}
+
 QImage *ImageLib::rotatedRaw(const QImage *src, int grad) {
     if(!src)
         return new QImage();

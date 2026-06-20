@@ -54,6 +54,8 @@ public:
     void setLabelSpacing(int _labelSpacing);
     void setThumbnailAreaSize(int width, int height);
     void setFixedBackgroundRect(bool mode);
+    void setCellBorderVisible(bool mode);
+    void setTransparencyGridVisible(bool mode);
     void setThumbnailTopMargin(int margin);
     void setCellHeightRatio(qreal heightOverWidth);
     void setLabelFontPointSize(int size);
@@ -70,7 +72,11 @@ protected:
     void drawHighlightBorder(QPainter *painter);
     void drawHoverBg(QPainter *painter);
     void drawHoverHighlight(QPainter *painter);
+    void drawCellBorder(QPainter *painter);
+    void drawTransparencyGrid(QPainter *painter);
     void drawLabel(QPainter *painter);
+    QRectF labelBackgroundRect() const;
+    int labelBlockHeight() const;
     void drawThumbnailShadow(QPainter *painter, const QPixmap *pixmap);
     void drawDropHover(QPainter *painter);
     void drawSingleLineText(QPainter *painter, QRect rect, QString text, const QColor &color);
@@ -87,7 +93,7 @@ protected:
     void updateDpr(qreal newDpr);
 
     std::shared_ptr<Thumbnail> thumbnail;
-    bool highlighted, hovered, dropHovered, mShowInfo, mFixedBackgroundRect;
+    bool highlighted, hovered, dropHovered, mShowInfo, mFixedBackgroundRect, mCellBorderVisible, mTransparencyGridVisible;
     int mThumbnailSize, mThumbnailWidth, mThumbnailHeight, mThumbnailTopMargin, padding, marginX, marginY, labelSpacing, textHeight;
     qreal mCellHeightRatio = 0.0;
     QRectF bgRect, mBoundingRect;

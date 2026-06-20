@@ -9,6 +9,8 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
     dropHovered(false),
     mShowInfo(true),
     mFixedBackgroundRect(false),
+    mCellBorderVisible(false),
+    mTransparencyGridVisible(false),
     mThumbnailSize(100),
     mThumbnailWidth(100),
     mThumbnailHeight(100),
@@ -100,6 +102,20 @@ void ThumbnailWidget::setFixedBackgroundRect(bool mode) {
     if(mFixedBackgroundRect != mode) {
         mFixedBackgroundRect = mode;
         updateBackgroundRect();
+        update();
+    }
+}
+
+void ThumbnailWidget::setCellBorderVisible(bool mode) {
+    if(mCellBorderVisible != mode) {
+        mCellBorderVisible = mode;
+        update();
+    }
+}
+
+void ThumbnailWidget::setTransparencyGridVisible(bool mode) {
+    if(mTransparencyGridVisible != mode) {
+        mTransparencyGridVisible = mode;
         update();
     }
 }
@@ -223,9 +239,17 @@ void ThumbnailWidget::unsetThumbnail() {
 
 void ThumbnailWidget::setupTextLayout() {
     if(thumbStyle != THUMB_SIMPLE) {
-        nameRect = QRect(padding + marginX,
-                          padding + marginY + mThumbnailHeight + labelSpacing,
-                          mThumbnailWidth, textHeight);
+        if(mCellBorderVisible) {
+            QRectF labelRect = labelBackgroundRect();
+            nameRect = QRect(qRound(labelRect.left()),
+                             qRound(labelRect.top()),
+                             qRound(labelRect.width()),
+                             textHeight);
+        } else {
+            nameRect = QRect(padding + marginX,
+                             padding + marginY + mThumbnailHeight + labelSpacing,
+                             mThumbnailWidth, textHeight);
+        }
         if(mShowInfo)
             infoRect = nameRect.adjusted(0, textHeight + 2, 0, textHeight + 2);
         else
@@ -334,6 +358,8 @@ void ThumbnailWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
         if(thumbStyle != THUMB_SIMPLE)
             drawLabel(painter);
     }
+    if(mCellBorderVisible)
+        drawCellBorder(painter);
     if(isDropHovered())
         drawDropHover(painter);
     if(isHighlighted())
@@ -382,9 +408,27 @@ void ThumbnailWidget::drawHoverHighlight(QPainter *painter) {
     painter->setCompositionMode(mode);
 }
 
+void ThumbnailWidget::drawCellBorder(QPainter *painter) {
+    auto hints = painter->renderHints();
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    QPen pen(settings->colorScheme().widget_border, 1);
+    pen.setCosmetic(true);
+    painter->setPen(pen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(bgRect.adjusted(0.5, 0.5, -0.5, -0.5));
+    painter->setRenderHints(hints);
+}
+
+void ThumbnailWidget::drawTransparencyGrid(QPainter *painter) {
+    ImageLib::drawTransparencyGrid(painter, drawRectCentered);
+}
+
 void ThumbnailWidget::drawLabel(QPainter *painter) {
     if(thumbnail) {
-        painter->fillRect(nameRect.adjusted(-4, -1, 4, 1), mLabelBackgroundColor);
+        if(mCellBorderVisible)
+            painter->fillRect(labelBackgroundRect(), mLabelBackgroundColor);
+        else
+            painter->fillRect(nameRect.adjusted(-4, -1, 4, 1), mLabelBackgroundColor);
         drawSingleLineText(painter, nameRect, thumbnail->name(), settings->colorScheme().text_hc2);
         if(mShowInfo) {
             auto op = painter->opacity();
@@ -393,6 +437,21 @@ void ThumbnailWidget::drawLabel(QPainter *painter) {
             painter->setOpacity(op);
         }
     }
+}
+
+QRectF ThumbnailWidget::labelBackgroundRect() const {
+    if(!mCellBorderVisible)
+        return QRectF(nameRect.adjusted(-4, -1, 4, 1));
+
+    int blockHeight = labelBlockHeight();
+    return QRectF(marginX,
+                  mBoundingRect.height() - marginY - blockHeight,
+                  mBoundingRect.width() - marginX * 2,
+                  blockHeight);
+}
+
+int ThumbnailWidget::labelBlockHeight() const {
+    return textHeight * (mShowInfo ? 2 : 1) + (mShowInfo ? 2 : 0);
 }
 
 void ThumbnailWidget::drawSingleLineText(QPainter *painter, QRect rect, QString text, const QColor &color) {
@@ -448,6 +507,8 @@ void ThumbnailWidget::drawDropHover(QPainter *painter) {
 
 void ThumbnailWidget::drawThumbnail(QPainter* painter, const QPixmap *pixmap) {
     drawThumbnailShadow(painter, pixmap);
+    if(mTransparencyGridVisible && thumbnail->hasAlphaChannel() && thumbnail->transparencyGridEligible())
+        drawTransparencyGrid(painter);
     painter->drawPixmap(drawRectCentered, *pixmap);
 }
 
