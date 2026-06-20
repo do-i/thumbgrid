@@ -34,6 +34,7 @@ public:
 
     bool showDirs();
     void setShowDirs(bool mode);
+    void setShowParentDir(bool mode);
 
     QList<QString> selectedPaths() const;
 
@@ -62,4 +63,11 @@ private:
     std::shared_ptr<DirectoryModel> model = nullptr;
     Thumbnailer thumbnailer;
     bool mShowDirs;
+    bool mShowParentDir = false;
+
+    bool hasParentDir() const;
+    int parentOffset() const;
+    QString parentDirPath() const;
+    std::shared_ptr<Thumbnail> createDirThumbnail(const QString &name, const QString &info, int size);
+    std::shared_ptr<Thumbnail> createParentDirThumbnail(int size);
 };

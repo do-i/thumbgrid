@@ -1,4 +1,5 @@
 ﻿#include "directorypresenter.h"
+#include <QDir>
 
 DirectoryPresenter::DirectoryPresenter(QObject *parent) : QObject(parent), mShowDirs(false) {
     connect(&thumbnailer, &Thumbnailer::thumbnailReady, this, &DirectoryPresenter::onThumbnailReady);
@@ -21,7 +22,7 @@ void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> _view) {
         return;
     view = _view;
     if(model)
-        view->populate(mShowDirs ? model->totalCount() : model->fileCount());
+        view->populate(parentOffset() + (mShowDirs ? model->totalCount() : model->fileCount()));
     connect(dynamic_cast<QObject *>(view.get()), SIGNAL(itemActivated(int)),
             this, SLOT(onItemActivated(int)));
     connect(dynamic_cast<QObject *>(view.get()), SIGNAL(thumbnailsRequested(QList<int>, int, bool, bool)),
@@ -59,7 +60,7 @@ void DirectoryPresenter::reloadModel() {
 void DirectoryPresenter::populateView() {
     if(!model || !view)
         return;
-    view->populate(mShowDirs ? model->totalCount() : model->fileCount());
+    view->populate(parentOffset() + (mShowDirs ? model->totalCount() : model->fileCount()));
     selectAndFocus(0);
 }
 
@@ -73,7 +74,7 @@ void DirectoryPresenter::onFileRemoved(QString filePath, int index) {
     Q_UNUSED(filePath)
     if(!view)
         return;
-    view->removeItem(mShowDirs ? index + model->dirCount() : index);
+    view->removeItem(parentOffset() + (mShowDirs ? index + model->dirCount() : index));
 }
 
 void DirectoryPresenter::onFileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo) {
@@ -82,8 +83,11 @@ void DirectoryPresenter::onFileRenamed(QString fromPath, int indexFrom, QString 
     if(!view)
         return;
     if(mShowDirs) {
-        indexFrom += model->dirCount();
-        indexTo += model->dirCount();
+        indexFrom += parentOffset() + model->dirCount();
+        indexTo += parentOffset() + model->dirCount();
+    } else {
+        indexFrom += parentOffset();
+        indexTo += parentOffset();
     }
     auto oldSelection = view->selection();
     view->removeItem(indexFrom);
@@ -103,21 +107,21 @@ void DirectoryPresenter::onFileAdded(QString filePath) {
     if(!view)
         return;
     int index = model->indexOfFile(filePath);
-    view->insertItem(mShowDirs ? model->dirCount() + index : index);
+    view->insertItem(parentOffset() + (mShowDirs ? model->dirCount() + index : index));
 }
 
 void DirectoryPresenter::onFileModified(QString filePath) {
     if(!view)
         return;
     int index = model->indexOfFile(filePath);
-    view->reloadItem(mShowDirs ? model->dirCount() + index : index);
+    view->reloadItem(parentOffset() + (mShowDirs ? model->dirCount() + index : index));
 }
 
 void DirectoryPresenter::onDirRemoved(QString dirPath, int index) {
     Q_UNUSED(dirPath)
     if(!view || !mShowDirs)
         return;
-    view->removeItem(index);
+    view->removeItem(parentOffset() + index);
 }
 
 void DirectoryPresenter::onDirRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo) {
@@ -125,6 +129,8 @@ void DirectoryPresenter::onDirRenamed(QString fromPath, int indexFrom, QString t
     Q_UNUSED(toPath)
     if(!view || !mShowDirs)
         return;
+    indexFrom += parentOffset();
+    indexTo += parentOffset();
     auto oldSelection = view->selection();
     view->removeItem(indexFrom);
     view->insertItem(indexTo);
@@ -143,7 +149,7 @@ void DirectoryPresenter::onDirAdded(QString dirPath) {
     if(!view || !mShowDirs)
         return;
     int index = model->indexOfDir(dirPath);
-    view->insertItem(index);
+    view->insertItem(parentOffset() + index);
 }
 
 bool DirectoryPresenter::showDirs() {
@@ -157,12 +163,23 @@ void DirectoryPresenter::setShowDirs(bool mode) {
     populateView();
 }
 
+void DirectoryPresenter::setShowParentDir(bool mode) {
+    if(mode == mShowParentDir)
+        return;
+    mShowParentDir = mode;
+    populateView();
+}
+
 QList<QString> DirectoryPresenter::selectedPaths() const {
     QList<QString> paths;
-    if(!view)
+    if(!view || !model)
         return paths;
+    int offset = parentOffset();
     if(mShowDirs) {
         for(auto i : view->selection()) {
+            if(i < offset)
+                continue;
+            i -= offset;
             if(i < model->dirCount())
                 paths << model->dirPathAt(i);
             else
@@ -170,6 +187,9 @@ QList<QString> DirectoryPresenter::selectedPaths() const {
         }
     } else {
         for(auto i : view->selection()) {
+            if(i < offset)
+                continue;
+            i -= offset;
             paths << model->filePathAt(i);
         }
     }
@@ -180,34 +200,27 @@ void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool c
     if(!view || !model)
         return;
     thumbnailer.clearTasks();
+    int offset = parentOffset();
+    for(int i : indexes) {
+        if(i == 0 && offset) {
+            view->setThumbnail(i, createParentDirThumbnail(size));
+        }
+    }
     if(!mShowDirs) {
-        for(int i : indexes)
+        for(int i : indexes) {
+            i -= offset;
+            if(i < 0)
+                continue;
             thumbnailer.getThumbnailAsync(model->filePathAt(i), size, crop, force);
+        }
         return;
     }
     for(int i : indexes) {
+        i -= offset;
+        if(i < 0)
+            continue;
         if(i < model->dirCount()) {
-            // tmp ------------------------------------------------------------
-            // gen thumb for a directory
-            // TODO: optimize & move dir icon loading to shared res; then overlay
-            // the mini-thumbs on top (similar to dolphin)
-            QSvgRenderer svgRenderer;
-            svgRenderer.load(QString(":/res/icons/common/other/folder32-scalable.svg"));
-            int factor = (size * 0.90f) / svgRenderer.defaultSize().width();
-            QPixmap *pixmap = new QPixmap(svgRenderer.defaultSize() * factor);
-            pixmap->fill(Qt::transparent);
-            QPainter pixPainter(pixmap);
-            svgRenderer.render(&pixPainter);
-            pixPainter.end();
-
-            ImageLib::recolor(*pixmap, settings->colorScheme().icons);
-
-            std::shared_ptr<Thumbnail> thumb(new Thumbnail(model->dirNameAt(i),
-                                                           "Folder",
-                                                           size,
-                                                           std::shared_ptr<QPixmap>(pixmap)));
-            // ^----------------------------------------------------------------
-            view->setThumbnail(i, thumb);
+            view->setThumbnail(i + offset, createDirThumbnail(model->dirNameAt(i), "Folder", size));
         } else {
             QString path = model->filePathAt(i - model->dirCount());
             thumbnailer.getThumbnailAsync(path, size, crop, force);
@@ -221,11 +234,19 @@ void DirectoryPresenter::onThumbnailReady(std::shared_ptr<Thumbnail> thumb, QStr
     int index = model->indexOfFile(filePath);
     if(index == -1)
         return;
-    view->setThumbnail(mShowDirs ? model->dirCount() + index : index, thumb);
+    view->setThumbnail(parentOffset() + (mShowDirs ? model->dirCount() + index : index), thumb);
 }
 
 void DirectoryPresenter::onItemActivated(int absoluteIndex) {
     if(!model)
+        return;
+    int offset = parentOffset();
+    if(absoluteIndex == 0 && offset) {
+        emit dirActivated(parentDirPath());
+        return;
+    }
+    absoluteIndex -= offset;
+    if(absoluteIndex < 0)
         return;
     if(!mShowDirs) {
         emit fileActivated(model->filePathAt(absoluteIndex));
@@ -244,8 +265,15 @@ void DirectoryPresenter::onDraggedOut() {
 void DirectoryPresenter::onDraggedOver(int index) {
     if(!model || view->selection().contains(index))
         return;
-    if(showDirs() && index < model->dirCount())
-        view->setDragHover(index);
+    int viewIndex = index;
+    int offset = parentOffset();
+    if(index == 0 && offset) {
+        view->setDragHover(viewIndex);
+        return;
+    }
+    index -= offset;
+    if(showDirs() && index >= 0 && index < model->dirCount())
+        view->setDragHover(viewIndex);
 
 }
 
@@ -258,8 +286,15 @@ void DirectoryPresenter::onDroppedInto(const QMimeData *data, QObject *source, i
         return;
     // ignore drops into a file
     // todo: drop into a current dir when target is a file
-    if(showDirs() && targetIndex >= model->dirCount())
+    int offset = parentOffset();
+    int modelIndex = targetIndex - offset;
+    if(targetIndex == 0 && offset) {
+        // parent dir is a valid drop target
+    } else if(showDirs() && modelIndex >= model->dirCount()) {
         return;
+    } else if(!showDirs() && targetIndex >= 0) {
+        return;
+    }
 
     // convert urls to qstrings
     QStringList pathList;
@@ -269,8 +304,10 @@ void DirectoryPresenter::onDroppedInto(const QMimeData *data, QObject *source, i
 
     // get target dir path
     QString destDir;
-    if(showDirs() && targetIndex < model->dirCount())
-       destDir = model->dirPathAt(targetIndex);
+    if(targetIndex == 0 && offset)
+        destDir = parentDirPath();
+    else if(showDirs() && modelIndex >= 0 && modelIndex < model->dirCount())
+        destDir = model->dirPathAt(modelIndex);
     if(destDir.isEmpty()) // fallback to the current dir
         destDir = model->directoryPath();
     pathList.removeAll(destDir); // remove target dir from source list
@@ -284,10 +321,10 @@ void DirectoryPresenter::selectAndFocus(QString path) {
         return;
     if(model->containsDir(path) && showDirs()) {
         int dirIndex = model->indexOfDir(path);
-        view->select(dirIndex);
-        view->focusOn(dirIndex);
+        view->select(parentOffset() + dirIndex);
+        view->focusOn(parentOffset() + dirIndex);
     } else if(model->containsFile(path)) {
-        int fileIndex = showDirs() ? model->indexOfFile(path) + model->dirCount() : model->indexOfFile(path);
+        int fileIndex = parentOffset() + (showDirs() ? model->indexOfFile(path) + model->dirCount() : model->indexOfFile(path));
         view->select(fileIndex);
         view->focusOn(fileIndex);
     }
@@ -298,4 +335,57 @@ void DirectoryPresenter::selectAndFocus(int absoluteIndex) {
         return;
     view->select(absoluteIndex);
     view->focusOn(absoluteIndex);
+}
+
+bool DirectoryPresenter::hasParentDir() const {
+    if(!mShowParentDir || !model || model->source() != SOURCE_DIRECTORY)
+        return false;
+    QDir dir(model->directoryPath());
+    return dir.cdUp();
+}
+
+int DirectoryPresenter::parentOffset() const {
+    return hasParentDir() ? 1 : 0;
+}
+
+QString DirectoryPresenter::parentDirPath() const {
+    if(!model)
+        return "";
+    QDir dir(model->directoryPath());
+    if(dir.cdUp())
+        return dir.absolutePath();
+    return "";
+}
+
+std::shared_ptr<Thumbnail> DirectoryPresenter::createDirThumbnail(const QString &name, const QString &info, int size) {
+    QSvgRenderer svgRenderer;
+    svgRenderer.load(QString(":/res/icons/common/other/folder32-scalable.svg"));
+    int factor = (size * 0.90f) / svgRenderer.defaultSize().width();
+    QPixmap *pixmap = new QPixmap(svgRenderer.defaultSize() * factor);
+    pixmap->fill(Qt::transparent);
+    QPainter pixPainter(pixmap);
+    svgRenderer.render(&pixPainter);
+    pixPainter.end();
+
+    ImageLib::recolor(*pixmap, settings->colorScheme().icons);
+
+    return std::shared_ptr<Thumbnail>(new Thumbnail(name, info, size, std::shared_ptr<QPixmap>(pixmap)));
+}
+
+std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size) {
+    QPixmap source(":/res/icons/common/buttons/panel/up16@2x.png");
+    if(source.isNull())
+        source = QPixmap(":/res/icons/common/buttons/panel/up16.png");
+    ImageLib::recolor(source, settings->colorScheme().icons);
+
+    QPixmap *pixmap = new QPixmap(size, size);
+    pixmap->fill(Qt::transparent);
+
+    QSize iconSize(size * 0.55f, size * 0.55f);
+    QPixmap scaled = source.scaled(iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QPainter painter(pixmap);
+    painter.drawPixmap((size - scaled.width()) / 2, (size - scaled.height()) / 2, scaled);
+    painter.end();
+
+    return std::shared_ptr<Thumbnail>(new Thumbnail("..", "Parent folder", size, std::shared_ptr<QPixmap>(pixmap)));
 }
