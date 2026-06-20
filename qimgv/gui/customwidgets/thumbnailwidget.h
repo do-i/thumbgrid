@@ -51,6 +51,8 @@ public:
     void setShowInfo(bool mode);
     void setPadding(int _padding);
     void setMargins(int _marginX, int _marginY);
+    void setLabelSpacing(int _labelSpacing);
+    void setThumbnailAreaSize(int width, int height);
     int thumbnailSize();
     void reset();
     void unsetThumbnail();
@@ -78,7 +80,7 @@ protected:
 
     std::shared_ptr<Thumbnail> thumbnail;
     bool highlighted, hovered, dropHovered, mShowInfo;
-    int mThumbnailSize, padding, marginX, marginY, labelSpacing, textHeight;
+    int mThumbnailSize, mThumbnailWidth, mThumbnailHeight, padding, marginX, marginY, labelSpacing, textHeight;
     QRectF bgRect, mBoundingRect;
     QFont font, fontInfo;
     QRect drawRectCentered, nameRect, infoRect;

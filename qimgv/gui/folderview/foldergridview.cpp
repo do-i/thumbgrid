@@ -2,6 +2,12 @@
 
 // TODO: create a base class for this and the one on panel
 
+namespace {
+    int folderGridThumbnailWidth(int size) {
+        return qRound(size * 1.28f);
+    }
+}
+
 FolderGridView::FolderGridView(QWidget *parent)
     : ThumbnailView(Qt::Vertical, parent),
       shiftedCol(-1)
@@ -280,7 +286,7 @@ void FolderGridView::setupLayout() {
     this->setAlignment(Qt::AlignHCenter);
 
     flowLayout = new FlowLayout();
-    flowLayout->setContentsMargins(9,6,9,0);
+    flowLayout->setContentsMargins(4,3,4,0);
     setFrameShape(QFrame::NoFrame);
     scene.addItem(&holderWidget);
     holderWidget.setLayout(flowLayout);
@@ -289,15 +295,19 @@ void FolderGridView::setupLayout() {
 
 ThumbnailWidget* FolderGridView::createThumbnailWidget() {
     ThumbnailWidget *widget = new ThumbnailWidget();
-    widget->setPadding(8);
+    widget->setPadding(3);
+    widget->setMargins(1,1);
+    widget->setLabelSpacing(5);
     ThumbnailStyle style = (settings->folderViewMode() == FV_SIMPLE) ? THUMB_SIMPLE : THUMB_NORMAL;
     widget->setThumbStyle(style);
     widget->setShowInfo(settings->folderViewShowInfo());
     widget->setThumbnailSize(this->mThumbnailSize); // TODO: constructor
+    widget->setThumbnailAreaSize(folderGridThumbnailWidth(this->mThumbnailSize), this->mThumbnailSize);
     return widget;
 }
 
 void FolderGridView::addItemToLayout(ThumbnailWidget* widget, int pos) {
+    widget->setThumbnailAreaSize(folderGridThumbnailWidth(this->mThumbnailSize), this->mThumbnailSize);
     scene.addItem(widget);
     flowLayout->insertItem(pos, widget);
 }
@@ -401,6 +411,7 @@ void FolderGridView::setThumbnailSize(int newSize) {
     mThumbnailSize = newSize;
     for(int i = 0; i < thumbnails.count(); i++) {
         thumbnails.at(i)->setThumbnailSize(newSize);
+        thumbnails.at(i)->setThumbnailAreaSize(folderGridThumbnailWidth(newSize), newSize);
     }
     updateLayout();
     fitSceneToContents();

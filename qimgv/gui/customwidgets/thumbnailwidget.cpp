@@ -9,6 +9,8 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
     dropHovered(false),
     mShowInfo(true),
     mThumbnailSize(100),
+    mThumbnailWidth(100),
+    mThumbnailHeight(100),
     padding(5),
     marginX(2),
     marginY(2),
@@ -40,6 +42,23 @@ void ThumbnailWidget::setThumbnailSize(int size) {
     if(mThumbnailSize != size && size > 0) {
         isLoaded = false;
         mThumbnailSize = size;
+        mThumbnailWidth = size;
+        mThumbnailHeight = size;
+        updateBoundingRect();
+        updateGeometry();
+        updateThumbnailDrawPosition();
+        updateBackgroundRect();
+        setupTextLayout();
+        update();
+    }
+}
+
+void ThumbnailWidget::setThumbnailAreaSize(int width, int height) {
+    if(width <= 0 || height <= 0)
+        return;
+    if(mThumbnailWidth != width || mThumbnailHeight != height) {
+        mThumbnailWidth = width;
+        mThumbnailHeight = height;
         updateBoundingRect();
         updateGeometry();
         updateThumbnailDrawPosition();
@@ -58,6 +77,18 @@ void ThumbnailWidget::setMargins(int _marginX, int _marginY) {
     marginX = _marginX;
     marginY = _marginY;
     updateBoundingRect();
+}
+
+void ThumbnailWidget::setLabelSpacing(int _labelSpacing) {
+    if(labelSpacing != _labelSpacing) {
+        labelSpacing = _labelSpacing;
+        updateBoundingRect();
+        updateThumbnailDrawPosition();
+        setupTextLayout();
+        updateBackgroundRect();
+        updateGeometry();
+        update();
+    }
 }
 
 int ThumbnailWidget::thumbnailSize() {
@@ -133,8 +164,8 @@ void ThumbnailWidget::unsetThumbnail() {
 void ThumbnailWidget::setupTextLayout() {
     if(thumbStyle != THUMB_SIMPLE) {
         nameRect = QRect(padding + marginX,
-                          padding + marginY + mThumbnailSize + labelSpacing,
-                          mThumbnailSize, textHeight);
+                          padding + marginY + mThumbnailHeight + labelSpacing,
+                          mThumbnailWidth, textHeight);
         if(mShowInfo)
             infoRect = nameRect.adjusted(0, textHeight + 2, 0, textHeight + 2);
         else
@@ -185,8 +216,8 @@ QRectF ThumbnailWidget::boundingRect() const {
 
 void ThumbnailWidget::updateBoundingRect() {
     mBoundingRect = QRectF(0, 0,
-                           mThumbnailSize + (padding + marginX) * 2,
-                           mThumbnailSize + (padding + marginY) * 2);
+                           mThumbnailWidth + (padding + marginX) * 2,
+                           mThumbnailHeight + (padding + marginY) * 2);
     if(thumbStyle != THUMB_SIMPLE)
         mBoundingRect.adjust(0, 0, 0, labelSpacing + textHeight * (mShowInfo ? 2 : 1));
 }
@@ -392,7 +423,7 @@ void ThumbnailWidget::updateThumbnailDrawPosition() {
         else if(thumbStyle == THUMB_NORMAL_CENTERED && !verticalFit)
             topLeft.setY((height() - pixmapSize.height()) / 2.0 - textHeight);
         else // THUMB_NORMAL - snap thumbnail to the filename label
-            topLeft.setY(padding + marginY + mThumbnailSize - pixmapSize.height());
+            topLeft.setY(padding + marginY + mThumbnailHeight - pixmapSize.height());
         drawRectCentered = QRect(topLeft, pixmapSize);
     }
 }
