@@ -5,7 +5,9 @@ FolderViewProxy::FolderViewProxy(QWidget *parent)
       folderView(nullptr)
 {
     stateBuf.sortingMode = settings->sortingMode();
+    statusFooter.reset(new InfoBarProxy(this));
     layout.setContentsMargins(0,0,0,0);
+    layout.setSpacing(0);
 }
 
 void FolderViewProxy::init() {
@@ -17,6 +19,10 @@ void FolderViewProxy::init() {
     folderView->setParent(this);
     ml.unlock();
     layout.addWidget(folderView.get());
+    layout.addWidget(statusFooter.get());
+    statusFooter->init();
+    statusFooter->setStatusText(statusText);
+    statusFooter->setVisible(statusFooterVisible);
     this->setFocusProxy(folderView.get());
     this->setLayout(&layout);
 
@@ -30,6 +36,7 @@ void FolderViewProxy::init() {
     connect(folderView.get(), &FolderView::moveUrlsRequested, this, &FolderViewProxy::moveUrlsRequested);
     connect(folderView.get(), &FolderView::droppedInto, this, &FolderViewProxy::droppedInto);
     connect(folderView.get(), &FolderView::draggedOver, this, &FolderViewProxy::draggedOver);
+    connect(folderView.get(), &FolderView::selectionChanged, this, &FolderViewProxy::selectionChanged);
 
     folderView->show();
 
@@ -163,6 +170,18 @@ void FolderViewProxy::onSortingChanged(SortingMode mode) {
     } else {
         stateBuf.sortingMode = mode;
     }
+}
+
+void FolderViewProxy::setStatusText(QString text) {
+    statusText = text;
+    if(statusFooter)
+        statusFooter->setStatusText(text);
+}
+
+void FolderViewProxy::setStatusFooterVisible(bool mode) {
+    statusFooterVisible = mode;
+    if(statusFooter)
+        statusFooter->setVisible(mode);
 }
 
 void FolderViewProxy::showEvent(QShowEvent *event) {

@@ -3,6 +3,22 @@
 #include <QFileInfo>
 #include <QImageReader>
 
+namespace {
+    QString formattedSize(qint64 bytes) {
+        if(bytes < 1024)
+            return QString::number(bytes) + " Bytes";
+
+        static const QStringList units = {"KiB", "MiB", "GiB", "TiB"};
+        double value = bytes / 1024.0;
+        int unit = 0;
+        while(value >= 1024.0 && unit < units.count() - 1) {
+            value /= 1024.0;
+            unit++;
+        }
+        return QString::number(value, 'f', 2) + " " + units.at(unit);
+    }
+}
+
 DirectoryPresenter::DirectoryPresenter(QObject *parent) : QObject(parent), mShowDirs(false) {
     connect(&thumbnailer, &Thumbnailer::thumbnailReady, this, &DirectoryPresenter::onThumbnailReady);
 }
@@ -35,6 +51,8 @@ void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> _view) {
             this, SLOT(onDraggedOver(int)));
     connect(dynamic_cast<QObject *>(view.get()), SIGNAL(droppedInto(const QMimeData*,QObject*,int)),
             this, SLOT(onDroppedInto(const QMimeData*,QObject*,int)));
+    connect(dynamic_cast<QObject *>(view.get()), SIGNAL(selectionChanged()),
+            this, SLOT(onSelectionChanged()));
 }
 
 void DirectoryPresenter::setModel(std::shared_ptr<DirectoryModel> newModel) {
@@ -64,6 +82,7 @@ void DirectoryPresenter::populateView() {
         return;
     view->populate(parentOffset() + (mShowDirs ? model->totalCount() : model->fileCount()));
     selectAndFocus(0);
+    emitStatusText();
 }
 
 void DirectoryPresenter::disconnectView() {
@@ -77,6 +96,7 @@ void DirectoryPresenter::onFileRemoved(QString filePath, int index) {
     if(!view)
         return;
     view->removeItem(parentOffset() + (mShowDirs ? index + model->dirCount() : index));
+    emitStatusText();
 }
 
 void DirectoryPresenter::onFileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo) {
@@ -103,6 +123,7 @@ void DirectoryPresenter::onFileRenamed(QString fromPath, int indexFrom, QString 
             view->select(view->selection() << indexTo);
         }
     }
+    emitStatusText();
 }
 
 void DirectoryPresenter::onFileAdded(QString filePath) {
@@ -110,6 +131,7 @@ void DirectoryPresenter::onFileAdded(QString filePath) {
         return;
     int index = model->indexOfFile(filePath);
     view->insertItem(parentOffset() + (mShowDirs ? model->dirCount() + index : index));
+    emitStatusText();
 }
 
 void DirectoryPresenter::onFileModified(QString filePath) {
@@ -124,6 +146,7 @@ void DirectoryPresenter::onDirRemoved(QString dirPath, int index) {
     if(!view || !mShowDirs)
         return;
     view->removeItem(parentOffset() + index);
+    emitStatusText();
 }
 
 void DirectoryPresenter::onDirRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo) {
@@ -145,6 +168,7 @@ void DirectoryPresenter::onDirRenamed(QString fromPath, int indexFrom, QString t
             view->select(view->selection() << indexTo);
         }
     }
+    emitStatusText();
 }
 
 void DirectoryPresenter::onDirAdded(QString dirPath) {
@@ -152,6 +176,7 @@ void DirectoryPresenter::onDirAdded(QString dirPath) {
         return;
     int index = model->indexOfDir(dirPath);
     view->insertItem(parentOffset() + index);
+    emitStatusText();
 }
 
 bool DirectoryPresenter::showDirs() {
@@ -163,6 +188,7 @@ void DirectoryPresenter::setShowDirs(bool mode) {
         return;
     mShowDirs = mode;
     populateView();
+    emitStatusText();
 }
 
 void DirectoryPresenter::setShowParentDir(bool mode) {
@@ -170,6 +196,7 @@ void DirectoryPresenter::setShowParentDir(bool mode) {
         return;
     mShowParentDir = mode;
     populateView();
+    emitStatusText();
 }
 
 QList<QString> DirectoryPresenter::selectedPaths() const {
@@ -196,6 +223,40 @@ QList<QString> DirectoryPresenter::selectedPaths() const {
         }
     }
     return paths;
+}
+
+QString DirectoryPresenter::statusText() const {
+    if(!view || !model)
+        return "";
+
+    int objectCount = parentOffset() + (mShowDirs ? model->totalCount() : model->fileCount());
+    QList<QString> paths = selectedPaths();
+    qint64 selectedBytes = 0;
+    QStringList selectedNames;
+    QStringList selectedDetails;
+
+    for(const QString &path : paths) {
+        QFileInfo info(path);
+        selectedBytes += info.size();
+        selectedNames << info.fileName();
+        selectedDetails << info.fileName() + " " + formattedSize(info.size());
+    }
+
+    QString text = QString::number(objectCount) + " object(s) / " +
+                   QString::number(paths.count()) + " object(s) selected";
+    if(paths.count())
+        text += " [" + formattedSize(selectedBytes) + "]";
+
+    if(paths.count() == 1)
+        text += "  " + selectedDetails.first();
+    else if(paths.count() > 1)
+        text += "  " + selectedNames.join(", ");
+
+    return text;
+}
+
+void DirectoryPresenter::emitStatusText() {
+    emit statusTextChanged(statusText());
 }
 
 void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool crop, bool force) {
@@ -277,6 +338,10 @@ void DirectoryPresenter::onDraggedOver(int index) {
     if(showDirs() && index >= 0 && index < model->dirCount())
         view->setDragHover(viewIndex);
 
+}
+
+void DirectoryPresenter::onSelectionChanged() {
+    emitStatusText();
 }
 
 void DirectoryPresenter::onDroppedInto(const QMimeData *data, QObject *source, int targetIndex) {

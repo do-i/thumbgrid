@@ -50,6 +50,7 @@ struct CurrentInfo {
     QString directoryName;
     QString directoryPath;
     QSize imageSize;
+    int imageDepth;
     qint64 fileSize;
     bool slideshow;
     bool shuffle;
@@ -72,8 +73,9 @@ public:
     void showAnimation(std::shared_ptr<QMovie> movie);
     void showVideo(QString file);
 
-    void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
+    void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, int imageDepth, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
     void setExifInfo(QMap<QString, QString>);
+    void setFolderStatusText(QString text);
     std::shared_ptr<FolderViewProxy> getFolderView();
     std::shared_ptr<ThumbnailStripProxy> getThumbnailPanel();
 
@@ -112,6 +114,7 @@ private:
 
     PanelPosition panelPosition;
     CurrentInfo info;
+    QString folderStatusText;
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     QDesktopWidget desktopWidget;
 #endif
@@ -120,6 +123,8 @@ private:
     void restoreWindowGeometry();
     void saveCurrentDisplay();
     void setupUi();
+    QString statusDataSize(qint64 bytes) const;
+    QString documentStatusText() const;
 
     void applyWindowedBackground();
     void applyFullscreenBackground();
@@ -138,6 +143,7 @@ private slots:
     void adaptToWindowState();
     void onWindowGeometryChanged();
     void onInfoUpdated();
+    void updateStatusFooters();
     void showScriptSettings();
 
 protected:

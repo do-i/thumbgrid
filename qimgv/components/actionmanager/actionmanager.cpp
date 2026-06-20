@@ -85,6 +85,7 @@ void ActionManager::initDefaults() {
     actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Z", "discardEdits");
     actionManager->defaults.insert("U", "folderView");
     actionManager->defaults.insert(InputMap::keyNameCtrl() + "+T", "toggleFolderViewTopBar");
+    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+B", "toggleStatusFooter");
     actionManager->defaults.insert(InputMap::keyNameShift() + "+Right", "nextDirectory");
     actionManager->defaults.insert(InputMap::keyNameShift() + "+Left", "prevDirectory");
     actionManager->defaults.insert(InputMap::keyNameShift() + "+F", "toggleFullscreenInfoBar");
@@ -107,6 +108,11 @@ void ActionManager::initShortcuts() {
     actionManager->readShortcuts();
     if(actionManager->shortcuts.isEmpty()) {
         actionManager->resetDefaults();
+    }
+    QString statusFooterShortcut = InputMap::keyNameCtrl() + "+B";
+    if(!actionManager->shortcuts.values().contains("toggleStatusFooter") &&
+       !actionManager->shortcuts.contains(statusFooterShortcut)) {
+        actionManager->shortcuts.insert(statusFooterShortcut, "toggleStatusFooter");
     }
 }
 //------------------------------------------------------------------------------

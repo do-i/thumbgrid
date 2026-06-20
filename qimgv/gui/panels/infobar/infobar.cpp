@@ -19,6 +19,12 @@ void InfoBar::setInfo(QString position, QString fileName, QString info) {
     ui->info->setText(info);
 }
 
+void InfoBar::setStatusText(QString text) {
+    ui->index->clear();
+    ui->path->setText(text);
+    ui->info->clear();
+}
+
 void InfoBar::wheelEvent(QWheelEvent *event) {
     event->accept();
 }

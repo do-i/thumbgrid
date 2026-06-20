@@ -61,6 +61,7 @@ void ThumbnailWidget::setThumbnailAreaSize(int width, int height) {
     if(mThumbnailWidth != width || mThumbnailHeight != height) {
         mThumbnailWidth = width;
         mThumbnailHeight = height;
+        updateThumbnailHeightForCellRatio();
         updateBoundingRect();
         updateGeometry();
         updateThumbnailDrawPosition();
@@ -107,6 +108,21 @@ void ThumbnailWidget::setThumbnailTopMargin(int margin) {
         mThumbnailTopMargin = margin;
         updateThumbnailDrawPosition();
         updateBackgroundRect();
+        update();
+    }
+}
+
+void ThumbnailWidget::setCellHeightRatio(qreal heightOverWidth) {
+    if(heightOverWidth < 0.0)
+        heightOverWidth = 0.0;
+    if(!qFuzzyCompare(mCellHeightRatio, heightOverWidth)) {
+        mCellHeightRatio = heightOverWidth;
+        updateThumbnailHeightForCellRatio();
+        updateBoundingRect();
+        updateGeometry();
+        updateThumbnailDrawPosition();
+        updateBackgroundRect();
+        setupTextLayout();
         update();
     }
 }
@@ -240,6 +256,7 @@ QRectF ThumbnailWidget::boundingRect() const {
 }
 
 void ThumbnailWidget::updateBoundingRect() {
+    updateThumbnailHeightForCellRatio();
     mBoundingRect = QRectF(0, 0,
                            mThumbnailWidth + (padding + marginX) * 2,
                            mThumbnailHeight + (padding + marginY) * 2);
@@ -454,4 +471,18 @@ void ThumbnailWidget::updateThumbnailDrawPosition() {
         }
         drawRectCentered = QRect(topLeft, pixmapSize);
     }
+}
+
+void ThumbnailWidget::updateThumbnailHeightForCellRatio() {
+    if(mCellHeightRatio <= 0.0)
+        return;
+
+    int cellWidth = mThumbnailWidth + (padding + marginX) * 2;
+    int labelBlockHeight = 0;
+    if(thumbStyle != THUMB_SIMPLE)
+        labelBlockHeight = labelSpacing + textHeight * (mShowInfo ? 2 : 1);
+
+    int targetCellHeight = qRound(cellWidth * mCellHeightRatio);
+    int targetThumbnailHeight = targetCellHeight - (padding + marginY) * 2 - labelBlockHeight;
+    mThumbnailHeight = qMax(1, targetThumbnailHeight);
 }

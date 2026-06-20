@@ -94,6 +94,8 @@ void Core::connectComponents() {
 
     connect(&folderViewPresenter, &DirectoryPresenter::droppedInto,
             this, qOverload<QList<QString>,QString>(&Core::movePathsTo));
+    connect(&folderViewPresenter, &DirectoryPresenter::statusTextChanged,
+            mw, &MW::setFolderStatusText);
 
     connect(scriptManager, &ScriptManager::error, mw, &MW::showError);
 
@@ -203,6 +205,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::prevDirectory, this, qOverload<>(&Core::prevDirectory));
     connect(actionManager, &ActionManager::print, this, &Core::print);
     connect(actionManager, &ActionManager::toggleFullscreenInfoBar, this, &Core::toggleFullscreenInfoBar);
+    connect(actionManager, &ActionManager::toggleStatusFooter, this, &Core::toggleStatusFooter);
     connect(actionManager, &ActionManager::pasteFile, this, &Core::openFromClipboard);
     connect(actionManager, &ActionManager::toggleFolderViewTopBar, this, &Core::toggleFolderViewTopBar);
 }
@@ -968,6 +971,11 @@ void Core::toggleFullscreenInfoBar() {
     mw->toggleFullscreenInfoBar();
 }
 
+void Core::toggleStatusFooter() {
+    settings->setInfoBarWindowed(!settings->infoBarWindowed());
+    settings->sendChangeNotification();
+}
+
 void Core::requestSavePath() {
     if(model->isEmpty())
         return;
@@ -1527,12 +1535,16 @@ void Core::guiSetImage(std::shared_ptr<Image> img) {
 
 void Core::updateInfoString() {
     QSize imageSize(0,0);
+    int imageDepth = 0;
     qint64 fileSize = 0;
     bool edited = false;
 
     if(model->isLoaded(state.currentFilePath)) {
         auto img = model->getImage(state.currentFilePath);
         imageSize = img->size();
+        auto sourceImage = img->getImage();
+        if(sourceImage)
+            imageDepth = sourceImage->depth();
         fileSize  = img->fileSize();
         edited = img->isEdited();
     }
@@ -1542,6 +1554,7 @@ void Core::updateInfoString() {
                        model->filePathAt(index),
                        model->fileNameAt(index),
                        imageSize,
+                       imageDepth,
                        fileSize,
                        slideshow,
                        shuffle,

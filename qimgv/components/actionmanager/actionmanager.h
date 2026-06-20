@@ -125,6 +125,7 @@ signals:
     void toggleFullscreenInfoBar();
     void pasteFile();
     void toggleFolderViewTopBar();
+    void toggleStatusFooter();
 };
 
 extern ActionManager *actionManager;

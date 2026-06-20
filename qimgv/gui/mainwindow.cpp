@@ -80,6 +80,7 @@ void MW::setupUi() {
     connect(viewerWidget.get(), &ViewerWidget::draggedOut, this, qOverload<>(&MW::draggedOut));
     connect(viewerWidget.get(), &ViewerWidget::playbackFinished, this, &MW::playbackFinished);
     connect(viewerWidget.get(), &ViewerWidget::showScriptSettings, this, &MW::showScriptSettings);
+    connect(viewerWidget.get(), &ViewerWidget::scaleChanged, this, &MW::updateStatusFooters);
     connect(this, &MW::zoomIn,        viewerWidget.get(), &ViewerWidget::zoomIn);
     connect(this, &MW::zoomOut,       viewerWidget.get(), &ViewerWidget::zoomOut);
     connect(this, &MW::zoomInCursor,  viewerWidget.get(), &ViewerWidget::zoomInCursor);
@@ -781,17 +782,82 @@ void MW::closeFullScreenOrExit() {
 }
 
 // todo: this is crap, use shared state object
-void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, qint64 _fileSize, bool slideshow, bool shuffle, bool edited) {
+void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, int _imageDepth, qint64 _fileSize, bool slideshow, bool shuffle, bool edited) {
     info.index = _index;
     info.fileCount = _fileCount;
     info.fileName = _fileName;
     info.filePath = _filePath;
     info.imageSize = _imageSize;
+    info.imageDepth = _imageDepth;
     info.fileSize = _fileSize;
     info.slideshow = slideshow;
     info.shuffle = shuffle;
     info.edited = edited;
     onInfoUpdated();
+}
+
+void MW::setFolderStatusText(QString text) {
+    folderStatusText = text;
+    updateStatusFooters();
+}
+
+QString MW::statusDataSize(qint64 bytes) const {
+    if(bytes < 1024)
+        return QString::number(bytes) + " Bytes";
+
+    static const QStringList units = {"KiB", "MiB", "GiB", "TiB"};
+    double value = bytes / 1024.0;
+    int unit = 0;
+    while(value >= 1024.0 && unit < units.count() - 1) {
+        value /= 1024.0;
+        unit++;
+    }
+    return QString::number(value, 'f', 2) + " " + units.at(unit);
+}
+
+QString MW::documentStatusText() const {
+    if(info.fileName.isEmpty())
+        return tr("No file opened.");
+
+    QString text = QString::number(info.fileCount) + " object(s) / 1 object(s) selected";
+    if(info.fileSize)
+        text += " [" + statusDataSize(info.fileSize) + "]";
+
+    text += "  " + info.fileName;
+    if(info.imageSize.width()) {
+        text += " " + QString::number(info.imageSize.width()) + "x" + QString::number(info.imageSize.height());
+        if(info.imageDepth)
+            text += "x" + QString::number(info.imageDepth);
+        text += " (" + QString::number(viewerWidget->currentScale(), 'f', 2) + ")";
+    }
+    if(info.fileSize)
+        text += " " + statusDataSize(info.fileSize);
+
+    QString states;
+    if(info.slideshow)
+        states.append(" [slideshow]");
+    if(info.shuffle)
+        states.append(" [shuffle]");
+    if(viewerWidget->lockZoomEnabled())
+        states.append(" [zoom lock]");
+    if(viewerWidget->lockViewEnabled())
+        states.append(" [view lock]");
+    if(!states.isEmpty())
+        text += " " + states;
+
+    return text;
+}
+
+void MW::updateStatusFooters() {
+    bool visible = showInfoBarWindowed && !isFullScreen();
+    infoBarWindowed->setVisible(visible);
+    folderView->setStatusFooterVisible(visible);
+
+    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
+        folderView->setStatusText(folderStatusText);
+    } else {
+        infoBarWindowed->setStatusText(documentStatusText());
+    }
 }
 
 // todo: nuke and rewrite
@@ -813,11 +879,11 @@ void MW::onInfoUpdated() {
     if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
         windowTitle = tr("Folder view");
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
-        infoBarWindowed->setInfo("", tr("No file opened."), "");
+        folderView->setStatusText(folderStatusText);
     } else if(info.fileName.isEmpty()) {
         windowTitle = qApp->applicationName();
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
-        infoBarWindowed->setInfo("", tr("No file opened."), "");
+        infoBarWindowed->setStatusText(tr("No file opened."));
     } else {
         windowTitle = info.fileName;
         if(settings->windowTitleExtendedInfo()) {
@@ -845,8 +911,9 @@ void MW::onInfoUpdated() {
             windowTitle.prepend("* ");
 
         infoBarFullscreen->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), resString + "  " + sizeString);
-        infoBarWindowed->setInfo(posString, info.fileName + (info.edited ? "  *" : ""), resString + "  " + sizeString + " " + states);
+        infoBarWindowed->setStatusText(documentStatusText());
     }
+    updateStatusFooters();
     setWindowTitle(windowTitle);
 }
 
@@ -958,7 +1025,7 @@ void MW::adaptToWindowState() {
     docWidget->hideFloatingPanel();
     if(isFullScreen()) { //-------------------------------------- fullscreen ---
         applyFullscreenBackground();
-        infoBarWindowed->hide();
+        updateStatusFooters();
 
         if(showInfoBarFullscreen)
             infoBarFullscreen->showWhenReady();
@@ -973,11 +1040,7 @@ void MW::adaptToWindowState() {
     } else { //------------------------------------------------------ window ---
         applyWindowedBackground();
         infoBarFullscreen->hide();
-
-        if(showInfoBarWindowed)
-            infoBarWindowed->show();
-        else
-            infoBarWindowed->hide();
+        updateStatusFooters();
 
         controlsOverlay->hide();
     }

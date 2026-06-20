@@ -23,6 +23,16 @@ void InfoBarProxy::setInfo(QString position, QString fileName, QString info) {
     }
 }
 
+void InfoBarProxy::setStatusText(QString text) {
+    if(infoBar) {
+        infoBar->setStatusText(text);
+    } else {
+        stateBuf.position = "";
+        stateBuf.fileName = text;
+        stateBuf.info = "";
+    }
+}
+
 void InfoBarProxy::init() {
     if(infoBar)
         return;
