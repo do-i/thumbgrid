@@ -519,8 +519,29 @@ void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &im
                       pixmap.width() - gutter * 2,
                       pixmap.height() - bodyTop - gutter * 2);
 
-    int columns = images.count() == 1 ? 1 : 2;
-    int rows = images.count() <= 2 ? 1 : 2;
+    // false = "Cover" (mode A): crop each preview to fill its cell.
+    // true  = "Contain" (mode B): fit the whole image, no cropping, with a
+    //         layout that adapts to image orientation for the 1-2 image cases.
+    bool fit = settings->folderViewPreviewFit();
+
+    int columns, rows;
+    if(images.count() == 1) {
+        columns = 1;
+        rows = 1;
+    } else if(images.count() == 2 && fit) {
+        // Two images: stack wide images in 2 rows, place tall images in 2 cols.
+        // (Mixed orientations fall back to side-by-side columns.)
+        bool bothWide = true;
+        for(const QImage &img : images)
+            if(img.width() <= img.height())
+                bothWide = false;
+        columns = bothWide ? 1 : 2;
+        rows    = bothWide ? 2 : 1;
+    } else {
+        columns = 2;
+        rows = images.count() <= 2 ? 1 : 2;
+    }
+
     int cellWidth = (previewRect.width() - gutter * (columns - 1)) / columns;
     int cellHeight = (previewRect.height() - gutter * (rows - 1)) / rows;
     if(cellWidth <= 0 || cellHeight <= 0)
@@ -537,12 +558,21 @@ void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &im
                    cellWidth,
                    cellHeight);
 
-        QImage scaled = images.at(i).scaled(cell.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-        QRect source((scaled.width() - cell.width()) / 2,
-                     (scaled.height() - cell.height()) / 2,
-                     cell.width(),
-                     cell.height());
-        painter.drawImage(cell, scaled, source);
+        if(fit) {
+            // Contain: show the entire image, centered within the cell.
+            QSize scaledSize = images.at(i).size().scaled(cell.size(), Qt::KeepAspectRatio);
+            QRect target(QPoint(0, 0), scaledSize);
+            target.moveCenter(cell.center());
+            painter.drawImage(target, images.at(i));
+        } else {
+            // Cover: fill the cell, cropping the overflow.
+            QImage scaled = images.at(i).scaled(cell.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+            QRect source((scaled.width() - cell.width()) / 2,
+                         (scaled.height() - cell.height()) / 2,
+                         cell.width(),
+                         cell.height());
+            painter.drawImage(cell, scaled, source);
+        }
     }
 }
 
@@ -551,12 +581,13 @@ std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size
     if(source.isNull())
         source = QPixmap(":/res/icons/common/buttons/panel/up16.png");
     source.setDevicePixelRatio(1.0);
-    ImageLib::recolor(source, settings->colorScheme().icons);
+    ImageLib::recolor(source, settings->folderViewParentIconColor());
 
     QPixmap *pixmap = new QPixmap(qRound(size * 1.10f), qRound(size * 1.10f));
     pixmap->fill(Qt::transparent);
 
-    QSize iconSize(size * 0.55f, size * 0.55f);
+    // 75% of the previous icon size (0.55 * 0.75)
+    QSize iconSize(size * 0.4125f, size * 0.4125f);
     QPixmap scaled = source.scaled(iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     scaled.setDevicePixelRatio(1.0);
     QRect visibleBounds = visibleAlphaBounds(scaled.toImage());
