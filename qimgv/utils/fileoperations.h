@@ -33,6 +33,7 @@ public:
     static void rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result);
     static void removeFile(const QString &filePath, FileOpResult &result);
     static void removeDir(const QString &dirPath, bool recursive, FileOpResult &result);
+    static void createDirectory(const QString &dirPath, FileOpResult &result);
     static void moveToTrash(const QString &filePath, FileOpResult &result);
 
     static QString decodeResult(const FileOpResult &result);

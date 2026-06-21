@@ -93,4 +93,5 @@ void Actions::init() {
     mActions.insert("pasteFile", QVersionNumber(1,0,3));
     mActions.insert("toggleFolderViewTopBar", QVersionNumber(1,0,3));
     mActions.insert("toggleStatusFooter", QVersionNumber(1,0,3));
+    mActions.insert("createDirectory", QVersionNumber(1,0,4));
 }

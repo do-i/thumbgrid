@@ -7,6 +7,9 @@
 
 #include "core.h"
 
+#include <QInputDialog>
+#include <QLineEdit>
+
 #ifdef __WIN32
 #include <tchar.h>
 #endif
@@ -187,6 +190,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::copyFileClipboard, this, &Core::copyFileClipboard);
     connect(actionManager, &ActionManager::copyPathClipboard, this, &Core::copyPathClipboard);
     connect(actionManager, &ActionManager::renameFile, this, &Core::showRenameDialog);
+    connect(actionManager, &ActionManager::createDirectory, this, &Core::createDirectory);
     connect(actionManager, &ActionManager::contextMenu, mw, &MW::showContextMenu);
     connect(actionManager, &ActionManager::toggleTransparencyGrid, mw, &MW::toggleTransparencyGrid);
     connect(actionManager, &ActionManager::sortByName, this, &Core::sortByName);
@@ -649,7 +653,10 @@ void Core::setFoldersDisplay(bool mode) {
 }
 
 void Core::renameCurrentSelection(QString newName) {
-    if(!model->fileCount() || newName.isEmpty() || selectedPath().isEmpty())
+    // Guard on the actual selection rather than the image file count: in folder
+    // view the selection may be a directory, and the open directory can hold
+    // zero images (fileCount()==0) while still containing folders to rename.
+    if(selectedPath().isEmpty() || newName.isEmpty())
         return;
     FileOpResult result;
     model->renameEntry(selectedPath(), newName, false, result);
@@ -1208,10 +1215,35 @@ void Core::sortBySize() {
 }
 
 void Core::showRenameDialog() {
-    if(model->isEmpty())
+    // isEmpty() only counts image files, so it wrongly blocks renaming a folder
+    // when the open directory has no images. Gate on the selection instead.
+    if(selectedPath().isEmpty())
         return;
     QFileInfo fi(selectedPath());
     mw->toggleRenameOverlay(fi.fileName());
+}
+
+void Core::createDirectory() {
+    if(!model)
+        return;
+    QString parentDir = model->directoryPath();
+    if(parentDir.isEmpty())
+        return;
+    bool ok = false;
+    QString name = QInputDialog::getText(mw, tr("New Folder"), tr("Folder name:"),
+                                         QLineEdit::Normal, tr("New Folder"), &ok);
+    if(!ok)
+        return;
+    name = name.trimmed();
+    if(name.isEmpty())
+        return;
+    if(name.contains('/') || name.contains('\\')) {
+        mw->showError(tr("Folder name cannot contain path separators."));
+        return;
+    }
+    FileOpResult result;
+    model->createDirectory(parentDir + "/" + name, result);
+    outputError(result);
 }
 
 void Core::runScript(const QString &scriptName) {
