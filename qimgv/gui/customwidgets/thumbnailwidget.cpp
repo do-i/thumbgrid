@@ -338,7 +338,7 @@ void ThumbnailWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
         // todo: recolor once in shrRes
         QPixmap loadingIcon(*shrRes->getPixmap(ShrIcon::SHR_ICON_LOADING, dpr));
         if(isHighlighted())
-            ImageLib::recolor(loadingIcon, settings->colorScheme().accent);
+            ImageLib::recolor(loadingIcon, settings->folderViewSelectionColor());
         else
             ImageLib::recolor(loadingIcon, settings->colorScheme().folderview_hc2);
         drawIcon(painter, &loadingIcon);
@@ -346,7 +346,7 @@ void ThumbnailWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
         if(!thumbnail->pixmap() || thumbnail->pixmap().get()->width() == 0) { // invalid thumb
             QPixmap errorIcon(*shrRes->getPixmap(ShrIcon::SHR_ICON_ERROR, dpr));
             if(isHighlighted())
-                ImageLib::recolor(errorIcon, settings->colorScheme().accent);
+                ImageLib::recolor(errorIcon, settings->folderViewSelectionColor());
             else
                 ImageLib::recolor(errorIcon, settings->colorScheme().folderview_hc2);
             drawIcon(painter, &errorIcon);
@@ -372,7 +372,7 @@ void ThumbnailWidget::drawHighlight(QPainter *painter) {
         auto op = painter->opacity();
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setOpacity(0.40f * op);
-        painter->fillRect(bgRect, settings->colorScheme().accent);
+        painter->fillRect(bgRect, settings->folderViewSelectionColor());
         painter->setOpacity(op);
         painter->setRenderHints(hints);
     }
@@ -384,7 +384,7 @@ void ThumbnailWidget::drawHighlightBorder(QPainter *painter) {
         auto op = painter->opacity();
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setOpacity(0.70f * op);
-        QPen pen(settings->colorScheme().accent, 2);
+        QPen pen(settings->folderViewSelectionColor(), 2);
         painter->setPen(pen);
         painter->drawRect(bgRect.adjusted(1,1,-1,-1)); // 2px pen
         painter->setOpacity(op);
@@ -425,10 +425,12 @@ void ThumbnailWidget::drawTransparencyGrid(QPainter *painter) {
 
 void ThumbnailWidget::drawLabel(QPainter *painter) {
     if(thumbnail) {
+        QColor labelBg = isHighlighted() ? settings->folderViewSelectedLabelBackgroundColor()
+                                         : mLabelBackgroundColor;
         if(mCellBorderVisible)
-            painter->fillRect(labelBackgroundRect(), mLabelBackgroundColor);
+            painter->fillRect(labelBackgroundRect(), labelBg);
         else
-            painter->fillRect(nameRect.adjusted(-4, -1, 4, 1), mLabelBackgroundColor);
+            painter->fillRect(nameRect.adjusted(-4, -1, 4, 1), labelBg);
         drawSingleLineText(painter, nameRect, thumbnail->name(), settings->colorScheme().text_hc2);
         if(mShowInfo) {
             auto op = painter->opacity();

@@ -57,6 +57,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->colorSelectorFolderview->setDescription(tr("FolderView background"));
     ui->colorSelectorFolderviewPanel->setDescription(tr("FolderView top panel"));
     ui->folderViewLabelBackgroundColorSelector->setDescription(tr("Folder view filename background"));
+    ui->folderViewSelectionColorSelector->setDescription(tr("Folder view selection"));
+    ui->folderViewParentIconColorSelector->setDescription(tr("Folder view parent icon"));
+    ui->folderViewSelectedLabelBackgroundColorSelector->setDescription(tr("Folder view selected filename background"));
     ui->colorSelectorText->setDescription(tr("Text color"));
     ui->colorSelectorWidget->setDescription(tr("Widget background"));
     ui->colorSelectorWidgetBorder->setDescription(tr("Widget border"));
@@ -238,6 +241,12 @@ void SettingsDialog::readSettings() {
     ui->folderViewFontSizeSpinBox->setValue(settings->folderViewFontPointSize());
     QColor folderViewLabelBackground = settings->folderViewLabelBackgroundColor();
     ui->folderViewLabelBackgroundColorSelector->setColor(folderViewLabelBackground);
+    QColor folderViewSelection = settings->folderViewSelectionColor();
+    ui->folderViewSelectionColorSelector->setColor(folderViewSelection);
+    QColor folderViewParentIcon = settings->folderViewParentIconColor();
+    ui->folderViewParentIconColorSelector->setColor(folderViewParentIcon);
+    QColor folderViewSelectedLabelBackground = settings->folderViewSelectedLabelBackgroundColor();
+    ui->folderViewSelectedLabelBackgroundColorSelector->setColor(folderViewSelectedLabelBackground);
 
     if(settings->folderEndAction() == FOLDER_END_NO_ACTION)
         ui->folderEndNoAction->setChecked(true);
@@ -376,6 +385,9 @@ void SettingsDialog::saveSettings() {
     settings->setFolderViewTopBar(ui->folderViewTopBarCheckBox->isChecked());
     settings->setFolderViewFontPointSize(ui->folderViewFontSizeSpinBox->value());
     settings->setFolderViewLabelBackgroundColor(ui->folderViewLabelBackgroundColorSelector->color());
+    settings->setFolderViewSelectionColor(ui->folderViewSelectionColorSelector->color());
+    settings->setFolderViewParentIconColor(ui->folderViewParentIconColorSelector->color());
+    settings->setFolderViewSelectedLabelBackgroundColor(ui->folderViewSelectedLabelBackgroundColorSelector->color());
 
     if(ui->folderEndNoAction->isChecked())
         settings->setFolderEndAction(FOLDER_END_NO_ACTION);

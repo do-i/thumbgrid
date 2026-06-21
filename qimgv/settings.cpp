@@ -473,6 +473,16 @@ void Settings::setFolderViewShowInfo(bool mode) {
     settings->settingsConf->setValue("folderViewShowInfo", mode);
 }
 //------------------------------------------------------------------------------
+// false = "Cover" (mode A: crop child previews to fill each cell)
+// true  = "Contain" (mode B: fit the whole child image, no cropping)
+bool Settings::folderViewPreviewFit() {
+    return settings->settingsConf->value("folderViewPreviewFit", false).toBool();
+}
+
+void Settings::setFolderViewPreviewFit(bool mode) {
+    settings->settingsConf->setValue("folderViewPreviewFit", mode);
+}
+//------------------------------------------------------------------------------
 ThumbPanelStyle Settings::thumbPanelStyle() {
     int mode = settings->settingsConf->value("thumbPanelStyle", 1).toInt();
     if(mode < 0 || mode > 1)
@@ -853,6 +863,51 @@ QColor Settings::folderViewLabelBackgroundColor() {
 void Settings::setFolderViewLabelBackgroundColor(QColor color) {
     if(color.isValid())
         settings->settingsConf->setValue("folderViewLabelBackgroundColor", color);
+}
+//------------------------------------------------------------------------------
+QColor Settings::folderViewSelectionColor() {
+    QVariant value = settings->settingsConf->value("folderViewSelectionColor", settings->colorScheme().accent);
+    QColor color = value.value<QColor>();
+    if(!color.isValid())
+        color = QColor(value.toString());
+    if(!color.isValid())
+        color = settings->colorScheme().accent;
+    return color;
+}
+
+void Settings::setFolderViewSelectionColor(QColor color) {
+    if(color.isValid())
+        settings->settingsConf->setValue("folderViewSelectionColor", color);
+}
+//------------------------------------------------------------------------------
+QColor Settings::folderViewParentIconColor() {
+    QVariant value = settings->settingsConf->value("folderViewParentIconColor", settings->colorScheme().icons);
+    QColor color = value.value<QColor>();
+    if(!color.isValid())
+        color = QColor(value.toString());
+    if(!color.isValid())
+        color = settings->colorScheme().icons;
+    return color;
+}
+
+void Settings::setFolderViewParentIconColor(QColor color) {
+    if(color.isValid())
+        settings->settingsConf->setValue("folderViewParentIconColor", color);
+}
+//------------------------------------------------------------------------------
+QColor Settings::folderViewSelectedLabelBackgroundColor() {
+    QVariant value = settings->settingsConf->value("folderViewSelectedLabelBackgroundColor", settings->folderViewLabelBackgroundColor());
+    QColor color = value.value<QColor>();
+    if(!color.isValid())
+        color = QColor(value.toString());
+    if(!color.isValid())
+        color = settings->folderViewLabelBackgroundColor();
+    return color;
+}
+
+void Settings::setFolderViewSelectedLabelBackgroundColor(QColor color) {
+    if(color.isValid())
+        settings->settingsConf->setValue("folderViewSelectedLabelBackgroundColor", color);
 }
 //------------------------------------------------------------------------------
 bool Settings::expandImage() {

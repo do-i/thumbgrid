@@ -50,6 +50,7 @@ private:
     int shiftedCol;
     void scrollToCurrent();
     int lastDragTarget = -1;
+    bool mPreviewFit = false;
 
 private slots:
     void onitemSelected();

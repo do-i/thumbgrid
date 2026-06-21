@@ -174,6 +174,12 @@ public:
     void setFolderViewFontPointSize(int value);
     QColor folderViewLabelBackgroundColor();
     void setFolderViewLabelBackgroundColor(QColor color);
+    QColor folderViewSelectionColor();
+    void setFolderViewSelectionColor(QColor color);
+    QColor folderViewParentIconColor();
+    void setFolderViewParentIconColor(QColor color);
+    QColor folderViewSelectedLabelBackgroundColor();
+    void setFolderViewSelectedLabelBackgroundColor(QColor color);
 
     bool firstRun();
     void setFirstRun(bool mode);
@@ -259,6 +265,8 @@ public:
     void setFolderViewMode(FolderViewMode mode);
     bool folderViewShowInfo();
     void setFolderViewShowInfo(bool mode);
+    bool folderViewPreviewFit();
+    void setFolderViewPreviewFit(bool mode);
 
     const QMultiMap<QByteArray, QByteArray> videoFormats() const;
 

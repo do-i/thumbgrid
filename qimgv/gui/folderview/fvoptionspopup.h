@@ -37,11 +37,13 @@ private slots:
     void selectExtendedView();
     void selectFoldersView();
     void toggleShowInfo();
+    void toggleFitPreview();
 
 private:
     Ui::FVOptionsPopup *ui;
     void setViewMode(FolderViewMode mode);
     void setShowInfo(bool mode);
+    void setFitPreview(bool mode);
     void setSimpleView();
     void setExtendedView();
     void setFoldersView();

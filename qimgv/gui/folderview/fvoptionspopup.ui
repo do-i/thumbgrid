@@ -92,6 +92,9 @@
    <item>
     <widget class="ContextMenuItem" name="showInfoButton" native="true"/>
    </item>
+   <item>
+    <widget class="ContextMenuItem" name="fitPreviewButton" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>

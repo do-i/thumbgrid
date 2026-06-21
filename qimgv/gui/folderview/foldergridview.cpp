@@ -24,8 +24,17 @@ FolderGridView::FolderGridView(QWidget *parent)
     setDrawScrollbarIndicator(false);
     setSelectMode(ACTIVATE_BY_DOUBLECLICK);
 
+    mPreviewFit = settings->folderViewPreviewFit();
     connect(settings, &Settings::settingsChanged, [this]() {
         this->scene.setBackgroundBrush(settings->colorScheme().folderview);
+        // Folder thumbnails bake the child-preview layout into the pixmap, so a
+        // change to the preview fit mode requires regenerating them.
+        if(mPreviewFit != settings->folderViewPreviewFit()) {
+            mPreviewFit = settings->folderViewPreviewFit();
+            for(int i = 0; i < thumbnails.count(); i++)
+                thumbnails.at(i)->unsetThumbnail();
+            loadVisibleThumbnails();
+        }
     });
 
     setupLayout();
@@ -296,7 +305,7 @@ void FolderGridView::focusOn(int index) {
 }
 
 void FolderGridView::setupLayout() {
-    this->setAlignment(Qt::AlignHCenter);
+    this->setAlignment(Qt::AlignLeft | Qt::AlignTop);
 
     flowLayout = new FlowLayout();
     flowLayout->setContentsMargins(4,3,4,0);
