@@ -60,6 +60,7 @@ public:
     void setCellHeightRatio(qreal heightOverWidth);
     void setLabelFontPointSize(int size);
     void setLabelBackgroundColor(const QColor &color);
+    void setCellBackgroundColor(const QColor &color);
     int thumbnailSize();
     void reset();
     void unsetThumbnail();
@@ -98,6 +99,8 @@ protected:
     qreal mCellHeightRatio = 0.0;
     QRectF bgRect, mBoundingRect;
     QColor mLabelBackgroundColor;
+    QColor mCellBackgroundColor;
+    void drawCellBackground(QPainter *painter);
     QFont font, fontInfo;
     QRect drawRectCentered, nameRect, infoRect;
     qreal dpr = 1.0;

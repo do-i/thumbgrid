@@ -204,6 +204,15 @@ void ThumbnailWidget::setLabelBackgroundColor(const QColor &color) {
     }
 }
 
+// An invalid color disables the cell background fill (lets the view background
+// show through), which is the default for the thumbnail strip.
+void ThumbnailWidget::setCellBackgroundColor(const QColor &color) {
+    if(mCellBackgroundColor != color) {
+        mCellBackgroundColor = color;
+        update();
+    }
+}
+
 void ThumbnailWidget::updateGeometry() {
     QGraphicsWidget::updateGeometry();
 }
@@ -329,6 +338,8 @@ void ThumbnailWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
     // actual thumbnail still has incorrect dpr but it is still drawn "correctly" so whatever
     updateDpr(painter->paintEngine()->paintDevice()->devicePixelRatioF());
 
+    if(mCellBackgroundColor.isValid())
+        drawCellBackground(painter);
     if(isHovered() && !isHighlighted())
         drawHoverBg(painter);
     if(isHighlighted())
@@ -390,6 +401,12 @@ void ThumbnailWidget::drawHighlightBorder(QPainter *painter) {
         painter->setOpacity(op);
         painter->setRenderHints(hints);
     }
+}
+
+void ThumbnailWidget::drawCellBackground(QPainter *painter) {
+    auto op = painter->opacity();
+    painter->fillRect(bgRect, mCellBackgroundColor);
+    painter->setOpacity(op);
 }
 
 void ThumbnailWidget::drawHoverBg(QPainter *painter) {

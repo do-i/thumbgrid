@@ -910,6 +910,21 @@ void Settings::setFolderViewSelectedLabelBackgroundColor(QColor color) {
         settings->settingsConf->setValue("folderViewSelectedLabelBackgroundColor", color);
 }
 //------------------------------------------------------------------------------
+QColor Settings::folderViewCellBackgroundColor() {
+    QVariant value = settings->settingsConf->value("folderViewCellBackgroundColor", settings->colorScheme().folderview);
+    QColor color = value.value<QColor>();
+    if(!color.isValid())
+        color = QColor(value.toString());
+    if(!color.isValid())
+        color = settings->colorScheme().folderview;
+    return color;
+}
+
+void Settings::setFolderViewCellBackgroundColor(QColor color) {
+    if(color.isValid())
+        settings->settingsConf->setValue("folderViewCellBackgroundColor", color);
+}
+//------------------------------------------------------------------------------
 bool Settings::expandImage() {
     return settings->settingsConf->value("expandImage", false).toBool();
 }

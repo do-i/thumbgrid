@@ -40,6 +40,7 @@ public slots:
     void setShowInfo(bool mode);
     void setLabelFontPointSize(int size);
     void setLabelBackgroundColor(const QColor &color);
+    void setCellBackgroundColor(const QColor &color);
     virtual void focusOn(int index) override;
     virtual void focusOnSelection() override;
     virtual void setDragHover(int index) override;

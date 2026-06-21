@@ -180,6 +180,8 @@ public:
     void setFolderViewParentIconColor(QColor color);
     QColor folderViewSelectedLabelBackgroundColor();
     void setFolderViewSelectedLabelBackgroundColor(QColor color);
+    QColor folderViewCellBackgroundColor();
+    void setFolderViewCellBackgroundColor(QColor color);
 
     bool firstRun();
     void setFirstRun(bool mode);
