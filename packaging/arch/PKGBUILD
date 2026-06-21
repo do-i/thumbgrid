@@ -1,0 +1,66 @@
+# Maintainer: doijoji+git@gmail.com
+# PKGBUILD for the do-i fork of qimgv.
+# Minimal build: Qt5 only, no Exiv2 / OpenCV / mpv (matches run.sh "minimal build").
+#
+# This PKGBUILD builds from the already checked-out source tree (the repo this
+# file lives in), so CI can package the exact tag without downloading a tarball
+# or maintaining a sha256sum. pkgver is supplied by CI via $QIMGV_PKGVER
+# (derived from the git tag); it falls back to a git-describe value for local
+# `makepkg` runs from this directory.
+
+pkgname=qimgv-do-i
+_srcroot="$(cd "$startdir/../.." && pwd)"
+pkgver="${QIMGV_PKGVER:-0}"
+pkgrel=1
+pkgdesc="Qt image viewer (do-i fork), minimal Qt5 build (no exiv2/opencv/mpv)"
+arch=('x86_64')
+url="https://github.com/do-i/qimgv"
+license=('GPL-3.0-only')
+depends=(
+  'qt5-base'
+  'qt5-svg'
+  'qt5-imageformats'
+)
+makedepends=(
+  'cmake'
+  'qt5-tools'
+  'pkgconf'
+  'git'
+)
+provides=('qimgv')
+conflicts=('qimgv')
+# Release build only; no separate -debug package.
+options=('!debug')
+source=()
+
+pkgver() {
+  # Used only when $QIMGV_PKGVER is not set (local builds). Maps the tag's
+  # '-' to '_' since pacman versions may not contain '-'.
+  if [[ -n "${QIMGV_PKGVER:-}" ]]; then
+    printf '%s' "$QIMGV_PKGVER"
+    return
+  fi
+  git -C "$_srcroot" describe --tags --always 2>/dev/null \
+    | sed 's/^v//; s/-/_/g' || printf '0'
+}
+
+build() {
+  cmake -B "$srcdir/build" -S "$_srcroot" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DUSE_QT5=ON \
+    -DEXIV2=OFF \
+    -DVIDEO_SUPPORT=OFF \
+    -DOPENCV_SUPPORT=OFF \
+    -DKDE_SUPPORT=OFF \
+    -Wno-dev
+  cmake --build "$srcdir/build"
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install "$srcdir/build"
+
+  # Install the license explicitly (upstream does not install it).
+  install -Dm644 "$_srcroot/LICENSE" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE" 2>/dev/null || true
+}
