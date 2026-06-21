@@ -170,7 +170,6 @@ GridInfo FlowLayout::doLayout(const QRectF &geom, bool applyNewGeometry) const {
     getContentsMargins(&leftMargin, &topMargin, &rightMargin, &bottomMargin);
 
     const qreal maxRowWidth = geom.width() - leftMargin - rightMargin;
-    int centerOffset = 0;
 
     qreal x = 0;
     qreal y = 0;
@@ -183,11 +182,6 @@ GridInfo FlowLayout::doLayout(const QRectF &geom, bool applyNewGeometry) const {
         rows = 1;
 
     if(m_items.count()) {
-        // calculate offset for centering
-        const qreal itemWidth = m_items.at(0)->effectiveSizeHint(Qt::PreferredSize).width();
-        int maxCols = static_cast<int>(maxRowWidth / itemWidth);
-        if(m_items.count() >= maxCols)
-            centerOffset = static_cast<int>(fmod(maxRowWidth, itemWidth) / 2);
         QGraphicsLayoutItem *item = m_items.at(0);
         itemSize = item->effectiveSizeHint(Qt::PreferredSize);
     }
@@ -208,7 +202,7 @@ GridInfo FlowLayout::doLayout(const QRectF &geom, bool applyNewGeometry) const {
             y += itemSize.height() + spacing(Qt::Vertical);
         }
         if(applyNewGeometry)
-            m_items.at(i)->setGeometry(QRectF(QPointF(leftMargin + x + centerOffset, topMargin + y), itemSize));
+            m_items.at(i)->setGeometry(QRectF(QPointF(leftMargin + x, topMargin + y), itemSize));
         x = next_x + spacing(Qt::Horizontal);
     }
     //qDebug() << "elapsed: " << t.elapsed();
