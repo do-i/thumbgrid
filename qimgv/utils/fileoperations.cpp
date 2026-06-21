@@ -264,6 +264,21 @@ void FileOperations::rename(const QString &srcFilePath, const QString &newName, 
     }
 }
 
+void FileOperations::createDirectory(const QString &dirPath, FileOpResult &result) {
+    QFileInfo fi(dirPath);
+    if(fi.exists()) {
+        result = fi.isDir() ? FileOpResult::DESTINATION_DIR_EXISTS
+                            : FileOpResult::DESTINATION_FILE_EXISTS;
+        return;
+    }
+    // Parent must already exist; mkdir() (not mkpath()) keeps this a single,
+    // explicit folder creation in the current directory.
+    if(QDir().mkdir(dirPath))
+        result = FileOpResult::SUCCESS;
+    else
+        result = FileOpResult::OTHER_ERROR;
+}
+
 void FileOperations::moveToTrash(const QString &filePath, FileOpResult &result) {
     QFileInfo file(filePath);
     if(!file.exists()) {

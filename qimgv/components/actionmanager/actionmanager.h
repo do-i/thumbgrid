@@ -102,6 +102,7 @@ signals:
     void copyFileClipboard();
     void copyPathClipboard();
     void renameFile();
+    void createDirectory();
     void contextMenu();
     void toggleTransparencyGrid();
     void sortByName();

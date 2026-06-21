@@ -155,6 +155,7 @@ private slots:
     void sortByTime();
     void sortBySize();
     void showRenameDialog();
+    void createDirectory();
     void onDraggedOut();
     void onDraggedOut(QList<QString> paths);
     void onDropIn(const QMimeData *mimeData, QObject* source);

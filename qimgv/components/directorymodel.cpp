@@ -159,6 +159,15 @@ void DirectoryModel::removeDir(const QString &dirPath, bool trash, bool recursiv
     return;
 }
 
+void DirectoryModel::createDirectory(const QString &dirPath, FileOpResult &result) {
+    FileOperations::createDirectory(dirPath, result);
+    if(result != FileOpResult::SUCCESS)
+        return;
+    // Add the entry now so the view updates immediately; if the fs watcher also
+    // reports it, insertDirEntry() is a no-op (it guards on containsDir).
+    dirManager.insertDirEntry(dirPath);
+}
+
 void DirectoryModel::copyFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result) {
     FileOperations::copyFileTo(srcFile, destDirPath, force, result);
 }

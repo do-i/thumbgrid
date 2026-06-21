@@ -37,6 +37,7 @@ public:
     void renameEntry(const QString &oldFilePath, const QString &newName, bool force, FileOpResult &result);
     void removeFile(const QString &filePath, bool trash, FileOpResult &result);
     void removeDir(const QString &dirPath, bool trash, bool recursive, FileOpResult &result);
+    void createDirectory(const QString &dirPath, FileOpResult &result);
 
     bool setDirectory(QString);
 
