@@ -54,6 +54,7 @@ signals:
     void droppedInto(const QMimeData*, QObject*, int) override;
     void draggedOver(int) override;
     void selectionChanged();
+    void convertFormatRequested(QString format);
 
 private:
     std::shared_ptr<FolderView> folderView;

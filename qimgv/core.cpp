@@ -105,6 +105,7 @@ void Core::connectComponents() {
     connect(mw, &MW::moveRequested,         this, &Core::moveCurrentFile);
     connect(mw, &MW::copyUrlsRequested,     this, qOverload<QList<QString>, QString>(&Core::copyPathsTo));
     connect(mw, &MW::moveUrlsRequested,     this, &Core::movePathsTo);
+    connect(mw, &MW::convertFormatRequested, this, &Core::convertSelectionToFormat);
     connect(mw, &MW::cropRequested,         this, &Core::crop);
     connect(mw, &MW::cropAndSaveRequested,  this, &Core::cropAndSave);
     connect(mw, &MW::saveAsClicked,         this, &Core::requestSavePath);
@@ -915,6 +916,75 @@ void Core::copyPathsTo(QList<QString> paths, QString destDirectory) {
 
 void Core::movePathsTo(QList<QString> paths, QString destDirectory) {
     interactiveMove(paths, destDirectory);
+}
+
+// Converts the currently selected file(s) to another image format.
+// The converted copy is written next to the original (same base name, new extension).
+// Only static images are supported; animated images and video are skipped.
+void Core::convertSelectionToFormat(QString format) {
+    if(!model || model->isEmpty())
+        return;
+    QList<QString> selection = currentSelection();
+    if(selection.isEmpty())
+        return;
+
+    // normalize the target extension
+    QString ext = format.toLower();
+    if(ext == "jpeg")
+        ext = "jpg";
+
+    struct ConvertJob {
+        QString src;
+        QString dest;
+        std::shared_ptr<Image> img;
+    };
+    QList<ConvertJob> jobs;
+    int skipped = 0;
+    bool overwrites = false;
+
+    for(const QString &path : selection) {
+        QFileInfo fi(path);
+        QString srcExt = fi.suffix().toLower();
+        // already in the target format
+        if(srcExt == ext || (ext == "jpg" && srcExt == "jpeg")) {
+            skipped++;
+            continue;
+        }
+        auto img = model->getImage(path);
+        if(!img || img->type() != STATIC) {
+            skipped++;
+            continue;
+        }
+        QString dest = fi.absolutePath() + "/" + fi.completeBaseName() + "." + ext;
+        if(QFileInfo::exists(dest))
+            overwrites = true;
+        jobs.append({path, dest, img});
+    }
+
+    if(jobs.isEmpty()) {
+        mw->showMessage(tr("Nothing to convert"));
+        return;
+    }
+    if(overwrites && !mw->showConfirmation(tr("Convert"),
+            tr("Some files already exist and will be overwritten.\n\nContinue?")))
+        return;
+
+    int converted = 0, failed = 0;
+    for(const ConvertJob &job : jobs) {
+        // make sure the image is cached so DirectoryModel::saveFile can access it
+        model->updateImage(job.src, job.img);
+        if(model->saveFile(job.src, job.dest))
+            converted++;
+        else
+            failed++;
+    }
+
+    if(converted && !failed)
+        mw->showMessageSuccess(tr("Converted %1 file(s)").arg(converted));
+    else if(converted && failed)
+        mw->showWarning(tr("Converted %1, failed %2").arg(converted).arg(failed));
+    else
+        mw->showError(tr("Could not convert file(s)"));
 }
 
 void Core::moveCurrentFile(QString destDirectory) {

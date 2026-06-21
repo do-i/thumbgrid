@@ -73,6 +73,7 @@ FolderView::FolderView(QWidget *parent) :
     connect(ui->thumbnailGrid, &FolderGridView::draggedOver,     this, &FolderView::draggedOver);
     connect(ui->thumbnailGrid, &FolderGridView::droppedInto,     this, &FolderView::droppedInto);
     connect(ui->thumbnailGrid, &FolderGridView::selectionChanged, this, &FolderView::selectionChanged);
+    connect(ui->thumbnailGrid, &FolderGridView::convertFormatRequested, this, &FolderView::convertFormatRequested);
 
     connect(ui->bookmarksWidget, &BookmarksWidget::bookmarkClicked, this, &FolderView::onBookmarkClicked);
 

@@ -169,6 +169,7 @@ signals:
     void moveRequested(QString);
     void copyUrlsRequested(QList<QString>, QString);
     void moveUrlsRequested(QList<QString>, QString);
+    void convertFormatRequested(QString);
     void showFoldersChanged(bool);
     void resizeRequested(QSize);
     void renameRequested(QString);

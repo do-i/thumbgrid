@@ -37,6 +37,7 @@ void FolderViewProxy::init() {
     connect(folderView.get(), &FolderView::droppedInto, this, &FolderViewProxy::droppedInto);
     connect(folderView.get(), &FolderView::draggedOver, this, &FolderViewProxy::draggedOver);
     connect(folderView.get(), &FolderView::selectionChanged, this, &FolderViewProxy::selectionChanged);
+    connect(folderView.get(), &FolderView::convertFormatRequested, this, &FolderViewProxy::convertFormatRequested);
 
     folderView->show();
 

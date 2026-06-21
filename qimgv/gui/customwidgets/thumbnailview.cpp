@@ -666,8 +666,11 @@ void ThumbnailView::mousePressEvent(QMouseEvent *event) {
                 mouseReleaseSelect = true;
             }
             dragStartPos = event->pos();
-        } else if(event->button() == Qt::RightButton) { // todo: context menu maybe?
-            select(index);
+        } else if(event->button() == Qt::RightButton) {
+            // keep an existing multi-selection if the clicked item is part of it,
+            // so the context menu acts on the whole selection
+            if(!selection().contains(index))
+                select(index);
             return;
         }
     }

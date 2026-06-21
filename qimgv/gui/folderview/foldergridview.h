@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QGraphicsWidget>
+#include <QMenu>
+#include <QContextMenuEvent>
 
 #include "gui/customwidgets/thumbnailview.h"
 #include "gui/customwidgets/thumbnailwidget.h"
@@ -64,8 +66,9 @@ protected:
     virtual void fitSceneToContents() override;
 
     void keyPressEvent(QKeyEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;    
+    void wheelEvent(QWheelEvent *event) override;
     void dropEvent(QDropEvent *event) override;
+    void contextMenuEvent(QContextMenuEvent *event) override;
 
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
@@ -74,4 +77,5 @@ protected:
 
 signals:
     void thumbnailSizeChanged(int);
+    void convertFormatRequested(QString format);
 };

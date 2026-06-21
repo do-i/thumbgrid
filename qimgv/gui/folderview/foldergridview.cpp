@@ -427,6 +427,31 @@ void FolderGridView::wheelEvent(QWheelEvent *event) {
     }
 }
 
+void FolderGridView::contextMenuEvent(QContextMenuEvent *event) {
+    // a right-press already selected the item under the cursor (see ThumbnailView)
+    if(selection().isEmpty()) {
+        event->accept();
+        return;
+    }
+    QMenu menu(this);
+    QMenu *convertMenu = menu.addMenu(tr("Convert to"));
+
+    const QList<QPair<QString, QString>> formats = {
+        {"JPEG", "jpg"},
+        {"PNG",  "png"},
+        {"WebP", "webp"}
+    };
+    for(const auto &f : formats) {
+        QString format = f.second;
+        QAction *action = convertMenu->addAction(f.first);
+        connect(action, &QAction::triggered, this, [this, format]() {
+            emit convertFormatRequested(format);
+        });
+    }
+    menu.exec(event->globalPos());
+    event->accept();
+}
+
 void FolderGridView::zoomIn() {
     setThumbnailSize(this->mThumbnailSize + ZOOM_STEP);
 }
