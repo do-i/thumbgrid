@@ -138,6 +138,11 @@ void FolderGridView::setLabelBackgroundColor(const QColor &color) {
         thumbnails.at(i)->setLabelBackgroundColor(color);
 }
 
+void FolderGridView::setCellBackgroundColor(const QColor &color) {
+    for(int i = 0; i < thumbnails.count(); i++)
+        thumbnails.at(i)->setCellBackgroundColor(color);
+}
+
 void FolderGridView::focusOnSelection() {
     if(!thumbnails.count() || lastSelected() == -1)
         return;
@@ -330,6 +335,7 @@ ThumbnailWidget* FolderGridView::createThumbnailWidget() {
     widget->setShowInfo(settings->folderViewShowInfo());
     widget->setLabelFontPointSize(settings->folderViewFontPointSize());
     widget->setLabelBackgroundColor(settings->folderViewLabelBackgroundColor());
+    widget->setCellBackgroundColor(settings->folderViewCellBackgroundColor());
     widget->setThumbnailSize(this->mThumbnailSize); // TODO: constructor
     widget->setThumbnailAreaSize(folderGridThumbnailWidth(this->mThumbnailSize), this->mThumbnailSize);
     return widget;

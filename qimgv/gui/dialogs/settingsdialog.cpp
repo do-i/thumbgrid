@@ -60,6 +60,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->folderViewSelectionColorSelector->setDescription(tr("Folder view selection"));
     ui->folderViewParentIconColorSelector->setDescription(tr("Folder view parent icon"));
     ui->folderViewSelectedLabelBackgroundColorSelector->setDescription(tr("Folder view selected filename background"));
+    ui->folderViewCellBackgroundColorSelector->setDescription(tr("Folder view preview cell background"));
     ui->colorSelectorText->setDescription(tr("Text color"));
     ui->colorSelectorWidget->setDescription(tr("Widget background"));
     ui->colorSelectorWidgetBorder->setDescription(tr("Widget border"));
@@ -247,6 +248,8 @@ void SettingsDialog::readSettings() {
     ui->folderViewParentIconColorSelector->setColor(folderViewParentIcon);
     QColor folderViewSelectedLabelBackground = settings->folderViewSelectedLabelBackgroundColor();
     ui->folderViewSelectedLabelBackgroundColorSelector->setColor(folderViewSelectedLabelBackground);
+    QColor folderViewCellBackground = settings->folderViewCellBackgroundColor();
+    ui->folderViewCellBackgroundColorSelector->setColor(folderViewCellBackground);
 
     if(settings->folderEndAction() == FOLDER_END_NO_ACTION)
         ui->folderEndNoAction->setChecked(true);
@@ -388,6 +391,7 @@ void SettingsDialog::saveSettings() {
     settings->setFolderViewSelectionColor(ui->folderViewSelectionColorSelector->color());
     settings->setFolderViewParentIconColor(ui->folderViewParentIconColorSelector->color());
     settings->setFolderViewSelectedLabelBackgroundColor(ui->folderViewSelectedLabelBackgroundColorSelector->color());
+    settings->setFolderViewCellBackgroundColor(ui->folderViewCellBackgroundColorSelector->color());
 
     if(ui->folderEndNoAction->isChecked())
         settings->setFolderEndAction(FOLDER_END_NO_ACTION);
