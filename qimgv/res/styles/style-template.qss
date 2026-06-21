@@ -705,6 +705,11 @@ InfoBar QLabel {
     color: %text_hc%;
 }
 
+/* folder view footer status bar */
+[accessibleName="FolderViewStatusFooter"] InfoBar {
+    border-top: 1px solid %text_lc2%;
+}
+
 /*----------------------------------------------------------------------------*/
 ZoomIndicatorOverlay {
     background-color: %overlay_rgba%;
@@ -725,6 +730,7 @@ ZoomIndicatorOverlay QLabel {
 FolderView QScrollBar:vertical {
     width: 13px;
     background-color: transparent;
+    border-left: 1px solid %text_lc2%;
 }
 
 FolderView QScrollBar::handle:vertical {
