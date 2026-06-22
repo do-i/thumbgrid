@@ -1,14 +1,27 @@
 ## :exclamation: Updates may be slow due to war in Ukraine :sunflower: :sunflower: :sunflower:
 
-qimgv | Current version: 1.0.2
+thumbgrid
 =====
 Image viewer. Fast, easy to use. Optional video support.
+
+> **thumbgrid** is a hard fork of [easymodo/qimgv](https://github.com/easymodo/qimgv),
+> originally written by easymodo and its contributors. It remains free software
+> under the GNU GPL v3. The original copyright and attribution are retained — see
+> [`NOTICE`](NOTICE) and [`LICENSE`](LICENSE).
+
+**Versioning:** thumbgrid uses calendar versioning (`YYYY.M.N`), independent of
+upstream. The current version is defined in
+[`qimgv/appversion.cpp`](qimgv/appversion.cpp) and `CMakeLists.txt`
+(currently **2026.6.1**), and is reported by `thumbgrid --version`.
 
 ## Screenshots
 
 Main window & panel        |  Folder view   |  Settings window  
 :-------------------------:|:-------------------------:|:-------------------------:|
 [![img1](qimgv/distrib/screenshots/qimgv0.9_1_thumb.jpg)](qimgv/distrib/screenshots/qimgv0.9_1.jpg?raw=true)  |  [![img2](qimgv/distrib/screenshots/qimgv0.9_2_thumb.jpg)](qimgv/distrib/screenshots/qimgv0.9_2.jpg?raw=true) | [![img3](qimgv/distrib/screenshots/qimgv_3_thumb.jpg)](qimgv/distrib/screenshots/qimgv_3.jpg?raw=true)
+
+_Note: screenshots are inherited from upstream 0.9 and may not reflect the
+current UI._
 
 ## Key features:
 
@@ -27,6 +40,10 @@ Main window & panel        |  Folder view   |  Settings window
 - EXIF/IPTC/XMP metadata via exiv2: view tags (with an optional full-metadata
   mode), preserve metadata when saving edits, and strip all metadata for privacy
 
+- Folder view with file management: copy / cut / paste of files and folders
+  (symlink-aware), create directory (F7), rename (F2), and an on-disk async
+  folder thumbnail cache
+
 - Ability to quickly copy / move images to different folders
 
 - Experimental video playback via libmpv
@@ -34,6 +51,8 @@ Main window & panel        |  Folder view   |  Settings window
 - Folder view mode
 
 - Ability to run shell scripts
+
+- Qt6-only build (upstream Qt5 support has been dropped)
 
 ## Default control scheme:
 
@@ -90,6 +109,19 @@ With panel visible, use 1 - 9 keys to copy/move current image to corresponding d
 
 When you are done press C or M again to hide the panel.
 
+## Folder view & file management
+
+In folder view you can manage files directly: copy / cut / paste files and
+folders (symlink-aware), create a new directory (F7) and rename (F2). Thumbnails
+are cached on disk and generated asynchronously.
+
+## Metadata (exiv2)
+
+When built with exiv2 support (`-DEXIV2=ON`, default), thumbgrid can read
+Exif / IPTC / XMP tags. The image-info panel (`I`) has an optional full-metadata
+mode. Metadata is preserved when saving edits, and a strip-metadata action lets
+you remove all metadata for privacy. Both are available from the context menu.
+
 ## Running scripts
 
 You can run custom scripts on a current image.
@@ -111,21 +143,21 @@ When you've created your script go to __Settings > Controls > Add__, then select
 
 ## HiDPI (Linux / MacOS only)
 
-If qimgv appears too small / too big on your display, you can override the scale factor. Example:
+If thumbgrid appears too small / too big on your display, you can override the scale factor. Example:
 ```
-QT_SCALE_FACTOR="1.5" qimgv /path/to/image.png
+QT_SCALE_FACTOR="1.5" thumbgrid /path/to/image.png
 ```
-You can put it in `qimgv.desktop` file to make it permanent. Using values less than `1.0` is not supported.
+You can put it in `thumbgrid.desktop` file to make it permanent. Using values less than `1.0` is not supported.
 
-qimgv should also obey the global scale factor set in KDE's systemsettings.
+thumbgrid should also obey the global scale factor set in KDE's systemsettings.
 
 ## High quality scaling
 
-qimgv supports nicer scaling filters when compiled with `opencv` support (ON by default, but might vary depending on your linux distribution). Filter options are available in __Settings > Scaling__. `Bicubic` or `bilinear+sharpen` is recommended.
+thumbgrid supports nicer scaling filters when compiled with `opencv` support (ON by default, but might vary depending on your linux distribution). Filter options are available in __Settings > Scaling__. `Bicubic` or `bilinear+sharpen` is recommended.
 
 # Additional image formats
 
-qimgv can open some extra formats via third-party image plugins. All of them are included with windows package.
+thumbgrid can open some extra formats via third-party image plugins.
 
 | Format  | Plugin |
 | ------- | ------------- |
@@ -138,92 +170,61 @@ qimgv can open some extra formats via third-party image plugins. All of them are
 
 # Installation
 
-## Windows
-  
-  Windows builds are portable (everything is contained within the install folder). The installer also sets up file associations.
-  
-  _NOTE: `-video` variants include mpv for video support_
-  
-  Grab the latest version from the [releases page](https://github.com/easymodo/qimgv/releases)
+This fork does not yet ship to the upstream distribution channels (AUR
+`qimgv-git`, apt/dnf/zypper/pkg, Chocolatey, WinGet). Build from source, or grab
+a CI-built package from the fork's releases.
 
-  Alternatively you can install it with Chocolatey:
-  
-  ```
-  choco install qimgv
-  ```
-  
-  Or WinGet:
-  
-  ```
-  winget install --id easymodo.qimgv
-  ```
+## Build from source (GNU+Linux)
 
-## GNU+Linux
+Requirements: a C++17 compiler (GCC 9+), CMake 3.13+, and Qt6
+(`Core Widgets Svg PrintSupport OpenGLWidgets`). Optional features pull in
+exiv2 (metadata), OpenCV (HQ scaling) and mpv (video).
 
-### Arch Linux / Manjaro / etc.
-
-AUR package: 
+The easiest way is the interactive helper, which can install the minimal Qt6
+build dependencies for your distro and then configure / build / run:
 
 ```
-qimgv-git
-```
-  
-### Ubuntu / Linux Mint / Pop!\_OS / etc.
-
-```
-sudo apt install qimgv
+./run.sh
 ```
 
-### Fedora
+Or build directly with CMake:
 
 ```
-sudo dnf install qimgv
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 ```
 
-### OpenSUSE
+Feature toggles (all default `ON` except KDE):
 
 ```
-zypper install qimgv
+-DEXIV2=ON|OFF            # Exif/Iptc/Xmp metadata, metadata-preserving saves, strip-metadata
+-DVIDEO_SUPPORT=ON|OFF    # video playback via the mpv plugin
+-DOPENCV_SUPPORT=ON|OFF   # high quality scaling
+-DKDE_SUPPORT=ON|OFF      # blur behind the window on KDE
 ```
 
-### Gentoo
+Install with:
 
 ```
-emerge qimgv
+sudo cmake --install build
 ```
 
-### Void linux
+## Arch Linux package
+
+A minimal Qt6 PKGBUILD lives in [`packaging/arch/`](packaging/arch/). From that
+directory:
 
 ```
-xbps-install -S qimgv
+makepkg -si
 ```
 
-### Alpine Linux
-
-```
-apk add qimgv
-```
-
-## BSD
-
-### FreeBSD
-
-```
-pkg install qimgv
-```
-
-This list may be incomplete. 
-
-## Compiling from source
-
-See [Compiling qimgv from source](https://github.com/easymodo/qimgv/wiki/Compiling-qimgv-from-source) on the wiki
+CI also builds this package and attaches a `*.pkg.tar.zst` to the release on
+every version tag.
 
 # Donate
 
-If you wish to give me a few bucks, please consider donating to the Ukrainian Army instead:
+If you wish to give a few bucks, please consider donating to the Ukrainian Army:
 
 [https://savelife.in.ua/en/donate-en/#donate-army-card-once](https://savelife.in.ua/en/donate-en/#donate-army-card-once)
 
 [https://u24.gov.ua/](https://u24.gov.ua/)
-
-This directly increases the chances of me being able to work on this in future
