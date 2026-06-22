@@ -1,0 +1,14 @@
+thumbgrid
+Copyright (C) 2024-2026 do-i and thumbgrid contributors
+
+This product is a hard fork of qimgv:
+  qimgv - Copyright (C) easymodo and qimgv contributors
+  https://github.com/easymodo/qimgv
+
+thumbgrid is free software: you can redistribute it and/or modify it under the
+terms of the GNU General Public License version 3 as published by the Free
+Software Foundation. See the LICENSE file for the full license text.
+
+The original qimgv copyright and the contributions of its authors are retained.
+Files substantially changed or added by the fork carry their own copyright
+headers alongside the original attribution where applicable.

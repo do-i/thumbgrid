@@ -1,4 +1,6 @@
 # Maintainer: doijoji+git@gmail.com
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2024-2026 do-i and thumbgrid contributors
 # PKGBUILD for thumbgrid (a hard fork of easymodo/qimgv).
 # Minimal build: Qt6 only, no Exiv2 / OpenCV / mpv (matches run.sh "minimal build").
 #
