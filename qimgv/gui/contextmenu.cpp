@@ -94,6 +94,14 @@ ContextMenu::ContextMenu(QWidget *parent) :
     ui->showLocation->setText(tr("Show in folder"));
     ui->showLocation->setIconPath(":/res/icons/common/menuitem/folder16.png");
     // -------------------------------------------------------------------------
+    ui->imageInfo->setAction("toggleImageInfo");
+    ui->imageInfo->setText(tr("Image info"));
+    ui->imageInfo->setIconPath(":/res/icons/common/overlay/info16.png");
+
+    ui->stripMetadata->setAction("stripMetadata");
+    ui->stripMetadata->setText(tr("Strip metadata"));
+    ui->stripMetadata->setIconPath(":/res/icons/common/menuitem/trash16.png");
+    // -------------------------------------------------------------------------
     // force resize to fit new menuitem width
     this->adjustSize();
 
@@ -148,6 +156,8 @@ void ContextMenu::setImageEntriesEnabled(bool mode) {
     ui->trash->setEnabled(mode);
     ui->openWith->setEnabled(mode);
     ui->showLocation->setEnabled(mode);
+    ui->imageInfo->setEnabled(mode);
+    ui->stripMetadata->setEnabled(mode);
 }
 
 void ContextMenu::showAt(QPoint pos) {
