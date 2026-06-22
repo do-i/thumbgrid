@@ -24,6 +24,9 @@ Main window & panel        |  Folder view   |  Settings window
 
 - Basic image editing: Crop, Rotate and Resize
 
+- EXIF/IPTC/XMP metadata via exiv2: view tags (with an optional full-metadata
+  mode), preserve metadata when saving edits, and strip all metadata for privacy
+
 - Ability to quickly copy / move images to different folders
 
 - Experimental video playback via libmpv

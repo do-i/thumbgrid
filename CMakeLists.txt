@@ -21,6 +21,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # USER OPTIONS
 # Usage: cmake -DVIDEO_SUPPORT=ON [...]
+# Enables reading/writing Exif/Iptc/Xmp metadata, metadata-preserving saves and
+# the strip-metadata action. For tags inside cr3/heif/jxl/avif, exiv2 itself must
+# be built with EXIV2_ENABLE_BMFF (default in exiv2 >= 0.28).
 option(EXIV2 "For reading/writing exif tags" ON)
 option(VIDEO_SUPPORT "Enable video support" ON)
 option(OPENCV_SUPPORT "Enable HQ scaling via OpenCV" ON)
