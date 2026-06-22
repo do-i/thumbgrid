@@ -50,6 +50,7 @@ public slots:
 private slots:
     void generateThumbnails(QList<int>, int, bool, bool);
     void onThumbnailReady(std::shared_ptr<Thumbnail> thumb, QString filePath);
+    void onDirThumbnailReady(std::shared_ptr<Thumbnail> thumb, QString dirPath);
     void populateView();
     void onItemActivated(int absoluteIndex);
     void onDraggedOut();
@@ -67,10 +68,7 @@ private:
     bool hasParentDir() const;
     int parentOffset() const;
     QString parentDirPath() const;
-    std::shared_ptr<Thumbnail> createDirThumbnail(const QString &path, const QString &name, const QString &info, int size);
     std::shared_ptr<Thumbnail> createParentDirThumbnail(int size);
-    QList<QImage> dirPreviewImages(const QString &path, int targetSize) const;
-    void drawDirPreview(QPixmap &pixmap, const QList<QImage> &images) const;
     int realObjectCount() const;
     QString statusText() const;
     void emitStatusText();

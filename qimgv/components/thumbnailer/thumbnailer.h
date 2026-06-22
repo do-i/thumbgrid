@@ -17,17 +17,26 @@ public:
 
 public slots:
     void getThumbnailAsync(QString path, int size, bool crop, bool force);
+    void getDirThumbnailAsync(QString path, int size, bool previewFit, bool crop, bool force);
 
 private:
     ThumbnailCache *cache;
     QThreadPool *pool;
     void startThumbnailerThread(QString filePath, int size, bool crop, bool force);
+    void startDirThumbnailerThread(QString dirPath, int size, bool previewFit, bool crop, bool force);
+    QImage dirIconBase(int size);
     QMultiMap<QString, int> runningTasks;
+    // cached recolored+scaled folder icon, keyed by size + scheme color
+    QImage cachedIconBase;
+    int cachedIconSize = -1;
+    QString cachedIconColor;
 
 private slots:
     void onTaskStart(QString filePath, int size);
     void onTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString filePath);
+    void onDirTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString dirPath);
 
 signals:
     void thumbnailReady(std::shared_ptr<Thumbnail> thumbnail, QString filePath);
+    void dirThumbnailReady(std::shared_ptr<Thumbnail> thumbnail, QString dirPath);
 };
