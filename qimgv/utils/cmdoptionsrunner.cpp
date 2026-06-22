@@ -4,7 +4,7 @@ void CmdOptionsRunner::generateThumbs(QString dirPath, int size) {
     if(size <= 50 || size > 400) {
         qDebug() << "Error: Invalid thumbnail size.";
         qDebug() << "Please specify a value between [50, 400].";
-        qDebug() << "Example:  qimgv --gen-thumbs=/home/user/Pictures/ --gen-thumbs-size=120";
+        qDebug() << "Example:  thumbgrid --gen-thumbs=/home/user/Pictures/ --gen-thumbs-size=120";
         QCoreApplication::exit(1);
         return;
     }

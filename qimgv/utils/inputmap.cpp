@@ -26,7 +26,7 @@ void InputMap::initKeyMap() {
     // key codes as reported by QKeyEvent::nativeScanCode()
     keyMap.clear();
 #ifdef _WIN32
-    // windows keymap for qimgv
+    // windows keymap for thumbgrid
 
     // row 1
     keyMap.insert( 1 , "Esc" );
@@ -163,7 +163,7 @@ void InputMap::initKeyMap() {
     keyMap.insert( 57372 , "Enter" );
 
 #elif defined(__linux__) || defined(__FreeBSD__)
-    // linux keymap for qimgv
+    // linux keymap for thumbgrid
 
     // row 1
     keyMap.insert( 9 , "Esc" );

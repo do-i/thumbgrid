@@ -155,7 +155,7 @@ bool ImageStatic::save(QString destPath) {
         try {
             auto dstImage = Exiv2::ImageFactory::open(toStdString(destPath));
             if(dstImage.get()) {
-                // qimgv bakes exif rotation into pixels on load, so the saved
+                // thumbgrid bakes exif rotation into pixels on load, so the saved
                 // pixels are always upright - normalize orientation/dimensions
                 // to avoid viewers rotating an already-upright image.
                 srcExif["Exif.Image.Orientation"]     = uint16_t(1);
