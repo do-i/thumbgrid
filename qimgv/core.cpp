@@ -91,6 +91,8 @@ void Core::connectComponents() {
             this, &Core::onDirectoryViewFileActivated);
     connect(&folderViewPresenter, &DirectoryPresenter::dirActivated,
             this, &Core::loadPath);
+    connect(&folderViewPresenter, &DirectoryPresenter::parentDirActivated,
+            this, &Core::loadParentDir);
 
     connect(&folderViewPresenter, &DirectoryPresenter::draggedOut,
             this, qOverload<QList<QString>>(&Core::onDraggedOut));
@@ -407,7 +409,11 @@ void Core::moveToTrash() {
     FileOpResult result;
     int successCount = 0;
     for(auto path : paths) {
-        result = removeFile(path, true);
+        QFileInfo fi(path);
+        if(fi.isDir())
+            model->removeDir(path, true, true, result);
+        else
+            result = removeFile(path, true);
         if(result == FileOpResult::SUCCESS)
             successCount++;
     }
@@ -1572,9 +1578,18 @@ void Core::loadParentDir() {
         return;
     }
     QFileInfo parentDir(currentDir.absolutePath());
-    if(parentDir.exists() && parentDir.isReadable())
+    if(parentDir.exists() && parentDir.isReadable()) {
+        QString childPath = currentDir.absoluteFilePath();
         loadPath(parentDir.absoluteFilePath());
-    folderViewPresenter.selectAndFocus(currentDir.absoluteFilePath());
+        // Loading the parent repopulates the folder view, which resets the
+        // selection to the first item (populate() -> selectAndFocus(0)) and
+        // queues layout events. Defer selecting the subdir we came from until
+        // those settle, otherwise our selection is immediately overwritten.
+        QTimer::singleShot(0, this, [this, childPath]() {
+            if(mw->currentViewMode() == MODE_FOLDERVIEW)
+                folderViewPresenter.selectAndFocus(childPath);
+        });
+    }
 }
 
 void Core::nextDirectory() {

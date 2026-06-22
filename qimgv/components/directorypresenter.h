@@ -38,6 +38,7 @@ public:
 
 signals:
     void dirActivated(QString dirPath);
+    void parentDirActivated();
     void fileActivated(QString filePath);
     void draggedOut(QList<QString>);
     void droppedInto(QList<QString>, QString);

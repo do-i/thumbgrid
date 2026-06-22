@@ -340,7 +340,10 @@ void DirectoryPresenter::onItemActivated(int absoluteIndex) {
         QString parentPath = parentDirPath();
         if(parentPath.isEmpty() || parentPath == model->directoryPath())
             return;
-        emit dirActivated(parentPath);
+        // Route through the dedicated "go up" path so the directory we are
+        // leaving gets selected/focused in the parent view, same as the
+        // keyboard/up-button navigation.
+        emit parentDirActivated();
         return;
     }
     absoluteIndex -= offset;
