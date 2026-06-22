@@ -34,6 +34,8 @@ public:
     bool forceInsert(QString filePath);
     void copyFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
     void moveFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
+    void copySymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result);
+    void moveSymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result);
     void renameEntry(const QString &oldFilePath, const QString &newName, bool force, FileOpResult &result);
     void removeFile(const QString &filePath, bool trash, FileOpResult &result);
     void removeDir(const QString &dirPath, bool trash, bool recursive, FileOpResult &result);

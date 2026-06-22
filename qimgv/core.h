@@ -73,6 +73,7 @@ private:
 
     QDrag *mDrag;
     QMimeData *getMimeDataForImage(std::shared_ptr<Image> img, MimeDataTarget target);
+    void copySelectionToClipboard(bool cut);
     QTranslator *translator = nullptr;
 
     Randomizer randomizer;
@@ -147,6 +148,8 @@ private slots:
     void reloadImage();
     void reloadImage(QString fileName);
     void copyFileClipboard();
+    void cutFileClipboard();
+    void pasteFile();
     void copyPathClipboard();
     void openFromClipboard();
     void renameCurrentSelection(QString newName);

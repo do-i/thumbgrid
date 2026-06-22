@@ -215,6 +215,75 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
     return;
 }
 
+// Recreates a symbolic link at destDirPath pointing to the same target as srcLinkPath.
+// The link target is resolved to an absolute path so it keeps resolving from the new location.
+// We never follow the link to copy its target's contents - this preserves symlinks "as is".
+void FileOperations::copySymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result) {
+    QFileInfo srcLink(srcLinkPath);
+    if(!srcLink.isSymLink()) {
+        result = FileOpResult::SOURCE_DOES_NOT_EXIST;
+        return;
+    }
+    if(destDirPath == srcLink.absolutePath()) {
+        result = FileOpResult::NOTHING_TO_DO;
+        return;
+    }
+    QFileInfo destDir(destDirPath);
+    if(!destDir.exists()) {
+        result = FileOpResult::DESTINATION_DOES_NOT_EXIST;
+        return;
+    }
+    if(!destDir.isWritable()) {
+        result = FileOpResult::DESTINATION_NOT_WRITABLE;
+        return;
+    }
+    QString linkTarget = srcLink.symLinkTarget(); // absolute target path (empty if dangling)
+    if(linkTarget.isEmpty()) {
+        // Can't resolve the target (e.g. broken link); refuse rather than silently lose it.
+        result = FileOpResult::SOURCE_DOES_NOT_EXIST;
+        return;
+    }
+    QString destLinkPath = destDirPath + "/" + srcLink.fileName();
+    QFileInfo destLink(destLinkPath);
+    QString tmpPath;
+    bool exists = false;
+    if(destLink.exists() || destLink.isSymLink()) {
+        if(destLink.isDir() && !destLink.isSymLink()) {
+            result = FileOpResult::DESTINATION_DIR_EXISTS;
+            return;
+        }
+        if(!force) {
+            result = FileOpResult::DESTINATION_FILE_EXISTS;
+            return;
+        }
+        // back up whatever is in the way, then restore on failure
+        tmpPath = destLinkPath + "_" + generateHash(destLinkPath);
+        QFile::remove(tmpPath);
+        QFile::rename(destLinkPath, tmpPath);
+        exists = true;
+    }
+    if(QFile::link(linkTarget, destLinkPath)) {
+        result = FileOpResult::SUCCESS;
+        if(exists)
+            QFile::remove(tmpPath);
+    } else {
+        result = FileOpResult::OTHER_ERROR;
+        if(exists)
+            QFile::rename(tmpPath, destLinkPath);
+    }
+}
+
+void FileOperations::moveSymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result) {
+    copySymLinkTo(srcLinkPath, destDirPath, force, result);
+    if(result == FileOpResult::SUCCESS) {
+        // remove the original link only (QFile::remove unlinks the link, not its target)
+        FileOpResult removeResult;
+        removeFile(srcLinkPath, removeResult);
+        if(removeResult != FileOpResult::SUCCESS)
+            result = removeResult;
+    }
+}
+
 void FileOperations::rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result) {
     QFileInfo srcFile(srcFilePath);
     QString tmpPath;
