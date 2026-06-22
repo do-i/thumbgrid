@@ -105,6 +105,28 @@ bool ImageStatic::save(QString destPath) {
         }
         backupExists = true;
     }
+
+#ifdef USE_EXIV2
+    // Qt's QImage::save() drops all metadata, so grab the source file's
+    // Exif/Iptc/Xmp now (before mPath may be overwritten) to re-attach later.
+    Exiv2::ExifData srcExif;
+    Exiv2::IptcData srcIptc;
+    Exiv2::XmpData  srcXmp;
+    bool haveSrcMeta = false;
+    try {
+        auto srcImage = Exiv2::ImageFactory::open(toStdString(mPath));
+        if(srcImage.get()) {
+            srcImage->readMetadata();
+            srcExif = srcImage->exifData();
+            srcIptc = srcImage->iptcData();
+            srcXmp  = srcImage->xmpData();
+            haveSrcMeta = !srcExif.empty() || !srcIptc.empty() || !srcXmp.empty();
+        }
+    } catch(...) {
+        haveSrcMeta = false;
+    }
+#endif
+
     // save file
     if(isEdited()) {
         success = imageEdited->save(destPath, ext.toStdString().c_str(), quality);
@@ -125,6 +147,31 @@ bool ImageStatic::save(QString destPath) {
             QFile::remove(tmpPath);
         }
     }
+
+#ifdef USE_EXIV2
+    // Re-attach the source metadata that QImage::save() stripped. Best-effort:
+    // any failure (unsupported format, etc.) leaves the pixel save intact.
+    if(success && haveSrcMeta) {
+        try {
+            auto dstImage = Exiv2::ImageFactory::open(toStdString(destPath));
+            if(dstImage.get()) {
+                // qimgv bakes exif rotation into pixels on load, so the saved
+                // pixels are always upright - normalize orientation/dimensions
+                // to avoid viewers rotating an already-upright image.
+                srcExif["Exif.Image.Orientation"]     = uint16_t(1);
+                srcExif["Exif.Photo.PixelXDimension"] = uint32_t(image->width());
+                srcExif["Exif.Photo.PixelYDimension"] = uint32_t(image->height());
+                dstImage->setExifData(srcExif);
+                dstImage->setIptcData(srcIptc);
+                dstImage->setXmpData(srcXmp);
+                dstImage->writeMetadata();
+            }
+        } catch(...) {
+            qDebug() << "ImageStatic::save() - could not write metadata to" << destPath;
+        }
+    }
+#endif
+
     if(destPath == mPath && success)
         mDocInfo->refresh();
     return success;
