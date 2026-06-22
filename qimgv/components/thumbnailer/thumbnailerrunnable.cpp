@@ -179,17 +179,42 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, con
 
 std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cache, QString path, int size, bool crop, bool force,
                                                             bool previewFit, bool showHidden, const QImage &iconBase, const QString &colorId) {
-    Q_UNUSED(force)
-    Q_UNUSED(colorId)
     QString name = QFileInfo(path).fileName();
+    QString thumbnailId = generateDirIdString(path, size, previewFit, colorId);
+    // directory mtime changes when direct children are added/removed/renamed,
+    // which is exactly what changes the preview set
+    QString time = QString::number(QFileInfo(path).lastModified().toMSecsSinceEpoch());
 
-    // iconBase is implicitly shared; the copy becomes deep on first paint (copy-on-write)
-    QImage composite = iconBase;
-    drawDirPreview(composite, dirPreviewImages(cache, path, size, crop, showHidden), previewFit);
+    std::unique_ptr<QImage> composite;
+    if(!force && cache) {
+        composite.reset(cache->readThumbnail(thumbnailId));
+        if(composite && composite->text("lastModified") != time)
+            composite.reset(nullptr);
+    }
 
-    auto pixmap = new QPixmap(QPixmap::fromImage(composite));
+    if(!composite) {
+        // iconBase is implicitly shared; the copy becomes deep on first paint (copy-on-write)
+        QImage base = iconBase;
+        drawDirPreview(base, dirPreviewImages(cache, path, size, crop, showHidden), previewFit);
+        base.setText("lastModified", time);
+        composite.reset(new QImage(base));
+        if(cache)
+            cache->saveThumbnail(composite.get(), thumbnailId);
+    }
+
+    auto pixmap = new QPixmap(QPixmap::fromImage(*composite));
     pixmap->setDevicePixelRatio(qApp->devicePixelRatio());
     return std::shared_ptr<Thumbnail>(new Thumbnail(name, "Folder", size, std::shared_ptr<QPixmap>(pixmap), false));
+}
+
+// Cache key includes the preview-fit mode and the scheme icon color, so toggling
+// either regenerates rather than serving a stale composite.
+QString ThumbnailerRunnable::generateDirIdString(QString path, int size, bool previewFit, const QString &colorId) {
+    QString queryStr = path + QString::number(size) + "dir";
+    if(previewFit)
+        queryStr.append("f");
+    queryStr.append(colorId);
+    return QString(QCryptographicHash::hash(queryStr.toUtf8(), QCryptographicHash::Md5).toHex());
 }
 
 QList<QImage> ThumbnailerRunnable::dirPreviewImages(ThumbnailCache *cache, const QString &path, int targetSize, bool crop, bool showHidden) {
