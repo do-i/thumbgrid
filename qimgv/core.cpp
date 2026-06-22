@@ -188,6 +188,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::toggleFolderView, this, &Core::toggleFolderView);
     connect(actionManager, &ActionManager::reloadImage, this, qOverload<>(&Core::reloadImage));
     connect(actionManager, &ActionManager::copyFileClipboard, this, &Core::copyFileClipboard);
+    connect(actionManager, &ActionManager::cutFile, this, &Core::cutFileClipboard);
     connect(actionManager, &ActionManager::copyPathClipboard, this, &Core::copyPathClipboard);
     connect(actionManager, &ActionManager::renameFile, this, &Core::showRenameDialog);
     connect(actionManager, &ActionManager::createDirectory, this, &Core::createDirectory);
@@ -211,7 +212,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::print, this, &Core::print);
     connect(actionManager, &ActionManager::toggleFullscreenInfoBar, this, &Core::toggleFullscreenInfoBar);
     connect(actionManager, &ActionManager::toggleStatusFooter, this, &Core::toggleStatusFooter);
-    connect(actionManager, &ActionManager::pasteFile, this, &Core::openFromClipboard);
+    connect(actionManager, &ActionManager::pasteFile, this, &Core::pasteFile);
     connect(actionManager, &ActionManager::toggleFolderViewTopBar, this, &Core::toggleFolderViewTopBar);
 }
 
@@ -466,8 +467,14 @@ void Core::toggleFolderViewTopBar() {
     settings->sendChangeNotification();
 }
 
-// TODO: also copy selection from folder view?
 void Core::copyFileClipboard() {
+    // In folder view copy the whole selection (files and/or directories) as a file
+    // list, like a file manager. In image view keep copying the image's pixel data
+    // too, so it can be pasted into image editors.
+    if(mw->currentViewMode() == MODE_FOLDERVIEW) {
+        copySelectionToClipboard(false);
+        return;
+    }
     if(model->isEmpty())
         return;
 
@@ -482,11 +489,112 @@ void Core::copyFileClipboard() {
     mw->showMessage(tr("File copied"));
 }
 
+void Core::cutFileClipboard() {
+    copySelectionToClipboard(true);
+}
+
+// Puts the current selection (files and/or directories) onto the clipboard as a
+// file list, using the cross-desktop "x-special/gnome-copied-files" + KDE markers
+// so the operation interoperates with file managers (and our own pasteFile()).
+void Core::copySelectionToClipboard(bool cut) {
+    QList<QString> paths = currentSelection();
+    if(paths.isEmpty())
+        return;
+
+    QMimeData *mimeData = new QMimeData();
+    QList<QUrl> urls;
+    QByteArray gnomeFormat = cut ? QByteArray("cut\n") : QByteArray("copy\n");
+    for(int i = 0; i < paths.size(); i++) {
+        QUrl url = QUrl::fromLocalFile(paths.at(i));
+        urls << url;
+        if(i)
+            gnomeFormat.append('\n');
+        gnomeFormat.append(url.toEncoded());
+    }
+    mimeData->setUrls(urls);
+    mimeData->setData("x-special/gnome-copied-files", gnomeFormat);
+    mimeData->setData("application/x-kde-cutselection", cut ? "1" : "0");
+
+    QApplication::clipboard()->setMimeData(mimeData);
+    if(cut)
+        mw->showMessage(paths.count() > 1 ? tr("%1 items cut").arg(paths.count()) : tr("Item cut"));
+    else
+        mw->showMessage(paths.count() > 1 ? tr("%1 items copied").arg(paths.count()) : tr("Item copied"));
+}
+
+// Paste files/dirs from the clipboard into the currently open directory.
+// Copy vs move (cut) is decided from the clipboard markers. Falls back to the
+// old image-buffer / url open behaviour when there are no local files to paste.
+void Core::pasteFile() {
+    auto cb = QApplication::clipboard();
+    auto mimeData = cb->mimeData();
+    if(!mimeData)
+        return;
+
+    QString destDirectory = (model && !model->isEmpty()) ? model->directoryPath() : "";
+
+    // gather local file paths from the clipboard
+    QList<QString> paths;
+    if(mimeData->hasUrls()) {
+        for(auto &url : mimeData->urls()) {
+            QString localPath = url.toLocalFile();
+            if(!localPath.isEmpty())
+                paths << localPath;
+        }
+    }
+
+    // No real files to paste, or no folder to paste into: keep the legacy behaviour
+    // (open a url / save a clipboard image).
+    if(paths.isEmpty() || destDirectory.isEmpty()) {
+        openFromClipboard();
+        return;
+    }
+
+    // detect a "cut" operation (move) via the gnome / kde clipboard markers
+    bool cut = false;
+    if(mimeData->hasFormat("x-special/gnome-copied-files")) {
+        QByteArray data = mimeData->data("x-special/gnome-copied-files");
+        cut = data.startsWith("cut");
+    } else if(mimeData->hasFormat("application/x-kde-cutselection")) {
+        cut = mimeData->data("application/x-kde-cutselection").trimmed() == "1";
+    }
+
+    // drop entries that are already in the destination (nothing to do there)
+    QList<QString> toPaste;
+    QDir destDir(destDirectory);
+    for(auto &path : paths) {
+        QFileInfo fi(path);
+        if(!fi.exists() && !fi.isSymLink())
+            continue;
+        if(QDir(fi.absolutePath()) == destDir)
+            continue;
+        toPaste << path;
+    }
+    if(toPaste.isEmpty()) {
+        mw->showMessage(tr("Nothing to paste"));
+        return;
+    }
+
+    if(cut) {
+        interactiveMove(toPaste, destDirectory);
+        // clear the clipboard so a second paste won't fail on already-moved files
+        QApplication::clipboard()->clear();
+        mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
+    } else {
+        interactiveCopy(toPaste, destDirectory);
+        mw->showMessage(toPaste.count() > 1 ? tr("%1 items pasted").arg(toPaste.count()) : tr("Item pasted"));
+    }
+}
+
 void Core::copyPathClipboard() {
     if(model->isEmpty())
         return;
-    QApplication::clipboard()->setText(selectedPath());
-    mw->showMessage(tr("Path copied"));
+    // copy every selected path (one per line) so it covers a multi-selection in folder view
+    QList<QString> paths = currentSelection();
+    if(paths.isEmpty())
+        return;
+    QApplication::clipboard()->setText(paths.join("\n"));
+    mw->showMessage(paths.count() > 1 ? tr("%1 paths copied").arg(paths.count()) : tr("Path copied"));
 }
 
 // open from clipboard
@@ -790,6 +898,26 @@ void Core::interactiveCopy(QList<QString> paths, QString destDirectory) {
 // todo: replacing DIR with a FILE?
 void Core::doInteractiveCopy(QString path, QString destDirectory, DialogResult &overwriteFiles) {
     QFileInfo srcFi(path);
+// SYMLINK (recreate the link, never dereference into the target) ==============================
+    if(srcFi.isSymLink()) {
+        FileOpResult result;
+        FileOperations::copySymLinkTo(path, destDirectory, overwriteFiles, result);
+        if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
+            if(overwriteFiles.all)
+                return;
+            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
+            if(!overwriteFiles || overwriteFiles.cancel)
+                return;
+            FileOperations::copySymLinkTo(path, destDirectory, true, result);
+        }
+        if(result != FileOpResult::SUCCESS && !(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles)) {
+            mw->showError(FileOperations::decodeResult(result));
+            qDebug() << FileOperations::decodeResult(result);
+        }
+        if(!overwriteFiles.all)
+            overwriteFiles.yes = false;
+        return;
+    }
 // SINGLE FILE COPY ===========================================================================
     if(!srcFi.isDir()) {
         FileOpResult result;
@@ -858,6 +986,26 @@ void Core::interactiveMove(QList<QString> paths, QString destDirectory) {
 // todo: replacing DIR with a FILE?
 void Core::doInteractiveMove(QString path, QString destDirectory, DialogResult &overwriteFiles) {
     QFileInfo srcFi(path);
+// SYMLINK (move the link itself, never dereference into the target) ===========================
+    if(srcFi.isSymLink()) {
+        FileOpResult result;
+        model->moveSymLinkTo(path, destDirectory, overwriteFiles, result);
+        if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
+            if(overwriteFiles.all)
+                return;
+            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
+            if(!overwriteFiles || overwriteFiles.cancel)
+                return;
+            model->moveSymLinkTo(path, destDirectory, true, result);
+        }
+        if(result != FileOpResult::SUCCESS && !(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles)) {
+            mw->showError(FileOperations::decodeResult(result));
+            qDebug() << FileOperations::decodeResult(result);
+        }
+        if(!overwriteFiles.all)
+            overwriteFiles.yes = false;
+        return;
+    }
 // SINGLE FILE MOVE ===========================================================================
     if(!srcFi.isDir()) {
         FileOpResult result;

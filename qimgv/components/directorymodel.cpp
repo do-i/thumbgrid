@@ -181,6 +181,20 @@ void DirectoryModel::moveFileTo(const QString &srcFile, const QString &destDirPa
             dirManager.removeFileEntry(srcFile);
     }
 }
+
+void DirectoryModel::copySymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result) {
+    FileOperations::copySymLinkTo(srcLink, destDirPath, force, result);
+}
+
+void DirectoryModel::moveSymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result) {
+    FileOperations::moveSymLinkTo(srcLink, destDirPath, force, result);
+    // chew through watcher events so they wont be processed out of order
+    qApp->processEvents();
+    if(result == FileOpResult::SUCCESS) {
+        if(destDirPath != this->directoryPath())
+            dirManager.removeFileEntry(srcLink);
+    }
+}
 // -----------------------------------------------------------------------------
 bool DirectoryModel::setDirectory(QString path) {
     cache.clear();

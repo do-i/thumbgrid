@@ -100,6 +100,7 @@ signals:
     void moveToTrash();
     void reloadImage();
     void copyFileClipboard();
+    void cutFile();
     void copyPathClipboard();
     void renameFile();
     void createDirectory();

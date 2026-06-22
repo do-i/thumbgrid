@@ -30,6 +30,9 @@ class FileOperations {
 public:
     static void copyFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result);
     static void moveFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result);
+    // symlink-aware copy/move: recreates the link itself instead of dereferencing its target
+    static void copySymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
+    static void moveSymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
     static void rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result);
     static void removeFile(const QString &filePath, FileOpResult &result);
     static void removeDir(const QString &dirPath, bool recursive, FileOpResult &result);
