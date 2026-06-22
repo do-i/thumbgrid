@@ -531,7 +531,11 @@ void Core::pasteFile() {
     if(!mimeData)
         return;
 
-    QString destDirectory = (model && !model->isEmpty()) ? model->directoryPath() : "";
+    // The paste destination is the currently open folder, whether or not it
+    // contains any image files. model->isEmpty() only counts image files, so
+    // gating on it made pasting into an image-less folder fall back to
+    // openFromClipboard() (which opens the source file in image view instead).
+    QString destDirectory = model ? model->directoryPath() : "";
 
     // gather local file paths from the clipboard
     QList<QString> paths;
