@@ -1,20 +1,20 @@
 # Maintainer: doijoji+git@gmail.com
-# PKGBUILD for the do-i fork of qimgv.
+# PKGBUILD for thumbgrid (a hard fork of easymodo/qimgv).
 # Minimal build: Qt6 only, no Exiv2 / OpenCV / mpv (matches run.sh "minimal build").
 #
 # This PKGBUILD builds from the already checked-out source tree (the repo this
 # file lives in), so CI can package the exact tag without downloading a tarball
-# or maintaining a sha256sum. pkgver is supplied by CI via $QIMGV_PKGVER
+# or maintaining a sha256sum. pkgver is supplied by CI via $THUMBGRID_PKGVER
 # (derived from the git tag); it falls back to a git-describe value for local
 # `makepkg` runs from this directory.
 
-pkgname=qimgv-do-i
+pkgname=thumbgrid
 _srcroot="$(cd "$startdir/../.." && pwd)"
-pkgver="${QIMGV_PKGVER:-0}"
+pkgver="${THUMBGRID_PKGVER:-0}"
 pkgrel=1
-pkgdesc="Qt image viewer (do-i fork), minimal Qt6 build (no exiv2/opencv/mpv)"
+pkgdesc="Qt image viewer (fork of easymodo/qimgv), minimal Qt6 build (no exiv2/opencv/mpv)"
 arch=('x86_64')
-url="https://github.com/do-i/qimgv"
+url="https://github.com/do-i/thumbgrid"
 license=('GPL-3.0-only')
 depends=(
   'qt6-base'
@@ -27,17 +27,16 @@ makedepends=(
   'pkgconf'
   'git'
 )
-provides=('qimgv')
-conflicts=('qimgv')
+provides=('thumbgrid')
 # Release build only; no separate -debug package.
 options=('!debug')
 source=()
 
 pkgver() {
-  # Used only when $QIMGV_PKGVER is not set (local builds). Maps the tag's
+  # Used only when $THUMBGRID_PKGVER is not set (local builds). Maps the tag's
   # '-' to '_' since pacman versions may not contain '-'.
-  if [[ -n "${QIMGV_PKGVER:-}" ]]; then
-    printf '%s' "$QIMGV_PKGVER"
+  if [[ -n "${THUMBGRID_PKGVER:-}" ]]; then
+    printf '%s' "$THUMBGRID_PKGVER"
     return
   fi
   git -C "$_srcroot" describe --tags --always 2>/dev/null \

@@ -14,7 +14,7 @@ else
 fi
 
 print_header() {
-    printf '\nqimgv build menu\n'
+    printf '\nthumbgrid build menu\n'
     printf 'Source: %s\n' "$ROOT_DIR"
     printf 'Build:  %s\n' "$BUILD_DIR"
     printf 'Type:   %s\n\n' "$BUILD_TYPE"
@@ -40,7 +40,7 @@ confirm_install() {
     local package_manager="$1"
     shift
 
-    printf 'This installs dependencies for the minimal qimgv build.\n'
+    printf 'This installs dependencies for the minimal thumbgrid build.\n'
     printf 'Optional feature deps for Exiv2, OpenCV, and mpv are not included.\n\n'
     printf 'Package manager: %s\n' "$package_manager"
     printf 'Packages:\n'
@@ -186,9 +186,9 @@ build_project() {
 find_executable() {
     local candidate
     for candidate in \
-        "$BUILD_DIR/qimgv/qimgv" \
-        "$BUILD_DIR/qimgv/qimgv.exe" \
-        "$BUILD_DIR/qimgv/qimgv.app/Contents/MacOS/qimgv"; do
+        "$BUILD_DIR/qimgv/thumbgrid" \
+        "$BUILD_DIR/qimgv/thumbgrid.exe" \
+        "$BUILD_DIR/qimgv/thumbgrid.app/Contents/MacOS/thumbgrid"; do
         if [[ -x "$candidate" ]]; then
             printf '%s\n' "$candidate"
             return 0
@@ -201,7 +201,7 @@ find_executable() {
 run_executable() {
     local executable
     if ! executable="$(find_executable)"; then
-        printf 'Could not find a built qimgv executable under %s.\n' "$BUILD_DIR" >&2
+        printf 'Could not find a built thumbgrid executable under %s.\n' "$BUILD_DIR" >&2
         printf 'Build the project first, then try again.\n' >&2
         return 1
     fi

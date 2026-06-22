@@ -1,8 +1,8 @@
-# qimgv root
+# thumbgrid root (hard fork of easymodo/qimgv)
 cmake_minimum_required(VERSION 3.13)
-project(qimgv
+project(thumbgrid
     VERSION 2026.6.1
-    HOMEPAGE_URL "https://github.com/easymodo/qimgv"
+    HOMEPAGE_URL "https://github.com/do-i/thumbgrid"
     LANGUAGES CXX)
 
 message(STATUS "Build configuration: " ${CMAKE_BUILD_TYPE})

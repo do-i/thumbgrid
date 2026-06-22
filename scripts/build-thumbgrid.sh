@@ -1,5 +1,7 @@
 #!/bin/bash
-# This builds a complete qimgv-x64 package. Result is placed in qimgv/qimgv-x64_<version>
+# This builds a complete thumbgrid-x64 package. Result is placed in <repo>/thumbgrid-x64_<version>
+# NOTE: the easymodo/qimgv-deps-bin and easymodo/qt-builds URLs below are upstream
+# prebuilt build dependencies (Qt/OpenCV/mpv), not product branding; left as-is.
 # Warning: Some stuff will be left over behind after building (C:/qt and C:/opencv-4.5.5-minimal)
 
 #CFL='-ffunction-sections -fdata-sections -march=native -mtune=native -O3 -pipe'
@@ -165,13 +167,13 @@ mingw32-make -j4
 echo "PACKAGING"
 # 0 - prepare dir
 cd $SRC_DIR
-BUILD_NAME=qimgv-x64_$(git describe --tags)
+BUILD_NAME=thumbgrid-x64_$(git describe --tags)
 PACKAGE_DIR=$SRC_DIR/$BUILD_NAME
 rm -rf $PACKAGE_DIR
 mkdir $PACKAGE_DIR
 
-# 1 - copy qimgv build
-cp $BUILD_DIR/qimgv/qimgv.exe $PACKAGE_DIR
+# 1 - copy thumbgrid build
+cp $BUILD_DIR/qimgv/thumbgrid.exe $PACKAGE_DIR
 mkdir $PACKAGE_DIR/plugins
 cp $BUILD_DIR/plugins/player_mpv/player_mpv.dll $PACKAGE_DIR/plugins
 cp -r $BUILD_DIR/qimgv/translations/ $PACKAGE_DIR/

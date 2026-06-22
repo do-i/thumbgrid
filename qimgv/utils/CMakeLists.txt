@@ -1,6 +1,6 @@
 ## SOURCES FOR QIMGV UTILITY CLASSES
 
-target_sources(qimgv PRIVATE
+target_sources(thumbgrid PRIVATE
     actions.cpp
     cmdoptionsrunner.cpp
     imagefactory.cpp
