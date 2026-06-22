@@ -147,6 +147,7 @@ private slots:
     void moveToTrash();
     void reloadImage();
     void reloadImage(QString fileName);
+    void stripMetadata();
     void copyFileClipboard();
     void cutFileClipboard();
     void pasteFile();

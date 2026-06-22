@@ -95,4 +95,5 @@ void Actions::init() {
     mActions.insert("toggleStatusFooter", QVersionNumber(1,0,3));
     mActions.insert("createDirectory", QVersionNumber(1,0,4));
     mActions.insert("cutFile", QVersionNumber(1,0,4));
+    mActions.insert("stripMetadata", QVersionNumber(1,0,5));
 }

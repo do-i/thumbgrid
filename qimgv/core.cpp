@@ -200,6 +200,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::sortByTime, this, &Core::sortByTime);
     connect(actionManager, &ActionManager::sortBySize, this, &Core::sortBySize);
     connect(actionManager, &ActionManager::toggleImageInfo, mw, &MW::toggleImageInfoOverlay);
+    connect(actionManager, &ActionManager::stripMetadata, this, &Core::stripMetadata);
     connect(actionManager, &ActionManager::toggleShuffle, this, &Core::toggleShuffle);
     connect(actionManager, &ActionManager::toggleScalingFilter, mw, &MW::toggleScalingFilter);
     connect(actionManager, &ActionManager::showInDirectory, this, &Core::showInDirectory);
@@ -435,6 +436,26 @@ void Core::reloadImage(QString filePath) {
     if(model->isEmpty())
         return;
     model->reload(filePath);
+}
+
+// Removes all Exif/Iptc/Xmp metadata from the current file on disk (privacy).
+void Core::stripMetadata() {
+    if(model->isEmpty())
+        return;
+    QString path = selectedPath();
+    auto img = model->getImage(path);
+    if(!img)
+        return;
+    if(img->type() != STATIC && img->type() != ANIMATED) {
+        mw->showMessage(tr("Cannot strip metadata from this file type"));
+        return;
+    }
+    if(img->stripMetadata()) {
+        reloadImage(path);
+        mw->showMessageSuccess(tr("Metadata removed"));
+    } else {
+        mw->showMessage(tr("Could not remove metadata"));
+    }
 }
 
 void Core::enableFolderView() {
@@ -1807,7 +1828,7 @@ void Core::guiSetImage(std::shared_ptr<Image> img) {
         mw->showVideo(video->filePath());
     }
     img->isEdited() ? mw->showSaveOverlay() : mw->hideSaveOverlay();
-    mw->setExifInfo(img->getExifTags());
+    mw->setExifInfo(settings->showFullMetadata() ? img->getAllTags() : img->getExifTags());
 }
 
 void Core::updateInfoString() {

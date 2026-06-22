@@ -212,6 +212,7 @@ void SettingsDialog::readSettings() {
     ui->showInfoBarFullscreen->setChecked(settings->infoBarFullscreen());
     ui->showInfoBarWindowed->setChecked(settings->infoBarWindowed());
     ui->showExtendedInfoTitle->setChecked(settings->windowTitleExtendedInfo());
+    ui->showFullMetadataCheckBox->setChecked(settings->showFullMetadata());
     ui->cursorAutohideCheckBox->setChecked(settings->cursorAutohide());
     ui->keepFitModeCheckBox->setChecked(settings->keepFitMode());
     if(settings->focusPointIn1to1Mode() == FOCUS_TOP)
@@ -370,6 +371,7 @@ void SettingsDialog::saveSettings() {
     settings->setInfoBarFullscreen(ui->showInfoBarFullscreen->isChecked());
     settings->setInfoBarWindowed(ui->showInfoBarWindowed->isChecked());
     settings->setWindowTitleExtendedInfo(ui->showExtendedInfoTitle->isChecked());
+    settings->setShowFullMetadata(ui->showFullMetadataCheckBox->isChecked());
     settings->setCursorAutohide(ui->cursorAutohideCheckBox->isChecked());
     settings->setKeepFitMode(ui->keepFitModeCheckBox->isChecked());
     if(ui->focus1to1Top->isChecked())

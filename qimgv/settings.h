@@ -289,6 +289,8 @@ public:
 
     bool jxlAnimation();
     void setJxlAnimation(bool mode);
+    bool showFullMetadata();
+    void setShowFullMetadata(bool mode);
     bool absoluteZoomStep();
     void setAbsoluteZoomStep(bool mode);
     bool autoResizeWindow();

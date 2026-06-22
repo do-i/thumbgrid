@@ -1193,6 +1193,14 @@ void Settings::setJxlAnimation(bool mode) {
     settings->settingsConf->setValue("jxlAnimation", mode);
 }
 //------------------------------------------------------------------------------
+bool Settings::showFullMetadata() {
+    return settings->settingsConf->value("showFullMetadata", false).toBool();
+}
+
+void Settings::setShowFullMetadata(bool mode) {
+    settings->settingsConf->setValue("showFullMetadata", mode);
+}
+//------------------------------------------------------------------------------
 bool Settings::autoResizeWindow() {
     return settings->settingsConf->value("autoResizeWindow", false).toBool();
 }

@@ -110,6 +110,7 @@ signals:
     void sortByTime();
     void sortBySize();
     void toggleImageInfo();
+    void stripMetadata();
     void toggleShuffle();
     void toggleScalingFilter();
     void showInDirectory();

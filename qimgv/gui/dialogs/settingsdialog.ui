@@ -983,6 +983,16 @@
                         </property>
                        </widget>
                       </item>
+                      <item row="3" column="0">
+                       <widget class="QCheckBox" name="showFullMetadataCheckBox">
+                        <property name="toolTip">
+                         <string>Show all Exif/Iptc/Xmp tags in the info panel instead of a short summary.</string>
+                        </property>
+                        <property name="text">
+                         <string>Show full metadata in info panel</string>
+                        </property>
+                       </widget>
+                      </item>
                       <item row="0" column="2">
                        <spacer name="horizontalSpacer_20">
                         <property name="orientation">
