@@ -7,64 +7,60 @@ Action items for maintaining this hard fork of [easymodo/qimgv](https://github.c
 - [x] **Decide on a new app name** (and binary/package name). Until decided, the
       following items are blocked on it.
       Name: `thumbgrid`
-- [ ] **New app logo and icon.** Source assets live under
-      `qimgv/res/icons/`. Replace the app icon and update
-      use new icon -> `qimgv/res/icons/common/logo/thumbgrid/thumbgrid-icon.webp`
-      `qimgv/distrib/qimgv.desktop` (`Icon=` / `Name=`) and any packaging refs.
-- [ ] **Rename the project** once the name is final:
-  - `project(...)` and `HOMEPAGE_URL` in `CMakeLists.txt` (still
-    `https://github.com/easymodo/qimgv`).
-  - `qimgv/distrib/qimgv.desktop` and the `.desktop` filename.
-  - Window title / app id in source (grep `qimgv` across `qimgv/`).
-  - `packaging/` and `scripts/` build artifacts.
-  - use this new github repo: https://github.com/do-i/thumbgrid
+- [x] **New app logo and icon.** Source: `qimgv/res/icons/common/logo/thumbgrid/thumbgrid-icon.webp`.
+      Regenerated in-app About icon, hicolor PNGs (`thumbgrid.png`), scalable SVG,
+      `thumbgrid.ico` (Windows) and `thumbgrid.icns` (macOS); updated `.desktop`
+      `Icon=`/`Name=` and packaging refs.
+- [x] **Rename the project** (binary/package/app id → `thumbgrid`):
+  - `project(...)` / `HOMEPAGE_URL` in `CMakeLists.txt` → `do-i/thumbgrid`.
+  - `.desktop`, `.appdata.xml` renamed and rebranded; org/app id in `main.cpp`.
+  - CMake target, install paths (`/usr/lib/thumbgrid`, `…/share/thumbgrid`),
+    `packaging/` and `scripts/` artifacts, CI workflows.
+  - new repo: https://github.com/do-i/thumbgrid
+  - Note: the internal **source directory** is still named `qimgv/` (not
+    user-facing); only the product/binary/identity were renamed.
 
 ## About page & in-app credits
 
-File: `qimgv/gui/dialogs/settingsdialog.ui` (~lines 5279–5287).
+File: `qimgv/gui/dialogs/settingsdialog.ui`.
 
-- [ ] Retain original author credit (easymodo, easymodofrf@gmail.com) and the
+- [x] Retain original author credit (easymodo, easymodofrf@gmail.com) and the
       Contributors link — required for a GPL fork.
-- [ ] Add fork maintainer info: name, GitHub URL, and contact email
+- [x] Add fork maintainer info: name, GitHub URL, and contact email
       (`doijoji+git@gmail.com`).
-- [ ] Point "Report issues / request features" at the fork's issue tracker.
+- [x] Point "Report issues / request features" at the fork's issue tracker.
 
 ## License
 
-- [ ] Keep the existing `LICENSE` (GPLv3) intact.
-- [ ] Add fork copyright line alongside the original (do **not** remove upstream
-      copyright). Add per-file copyright headers only to files substantially
-      changed/added.
-- [ ] Add a short `NOTICE`/attribution paragraph to the README stating this is a
-      fork of easymodo/qimgv and crediting the original author.
+- [x] Keep the existing `LICENSE` (GPLv3) intact.
+- [x] Add fork copyright line alongside the original (upstream copyright kept).
+      Added `NOTICE` and SPDX/copyright headers to fork-authored files
+      (`appversion.cpp`, `run.sh`, `PKGBUILD`, `scripts/build-thumbgrid.sh`).
+- [x] Add a short `NOTICE`/attribution paragraph to the README crediting the
+      original author.
 
 ## Documentation
 
-- [ ] **Fix version mismatch:** README header still says `Current version: 1.0.2`
-      while `CMakeLists.txt` is now `2026.6.1` (calVer). Update README and decide
-      how version is surfaced going forward.
-- [ ] Rewrite README install section — the upstream channels (AUR `qimgv-git`,
-      `apt`/`dnf`/`zypper`/`pkg`, Chocolatey, WinGet, releases page) point to
-      easymodo and do not apply to this fork yet. Replace with build-from-source
-      instructions or fork-specific packages.
-- [ ] Document the fork's added features in the README:
-  - exiv2 EXIF/IPTC/XMP metadata: view tags, full-metadata mode, preserve on
-    save, strip-all for privacy (partially done — verify it's accurate).
-  - Folder view: copy/cut/paste of files & folders (symlink-aware), create dir
-    (F7), rename (F2), on-disk async folder thumbnail cache.
-  - Qt6-only build (Qt5 support dropped).
+- [x] **Fix version mismatch:** README now reflects calVer (`2026.6.1`) and
+      documents that the version lives in `qimgv/appversion.cpp` / `CMakeLists.txt`.
+- [x] Rewrite README install section — replaced upstream channels with
+      build-from-source (`run.sh` / CMake) and the Arch `packaging/arch` package.
+- [x] Document the fork's added features in the README (exiv2 metadata, folder
+      view file management, Qt6-only build).
 - [ ] Refresh screenshots if the UI has diverged from the upstream 0.9 shots.
-- [ ] Decide whether to keep the upstream "Donate to Ukraine" section as-is
-      (recommended to retain) and the war banner at the top.
+      (Still pending — requires capturing the running UI; README notes the shots
+      are inherited from upstream 0.9.)
+- [x] Decide on the "Donate to Ukraine" section and war banner: **retained**.
 
 ## Repo hygiene
 
-- [ ] Add a `CONTRIBUTING`/fork note or update `CLAUDE.md` if contributors are
-      expected.
-- [ ] Sync useful upstream changes periodically; document the merge strategy
-      (this is a hard fork, so likely cherry-pick rather than full merge).
-- [ ] Audit remaining `easymodo`/`qimgv` string references before a release:
-      `grep -rn "easymodo" .` and review each hit.
+- [x] Added `CONTRIBUTING.md` with a fork note and build pointers.
+- [x] Documented the upstream merge strategy (cherry-pick) in `CONTRIBUTING.md`.
+- [x] Audited remaining `easymodo`/`qimgv` references. Remaining hits are
+      intentional: upstream attribution (README/NOTICE/About/CMake/PKGBUILD),
+      historical upstream-issue links in comments, and the upstream
+      `qimgv-deps-bin`/`qt-builds` prebuilt build-dependency URLs in the Windows
+      script. Brand strings in CLI output and code comments were updated.
 
 ## Feature ideas / backlog
 
