@@ -1,6 +1,6 @@
 ## SOURCES FOR QIMGV CONTAINER CLASSES
 
-target_sources(qimgv PRIVATE
+target_sources(thumbgrid PRIVATE
     fsentry.cpp
     documentinfo.cpp
     image.cpp

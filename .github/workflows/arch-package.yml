@@ -45,9 +45,9 @@ jobs:
       - name: Build package
         working-directory: packaging/arch
         env:
-          QIMGV_PKGVER: ${{ steps.ver.outputs.pkgver }}
+          THUMBGRID_PKGVER: ${{ steps.ver.outputs.pkgver }}
         run: |
-          sudo -u builder --preserve-env=QIMGV_PKGVER \
+          sudo -u builder --preserve-env=THUMBGRID_PKGVER \
             makepkg -f --noconfirm --nodeps
           ls -al ./*.pkg.tar.zst
 

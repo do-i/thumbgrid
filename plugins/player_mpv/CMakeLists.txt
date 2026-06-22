@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11)
 project(player_mpv
-    DESCRIPTION "video player widget for qimgv (using mpv)"
+    DESCRIPTION "video player widget for thumbgrid (using mpv)"
     LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
@@ -54,5 +54,5 @@ endif()
 if(WIN32)
     install(TARGETS player_mpv LIBRARY DESTINATION "${CMAKE_INSTALL_BINDIR}/plugins")
 else()
-    install(TARGETS player_mpv LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/qimgv")
+    install(TARGETS player_mpv LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/thumbgrid")
 endif()
