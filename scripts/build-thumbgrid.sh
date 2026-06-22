@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2024-2026 do-i and thumbgrid contributors
+# Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
 # This builds a complete thumbgrid-x64 package. Result is placed in <repo>/thumbgrid-x64_<version>
 # NOTE: the easymodo/qimgv-deps-bin and easymodo/qt-builds URLs below are upstream
 # prebuilt build dependencies (Qt/OpenCV/mpv), not product branding; left as-is.
