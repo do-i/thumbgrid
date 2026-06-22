@@ -218,8 +218,6 @@ QString ThumbnailerRunnable::generateDirIdString(QString path, int size, bool pr
 }
 
 QList<QImage> ThumbnailerRunnable::dirPreviewImages(ThumbnailCache *cache, const QString &path, int targetSize, bool crop, bool showHidden) {
-    Q_UNUSED(cache)
-    Q_UNUSED(crop)
     QList<QImage> images;
     QDir dir(path);
     if(!dir.exists() || !dir.isReadable())
@@ -235,6 +233,18 @@ QList<QImage> ThumbnailerRunnable::dirPreviewImages(ThumbnailCache *cache, const
     for(const QFileInfo &entry : entries) {
         if(scanned++ >= maxScannedEntries || images.count() >= 4)
             break;
+
+        // best-effort: reuse an already-cached per-file thumbnail (same size+crop as
+        // the grid) as the preview tile, avoiding a fresh decode. Falls back below.
+        if(cache) {
+            QString childId = generateIdString(entry.absoluteFilePath(), targetSize, crop);
+            std::unique_ptr<QImage> cached(cache->readThumbnail(childId));
+            if(cached && !cached->isNull() &&
+               cached->text("lastModified") == QString::number(entry.lastModified().toMSecsSinceEpoch())) {
+                images << *cached;
+                continue;
+            }
+        }
 
         QImageReader reader(entry.absoluteFilePath());
         if(!reader.canRead())
