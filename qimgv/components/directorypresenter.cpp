@@ -586,8 +586,8 @@ std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size
     QPixmap *pixmap = new QPixmap(qRound(size * 1.10f), qRound(size * 1.10f));
     pixmap->fill(Qt::transparent);
 
-    // 75% of the previous icon size (0.55 * 0.75)
-    QSize iconSize(size * 0.4125f, size * 0.4125f);
+    constexpr int kParentIconAnchorSize = 30;
+    QSize iconSize(kParentIconAnchorSize, kParentIconAnchorSize);
     QPixmap scaled = source.scaled(iconSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
     scaled.setDevicePixelRatio(1.0);
     QRect visibleBounds = visibleAlphaBounds(scaled.toImage());
