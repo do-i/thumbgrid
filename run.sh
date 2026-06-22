@@ -62,11 +62,11 @@ install_required_deps() {
             build-essential
             cmake
             pkg-config
-            qtbase5-dev
-            qttools5-dev
-            qttools5-dev-tools
-            qt5-image-formats-plugins
-            libqt5svg5-dev
+            qt6-base-dev
+            qt6-tools-dev
+            qt6-tools-dev-tools
+            qt6-image-formats-plugins
+            libqt6svg6-dev
         )
         confirm_install "apt-get" "${packages[@]}" || return 0
         run_as_root apt-get update || return
@@ -76,10 +76,10 @@ install_required_deps() {
             gcc-c++
             cmake
             pkgconf-pkg-config
-            qt5-qtbase-devel
-            qt5-qtimageformats
-            qt5-qtsvg-devel
-            qt5-qttools-devel
+            qt6-qtbase-devel
+            qt6-qtimageformats
+            qt6-qtsvg-devel
+            qt6-qttools-devel
         )
         confirm_install "dnf" "${packages[@]}" || return 0
         run_as_root dnf install -y "${packages[@]}"
@@ -88,10 +88,10 @@ install_required_deps() {
             base-devel
             cmake
             pkgconf
-            qt5-base
-            qt5-imageformats
-            qt5-svg
-            qt5-tools
+            qt6-base
+            qt6-imageformats
+            qt6-svg
+            qt6-tools
         )
         confirm_install "pacman" "${packages[@]}" || return 0
         run_as_root pacman -S --needed "${packages[@]}"
@@ -100,10 +100,10 @@ install_required_deps() {
             patterns-devel-C-C++
             cmake
             pkg-config
-            libqt5-qtbase-devel
-            libqt5-qtimageformats
-            libqt5-qtsvg-devel
-            libqt5-qttools-devel
+            qt6-base-devel
+            qt6-imageformats-devel
+            qt6-svg-devel
+            qt6-tools-devel
         )
         confirm_install "zypper" "${packages[@]}" || return 0
         run_as_root zypper install -y "${packages[@]}"
@@ -112,10 +112,10 @@ install_required_deps() {
             build-base
             cmake
             pkgconf
-            qt5-qtbase-dev
-            qt5-qtimageformats
-            qt5-qtsvg-dev
-            qt5-qttools-dev
+            qt6-qtbase-dev
+            qt6-qtimageformats
+            qt6-qtsvg-dev
+            qt6-qttools-dev
         )
         confirm_install "apk" "${packages[@]}" || return 0
         run_as_root apk add "${packages[@]}"

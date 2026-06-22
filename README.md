@@ -129,7 +129,7 @@ qimgv can open some extra formats via third-party image plugins. All of them are
 
 | Format  | Plugin |
 | ------- | ------------- |
-| WebP | Qt ImageFormats (`qt5-imageformats` / `qt5-image-formats-plugins`) |
+| WebP | Qt ImageFormats (`qt6-imageformats` / `qt6-image-formats-plugins`) |
 | JPEG-XL | [github.com/novomesk/qt-jpegxl-image-plugin](https://github.com/novomesk/qt-jpegxl-image-plugin) |
 | AVIF | [github.com/novomesk/qt-avif-image-plugin](https://github.com/novomesk/qt-avif-image-plugin) |
 | APNG | [github.com/Skycoder42/QtApng](https://github.com/Skycoder42/QtApng) |

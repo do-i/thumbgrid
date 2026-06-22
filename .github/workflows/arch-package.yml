@@ -1,6 +1,6 @@
 name: Arch package
 
-# Build the minimal Qt5 Arch package and attach it to the GitHub release
+# Build the minimal Qt6 Arch package and attach it to the GitHub release
 # whenever a version tag is pushed.
 on:
   push:
@@ -18,7 +18,7 @@ jobs:
       image: archlinux:base-devel
     steps:
       - name: Install build tooling
-        run: pacman -Syu --noconfirm git cmake qt5-base qt5-svg qt5-imageformats qt5-tools pkgconf
+        run: pacman -Syu --noconfirm git cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf
 
       - uses: actions/checkout@v4
         with:

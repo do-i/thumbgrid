@@ -1,6 +1,6 @@
 # Maintainer: doijoji+git@gmail.com
 # PKGBUILD for the do-i fork of qimgv.
-# Minimal build: Qt5 only, no Exiv2 / OpenCV / mpv (matches run.sh "minimal build").
+# Minimal build: Qt6 only, no Exiv2 / OpenCV / mpv (matches run.sh "minimal build").
 #
 # This PKGBUILD builds from the already checked-out source tree (the repo this
 # file lives in), so CI can package the exact tag without downloading a tarball
@@ -12,18 +12,18 @@ pkgname=qimgv-do-i
 _srcroot="$(cd "$startdir/../.." && pwd)"
 pkgver="${QIMGV_PKGVER:-0}"
 pkgrel=1
-pkgdesc="Qt image viewer (do-i fork), minimal Qt5 build (no exiv2/opencv/mpv)"
+pkgdesc="Qt image viewer (do-i fork), minimal Qt6 build (no exiv2/opencv/mpv)"
 arch=('x86_64')
 url="https://github.com/do-i/qimgv"
 license=('GPL-3.0-only')
 depends=(
-  'qt5-base'
-  'qt5-svg'
-  'qt5-imageformats'
+  'qt6-base'
+  'qt6-svg'
+  'qt6-imageformats'
 )
 makedepends=(
   'cmake'
-  'qt5-tools'
+  'qt6-tools'
   'pkgconf'
   'git'
 )
@@ -48,7 +48,6 @@ build() {
   cmake -B "$srcdir/build" -S "$_srcroot" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DUSE_QT5=ON \
     -DEXIV2=OFF \
     -DVIDEO_SUPPORT=OFF \
     -DOPENCV_SUPPORT=OFF \

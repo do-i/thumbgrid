@@ -28,7 +28,6 @@ option(EXIV2 "For reading/writing exif tags" ON)
 option(VIDEO_SUPPORT "Enable video support" ON)
 option(OPENCV_SUPPORT "Enable HQ scaling via OpenCV" ON)
 option(KDE_SUPPORT "Support blur when using KDE" OFF)
-option(USE_QT5 "Build with Qt5 if available" ON)
 
 if(UNIX AND NOT APPLE)
     set(QT_EXTERN_PATH "" CACHE STRING "Tell compile external QT path, example: (/opt/Qt/6.2.0/gcc_64)")
@@ -39,28 +38,9 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # FIND PACKAGES
-if(USE_QT5) # Try Qt5 first if USE_QT5 is set
-    find_package(Qt5 COMPONENTS Widgets QUIET)
-    if(Qt5_FOUND)
-        find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Widgets Svg PrintSupport)
-    else()
-        find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
-    endif()
-else() # Try Qt6 otherwise
-    find_package(Qt6 COMPONENTS Widgets QUIET)
-    if(Qt6_FOUND)
-        find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
-    else()
-        find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Widgets Svg PrintSupport)
-    endif()
-endif()
-
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
 message(STATUS "Qt Version: " ${QT_VERSION})
-if(QT_VERSION_MAJOR GREATER_EQUAL 6)
-    find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
-else()
-    find_package(Qt${QT_VERSION_MAJOR} 5.12 REQUIRED COMPONENTS Core Widgets Svg PrintSupport)
-endif()
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
 
 if(EXIV2)
     find_package(PkgConfig REQUIRED)

@@ -8,7 +8,7 @@ if(APPLE)
 endif()
 
 # TRANSLATIONS
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS LinguistTools)
+find_package(Qt6 COMPONENTS LinguistTools)
 # Example of creating a new translation file.
 # 1. cd into qimgv directory and run:
 #   lupdate -recursive . -ts res/translations/qimgv_en_US.ts    [replace "en_US" with your locale]
@@ -25,14 +25,6 @@ set(TS_FILES
 )
 list(TRANSFORM TS_FILES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/res/translations/)
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION ${PROJECT_BINARY_DIR}/qimgv/translations)
-
-# 1. Create 'qimgv_lupdate' target to update .ts files (needs to be called manually)
-# 2. Compile .ts > .qm
-if(${QT_VERSION_MAJOR} EQUAL 5)
-    add_custom_target(qimgv_lupdate COMMAND ${Qt5_LUPDATE_EXECUTABLE} -recursive
-        ${CMAKE_CURRENT_SOURCE_DIR} -ts ${TS_FILES})
-    qt5_add_translation(QM_FILES ${TS_FILES})
-endif()
 
 # ADD EXECUTABLE
 add_executable(qimgv
@@ -51,10 +43,12 @@ add_executable(qimgv
     ${QM_FILES}
 )
 
-# update .ts, compile .qm (qt6 case)
-if(${QT_VERSION_MAJOR} EQUAL 6)
+# update .ts, compile .qm (requires Qt6 LinguistTools; skipped if unavailable)
+if(Qt6LinguistTools_FOUND)
     qt_add_lupdate(qimgv TS_FILES ${TS_FILES})
     qt_add_lrelease(qimgv TS_FILES ${TS_FILES})
+else()
+    message(WARNING "Qt6 LinguistTools not found; translations will not be built.")
 endif()
 
 # ADD SOURCES
@@ -71,10 +65,7 @@ target_compile_features(qimgv PRIVATE cxx_std_17)
 set_target_properties(qimgv PROPERTIES CXX_EXTENSIONS OFF)
 
 # LINK STUFF
-target_link_libraries(qimgv PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Svg Qt${QT_VERSION_MAJOR}::PrintSupport)
-if(QT_VERSION_MAJOR GREATER_EQUAL 6)
-    target_link_libraries(qimgv PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
-endif()
+target_link_libraries(qimgv PRIVATE Qt6::Core Qt6::Widgets Qt6::Svg Qt6::PrintSupport Qt6::OpenGLWidgets)
 
 # OPTION DEFINITIONS, LINKING
 if(EXIV2)
