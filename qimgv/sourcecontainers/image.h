@@ -29,6 +29,8 @@ public:
     qint64 fileSize() const;
     QDateTime lastModified() const;
     QMap<QString, QString> getExifTags();
+    QMap<QString, QString> getAllTags();
+    bool stripMetadata();
 
 protected:
     virtual void load() = 0;

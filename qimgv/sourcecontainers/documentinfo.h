@@ -46,6 +46,10 @@ public:
     void refresh();
     void loadExifTags();
     QMap<QString, QString> getExifTags();
+    // full Exif/Iptc/Xmp dump (lazy-loaded)
+    QMap<QString, QString> getAllTags();
+    // remove all Exif/Iptc/Xmp metadata from the file on disk
+    bool stripMetadata();
 
 private:
     QFileInfo fileInfo;
@@ -53,15 +57,22 @@ private:
     int mOrientation;
     QString mFormat;
     bool exifLoaded;
+    bool allTagsLoaded;
 
     // guesses file type from its contents
     // and sets extension
     void detectFormat();
     void loadExifOrientation();
+#ifdef USE_EXIV2
+    // reads Exif.Image.Orientation directly; returns false if unavailable
+    bool loadExifOrientationExiv2();
+#endif
+    void loadAllTags();
     bool detectAPNG();
     bool detectAnimatedWebP();
     bool detectAnimatedJxl();
     bool detectAnimatedAvif();
     QMap<QString, QString> exifTags;
+    QMap<QString, QString> allTags;
     QMimeType mMimeType;
 };

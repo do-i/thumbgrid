@@ -55,3 +55,11 @@ QMap<QString, QString> Image::getExifTags() {
     return mDocInfo->getExifTags();
 }
 
+QMap<QString, QString> Image::getAllTags() {
+    return mDocInfo->getAllTags();
+}
+
+bool Image::stripMetadata() {
+    return mDocInfo->stripMetadata();
+}
+

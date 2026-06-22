@@ -4,7 +4,8 @@ DocumentInfo::DocumentInfo(QString path)
     : mDocumentType(DocumentType::NONE),
       mOrientation(0),
       mFormat(""),
-      exifLoaded(false)
+      exifLoaded(false),
+      allTagsLoaded(false)
 {
     fileInfo.setFile(path);
     if(!fileInfo.isFile()) {
@@ -297,9 +298,113 @@ QMap<QString, QString> DocumentInfo::getExifTags() {
     return exifTags;
 }
 
+// Dumps every Exif/Iptc/Xmp tag exiv2 can read, keyed by its full family.key
+// name (e.g. "Exif.Image.Make"). Values are the human-readable interpreted
+// strings (same as `exiv2 -pa`). Keys sort into Exif/Iptc/Xmp groups for free.
+void DocumentInfo::loadAllTags() {
+    if(allTagsLoaded)
+        return;
+    allTagsLoaded = true;
+    allTags.clear();
+#ifdef USE_EXIV2
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return;
+        image->readMetadata();
+
+        const Exiv2::ExifData &exifData = image->exifData();
+        for(auto it = exifData.begin(); it != exifData.end(); ++it) {
+            std::ostringstream os;
+            os << *it;
+            allTags.insert(QString::fromStdString(it->key()), QString::fromStdString(os.str()));
+        }
+        const Exiv2::IptcData &iptcData = image->iptcData();
+        for(auto it = iptcData.begin(); it != iptcData.end(); ++it) {
+            std::ostringstream os;
+            os << *it;
+            allTags.insert(QString::fromStdString(it->key()), QString::fromStdString(os.str()));
+        }
+        const Exiv2::XmpData &xmpData = image->xmpData();
+        for(auto it = xmpData.begin(); it != xmpData.end(); ++it) {
+            std::ostringstream os;
+            os << *it;
+            allTags.insert(QString::fromStdString(it->key()), QString::fromStdString(os.str()));
+        }
+    } catch(...) {
+        qDebug() << "DocumentInfo::loadAllTags() - exiv2 failed to read" << fileInfo.filePath();
+    }
+#endif
+}
+
+QMap<QString, QString> DocumentInfo::getAllTags() {
+    if(!allTagsLoaded)
+        loadAllTags();
+    return allTags;
+}
+
+bool DocumentInfo::stripMetadata() {
+#ifdef USE_EXIV2
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        image->clearMetadata();
+        image->writeMetadata();
+        // invalidate caches so a refresh re-reads from disk
+        exifLoaded = false;
+        allTagsLoaded = false;
+        exifTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qDebug() << "DocumentInfo::stripMetadata() - exiv2 failed to write" << fileInfo.filePath();
+        return false;
+    }
+#else
+    return false;
+#endif
+}
+
+#ifdef USE_EXIV2
+bool DocumentInfo::loadExifOrientationExiv2() {
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        Exiv2::ExifData &exifData = image->exifData();
+        if(exifData.empty())
+            return false;
+        auto it = exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation"));
+        if(it == exifData.end())
+            return false;
+        int exifOri = QString::fromStdString(it->value().toString()).toInt();
+        if(exifOri < 1 || exifOri > 8)
+            return false;
+        // Map standard EXIF orientation (1-8) onto the QImageIOHandler
+        // transformation values consumed by ImageLib::exifRotated(). This is
+        // exactly Qt's exif2Qt() mapping, so behaviour matches QImageReader for
+        // formats Qt handles, and now also covers formats exiv2 reads but Qt
+        // does not expose orientation for.
+        static const int exif2qt[9] = {0, 0, 1, 3, 2, 6, 4, 5, 7};
+        mOrientation = exif2qt[exifOri];
+        return true;
+    } catch(...) {
+        return false;
+    }
+}
+#endif
+
 void DocumentInfo::loadExifOrientation() {
     if(mDocumentType == DocumentType::VIDEO || mDocumentType == DocumentType::NONE)
         return;
+
+#ifdef USE_EXIV2
+    if(loadExifOrientationExiv2())
+        return;
+#endif
 
     QString path = filePath();
     QImageReader *reader = nullptr;
