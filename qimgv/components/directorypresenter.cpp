@@ -577,7 +577,8 @@ void DirectoryPresenter::drawDirPreview(QPixmap &pixmap, const QList<QImage> &im
 }
 
 std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size) {
-    QPixmap source(":/res/icons/common/buttons/panel/up16@2x.png");
+    // QPixmap source(":/res/icons/common/buttons/panel/up16@2x.png");
+    QPixmap source(":/res/icons/common/other/go-to-parent-dir.png");
     if(source.isNull())
         source = QPixmap(":/res/icons/common/buttons/panel/up16.png");
     source.setDevicePixelRatio(1.0);
