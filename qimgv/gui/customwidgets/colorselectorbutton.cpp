@@ -18,7 +18,7 @@ QColor ColorSelectorButton::color() {
 }
 
 void ColorSelectorButton::showColorSelector() {
-    QColor newColor = QColorDialog::getColor(mColor, this, mDescription);
+    QColor newColor = QColorDialog::getColor(mColor, this, mDescription, QColorDialog::DontUseNativeDialog);
     if(newColor.isValid()) {
         mColor = newColor;
         update();
