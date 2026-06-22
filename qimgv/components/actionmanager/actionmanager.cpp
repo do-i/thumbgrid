@@ -116,6 +116,13 @@ void ActionManager::initShortcuts() {
        !actionManager->shortcuts.contains(statusFooterShortcut)) {
         actionManager->shortcuts.insert(statusFooterShortcut, "toggleStatusFooter");
     }
+    // cutFile is a newer action; merge its default into pre-existing configs so
+    // upgrading users get Ctrl+X without having to reset all shortcuts.
+    QString cutShortcut = InputMap::keyNameCtrl() + "+X";
+    if(!actionManager->shortcuts.values().contains("cutFile") &&
+       !actionManager->shortcuts.contains(cutShortcut)) {
+        actionManager->shortcuts.insert(cutShortcut, "cutFile");
+    }
 }
 //------------------------------------------------------------------------------
 void ActionManager::addShortcut(const QString &keys, const QString &action) {
