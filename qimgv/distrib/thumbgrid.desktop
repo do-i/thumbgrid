@@ -7,6 +7,7 @@ Exec=thumbgrid %f
 Icon=thumbgrid
 Terminal=false
 Type=Application
+StartupWMClass=thumbgrid
 Categories=Qt;Graphics;Viewer;
 MimeType=video/webm;image/jpeg;image/gif;image/png;image/bmp;image/webp;
 Keywords=image;view;thumbgrid;picture;gif;jpeg;webm;

@@ -2,6 +2,7 @@
 #include <QCommandLineParser>
 #include <QStyleFactory>
 #include <QEvent>
+#include <QIcon>
 
 #include "appversion.h"
 #include "settings.h"
@@ -85,6 +86,9 @@ int main(int argc, char *argv[]) {
     QCoreApplication::setApplicationVersion(appVersion.toString());
     QApplication::setEffectEnabled(Qt::UI_AnimateCombo, false);
     QGuiApplication::setDesktopFileName(QCoreApplication::applicationName() + ".desktop");
+    // Populate _NET_WM_ICON so taskbars/docks get the icon directly from the
+    // window, instead of relying on WM_CLASS<->desktop-file association.
+    QApplication::setWindowIcon(QIcon::fromTheme(QCoreApplication::applicationName()));
 
     // needed for mpv
 #ifndef _MSC_VER

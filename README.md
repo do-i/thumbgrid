@@ -16,7 +16,7 @@ upstream. The current version is defined in
 
 Main window         |  Folder view   |  Thumbnails  |  Settings window
 :------------------:|:--------------:|:------------:|:-----------------:|
-[![Main window](qimgv/distrib/screenshots/image.webp)](qimgv/distrib/screenshots/image.webp?raw=true) | [![Folder view](qimgv/distrib/screenshots/folder-view.webp)](qimgv/distrib/screenshots/folder-view.webp?raw=true) | [![Thumbnails](qimgv/distrib/screenshots/thumbnails.webp)](qimgv/distrib/screenshots/thumbnails.webp?raw=true) | [![Settings](qimgv/distrib/screenshots/preference.webp)](qimgv/distrib/screenshots/preference.webp?raw=true)
+[![Main window](qimgv/distrib/screenshots/image.webp)](qimgv/distrib/screenshots/image.webp) | [![Folder view](qimgv/distrib/screenshots/folder-view.webp)](qimgv/distrib/screenshots/folder-view.webp) | [![Thumbnails](qimgv/distrib/screenshots/thumbnails.webp)](qimgv/distrib/screenshots/thumbnails.webp) | [![Settings](qimgv/distrib/screenshots/preference.webp)](qimgv/distrib/screenshots/preference.webp)
 
 ## Key features:
 
