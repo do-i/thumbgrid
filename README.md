@@ -16,12 +16,9 @@ upstream. The current version is defined in
 
 ## Screenshots
 
-Main window & panel        |  Folder view   |  Settings window  
-:-------------------------:|:-------------------------:|:-------------------------:|
-[![img1](qimgv/distrib/screenshots/qimgv0.9_1_thumb.jpg)](qimgv/distrib/screenshots/qimgv0.9_1.jpg?raw=true)  |  [![img2](qimgv/distrib/screenshots/qimgv0.9_2_thumb.jpg)](qimgv/distrib/screenshots/qimgv0.9_2.jpg?raw=true) | [![img3](qimgv/distrib/screenshots/qimgv_3_thumb.jpg)](qimgv/distrib/screenshots/qimgv_3.jpg?raw=true)
-
-_Note: screenshots are inherited from upstream 0.9 and may not reflect the
-current UI._
+Main window         |  Folder view   |  Thumbnails  |  Settings window  
+:------------------:|:--------------:|:------------:|:-----------------:|
+[![Main window](qimgv/distrib/screenshots/image.webp)](qimgv/distrib/screenshots/image.webp?raw=true) | [![Folder view](qimgv/distrib/screenshots/folder-view.webp)](qimgv/distrib/screenshots/folder-view.webp?raw=true) | [![Thumbnails](qimgv/distrib/screenshots/thumbnails.webp)](qimgv/distrib/screenshots/thumbnails.webp?raw=true) | [![Settings](qimgv/distrib/screenshots/preference.webp)](qimgv/distrib/screenshots/preference.webp?raw=true)
 
 ## Key features:
 
