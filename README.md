@@ -1,5 +1,3 @@
-## :exclamation: Updates may be slow due to war in Ukraine :sunflower: :sunflower: :sunflower:
-
 thumbgrid
 =====
 Image viewer. Fast, easy to use. Optional video support.
@@ -16,7 +14,7 @@ upstream. The current version is defined in
 
 ## Screenshots
 
-Main window         |  Folder view   |  Thumbnails  |  Settings window  
+Main window         |  Folder view   |  Thumbnails  |  Settings window
 :------------------:|:--------------:|:------------:|:-----------------:|
 [![Main window](qimgv/distrib/screenshots/image.webp)](qimgv/distrib/screenshots/image.webp?raw=true) | [![Folder view](qimgv/distrib/screenshots/folder-view.webp)](qimgv/distrib/screenshots/folder-view.webp?raw=true) | [![Thumbnails](qimgv/distrib/screenshots/thumbnails.webp)](qimgv/distrib/screenshots/thumbnails.webp?raw=true) | [![Settings](qimgv/distrib/screenshots/preference.webp)](qimgv/distrib/screenshots/preference.webp?raw=true)
 
@@ -123,13 +121,13 @@ you remove all metadata for privacy. Both are available from the context menu.
 
 You can run custom scripts on a current image.
 
-Open __Settings > Scripts__. Press Add. Here you can choose between a shell command and a shell script. 
+Open __Settings > Scripts__. Press Add. Here you can choose between a shell command and a shell script.
 
-Example of a command: 
+Example of a command:
 
 `convert %file% %file%_.pdf`
 
-Example of a shell script file (`$1` will be image path): 
+Example of a shell script file (`$1` will be image path):
 ```
 #!/bin/bash
 gimp "$1"
@@ -220,8 +218,4 @@ every version tag.
 
 # Donate
 
-If you wish to give a few bucks, please consider donating to the Ukrainian Army:
-
-[https://savelife.in.ua/en/donate-en/#donate-army-card-once](https://savelife.in.ua/en/donate-en/#donate-army-card-once)
-
-[https://u24.gov.ua/](https://u24.gov.ua/)
+If you wish to give a few bucks, please consider donating to the original auther: [easymodo/qimgv](https://github.com/easymodo)
