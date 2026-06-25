@@ -5216,7 +5216,7 @@
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
-                  <string>About qimgv</string>
+                  <string>About thumbgrid</string>
                  </property>
                 </widget>
                </item>
