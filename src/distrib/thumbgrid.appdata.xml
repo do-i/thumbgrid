@@ -28,17 +28,17 @@
   </provides>
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/do-i/thumbgrid/main/qimgv/distrib/screenshots/qimgv0.9_1.jpg</image>
+      <image>https://raw.githubusercontent.com/do-i/thumbgrid/main/src/distrib/screenshots/qimgv0.9_1.jpg</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/do-i/thumbgrid/main/qimgv/distrib/screenshots/qimgv0.9_2.jpg</image>
+      <image>https://raw.githubusercontent.com/do-i/thumbgrid/main/src/distrib/screenshots/qimgv0.9_2.jpg</image>
     </screenshot>
     <screenshot>
-      <image>https://raw.githubusercontent.com/do-i/thumbgrid/main/qimgv/distrib/screenshots/qimgv_3.jpg</image>
+      <image>https://raw.githubusercontent.com/do-i/thumbgrid/main/src/distrib/screenshots/qimgv_3.jpg</image>
     </screenshot>
   </screenshots>
   <developer_name>do-i (fork of easymodo/qimgv)</developer_name>
   <url type="homepage">https://github.com/do-i/thumbgrid</url>
   <url type="bugtracker">https://github.com/do-i/thumbgrid/issues</url>
-  <url type="translate">https://github.com/do-i/thumbgrid/tree/main/qimgv/res/translations</url>
+  <url type="translate">https://github.com/do-i/thumbgrid/tree/main/src/res/translations</url>
 </component>

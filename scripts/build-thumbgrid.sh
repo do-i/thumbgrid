@@ -18,7 +18,7 @@ else
 fi
 CUSTOM_QT_DIR="C:/qt/5.15.3-mingw64-slim"
 OPENCV_DIR="C:/opencv-minimal-4.5.5"
-SCRIPTS_DIR=$(dirname $(readlink -f $0)) # this file's location (/path/to/qimgv/scripts)
+SCRIPTS_DIR=$(dirname $(readlink -f $0)) # this file's location (/path/to/thumbgrid/scripts)
 SRC_DIR=$(dirname $SCRIPTS_DIR)
 BUILD_DIR=$SRC_DIR/build
 EXT_DIR=$SRC_DIR/_external
@@ -89,7 +89,7 @@ rm mpv-x64.7z
 # ------------------------------------------------------------------------------
 echo "BUILDING"
 #rm -rf $BUILD_DIR
-sed -i 's|opencv4/||' $SRC_DIR/qimgv/3rdparty/QtOpenCV/cvmatandqimage.{h,cpp}
+sed -i 's|opencv4/||' $SRC_DIR/src/3rdparty/QtOpenCV/cvmatandqimage.{h,cpp}
 cmake -S $SRC_DIR -B $BUILD_DIR -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH=$CUSTOM_QT_DIR \
@@ -176,10 +176,10 @@ rm -rf $PACKAGE_DIR
 mkdir $PACKAGE_DIR
 
 # 1 - copy thumbgrid build
-cp $BUILD_DIR/qimgv/thumbgrid.exe $PACKAGE_DIR
+cp $BUILD_DIR/src/thumbgrid.exe $PACKAGE_DIR
 mkdir $PACKAGE_DIR/plugins
 cp $BUILD_DIR/plugins/player_mpv/player_mpv.dll $PACKAGE_DIR/plugins
-cp -r $BUILD_DIR/qimgv/translations/ $PACKAGE_DIR/
+cp -r $BUILD_DIR/src/translations/ $PACKAGE_DIR/
 
 # 2 - copy qt dlls
 cd $CUSTOM_QT_DIR/bin
@@ -211,7 +211,7 @@ cp mpv.exe libmpv-2.dll $PACKAGE_DIR
 mkdir $PACKAGE_DIR/cache
 mkdir $PACKAGE_DIR/conf
 mkdir $PACKAGE_DIR/thumbnails
-cp -r $SRC_DIR/qimgv/distrib/mimedata/data $PACKAGE_DIR
+cp -r $SRC_DIR/src/distrib/mimedata/data $PACKAGE_DIR
 
 cd $SRC_DIR
 echo "PACKAGING DONE"
