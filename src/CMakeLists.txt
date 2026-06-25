@@ -24,11 +24,18 @@ set(TS_FILES
     "ja_JP.ts"
 )
 list(TRANSFORM TS_FILES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/res/translations/)
-set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION ${PROJECT_BINARY_DIR}/qimgv/translations)
+set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION ${PROJECT_BINARY_DIR}/src/translations)
+
+# Generate appversion.cpp from the template, filling in the version that the
+# root CMakeLists derived from the latest git tag (single source of truth).
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/appversion.cpp.in
+    ${CMAKE_CURRENT_BINARY_DIR}/appversion.cpp
+    @ONLY)
 
 # ADD EXECUTABLE
 add_executable(thumbgrid
-    appversion.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/appversion.cpp
     core.cpp
     main.cpp
     settings.cpp
@@ -109,8 +116,8 @@ elseif(APPLE)
     set_target_properties(thumbgrid PROPERTIES
         MACOSX_BUNDLE YES
         MACOSX_BUNDLE_BUNDLE_NAME "thumbgrid"
-        MACOSX_BUNDLE_BUNDLE_VERSION "2026.6.1"
-        MACOSX_BUNDLE_SHORT_VERSION_STRING "2026.6.1"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
         MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/distrib/MyBundleInfo.plist.in
         MACOSX_BUNDLE_ICON_FILE ${APPLE_ICON_NAME}
     )
@@ -139,10 +146,10 @@ install(FILES distrib/thumbgrid.appdata.xml DESTINATION ${CMAKE_INSTALL_FULL_DAT
 
 # Install internationalization language files
 if(WIN32)
-    install(DIRECTORY "${PROJECT_BINARY_DIR}/qimgv/translations" DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    install(DIRECTORY "${PROJECT_BINARY_DIR}/src/translations" DESTINATION "${CMAKE_INSTALL_BINDIR}")
 else()
     ADD_DEFINITIONS(-DTRANSLATIONS_PATH="${CMAKE_INSTALL_FULL_DATAROOTDIR}/thumbgrid/translations")
-    install(DIRECTORY "${PROJECT_BINARY_DIR}/qimgv/translations" DESTINATION "${CMAKE_INSTALL_FULL_DATAROOTDIR}/thumbgrid")
+    install(DIRECTORY "${PROJECT_BINARY_DIR}/src/translations" DESTINATION "${CMAKE_INSTALL_FULL_DATAROOTDIR}/thumbgrid")
 endif()
 
 # uninstall target

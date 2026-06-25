@@ -57,3 +57,4 @@ jobs:
         with:
           files: packaging/arch/*.pkg.tar.zst
           fail_on_unmatched_files: true
+          generate_release_notes: true

@@ -23,16 +23,17 @@ wholesale. Instead, useful upstream changes are **cherry-picked**:
 
 When cherry-picking, watch for the rename from `qimgv` to `thumbgrid`
 (binary/target name, app id, desktop/appdata/icon names, install paths under
-`/usr/lib/thumbgrid` and `…/share/thumbgrid`). The internal source directory is
-still named `qimgv/`.
+`/usr/lib/thumbgrid` and `…/share/thumbgrid`). The source directory was also
+renamed from `qimgv/` to `src/`, so upstream paths need remapping.
 
 ## Coding notes
 
 - Qt6-only. Qt5 support was dropped upstream of this fork.
-- Versioning is calendar-based (`YYYY.M.N`) in
-  [`qimgv/appversion.cpp`](qimgv/appversion.cpp) and `CMakeLists.txt`; keep them
-  in sync and monotonically increasing (the value drives the changelog /
-  new-default-shortcut migration).
+- Versioning is calendar-based (`YYYY.M.N`); the **git tag is the single source
+  of truth**. CMake derives the version from the latest tag and generates
+  `src/appversion.cpp` from [`src/appversion.cpp.in`](src/appversion.cpp.in).
+  Cut releases with `scripts/release.sh` — don't hand-edit the version. It must
+  stay monotonically increasing (drives the changelog / shortcut migration).
 - Add an SPDX + copyright header to files you substantially change or add,
   alongside the existing upstream attribution.
 

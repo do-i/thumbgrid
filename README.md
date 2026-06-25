@@ -8,15 +8,16 @@ Image viewer. Fast, easy to use. Optional video support.
 > [`NOTICE`](NOTICE) and [`LICENSE`](LICENSE).
 
 **Versioning:** thumbgrid uses calendar versioning (`YYYY.M.N`), independent of
-upstream. The current version is defined in
-[`qimgv/appversion.cpp`](qimgv/appversion.cpp) and `CMakeLists.txt`
-(currently **2026.6.1**), and is reported by `thumbgrid --version`.
+upstream. The **git tag is the single source of truth**: CMake derives the
+version from the latest `vYYYY.M.N` tag (`src/appversion.cpp` is generated from
+[`appversion.cpp.in`](src/appversion.cpp.in) at build time), and it is reported
+by `thumbgrid --version`. See [Releasing](#releasing) to cut a new version.
 
 ## Screenshots
 
 Main window         |  Folder view   |  Thumbnails  |  Settings window
 :------------------:|:--------------:|:------------:|:-----------------:|
-[![Main window](qimgv/distrib/screenshots/image.webp)](qimgv/distrib/screenshots/image.webp) | [![Folder view](qimgv/distrib/screenshots/folder-view.webp)](qimgv/distrib/screenshots/folder-view.webp) | [![Thumbnails](qimgv/distrib/screenshots/thumbnails.webp)](qimgv/distrib/screenshots/thumbnails.webp) | [![Settings](qimgv/distrib/screenshots/preference.webp)](qimgv/distrib/screenshots/preference.webp)
+[![Main window](src/distrib/screenshots/image.webp)](src/distrib/screenshots/image.webp) | [![Folder view](src/distrib/screenshots/folder-view.webp)](src/distrib/screenshots/folder-view.webp) | [![Thumbnails](src/distrib/screenshots/thumbnails.webp)](src/distrib/screenshots/thumbnails.webp) | [![Settings](src/distrib/screenshots/preference.webp)](src/distrib/screenshots/preference.webp)
 
 ## Key features:
 
@@ -215,6 +216,37 @@ makepkg -si
 
 CI also builds this package and attaches a `*.pkg.tar.zst` to the release on
 every version tag.
+
+# Releasing
+
+For maintainers. The git tag is the single source of truth for the version, so
+cutting a release is one command — no version strings to edit by hand.
+
+From a clean `main` checkout that is up to date with origin:
+
+```
+./scripts/release.sh            # auto-pick the next CalVer (e.g. v2026.6.6)
+./scripts/release.sh 2026.7.1   # or set the version explicitly (no leading 'v')
+./scripts/release.sh --dry-run  # preview the steps without changing anything
+```
+
+The script sanity-checks the tree, bumps the tarball fallback version in
+`CMakeLists.txt`, commits it, then creates an annotated `vYYYY.M.N` tag and
+pushes both. Pushing the tag triggers
+[`arch-package.yml`](.github/workflows/arch-package.yml), which builds the Arch
+package and publishes a GitHub Release with **auto-generated release notes**
+(from merged PRs / commits since the previous tag).
+
+A few notes:
+
+- Versions follow CalVer `YYYY.M.N`: major = year, minor = month, micro =
+  sequential release within that month (from 1). The micro must stay
+  monotonically increasing — it drives the in-app update/changelog logic.
+- The in-app version is captured when CMake **configures**, not on every build.
+  CI always configures fresh, so releases are correct; locally, re-run `cmake`
+  after tagging if you need `--version` to reflect a new tag.
+- To shape the auto-generated notes (categorise by label, exclude bots, …), add
+  a [`.github/release.yml`](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes).
 
 # Donate
 

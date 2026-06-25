@@ -1,7 +1,31 @@
 # thumbgrid root (hard fork of easymodo/qimgv)
 cmake_minimum_required(VERSION 3.13)
+
+# ---------------------------------------------------------------------------
+# Version: single source of truth is the latest git tag (vYYYY.M.N).
+# The fallback below is only used for source tarballs without git history
+# (e.g. some packaging contexts); scripts/release.sh keeps it in sync on tag.
+# ---------------------------------------------------------------------------
+set(THUMBGRID_VERSION_FALLBACK 2026.6.5)
+find_package(Git QUIET)
+if(Git_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} describe --tags --abbrev=0
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE THUMBGRID_GIT_TAG
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET)
+endif()
+if(THUMBGRID_GIT_TAG)
+    # Strip leading 'v'; --abbrev=0 yields a clean tag so project() stays numeric.
+    string(REGEX REPLACE "^v" "" THUMBGRID_VERSION "${THUMBGRID_GIT_TAG}")
+else()
+    set(THUMBGRID_VERSION ${THUMBGRID_VERSION_FALLBACK})
+endif()
+message(STATUS "thumbgrid version: ${THUMBGRID_VERSION}")
+
 project(thumbgrid
-    VERSION 2026.6.1
+    VERSION ${THUMBGRID_VERSION}
     HOMEPAGE_URL "https://github.com/do-i/thumbgrid"
     LANGUAGES CXX)
 
@@ -58,7 +82,7 @@ endif()
 
 ##############################################################
 
-add_subdirectory(qimgv)
+add_subdirectory(src)
 
 if(VIDEO_SUPPORT)
     add_subdirectory(plugins/player_mpv)

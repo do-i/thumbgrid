@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 // Copyright (C) 2024-2026 do-i and thumbgrid contributors
 // Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
+//
+// GENERATED FILE — do not edit. Source template: appversion.cpp.in
+// The version is filled in by CMake from the latest git tag (see top
+// CMakeLists.txt). To cut a release, run scripts/release.sh — never edit
+// the version by hand here.
 
 #include "appversion.h"
 
@@ -8,4 +13,4 @@
 //   major = year, minor = month, micro = sequential release that month (from 1).
 // Must stay monotonically increasing; drives the onUpdate()/changelog and
 // new-default-shortcut migration in core.cpp / actionmanager.cpp.
-QVersionNumber appVersion(2026, 6, 1);
+QVersionNumber appVersion(@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@);

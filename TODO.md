@@ -7,7 +7,7 @@ Action items for maintaining this hard fork of [easymodo/qimgv](https://github.c
 - [x] **Decide on a new app name** (and binary/package name). Until decided, the
       following items are blocked on it.
       Name: `thumbgrid`
-- [x] **New app logo and icon.** Source: `qimgv/res/icons/common/logo/thumbgrid/thumbgrid-icon.webp`.
+- [x] **New app logo and icon.** Source: `src/res/icons/common/logo/thumbgrid/thumbgrid-icon.webp`.
       Regenerated in-app About icon, hicolor PNGs (`thumbgrid.png`), scalable SVG,
       `thumbgrid.ico` (Windows) and `thumbgrid.icns` (macOS); updated `.desktop`
       `Icon=`/`Name=` and packaging refs.
@@ -17,12 +17,12 @@ Action items for maintaining this hard fork of [easymodo/qimgv](https://github.c
   - CMake target, install paths (`/usr/lib/thumbgrid`, `…/share/thumbgrid`),
     `packaging/` and `scripts/` artifacts, CI workflows.
   - new repo: https://github.com/do-i/thumbgrid
-  - Note: the internal **source directory** is still named `qimgv/` (not
-    user-facing); only the product/binary/identity were renamed.
+  - [x] Renamed the internal **source directory** `qimgv/` → `src/` and updated
+    all build/script/doc path references (upstream attribution URLs kept).
 
 ## About page & in-app credits
 
-File: `qimgv/gui/dialogs/settingsdialog.ui`.
+File: `src/gui/dialogs/settingsdialog.ui`.
 
 - [x] Retain original author credit (easymodo, easymodofrf@gmail.com) and the
       Contributors link — required for a GPL fork.
@@ -42,7 +42,7 @@ File: `qimgv/gui/dialogs/settingsdialog.ui`.
 ## Documentation
 
 - [x] **Fix version mismatch:** README now reflects calVer (`2026.6.1`) and
-      documents that the version lives in `qimgv/appversion.cpp` / `CMakeLists.txt`.
+      documents that the version lives in `src/appversion.cpp` / `CMakeLists.txt`.
 - [x] Rewrite README install section — replaced upstream channels with
       build-from-source (`run.sh` / CMake) and the Arch `packaging/arch` package.
 - [x] Document the fork's added features in the README (exiv2 metadata, folder
