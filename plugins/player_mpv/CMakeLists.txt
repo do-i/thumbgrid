@@ -18,10 +18,26 @@ endif()
 
 include(GNUInstallDirs)
 
+# Two mpv embedding backends:
+#  - default (PLAYER_MPV_USE_WID=ON): hand mpv our native window id and let it
+#    pick its own video output (gpu -> xv -> x11). Works on both real GPUs and
+#    software rendering / headless VMs.
+#  - PLAYER_MPV_USE_WID=OFF: libmpv OpenGL render API into a QOpenGLWidget.
+#    Tighter Qt integration, but needs a working OpenGL stack -- on software
+#    rendering the render-API path produces a blank video frame.
+option(PLAYER_MPV_USE_WID "Embed mpv via native window id instead of the OpenGL render API" ON)
+
+if(PLAYER_MPV_USE_WID)
+    set(PLAYER_MPV_WIDGET_SRC src/nogl/mpvwidget.cpp src/nogl/videoplayermpv.cpp)
+    set(PLAYER_MPV_WIDGET_INC src/nogl)
+else()
+    set(PLAYER_MPV_WIDGET_SRC src/mpvwidget.cpp src/videoplayermpv.cpp)
+    set(PLAYER_MPV_WIDGET_INC)
+endif()
+
 add_library(player_mpv MODULE
     src/videoplayer.cpp
-    src/mpvwidget.cpp
-    src/videoplayermpv.cpp
+    ${PLAYER_MPV_WIDGET_SRC}
     src/qthelper.hpp)
 
 target_compile_features(player_mpv PRIVATE cxx_std_11)
@@ -34,7 +50,7 @@ else()
         Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Widgets PkgConfig::Mpv)
 endif()
 
-if(QT_VERSION_MAJOR GREATER_EQUAL 6)
+if(QT_VERSION_MAJOR GREATER_EQUAL 6 AND NOT PLAYER_MPV_USE_WID)
     target_link_libraries(player_mpv PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
@@ -42,7 +58,7 @@ set_target_properties(player_mpv PROPERTIES
     CXX_EXTENSIONS OFF
     PREFIX "")
 
-target_include_directories(player_mpv PRIVATE src)
+target_include_directories(player_mpv PRIVATE ${PLAYER_MPV_WIDGET_INC} src)
 
 if(WIN32)
     target_include_directories(player_mpv PRIVATE

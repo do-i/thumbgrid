@@ -14,15 +14,19 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
 
     int64_t wid = parent->winId();
     mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid);
-    
+
+    // mpv draws into our native window with its own video output. Try the GPU
+    // VO first, then fall back to XVideo and plain X11 so playback still works
+    // where OpenGL/Vulkan are unavailable (e.g. software rendering / VMs).
+    mpv_set_option_string(mpv, "vo", "gpu,xv,x11");
+
     this->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     mpv_set_option_string(mpv, "input-cursor", "no");   // no mouse handling
     mpv_set_option_string(mpv, "cursor-autohide", "no");// no cursor-autohide, we handle that
     //mpv_set_option_string(mpv, "terminal", "yes");
     //mpv_set_option_string(mpv, "msg-level", "all=v");
 
-    // Request hw decoding, just for testing.
-    mpv::qt::set_property(mpv, "hwdec", "auto");
+    mpv::qt::set_property(mpv, "hwdec", "auto-safe");
 
     //mpv::qt::set_property(mpv, "video-unscaled", "downscale-big");
 
@@ -115,7 +119,7 @@ int MpvWidget::volume() {
 }
 
 void MpvWidget::setVolume(int vol) {
-    qBound(0, vol, 100);
+    vol = qBound(0, vol, 100);
     mpv::qt::set_property_variant(mpv, "volume", vol);
 }
 

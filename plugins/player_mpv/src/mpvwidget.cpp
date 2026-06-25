@@ -29,8 +29,11 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     if (mpv_initialize(mpv) < 0)
         throw std::runtime_error("could not initialize mpv context");
 
-    // Request hw decoding, just for testing.
-    mpv::qt::set_property(mpv, "hwdec", "auto");
+    // Use software decoding. Hardware decoding ("auto") can select a hwdec
+    // whose GPU surfaces this libmpv OpenGL render path cannot map, producing a
+    // blank video frame for some codecs (and, because playback then stalls, no
+    // audio either) while other codecs play fine.
+    mpv::qt::set_property(mpv, "hwdec", "no");
 
     //mpv::qt::set_property(mpv, "video-unscaled", "downscale-big");
 
@@ -173,7 +176,7 @@ int MpvWidget::volume() {
 }
 
 void MpvWidget::setVolume(int vol) {
-    qBound(0, vol, 100);
+    vol = qBound(0, vol, 100);
     mpv::qt::set_property_variant(mpv, "volume", vol);
 }
 
