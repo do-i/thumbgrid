@@ -113,8 +113,7 @@ are cached on disk and generated asynchronously.
 
 ## Metadata (exiv2)
 
-When built with exiv2 support (`-DEXIV2=ON`, default), thumbgrid can read
-Exif / IPTC / XMP tags. The image-info panel (`I`) has an optional full-metadata
+thumbgrid reads Exif / IPTC / XMP tags via exiv2 (always built in). The image-info panel (`I`) has an optional full-metadata
 mode. Metadata is preserved when saving edits, and a strip-metadata action lets
 you remove all metadata for privacy. Both are available from the context menu.
 
@@ -190,13 +189,12 @@ cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 ```
 
-Feature toggles (all default `ON` except KDE):
+Exiv2 (metadata), the mpv plugin (video playback) and OpenCV (high quality
+scaling) are always built in and require those libraries at build time. The
+only feature toggle is:
 
 ```
--DEXIV2=ON|OFF            # Exif/Iptc/Xmp metadata, metadata-preserving saves, strip-metadata
--DVIDEO_SUPPORT=ON|OFF    # video playback via the mpv plugin
--DOPENCV_SUPPORT=ON|OFF   # high quality scaling
--DKDE_SUPPORT=ON|OFF      # blur behind the window on KDE
+-DKDE_SUPPORT=ON|OFF      # blur behind the window on KDE (default OFF)
 ```
 
 Install with:
