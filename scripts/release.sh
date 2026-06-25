@@ -28,7 +28,7 @@ DEFAULT_BRANCH="main"
 for arg in "$@"; do
     case "$arg" in
         --dry-run) DRY_RUN=1 ;;
-        -h|--help) sed -n '2,30p' "$0"; exit 0 ;;
+        -h|--help) sed -n '2,21p' "$0"; exit 0 ;;
         v*) EXPLICIT_VERSION="${arg#v}" ;;
         [0-9]*) EXPLICIT_VERSION="$arg" ;;
         *) echo "error: unknown argument '$arg'" >&2; exit 2 ;;
@@ -55,7 +55,14 @@ if [[ -n "$(git status --porcelain)" ]]; then
     echo "error: working tree is dirty. Commit or stash first." >&2
     exit 1
 fi
-git fetch --quiet --tags origin
+# Refresh the remote branch for the behind-check below. Fail loudly, never silently.
+if ! git fetch --quiet origin "$DEFAULT_BRANCH"; then
+    echo "error: failed to fetch origin/$DEFAULT_BRANCH (network or remote problem)." >&2
+    exit 1
+fi
+# Refresh tags too, but a tag mismatch (diverged tags) must not abort the release silently.
+git fetch --quiet --tags origin \
+    || echo "warning: 'git fetch --tags' reported issues (diverged tags?); continuing with local tags." >&2
 if [[ -n "$(git rev-list "HEAD..origin/$DEFAULT_BRANCH" 2>/dev/null)" ]]; then
     echo "error: local $DEFAULT_BRANCH is behind origin/$DEFAULT_BRANCH. Pull first." >&2
     exit 1
@@ -99,7 +106,7 @@ echo "Releasing $TAG (from branch $branch)"
 # Keeps source-tarball builds (no .git) reporting the right version.
 if grep -q 'set(THUMBGRID_VERSION_FALLBACK ' CMakeLists.txt; then
     run sed -i "s|set(THUMBGRID_VERSION_FALLBACK .*)|set(THUMBGRID_VERSION_FALLBACK ${VERSION})|" CMakeLists.txt
-    if [[ "$DRY_RUN" != "1" ]] && ! git diff --quiet CMakeLists.txt; then
+    if [[ "$DRY_RUN" == "1" ]] || ! git diff --quiet CMakeLists.txt; then
         run git add CMakeLists.txt
         run git commit -m "Release ${TAG}"
     fi
