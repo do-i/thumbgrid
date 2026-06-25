@@ -18,9 +18,10 @@ jobs:
           install: git p7zip
 
       - uses: actions/checkout@v4
-        with: 
+        with:
           #ref: dev
           fetch-depth: 0
+          lfs: true        # fetch real image bytes; LFS pointer stubs in qrc crash at runtime
 
       - id: build
         name: CI-Build

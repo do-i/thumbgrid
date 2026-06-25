@@ -18,11 +18,12 @@ jobs:
       image: archlinux:base-devel
     steps:
       - name: Install build tooling
-        run: pacman -Syu --noconfirm git cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf
+        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf
 
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0   # tags needed for pkgver fallback / git describe
+          lfs: true        # fetch real image bytes; LFS pointer stubs in qrc crash at runtime
 
       - name: Mark workspace as a safe git directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
