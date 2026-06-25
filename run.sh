@@ -43,8 +43,8 @@ confirm_install() {
     local package_manager="$1"
     shift
 
-    printf 'This installs dependencies for the minimal thumbgrid build.\n'
-    printf 'Optional feature deps for Exiv2, OpenCV, and mpv are not included.\n\n'
+    printf 'This installs dependencies for the full thumbgrid build.\n'
+    printf 'Includes feature deps for Exiv2, OpenCV, and mpv.\n\n'
     printf 'Package manager: %s\n' "$package_manager"
     printf 'Packages:\n'
     printf '  %s\n' "$@"
@@ -57,7 +57,7 @@ confirm_install() {
     esac
 }
 
-install_required_deps() {
+install_full_deps() {
     local packages=()
 
     if command -v apt-get >/dev/null 2>&1; then
@@ -70,6 +70,9 @@ install_required_deps() {
             qt6-tools-dev-tools
             qt6-image-formats-plugins
             libqt6svg6-dev
+            libexiv2-dev
+            libopencv-dev
+            libmpv-dev
         )
         confirm_install "apt-get" "${packages[@]}" || return 0
         run_as_root apt-get update || return
@@ -83,6 +86,9 @@ install_required_deps() {
             qt6-qtimageformats
             qt6-qtsvg-devel
             qt6-qttools-devel
+            exiv2-devel
+            opencv-devel
+            mpv-libs-devel
         )
         confirm_install "dnf" "${packages[@]}" || return 0
         run_as_root dnf install -y "${packages[@]}"
@@ -95,6 +101,9 @@ install_required_deps() {
             qt6-imageformats
             qt6-svg
             qt6-tools
+            exiv2
+            opencv
+            mpv
         )
         confirm_install "pacman" "${packages[@]}" || return 0
         run_as_root pacman -S --needed "${packages[@]}"
@@ -107,6 +116,9 @@ install_required_deps() {
             qt6-imageformats-devel
             qt6-svg-devel
             qt6-tools-devel
+            libexiv2-devel
+            opencv-devel
+            mpv-devel
         )
         confirm_install "zypper" "${packages[@]}" || return 0
         run_as_root zypper install -y "${packages[@]}"
@@ -119,6 +131,9 @@ install_required_deps() {
             qt6-qtimageformats
             qt6-qtsvg-dev
             qt6-qttools-dev
+            exiv2-dev
+            opencv-dev
+            mpv-dev
         )
         confirm_install "apk" "${packages[@]}" || return 0
         run_as_root apk add "${packages[@]}"
@@ -127,12 +142,15 @@ install_required_deps() {
             cmake
             pkg-config
             qt
+            exiv2
+            opencv
+            mpv
         )
         confirm_install "Homebrew" "${packages[@]}" || return 0
         brew install "${packages[@]}"
     else
         printf 'No supported package manager found.\n' >&2
-        printf 'Install a C++ compiler, CMake, pkg-config, Qt Widgets, Qt ImageFormats, Qt Svg, Qt PrintSupport, and Qt LinguistTools.\n' >&2
+        printf 'Install a C++ compiler, CMake, pkg-config, Qt Widgets, Qt ImageFormats, Qt Svg, Qt Tools, plus Exiv2, OpenCV, and mpv.\n' >&2
         return 1
     fi
 }
@@ -165,22 +183,12 @@ configure_default() {
         -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
 }
 
-configure_minimal() {
-    require_cmake || return
-
-    "$CMAKE_BIN" -S "$ROOT_DIR" -B "$BUILD_DIR" \
-        -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-        -DEXIV2=OFF \
-        -DOPENCV_SUPPORT=OFF \
-        -DVIDEO_SUPPORT=OFF
-}
-
 build_project() {
     require_cmake || return
 
     if [[ ! -f "$BUILD_DIR/CMakeCache.txt" ]]; then
-        printf 'No CMake build directory found. Configuring a minimal build first.\n'
-        configure_minimal || return
+        printf 'No CMake build directory found. Configuring a full build first.\n'
+        configure_default || return
     fi
 
     "$CMAKE_BIN" --build "$BUILD_DIR" --parallel "$JOBS"
@@ -212,11 +220,6 @@ run_executable() {
     "$executable" "${APP_ARGS[@]}"
 }
 
-build_and_run() {
-    build_project || return
-    run_executable
-}
-
 clean_build_dir() {
     if [[ ! -d "$BUILD_DIR" ]]; then
         printf 'Build directory does not exist: %s\n' "$BUILD_DIR"
@@ -237,27 +240,19 @@ clean_build_dir() {
 
 while true; do
     print_header
-    printf '1) Install required deps (minimal build)\n'
-    printf '2) Configure minimal build\n'
-    printf '3) Build\n'
-    printf '4) Run executable\n'
-    printf '5) Build and run\n'
-    printf '6) Configure full build (requires optional deps)\n'
-    printf '7) Clean build directory\n'
-    printf '8) Exit\n\n'
+    printf '  i) Init   - install full dependencies\n'
+    printf '  b) Build\n'
+    printf '  r) Run\n'
+    printf '  c) Clean  - delete build directory\n'
+    printf '  q) Quit\n\n'
 
-    printf 'Note: full build enables Exiv2, OpenCV, and mpv support.\n\n'
-
-    read -r -p "Choose an option: " choice
+    read -r -p "Choose [i/b/c/r/q]: " choice
     case "$choice" in
-        1) run_menu_action install_required_deps ;;
-        2) run_menu_action configure_minimal ;;
-        3) run_menu_action build_project ;;
-        4) run_menu_action run_executable ;;
-        5) run_menu_action build_and_run ;;
-        6) run_menu_action configure_default ;;
-        7) run_menu_action clean_build_dir ;;
-        8|q|Q) exit 0 ;;
+        i|I) run_menu_action install_full_deps ;;
+        b|B) run_menu_action build_project ;;
+        r|R) run_menu_action run_executable ;;
+        c|C) run_menu_action clean_build_dir ;;
+        q|Q) printf '\n'; exit 0 ;;
         *) printf 'Invalid option: %s\n' "$choice"; pause ;;
     esac
 done

@@ -44,13 +44,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # USER OPTIONS
-# Usage: cmake -DVIDEO_SUPPORT=ON [...]
-# Enables reading/writing Exif/Iptc/Xmp metadata, metadata-preserving saves and
-# the strip-metadata action. For tags inside cr3/heif/jxl/avif, exiv2 itself must
-# be built with EXIV2_ENABLE_BMFF (default in exiv2 >= 0.28).
-option(EXIV2 "For reading/writing exif tags" ON)
-option(VIDEO_SUPPORT "Enable video support" ON)
-option(OPENCV_SUPPORT "Enable HQ scaling via OpenCV" ON)
+# Exiv2, mpv (video) and OpenCV are mandatory and always built in. Exiv2 enables
+# reading/writing Exif/Iptc/Xmp metadata, metadata-preserving saves and the
+# strip-metadata action; for tags inside cr3/heif/jxl/avif, exiv2 itself must be
+# built with EXIV2_ENABLE_BMFF (default in exiv2 >= 0.28).
 option(KDE_SUPPORT "Support blur when using KDE" OFF)
 
 if(UNIX AND NOT APPLE)
@@ -66,24 +63,17 @@ find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport Open
 message(STATUS "Qt Version: " ${QT_VERSION})
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
 
-if(EXIV2)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(Exiv2 REQUIRED IMPORTED_TARGET exiv2)
-endif()
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(Exiv2 REQUIRED IMPORTED_TARGET exiv2)
 
 if(KDE_SUPPORT)
     find_package(KF6WindowSystem REQUIRED)
 endif()
 
-if(OPENCV_SUPPORT)
-    find_package(PkgConfig REQUIRED)
-    find_package(OpenCV REQUIRED core imgproc)
-endif()
+find_package(OpenCV REQUIRED core imgproc)
 
 ##############################################################
 
 add_subdirectory(src)
 
-if(VIDEO_SUPPORT)
-    add_subdirectory(plugins/player_mpv)
-endif()
+add_subdirectory(plugins/player_mpv)

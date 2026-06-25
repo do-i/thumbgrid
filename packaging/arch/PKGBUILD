@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2024-2026 do-i and thumbgrid contributors
 # PKGBUILD for thumbgrid (a hard fork of easymodo/qimgv).
-# Minimal build: Qt6 only, no Exiv2 / OpenCV / mpv (matches run.sh "minimal build").
+# Full build: Qt6 plus Exiv2 / OpenCV / mpv (matches run.sh default build).
 #
 # This PKGBUILD builds from the already checked-out source tree (the repo this
 # file lives in), so CI can package the exact tag without downloading a tarball
@@ -14,7 +14,7 @@ pkgname=thumbgrid
 _srcroot="$(cd "$startdir/../.." && pwd)"
 pkgver="${THUMBGRID_PKGVER:-0}"
 pkgrel=1
-pkgdesc="Qt image viewer (fork of easymodo/qimgv), minimal Qt6 build (no exiv2/opencv/mpv)"
+pkgdesc="Qt image viewer (fork of easymodo/qimgv), full build (exiv2/opencv/mpv)"
 arch=('x86_64')
 url="https://github.com/do-i/thumbgrid"
 license=('GPL-3.0-only')
@@ -22,6 +22,9 @@ depends=(
   'qt6-base'
   'qt6-svg'
   'qt6-imageformats'
+  'exiv2'
+  'opencv'
+  'mpv'
 )
 makedepends=(
   'cmake'
@@ -49,9 +52,6 @@ build() {
   cmake -B "$srcdir/build" -S "$_srcroot" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
-    -DEXIV2=OFF \
-    -DVIDEO_SUPPORT=OFF \
-    -DOPENCV_SUPPORT=OFF \
     -DKDE_SUPPORT=OFF \
     -Wno-dev
   cmake --build "$srcdir/build"
