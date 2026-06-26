@@ -97,6 +97,7 @@ public slots:
     ImageFitMode fitMode();
     void closeImage();
     void clearVideoView();
+    void clearImageView();
     void hideCursor();
     void showCursor();
     void hideCursorTimed(bool restartTimer);

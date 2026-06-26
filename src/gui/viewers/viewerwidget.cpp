@@ -216,6 +216,10 @@ bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap) {
     stopPlayback();
     videoControls->hide();
     enableImageViewer();
+    // enableImageViewer() only show()s on a widget switch; re-show explicitly in
+    // case a navigation hid the image viewer via clearImageView() while we were
+    // already on it (e.g. a misdetected video that turned out to be an image).
+    imageViewer->show();
     imageViewer->showImage(std::move(pixmap));
     hideCursorTimed(false);
     return true;
@@ -226,6 +230,7 @@ bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
         return false;
     stopPlayback();
     enableImageViewer();
+    imageViewer->show();
     imageViewer->showAnimation(movie);
     hideCursorTimed(false);
     return true;
@@ -253,6 +258,15 @@ void ViewerWidget::clearVideoView() {
         videoPlayer->stop();
         videoPlayer->hide();
     }
+}
+
+// Mirror of clearVideoView for the image viewer. Called when navigating to a
+// video so the current image doesn't linger on screen while the video loads.
+// currentWidget is left unchanged; showImage()/showAnimation() re-show the
+// image viewer if we end up back on an image.
+void ViewerWidget::clearImageView() {
+    if(currentWidget == IMAGEVIEWER)
+        imageViewer->hide();
 }
 
 void ViewerWidget::stopPlayback() {

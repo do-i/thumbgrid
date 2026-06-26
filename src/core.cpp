@@ -1572,16 +1572,36 @@ bool Core::setDirectory(QString path) {
     return true;
 }
 
+// Cheap, extension-based "is this a video?" check. Used at navigation time
+// (before the file is loaded), so it must not touch file contents the way
+// DocumentInfo's mime detection does.
+static bool isVideoFile(const QString &path) {
+    const QString suffix = QFileInfo(path).suffix().toLower();
+    if(suffix.isEmpty())
+        return false;
+    const auto extensions = settings->videoFormats().values();
+    for(const QByteArray &ext : extensions)
+        if(suffix == QString::fromLatin1(ext))
+            return true;
+    return false;
+}
+
 bool Core::loadFileIndex(int index, bool async, bool preload) {
     if(!model)
         return false;
     auto entry = model->fileEntryAt(index);
     if(entry.path.isEmpty())
         return false;
-    // We're navigating to another item. If a video is currently on screen,
-    // stop & blank it now so it doesn't keep playing or flash while the next
-    // item loads (the load may be async, and even sync loads decode first).
+    // We're navigating to another item. Blank the outgoing view now so the
+    // previous item doesn't linger on screen while the next one loads (the load
+    // is usually async, and even sync loads decode first). A video on screen is
+    // always blanked; the current image is only blanked when the next item is a
+    // video, so plain image -> image browsing stays flicker-free.
+    // clearVideoView() is a no-op unless a video is showing, clearImageView()
+    // a no-op unless an image is showing, so the two never fight.
     mw->clearVideoView();
+    if(isVideoFile(entry.path))
+        mw->clearImageView();
     state.currentFilePath = entry.path;
     model->unloadExcept(entry.path, preload);
     model->load(entry.path, async);
