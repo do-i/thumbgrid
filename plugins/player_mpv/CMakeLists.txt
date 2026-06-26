@@ -58,6 +58,14 @@ set_target_properties(player_mpv PROPERTIES
     CXX_EXTENSIONS OFF
     PREFIX "")
 
+# Deploy the freshly built plugin next to where the in-tree binary looks for it
+# (<build>/lib/thumbgrid, i.e. ../lib/thumbgrid relative to the app), so running
+# from the build tree always picks up plugin changes instead of a stale copy.
+add_custom_command(TARGET player_mpv POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_BINARY_DIR}/lib/thumbgrid"
+    COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:player_mpv>" "${CMAKE_BINARY_DIR}/lib/thumbgrid/"
+    VERBATIM)
+
 target_include_directories(player_mpv PRIVATE ${PLAYER_MPV_WIDGET_INC} src)
 
 if(WIN32)
