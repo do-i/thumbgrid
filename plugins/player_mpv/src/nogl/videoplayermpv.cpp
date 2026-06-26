@@ -4,7 +4,10 @@
 #include <QSlider>
 #include <QLayout>
 #include <QFileDialog>
+#include <QResizeEvent>
+#include <QShowEvent>
 #include <QTimer>
+#include <QPalette>
 
 // TODO: window flashes white when opening a video (straight from file manager)
 VideoPlayerMpv::VideoPlayerMpv(QWidget *parent) : VideoPlayer(parent) {
@@ -16,6 +19,21 @@ VideoPlayerMpv::VideoPlayerMpv(QWidget *parent) : VideoPlayer(parent) {
     vl->setContentsMargins(0,0,0,0);
     vl->addWidget(m_mpv);
     setLayout(vl);
+
+    mBlankOverlay = new QWidget(this);
+    mBlankOverlay->setAttribute(Qt::WA_TransparentForMouseEvents);
+    // mpv renders into MpvWidget's own *native* X window, which stacks above
+    // ordinary (non-native) Qt sibling widgets no matter how we raise() them.
+    // So the cover must itself be a native window -- then raise() restacks it
+    // above mpv at the X level and it actually hides the video.
+    mBlankOverlay->setAttribute(Qt::WA_NativeWindow);
+    // Paint solid black via the palette; a stylesheet background is unreliable
+    // on a native, layout-less child window.
+    mBlankOverlay->setAutoFillBackground(true);
+    QPalette ovpal = mBlankOverlay->palette();
+    ovpal.setColor(QPalette::Window, Qt::black);
+    mBlankOverlay->setPalette(ovpal);
+    mBlankOverlay->hide();
 
     setFocusPolicy(Qt::NoFocus);
     m_mpv->setFocusPolicy(Qt::NoFocus);
@@ -36,7 +54,7 @@ bool VideoPlayerMpv::showVideo(QString file) {
     // previous file's last frame doesn't briefly flash during the switch.
     // onPlaybackRestarted() reveals it again.
     mPendingReveal = true;
-    QWidget::hide();
+    raiseBlankOverlay();
     m_mpv->command(QStringList() << "loadfile" << file);
     setPaused(false);
     return true;
@@ -46,7 +64,7 @@ void VideoPlayerMpv::onPlaybackRestarted() {
     QTimer::singleShot(50, this, [this]() {
         if(mPendingReveal) {
             mPendingReveal = false;
-            QWidget::show();
+            mBlankOverlay->hide();
         }
     });
 }
@@ -117,6 +135,29 @@ void VideoPlayerMpv::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event)
 }
 
+void VideoPlayerMpv::resizeEvent(QResizeEvent *event) {
+    QWidget::resizeEvent(event);
+    if(mBlankOverlay)
+        mBlankOverlay->setGeometry(rect());
+}
+
+void VideoPlayerMpv::showEvent(QShowEvent *event) {
+    QWidget::showEvent(event);
+    // When opening a video from the grid, showVideo() runs while this widget
+    // (and the whole document view) is still hidden, so the cover wasn't on a
+    // real on-screen window yet. Now that we're actually being shown, re-assert
+    // it on top so mpv's old frame doesn't flash before the new one is ready.
+    if(mPendingReveal)
+        raiseBlankOverlay();
+}
+
+// Size the black cover to the player and stack it above mpv's native window.
+void VideoPlayerMpv::raiseBlankOverlay() {
+    mBlankOverlay->setGeometry(rect());
+    mBlankOverlay->show();
+    mBlankOverlay->raise();
+}
+
 void VideoPlayerMpv::readSettings() {
     //setMuted(!settings->playVideoSounds());
     //setVideoUnscaled(!settings->expandImage());
@@ -146,6 +187,7 @@ void VideoPlayerMpv::hide() {
     // Cancel any pending reveal so a late playback-restart can't pop the video
     // back up after we've switched away (e.g. to an image).
     mPendingReveal = false;
+    mBlankOverlay->hide();
     QWidget::hide();
 }
 

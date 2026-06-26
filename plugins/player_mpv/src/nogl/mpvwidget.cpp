@@ -12,7 +12,7 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     if(!mpv)
         throw std::runtime_error("could not create mpv context");
 
-    int64_t wid = parent->winId();
+    int64_t wid = winId();
     mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid);
 
     // mpv draws into our native window with its own video output. Try the GPU

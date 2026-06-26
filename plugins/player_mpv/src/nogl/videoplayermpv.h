@@ -38,6 +38,8 @@ public slots:
 
 protected:
     void paintEvent(QPaintEvent *event);
+    void resizeEvent(QResizeEvent *event);
+    void showEvent(QShowEvent *event);
 
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -51,9 +53,12 @@ private slots:
     void onPlaybackRestarted();
 
 private:
+    void raiseBlankOverlay();
+
     MpvWidget *m_mpv;
-    // While true, the player is hidden waiting for the next file's first frame
-    // so the previous file's last frame doesn't flash during a switch.
+    QWidget *mBlankOverlay;
+    // While true, the player is covered until the next file has started
+    // painting, so the previous file's last frame doesn't flash.
     bool mPendingReveal = false;
 
 };
