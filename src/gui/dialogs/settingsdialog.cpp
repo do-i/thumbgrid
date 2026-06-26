@@ -51,22 +51,26 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         settings->setColorTid(COLORS_CUSTOMIZED);
     });
 
-    ui->colorSelectorAccent->setDescription(tr("Accent color"));
-    ui->colorSelectorBackground->setDescription(tr("Windowed mode background"));
-    ui->colorSelectorFullscreen->setDescription(tr("Fullscreen mode background"));
-    ui->colorSelectorFolderview->setDescription(tr("FolderView background"));
-    ui->colorSelectorFolderviewPanel->setDescription(tr("FolderView top panel"));
-    ui->folderViewLabelBackgroundColorSelector->setDescription(tr("Folder view filename background"));
-    ui->folderViewSelectionColorSelector->setDescription(tr("Folder view selection"));
-    ui->folderViewParentIconColorSelector->setDescription(tr("Folder view parent icon"));
-    ui->folderViewSelectedLabelBackgroundColorSelector->setDescription(tr("Folder view selected filename background"));
-    ui->folderViewCellBackgroundColorSelector->setDescription(tr("Folder view preview cell background"));
-    ui->colorSelectorText->setDescription(tr("Text color"));
-    ui->colorSelectorWidget->setDescription(tr("Widget background"));
-    ui->colorSelectorWidgetBorder->setDescription(tr("Widget border"));
+    // App-wide
+    ui->colorSelectorAccent->setDescription(tr("Accent"));
+    ui->colorSelectorText->setDescription(tr("Text"));
+    ui->colorSelectorIcons->setDescription(tr("Icons"));
+    ui->colorSelectorBackground->setDescription(tr("Window background"));
+    ui->colorSelectorWidget->setDescription(tr("Control background"));
+    ui->colorSelectorWidgetBorder->setDescription(tr("Control border"));
+    ui->colorSelectorScrollbar->setDescription(tr("Scrollbar"));
+    // Grid
+    ui->colorSelectorFolderview->setDescription(tr("Grid background"));
+    ui->colorSelectorFolderviewPanel->setDescription(tr("Grid top bar"));
+    ui->folderViewCellBackgroundColorSelector->setDescription(tr("Thumbnail cell"));
+    ui->folderViewLabelBackgroundColorSelector->setDescription(tr("Filename label"));
+    ui->folderViewSelectedLabelBackgroundColorSelector->setDescription(tr("Selected filename label"));
+    ui->folderViewSelectionColorSelector->setDescription(tr("Selection highlight"));
+    ui->folderViewParentIconColorSelector->setDescription(tr("Folder-icon tint"));
+    // Content view
+    ui->colorSelectorFullscreen->setDescription(tr("Fullscreen background"));
     ui->colorSelectorOverlay->setDescription(tr("Overlay background"));
     ui->colorSelectorOverlayText->setDescription(tr("Overlay text"));
-    ui->colorSelectorScrollbar->setDescription(tr("Scrollbars"));
 
 #ifndef USE_KDE_BLUR
     ui->blurBackgroundCheckBox->setEnabled(false);

@@ -537,326 +537,6 @@
                       </item>
                      </layout>
                     </item>
-                    <item>
-                     <layout class="QHBoxLayout" name="folderViewLabelBackgroundLayout">
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                      <item>
-                       <widget class="ColorSelectorButton" name="folderViewLabelBackgroundColorSelector">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>40</width>
-                          <height>22</height>
-                         </size>
-                        </property>
-                        <property name="cursor">
-                         <cursorShape>PointingHandCursor</cursorShape>
-                        </property>
-                        <property name="autoFillBackground">
-                         <bool>true</bool>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::Box</enum>
-                        </property>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLabel" name="folderViewLabelBackgroundLabel">
-                        <property name="text">
-                         <string>Folder view filename background</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <spacer name="folderViewLabelBackgroundSpacer">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>40</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                     </layout>
-                    </item>
-                    <item>
-                     <layout class="QHBoxLayout" name="folderViewSelectionColorLayout">
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                      <item>
-                       <widget class="ColorSelectorButton" name="folderViewSelectionColorSelector">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>40</width>
-                          <height>22</height>
-                         </size>
-                        </property>
-                        <property name="cursor">
-                         <cursorShape>PointingHandCursor</cursorShape>
-                        </property>
-                        <property name="autoFillBackground">
-                         <bool>true</bool>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::Box</enum>
-                        </property>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLabel" name="folderViewSelectionColorLabel">
-                        <property name="text">
-                         <string>Folder view selection</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <spacer name="folderViewSelectionColorSpacer">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>40</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                     </layout>
-                    </item>
-                    <item>
-                     <layout class="QHBoxLayout" name="folderViewParentIconColorLayout">
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                      <item>
-                       <widget class="ColorSelectorButton" name="folderViewParentIconColorSelector">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>40</width>
-                          <height>22</height>
-                         </size>
-                        </property>
-                        <property name="cursor">
-                         <cursorShape>PointingHandCursor</cursorShape>
-                        </property>
-                        <property name="autoFillBackground">
-                         <bool>true</bool>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::Box</enum>
-                        </property>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLabel" name="folderViewParentIconColorLabel">
-                        <property name="text">
-                         <string>Folder view parent icon</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <spacer name="folderViewParentIconColorSpacer">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>40</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                     </layout>
-                    </item>
-                    <item>
-                     <layout class="QHBoxLayout" name="folderViewSelectedLabelBackgroundColorLayout">
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                      <item>
-                       <widget class="ColorSelectorButton" name="folderViewSelectedLabelBackgroundColorSelector">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>40</width>
-                          <height>22</height>
-                         </size>
-                        </property>
-                        <property name="cursor">
-                         <cursorShape>PointingHandCursor</cursorShape>
-                        </property>
-                        <property name="autoFillBackground">
-                         <bool>true</bool>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::Box</enum>
-                        </property>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLabel" name="folderViewSelectedLabelBackgroundColorLabel">
-                        <property name="text">
-                         <string>Folder view selected filename background</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <spacer name="folderViewSelectedLabelBackgroundColorSpacer">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>40</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                     </layout>
-                    </item>
-                    <item>
-                     <layout class="QHBoxLayout" name="folderViewCellBackgroundColorLayout">
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                      <item>
-                       <widget class="ColorSelectorButton" name="folderViewCellBackgroundColorSelector">
-                        <property name="sizePolicy">
-                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                          <horstretch>0</horstretch>
-                          <verstretch>0</verstretch>
-                         </sizepolicy>
-                        </property>
-                        <property name="minimumSize">
-                         <size>
-                          <width>40</width>
-                          <height>22</height>
-                         </size>
-                        </property>
-                        <property name="cursor">
-                         <cursorShape>PointingHandCursor</cursorShape>
-                        </property>
-                        <property name="autoFillBackground">
-                         <bool>true</bool>
-                        </property>
-                        <property name="frameShape">
-                         <enum>QFrame::Box</enum>
-                        </property>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLabel" name="folderViewCellBackgroundColorLabel">
-                        <property name="text">
-                         <string>Folder view preview cell background</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <spacer name="folderViewCellBackgroundColorSpacer">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
-                        </property>
-                        <property name="sizeHint" stdset="0">
-                         <size>
-                          <width>40</width>
-                          <height>20</height>
-                         </size>
-                        </property>
-                       </spacer>
-                      </item>
-                     </layout>
-                    </item>
                    </layout>
                   </item>
                  </layout>
@@ -3393,7 +3073,19 @@
                      <property name="verticalSpacing">
                       <number>7</number>
                      </property>
-                     <item row="0" column="0">
+                     <item row="0" column="0" colspan="5">
+                      <widget class="QLabel" name="hdrAppWide">
+                       <property name="font">
+                        <font>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>App-wide</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
                       <widget class="ColorSelectorButton" name="colorSelectorAccent">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -3410,9 +3102,6 @@
                        <property name="cursor">
                         <cursorShape>PointingHandCursor</cursorShape>
                        </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
                        <property name="autoFillBackground">
                         <bool>true</bool>
                        </property>
@@ -3424,114 +3113,11 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="3" column="2">
-                      <widget class="ColorSelectorButton" name="colorSelectorIcons">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>40</width>
-                         <height>22</height>
-                        </size>
-                       </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="text">
-                        <string notr="true"/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="2">
-                      <widget class="ColorSelectorButton" name="colorSelectorFullscreen">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>40</width>
-                         <height>22</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="text">
-                        <string notr="true"/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="0">
-                      <widget class="ColorSelectorButton" name="colorSelectorBackground">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>40</width>
-                         <height>22</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="4">
-                      <spacer name="horizontalSpacer_28">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item row="0" column="1">
+                     <item row="1" column="1">
                       <widget class="QLabel" name="label_33">
                        <property name="minimumSize">
                         <size>
-                         <width>180</width>
+                         <width>170</width>
                          <height>0</height>
                         </size>
                        </property>
@@ -3540,97 +3126,7 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="1" column="1">
-                      <widget class="QLabel" name="label_34">
-                       <property name="text">
-                        <string>Background</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="3">
-                      <widget class="QLabel" name="label_35">
-                       <property name="text">
-                        <string>Background (fullscreen mode)</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="6" column="2">
-                      <widget class="ColorSelectorButton" name="colorSelectorOverlayText">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>40</width>
-                         <height>22</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="1">
-                      <widget class="QLabel" name="label_11">
-                       <property name="text">
-                        <string>Text</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="3">
-                      <widget class="QLabel" name="label_14">
-                       <property name="text">
-                        <string>Icons</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="0">
-                      <widget class="ColorSelectorButton" name="colorSelectorFolderview">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>40</width>
-                         <height>22</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="3" column="0">
+                     <item row="1" column="2">
                       <widget class="ColorSelectorButton" name="colorSelectorText">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -3647,9 +3143,6 @@
                        <property name="cursor">
                         <cursorShape>PointingHandCursor</cursorShape>
                        </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
                        <property name="autoFillBackground">
                         <bool>true</bool>
                        </property>
@@ -3661,8 +3154,34 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="2">
-                      <widget class="ColorSelectorButton" name="colorSelectorWidgetBorder">
+                     <item row="1" column="3">
+                      <widget class="QLabel" name="label_11">
+                       <property name="minimumSize">
+                        <size>
+                         <width>170</width>
+                         <height>0</height>
+                        </size>
+                       </property>
+                       <property name="text">
+                        <string>Text</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="4">
+                      <spacer name="horizontalSpacer_28">
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>40</width>
+                         <height>20</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="ColorSelectorButton" name="colorSelectorIcons">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                          <horstretch>0</horstretch>
@@ -3678,9 +3197,6 @@
                        <property name="cursor">
                         <cursorShape>PointingHandCursor</cursorShape>
                        </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
                        <property name="autoFillBackground">
                         <bool>true</bool>
                        </property>
@@ -3692,15 +3208,15 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="6" column="1">
-                      <widget class="QLabel" name="label_36">
+                     <item row="2" column="1">
+                      <widget class="QLabel" name="label_14">
                        <property name="text">
-                        <string>Overlay background</string>
+                        <string>Icons</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="6" column="0">
-                      <widget class="ColorSelectorButton" name="colorSelectorOverlay">
+                     <item row="2" column="2">
+                      <widget class="ColorSelectorButton" name="colorSelectorBackground">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                          <horstretch>0</horstretch>
@@ -3716,9 +3232,6 @@
                        <property name="cursor">
                         <cursorShape>PointingHandCursor</cursorShape>
                        </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
                        <property name="autoFillBackground">
                         <bool>true</bool>
                        </property>
@@ -3730,97 +3243,14 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="1">
-                      <widget class="QLabel" name="label_21">
+                     <item row="2" column="3">
+                      <widget class="QLabel" name="label_34">
                        <property name="text">
-                        <string>Widget background</string>
+                        <string>Window background</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="4" column="3">
-                      <widget class="QLabel" name="label_31">
-                       <property name="text">
-                        <string>Folder view top panel</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="5" column="3">
-                      <widget class="QLabel" name="label_22">
-                       <property name="text">
-                        <string>Widget border</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="7" column="0">
-                      <widget class="ColorSelectorButton" name="colorSelectorScrollbar">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>40</width>
-                         <height>22</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="2">
-                      <widget class="ColorSelectorButton" name="colorSelectorFolderviewPanel">
-                       <property name="sizePolicy">
-                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                         <horstretch>0</horstretch>
-                         <verstretch>0</verstretch>
-                        </sizepolicy>
-                       </property>
-                       <property name="minimumSize">
-                        <size>
-                         <width>40</width>
-                         <height>22</height>
-                        </size>
-                       </property>
-                       <property name="cursor">
-                        <cursorShape>PointingHandCursor</cursorShape>
-                       </property>
-                       <property name="accessibleName">
-                        <string notr="true"/>
-                       </property>
-                       <property name="autoFillBackground">
-                        <bool>true</bool>
-                       </property>
-                       <property name="frameShape">
-                        <enum>QFrame::Box</enum>
-                       </property>
-                       <property name="text">
-                        <string/>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="6" column="3">
-                      <widget class="QLabel" name="label_37">
-                       <property name="text">
-                        <string>Overlay text</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="5" column="0">
+                     <item row="3" column="0">
                       <widget class="ColorSelectorButton" name="colorSelectorWidget">
                        <property name="sizePolicy">
                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -3837,8 +3267,135 @@
                        <property name="cursor">
                         <cursorShape>PointingHandCursor</cursorShape>
                        </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QLabel" name="label_21">
+                       <property name="text">
+                        <string>Control background</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="2">
+                      <widget class="ColorSelectorButton" name="colorSelectorWidgetBorder">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="3">
+                      <widget class="QLabel" name="label_22">
+                       <property name="text">
+                        <string>Control border</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="0">
+                      <widget class="ColorSelectorButton" name="colorSelectorScrollbar">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="1">
+                      <widget class="QLabel" name="label_32">
+                       <property name="text">
+                        <string>Scrollbar</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="0" colspan="5">
+                      <widget class="QWidget" name="lineColors1" native="true">
+                       <property name="minimumSize">
+                        <size>
+                         <width>0</width>
+                         <height>1</height>
+                        </size>
+                       </property>
                        <property name="accessibleName">
-                        <string notr="true"/>
+                        <string notr="true">SLine</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="0" colspan="5">
+                      <widget class="QLabel" name="hdrGrid">
+                       <property name="font">
+                        <font>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Grid</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="0">
+                      <widget class="ColorSelectorButton" name="colorSelectorFolderview">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
                        </property>
                        <property name="autoFillBackground">
                         <bool>true</bool>
@@ -3852,21 +3409,224 @@
                       </widget>
                      </item>
                      <item row="7" column="1">
-                      <widget class="QLabel" name="label_32">
-                       <property name="text">
-                        <string>Scrollbars</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="4" column="1">
                       <widget class="QLabel" name="label_23">
                        <property name="text">
-                        <string>Folder view background</string>
+                        <string>Grid background</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="2" column="0" colspan="5">
-                      <widget class="QWidget" name="widget_24" native="true">
+                     <item row="7" column="2">
+                      <widget class="ColorSelectorButton" name="colorSelectorFolderviewPanel">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="3">
+                      <widget class="QLabel" name="label_31">
+                       <property name="text">
+                        <string>Grid top bar</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="0">
+                      <widget class="ColorSelectorButton" name="folderViewCellBackgroundColorSelector">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="1">
+                      <widget class="QLabel" name="folderViewCellBackgroundColorLabel">
+                       <property name="text">
+                        <string>Thumbnail cell</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="2">
+                      <widget class="ColorSelectorButton" name="folderViewLabelBackgroundColorSelector">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="3">
+                      <widget class="QLabel" name="folderViewLabelBackgroundLabel">
+                       <property name="text">
+                        <string>Filename label</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="0">
+                      <widget class="ColorSelectorButton" name="folderViewSelectedLabelBackgroundColorSelector">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="1">
+                      <widget class="QLabel" name="folderViewSelectedLabelBackgroundColorLabel">
+                       <property name="text">
+                        <string>Selected filename label</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="2">
+                      <widget class="ColorSelectorButton" name="folderViewSelectionColorSelector">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="3">
+                      <widget class="QLabel" name="folderViewSelectionColorLabel">
+                       <property name="text">
+                        <string>Selection highlight</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="10" column="0">
+                      <widget class="ColorSelectorButton" name="folderViewParentIconColorSelector">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="10" column="1">
+                      <widget class="QLabel" name="folderViewParentIconColorLabel">
+                       <property name="text">
+                        <string>Folder-icon tint</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="11" column="0" colspan="5">
+                      <widget class="QWidget" name="lineColors2" native="true">
                        <property name="minimumSize">
                         <size>
                          <width>0</width>
@@ -3875,6 +3635,123 @@
                        </property>
                        <property name="accessibleName">
                         <string notr="true">SLine</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="12" column="0" colspan="5">
+                      <widget class="QLabel" name="hdrContentView">
+                       <property name="font">
+                        <font>
+                         <bold>true</bold>
+                        </font>
+                       </property>
+                       <property name="text">
+                        <string>Content view</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="13" column="0">
+                      <widget class="ColorSelectorButton" name="colorSelectorFullscreen">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="13" column="1">
+                      <widget class="QLabel" name="label_35">
+                       <property name="text">
+                        <string>Fullscreen background</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="13" column="2">
+                      <widget class="ColorSelectorButton" name="colorSelectorOverlay">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="13" column="3">
+                      <widget class="QLabel" name="label_36">
+                       <property name="text">
+                        <string>Overlay background</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="14" column="0">
+                      <widget class="ColorSelectorButton" name="colorSelectorOverlayText">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="minimumSize">
+                        <size>
+                         <width>40</width>
+                         <height>22</height>
+                        </size>
+                       </property>
+                       <property name="cursor">
+                        <cursorShape>PointingHandCursor</cursorShape>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="frameShape">
+                        <enum>QFrame::Box</enum>
+                       </property>
+                       <property name="text">
+                        <string/>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="14" column="1">
+                      <widget class="QLabel" name="label_37">
+                       <property name="text">
+                        <string>Overlay text</string>
                        </property>
                       </widget>
                      </item>
