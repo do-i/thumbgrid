@@ -343,8 +343,6 @@ void Core::onModelLoaded() {
 }
 
 void Core::onDirectoryViewFileActivated(QString filePath) {
-    // we aren`t using async load so it won't flicker with empty view
-    mw->enableDocumentView();
     loadPath(filePath);
 }
 
@@ -1510,6 +1508,8 @@ void Core::reset() {
     model->setDirectory("");
 }
 
+static bool isVideoFile(const QString &path);
+
 bool Core::loadPath(QString path) {
     if(path.isEmpty())
         return false;
@@ -1551,6 +1551,14 @@ bool Core::loadPath(QString path) {
                     index = model->indexOfFile(fileInfo.absoluteFilePath());
                 }
             }
+        }
+        const bool activateFromFolderView = mw->currentViewMode() == MODE_FOLDERVIEW;
+        const bool targetIsVideo = isVideoFile(fileInfo.absoluteFilePath());
+        if(activateFromFolderView && !targetIsVideo) {
+            const bool loaded = loadFileIndex(index, false, settings->usePreloader());
+            if(loaded)
+                mw->enableDocumentView();
+            return loaded;
         }
         mw->enableDocumentView();
         return loadFileIndex(index, false, settings->usePreloader());
