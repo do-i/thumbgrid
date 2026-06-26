@@ -1508,8 +1508,6 @@ void Core::reset() {
     model->setDirectory("");
 }
 
-static bool isVideoFile(const QString &path);
-
 bool Core::loadPath(QString path) {
     if(path.isEmpty())
         return false;
@@ -1552,9 +1550,7 @@ bool Core::loadPath(QString path) {
                 }
             }
         }
-        const bool activateFromFolderView = mw->currentViewMode() == MODE_FOLDERVIEW;
-        const bool targetIsVideo = isVideoFile(fileInfo.absoluteFilePath());
-        if(activateFromFolderView && !targetIsVideo) {
+        if(mw->currentViewMode() == MODE_FOLDERVIEW) {
             const bool loaded = loadFileIndex(index, false, settings->usePreloader());
             if(loaded)
                 mw->enableDocumentView();
