@@ -23,10 +23,6 @@ print_header() {
     printf 'Type:   %s\n\n' "$BUILD_TYPE"
 }
 
-pause() {
-    read -r -p "Press Enter to continue..."
-}
-
 run_as_root() {
     if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
         "$@"
@@ -173,7 +169,7 @@ run_menu_action() {
         printf '\nCommand failed with exit code %s.\n' "$status" >&2
     fi
 
-    pause
+    exit "$status"
 }
 
 configure_default() {
@@ -238,21 +234,22 @@ clean_build_dir() {
     esac
 }
 
-while true; do
-    print_header
-    printf '  i) Init   - install full dependencies\n'
-    printf '  b) Build\n'
-    printf '  r) Run\n'
-    printf '  c) Clean  - delete build directory\n'
-    printf '  q) Quit\n\n'
+print_header
+printf '  i) Init   - install full dependencies\n'
+printf '  b) Build\n'
+printf '  r) Run\n'
+printf '  c) Clean  - delete build directory\n'
+printf '  q) Quit\n\n'
 
-    read -r -p "Choose [i/b/c/r/q]: " choice
-    case "$choice" in
-        i|I) run_menu_action install_full_deps ;;
-        b|B) run_menu_action build_project ;;
-        r|R) run_menu_action run_executable ;;
-        c|C) run_menu_action clean_build_dir ;;
-        q|Q) printf '\n'; exit 0 ;;
-        *) printf 'Invalid option: %s\n' "$choice"; pause ;;
-    esac
-done
+# Single keypress, no Enter needed. Each choice runs once and then exits
+# (run_menu_action exits for i/b/r/c), so the menu does not loop.
+read -rsn1 -p "Choose [i/b/c/r/q]: " choice
+printf '%s\n\n' "$choice"
+case "$choice" in
+    i|I) run_menu_action install_full_deps ;;
+    b|B) run_menu_action build_project ;;
+    r|R) run_menu_action run_executable ;;
+    c|C) run_menu_action clean_build_dir ;;
+    q|Q) exit 0 ;;
+    *) printf 'Invalid option: %s\n' "$choice"; exit 1 ;;
+esac
