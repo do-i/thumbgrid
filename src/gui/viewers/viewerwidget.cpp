@@ -234,9 +234,25 @@ bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
 bool ViewerWidget::showVideo(QString file) {
     stopPlayback();
     enableVideoPlayer();
+    // enableVideoPlayer() is a no-op when we're already on the video player
+    // (video -> video). Make sure the player is visible again, since a previous
+    // navigation may have hidden it via clearVideoView(). The player itself
+    // stays blanked until the new file's first frame is ready (see the plugin).
+    videoPlayer->show();
     videoPlayer->showVideo(file);
     hideCursorTimed(false);
     return true;
+}
+
+// Called when navigating to another item. If a video is currently playing,
+// stop and hide it right away so it doesn't keep playing / linger on screen
+// while the next item loads (which usually happens asynchronously).
+// stop() unloads the file in mpv, freeing the decoded frame and stopping audio.
+void ViewerWidget::clearVideoView() {
+    if(currentWidget == VIDEOPLAYER) {
+        videoPlayer->stop();
+        videoPlayer->hide();
+    }
 }
 
 void ViewerWidget::stopPlayback() {

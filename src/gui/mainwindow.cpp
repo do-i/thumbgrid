@@ -222,6 +222,10 @@ void MW::closeImage() {
     viewerWidget->closeImage();
 }
 
+void MW::clearVideoView() {
+    viewerWidget->clearVideoView();
+}
+
 // todo: fix flicker somehow
 // ideally it should change img & resize in one go
 void MW::preShowResize(QSize sz) {

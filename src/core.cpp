@@ -1576,6 +1576,10 @@ bool Core::loadFileIndex(int index, bool async, bool preload) {
     auto entry = model->fileEntryAt(index);
     if(entry.path.isEmpty())
         return false;
+    // We're navigating to another item. If a video is currently on screen,
+    // stop & blank it now so it doesn't keep playing or flash while the next
+    // item loads (the load may be async, and even sync loads decode first).
+    mw->clearVideoView();
     state.currentFilePath = entry.path;
     model->unloadExcept(entry.path, preload);
     model->load(entry.path, async);

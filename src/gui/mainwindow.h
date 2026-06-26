@@ -249,6 +249,7 @@ public slots:
     void fitWindowStretch();
     void switchFitMode();
     void closeImage();
+    void clearVideoView();
     void showContextMenu();
     void onSortingChanged(SortingMode);
     void toggleImageInfoOverlay();
