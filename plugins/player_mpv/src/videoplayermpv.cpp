@@ -4,6 +4,7 @@
 #include <QSlider>
 #include <QLayout>
 #include <QFileDialog>
+#include <QTimer>
 
 // TODO: window flashes white when opening a video (straight from file manager)
 VideoPlayerMpv::VideoPlayerMpv(QWidget *parent) : VideoPlayer(parent) {
@@ -25,14 +26,29 @@ VideoPlayerMpv::VideoPlayerMpv(QWidget *parent) : VideoPlayer(parent) {
     connect(m_mpv, SIGNAL(positionChanged(int)), this, SIGNAL(positionChanged(int)));
     connect(m_mpv, SIGNAL(videoPaused(bool)), this, SIGNAL(videoPaused(bool)));
     connect(m_mpv, SIGNAL(playbackFinished()), this, SIGNAL(playbackFinished()));
+    connect(m_mpv, SIGNAL(playbackRestarted()), this, SLOT(onPlaybackRestarted()));
 }
 
 bool VideoPlayerMpv::showVideo(QString file) {
     if(file.isEmpty())
         return false;
+    // Keep the wrapper hidden until mpv reports fresh output for this file.
+    // Otherwise the previous video's last rendered frame can flash during the
+    // loadfile handoff, especially when returning from folder view.
+    mPendingReveal = true;
+    QWidget::hide();
     m_mpv->command(QStringList() << "loadfile" << file);
     setPaused(false);
     return true;
+}
+
+void VideoPlayerMpv::onPlaybackRestarted() {
+    QTimer::singleShot(50, this, [this]() {
+        if(mPendingReveal) {
+            mPendingReveal = false;
+            QWidget::show();
+        }
+    });
 }
 
 void VideoPlayerMpv::seek(int pos) {
@@ -131,6 +147,7 @@ void VideoPlayerMpv::show() {
 }
 
 void VideoPlayerMpv::hide() {
+    mPendingReveal = false;
     QWidget::hide();
 }
 

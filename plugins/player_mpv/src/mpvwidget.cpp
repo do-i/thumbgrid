@@ -132,6 +132,12 @@ void MpvWidget::handle_mpv_event(mpv_event *event) {
         }
         break;
     }
+    case MPV_EVENT_PLAYBACK_RESTART:
+        // Fired once the new file has fresh playback output ready. The player
+        // wrapper uses this to stay hidden during loadfile, avoiding a brief
+        // flash of the previous file's last frame.
+        emit playbackRestarted();
+        break;
     default: ;
         // Ignore uninteresting or unknown events.
     }

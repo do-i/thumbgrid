@@ -4,6 +4,7 @@
 #include <QSlider>
 #include <QLayout>
 #include <QFileDialog>
+#include <QTimer>
 
 // TODO: window flashes white when opening a video (straight from file manager)
 VideoPlayerMpv::VideoPlayerMpv(QWidget *parent) : VideoPlayer(parent) {
@@ -42,10 +43,12 @@ bool VideoPlayerMpv::showVideo(QString file) {
 }
 
 void VideoPlayerMpv::onPlaybackRestarted() {
-    if(mPendingReveal) {
-        mPendingReveal = false;
-        QWidget::show();
-    }
+    QTimer::singleShot(50, this, [this]() {
+        if(mPendingReveal) {
+            mPendingReveal = false;
+            QWidget::show();
+        }
+    });
 }
 
 void VideoPlayerMpv::seek(int pos) {

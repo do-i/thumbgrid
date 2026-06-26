@@ -48,9 +48,11 @@ signals:
 
 private slots:
     void readSettings();
+    void onPlaybackRestarted();
 
 private:
     MpvWidget *m_mpv;
+    bool mPendingReveal = false;
 
 };
 

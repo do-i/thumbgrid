@@ -44,6 +44,7 @@ signals:
     void positionChanged(int value);
     void videoPaused(bool);
     void playbackFinished();
+    void playbackRestarted();
 
 protected:
     void initializeGL() override;
