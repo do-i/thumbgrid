@@ -222,12 +222,8 @@ void MW::closeImage() {
     viewerWidget->closeImage();
 }
 
-void MW::clearVideoView() {
-    viewerWidget->clearVideoView();
-}
-
-void MW::clearImageView() {
-    viewerWidget->clearImageView();
+void MW::prepareForLoad(bool nextIsVideo) {
+    viewerWidget->prepareForLoad(nextIsVideo);
 }
 
 // todo: fix flicker somehow

@@ -1594,14 +1594,11 @@ bool Core::loadFileIndex(int index, bool async, bool preload) {
         return false;
     // We're navigating to another item. Blank the outgoing view now so the
     // previous item doesn't linger on screen while the next one loads (the load
-    // is usually async, and even sync loads decode first). A video on screen is
-    // always blanked; the current image is only blanked when the next item is a
-    // video, so plain image -> image browsing stays flicker-free.
-    // clearVideoView() is a no-op unless a video is showing, clearImageView()
-    // a no-op unless an image is showing, so the two never fight.
-    mw->clearVideoView();
-    if(isVideoFile(entry.path))
-        mw->clearImageView();
+    // is usually async, and even sync loads decode first). prepareForLoad()
+    // only blanks across an image<->video change, so plain image -> image
+    // browsing stays flicker-free. It needs to know the next item's type, which
+    // we determine cheaply from the extension (the file isn't loaded yet).
+    mw->prepareForLoad(isVideoFile(entry.path));
     state.currentFilePath = entry.path;
     model->unloadExcept(entry.path, preload);
     model->load(entry.path, async);

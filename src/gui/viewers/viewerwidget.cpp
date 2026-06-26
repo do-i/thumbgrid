@@ -217,10 +217,11 @@ bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap) {
     videoControls->hide();
     enableImageViewer();
     // enableImageViewer() only show()s on a widget switch; re-show explicitly in
-    // case a navigation hid the image viewer via clearImageView() while we were
-    // already on it (e.g. a misdetected video that turned out to be an image).
+    // case prepareForLoad() hid the image viewer while we were already on it
+    // (e.g. a misdetected video that turned out to be an image).
     imageViewer->show();
     imageViewer->showImage(std::move(pixmap));
+    showCursor();
     hideCursorTimed(false);
     return true;
 }
@@ -232,6 +233,7 @@ bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
     enableImageViewer();
     imageViewer->show();
     imageViewer->showAnimation(movie);
+    showCursor();
     hideCursorTimed(false);
     return true;
 }
@@ -241,32 +243,44 @@ bool ViewerWidget::showVideo(QString file) {
     enableVideoPlayer();
     // enableVideoPlayer() is a no-op when we're already on the video player
     // (video -> video). Make sure the player is visible again, since a previous
-    // navigation may have hidden it via clearVideoView(). The player itself
+    // navigation may have hidden it via prepareForLoad(). The player itself
     // stays blanked until the new file's first frame is ready (see the plugin).
     videoPlayer->show();
     videoPlayer->showVideo(file);
+    // Restore the pointer on every switch; it auto-hides again after the idle
+    // timeout. Without this the cursor stays blanked from the previous item
+    // (the mpv window doesn't track our auto-hide on its own).
+    showCursor();
     hideCursorTimed(false);
     return true;
 }
 
-// Called when navigating to another item. If a video is currently playing,
-// stop and hide it right away so it doesn't keep playing / linger on screen
-// while the next item loads (which usually happens asynchronously).
-// stop() unloads the file in mpv, freeing the decoded frame and stopping audio.
-void ViewerWidget::clearVideoView() {
+// Called when navigating to another item, before the next one is loaded (the
+// load is usually async). Blanks the outgoing view so it doesn't linger on
+// screen during the load, but only across an image<->video change; plain
+// image -> image keeps its current frame so browsing stays flicker-free.
+void ViewerWidget::prepareForLoad(bool nextIsVideo) {
     if(currentWidget == VIDEOPLAYER) {
+        // stop() unloads the file in mpv (frees the decoded frame, stops audio).
         videoPlayer->stop();
-        videoPlayer->hide();
-    }
-}
-
-// Mirror of clearVideoView for the image viewer. Called when navigating to a
-// video so the current image doesn't linger on screen while the video loads.
-// currentWidget is left unchanged; showImage()/showAnimation() re-show the
-// image viewer if we end up back on an image.
-void ViewerWidget::clearImageView() {
-    if(currentWidget == IMAGEVIEWER)
+        if(nextIsVideo) {
+            // video -> video: hide the player; showVideo() re-shows it blanked
+            // and the plugin reveals it again on the new file's first frame.
+            videoPlayer->hide();
+        } else {
+            // video -> image: just hiding the video isn't enough -- with the wid
+            // backend its last frame lingers in the framebuffer until something
+            // repaints over it. Bring up the cleared image viewer now; its
+            // viewport is opaque and paints the background brush over the old
+            // frame. showImage() then drops the new pixmap into it.
+            imageViewer->closeImage();
+            enableImageViewer();
+        }
+    } else if(currentWidget == IMAGEVIEWER && nextIsVideo) {
+        // image -> video: blank the image so it doesn't linger during load.
+        // currentWidget is left unchanged; showVideo() switches to the player.
         imageViewer->hide();
+    }
 }
 
 void ViewerWidget::stopPlayback() {
@@ -459,6 +473,8 @@ void ViewerWidget::hideCursor() {
             if(w && (w == imageViewer.get()->viewport() || w == videoPlayer->getPlayer().get())) {
                 if(!videoControls->isVisible() || !videoControlsArea().contains(posMapped)) {
                     setCursor(QCursor(Qt::BlankCursor));
+                    // also blank the video player's own (native) window
+                    videoPlayer->setCursor(QCursor(Qt::BlankCursor));
                     videoControls->hide();
                 }
             }
@@ -559,6 +575,11 @@ void ViewerWidget::showCursor() {
     cursorTimer.stop();
     if(cursor().shape() == Qt::BlankCursor)
         setCursor(QCursor(Qt::ArrowCursor));
+    // The video player hosts its own (native) window which doesn't inherit our
+    // cursor changes, so set it explicitly too. Otherwise the pointer stays
+    // hidden over a playing video even after we mean to show it.
+    if(videoPlayer->cursor().shape() == Qt::BlankCursor)
+        videoPlayer->setCursor(QCursor(Qt::ArrowCursor));
 }
 
 void ViewerWidget::showContextMenu() {
