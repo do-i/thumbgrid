@@ -608,13 +608,15 @@ void Core::pasteFile() {
 
     if(cut) {
         interactiveMove(toPaste, destDirectory);
-        // clear the clipboard so a second paste won't fail on already-moved files
-        QApplication::clipboard()->clear();
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
     } else {
         interactiveCopy(toPaste, destDirectory);
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items pasted").arg(toPaste.count()) : tr("Item pasted"));
     }
+    // Clear the clipboard once the paste is done. For a move this stops a second
+    // paste from failing on already-moved files; for a copy it gives the same
+    // one-shot paste behaviour, so the same files aren't accidentally re-pasted.
+    QApplication::clipboard()->clear();
 }
 
 void Core::copyPathClipboard() {
