@@ -215,12 +215,24 @@ bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap) {
         return false;
     stopPlayback();
     videoControls->hide();
-    enableImageViewer();
-    // enableImageViewer() only show()s on a widget switch; re-show explicitly in
-    // case prepareForLoad() hid the image viewer while we were already on it
-    // (e.g. a misdetected video that turned out to be an image).
-    imageViewer->show();
-    imageViewer->showImage(std::move(pixmap));
+    if(currentWidget == VIDEOPLAYER) {
+        // Coming from a video. The mpv native window stacks above our Qt widgets,
+        // so paint the new image into the (still-occluded) image viewer FIRST and
+        // flush it, then hide the video window. That way the image is already in
+        // the framebuffer the instant the video window is unmapped -- otherwise
+        // there's a one-frame gap where the background shows through.
+        imageViewer->show();
+        imageViewer->showImage(std::move(pixmap));
+        imageViewer->repaint();
+        enableImageViewer();
+    } else {
+        enableImageViewer();
+        // enableImageViewer() only show()s on a widget switch; re-show explicitly
+        // in case prepareForLoad() hid the image viewer while we were already on
+        // it (e.g. a misdetected video that turned out to be an image).
+        imageViewer->show();
+        imageViewer->showImage(std::move(pixmap));
+    }
     showCursor();
     hideCursorTimed(false);
     return true;
@@ -241,11 +253,6 @@ bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
 bool ViewerWidget::showVideo(QString file) {
     stopPlayback();
     enableVideoPlayer();
-    // enableVideoPlayer() is a no-op when we're already on the video player
-    // (video -> video). Make sure the player is visible again, since a previous
-    // navigation may have hidden it via prepareForLoad(). The player itself
-    // stays blanked until the new file's first frame is ready (see the plugin).
-    videoPlayer->show();
     videoPlayer->showVideo(file);
     // Restore the pointer on every switch; it auto-hides again after the idle
     // timeout. Without this the cursor stays blanked from the previous item
@@ -261,24 +268,20 @@ bool ViewerWidget::showVideo(QString file) {
 // image -> image keeps its current frame so browsing stays flicker-free.
 void ViewerWidget::prepareForLoad(bool nextIsVideo) {
     if(currentWidget == VIDEOPLAYER) {
-        // stop() unloads the file in mpv (frees the decoded frame, stops audio).
-        videoPlayer->stop();
-        if(nextIsVideo) {
-            // video -> video: hide the player; showVideo() re-shows it blanked
-            // and the plugin reveals it again on the new file's first frame.
-            videoPlayer->hide();
-        } else {
-            // video -> image: just hiding the video isn't enough -- with the wid
-            // backend its last frame lingers in the framebuffer until something
-            // repaints over it. Bring up the cleared image viewer now; its
-            // viewport is opaque and paints the background brush over the old
-            // frame. showImage() then drops the new pixmap into it.
-            imageViewer->closeImage();
-            enableImageViewer();
-        }
+        // Leaving a video. Pause it so audio stops, but do NOT stop()/unload the
+        // file: unloading tears down mpv's video output, and re-creating it on
+        // the next load crashes on machines with broken GL acceleration. A plain
+        // reload (loadfile) reuses the existing output and is safe.
+        //
+        // We deliberately do NOT blank the video here. showImage()/showVideo()
+        // swap to the next item atomically, and Core loads a video -> image
+        // switch synchronously (see loadFileIndex), so the new image is on
+        // screen the instant the video is hidden -- no empty/background frame
+        // flashes in between, and no stale video frame lingers either.
+        videoPlayer->setPaused(true);
     } else if(currentWidget == IMAGEVIEWER && nextIsVideo) {
-        // image -> video: blank the image so it doesn't linger during load.
-        // currentWidget is left unchanged; showVideo() switches to the player.
+        // image -> video: blank the image so it doesn't linger during the
+        // (async) video load; the plugin blanks the player until its first frame.
         imageViewer->hide();
     }
 }

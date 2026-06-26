@@ -1592,13 +1592,17 @@ bool Core::loadFileIndex(int index, bool async, bool preload) {
     auto entry = model->fileEntryAt(index);
     if(entry.path.isEmpty())
         return false;
-    // We're navigating to another item. Blank the outgoing view now so the
-    // previous item doesn't linger on screen while the next one loads (the load
-    // is usually async, and even sync loads decode first). prepareForLoad()
-    // only blanks across an image<->video change, so plain image -> image
-    // browsing stays flicker-free. It needs to know the next item's type, which
-    // we determine cheaply from the extension (the file isn't loaded yet).
-    mw->prepareForLoad(isVideoFile(entry.path));
+    // We're navigating to another item. Let the viewer pause/blank the outgoing
+    // item as needed for the upcoming type (determined cheaply from the
+    // extension, since the file isn't loaded yet).
+    bool nextIsVideo = isVideoFile(entry.path);
+    bool currentIsVideo = state.currentImg && state.currentImg->type() == DocumentType::VIDEO;
+    // Switching from a video to an image: load synchronously so the decoded
+    // image is shown the instant the video is hidden. With an async load there
+    // is a gap where neither is ready and the window background flashes through.
+    if(currentIsVideo && !nextIsVideo)
+        async = false;
+    mw->prepareForLoad(nextIsVideo);
     state.currentFilePath = entry.path;
     model->unloadExcept(entry.path, preload);
     model->load(entry.path, async);
