@@ -48,9 +48,13 @@ signals:
 
 private slots:
     void readSettings();
+    void onPlaybackRestarted();
 
 private:
     MpvWidget *m_mpv;
+    // While true, the player is hidden waiting for the next file's first frame
+    // so the previous file's last frame doesn't flash during a switch.
+    bool mPendingReveal = false;
 
 };
 

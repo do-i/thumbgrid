@@ -132,12 +132,12 @@ void ViewerWidget::disableVideoPlayer() {
         disconnect(videoPlayer.get(), &VideoPlayer::positionChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         disconnect(videoPlayer.get(), &VideoPlayer::videoPaused,     videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
         videoPlayer->setPaused(true);
-        // even after calling hide() the player sends a few video frames
-        // which paints over the imageviewer, causing corruption
-        // so we do not HIDE it, but rather just cover it by imageviewer's widget
-        // seems to work fine, might even feel a bit snappier
-        if(!videoPlayer->isInitialized())
-            videoPlayer->hide();
+        // Hide the player when leaving it. Otherwise its last decoded frame
+        // lingers and briefly flashes when we switch to an image.
+        // The old "do not hide, late GL frames corrupt the imageviewer" caveat
+        // applied to the OpenGL render-API backend; the default wid backend
+        // renders into its own native window, so hiding is clean.
+        videoPlayer->hide();
     }
 }
 

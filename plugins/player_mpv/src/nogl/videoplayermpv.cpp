@@ -25,14 +25,27 @@ VideoPlayerMpv::VideoPlayerMpv(QWidget *parent) : VideoPlayer(parent) {
     connect(m_mpv, SIGNAL(positionChanged(int)), this, SIGNAL(positionChanged(int)));
     connect(m_mpv, SIGNAL(videoPaused(bool)), this, SIGNAL(videoPaused(bool)));
     connect(m_mpv, SIGNAL(playbackFinished()), this, SIGNAL(playbackFinished()));
+    connect(m_mpv, SIGNAL(playbackRestarted()), this, SLOT(onPlaybackRestarted()));
 }
 
 bool VideoPlayerMpv::showVideo(QString file) {
     if(file.isEmpty())
         return false;
+    // Blank the player until the new file's first frame is ready, so the
+    // previous file's last frame doesn't briefly flash during the switch.
+    // onPlaybackRestarted() reveals it again.
+    mPendingReveal = true;
+    QWidget::hide();
     m_mpv->command(QStringList() << "loadfile" << file);
     setPaused(false);
     return true;
+}
+
+void VideoPlayerMpv::onPlaybackRestarted() {
+    if(mPendingReveal) {
+        mPendingReveal = false;
+        QWidget::show();
+    }
 }
 
 void VideoPlayerMpv::seek(int pos) {
@@ -127,6 +140,9 @@ void VideoPlayerMpv::show() {
 }
 
 void VideoPlayerMpv::hide() {
+    // Cancel any pending reveal so a late playback-restart can't pop the video
+    // back up after we've switched away (e.g. to an image).
+    mPendingReveal = false;
     QWidget::hide();
 }
 

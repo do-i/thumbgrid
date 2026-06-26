@@ -98,6 +98,12 @@ void MpvWidget::handle_mpv_event(mpv_event *event) {
         }
         break;
     }
+    case MPV_EVENT_PLAYBACK_RESTART:
+        // Fired once the (new) file's first frame is decoded and ready to be
+        // shown. Used to reveal the player only when there is fresh content,
+        // so the previous file's last frame doesn't flash on screen.
+        emit playbackRestarted();
+        break;
     default: ;
         // Ignore uninteresting or unknown events.
     }

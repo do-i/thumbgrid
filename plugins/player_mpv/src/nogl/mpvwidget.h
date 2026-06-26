@@ -33,6 +33,7 @@ signals:
     void positionChanged(int value);
     void videoPaused(bool);
     void playbackFinished();
+    void playbackRestarted();
 
 private slots:
     void on_mpv_events();
