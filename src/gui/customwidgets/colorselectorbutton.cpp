@@ -22,6 +22,7 @@ void ColorSelectorButton::showColorSelector() {
     if(newColor.isValid()) {
         mColor = newColor;
         update();
+        emit colorChanged(mColor);
     }
 }
 

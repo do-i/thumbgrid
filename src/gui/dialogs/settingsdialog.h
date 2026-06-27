@@ -37,7 +37,13 @@ public slots:
 private:
     void readColorScheme();
     void setColorScheme(ColorScheme colors);
+    ColorScheme collectColorScheme();
     void saveColorScheme();
+    void markThemeCustom();
+    int selectedThemeTid() const;
+    // user's custom palette, preserved while a preset is previewed
+    ColorScheme mCustomColors;
+    int mPrevThemeIndex = -1;
     void readSettings();
     void readShortcuts();
     void readScripts();

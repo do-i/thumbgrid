@@ -5,7 +5,9 @@ ColorScheme ThemeStore::colorScheme(ColorSchemes name) {
     QPalette p;
     switch(name) {
         case COLORS_SYSTEM:
-        case COLORS_CUSTOMIZED:    
+        case COLORS_CUSTOM:
+            base.background = p.window().color();
+            base.background_fullscreen = p.window().color();
             base.folderview_topbar = p.window().color();
             base.widget = p.window().color();
             base.widget_border = p.window().color();
@@ -13,6 +15,8 @@ ColorScheme ThemeStore::colorScheme(ColorSchemes name) {
             base.text = p.text().color();
             base.icons = p.text().color();
             base.accent = p.highlight().color();
+            base.overlay = p.window().color();
+            base.overlay_text = p.text().color();
             base.scrollbar.setHsv(p.highlight().color().hue(),
                                   qBound(0, p.highlight().color().saturation() - 20, 240),
                                   qBound(0, p.highlight().color().value() - 35, 240));
@@ -107,6 +111,11 @@ void ColorScheme::setBaseColors(BaseColorScheme base) {
     scrollbar             = base.scrollbar;
     tid = base.tid;
     createColorVariants();
+    folderview_label_bg          = base.folderview_label_bg.isValid() ? base.folderview_label_bg : folderview_hc;
+    folderview_selection         = base.folderview_selection.isValid() ? base.folderview_selection : accent;
+    folderview_parent_icon       = base.folderview_parent_icon.isValid() ? base.folderview_parent_icon : icons;
+    folderview_selected_label_bg = base.folderview_selected_label_bg.isValid() ? base.folderview_selected_label_bg : folderview_label_bg;
+    folderview_cell_bg           = base.folderview_cell_bg.isValid() ? base.folderview_cell_bg : folderview;
 }
 
 void ColorScheme::createColorVariants() {
@@ -152,4 +161,3 @@ void ColorScheme::createColorVariants() {
     // misc
     input_field_focus = QColor(accent);
 }
-

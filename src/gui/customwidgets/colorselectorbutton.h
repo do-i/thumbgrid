@@ -14,6 +14,9 @@ public:
     QColor color();
     void setDescription(QString text);
 
+signals:
+    void colorChanged(QColor color);
+
 protected:
     void paintEvent(QPaintEvent *e);
 

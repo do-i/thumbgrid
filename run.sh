@@ -216,6 +216,10 @@ run_executable() {
     "$executable" "${APP_ARGS[@]}"
 }
 
+migrate_theme() {
+    "$ROOT_DIR/scripts/migrate-theme.sh" "${APP_ARGS[@]}"
+}
+
 clean_build_dir() {
     if [[ ! -d "$BUILD_DIR" ]]; then
         printf 'Build directory does not exist: %s\n' "$BUILD_DIR"
@@ -239,17 +243,19 @@ printf '  i) Init   - install full dependencies\n'
 printf '  b) Build\n'
 printf '  r) Run\n'
 printf '  c) Clean  - delete build directory\n'
+printf '  m) Migrate - migrate custom theme and colors\n'
 printf '  q) Quit\n\n'
 
 # Single keypress, no Enter needed. Each choice runs once and then exits
 # (run_menu_action exits for i/b/r/c), so the menu does not loop.
-read -rsn1 -p "Choose [i/b/c/r/q]: " choice
+read -rsn1 -p "Choose [i/b/c/r/m/q]: " choice
 printf '%s\n\n' "$choice"
 case "$choice" in
     i|I) run_menu_action install_full_deps ;;
     b|B) run_menu_action build_project ;;
     r|R) run_menu_action run_executable ;;
     c|C) run_menu_action clean_build_dir ;;
+    m|M) run_menu_action migrate_theme ;;
     q|Q) exit 0 ;;
     *) printf 'Invalid option: %s\n' "$choice"; exit 1 ;;
 esac

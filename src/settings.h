@@ -245,8 +245,10 @@ public:
     void setFolderEndAction(FolderEndAction mode);
 
     const ColorScheme& colorScheme();
+    ColorScheme customColorScheme();
     void setColorScheme(ColorScheme scheme);
     void setColorTid(int tid);
+    void saveTheme();
 
     bool videoPlayback();
     void setVideoPlayback(bool mode);
@@ -337,7 +339,6 @@ private:
     ColorScheme mColorScheme;
     QMultiMap<QByteArray, QByteArray> mVideoFormatsMap; // [mimetype, format]
     void loadTheme();
-    void saveTheme();
     void createColorVariants();
 
     void setupCache();

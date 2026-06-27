@@ -1,5 +1,6 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
+#include <QSignalBlocker>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -19,26 +20,29 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     // less code than using pushbutton with menu
     // will be replaced with something custom later
     connect(ui->themeSelectorComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        ui->themeSelectorComboBox->blockSignals(true);
-        ui->themeSelectorComboBox->setCurrentIndex(index);
-        ui->themeSelectorComboBox->blockSignals(false);
-        switch(index) {
-            case 0: setColorScheme(ThemeStore::colorScheme(COLORS_BLACK));    settings->setColorTid(COLORS_BLACK);    break;
-            case 1: setColorScheme(ThemeStore::colorScheme(COLORS_DARK));     settings->setColorTid(COLORS_DARK);     break;
-            case 2: setColorScheme(ThemeStore::colorScheme(COLORS_DARKBLUE)); settings->setColorTid(COLORS_DARKBLUE); break;
-            case 3: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));    settings->setColorTid(COLORS_LIGHT);    break;
+        // leaving the custom theme: stash the current palette so previewing a
+        // preset doesn't discard the user's custom colors
+        if(mPrevThemeIndex == 4 && index != 4) {
+            mCustomColors = collectColorScheme();
+            mCustomColors.tid = COLORS_CUSTOM;
         }
+        switch(index) {
+            case 0: setColorScheme(ThemeStore::colorScheme(COLORS_BLACK));    break;
+            case 1: setColorScheme(ThemeStore::colorScheme(COLORS_DARK));     break;
+            case 2: setColorScheme(ThemeStore::colorScheme(COLORS_DARKBLUE)); break;
+            case 3: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));    break;
+            case 4: setColorScheme(mCustomColors);                            break;
+        }
+        mPrevThemeIndex = index;
     });
 
     connect(ui->useSystemColorsCheckBox, &QCheckBox::toggled, [this](bool useSystemTheme) {
         if(useSystemTheme) {
             ui->themeSelectorComboBox->setCurrentIndex(-1);
             setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));
-            settings->setColorTid(COLORS_SYSTEM);
         }
         else {
             readColorScheme();
-            settings->setColorTid(COLORS_CUSTOMIZED);
         }
         ui->themeSelectorComboBox->setEnabled(!useSystemTheme);
         ui->colorConfigSubgroup->setEnabled(!useSystemTheme);
@@ -47,8 +51,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     connect(ui->modifySystemSchemeLabel, &ClickableLabel::clicked, [this]() {
         ui->useSystemColorsCheckBox->setChecked(false);
-        setColorScheme(ThemeStore::colorScheme(COLORS_CUSTOMIZED));
-        settings->setColorTid(COLORS_CUSTOMIZED);
+        ColorScheme custom = ThemeStore::colorScheme(COLORS_SYSTEM);
+        custom.tid = COLORS_CUSTOM;
+        setColorScheme(custom);
     });
 
     // App-wide
@@ -71,6 +76,25 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->colorSelectorFullscreen->setDescription(tr("Fullscreen background"));
     ui->colorSelectorOverlay->setDescription(tr("Overlay background"));
     ui->colorSelectorOverlayText->setDescription(tr("Overlay text"));
+
+    auto switchToCustom = [this](QColor) { markThemeCustom(); };
+    connect(ui->colorSelectorAccent,                        &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorBackground,                    &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorFullscreen,                    &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorFolderview,                    &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorFolderviewPanel,               &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorText,                          &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorIcons,                         &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorWidget,                        &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorWidgetBorder,                  &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorScrollbar,                     &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorOverlay,                       &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->colorSelectorOverlayText,                   &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->folderViewCellBackgroundColorSelector,      &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->folderViewLabelBackgroundColorSelector,     &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->folderViewSelectedLabelBackgroundColorSelector, &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->folderViewSelectionColorSelector,           &ColorSelectorButton::colorChanged, this, switchToCustom);
+    connect(ui->folderViewParentIconColorSelector,          &ColorSelectorButton::colorChanged, this, switchToCustom);
 
 #ifndef USE_KDE_BLUR
     ui->blurBackgroundCheckBox->setEnabled(false);
@@ -245,16 +269,6 @@ void SettingsDialog::readSettings() {
         ui->startInFolderViewCheckBox->setChecked(false);
     ui->folderViewTopBarCheckBox->setChecked(settings->folderViewTopBar());
     ui->folderViewFontSizeSpinBox->setValue(settings->folderViewFontPointSize());
-    QColor folderViewLabelBackground = settings->folderViewLabelBackgroundColor();
-    ui->folderViewLabelBackgroundColorSelector->setColor(folderViewLabelBackground);
-    QColor folderViewSelection = settings->folderViewSelectionColor();
-    ui->folderViewSelectionColorSelector->setColor(folderViewSelection);
-    QColor folderViewParentIcon = settings->folderViewParentIconColor();
-    ui->folderViewParentIconColorSelector->setColor(folderViewParentIcon);
-    QColor folderViewSelectedLabelBackground = settings->folderViewSelectedLabelBackgroundColor();
-    ui->folderViewSelectedLabelBackgroundColorSelector->setColor(folderViewSelectedLabelBackground);
-    QColor folderViewCellBackground = settings->folderViewCellBackgroundColor();
-    ui->folderViewCellBackgroundColorSelector->setColor(folderViewCellBackground);
 
     if(settings->folderEndAction() == FOLDER_END_NO_ACTION)
         ui->folderEndNoAction->setChecked(true);
@@ -393,11 +407,6 @@ void SettingsDialog::saveSettings() {
         settings->setDefaultViewMode(MODE_DOCUMENT);
     settings->setFolderViewTopBar(ui->folderViewTopBarCheckBox->isChecked());
     settings->setFolderViewFontPointSize(ui->folderViewFontSizeSpinBox->value());
-    settings->setFolderViewLabelBackgroundColor(ui->folderViewLabelBackgroundColorSelector->color());
-    settings->setFolderViewSelectionColor(ui->folderViewSelectionColorSelector->color());
-    settings->setFolderViewParentIconColor(ui->folderViewParentIconColorSelector->color());
-    settings->setFolderViewSelectedLabelBackgroundColor(ui->folderViewSelectedLabelBackgroundColorSelector->color());
-    settings->setFolderViewCellBackgroundColor(ui->folderViewCellBackgroundColorSelector->color());
 
     if(ui->folderEndNoAction->isChecked())
         settings->setFolderEndAction(FOLDER_END_NO_ACTION);
@@ -435,9 +444,13 @@ void SettingsDialog::saveSettings() {
     settings->setThumbnailerThreadCount(ui->thumbnailerThreadsSlider->value());
     settings->setMemoryAllocationLimit(ui->memoryLimitSpinBox->value());
 
-    settings->setUseSystemColorScheme(ui->useSystemColorsCheckBox->isChecked());
+    bool useSystemColors = ui->useSystemColorsCheckBox->isChecked();
+    settings->setUseSystemColorScheme(useSystemColors);
 
-    saveColorScheme();
+    if(useSystemColors)
+        settings->setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));
+    else
+        saveColorScheme();
     saveShortcuts();
 
     scriptManager->saveScripts();
@@ -452,16 +465,23 @@ void SettingsDialog::saveSettingsAndClose() {
 //------------------------------------------------------------------------------
 void SettingsDialog::readColorScheme() {
     auto colors = settings->colorScheme();
+    // seed the custom cache: the active palette if it's custom, otherwise the
+    // separately-stored custom palette that presets don't overwrite
+    mCustomColors = (colors.tid == COLORS_CUSTOM) ? colors : settings->customColorScheme();
+    mCustomColors.tid = COLORS_CUSTOM;
     setColorScheme(colors);
+    mPrevThemeIndex = ui->themeSelectorComboBox->currentIndex();
 }
 
 void SettingsDialog::setColorScheme(ColorScheme colors) {
+    QSignalBlocker blocker(ui->themeSelectorComboBox);
     switch (colors.tid) {
-        case COLORS_LIGHT: ui->themeSelectorComboBox->setCurrentIndex(3);   break;
-        case COLORS_BLACK: ui->themeSelectorComboBox->setCurrentIndex(0);   break;
-        case COLORS_DARK: ui->themeSelectorComboBox->setCurrentIndex(1);    break;
-        case COLORS_DARKBLUE: ui->themeSelectorComboBox->setCurrentIndex(2);break;
-        default: ui->themeSelectorComboBox->setCurrentIndex(-1);            break;
+        case COLORS_LIGHT:     ui->themeSelectorComboBox->setCurrentIndex(3); break;
+        case COLORS_BLACK:     ui->themeSelectorComboBox->setCurrentIndex(0); break;
+        case COLORS_DARK:      ui->themeSelectorComboBox->setCurrentIndex(1); break;
+        case COLORS_DARKBLUE:  ui->themeSelectorComboBox->setCurrentIndex(2); break;
+        case COLORS_CUSTOM:    ui->themeSelectorComboBox->setCurrentIndex(4); break;
+        default:               ui->themeSelectorComboBox->setCurrentIndex(-1); break;
     }
     ui->colorSelectorAccent->setColor(colors.accent);
     ui->colorSelectorBackground->setColor(colors.background);
@@ -475,10 +495,15 @@ void SettingsDialog::setColorScheme(ColorScheme colors) {
     ui->colorSelectorOverlay->setColor(colors.overlay);
     ui->colorSelectorOverlayText->setColor(colors.overlay_text);
     ui->colorSelectorScrollbar->setColor(colors.scrollbar);
+    ui->folderViewCellBackgroundColorSelector->setColor(colors.folderview_cell_bg);
+    ui->folderViewLabelBackgroundColorSelector->setColor(colors.folderview_label_bg);
+    ui->folderViewSelectedLabelBackgroundColorSelector->setColor(colors.folderview_selected_label_bg);
+    ui->folderViewSelectionColorSelector->setColor(colors.folderview_selection);
+    ui->folderViewParentIconColorSelector->setColor(colors.folderview_parent_icon);
 }
 
 //------------------------------------------------------------------------------
-void SettingsDialog::saveColorScheme() {
+ColorScheme SettingsDialog::collectColorScheme() {
     BaseColorScheme base;
     base.accent = ui->colorSelectorAccent->color();
     base.background = ui->colorSelectorBackground->color();
@@ -492,8 +517,35 @@ void SettingsDialog::saveColorScheme() {
     base.overlay = ui->colorSelectorOverlay->color();
     base.overlay_text = ui->colorSelectorOverlayText->color();
     base.scrollbar = ui->colorSelectorScrollbar->color();
-    base.tid = settings->colorScheme().tid;
-    settings->setColorScheme(ColorScheme(base));
+    base.folderview_cell_bg = ui->folderViewCellBackgroundColorSelector->color();
+    base.folderview_label_bg = ui->folderViewLabelBackgroundColorSelector->color();
+    base.folderview_selected_label_bg = ui->folderViewSelectedLabelBackgroundColorSelector->color();
+    base.folderview_selection = ui->folderViewSelectionColorSelector->color();
+    base.folderview_parent_icon = ui->folderViewParentIconColorSelector->color();
+    base.tid = selectedThemeTid();
+    return ColorScheme(base);
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::saveColorScheme() {
+    settings->setColorScheme(collectColorScheme());
+    settings->saveTheme();
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::markThemeCustom() {
+    QSignalBlocker blocker(ui->themeSelectorComboBox);
+    ui->themeSelectorComboBox->setCurrentIndex(4);
+    mPrevThemeIndex = 4;
+}
+//------------------------------------------------------------------------------
+int SettingsDialog::selectedThemeTid() const {
+    switch(ui->themeSelectorComboBox->currentIndex()) {
+        case 0: return COLORS_BLACK;
+        case 1: return COLORS_DARK;
+        case 2: return COLORS_DARKBLUE;
+        case 3: return COLORS_LIGHT;
+        case 4: return COLORS_CUSTOM;
+        default: return COLORS_CUSTOM;
+    }
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::readShortcuts() {

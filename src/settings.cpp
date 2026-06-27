@@ -2,6 +2,35 @@
 
 Settings *settings = nullptr;
 
+namespace {
+
+QColor colorFromVariant(const QVariant &value, const QColor &fallback) {
+    QColor color = value.value<QColor>();
+    if(!color.isValid())
+        color = QColor(value.toString());
+    return color.isValid() ? color : fallback;
+}
+
+QColor colorFromSettings(QSettings *primary, const QString &primaryKey,
+                         QSettings *fallbackSettings, const QString &fallbackKey,
+                         const QColor &fallbackColor) {
+    if(primary->contains(primaryKey))
+        return colorFromVariant(primary->value(primaryKey), fallbackColor);
+    if(fallbackSettings->contains(fallbackKey))
+        return colorFromVariant(fallbackSettings->value(fallbackKey), fallbackColor);
+    return fallbackColor;
+}
+
+int normalizedThemeTid(int tid) {
+    // Older builds used COLORS_CUSTOMIZED at value 5; one interim build used
+    // COLORS_CUSTOM at value 6 after it. Both should now load as custom.
+    if(tid == 5 || tid == 6)
+        return COLORS_CUSTOM;
+    return tid;
+}
+
+}
+
 Settings::Settings(QObject *parent) : QObject(parent) {
 #if defined(__linux__) || defined(__FreeBSD__)
     // config files
@@ -221,9 +250,26 @@ void Settings::loadStylesheet() {
 void Settings::loadTheme() {
     if(settings->useSystemColorScheme()) {
         setColorScheme(ThemeStore::colorScheme(ColorSchemes::COLORS_SYSTEM));
-    } else {
-        BaseColorScheme base;
-        themeConf->beginGroup("Colors");
+        return;
+    }
+    int tid = normalizedThemeTid(themeConf->value("Colors/tid", "-1").toInt());
+    switch(tid) {
+        case COLORS_BLACK:
+        case COLORS_DARK:
+        case COLORS_DARKBLUE:
+        case COLORS_LIGHT:
+            // presets are generated, never read from the stored custom palette
+            setColorScheme(ThemeStore::colorScheme(static_cast<ColorSchemes>(tid)));
+            break;
+        default:
+            setColorScheme(customColorScheme());
+            break;
+    }
+}
+//------------------------------------------------------------------------------
+ColorScheme Settings::customColorScheme() {
+    BaseColorScheme base;
+    themeConf->beginGroup("Colors");
         base.background            = QColor(themeConf->value("background",            "#1a1a1a").toString());
         base.background_fullscreen = QColor(themeConf->value("background_fullscreen", "#1a1a1a").toString());
         base.text                  = QColor(themeConf->value("text",                  "#b6b6b6").toString());
@@ -236,15 +282,39 @@ void Settings::loadTheme() {
         base.scrollbar             = QColor(themeConf->value("scrollbar",             "#5a5a5a").toString());
         base.overlay_text          = QColor(themeConf->value("overlay_text",          "#d2d2d2").toString());
         base.overlay               = QColor(themeConf->value("overlay",               "#1a1a1a").toString());
-        base.tid                   = themeConf->value("tid", "-1").toInt();
-        themeConf->endGroup();
-        setColorScheme(ColorScheme(base));
-    }
+        base.tid                   = normalizedThemeTid(themeConf->value("tid", "-1").toInt());
+        ColorScheme defaults(base);
+        base.folderview_label_bg = colorFromSettings(themeConf, "fv_label_bg",
+                                                     settingsConf, "folderViewLabelBackgroundColor",
+                                                     defaults.folderview_label_bg);
+        base.folderview_selection = colorFromSettings(themeConf, "fv_selection",
+                                                      settingsConf, "folderViewSelectionColor",
+                                                      defaults.folderview_selection);
+        base.folderview_parent_icon = colorFromSettings(themeConf, "fv_parent_icon",
+                                                        settingsConf, "folderViewParentIconColor",
+                                                        defaults.folderview_parent_icon);
+        base.folderview_selected_label_bg = colorFromSettings(themeConf, "fv_sel_label_bg",
+                                                              settingsConf, "folderViewSelectedLabelBackgroundColor",
+                                                              base.folderview_label_bg);
+        base.folderview_cell_bg = colorFromSettings(themeConf, "fv_cell_bg",
+                                                    settingsConf, "folderViewCellBackgroundColor",
+                                                    defaults.folderview_cell_bg);
+    themeConf->endGroup();
+    return ColorScheme(base);
 }
 void Settings::saveTheme() {
     if(settings->useSystemColorScheme())
         return;
     themeConf->beginGroup("Colors");
+    themeConf->setValue("tid", mColorScheme.tid);
+    // Presets are generated from ThemeStore and must never overwrite the stored
+    // custom palette, otherwise switching to a preset would discard the user's
+    // custom colors. Only persist color values while the custom theme is active.
+    if(mColorScheme.tid == COLORS_BLACK || mColorScheme.tid == COLORS_DARK ||
+       mColorScheme.tid == COLORS_DARKBLUE || mColorScheme.tid == COLORS_LIGHT) {
+        themeConf->endGroup();
+        return;
+    }
     themeConf->setValue("background",            mColorScheme.background.name());
     themeConf->setValue("background_fullscreen", mColorScheme.background_fullscreen.name());
     themeConf->setValue("text",                  mColorScheme.text.name());
@@ -254,10 +324,14 @@ void Settings::saveTheme() {
     themeConf->setValue("accent",                mColorScheme.accent.name());
     themeConf->setValue("folderview",            mColorScheme.folderview.name());
     themeConf->setValue("folderview_topbar",     mColorScheme.folderview_topbar.name());
+    themeConf->setValue("fv_label_bg",           mColorScheme.folderview_label_bg.name());
+    themeConf->setValue("fv_selection",          mColorScheme.folderview_selection.name());
+    themeConf->setValue("fv_parent_icon",        mColorScheme.folderview_parent_icon.name());
+    themeConf->setValue("fv_sel_label_bg",       mColorScheme.folderview_selected_label_bg.name());
+    themeConf->setValue("fv_cell_bg",            mColorScheme.folderview_cell_bg.name());
     themeConf->setValue("scrollbar",             mColorScheme.scrollbar.name());
     themeConf->setValue("overlay_text",          mColorScheme.overlay_text.name());
     themeConf->setValue("overlay",               mColorScheme.overlay.name());
-    themeConf->setValue("tid",                   mColorScheme.tid);
     themeConf->endGroup();
 }
 //------------------------------------------------------------------------------
@@ -851,78 +925,58 @@ void Settings::setFolderViewFontPointSize(int value) {
 }
 
 QColor Settings::folderViewLabelBackgroundColor() {
-    QVariant value = settings->settingsConf->value("folderViewLabelBackgroundColor", settings->colorScheme().folderview_hc);
-    QColor color = value.value<QColor>();
-    if(!color.isValid())
-        color = QColor(value.toString());
-    if(!color.isValid())
-        color = settings->colorScheme().folderview_hc;
-    return color;
+    return settings->mColorScheme.folderview_label_bg;
 }
 
 void Settings::setFolderViewLabelBackgroundColor(QColor color) {
-    if(color.isValid())
-        settings->settingsConf->setValue("folderViewLabelBackgroundColor", color);
+    if(color.isValid()) {
+        settings->mColorScheme.folderview_label_bg = color;
+        settings->themeConf->setValue("Colors/fv_label_bg", color.name());
+    }
 }
 //------------------------------------------------------------------------------
 QColor Settings::folderViewSelectionColor() {
-    QVariant value = settings->settingsConf->value("folderViewSelectionColor", settings->colorScheme().accent);
-    QColor color = value.value<QColor>();
-    if(!color.isValid())
-        color = QColor(value.toString());
-    if(!color.isValid())
-        color = settings->colorScheme().accent;
-    return color;
+    return settings->mColorScheme.folderview_selection;
 }
 
 void Settings::setFolderViewSelectionColor(QColor color) {
-    if(color.isValid())
-        settings->settingsConf->setValue("folderViewSelectionColor", color);
+    if(color.isValid()) {
+        settings->mColorScheme.folderview_selection = color;
+        settings->themeConf->setValue("Colors/fv_selection", color.name());
+    }
 }
 //------------------------------------------------------------------------------
 QColor Settings::folderViewParentIconColor() {
-    QVariant value = settings->settingsConf->value("folderViewParentIconColor", settings->colorScheme().icons);
-    QColor color = value.value<QColor>();
-    if(!color.isValid())
-        color = QColor(value.toString());
-    if(!color.isValid())
-        color = settings->colorScheme().icons;
-    return color;
+    return settings->mColorScheme.folderview_parent_icon;
 }
 
 void Settings::setFolderViewParentIconColor(QColor color) {
-    if(color.isValid())
-        settings->settingsConf->setValue("folderViewParentIconColor", color);
+    if(color.isValid()) {
+        settings->mColorScheme.folderview_parent_icon = color;
+        settings->themeConf->setValue("Colors/fv_parent_icon", color.name());
+    }
 }
 //------------------------------------------------------------------------------
 QColor Settings::folderViewSelectedLabelBackgroundColor() {
-    QVariant value = settings->settingsConf->value("folderViewSelectedLabelBackgroundColor", settings->folderViewLabelBackgroundColor());
-    QColor color = value.value<QColor>();
-    if(!color.isValid())
-        color = QColor(value.toString());
-    if(!color.isValid())
-        color = settings->folderViewLabelBackgroundColor();
-    return color;
+    return settings->mColorScheme.folderview_selected_label_bg;
 }
 
 void Settings::setFolderViewSelectedLabelBackgroundColor(QColor color) {
-    if(color.isValid())
-        settings->settingsConf->setValue("folderViewSelectedLabelBackgroundColor", color);
+    if(color.isValid()) {
+        settings->mColorScheme.folderview_selected_label_bg = color;
+        settings->themeConf->setValue("Colors/fv_sel_label_bg", color.name());
+    }
 }
 //------------------------------------------------------------------------------
 QColor Settings::folderViewCellBackgroundColor() {
-    QVariant value = settings->settingsConf->value("folderViewCellBackgroundColor", settings->colorScheme().folderview);
-    QColor color = value.value<QColor>();
-    if(!color.isValid())
-        color = QColor(value.toString());
-    if(!color.isValid())
-        color = settings->colorScheme().folderview;
-    return color;
+    return settings->mColorScheme.folderview_cell_bg;
 }
 
 void Settings::setFolderViewCellBackgroundColor(QColor color) {
-    if(color.isValid())
-        settings->settingsConf->setValue("folderViewCellBackgroundColor", color);
+    if(color.isValid()) {
+        settings->mColorScheme.folderview_cell_bg = color;
+        settings->themeConf->setValue("Colors/fv_cell_bg", color.name());
+    }
 }
 //------------------------------------------------------------------------------
 bool Settings::expandImage() {

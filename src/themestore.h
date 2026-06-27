@@ -10,7 +10,7 @@ enum ColorSchemes {
     COLORS_BLACK,
     COLORS_DARK,
     COLORS_DARKBLUE,
-    COLORS_CUSTOMIZED
+    COLORS_CUSTOM
 };
 
 struct BaseColorScheme {
@@ -24,6 +24,11 @@ struct BaseColorScheme {
     QColor accent;
     QColor folderview;
     QColor folderview_topbar;
+    QColor folderview_label_bg;
+    QColor folderview_selection;
+    QColor folderview_parent_icon;
+    QColor folderview_selected_label_bg;
+    QColor folderview_cell_bg;
     QColor scrollbar;
     QColor overlay_text;
     QColor overlay;
@@ -46,6 +51,11 @@ public:
     QColor accent;
     QColor folderview;
     QColor folderview_topbar;
+    QColor folderview_label_bg;
+    QColor folderview_selection;
+    QColor folderview_parent_icon;
+    QColor folderview_selected_label_bg;
+    QColor folderview_cell_bg;
     QColor scrollbar;
     QColor scrollbar_hover;
     QColor overlay_text;
