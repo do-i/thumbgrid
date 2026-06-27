@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.13)
 # The fallback below is only used for source tarballs without git history
 # (e.g. some packaging contexts); scripts/release.sh keeps it in sync on tag.
 # ---------------------------------------------------------------------------
-set(THUMBGRID_VERSION_FALLBACK 2026.6.13)
+set(THUMBGRID_VERSION_FALLBACK 2026.6.14)
 find_package(Git QUIET)
 if(Git_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process(
