@@ -1096,11 +1096,34 @@ void Core::doInteractiveMove(QString path, QString destDirectory, DialogResult &
 
 // -----------------------------------------------------------------------------------
 
+bool Core::confirmFileOperation(QString action, QList<QString> paths, QString destDirectory) {
+    if(paths.isEmpty())
+        return false;
+
+    QString destination = QDir::toNativeSeparators(destDirectory);
+    QString msg;
+    if(paths.count() == 1) {
+        QFileInfo fi(paths.first());
+        QString itemName = fi.fileName();
+        if(itemName.isEmpty())
+            itemName = paths.first();
+        msg = tr("%1 \"%2\" to \"%3\"?").arg(action, itemName, destination);
+    } else {
+        msg = tr("%1 %2 items to \"%3\"?").arg(action).arg(paths.count()).arg(destination);
+    }
+
+    return mw->showConfirmation(action, msg);
+}
+
 void Core::copyPathsTo(QList<QString> paths, QString destDirectory) {
+    if(!confirmFileOperation(tr("Copy"), paths, destDirectory))
+        return;
     interactiveCopy(paths, destDirectory);
 }
 
 void Core::movePathsTo(QList<QString> paths, QString destDirectory) {
+    if(!confirmFileOperation(tr("Move"), paths, destDirectory))
+        return;
     interactiveMove(paths, destDirectory);
 }
 

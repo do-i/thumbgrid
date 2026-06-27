@@ -99,6 +99,7 @@ private:
 
     void doInteractiveCopy(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
     void doInteractiveMove(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
+    bool confirmFileOperation(QString action, QList<QString> paths, QString destDirectory);
 
 private slots:
     void readSettings();
