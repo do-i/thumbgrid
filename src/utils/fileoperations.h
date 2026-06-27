@@ -22,6 +22,7 @@ enum FileOpResult {
     SOURCE_DOES_NOT_EXIST,
     DESTINATION_DOES_NOT_EXIST,
     DIRECTORY_NOT_EMPTY,
+    PARENT_DIRECTORY_NOT_WRITABLE,
     NOTHING_TO_DO, // todo: maybe just return SUCCESS?
     OTHER_ERROR
 };
@@ -34,6 +35,7 @@ public:
     static void copySymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
     static void moveSymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
     static void rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result);
+    static void checkCanRemove(const QString &filePath, FileOpResult &result);
     static void removeFile(const QString &filePath, FileOpResult &result);
     static void removeDir(const QString &dirPath, bool recursive, FileOpResult &result);
     static void createDirectory(const QString &dirPath, FileOpResult &result);

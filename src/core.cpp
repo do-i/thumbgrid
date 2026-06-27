@@ -362,6 +362,8 @@ void Core::removePermanent() {
     auto paths = currentSelection();
     if(!paths.count())
         return;
+    if(!confirmRemovePossible(paths, false))
+        return;
     if(settings->confirmDelete()) {
         QString msg;
         if(paths.count() > 1)
@@ -396,6 +398,8 @@ void Core::moveToTrash() {
     auto paths = currentSelection();
     if(!paths.count())
         return;
+    if(!confirmRemovePossible(paths, true))
+        return;
     if(settings->confirmTrash()) {
         QString msg;
         if(paths.count() > 1)
@@ -424,6 +428,22 @@ void Core::moveToTrash() {
     } else if(paths.count() > 1) {
         mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
     }
+}
+
+bool Core::confirmRemovePossible(QList<QString> paths, bool trash) {
+    FileOpResult result;
+    for(const auto &path : paths) {
+        FileOperations::checkCanRemove(path, result);
+        if(result == FileOpResult::SUCCESS)
+            continue;
+
+        const QString title = trash ? tr("Cannot move to trash") : tr("Cannot delete");
+        QString msg = FileOperations::decodeResult(result);
+        msg += "\n\n" + QDir::toNativeSeparators(path);
+        mw->showErrorDialog(title, msg);
+        return false;
+    }
+    return true;
 }
 
 void Core::reloadImage() {

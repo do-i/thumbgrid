@@ -5,24 +5,49 @@ QString FileOperations::generateHash(const QString &str) {
 }
 
 void FileOperations::removeFile(const QString &filePath, FileOpResult &result) {
+    checkCanRemove(filePath, result);
+    if(result != FileOpResult::SUCCESS)
+        return;
+
+    if(QFile::remove(filePath))
+        result = FileOpResult::SUCCESS;
+    else
+        result = FileOpResult::OTHER_ERROR;
+    return;
+}
+
+void FileOperations::checkCanRemove(const QString &filePath, FileOpResult &result) {
     QFileInfo file(filePath);
     if(!file.exists()) {
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
-#ifdef Q_OS_WIN32
-    } else if(!file.isWritable()) {
-        result = FileOpResult::SOURCE_NOT_WRITABLE;
-#endif
-    } else {
-        if(QFile::remove(filePath))
-            result = FileOpResult::SUCCESS;
-        else
-            result = FileOpResult::OTHER_ERROR;
+        return;
     }
-    return;
+#ifdef Q_OS_WIN32
+    if(!file.isWritable()) {
+        result = FileOpResult::SOURCE_NOT_WRITABLE;
+        return;
+    }
+#endif
+
+    QFileInfo parent(file.absolutePath());
+    bool parentWritable = parent.exists() && parent.isDir() && parent.isWritable();
+#ifndef Q_OS_WIN32
+    parentWritable = parentWritable && parent.isExecutable();
+#endif
+    if(!parentWritable) {
+        result = FileOpResult::PARENT_DIRECTORY_NOT_WRITABLE;
+        return;
+    }
+
+    result = FileOpResult::SUCCESS;
 }
 
 // non-recursive
 void FileOperations::removeDir(const QString &dirPath, bool recursive, FileOpResult &result) {
+    checkCanRemove(dirPath, result);
+    if(result != FileOpResult::SUCCESS)
+        return;
+
     QDir dir(dirPath);
     if(!dir.exists()) {
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
@@ -55,6 +80,8 @@ QString FileOperations::decodeResult(const FileOpResult &result) {
         return QObject::tr("Destination does not exist.");
     case FileOpResult::DIRECTORY_NOT_EMPTY:
         return QObject::tr("Directory is not empty.");
+    case FileOpResult::PARENT_DIRECTORY_NOT_WRITABLE:
+        return QObject::tr("Containing directory is not writable.");
     case FileOpResult::NOTHING_TO_DO:
         return QObject::tr("Nothing to do.");
     case FileOpResult::OTHER_ERROR:
@@ -349,19 +376,14 @@ void FileOperations::createDirectory(const QString &dirPath, FileOpResult &resul
 }
 
 void FileOperations::moveToTrash(const QString &filePath, FileOpResult &result) {
-    QFileInfo file(filePath);
-    if(!file.exists()) {
-        result = FileOpResult::SOURCE_DOES_NOT_EXIST;
-#ifdef Q_OS_WIN32
-    } else if(!file.isWritable()) {
-        result = FileOpResult::SOURCE_NOT_WRITABLE;
-#endif
-    } else {
-        if(moveToTrashImpl(filePath))
-            result = FileOpResult::SUCCESS;
-        else
-            result = FileOpResult::OTHER_ERROR;
-    }
+    checkCanRemove(filePath, result);
+    if(result != FileOpResult::SUCCESS)
+        return;
+
+    if(moveToTrashImpl(filePath))
+        result = FileOpResult::SUCCESS;
+    else
+        result = FileOpResult::OTHER_ERROR;
     return;
 }
 
@@ -404,9 +426,13 @@ bool FileOperations::moveToTrashImpl(const QString &filePath) {
             qDebug() << "Trash doesn`t look like FreeDesktop.org Trash specification";
         TrashInitialized = true;
     }
+    if( TrashPath.isEmpty() || !QDir( TrashPathInfo ).exists() || !QDir( TrashPathFiles ).exists() )
+        return false;
     QFileInfo original( filePath );
-    if( !original.exists() )
+    if( !original.exists() ) {
         qDebug() << "File doesn`t exist, cant move to trash";
+        return false;
+    }
     QString info;
     info += "[Trash Info]\nPath=";
     info += original.absoluteFilePath();
@@ -429,9 +455,13 @@ bool FileOperations::moveToTrashImpl(const QString &filePath) {
     QDir dir;
     if( !dir.rename( original.absoluteFilePath(), filepath ) ){
         qDebug() << "move to trash failed";
+        return false;
     }
     QFile infoFile(infopath);
-    infoFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    if( !infoFile.open(QIODevice::WriteOnly | QIODevice::Text) ) {
+        QFile::rename(filepath, original.absoluteFilePath());
+        return false;
+    }
     QTextStream out(&infoFile);
     out.setCodec("UTF-8");
     out.setGenerateByteOrderMark(false);

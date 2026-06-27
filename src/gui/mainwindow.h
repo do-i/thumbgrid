@@ -82,6 +82,7 @@ public:
     ViewMode currentViewMode();
 
     bool showConfirmation(QString title, QString msg);
+    void showErrorDialog(QString title, QString msg);
     DialogResult fileReplaceDialog(QString source, QString target, FileReplaceMode mode, bool multiple);
 
 private:

@@ -100,6 +100,7 @@ private:
     void doInteractiveCopy(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
     void doInteractiveMove(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
     bool confirmFileOperation(QString action, QList<QString> paths, QString destDirectory);
+    bool confirmRemovePossible(QList<QString> paths, bool trash);
 
 private slots:
     void readSettings();

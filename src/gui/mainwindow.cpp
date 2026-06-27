@@ -998,6 +998,17 @@ bool MW::showConfirmation(QString title, QString msg) {
         return false;
 }
 
+void MW::showErrorDialog(QString title, QString msg) {
+    QMessageBox msgBox(this);
+    msgBox.setWindowTitle(title);
+    msgBox.setText(msg);
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setStandardButtons(QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setModal(true);
+    msgBox.exec();
+}
+
 void MW::readSettings() {
     showInfoBarFullscreen = settings->infoBarFullscreen();
     showInfoBarWindowed = settings->infoBarWindowed();
