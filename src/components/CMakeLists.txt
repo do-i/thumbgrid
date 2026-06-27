@@ -1,6 +1,6 @@
 ## SOURCES FOR QIMGV COMPONENTS
 
-target_sources(thumbgrid PRIVATE
+target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     directorymodel.cpp
     directorypresenter.cpp
 
@@ -35,12 +35,12 @@ if(APPLE)
     #    directorymanager/watchers/linux/linuxwatcher.cpp
     #    directorymanager/watchers/linux/linuxworker.cpp)
 elseif(UNIX)
-    target_sources(thumbgrid PRIVATE
+    target_sources(${THUMBGRID_APP_TARGET} PRIVATE
         directorymanager/watchers/linux/linuxfsevent.cpp
         directorymanager/watchers/linux/linuxwatcher.cpp
         directorymanager/watchers/linux/linuxworker.cpp)
 elseif(WIN32)
-    target_sources(thumbgrid PRIVATE
+    target_sources(${THUMBGRID_APP_TARGET} PRIVATE
         directorymanager/watchers/windows/windowswatcher.cpp
         directorymanager/watchers/windows/windowsworker.cpp)
 endif()

@@ -1,9 +1,19 @@
-enable_testing()
 find_package(Qt6 REQUIRED COMPONENTS Test Widgets)
 
-include_directories(${CMAKE_SOURCE_DIR})
+if(POLICY CMP0110)
+    cmake_policy(SET CMP0110 NEW)
+endif()
 
-add_executable(unit_tests test_mapoverlay.cpp)
-target_link_libraries(unit_tests PRIVATE Qt6::Test Qt6::Widgets)
+add_executable(thumbgrid_behavior_tests
+    behavior/test_starts_in_folder_and_shows_gallery.cpp
+)
 
-add_test(NAME QUI_TEST COMMAND unit_tests)
+target_link_libraries(thumbgrid_behavior_tests PRIVATE
+    thumbgrid_app_objects
+    Qt6::Test
+)
+
+add_test(
+    NAME "Starts in a folder and shows the gallery"
+    COMMAND thumbgrid_behavior_tests
+)

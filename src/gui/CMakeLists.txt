@@ -1,6 +1,6 @@
 ## SOURCES FOR QIMGV GUI
 
-target_sources(thumbgrid PRIVATE
+target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     centralwidget.cpp
     contextmenu.cpp
     flowlayout.cpp
@@ -83,7 +83,7 @@ target_sources(thumbgrid PRIVATE
 
 # UI Files
 
-target_sources(thumbgrid PRIVATE
+target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     contextmenu.ui
 
     dialogs/filereplacedialog.ui

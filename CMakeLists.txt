@@ -31,6 +31,8 @@ project(thumbgrid
 
 message(STATUS "Build configuration: " ${CMAKE_BUILD_TYPE})
 
+include(CTest)
+
 # check for gcc
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND
         CMAKE_CXX_COMPILER_VERSION VERSION_LESS 9.0)
@@ -75,5 +77,9 @@ find_package(OpenCV REQUIRED core imgproc)
 ##############################################################
 
 add_subdirectory(src)
+
+if(BUILD_TESTING)
+    add_subdirectory(src/tests)
+endif()
 
 add_subdirectory(plugins/player_mpv)

@@ -11,10 +11,14 @@ CMAKE_BIN="${CMAKE_BIN:-cmake}"
 APP_ARGS=("$@")
 
 if command -v nproc >/dev/null 2>&1; then
-    JOBS="${JOBS:-$(nproc)}"
+    DEFAULT_JOBS="$(nproc)"
 else
-    JOBS="${JOBS:-4}"
+    DEFAULT_JOBS=4
 fi
+if (( DEFAULT_JOBS > 2 )); then
+    DEFAULT_JOBS=2
+fi
+JOBS="${JOBS:-$DEFAULT_JOBS}"
 
 print_header() {
     printf '\nthumbgrid build menu\n'
@@ -190,6 +194,17 @@ build_project() {
     "$CMAKE_BIN" --build "$BUILD_DIR" --parallel "$JOBS"
 }
 
+test_project() {
+    require_cmake || return
+
+    "$CMAKE_BIN" -S "$ROOT_DIR" -B "$BUILD_DIR" \
+        -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+        -DBUILD_TESTING=ON || return
+
+    "$CMAKE_BIN" --build "$BUILD_DIR" --parallel "$JOBS" || return
+    "$CMAKE_BIN" --build "$BUILD_DIR" --target test --parallel "$JOBS"
+}
+
 find_executable() {
     local candidate
     for candidate in \
@@ -241,6 +256,7 @@ clean_build_dir() {
 print_header
 printf '  i) Init   - install full dependencies\n'
 printf '  b) Build\n'
+printf '  t) Test\n'
 printf '  r) Run\n'
 printf '  c) Clean  - delete build directory\n'
 printf '  m) Migrate - migrate custom theme and colors\n'
@@ -248,11 +264,12 @@ printf '  q) Quit\n\n'
 
 # Single keypress, no Enter needed. Each choice runs once and then exits
 # (run_menu_action exits for i/b/r/c), so the menu does not loop.
-read -rsn1 -p "Choose [i/b/c/r/m/q]: " choice
+read -rsn1 -p "Choose [i/b/t/c/r/m/q]: " choice
 printf '%s\n\n' "$choice"
 case "$choice" in
     i|I) run_menu_action install_full_deps ;;
     b|B) run_menu_action build_project ;;
+    t|T) run_menu_action test_project ;;
     r|R) run_menu_action run_executable ;;
     c|C) run_menu_action clean_build_dir ;;
     m|M) run_menu_action migrate_theme ;;

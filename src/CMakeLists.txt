@@ -33,11 +33,12 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/appversion.cpp
     @ONLY)
 
-# ADD EXECUTABLE
-add_executable(thumbgrid
+set(THUMBGRID_APP_TARGET thumbgrid_app_objects)
+
+# ADD APPLICATION OBJECTS
+add_library(${THUMBGRID_APP_TARGET} OBJECT
     ${CMAKE_CURRENT_BINARY_DIR}/appversion.cpp
     core.cpp
-    main.cpp
     settings.cpp
     themestore.cpp
     sharedresources.cpp
@@ -46,14 +47,24 @@ add_executable(thumbgrid
     macosapplication.cpp
     resources.qrc
     thumbgrid.rc
-    ${APPLE_ICON_PATH}
     ${QM_FILES}
 )
+target_include_directories(${THUMBGRID_APP_TARGET} PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+# ADD EXECUTABLE
+add_executable(thumbgrid
+    main.cpp
+    ${APPLE_ICON_PATH}
+)
+target_link_libraries(thumbgrid PRIVATE ${THUMBGRID_APP_TARGET})
 
 # update .ts, compile .qm (requires Qt6 LinguistTools; skipped if unavailable)
 if(Qt6LinguistTools_FOUND)
-    qt_add_lupdate(thumbgrid TS_FILES ${TS_FILES})
-    qt_add_lrelease(thumbgrid TS_FILES ${TS_FILES})
+    qt_add_lupdate(${THUMBGRID_APP_TARGET} TS_FILES ${TS_FILES})
+    qt_add_lrelease(${THUMBGRID_APP_TARGET} TS_FILES ${TS_FILES})
 else()
     message(WARNING "Qt6 LinguistTools not found; translations will not be built.")
 endif()
@@ -66,20 +77,20 @@ add_subdirectory(utils)
 add_subdirectory(3rdparty/QtOpenCV)
 
 # C++ STANDARD
-target_compile_features(thumbgrid PRIVATE cxx_std_17)
-set_target_properties(thumbgrid PROPERTIES CXX_EXTENSIONS OFF)
+target_compile_features(${THUMBGRID_APP_TARGET} PUBLIC cxx_std_17)
+set_target_properties(${THUMBGRID_APP_TARGET} thumbgrid PROPERTIES CXX_EXTENSIONS OFF)
 
 # LINK STUFF
-target_link_libraries(thumbgrid PRIVATE Qt6::Core Qt6::Widgets Qt6::Svg Qt6::PrintSupport Qt6::OpenGLWidgets)
+target_link_libraries(${THUMBGRID_APP_TARGET} PUBLIC Qt6::Core Qt6::Widgets Qt6::Svg Qt6::PrintSupport Qt6::OpenGLWidgets)
 
 # OPTION DEFINITIONS, LINKING
-target_link_libraries(thumbgrid PRIVATE PkgConfig::Exiv2)
-target_compile_definitions(thumbgrid PRIVATE USE_EXIV2)
+target_link_libraries(${THUMBGRID_APP_TARGET} PUBLIC PkgConfig::Exiv2)
+target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_EXIV2)
 if(KDE_SUPPORT)
-    target_link_libraries(thumbgrid PRIVATE KF6::WindowSystem)
-    target_compile_definitions(thumbgrid PRIVATE USE_KDE_BLUR)
+    target_link_libraries(${THUMBGRID_APP_TARGET} PUBLIC KF6::WindowSystem)
+    target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_KDE_BLUR)
 endif()
-target_compile_definitions(thumbgrid PRIVATE USE_MPV)
+target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_MPV)
 if(WIN32)
     ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="plugins")
     ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.dll")
@@ -87,8 +98,8 @@ else()
     ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="${QIMGV_PLUGIN_DIR}")
     ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.so")
 endif()
-target_link_libraries(thumbgrid PRIVATE ${OpenCV_LIBS})
-target_compile_definitions(thumbgrid PRIVATE USE_OPENCV)
+target_link_libraries(${THUMBGRID_APP_TARGET} PUBLIC ${OpenCV_LIBS})
+target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_OPENCV)
 
 # generate proper GUI program on specified platform
 if(WIN32) # Check if we are on Windows
