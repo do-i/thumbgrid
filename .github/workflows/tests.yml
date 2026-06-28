@@ -31,7 +31,7 @@ jobs:
         run: cmake -S . -B build -DBUILD_TESTING=ON
 
       - name: Build tests
-        run: cmake --build build --target thumbgrid_behavior_tests -j"$(nproc)"
+        run: cmake --build build --target thumbgrid_behavior_tests_all -j"$(nproc)"
 
       - name: Run tests
         run: ctest --test-dir build --output-on-failure
