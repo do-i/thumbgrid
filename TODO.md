@@ -4,28 +4,51 @@ Action items for maintaining this hard fork of [easymodo/qimgv](https://github.c
 
 ## Test automation framework
 
-- Wire the existing `src/tests` Qt Test setup into the normal CMake build with `BUILD_TESTING` / CTest.
-- Rename the current generic `unit_tests` target to a project-specific target such as `thumbgrid_unit_tests`.
-- Keep tests under `src/tests`, but split by purpose as coverage grows:
-  - `src/tests/unit/` for deterministic logic and widget unit tests.
-  - `src/tests/gui/` for interaction tests that need visible widgets, dialogs, focus, or drag/drop.
-  - `src/tests/support/` for reusable test fixtures and GUI helpers.
-- Keep the existing `test_<thing>.cpp` naming style, for example `test_mapoverlay.cpp` and `test_fileoperations.cpp`.
-- Add a documented headless test command, for example `QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure`.
-- Add an opt-in headed visual verification mode, for example `THUMBGRID_TEST_VISUAL=1`, so GUI tests can be watched by a human when needed.
-- Make tests use temporary directories and isolated settings/config paths so they do not touch real user files.
-- Add first useful coverage around current pain points:
-  - file delete failure and permission/error reporting.
-  - copy/move drag-drop confirmation behavior.
-  - overwrite dialog flow.
-  - folder-grid and viewer transition regressions.
-- Add CI coverage after local tests are stable, starting with build plus CTest on Linux.
+Qt Test + CTest, wired into the build behind `BUILD_TESTING`. Tests link the
+`thumbgrid_app_objects` object library so they exercise the real app code.
+
+Done:
+
+- `src/tests` is wired into the build behind `BUILD_TESTING`; `ctest` runs the suite.
+- Behavior tests live in `src/tests/behavior/`, one executable per behavior so the
+  app singletons stay isolated between behaviors (registered via the
+  `thumbgrid_add_behavior_test` helper in `src/tests/CMakeLists.txt`).
+- Shared fixtures, singleton bootstrap, and the `TG_BEHAVIOR_TEST_MAIN` macro live
+  in `src/tests/support/thumbgrid_test_support.h`.
+- File naming follows the project-consistent `test_<behavior>.cpp` style.
+- Headless by default (`QT_QPA_PLATFORM=offscreen`), with an opt-in headed visual
+  mode via `THUMBGRID_TEST_VISUAL=1`.
+- Config/cache isolated via throwaway `XDG_*` dirs plus
+  `QStandardPaths::setTestModeEnabled(true)` and a test-only org/app name, so tests
+  never touch real user files.
+- CI builds with `-DBUILD_TESTING=ON` and runs `ctest` on Linux
+  (`.github/workflows/tests.yml`).
+
+Commands:
+
+- Headless: `QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure`
+- Watch a GUI test: `THUMBGRID_TEST_VISUAL=1 ./build/src/tests/thumbgrid_behavior_tests`
+
+To do — add coverage around current pain points (each as its own behavior binary):
+
+- file delete failure and permission/error reporting.
+- copy/move drag-drop confirmation behavior.
+- overwrite dialog flow.
+- folder-grid and viewer transition regressions.
+
+Notes / scope:
+
+- Use `QSignalSpy` + `QTRY_*` for anything touching the threaded loader/scaler/
+  thumbnailer or directory watchers; prefer the existing `dummywatcher` for
+  deterministic, platform-independent watcher tests.
+- Video playback (`player_mpv`) is out of scope for automated tests — it needs the
+  WID backend on software-GL hosts and is not unit-testable.
 
 ## First behavior tests
 
 These should be GUI behavior tests with plain-language test names. Use a temporary test folder with a few small generated images and subfolders, plus isolated app settings, so the tests never depend on the user's real files.
 
-- `Starts in a folder and shows the gallery`
+- `Starts in a folder and shows the gallery` — **done** (`behavior/test_starts_in_folder_and_shows_gallery.cpp`)
   - Start thumbgrid pointed at a temporary folder containing images and one child folder.
   - Verify the app opens in grid view.
   - Verify image thumbnails appear for the files in that folder.
