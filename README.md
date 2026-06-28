@@ -217,8 +217,8 @@ every version tag.
 
 # Releasing
 
-For maintainers. The git tag is the single source of truth for the version, so
-cutting a release is one command — no version strings to edit by hand.
+For maintainers. The git tag is the single source of truth for the version, and
+the release commit is tested on `main` before that tag is published.
 
 From a clean `main` checkout that is up to date with origin:
 
@@ -229,8 +229,16 @@ From a clean `main` checkout that is up to date with origin:
 ```
 
 The script sanity-checks the tree, bumps the tarball fallback version in
-`CMakeLists.txt`, commits it, then creates an annotated `vYYYY.M.N` tag and
-pushes both. Pushing the tag triggers
+`CMakeLists.txt`, commits it, and pushes `main`. That push runs the normal Tests
+workflow against the exact release commit. After the Tests workflow passes, run
+the tag command printed by the script, for example:
+
+```
+./scripts/release.sh --tag 2026.7.1
+```
+
+Tag mode verifies that local `main` matches `origin/main`, creates an annotated
+`vYYYY.M.N` tag, and pushes only the tag. Pushing the tag triggers
 [`arch-package.yml`](.github/workflows/arch-package.yml), which builds the Arch
 package and publishes a GitHub Release with **auto-generated release notes**
 (from merged PRs / commits since the previous tag).

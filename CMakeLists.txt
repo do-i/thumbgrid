@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.13)
 # ---------------------------------------------------------------------------
 # Version: single source of truth is the latest git tag (vYYYY.M.N).
 # The fallback below is only used for source tarballs without git history
-# (e.g. some packaging contexts); scripts/release.sh keeps it in sync on tag.
+# (e.g. some packaging contexts); scripts/release.sh updates it before tagging.
 # ---------------------------------------------------------------------------
 set(THUMBGRID_VERSION_FALLBACK 2026.6.15)
 find_package(Git QUIET)
