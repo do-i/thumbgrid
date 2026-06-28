@@ -54,7 +54,7 @@ These should be GUI behavior tests with plain-language test names. Use a tempora
   - Verify image thumbnails appear for the files in that folder.
   - Verify the child folder appears as a folder thumbnail/tile.
 
-- `Opening a folder shows what is inside it`
+- `Opening a folder shows what is inside it` — **done** (`behavior/test_opening_a_folder_shows_its_contents.cpp`)
   - Start in a temporary parent folder with one child folder.
   - Click the child folder tile.
   - Verify the grid changes to the child folder.
