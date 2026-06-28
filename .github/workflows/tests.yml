@@ -1,0 +1,37 @@
+name: Tests
+
+# Build with testing enabled and run the CTest behavior suite on Linux.
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch: {}
+
+jobs:
+  ctest:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - name: Install build tooling
+        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf exiv2 opencv mpv
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # tags needed for git describe / appversion
+          lfs: true        # fetch real image bytes; LFS pointer stubs in qrc crash at runtime
+
+      - name: Mark workspace as a safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Configure
+        run: cmake -S . -B build -DBUILD_TESTING=ON
+
+      - name: Build tests
+        run: cmake --build build --target thumbgrid_behavior_tests -j"$(nproc)"
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
