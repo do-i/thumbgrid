@@ -3,6 +3,23 @@
 #include <QFileInfo>
 #include <QImageReader>
 #include <QPainter>
+#include <QSet>
+
+namespace {
+    QSet<QString> supportedPreviewImageSuffixes() {
+        QSet<QString> suffixes;
+        for(const QByteArray &format : QImageReader::supportedImageFormats())
+            suffixes.insert(QString::fromLatin1(format).toLower());
+        suffixes.insert("jfif");
+        suffixes.remove("pdf");
+        return suffixes;
+    }
+
+    bool hasSupportedPreviewImageSuffix(const QFileInfo &fileInfo) {
+        static const QSet<QString> suffixes = supportedPreviewImageSuffixes();
+        return suffixes.contains(fileInfo.suffix().toLower());
+    }
+}
 
 ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, int _size, bool _crop, bool _force) :
     path(_path),
@@ -29,7 +46,6 @@ ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, 
 }
 
 void ThumbnailerRunnable::run() {
-    emit taskStart(path, size);
     if(isDir) {
         std::shared_ptr<Thumbnail> thumbnail = generateDir(cache, path, size, crop, force, previewFit, showHidden, iconBase, colorId);
         emit dirTaskEnd(thumbnail, path);
@@ -112,6 +128,14 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
 }
 
 ThumbnailerRunnable::~ThumbnailerRunnable() {
+}
+
+QString ThumbnailerRunnable::taskPath() const {
+    return path;
+}
+
+int ThumbnailerRunnable::taskSize() const {
+    return size;
 }
 
 std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, const char *format, int size, bool squared) {
@@ -233,6 +257,8 @@ QList<QImage> ThumbnailerRunnable::dirPreviewImages(ThumbnailCache *cache, const
     for(const QFileInfo &entry : entries) {
         if(scanned++ >= maxScannedEntries || images.count() >= 4)
             break;
+        if(!hasSupportedPreviewImageSuffix(entry))
+            continue;
 
         // best-effort: reuse an already-cached per-file thumbnail (same size+crop as
         // the grid) as the preview tile, avoiding a fresh decode. Falls back below.

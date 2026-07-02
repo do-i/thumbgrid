@@ -21,6 +21,8 @@ public:
     ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, int _size, bool _crop, bool _force,
                         bool _previewFit, bool _showHidden, QImage _iconBase, QString _colorId);
     ~ThumbnailerRunnable();
+    QString taskPath() const;
+    int taskSize() const;
     void run();
     static std::shared_ptr<Thumbnail> generate(ThumbnailCache *cache, QString path, int size, bool crop, bool force);
     static std::shared_ptr<Thumbnail> generateDir(ThumbnailCache *cache, QString path, int size, bool crop, bool force,
@@ -43,7 +45,6 @@ private:
     QString colorId;
 
 signals:
-    void taskStart(QString, int);
     void taskEnd(std::shared_ptr<Thumbnail>, QString);
     void dirTaskEnd(std::shared_ptr<Thumbnail>, QString);
 };

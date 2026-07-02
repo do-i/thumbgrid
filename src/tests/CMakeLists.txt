@@ -34,6 +34,14 @@ add_test(
     COMMAND thumbgrid_open_folder_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_folder_thumbnails_test
+    behavior/test_opening_a_folder_loads_its_thumbnails.cpp
+)
+add_test(
+    NAME "Opening a folder loads its thumbnails"
+    COMMAND thumbgrid_folder_thumbnails_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_open_picture_test
     behavior/test_opening_a_picture_shows_the_picture_view.cpp
 )

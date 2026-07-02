@@ -98,6 +98,10 @@ void DirectoryPresenter::setModel(std::shared_ptr<DirectoryModel> newModel) {
 }
 
 void DirectoryPresenter::reloadModel() {
+    // The directory changed (or was refreshed): drop thumbnail jobs queued for the
+    // previous contents so they don't linger. Done here, once per load, rather than
+    // on every visible-thumbnail request (which would cancel jobs mid-flight).
+    thumbnailer.clearTasks();
     populateView();
 }
 
@@ -285,32 +289,42 @@ void DirectoryPresenter::emitStatusText() {
 void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool crop, bool force) {
     if(!view || !model)
         return;
-    thumbnailer.clearTasks();
     int offset = parentOffset();
     for(int i : indexes) {
         if(i == 0 && offset) {
             view->setThumbnail(i, createParentDirThumbnail(size));
         }
     }
+
+    QList<QPair<QString, int>> requestedTasks;
     if(!mShowDirs) {
         for(int i : indexes) {
             i -= offset;
             if(i < 0)
                 continue;
-            thumbnailer.getThumbnailAsync(model->filePathAt(i), size, crop, force);
+            requestedTasks.append(qMakePair(model->filePathAt(i), size));
         }
+        thumbnailer.keepOnlyQueuedTasks(requestedTasks);
+        for(const auto &task : requestedTasks)
+            thumbnailer.getThumbnailAsync(task.first, size, crop, force);
         return;
     }
     for(int i : indexes) {
         i -= offset;
         if(i < 0)
             continue;
-        if(i < model->dirCount()) {
-            thumbnailer.getDirThumbnailAsync(model->dirPathAt(i), size, settings->folderViewPreviewFit(), crop, force);
-        } else {
-            QString path = model->filePathAt(i - model->dirCount());
-            thumbnailer.getThumbnailAsync(path, size, crop, force);
-        }
+        if(i < model->dirCount())
+            requestedTasks.append(qMakePair(model->dirPathAt(i), size));
+        else
+            requestedTasks.append(qMakePair(model->filePathAt(i - model->dirCount()), size));
+    }
+    thumbnailer.keepOnlyQueuedTasks(requestedTasks);
+    for(const auto &task : requestedTasks) {
+        int dirIndex = model->indexOfDir(task.first);
+        if(dirIndex != -1)
+            thumbnailer.getDirThumbnailAsync(task.first, size, settings->folderViewPreviewFit(), crop, force);
+        else
+            thumbnailer.getThumbnailAsync(task.first, size, crop, force);
     }
 }
 
