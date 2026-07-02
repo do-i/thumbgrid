@@ -11,7 +11,7 @@ ContextMenuItem::~ContextMenuItem() {
 
 void ContextMenuItem::setAction(QString text) {
     this->mAction = text;
-    setShortcutText(actionManager->shortcutForAction(mAction));
+    setShortcutText(actionManager->shortcutForAction(actionManager->currentContext(), mAction));
 }
 
 void ContextMenuItem::onPress() {

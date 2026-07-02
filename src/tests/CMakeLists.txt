@@ -49,3 +49,19 @@ add_test(
     NAME "Returning from picture view shows the same folder selection"
     COMMAND thumbgrid_return_from_picture_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_shortcut_context_dispatch_test
+    behavior/test_the_same_key_runs_different_actions_per_context.cpp
+)
+add_test(
+    NAME "The same key runs different actions per view"
+    COMMAND thumbgrid_shortcut_context_dispatch_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_shortcut_context_persistence_test
+    behavior/test_shortcut_contexts_persist_and_legacy_configs_migrate.cpp
+)
+add_test(
+    NAME "Shortcut contexts persist and legacy configs migrate"
+    COMMAND thumbgrid_shortcut_context_persistence_test
+)

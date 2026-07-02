@@ -127,8 +127,11 @@ public:
     void setPanelPosition(PanelPosition);
     bool loopSlideshow();
     void setLoopSlideshow(bool mode);
-    void readShortcuts(QMap<QString, QString> &shortcuts);
-    void saveShortcuts(const QMap<QString, QString> &shortcuts);
+    // Shortcuts are scoped per context (ViewMode). On-disk format is a string list
+    // of "context|action=key" entries; legacy context-less "action=key" entries are
+    // migrated into both contexts on read.
+    void readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts);
+    void saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     bool panelEnabled();
     void setPanelEnabled(bool mode);
     int lastDisplay();

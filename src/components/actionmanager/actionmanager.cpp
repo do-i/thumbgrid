@@ -19,128 +19,155 @@ ActionManager *ActionManager::getInstance() {
 }
 //------------------------------------------------------------------------------
 void ActionManager::initDefaults() {
-    actionManager->defaults.insert("Right", "nextImage");
-    actionManager->defaults.insert("Left", "prevImage");
-    actionManager->defaults.insert("XButton2", "nextImage");
-    actionManager->defaults.insert("XButton1", "prevImage");
-    actionManager->defaults.insert("WheelDown", "nextImage");
-    actionManager->defaults.insert("WheelUp", "prevImage");
-    actionManager->defaults.insert("F", "toggleFullscreen");
-    actionManager->defaults.insert("F11", "toggleFullscreen");
-    actionManager->defaults.insert("LMB_DoubleClick", "toggleFullscreen");
-    actionManager->defaults.insert("MiddleButton", "exit");
-    actionManager->defaults.insert("Space", "toggleFitMode");
-    actionManager->defaults.insert("1", "fitWindow");
-    actionManager->defaults.insert("2", "fitWidth");
-    actionManager->defaults.insert("3", "fitNormal");
-    actionManager->defaults.insert("4", "fitWindowStretch");
-    actionManager->defaults.insert("R", "resize");
-    actionManager->defaults.insert("H", "flipH");
-    actionManager->defaults.insert("V", "flipV");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+R", "rotateRight");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+L", "rotateLeft");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+WheelUp", "zoomInCursor");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+WheelDown", "zoomOutCursor");
-    actionManager->defaults.insert("=", "zoomIn"); // [=+] key on the number row
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+=", "zoomIn");
-    actionManager->defaults.insert("+", "zoomIn");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "++", "zoomIn");
-    actionManager->defaults.insert("-", "zoomOut");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+-", "zoomOut");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Down", "zoomOut");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Up", "zoomIn");
-    actionManager->defaults.insert("Up", "scrollUp");
-    actionManager->defaults.insert("Down", "scrollDown");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+O", "open");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+S", "save");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+" + InputMap::keyNameShift() + "+S", "saveAs");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+W", "setWallpaper");
-    actionManager->defaults.insert("X", "crop");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+P", "print");
-    actionManager->defaults.insert(InputMap::keyNameAlt() + "+X", "exit");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Q", "exit");
-    actionManager->defaults.insert("Esc", "closeFullScreenOrExit");
-    actionManager->defaults.insert("Del", "moveToTrash");
-    actionManager->defaults.insert(InputMap::keyNameShift() + "+Del", "removeFile");
-    actionManager->defaults.insert("C", "copyFile");
-    actionManager->defaults.insert("M", "moveFile");
-    actionManager->defaults.insert("Home", "jumpToFirst");
-    actionManager->defaults.insert("End", "jumpToLast");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Right", "seekVideoForward");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Left", "seekVideoBackward");
-    actionManager->defaults.insert(",", "frameStepBack");
-    actionManager->defaults.insert(".", "frameStep");
-    actionManager->defaults.insert("Enter", "folderView");
-    actionManager->defaults.insert("Backspace", "folderView");
-    actionManager->defaults.insert("F5", "reloadImage");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+C", "copyFileClipboard");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+" + InputMap::keyNameShift() + "+C", "copyPathClipboard");
-    actionManager->defaults.insert("F2", "renameFile");
-    actionManager->defaults.insert("F7", "createDirectory");
-    actionManager->defaults.insert("RMB", "contextMenu");
-    actionManager->defaults.insert("Menu", "contextMenu");
-    actionManager->defaults.insert("I", "toggleImageInfo");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+`", "toggleShuffle");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+D", "showInDirectory");
-    actionManager->defaults.insert("`", "toggleSlideshow");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Z", "discardEdits");
-    actionManager->defaults.insert("U", "folderView");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+T", "toggleFolderViewTopBar");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+B", "toggleStatusFooter");
-    actionManager->defaults.insert(InputMap::keyNameShift() + "+Right", "nextDirectory");
-    actionManager->defaults.insert(InputMap::keyNameShift() + "+Left", "prevDirectory");
-    actionManager->defaults.insert(InputMap::keyNameShift() + "+F", "toggleFullscreenInfoBar");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+V", "pasteFile");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+X", "cutFile");
-    actionManager->defaults.insert("F12", "openSettings");
+    // Built once, then seeded into every context. Today every shortcut works in
+    // every screen, so the two contexts start identical; users differentiate them
+    // per-context from the shortcut editor. There is no global fallback.
+    ContextMap d;
+    d.insert("Right", "nextImage");
+    d.insert("Left", "prevImage");
+    d.insert("XButton2", "nextImage");
+    d.insert("XButton1", "prevImage");
+    d.insert("WheelDown", "nextImage");
+    d.insert("WheelUp", "prevImage");
+    d.insert("F", "toggleFullscreen");
+    d.insert("F11", "toggleFullscreen");
+    d.insert("LMB_DoubleClick", "toggleFullscreen");
+    d.insert("MiddleButton", "exit");
+    d.insert("Space", "toggleFitMode");
+    d.insert("1", "fitWindow");
+    d.insert("2", "fitWidth");
+    d.insert("3", "fitNormal");
+    d.insert("4", "fitWindowStretch");
+    d.insert("R", "resize");
+    d.insert("H", "flipH");
+    d.insert("V", "flipV");
+    d.insert(InputMap::keyNameCtrl() + "+R", "rotateRight");
+    d.insert(InputMap::keyNameCtrl() + "+L", "rotateLeft");
+    d.insert(InputMap::keyNameCtrl() + "+WheelUp", "zoomInCursor");
+    d.insert(InputMap::keyNameCtrl() + "+WheelDown", "zoomOutCursor");
+    d.insert("=", "zoomIn"); // [=+] key on the number row
+    d.insert(InputMap::keyNameCtrl() + "+=", "zoomIn");
+    d.insert("+", "zoomIn");
+    d.insert(InputMap::keyNameCtrl() + "++", "zoomIn");
+    d.insert("-", "zoomOut");
+    d.insert(InputMap::keyNameCtrl() + "+-", "zoomOut");
+    d.insert(InputMap::keyNameCtrl() + "+Down", "zoomOut");
+    d.insert(InputMap::keyNameCtrl() + "+Up", "zoomIn");
+    d.insert("Up", "scrollUp");
+    d.insert("Down", "scrollDown");
+    d.insert(InputMap::keyNameCtrl() + "+O", "open");
+    d.insert(InputMap::keyNameCtrl() + "+S", "save");
+    d.insert(InputMap::keyNameCtrl() + "+" + InputMap::keyNameShift() + "+S", "saveAs");
+    d.insert(InputMap::keyNameCtrl() + "+W", "setWallpaper");
+    d.insert("X", "crop");
+    d.insert(InputMap::keyNameCtrl() + "+P", "print");
+    d.insert(InputMap::keyNameAlt() + "+X", "exit");
+    d.insert(InputMap::keyNameCtrl() + "+Q", "exit");
+    d.insert("Esc", "closeFullScreenOrExit");
+    d.insert("Del", "moveToTrash");
+    d.insert(InputMap::keyNameShift() + "+Del", "removeFile");
+    d.insert("C", "copyFile");
+    d.insert("M", "moveFile");
+    d.insert("Home", "jumpToFirst");
+    d.insert("End", "jumpToLast");
+    d.insert(InputMap::keyNameCtrl() + "+Right", "seekVideoForward");
+    d.insert(InputMap::keyNameCtrl() + "+Left", "seekVideoBackward");
+    d.insert(",", "frameStepBack");
+    d.insert(".", "frameStep");
+    d.insert("Enter", "folderView");
+    d.insert("Backspace", "folderView");
+    d.insert("F5", "reloadImage");
+    d.insert(InputMap::keyNameCtrl() + "+C", "copyFileClipboard");
+    d.insert(InputMap::keyNameCtrl() + "+" + InputMap::keyNameShift() + "+C", "copyPathClipboard");
+    d.insert("F2", "renameFile");
+    d.insert("F7", "createDirectory");
+    d.insert("RMB", "contextMenu");
+    d.insert("Menu", "contextMenu");
+    d.insert("I", "toggleImageInfo");
+    d.insert(InputMap::keyNameCtrl() + "+`", "toggleShuffle");
+    d.insert(InputMap::keyNameCtrl() + "+D", "showInDirectory");
+    d.insert("`", "toggleSlideshow");
+    d.insert(InputMap::keyNameCtrl() + "+Z", "discardEdits");
+    d.insert("U", "folderView");
+    d.insert(InputMap::keyNameCtrl() + "+T", "toggleFolderViewTopBar");
+    d.insert(InputMap::keyNameCtrl() + "+B", "toggleStatusFooter");
+    d.insert(InputMap::keyNameShift() + "+Right", "nextDirectory");
+    d.insert(InputMap::keyNameShift() + "+Left", "prevDirectory");
+    d.insert(InputMap::keyNameShift() + "+F", "toggleFullscreenInfoBar");
+    d.insert(InputMap::keyNameCtrl() + "+V", "pasteFile");
+    d.insert(InputMap::keyNameCtrl() + "+X", "cutFile");
+    d.insert("F12", "openSettings");
 
 #ifdef __APPLE__
-    actionManager->defaults.insert(InputMap::keyNameAlt() + "+Up", "zoomIn");
-    actionManager->defaults.insert(InputMap::keyNameAlt() + "+Down", "zoomOut");
-    actionManager->defaults.insert(InputMap::keyNameCtrl() + "+Comma", "openSettings");
+    d.insert(InputMap::keyNameAlt() + "+Up", "zoomIn");
+    d.insert(InputMap::keyNameAlt() + "+Down", "zoomOut");
+    d.insert(InputMap::keyNameCtrl() + "+Comma", "openSettings");
 #else
-    actionManager->defaults.insert("P", "openSettings");
+    d.insert("P", "openSettings");
 #endif
 
-    //actionManager->defaults.insert("Backspace", "goUp"); // todo: shortcut scopes?
+    //d.insert("Backspace", "goUp");
+
+    // Seed each context with the full default set.
+    actionManager->defaults.insert(MODE_DOCUMENT, d);
+    actionManager->defaults.insert(MODE_FOLDERVIEW, d);
 }
 
 //------------------------------------------------------------------------------
 void ActionManager::initShortcuts() {
     actionManager->readShortcuts();
-    if(actionManager->shortcuts.isEmpty()) {
+    bool empty = true;
+    for(auto it = actionManager->shortcuts.cbegin(); it != actionManager->shortcuts.cend(); ++it)
+        if(!it.value().isEmpty()) { empty = false; break; }
+    if(empty)
         actionManager->resetDefaults();
-    }
-    QString statusFooterShortcut = InputMap::keyNameCtrl() + "+B";
-    if(!actionManager->shortcuts.values().contains("toggleStatusFooter") &&
-       !actionManager->shortcuts.contains(statusFooterShortcut)) {
-        actionManager->shortcuts.insert(statusFooterShortcut, "toggleStatusFooter");
-    }
-    // cutFile is a newer action; merge its default into pre-existing configs so
-    // upgrading users get Ctrl+X without having to reset all shortcuts.
-    QString cutShortcut = InputMap::keyNameCtrl() + "+X";
-    if(!actionManager->shortcuts.values().contains("cutFile") &&
-       !actionManager->shortcuts.contains(cutShortcut)) {
-        actionManager->shortcuts.insert(cutShortcut, "cutFile");
-    }
+
+    // Merge newer default actions into pre-existing configs, per context, so
+    // upgrading users get them without resetting all shortcuts.
+    auto mergeMissing = [](const QString &action, const QString &shortcut) {
+        for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+            ContextMap &m = actionManager->shortcuts[ctx];
+            if(!m.values().contains(action) && !m.contains(shortcut))
+                m.insert(shortcut, action);
+        }
+    };
+    mergeMissing("toggleStatusFooter", InputMap::keyNameCtrl() + "+B");
+    mergeMissing("cutFile", InputMap::keyNameCtrl() + "+X");
 }
 //------------------------------------------------------------------------------
-void ActionManager::addShortcut(const QString &keys, const QString &action) {
+void ActionManager::addShortcut(ViewMode context, const QString &keys, const QString &action) {
     ActionType type = validateAction(action);
     if(type != ActionType::ACTION_INVALID) {
-        actionManager->shortcuts.insert(keys, action);
+        actionManager->shortcuts[context].insert(keys, action);
     }
 }
 //------------------------------------------------------------------------------
-void ActionManager::removeShortcut(const QString &keys) {
-    actionManager->shortcuts.remove(keys);
+void ActionManager::removeShortcut(ViewMode context, const QString &keys) {
+    actionManager->shortcuts[context].remove(keys);
+}
+//------------------------------------------------------------------------------
+void ActionManager::setContext(ViewMode context) {
+    actionManager->context = context;
+}
+//------------------------------------------------------------------------------
+ViewMode ActionManager::currentContext() const {
+    return context;
+}
+//------------------------------------------------------------------------------
+QString ActionManager::contextToString(ViewMode context) {
+    return (context == MODE_FOLDERVIEW) ? QStringLiteral("folderview")
+                                        : QStringLiteral("document");
+}
+//------------------------------------------------------------------------------
+ViewMode ActionManager::contextFromString(const QString &name) {
+    return (name == QStringLiteral("folderview")) ? MODE_FOLDERVIEW : MODE_DOCUMENT;
 }
 //------------------------------------------------------------------------------
 QStringList ActionManager::actionList() {
     return appActions->getList();
 }
 //------------------------------------------------------------------------------
-const QMap<QString, QString> &ActionManager::allShortcuts() {
+const ActionManager::ShortcutMap &ActionManager::allShortcuts() {
     return actionManager->shortcuts;
 }
 //------------------------------------------------------------------------------
@@ -153,11 +180,14 @@ void ActionManager::removeAllShortcuts(QString actionName) {
     if(validateAction(actionName) == ActionType::ACTION_INVALID)
         return;
 
-    for (auto i = shortcuts.begin(); i != shortcuts.end();) {
-        if(i.value() == actionName)
-            i = shortcuts.erase(i);
-        else
-            ++i;
+    for(auto ctx = shortcuts.begin(); ctx != shortcuts.end(); ++ctx) {
+        ContextMap &m = ctx.value();
+        for(auto i = m.begin(); i != m.end();) {
+            if(i.value() == actionName)
+                i = m.erase(i);
+            else
+                ++i;
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -174,12 +204,14 @@ void ActionManager::resetDefaults() {
 //------------------------------------------------------------------------------
 void ActionManager::resetDefaults(QString action) {
     actionManager->removeAllShortcuts(action);
-    QMapIterator<QString, QString> i(defaults);
-    while(i.hasNext()) {
-        i.next();
-        if(i.value() == action) {
-            shortcuts.insert(i.key(), i.value());
-            qDebug() << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "]";
+    for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+        QMapIterator<QString, QString> i(defaults[ctx]);
+        while(i.hasNext()) {
+            i.next();
+            if(i.value() == action) {
+                shortcuts[ctx].insert(i.key(), i.value());
+                qDebug() << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "] in" << contextToString(ctx);
+            }
         }
     }
 }
@@ -193,29 +225,34 @@ void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
     // swap WheelUp/WheelDown. derp
     if(lastVer < QVersionNumber(1,0,1)) {
         qDebug() << "[actionManager]: swapping WheelUp/WheelDown";
-        QMapIterator<QString, QString> i(shortcuts);
-        QMap<QString, QString> swapped;
+        for(auto ctx = shortcuts.begin(); ctx != shortcuts.end(); ++ctx) {
+            ContextMap swapped;
+            QMapIterator<QString, QString> i(ctx.value());
+            while(i.hasNext()) {
+                i.next();
+                QString key = i.key();
+                if(key.contains("WheelUp"))
+                    key.replace("WheelUp", "WheelDown");
+                else if(key.contains("WheelDown"))
+                    key.replace("WheelDown", "WheelUp");
+                swapped.insert(key, i.value());
+            }
+            ctx.value() = swapped;
+        }
+    }
+    // add new default actions, per context
+    for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+        ContextMap &cur = shortcuts[ctx];
+        QMapIterator<QString, QString> i(defaults[ctx]);
         while(i.hasNext()) {
             i.next();
-            QString key = i.key();
-            if(key.contains("WheelUp"))
-                key.replace("WheelUp", "WheelDown");
-            else if(key.contains("WheelDown"))
-                key.replace("WheelDown", "WheelUp");
-            swapped.insert(key, i.value());
-        }
-        shortcuts = swapped;
-    }
-    // add new default actions
-    QMapIterator<QString, QString> i(defaults);
-    while(i.hasNext()) {
-        i.next();
-        if(appActions->getMap().value(i.value()) > lastVer) {
-            if(!shortcuts.contains(i.key())) {
-                shortcuts.insert(i.key(), i.value());
-                qDebug() << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "]";
-            } else if(i.value() != actionForShortcut(i.key())) {
-                qDebug() << "[ActionManager] new action " << i.value() << " - shortcut [" << i.key() << "] already assigned to another action " << actionForShortcut(i.key());
+            if(appActions->getMap().value(i.value()) > lastVer) {
+                if(!cur.contains(i.key())) {
+                    cur.insert(i.key(), i.value());
+                    qDebug() << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "] in" << contextToString(ctx);
+                } else if(i.value() != cur.value(i.key())) {
+                    qDebug() << "[ActionManager] new action " << i.value() << " - shortcut [" << i.key() << "] already assigned to " << cur.value(i.key());
+                }
             }
         }
     }
@@ -227,17 +264,25 @@ void ActionManager::saveShortcuts() {
     settings->saveShortcuts(actionManager->shortcuts);
 }
 //------------------------------------------------------------------------------
-QString ActionManager::actionForShortcut(const QString &keys) {
-    return actionManager->shortcuts[keys];
+QString ActionManager::actionForShortcut(ViewMode context, const QString &keys) {
+    return actionManager->shortcuts[context].value(keys);
 }
 
-// returns first shortcut that is found
-const QString ActionManager::shortcutForAction(QString action) {
-    return shortcuts.key(action, "");
+// returns first shortcut that is found in the given context
+const QString ActionManager::shortcutForAction(ViewMode context, QString action) {
+    return shortcuts[context].key(action, "");
 }
 
+// returns every shortcut bound to action across all contexts
 const QList<QString> ActionManager::shortcutsForAction(QString action) {
-    return shortcuts.keys(action);
+    QList<QString> keys;
+    for(auto it = shortcuts.cbegin(); it != shortcuts.cend(); ++it) {
+        const QList<QString> ctxKeys = it.value().keys(action);
+        for(const QString &k : ctxKeys)
+            if(!keys.contains(k))
+                keys.append(k);
+    }
+    return keys;
 }
 
 //------------------------------------------------------------------------------
@@ -255,19 +300,23 @@ bool ActionManager::invokeAction(const QString &actionName) {
     return false;
 }
 //------------------------------------------------------------------------------
-bool ActionManager::invokeActionForShortcut(const QString &shortcut) {
-    if(!shortcut.isEmpty() && shortcuts.contains(shortcut)) {
-        return invokeAction(actionManager->shortcuts[shortcut]);
+bool ActionManager::invokeActionForShortcut(ViewMode context, const QString &shortcut) {
+    const ContextMap &m = shortcuts[context];
+    if(!shortcut.isEmpty() && m.contains(shortcut)) {
+        return invokeAction(m.value(shortcut));
     }
     return false;
 }
 //------------------------------------------------------------------------------
 void ActionManager::validateShortcuts() {
-    for (auto i = shortcuts.begin(); i != shortcuts.end();) {
-        if(validateAction(i.value()) == ActionType::ACTION_INVALID)
-            i = shortcuts.erase(i);
-        else
-            ++i;
+    for(auto ctx = shortcuts.begin(); ctx != shortcuts.end(); ++ctx) {
+        ContextMap &m = ctx.value();
+        for(auto i = m.begin(); i != m.end();) {
+            if(validateAction(i.value()) == ActionType::ACTION_INVALID)
+                i = m.erase(i);
+            else
+                ++i;
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -290,6 +339,6 @@ void ActionManager::readShortcuts() {
 }
 //------------------------------------------------------------------------------
 bool ActionManager::processEvent(QInputEvent *event) {
-    return actionManager->invokeActionForShortcut(ShortcutBuilder::fromEvent(event));
+    return actionManager->invokeActionForShortcut(actionManager->context, ShortcutBuilder::fromEvent(event));
 }
 //------------------------------------------------------------------------------

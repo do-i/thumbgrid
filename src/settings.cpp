@@ -730,31 +730,47 @@ void Settings::sendChangeNotification() {
     emit settingsChanged();
 }
 //------------------------------------------------------------------------------
-void Settings::readShortcuts(QMap<QString, QString> &shortcuts) {
+// Context token strings must match ActionManager::contextToString().
+void Settings::readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     settings->settingsConf->beginGroup("Controls");
-    QStringList in, pair;
-    in = settings->settingsConf->value("shortcuts").toStringList();
+    const QStringList in = settings->settingsConf->value("shortcuts").toStringList();
     for(int i = 0; i < in.count(); i++) {
-        pair = in[i].split("=");
-        if(!pair[0].isEmpty() && !pair[1].isEmpty()) {
-            if(pair[1].endsWith("eq"))
-                pair[1]=pair[1].chopped(2) + "=";
-            shortcuts.insert(pair[1], pair[0]);
+        QString entry = in[i];
+        // "context|action=key"; legacy entries lack the "context|" prefix and were
+        // active everywhere, so they are seeded into both contexts.
+        bool legacy = !entry.contains('|');
+        QString ctxName;
+        if(!legacy) {
+            ctxName = entry.section('|', 0, 0);
+            entry = entry.section('|', 1);
+        }
+        QStringList pair = entry.split("=");
+        if(pair.size() < 2 || pair[0].isEmpty() || pair[1].isEmpty())
+            continue;
+        if(pair[1].endsWith("eq"))
+            pair[1] = pair[1].chopped(2) + "=";
+        if(legacy) {
+            shortcuts[MODE_DOCUMENT].insert(pair[1], pair[0]);
+            shortcuts[MODE_FOLDERVIEW].insert(pair[1], pair[0]);
+        } else {
+            ViewMode ctx = (ctxName == "folderview") ? MODE_FOLDERVIEW : MODE_DOCUMENT;
+            shortcuts[ctx].insert(pair[1], pair[0]);
         }
     }
     settings->settingsConf->endGroup();
 }
 
-void Settings::saveShortcuts(const QMap<QString, QString> &shortcuts) {
+void Settings::saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     settings->settingsConf->beginGroup("Controls");
-    QMapIterator<QString, QString> i(shortcuts);
     QStringList out;
-    while(i.hasNext()) {
-        i.next();
-        if(i.key().endsWith("="))
-            out << i.value() + "=" + i.key().chopped(1) + "eq";
-        else
-            out << i.value() + "=" + i.key();
+    for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
+        const QString ctxName = (ctx.key() == MODE_FOLDERVIEW) ? "folderview" : "document";
+        QMapIterator<QString, QString> i(ctx.value());
+        while(i.hasNext()) {
+            i.next();
+            const QString encodedKey = i.key().endsWith("=") ? i.key().chopped(1) + "eq" : i.key();
+            out << ctxName + "|" + i.value() + "=" + encodedKey;
+        }
     }
     settings->settingsConf->setValue("shortcuts", out);
     settings->settingsConf->endGroup();

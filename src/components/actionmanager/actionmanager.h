@@ -23,16 +23,29 @@ class ActionManager : public QObject {
 public:
     static ActionManager* getInstance();
     ~ActionManager();
+    // Shortcuts are scoped to a context (the active ViewMode). The same key may
+    // map to different actions in different contexts; there is no global fallback.
+    using ContextMap = QMap<QString, QString>;                 // <shortcut, action>
+    using ShortcutMap = QMap<ViewMode, ContextMap>;            // context -> bindings
+
+    // The active context is tracked here and used by processEvent(). It is kept in
+    // sync with the visible screen by CentralWidget.
+    void setContext(ViewMode context);
+    ViewMode currentContext() const;
+    static QString contextToString(ViewMode context);
+    static ViewMode contextFromString(const QString &name);
+
     bool processEvent(QInputEvent*);
-    void addShortcut(const QString &keys, const QString &action);
+    void addShortcut(ViewMode context, const QString &keys, const QString &action);
     void resetDefaults();
     void resetDefaults(QString action);
-    QString actionForShortcut(const QString &keys);
-    const QString shortcutForAction(QString action);
+    QString actionForShortcut(ViewMode context, const QString &keys);
+    const QString shortcutForAction(ViewMode context, QString action);
+    // Returns every shortcut bound to action across all contexts (used for key filters).
     const QList<QString> shortcutsForAction(QString action);
     QStringList actionList();
-    const QMap<QString,QString>& allShortcuts();
-    void removeShortcut(const QString &keys);
+    const ShortcutMap& allShortcuts();
+    void removeShortcut(ViewMode context, const QString &keys);
     void removeAllShortcuts();
     void removeAllShortcuts(QString actionName);
     QString keyForNativeScancode(quint32 scanCode);
@@ -42,13 +55,14 @@ public slots:
     bool invokeAction(const QString &actionName);
 private:
     explicit ActionManager(QObject *parent = nullptr);
-    QMap<QString, QString> defaults, shortcuts; // <shortcut, action>
+    ShortcutMap defaults, shortcuts;
+    ViewMode context = MODE_DOCUMENT;
 
     static void initDefaults();
     static void initActions();
     static void initShortcuts();
     QString modifierKeys(QEvent *event);
-    bool invokeActionForShortcut(const QString &action);
+    bool invokeActionForShortcut(ViewMode context, const QString &shortcut);
     void validateShortcuts();
     void readShortcuts();
     ActionType validateAction(const QString &actionName);

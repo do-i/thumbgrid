@@ -23,8 +23,10 @@ public:
     ~ShortcutCreatorDialog();
     QString selectedAction();
     QString selectedShortcut();
+    ViewMode selectedContext();
     void setAction(QString);
     void setShortcut(QString);
+    void setContext(ViewMode);
 
 private slots:
     void onShortcutEdited();

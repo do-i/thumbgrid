@@ -7,6 +7,13 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle("Add shortcut");
+
+    // Each shortcut belongs to one context (screen). The userData holds the stable
+    // context token written to disk; see ActionManager::contextToString().
+    ui->contextComboBox->addItem(tr("Document"), ActionManager::contextToString(MODE_DOCUMENT));
+    ui->contextComboBox->addItem(tr("Folder"), ActionManager::contextToString(MODE_FOLDERVIEW));
+    ui->contextComboBox->setCurrentIndex(0);
+
     actionList = appActions->getList();
     scriptList = scriptManager->scriptNames();
 
@@ -32,8 +39,13 @@ QString ShortcutCreatorDialog::selectedShortcut() {
     return ui->sequenceEdit->sequence();
 }
 
+ViewMode ShortcutCreatorDialog::selectedContext() {
+    return ActionManager::contextFromString(ui->contextComboBox->currentData().toString());
+}
+
 void ShortcutCreatorDialog::onShortcutEdited() {
-    QString action = actionManager->actionForShortcut(ui->sequenceEdit->sequence());
+    // A shortcut only conflicts within the same context, so scope the check.
+    QString action = actionManager->actionForShortcut(selectedContext(), ui->sequenceEdit->sequence());
     if(!action.isEmpty())
         ui->warningLabel->setText("This shortcut is used for action: " + action + ". Replace?");
     else
@@ -54,4 +66,10 @@ void ShortcutCreatorDialog::setAction(QString action) {
 
 void ShortcutCreatorDialog::setShortcut(QString shortcut) {
     ui->sequenceEdit->setText(shortcut);
+}
+
+void ShortcutCreatorDialog::setContext(ViewMode context) {
+    int index = ui->contextComboBox->findData(ActionManager::contextToString(context));
+    if(index != -1)
+        ui->contextComboBox->setCurrentIndex(index);
 }

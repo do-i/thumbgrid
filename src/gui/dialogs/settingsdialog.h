@@ -50,8 +50,11 @@ private:
     Ui::SettingsDialog *ui;
 
     void saveShortcuts();
-    void addShortcutToTable(const QString &action, const QString &shortcut);
+    void addShortcutToTable(const QString &action, const QString &shortcut, ViewMode context);
     void addScriptToList(const QString &name);
+    // The shortcut table carries a Context column (stable token in Qt::UserRole).
+    ViewMode contextAtRow(int row);
+    void selectShortcutRow(const QString &shortcut, ViewMode context);
 
     void setupSidebar();
     void removeShortcutAt(int row);

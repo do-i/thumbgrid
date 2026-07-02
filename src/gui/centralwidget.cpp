@@ -1,4 +1,5 @@
 #include "centralwidget.h"
+#include "components/actionmanager/actionmanager.h"
 
 CentralWidget::CentralWidget(std::shared_ptr<DocumentWidget> _docWidget, std::shared_ptr<FolderViewProxy> _folderView, QWidget *parent)
     : QStackedWidget(parent),
@@ -20,6 +21,8 @@ void CentralWidget::showDocumentView() {
     if(mode == MODE_DOCUMENT)
         return;
     mode = MODE_DOCUMENT;
+    if(actionManager)
+        actionManager->setContext(mode);
     setCurrentIndex(0);
     widget(0)->setFocus();
     documentView->viewWidget()->startPlayback();
@@ -30,6 +33,8 @@ void CentralWidget::showFolderView() {
         return;
 
     mode = MODE_FOLDERVIEW;
+    if(actionManager)
+        actionManager->setContext(mode);
     setCurrentIndex(1);
     widget(1)->show();
     widget(1)->setFocus();

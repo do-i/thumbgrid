@@ -556,11 +556,30 @@ int SettingsDialog::selectedThemeTid() const {
 void SettingsDialog::readShortcuts() {
     ui->shortcutsTableWidget->clearContents();
     ui->shortcutsTableWidget->setRowCount(0);
-    const QMap<QString, QString> shortcuts = actionManager->allShortcuts();
-    QMapIterator<QString, QString> i(shortcuts);
-    while(i.hasNext()) {
-        i.next();
-        addShortcutToTable(i.value(), i.key());
+    const ActionManager::ShortcutMap &shortcuts = actionManager->allShortcuts();
+    for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
+        QMapIterator<QString, QString> i(ctx.value());
+        while(i.hasNext()) {
+            i.next();
+            addShortcutToTable(i.value(), i.key(), ctx.key());
+        }
+    }
+}
+//------------------------------------------------------------------------------
+ViewMode SettingsDialog::contextAtRow(int row) {
+    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, 2);
+    return item ? ActionManager::contextFromString(item->data(Qt::UserRole).toString())
+                : MODE_DOCUMENT;
+}
+//------------------------------------------------------------------------------
+// Selects the row matching both the shortcut and its context (the same key may
+// appear once per context).
+void SettingsDialog::selectShortcutRow(const QString &shortcut, ViewMode context) {
+    for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
+        if(ui->shortcutsTableWidget->item(i, 1)->text() == shortcut && contextAtRow(i) == context) {
+            ui->shortcutsTableWidget->selectRow(i);
+            return;
+        }
     }
 }
 //------------------------------------------------------------------------------
@@ -633,17 +652,23 @@ void SettingsDialog::removeScript() {
 }
 //------------------------------------------------------------------------------
 // does not check if the shortcut already there
-void SettingsDialog::addShortcutToTable(const QString &action, const QString &shortcut) {
+void SettingsDialog::addShortcutToTable(const QString &action, const QString &shortcut, ViewMode context) {
     if(action.isEmpty() || shortcut.isEmpty())
         return;
 
-    ui->shortcutsTableWidget->setRowCount(ui->shortcutsTableWidget->rowCount() + 1);
+    int row = ui->shortcutsTableWidget->rowCount();
+    ui->shortcutsTableWidget->setRowCount(row + 1);
     QTableWidgetItem *actionItem = new QTableWidgetItem(action);
     actionItem->setTextAlignment(Qt::AlignCenter);
-    ui->shortcutsTableWidget->setItem(ui->shortcutsTableWidget->rowCount() - 1, 0, actionItem);
+    ui->shortcutsTableWidget->setItem(row, 0, actionItem);
     QTableWidgetItem *shortcutItem = new QTableWidgetItem(shortcut);
     shortcutItem->setTextAlignment(Qt::AlignCenter);
-    ui->shortcutsTableWidget->setItem(ui->shortcutsTableWidget->rowCount() - 1, 1, shortcutItem);
+    ui->shortcutsTableWidget->setItem(row, 1, shortcutItem);
+    QTableWidgetItem *contextItem = new QTableWidgetItem(
+        (context == MODE_FOLDERVIEW) ? tr("Folder") : tr("Document"));
+    contextItem->setTextAlignment(Qt::AlignCenter);
+    contextItem->setData(Qt::UserRole, ActionManager::contextToString(context));
+    ui->shortcutsTableWidget->setItem(row, 2, contextItem);
     // EFFICIENCY
     ui->shortcutsTableWidget->sortByColumn(0, Qt::AscendingOrder);
 }
@@ -652,17 +677,17 @@ void SettingsDialog::addShortcut() {
     ShortcutCreatorDialog w;
     if(!w.exec())
         return;
+    // Only replace a binding for the same key in the same context; the same key in
+    // the other context is a separate, valid binding.
     for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-        if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut())
+        if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut()
+           && contextAtRow(i) == w.selectedContext()) {
             removeShortcutAt(i);
+            break;
+        }
     }
-    addShortcutToTable(w.selectedAction(), w.selectedShortcut());
-    // select
-    auto items = ui->shortcutsTableWidget->findItems(w.selectedShortcut(), Qt::MatchExactly);
-    if(items.count()) {
-        int newRow = ui->shortcutsTableWidget->row(items.at(0));
-        ui->shortcutsTableWidget->selectRow(newRow);
-    }
+    addShortcutToTable(w.selectedAction(), w.selectedShortcut(), w.selectedContext());
+    selectShortcutRow(w.selectedShortcut(), w.selectedContext());
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::removeShortcutAt(int row) {
@@ -677,23 +702,23 @@ void SettingsDialog::editShortcut(int row) {
         w.setWindowTitle(tr("Edit shortcut"));
         w.setAction(ui->shortcutsTableWidget->item(row, 0)->text());
         w.setShortcut(ui->shortcutsTableWidget->item(row, 1)->text());
+        w.setContext(contextAtRow(row));
         if(!w.exec())
             return;
         // remove itself
         removeShortcutAt(row);
-        // remove anything we are replacing
+        // remove anything we are replacing (same key, same context)
         for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-            if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut())
+            if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut()
+               && contextAtRow(i) == w.selectedContext()) {
                 removeShortcutAt(i);
+                break;
+            }
         }
         // re-add
-        addShortcutToTable(w.selectedAction(), w.selectedShortcut());
+        addShortcutToTable(w.selectedAction(), w.selectedShortcut(), w.selectedContext());
         // re-select
-        auto items = ui->shortcutsTableWidget->findItems(w.selectedShortcut(), Qt::MatchExactly);
-        if(items.count()) {
-            int newRow = ui->shortcutsTableWidget->row(items.at(0));
-            ui->shortcutsTableWidget->selectRow(newRow);
-        }
+        selectShortcutRow(w.selectedShortcut(), w.selectedContext());
     }
 }
 //------------------------------------------------------------------------------
@@ -708,7 +733,8 @@ void SettingsDialog::removeShortcut() {
 void SettingsDialog::saveShortcuts() {
     actionManager->removeAllShortcuts();
     for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-        actionManager->addShortcut(ui->shortcutsTableWidget->item(i, 1)->text(),
+        actionManager->addShortcut(contextAtRow(i),
+                                   ui->shortcutsTableWidget->item(i, 1)->text(),
                                    ui->shortcutsTableWidget->item(i, 0)->text());
     }
 }
