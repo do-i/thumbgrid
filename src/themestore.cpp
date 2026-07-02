@@ -82,6 +82,26 @@ ColorScheme ThemeStore::colorScheme(ColorSchemes name) {
             base.overlay = "#1a1a1a";
             base.tid = static_cast<int>(name);
             break;
+        case COLORS_YELLOW:
+            base.accent = "#99c1f1";
+            base.background = "#deddda";
+            base.background_fullscreen = "#9a9996";
+            base.folderview = "#deddda";
+            base.folderview_topbar = "#ffffff";
+            base.folderview_cell_bg = "#deddda";
+            base.folderview_label_bg = "#c0bfbc";
+            base.folderview_parent_icon = "#26a269";
+            base.folderview_selected_label_bg = "#99c1f1";
+            base.folderview_selection = "#badff8";
+            base.icons = "#f3ed9d";
+            base.overlay = "#f8e45c";
+            base.overlay_text = "#d2d2d2";
+            base.scrollbar = "#c0bfbc";
+            base.text = "#3d3846";
+            base.widget = "#e9cbcb";
+            base.widget_border = "#c3c3c3";
+            base.tid = static_cast<int>(name);
+            break;
     }
     return ColorScheme(base);
 }

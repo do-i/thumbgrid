@@ -32,6 +32,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
             case 2: setColorScheme(ThemeStore::colorScheme(COLORS_DARKBLUE)); break;
             case 3: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));    break;
             case 4: setColorScheme(mCustomColors);                            break;
+            case 5: setColorScheme(ThemeStore::colorScheme(COLORS_YELLOW));   break;
         }
         mPrevThemeIndex = index;
     });
@@ -481,6 +482,7 @@ void SettingsDialog::setColorScheme(ColorScheme colors) {
         case COLORS_DARK:      ui->themeSelectorComboBox->setCurrentIndex(1); break;
         case COLORS_DARKBLUE:  ui->themeSelectorComboBox->setCurrentIndex(2); break;
         case COLORS_CUSTOM:    ui->themeSelectorComboBox->setCurrentIndex(4); break;
+        case COLORS_YELLOW:    ui->themeSelectorComboBox->setCurrentIndex(5); break;
         default:               ui->themeSelectorComboBox->setCurrentIndex(-1); break;
     }
     ui->colorSelectorAccent->setColor(colors.accent);
@@ -544,6 +546,7 @@ int SettingsDialog::selectedThemeTid() const {
         case 2: return COLORS_DARKBLUE;
         case 3: return COLORS_LIGHT;
         case 4: return COLORS_CUSTOM;
+        case 5: return COLORS_YELLOW;
         default: return COLORS_CUSTOM;
     }
 }

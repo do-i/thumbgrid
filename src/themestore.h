@@ -10,7 +10,10 @@ enum ColorSchemes {
     COLORS_BLACK,
     COLORS_DARK,
     COLORS_DARKBLUE,
-    COLORS_CUSTOM
+    COLORS_CUSTOM,
+    // 6 is reserved: an interim build stored COLORS_CUSTOM there and
+    // normalizedThemeTid() still folds 5/6 into COLORS_CUSTOM.
+    COLORS_YELLOW = 7
 };
 
 struct BaseColorScheme {
