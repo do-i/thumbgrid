@@ -1340,6 +1340,14 @@ void Settings::setSortFolders(bool mode) {
     settings->settingsConf->setValue("sortFolders", mode);
 }
 //------------------------------------------------------------------------------
+bool Settings::allowBrowseRoot() {
+    return settings->settingsConf->value("allowBrowseRoot", false).toBool();
+}
+
+void Settings::setAllowBrowseRoot(bool mode) {
+    settings->settingsConf->setValue("allowBrowseRoot", mode);
+}
+//------------------------------------------------------------------------------
 bool Settings::trackpadDetection() {
     return settings->settingsConf->value("trackpadDetection", true).toBool();
 }

@@ -318,6 +318,8 @@ public:
     void setUnlockMinZoom(bool mode);
     bool sortFolders();
     void setSortFolders(bool mode);
+    bool allowBrowseRoot();
+    void setAllowBrowseRoot(bool mode);
     bool trackpadDetection();
     void setTrackpadDetection(bool mode);
 

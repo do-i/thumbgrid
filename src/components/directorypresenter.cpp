@@ -448,7 +448,14 @@ bool DirectoryPresenter::hasParentDir() const {
     QDir dir(model->directoryPath());
     if(QDir::cleanPath(dir.absolutePath()) == QDir::cleanPath(QDir::rootPath()))
         return false;
-    return dir.cdUp();
+    if(!dir.cdUp())
+        return false;
+    // With root browsing disabled the parent (now in dir) may be the unviewable
+    // root - in that case there is no reachable parent to show a tile for.
+    if(!settings->allowBrowseRoot() &&
+       QDir::cleanPath(dir.absolutePath()) == QDir::cleanPath(QDir::rootPath()))
+        return false;
+    return true;
 }
 
 int DirectoryPresenter::parentOffset() const {
@@ -461,9 +468,12 @@ QString DirectoryPresenter::parentDirPath() const {
     QDir dir(model->directoryPath());
     if(QDir::cleanPath(dir.absolutePath()) == QDir::cleanPath(QDir::rootPath()))
         return "";
-    if(dir.cdUp())
-        return dir.absolutePath();
-    return "";
+    if(!dir.cdUp())
+        return "";
+    if(!settings->allowBrowseRoot() &&
+       QDir::cleanPath(dir.absolutePath()) == QDir::cleanPath(QDir::rootPath()))
+        return "";
+    return dir.absolutePath();
 }
 
 int DirectoryPresenter::realObjectCount() const {

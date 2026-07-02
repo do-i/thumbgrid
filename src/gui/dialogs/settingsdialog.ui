@@ -1622,6 +1622,13 @@
                       </property>
                      </widget>
                     </item>
+                    <item>
+                     <widget class="QCheckBox" name="allowBrowseRootCheckBox">
+                      <property name="text">
+                       <string>Allow browsing the root folder (/)</string>
+                      </property>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                  </layout>

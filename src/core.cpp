@@ -1562,7 +1562,8 @@ bool Core::loadPath(QString path) {
     QFileInfo fileInfo(path);
     if(fileInfo.isDir()) {
         state.directoryPath = QDir(path).absolutePath();
-        if(QDir::cleanPath(state.directoryPath) == QDir::cleanPath(QDir::rootPath())) {
+        if(!settings->allowBrowseRoot() &&
+           QDir::cleanPath(state.directoryPath) == QDir::cleanPath(QDir::rootPath())) {
             mw->showMessage(tr("Cannot view root folder."), 2200);
             return false;
         }
@@ -1673,6 +1674,12 @@ void Core::loadParentDir() {
         return;
     }
     QFileInfo parentDir(currentDir.absolutePath());
+    // With root browsing disabled, the parent of e.g. /home is the unviewable
+    // root - treat it as the ceiling and no-op instead of routing into
+    // loadPath() and flashing a misleading "Cannot view root folder" toast.
+    if(!settings->allowBrowseRoot() &&
+       QDir::cleanPath(parentDir.absoluteFilePath()) == QDir::cleanPath(QDir::rootPath()))
+        return;
     if(parentDir.exists() && parentDir.isReadable()) {
         QString childPath = currentDir.absoluteFilePath();
         loadPath(parentDir.absoluteFilePath());
