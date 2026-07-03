@@ -274,6 +274,10 @@ void MW::showVideo(QString file) {
     viewerWidget->showVideo(file);
 }
 
+void MW::showText(QString file) {
+    viewerWidget->showText(file);
+}
+
 void MW::showContextMenu() {
     viewerWidget->showContextMenu();
 }

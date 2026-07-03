@@ -73,3 +73,11 @@ add_test(
     NAME "Shortcut contexts persist and legacy configs migrate"
     COMMAND thumbgrid_shortcut_context_persistence_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_other_file_types_test
+    behavior/test_other_file_types_toggle.cpp
+)
+add_test(
+    NAME "Other file types can be shown and text files open in the viewer"
+    COMMAND thumbgrid_other_file_types_test
+)

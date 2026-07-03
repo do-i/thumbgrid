@@ -70,6 +70,7 @@ install_full_deps() {
             qt6-tools-dev-tools
             qt6-image-formats-plugins
             libqt6svg6-dev
+            libkf6syntaxhighlighting-dev
             libexiv2-dev
             libopencv-dev
             libmpv-dev
@@ -86,6 +87,7 @@ install_full_deps() {
             qt6-qtimageformats
             qt6-qtsvg-devel
             qt6-qttools-devel
+            kf6-syntax-highlighting-devel
             exiv2-devel
             opencv-devel
             mpv-libs-devel
@@ -101,6 +103,7 @@ install_full_deps() {
             qt6-imageformats
             qt6-svg
             qt6-tools
+            syntax-highlighting
             exiv2
             opencv
             mpv
@@ -116,6 +119,7 @@ install_full_deps() {
             qt6-imageformats-devel
             qt6-svg-devel
             qt6-tools-devel
+            kf6-syntax-highlighting-devel
             libexiv2-devel
             opencv-devel
             mpv-devel
@@ -131,6 +135,7 @@ install_full_deps() {
             qt6-qtimageformats
             qt6-qtsvg-dev
             qt6-qttools-dev
+            syntax-highlighting-dev
             exiv2-dev
             opencv-dev
             mpv-dev
@@ -142,6 +147,7 @@ install_full_deps() {
             cmake
             pkg-config
             qt
+            ksyntaxhighlighting
             exiv2
             opencv
             mpv

@@ -3,6 +3,7 @@
 #include "gui/customwidgets/floatingwidgetcontainer.h"
 #include <QVBoxLayout>
 #include "gui/viewers/imageviewerv2.h"
+#include "gui/viewers/textviewer.h"
 #include "gui/viewers/videoplayerinitproxy.h"
 #include "gui/overlays/videocontrolsproxy.h"
 #include "gui/overlays/zoomindicatoroverlayproxy.h"
@@ -12,6 +13,7 @@
 enum CurrentWidget {
     IMAGEVIEWER,
     VIDEOPLAYER,
+    TEXTVIEWER,
     UNSET
 };
 
@@ -39,6 +41,7 @@ private:
     QVBoxLayout layout;
     std::unique_ptr<ImageViewerV2> imageViewer;
     std::unique_ptr<VideoPlayerInitProxy> videoPlayer;
+    std::unique_ptr<TextViewer> textViewer;
     std::unique_ptr<ContextMenu> contextMenu;
     VideoControlsProxyWrapper *videoControls;
     ZoomIndicatorOverlayProxy *zoomIndicator;
@@ -46,6 +49,7 @@ private:
 
     void enableImageViewer();
     void enableVideoPlayer();
+    void enableTextViewer();
 
     CurrentWidget currentWidget;
     bool mInteractionEnabled, mWaylandCursorWorkaround;
@@ -55,6 +59,7 @@ private:
 
     void disableImageViewer();
     void disableVideoPlayer();
+    void disableTextViewer();
 
     QRect videoControlsArea();
 
@@ -92,6 +97,7 @@ signals:
 
 public slots:
     bool showVideo(QString file);
+    bool showText(QString file);
     void stopPlayback();
     void setFitMode(ImageFitMode mode);
     ImageFitMode fitMode();

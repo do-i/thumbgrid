@@ -44,6 +44,10 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     videoPlayer.reset(new VideoPlayerInitProxy(this));
     layout.addWidget(videoPlayer.get());
     videoPlayer->hide();
+
+    textViewer.reset(new TextViewer(this));
+    layout.addWidget(textViewer.get());
+    textViewer->hide();
     videoControls = new VideoControlsProxyWrapper(this);
 
     // tmp no wrapper
@@ -90,6 +94,7 @@ QSize ViewerWidget::sourceSize() {
 void ViewerWidget::enableImageViewer() {
     if(currentWidget != IMAGEVIEWER) {
         disableVideoPlayer();
+        disableTextViewer();
         videoControls->setMode(PLAYBACK_ANIMATION);
         connect(imageViewer.get(), &ImageViewerV2::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         connect(imageViewer.get(), &ImageViewerV2::frameChanged,    videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
@@ -103,6 +108,7 @@ void ViewerWidget::enableImageViewer() {
 void ViewerWidget::enableVideoPlayer() {
     if(currentWidget != VIDEOPLAYER) {
         disableImageViewer();
+        disableTextViewer();
         videoControls->setMode(PLAYBACK_VIDEO);
         connect(videoPlayer.get(), &VideoPlayer::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         connect(videoPlayer.get(), &VideoPlayer::positionChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
@@ -121,6 +127,25 @@ void ViewerWidget::disableImageViewer() {
         disconnect(imageViewer.get(), &ImageViewerV2::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         disconnect(imageViewer.get(), &ImageViewerV2::frameChanged,    videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         disconnect(imageViewer.get(), &ImageViewerV2::animationPaused, videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
+    }
+}
+
+// hide other widgets, show textViewer
+void ViewerWidget::enableTextViewer() {
+    if(currentWidget != TEXTVIEWER) {
+        disableImageViewer();
+        disableVideoPlayer();
+        videoControls->hide();
+        textViewer->show();
+        currentWidget = TEXTVIEWER;
+    }
+}
+
+void ViewerWidget::disableTextViewer() {
+    if(currentWidget == TEXTVIEWER) {
+        currentWidget = UNSET;
+        textViewer->clear();
+        textViewer->hide();
     }
 }
 
@@ -260,6 +285,15 @@ bool ViewerWidget::showVideo(QString file) {
     showCursor();
     hideCursorTimed(false);
     return true;
+}
+
+bool ViewerWidget::showText(QString file) {
+    stopPlayback();
+    enableTextViewer();
+    bool ok = textViewer->showFile(file);
+    showCursor();
+    hideCursorTimed(false);
+    return ok;
 }
 
 // Called when navigating to another item, before the next one is loaded (the

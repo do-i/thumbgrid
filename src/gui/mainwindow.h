@@ -72,6 +72,7 @@ public:
     void showImage(std::unique_ptr<QPixmap> pixmap);
     void showAnimation(std::shared_ptr<QMovie> movie);
     void showVideo(QString file);
+    void showText(QString file);
 
     void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, int imageDepth, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
     void setExifInfo(QMap<QString, QString>);

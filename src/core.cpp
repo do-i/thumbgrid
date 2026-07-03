@@ -354,6 +354,16 @@ void Core::onModelLoaded() {
 }
 
 void Core::onDirectoryViewFileActivated(QString filePath) {
+    // with showOtherFileTypes the grid can contain files thumbgrid cannot
+    // render; keep the user in the folder view with a clear message instead of
+    // switching to an empty document view
+    if(settings->showOtherFileTypes()) {
+        DocumentInfo info(filePath);
+        if(info.type() == DocumentType::NONE) {
+            mw->showMessage(tr("Cannot display this file type"));
+            return;
+        }
+    }
     loadPath(filePath);
 }
 
@@ -1859,9 +1869,12 @@ void Core::jumpToLast() {
 }
 
 void Core::onLoadFailed(const QString &path) {
-    mw->showMessage(tr("Load failed: ") + path);
-    if(path == state.currentFilePath)
-        mw->closeImage();
+    // background preloads of unviewable neighbors also fail; only report
+    // failures for the file the user is actually looking at
+    if(path != state.currentFilePath)
+        return;
+    mw->showMessage(tr("Cannot display file: ") + path);
+    mw->closeImage();
 }
 
 void Core::onModelItemReady(std::shared_ptr<Image> img, const QString &path) {
@@ -1918,6 +1931,8 @@ void Core::guiSetImage(std::shared_ptr<Image> img) {
         // affects only initial startup (e.g. we open webm from file manager)
         showGui();
         mw->showVideo(video->filePath());
+    } else if(type == TEXT) {
+        mw->showText(img->filePath());
     }
     img->isEdited() ? mw->showSaveOverlay() : mw->hideSaveOverlay();
     mw->setExifInfo(settings->showFullMetadata() ? img->getAllTags() : img->getExifTags());

@@ -100,6 +100,16 @@ else()
 endif()
 target_link_libraries(${THUMBGRID_APP_TARGET} PUBLIC ${OpenCV_LIBS})
 target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_OPENCV)
+# optional: KDE KSyntaxHighlighting for the text viewer; without it the
+# built-in fallback highlighter (textsyntaxhighlighter.cpp) is used
+find_package(KF6SyntaxHighlighting QUIET)
+if(KF6SyntaxHighlighting_FOUND)
+    target_link_libraries(${THUMBGRID_APP_TARGET} PUBLIC KF6::SyntaxHighlighting)
+    target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_KSYNTAXHIGHLIGHTING)
+    message(STATUS "Using KSyntaxHighlighting for the text viewer")
+else()
+    message(STATUS "KF6SyntaxHighlighting not found - text viewer uses the built-in highlighter")
+endif()
 
 # generate proper GUI program on specified platform
 if(WIN32) # Check if we are on Windows
