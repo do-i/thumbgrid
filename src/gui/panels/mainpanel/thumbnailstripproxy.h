@@ -38,6 +38,7 @@ protected:
 
 signals:
     void itemActivated(int) override;
+    void selectionChanged();
     void thumbnailsRequested(QList<int>, int, bool, bool) override;
     void draggedOut() override;
     void draggedToBookmarks(QList<int>) override;

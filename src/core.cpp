@@ -1843,6 +1843,8 @@ void Core::startSlideshowTimer() {
     // start timer only for static images or single frame gifs
     // for proper gifs and video we get a playbackFinished() signal
     auto img = model->getImage(state.currentFilePath);
+    if(!img) // unviewable file (e.g. with showOtherFileTypes enabled)
+        return;
     if(img->type() == STATIC) {
         slideshowTimer.start();
     } else if(img->type() == ANIMATED) {
