@@ -393,14 +393,23 @@ void ThumbnailView::loadVisibleThumbnails() {
             visibleItems = scene.items(visRect, Qt::IntersectsItemBoundingRect, Qt::DescendingOrder);
         visibleItems.append(scene.items(offRectBack,  Qt::IntersectsItemBoundingRect, Qt::DescendingOrder));
         visibleItems.append(scene.items(offRectFront, Qt::IntersectsItemBoundingRect, Qt::AscendingOrder));
-        // select
+        // O(1) widget->index lookups; QList::indexOf per item is O(n) and this
+        // runs on every scroll tick, which hurts with thousands of items
+        QHash<const QGraphicsItem*, int> indexLookup;
+        indexLookup.reserve(thumbnails.count());
+        for(int i = 0; i < thumbnails.count(); i++)
+            indexLookup.insert(thumbnails.at(i), i);
+        // select, preserving visibleItems priority order (closest first)
         QList<int> loadList;
+        QSet<int> queuedIndexes;
         for(int i = 0; i < visibleItems.count(); i++) {
             ThumbnailWidget* widget = qgraphicsitem_cast<ThumbnailWidget*>(visibleItems.at(i));
             if(widget && !widget->isLoaded) {
-                int idx = thumbnails.indexOf(widget);
-                if(!loadList.contains(idx))
+                int idx = indexLookup.value(widget, -1);
+                if(idx != -1 && !queuedIndexes.contains(idx)) {
+                    queuedIndexes.insert(idx);
                     loadList.append(idx);
+                }
             }
         }
         // load
@@ -408,8 +417,12 @@ void ThumbnailView::loadVisibleThumbnails() {
             emit thumbnailsRequested(loadList, static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize), mCropThumbnails, false);
         // unload offscreen
         if(settings->unloadThumbs()) {
+            QSet<const QGraphicsItem*> visibleSet;
+            visibleSet.reserve(visibleItems.count());
+            for(const QGraphicsItem *item : visibleItems)
+                visibleSet.insert(item);
             for(int i = 0; i < thumbnails.count(); i++)
-                if(!visibleItems.contains(thumbnails.at(i)))
+                if(!visibleSet.contains(thumbnails.at(i)))
                     thumbnails.at(i)->unsetThumbnail();
         }
     }

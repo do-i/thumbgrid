@@ -94,8 +94,14 @@ private:
     QRegularExpression regex;
     QCollator collator;
     std::vector<FSEntry> fileEntryVec, dirEntryVec;
+    // path -> index lookup tables; kept in sync with the vectors so that
+    // indexOfFile()/containsFile() are O(1) instead of a linear scan
+    // (those are hot: called once per thumbnail while scrolling large dirs)
+    QHash<QString, int> fileIndexCache, dirIndexCache;
     const FSEntry defaultEntry;
     QString mDirectoryPath;
+    void rebuildFileIndexCache();
+    void rebuildDirIndexCache();
 
     DirectoryWatcher* watcher;
     void readSettings();
