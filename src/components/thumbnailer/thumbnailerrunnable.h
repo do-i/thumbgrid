@@ -27,6 +27,8 @@ public:
     static std::shared_ptr<Thumbnail> generate(ThumbnailCache *cache, QString path, int size, bool crop, bool force);
     static std::shared_ptr<Thumbnail> generateDir(ThumbnailCache *cache, QString path, int size, bool crop, bool force,
                                                   bool previewFit, bool showHidden, const QImage &iconBase, const QString &colorId);
+    static std::shared_ptr<Thumbnail> generateFileTypeIcon(const DocumentInfo &imgInfo, int size);
+    static QImage renderFileTypeIcon(const QString &suffix, bool viewable, int size);
 private:
     static QString generateIdString(QString path, int size, bool crop);
     static QString generateDirIdString(QString path, int size, bool previewFit, const QString &colorId);

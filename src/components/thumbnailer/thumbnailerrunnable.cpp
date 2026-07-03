@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QImageReader>
 #include <QPainter>
+#include <QPainterPath>
 #include <QSet>
 
 namespace {
@@ -77,10 +78,10 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
     }
 
     if(!image) {
-        if(imgInfo.type() == DocumentType::NONE) {
-            std::shared_ptr<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), "", size, nullptr));
-            return thumbnail;
-        }
+        // non-media entries get a rendered file-type icon instead of a decoded picture;
+        // it is cheap to draw, so it skips the disk cache entirely
+        if(imgInfo.type() == DocumentType::TEXT || imgInfo.type() == DocumentType::NONE)
+            return generateFileTypeIcon(imgInfo, size);
         std::pair<QImage*, QSize> pair;
         if(imgInfo.type() == VIDEO)
             pair = createVideoThumbnail(path, size, crop);
@@ -355,6 +356,132 @@ void ThumbnailerRunnable::drawDirPreview(QImage &base, const QList<QImage> &imag
             painter.drawImage(cell, scaled, source);
         }
     }
+}
+
+std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateFileTypeIcon(const DocumentInfo &imgInfo, int size) {
+    bool viewable = (imgInfo.type() == DocumentType::TEXT);
+    QString suffix = QFileInfo(imgInfo.fileName()).suffix().toLower();
+    QImage icon = renderFileTypeIcon(suffix, viewable, size);
+    auto pixmap = new QPixmap(QPixmap::fromImage(icon));
+    pixmap->setDevicePixelRatio(qApp->devicePixelRatio());
+    QString label;
+    if(viewable)
+        label = suffix.isEmpty() ? QObject::tr("Text file") : suffix.toUpper() + QObject::tr(" file");
+    else
+        label = QObject::tr("Unknown format");
+    return std::shared_ptr<Thumbnail>(
+        new Thumbnail(imgInfo.fileName(), label, size, std::shared_ptr<QPixmap>(pixmap), false));
+}
+
+// Generic "document page" icon with a folded corner. Text files get faux text
+// lines plus an extension badge (e.g. [TXT]); files thumbgrid cannot render get
+// a dimmed page with a big question mark instead. Uses only QImage + QPainter,
+// so it is safe to run on thumbnailer worker threads.
+QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewable, int size) {
+    const ColorScheme &scheme = settings->colorScheme();
+    QImage icon(size, size, QImage::Format_ARGB32_Premultiplied);
+    icon.fill(Qt::transparent);
+
+    QPainter p(&icon);
+    p.setRenderHint(QPainter::Antialiasing);
+
+    // page geometry
+    qreal pageW = size * 0.54;
+    qreal pageH = size * 0.72;
+    QRectF page((size - pageW) / 2.0, (size - pageH) / 2.0, pageW, pageH);
+    qreal fold = pageW * 0.26;
+    qreal radius = pageW * 0.07;
+
+    // nudge the page away from the grid background so the glyph reads clearly
+    // on both dark (lighten) and light (darken) themes
+    QColor pageFill = scheme.widget;
+    qreal pageLum = 0.299 * pageFill.redF() + 0.587 * pageFill.greenF() + 0.114 * pageFill.blueF();
+    pageFill = (pageLum < 0.5) ? pageFill.lighter(160) : pageFill.darker(108);
+    QColor pageOutline = scheme.widget_border;
+    QColor lineColor = scheme.text_lc2.isValid() ? scheme.text_lc2 : scheme.text;
+    if(!viewable)
+        pageFill.setAlphaF(pageFill.alphaF() * 0.6);
+
+    // page body with the top-right corner cut off
+    QPainterPath pagePath;
+    pagePath.moveTo(page.left() + radius, page.top());
+    pagePath.lineTo(page.right() - fold, page.top());
+    pagePath.lineTo(page.right(), page.top() + fold);
+    pagePath.lineTo(page.right(), page.bottom() - radius);
+    pagePath.quadTo(page.right(), page.bottom(), page.right() - radius, page.bottom());
+    pagePath.lineTo(page.left() + radius, page.bottom());
+    pagePath.quadTo(page.left(), page.bottom(), page.left(), page.bottom() - radius);
+    pagePath.lineTo(page.left(), page.top() + radius);
+    pagePath.quadTo(page.left(), page.top(), page.left() + radius, page.top());
+    p.setPen(QPen(pageOutline, qMax(1.0, size / 96.0)));
+    p.setBrush(pageFill);
+    p.drawPath(pagePath);
+
+    // folded corner triangle
+    QPainterPath foldPath;
+    foldPath.moveTo(page.right() - fold, page.top());
+    foldPath.lineTo(page.right() - fold, page.top() + fold);
+    foldPath.lineTo(page.right(), page.top() + fold);
+    foldPath.closeSubpath();
+    QColor foldFill = pageOutline;
+    foldFill.setAlphaF(0.65);
+    p.setPen(Qt::NoPen);
+    p.setBrush(foldFill);
+    p.drawPath(foldPath);
+
+    if(viewable) {
+        // faux text lines
+        QColor faint = lineColor;
+        faint.setAlphaF(0.35);
+        p.setBrush(faint);
+        qreal lineH = qMax(2.0, pageH * 0.045);
+        qreal lineGap = pageH * 0.115;
+        qreal lineLeft = page.left() + pageW * 0.14;
+        qreal top = page.top() + fold + lineGap * 0.4;
+        qreal maxRight = page.right() - pageW * 0.14;
+        const qreal widths[5] = {0.95, 0.75, 0.9, 0.6, 0.82};
+        for(int i = 0; i < 5; i++) {
+            qreal y = top + i * lineGap;
+            if(y + lineH > page.bottom() - pageH * 0.2)
+                break;
+            QRectF line(lineLeft, y, (maxRight - lineLeft) * widths[i], lineH);
+            p.drawRoundedRect(line, lineH / 2.0, lineH / 2.0);
+        }
+    } else {
+        // big question mark: this file cannot be rendered / viewed
+        QFont markFont;
+        markFont.setBold(true);
+        markFont.setPixelSize(qRound(pageH * 0.42));
+        p.setFont(markFont);
+        p.setPen(lineColor);
+        QRectF markRect = page.adjusted(0, fold * 0.5, 0, 0);
+        p.drawText(markRect, Qt::AlignCenter, "?");
+    }
+
+    // extension badge pill, slightly overlapping the page bottom
+    QString ext = suffix.left(5).toUpper();
+    if(!viewable && ext.isEmpty())
+        ext = "?";
+    if(!ext.isEmpty()) {
+        QFont badgeFont;
+        badgeFont.setBold(true);
+        badgeFont.setPixelSize(qMax(8, qRound(size * 0.11)));
+        p.setFont(badgeFont);
+        QFontMetricsF fm(badgeFont);
+        qreal badgeH = fm.height() * 1.35;
+        qreal badgeW = qMax(fm.horizontalAdvance(ext) + badgeH * 0.9, badgeH * 1.6);
+        QRectF badge((size - badgeW) / 2.0, page.bottom() - badgeH * 0.62, badgeW, badgeH);
+        QColor badgeBg = viewable ? scheme.accent : lineColor;
+        p.setPen(Qt::NoPen);
+        p.setBrush(badgeBg);
+        p.drawRoundedRect(badge, badgeH / 2.0, badgeH / 2.0);
+        // pick badge text color by background luminance
+        qreal lum = 0.299 * badgeBg.redF() + 0.587 * badgeBg.greenF() + 0.114 * badgeBg.blueF();
+        p.setPen(lum > 0.55 ? QColor(25, 25, 25) : QColor(245, 245, 245));
+        p.drawText(badge, Qt::AlignCenter, ext);
+    }
+    p.end();
+    return icon;
 }
 
 std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(QString path, int size, bool squared) {
