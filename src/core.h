@@ -60,6 +60,7 @@ private:
 
     State state;
     bool loopSlideshow, slideshow, shuffle;
+    bool mShowOtherFileTypes = false;
     FolderEndAction folderEndAction;
 
     // components

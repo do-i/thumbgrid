@@ -1395,3 +1395,12 @@ bool Settings::showHiddenFiles() {
 void Settings::setShowHiddenFiles(bool mode) {
     settings->settingsConf->setValue("showHiddenFiles", mode);
 }
+//------------------------------------------------------------------------------
+// show non-media files (text, configs, unknown types) in the folder view
+bool Settings::showOtherFileTypes() {
+    return settings->settingsConf->value("showOtherFileTypes", false).toBool();
+}
+
+void Settings::setShowOtherFileTypes(bool mode) {
+    settings->settingsConf->setValue("showOtherFileTypes", mode);
+}

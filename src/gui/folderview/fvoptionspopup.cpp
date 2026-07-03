@@ -15,12 +15,14 @@ FVOptionsPopup::FVOptionsPopup(QWidget *parent) :
     ui->viewFoldersButton->setText(QObject::tr("Extended + Folders"));
     ui->showInfoButton->setText(QObject::tr("Show descriptions"));
     ui->fitPreviewButton->setText(QObject::tr("Fit folder previews"));
+    ui->showOtherFilesButton->setText(QObject::tr("Show other file types"));
 
     connect(ui->viewSimpleButton,   &ContextMenuItem::pressed, this, &FVOptionsPopup::selectSimpleView);
     connect(ui->viewExtendedButton, &ContextMenuItem::pressed, this, &FVOptionsPopup::selectExtendedView);
     connect(ui->viewFoldersButton,  &ContextMenuItem::pressed, this, &FVOptionsPopup::selectFoldersView);
     connect(ui->showInfoButton,     &ContextMenuItem::pressed, this, &FVOptionsPopup::toggleShowInfo);
     connect(ui->fitPreviewButton,   &ContextMenuItem::pressed, this, &FVOptionsPopup::toggleFitPreview);
+    connect(ui->showOtherFilesButton, &ContextMenuItem::pressed, this, &FVOptionsPopup::toggleShowOtherFiles);
 
     // force size recalculation
     this->adjustSize();
@@ -62,6 +64,10 @@ void FVOptionsPopup::setFitPreview(bool mode) {
     ui->fitPreviewButton->setIconPath(mode ? ":res/icons/common/buttons/panel-small/add-new12.png" : "");
 }
 
+void FVOptionsPopup::setShowOtherFiles(bool mode) {
+    ui->showOtherFilesButton->setIconPath(mode ? ":res/icons/common/buttons/panel-small/add-new12.png" : "");
+}
+
 void FVOptionsPopup::selectSimpleView() {
     setSimpleView();
     emit viewModeSelected(FV_SIMPLE);
@@ -84,6 +90,11 @@ void FVOptionsPopup::toggleShowInfo() {
 
 void FVOptionsPopup::toggleFitPreview() {
     settings->setFolderViewPreviewFit(!settings->folderViewPreviewFit());
+    settings->sendChangeNotification();
+}
+
+void FVOptionsPopup::toggleShowOtherFiles() {
+    settings->setShowOtherFileTypes(!settings->showOtherFileTypes());
     settings->sendChangeNotification();
 }
 
@@ -115,6 +126,7 @@ void FVOptionsPopup::readSettings() {
     setViewMode(settings->folderViewMode());
     setShowInfo(settings->folderViewShowInfo());
     setFitPreview(settings->folderViewPreviewFit());
+    setShowOtherFiles(settings->showOtherFileTypes());
 }
 
 void FVOptionsPopup::showAt(QPoint pos) {

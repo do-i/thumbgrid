@@ -100,6 +100,7 @@ void DirectoryManager::stopFileWatcher() {
 
 void DirectoryManager::readSettings() {
     regex.setPattern(settings->supportedFormatsRegex());
+    mIncludeOtherFiles = settings->showOtherFileTypes();
 }
 
 bool DirectoryManager::setDirectory(QString dirPath) {
@@ -278,7 +279,7 @@ QDateTime DirectoryManager::lastModified(QString filePath) const {
 // TODO: what about symlinks?
 inline
 bool DirectoryManager::isSupportedFile(QString path) const {
-    return ( isFile(path) && regex.match(path).hasMatch() );
+    return ( isFile(path) && (mIncludeOtherFiles || regex.match(path).hasMatch()) );
 }
 
 bool DirectoryManager::isFile(QString path) const {
@@ -358,7 +359,7 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, Q
             newEntry.path = path;
             newEntry.isDirectory = true;
             dirEntryVec.emplace_back(newEntry);
-        } else if(match.hasMatch()) {
+        } else if(match.hasMatch() || mIncludeOtherFiles) {
             // the file may vanish mid-scan; skip it instead of aborting the whole listing
             std::uintmax_t size = entry.file_size(entryEc);
             if(entryEc)
@@ -395,7 +396,7 @@ void DirectoryManager::addEntriesFromDirectoryRecursive(std::vector<FSEntry> &en
         QString path = QString::fromStdString(entry.path().generic_string());
         match = regex.match(name);
         std::error_code entryEc;
-        if(!entry.is_directory(entryEc) && !entryEc && match.hasMatch()) {
+        if(!entry.is_directory(entryEc) && !entryEc && (match.hasMatch() || mIncludeOtherFiles)) {
             std::uintmax_t size = entry.file_size(entryEc);
             if(entryEc)
                 continue;

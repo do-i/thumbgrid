@@ -336,6 +336,8 @@ public:
 
     bool showHiddenFiles();
     void setShowHiddenFiles(bool mode);
+    bool showOtherFileTypes();
+    void setShowOtherFileTypes(bool mode);
 
 private:
     explicit Settings(QObject *parent = nullptr);

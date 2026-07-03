@@ -23,7 +23,7 @@
 
 #include <QImageReader>
 
-enum DocumentType { NONE, STATIC, ANIMATED, VIDEO };
+enum DocumentType { NONE, STATIC, ANIMATED, VIDEO, TEXT };
 
 class DocumentInfo {
 public:
@@ -50,6 +50,8 @@ public:
     QMap<QString, QString> getAllTags();
     // remove all Exif/Iptc/Xmp metadata from the file on disk
     bool stripMetadata();
+
+    static bool isTextDocument(const QMimeType &mimeType, const QString &suffix, const QString &fileName);
 
 private:
     QFileInfo fileInfo;

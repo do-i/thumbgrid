@@ -95,6 +95,9 @@
    <item>
     <widget class="ContextMenuItem" name="fitPreviewButton" native="true"/>
    </item>
+   <item>
+    <widget class="ContextMenuItem" name="showOtherFilesButton" native="true"/>
+   </item>
   </layout>
  </widget>
  <customwidgets>

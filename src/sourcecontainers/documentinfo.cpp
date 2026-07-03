@@ -119,10 +119,39 @@ void DocumentInfo::detectFormat() {
             mFormat = "jpg";
         if(settings->videoPlayback() && settings->videoFormats().values().contains(suffix))
             mDocumentType = DocumentType::VIDEO;
-        else
+        else if(mimeName.startsWith("image/") || QImageReader::supportedImageFormats().contains(suffix))
             mDocumentType = DocumentType::STATIC;
+        else if(isTextDocument(mMimeType, QString::fromUtf8(suffix), fileInfo.fileName()))
+            mDocumentType = DocumentType::TEXT;
+        else
+            mDocumentType = DocumentType::NONE; // not viewable by thumbgrid
     }
     loadExifOrientation();
+}
+
+// Anything we are willing to open in the text viewer. Content-based mime detection
+// covers most cases (anything derived from text/plain); the suffix and file name
+// sets catch text-like files that ship with unregistered or generic mime types.
+bool DocumentInfo::isTextDocument(const QMimeType &mimeType, const QString &suffix, const QString &fileName) {
+    if(mimeType.inherits("text/plain"))
+        return true;
+    static const QSet<QString> textSuffixes = {
+        "txt", "md", "markdown", "rst", "adoc", "org",
+        "xml", "json", "yaml", "yml", "toml", "ini", "conf", "cfg", "properties",
+        "csv", "tsv", "log",
+        "py", "java", "c", "h", "cpp", "hpp", "cc", "hh", "cxx", "hxx",
+        "js", "mjs", "ts", "jsx", "tsx", "css", "scss", "html", "htm", "xhtml", "svg",
+        "sh", "bash", "zsh", "fish", "bat", "cmd", "ps1",
+        "rs", "go", "rb", "php", "pl", "pm", "lua", "sql", "kt", "kts", "swift",
+        "cmake", "gradle", "tex", "srt", "vtt", "desktop", "service", "patch", "diff"
+    };
+    if(textSuffixes.contains(suffix.toLower()))
+        return true;
+    static const QSet<QString> textFileNames = {
+        "makefile", "gnumakefile", "dockerfile", "cmakelists.txt", "kconfig",
+        "license", "copying", "notice", "readme", "changelog", "authors", "todo", "install", "news"
+    };
+    return textFileNames.contains(fileName.toLower());
 }
 
 inline
@@ -389,7 +418,7 @@ bool DocumentInfo::loadExifOrientationExiv2() {
 #endif
 
 void DocumentInfo::loadExifOrientation() {
-    if(mDocumentType == DocumentType::VIDEO || mDocumentType == DocumentType::NONE)
+    if(mDocumentType != DocumentType::STATIC && mDocumentType != DocumentType::ANIMATED)
         return;
 
 #ifdef USE_EXIV2

@@ -1623,6 +1623,16 @@
                      </widget>
                     </item>
                     <item>
+                     <widget class="QCheckBox" name="showOtherFileTypesCheckBox">
+                      <property name="text">
+                       <string>Show other file types (text, configs, etc.)</string>
+                      </property>
+                      <property name="toolTip">
+                       <string>List non-media files in the folder view. Text files open in a built-in viewer; other files are shown but cannot be opened.</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
                      <widget class="QCheckBox" name="allowBrowseRootCheckBox">
                       <property name="text">
                        <string>Allow browsing the root folder (/)</string>

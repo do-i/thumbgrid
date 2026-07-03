@@ -45,6 +45,17 @@ void Core::readSettings() {
     bool showDirs = (settings->folderViewMode() == FV_EXT_FOLDERS);
     if(folderViewPresenter.showDirs() != showDirs)
         folderViewPresenter.setShowDirs(showDirs);
+    bool showOther = settings->showOtherFileTypes();
+    if(showOther != mShowOtherFileTypes) {
+        mShowOtherFileTypes = showOther;
+        // rescan so the new filter takes effect; deferred because the model's own
+        // settingsChanged slot (which updates the filter) may not have run yet
+        if(model && !model->directoryPath().isEmpty()) {
+            QTimer::singleShot(0, this, [this]() {
+                model->setDirectory(model->directoryPath());
+            });
+        }
+    }
     if(shuffle)
         syncRandomizer();
 }

@@ -105,6 +105,7 @@ private:
 
     DirectoryWatcher* watcher;
     void readSettings();
+    bool mIncludeOtherFiles = false;
     SortingMode mSortingMode;
     FileListSource mListSource;
     void loadEntryList(QString directoryPath, bool recursive);
