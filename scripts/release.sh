@@ -184,8 +184,30 @@ confirm() {
     [[ "$reply" =~ ^[Yy]$ ]]
 }
 
+# If local branch $1 exists and is a strict ancestor of $2 (i.e. it has no
+# unpushed local-only commits), fast-forwards it to $2. Otherwise warns and
+# leaves it alone - we never discard local work. Without this, a local branch
+# left behind by a push-only operation (main after the ff-merge, develop after
+# the version bump) silently diverges from origin the moment this script runs.
+sync_local_branch() {
+    local branch="$1" new_sha="$2"
+    if [[ "$DRY_RUN" == "1" ]]; then
+        return
+    fi
+    if git show-ref --verify --quiet "refs/heads/$branch"; then
+        if git merge-base --is-ancestor "$branch" "$new_sha"; then
+            git branch -f "$branch" "$new_sha"
+            echo "Fast-forwarded local $branch to ${new_sha:0:12}."
+        else
+            echo "warning: local $branch has diverged; not updating it automatically." >&2
+            echo "Run 'git fetch origin $branch && git rebase origin/$branch' to reconcile." >&2
+        fi
+    fi
+}
+
 # Checks out a detached HEAD at $1, sets THUMBGRID_VERSION_FALLBACK to $2,
-# commits with message $3, pushes to $DEV_BRANCH, then restores the ref that
+# commits with message $3, pushes to $DEV_BRANCH, fast-forwards local
+# $DEV_BRANCH to match (see sync_local_branch), then restores the ref that
 # was checked out before this ran (via the ORIGINAL_REF/EXIT-trap machinery
 # above, so it's restored even on error).
 bump_version_commit() {
@@ -200,6 +222,7 @@ bump_version_commit() {
             run git add CMakeLists.txt
             run git commit --quiet -m "$message"
             run git push origin "HEAD:refs/heads/$DEV_BRANCH"
+            sync_local_branch "$DEV_BRANCH" "$(git rev-parse HEAD)"
         else
             echo "CMakeLists.txt fallback version is already ${new_version}; nothing to bump."
         fi
@@ -265,6 +288,7 @@ cmd_cut() {
 
     run git tag -a "$tag" "$develop_sha" -m "thumbgrid ${version}"
     run git push --atomic origin "${develop_sha}:refs/heads/${DEFAULT_BRANCH}" "refs/tags/${tag}"
+    sync_local_branch "$DEFAULT_BRANCH" "$develop_sha"
     echo "Pushed $DEFAULT_BRANCH and $tag."
     echo "arch-package.yml will build the package and publish the GitHub Release."
 
