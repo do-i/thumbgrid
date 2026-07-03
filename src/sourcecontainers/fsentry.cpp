@@ -4,22 +4,19 @@ FSEntry::FSEntry() {
 }
 
 FSEntry::FSEntry(const QString &path) {
-    std::filesystem::directory_entry stdEntry(toStdString(path));
-    QString name = QString::fromStdString(stdEntry.path().filename().generic_string());
-    if(stdEntry.is_directory()) {
-        try {
-            this->name = name;
-            this->path = path;
-            this->isDirectory = true;
-        } catch (const std::filesystem::filesystem_error &err) { }
-    } else {
-        try {
-            this->name = name;
-            this->path = path;
-            this->isDirectory = false;
-            this->size = stdEntry.file_size();
-            this->modifyTime = stdEntry.last_write_time();
-        } catch (const std::filesystem::filesystem_error &err) { }
+    // error_code overloads: the entry may be racing with an external delete/rename
+    namespace fs = std::filesystem;
+    std::error_code ec;
+    this->path = path;
+    this->name = QString::fromStdString(fs::path(toStdString(path)).filename().generic_string());
+    this->isDirectory = fs::is_directory(toStdString(path), ec) && !ec;
+    if(!isDirectory) {
+        this->size = fs::file_size(toStdString(path), ec);
+        if(ec)
+            this->size = 0;
+        this->modifyTime = fs::last_write_time(toStdString(path), ec);
+        if(ec)
+            this->modifyTime = fs::file_time_type();
     }
 }
 

@@ -146,18 +146,13 @@ bool DocumentInfo::detectAnimatedWebP() {
     if(f.open(QFile::ReadOnly)) {
         QDataStream in(&f);
         in.skipRawData(12);
-        char *buf = static_cast<char*>(malloc(5));
-        buf[4] = '\0';
-        in.readRawData(buf, 4);
-        if(strcmp(buf, "VP8X") == 0) {
+        char buf[5] = {0};
+        if(in.readRawData(buf, 4) == 4 && strcmp(buf, "VP8X") == 0) {
             in.skipRawData(4);
-            char flags;
-            in.readRawData(&flags, 1);
-            if(flags & (1 << 1)) {
+            char flags = 0;
+            if(in.readRawData(&flags, 1) == 1 && (flags & (1 << 1)))
                 result = true;
-            }
         }
-        free(buf);
     }
     return result;
 }
@@ -174,13 +169,9 @@ bool DocumentInfo::detectAnimatedAvif() {
     if(f.open(QFile::ReadOnly)) {
         QDataStream in(&f);
         in.skipRawData(4); // skip box size
-        char *buf = static_cast<char*>(malloc(9));
-        buf[8] = '\0';
-        in.readRawData(buf, 8);
-        if(strcmp(buf, "ftypavis") == 0) {
+        char buf[9] = {0};
+        if(in.readRawData(buf, 8) == 8 && strcmp(buf, "ftypavis") == 0)
             result = true;
-        }
-        free(buf);
     }
     return result;
 }
