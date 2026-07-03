@@ -217,31 +217,53 @@ every version tag.
 
 # Releasing
 
-For maintainers. The git tag is the single source of truth for the version, and
-the release commit is tested on `main` before that tag is published.
+For maintainers. The git tag is the single source of truth for the version.
 
-From a clean `main` checkout that is up to date with origin:
+**Branching model:**
+
+- `develop` is the integration branch. Feature branches merge into it with
+  `--ff-only` (rebase onto `develop` first), so `develop` stays a linear
+  history sitting directly on top of `main`.
+- `main` never receives commits directly — a GitHub ruleset blocks
+  force-pushes and deletion, and `release.sh` itself refuses to release if
+  `main` has diverged (e.g. from an accidental direct push). `main` only
+  advances by a fast-forward of `develop`, done by the release script.
+- `release-<version>` branches are created manually, ad hoc, only to patch an
+  already-shipped version with a critical fix. `release.sh` never creates,
+  reads, or touches these; fixes there are cherry-picked into `develop`/`main`
+  by hand as needed.
+
+**Cutting a release**, from anywhere with a clean working tree:
 
 ```
-./scripts/release.sh            # auto-pick the next CalVer (e.g. v2026.6.6)
-./scripts/release.sh 2026.7.1   # or set the version explicitly (no leading 'v')
-./scripts/release.sh --dry-run  # preview the steps without changing anything
+./scripts/release.sh             # interactive menu
+./scripts/release.sh cut         # cut a release non-interactively
+./scripts/release.sh cut 2026.7.2  # cut an explicit version instead of auto-CalVer
+./scripts/release.sh --dry-run cut # preview the steps, change nothing
 ```
 
-The script sanity-checks the tree, bumps the tarball fallback version in
-`CMakeLists.txt`, commits it, and pushes `main`. That push runs the normal Tests
-workflow against the exact release commit. After the Tests workflow passes, run
-the tag command printed by the script, for example:
+"Cut release" fetches `origin`, verifies `origin/main` is an ancestor of
+`origin/develop` (aborting with the offending commits listed if not), checks
+via `gh` that `develop`'s tip has a passing `tests.yml` run, then fast-forwards
+`main` to that commit, tags it, and pushes `main` + the tag together
+atomically. Pushing the tag triggers
+[`arch-package.yml`](.github/workflows/arch-package.yml), which builds the
+Arch package and publishes a GitHub Release with **auto-generated release
+notes** (from merged PRs / commits since the previous tag). Finally it bumps
+`develop`'s fallback dev version and pushes `develop`.
+
+**Other menu items:**
 
 ```
-./scripts/release.sh --tag 2026.7.1
+./scripts/release.sh bump    # bump develop's dev version only (no merge, no tag)
+./scripts/release.sh status  # show develop/main state, make no changes
 ```
 
-Tag mode verifies that local `main` matches `origin/main`, creates an annotated
-`vYYYY.M.N` tag, and pushes only the tag. Pushing the tag triggers
-[`arch-package.yml`](.github/workflows/arch-package.yml), which builds the Arch
-package and publishes a GitHub Release with **auto-generated release notes**
-(from merged PRs / commits since the previous tag).
+"Bump" is for when releases are infrequent and you want `develop`'s CalVer
+fallback synced to the current month without actually cutting a release.
+
+Flags: `--dry-run` (preview only), `--skip-ci-check` (bypass the `gh` CI-status
+gate), `--yes` (skip the confirmation prompt).
 
 A few notes:
 
