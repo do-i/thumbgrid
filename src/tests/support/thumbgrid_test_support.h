@@ -84,8 +84,16 @@ inline void initializeThumbgrid() {
 // Provides a main() for a single behavior test class.
 #define TG_BEHAVIOR_TEST_MAIN(TestClass)                                        \
     int main(int argc, char **argv) {                                           \
+        QTemporaryDir testHome;                                                 \
         QTemporaryDir configHome;                                               \
         QTemporaryDir cacheHome;                                                \
+        /* QStandardPaths test mode resolves under $HOME/.qttest, which is      \
+           shared between test binaries; isolate HOME so state written by one   \
+           behavior test (e.g. shortcut migration) cannot leak into another. */ \
+        if(testHome.isValid()) {                                                \
+            qputenv("HOME", testHome.path().toUtf8());                          \
+            qputenv("USERPROFILE", testHome.path().toUtf8());                   \
+        }                                                                       \
         if(configHome.isValid())                                                \
             qputenv("XDG_CONFIG_HOME", configHome.path().toUtf8());             \
         if(cacheHome.isValid())                                                 \
