@@ -32,7 +32,6 @@ void ActionManager::initDefaults() {
     d.insert("F", "toggleFullscreen");
     d.insert("F11", "toggleFullscreen");
     d.insert("LMB_DoubleClick", "toggleFullscreen");
-    d.insert("MiddleButton", "exit");
     d.insert("Space", "toggleFitMode");
     d.insert("1", "fitWindow");
     d.insert("2", "fitWidth");
@@ -238,6 +237,17 @@ void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
                 swapped.insert(key, i.value());
             }
             ctx.value() = swapped;
+        }
+    }
+    // drop the old MiddleButton=exit default: a single stray middle-click quit
+    // the whole app with no confirmation. Only strip it if still bound to exit,
+    // so anyone who deliberately rebound MiddleButton keeps their choice.
+    if(lastVer < QVersionNumber(2026,7,3)) {
+        for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+            if(shortcuts[ctx].value("MiddleButton") == "exit") {
+                shortcuts[ctx].remove("MiddleButton");
+                qDebug() << "[actionManager]: removed MiddleButton=exit in" << contextToString(ctx);
+            }
         }
     }
     // add new default actions, per context

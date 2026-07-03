@@ -494,7 +494,7 @@ bool Settings::blurBackground() {
 #ifndef USE_KDE_BLUR
     return false;
 #endif
-    return settings->settingsConf->value("blurBackground", true).toBool();
+    return settings->settingsConf->value("blurBackground", false).toBool();
 }
 
 void Settings::setBlurBackground(bool mode) {
@@ -552,7 +552,7 @@ void Settings::setFolderViewShowInfo(bool mode) {
 // false = "Cover" (mode A: crop child previews to fill each cell)
 // true  = "Contain" (mode B: fit the whole child image, no cropping)
 bool Settings::folderViewPreviewFit() {
-    return settings->settingsConf->value("folderViewPreviewFit", false).toBool();
+    return settings->settingsConf->value("folderViewPreviewFit", true).toBool();
 }
 
 void Settings::setFolderViewPreviewFit(bool mode) {
@@ -1059,7 +1059,7 @@ void Settings::setInfoBarFullscreen(bool mode) {
 }
 //------------------------------------------------------------------------------
 bool Settings::infoBarWindowed() {
-    return settings->settingsConf->value("infoBarWindowed", false).toBool();
+    return settings->settingsConf->value("infoBarWindowed", true).toBool();
 }
 
 void Settings::setInfoBarWindowed(bool mode) {
@@ -1125,7 +1125,7 @@ void Settings::setUnloadThumbs(bool mode) {
 //------------------------------------------------------------------------------
 float Settings::zoomStep() {
     bool ok = false;
-    float value = settings->settingsConf->value("zoomStep", 0.2f).toFloat(&ok);
+    float value = settings->settingsConf->value("zoomStep", 0.26f).toFloat(&ok);
     if(!ok)
         return 0.2f;
     value = qBound(0.01f, value, 0.5f);
@@ -1196,7 +1196,7 @@ void Settings::setImageScrolling(ImageScrolling mode) {
 }
 //------------------------------------------------------------------------------
 ViewMode Settings::defaultViewMode() {
-    int mode = settings->settingsConf->value("defaultViewMode", 0).toInt();
+    int mode = settings->settingsConf->value("defaultViewMode", 1).toInt();
     if(mode < 0 || mode > 1)
         mode = 0;
     return static_cast<ViewMode>(mode);
@@ -1389,7 +1389,7 @@ void Settings::setClickableEdgesVisible(bool mode) {
 }
 //------------------------------------------------------------------------------
 bool Settings::showHiddenFiles() {
-    return settings->settingsConf->value("showHiddenFiles", false).toBool();
+    return settings->settingsConf->value("showHiddenFiles", true).toBool();
 }
 
 void Settings::setShowHiddenFiles(bool mode) {
