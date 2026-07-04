@@ -1,6 +1,7 @@
 #pragma once
 
 #include "settings.h"
+#include <QFrame>
 #include <QLabel>
 #include <QPushButton>
 #include <QSlider>
@@ -23,6 +24,9 @@ public:
     explicit VideoControls(QWidget *parent = nullptr);
     ~VideoControls();
 
+protected:
+    void resizeEvent(QResizeEvent *event);
+
 public slots:
     void setPlaybackDuration(int);
     void setPlaybackPosition(int);
@@ -38,6 +42,7 @@ signals:
     void volumeChanged(int volume);
     void playbackSpeedChanged(double speed);
     void loopABChanged(int startPosition, int endPosition);
+    void toggleMuteRequested();
 
 private:
     enum LoopABState {
@@ -48,14 +53,21 @@ private:
 
     void resetLoopAB();
     void updateLoopButton();
+    void showPopupBelow(QWidget *anchor, QFrame *popup);
+    void updateSpeedText(int value);
+    void updateResponsiveVisibility();
 
     Ui::VideoControls *ui;
     int lastPosition;
     PlaybackMode mode;
     QPushButton *loopABButton;
+    QPushButton *speedButton;
+    QPushButton *volumeMuteButton;
     QSlider *volumeSlider;
     QSlider *speedSlider;
-    QLabel *speedLabel;
+    QLabel *speedPopupLabel;
+    QFrame *volumePopup;
+    QFrame *speedPopup;
     LoopABState loopABState;
     int loopStartPosition;
 };

@@ -19,6 +19,7 @@ public:
 public slots:
     void setInfo(QString position, QString fileName, QString info);
     void setStatusText(QString text);
+    void readSettings();
 
 protected:
     void paintEvent(QPaintEvent *event);

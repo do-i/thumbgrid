@@ -29,6 +29,7 @@ void VideoControlsProxyWrapper::init() {
     connect(videoControls, &VideoControls::volumeChanged, this, &VideoControlsProxyWrapper::volumeChanged);
     connect(videoControls, &VideoControls::playbackSpeedChanged, this, &VideoControlsProxyWrapper::playbackSpeedChanged);
     connect(videoControls, &VideoControls::loopABChanged, this, &VideoControlsProxyWrapper::loopABChanged);
+    connect(videoControls, &VideoControls::toggleMuteRequested, this, &VideoControlsProxyWrapper::toggleMuteRequested);
 
     videoControls->setMode(stateBuf.mode);
     videoControls->setPlaybackDuration(stateBuf.duration);

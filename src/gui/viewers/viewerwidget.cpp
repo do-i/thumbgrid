@@ -65,6 +65,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     connect(videoControls, &VideoControlsProxyWrapper::volumeChanged, this, &ViewerWidget::setVolume);
     connect(videoControls, &VideoControlsProxyWrapper::playbackSpeedChanged, this, &ViewerWidget::setPlaybackSpeed);
     connect(videoControls, &VideoControlsProxyWrapper::loopABChanged, this, &ViewerWidget::setLoopAB);
+    connect(videoControls, &VideoControlsProxyWrapper::toggleMuteRequested, this, &ViewerWidget::toggleMute);
 
     enableImageViewer();
     setInteractionEnabled(true);

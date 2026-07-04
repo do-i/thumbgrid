@@ -30,6 +30,7 @@ signals:
     void volumeChanged(int volume);
     void playbackSpeedChanged(double speed);
     void loopABChanged(int startPosition, int endPosition);
+    void toggleMuteRequested();
 
 public slots:
     void setPlaybackDuration(int);

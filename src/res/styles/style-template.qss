@@ -439,52 +439,148 @@ ChangelogWindow QTextBrowser {
     max-height: 26px;
 }
 
+[accessibleName="VideoControlSeparator"] {
+    background-color: %text_lc2%;
+    min-width: 1px;
+    max-width: 1px;
+    min-height: 14px;
+    max-height: 14px;
+}
+
 VideoControls QLabel {
     color: %text_hc2%;
-    font: bold;
+    font-size: 11px;
+}
+
+VideoControls [accessibleName="Button"],
+VideoControls [accessibleName="ButtonSetLeft"],
+VideoControls [accessibleName="ButtonSetRight"] {
+    background-color: %button%;
+    border: 1px solid %button_hover%;
+    border-radius: 4px;
+    margin: 1px;
+    padding: 0px;
+}
+
+VideoControls [accessibleName="Button"]:hover,
+VideoControls [accessibleName="ButtonSetLeft"]:hover,
+VideoControls [accessibleName="ButtonSetRight"]:hover {
+    background-color: %button_hover%;
+    border-color: %text_lc2%;
+}
+
+VideoControls [accessibleName="Button"]:pressed,
+VideoControls [accessibleName="Button"][pressed="true"],
+VideoControls [accessibleName="ButtonSetLeft"]:pressed,
+VideoControls [accessibleName="ButtonSetLeft"][pressed="true"],
+VideoControls [accessibleName="ButtonSetRight"]:pressed,
+VideoControls [accessibleName="ButtonSetRight"][pressed="true"] {
+    background-color: %button_pressed%;
+    border-color: %button_pressed%;
 }
 
 VideoControls QPushButton[accessibleName="VideoControlTextButton"] {
     color: %text_hc%;
     background-color: %button%;
-    border: 0px;
-    border-radius: 3px;
+    border: 1px solid %button_hover%;
+    border-radius: 4px;
+    margin: 1px;
     padding: 0px;
-    font: bold;
+    font-size: 11px;
 }
 
 VideoControls QPushButton[accessibleName="VideoControlTextButton"]:hover {
     background-color: %button_hover%;
+    border-color: %text_lc2%;
     color: %text_hc2%;
 }
 
 VideoControls QPushButton[accessibleName="VideoControlTextButton"]:pressed,
 VideoControls QPushButton[accessibleName="VideoControlTextButton"][checked="true"] {
     background-color: %button_pressed%;
+    border-color: %button_pressed%;
     color: %text%;
 }
+
+QFrame[accessibleName="VideoControlPopup"] {
+    background-color: %widget%;
+    border: 1px solid %text_lc2%;
+    border-radius: 5px;
+}
+
+QFrame[accessibleName="VideoControlPopup"] QLabel {
+    color: %text_hc2%;
+    font-size: 11px;
+}
+
+QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"] {
+    color: %text_hc%;
+    background-color: %button%;
+    border: 1px solid %button_hover%;
+    border-radius: 4px;
+    padding: 0px;
+    font-size: 11px;
+}
+
+QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover {
+    background-color: %button_hover%;
+    border-color: %text_lc2%;
+}
 /*----------------------------------------------------------------------------*/
-VideoControls QSlider {
-    border: 2px solid %widget%;
-    margin: 1px;
+VideoControls QSlider,
+QFrame[accessibleName="VideoControlPopup"] QSlider {
+    background: transparent;
+    border: 0px;
+    margin: 0px;
+    min-height: 18px;
+    max-height: 18px;
 }
 
 VideoControls QSlider::groove:horizontal,
-VideoControls QSlider::add-page:horizontal {
-    background: %button_pressed%;
-    border-radius: 3px;
+QFrame[accessibleName="VideoControlPopup"] QSlider::groove:horizontal {
+    background: transparent;
+    border-radius: 2px;
+    height: 4px;
 }
 
-VideoControls QSlider::handle:horizontal {
-    height: 0px;
-    width:  0px;
+VideoControls QSlider::add-page:horizontal,
+QFrame[accessibleName="VideoControlPopup"] QSlider::add-page:horizontal {
+    background: %button%;
+    border-radius: 2px;
+    height: 4px;
+}
+
+VideoControls QSlider::handle:horizontal,
+QFrame[accessibleName="VideoControlPopup"] QSlider::handle:horizontal {
+    background: %slider_handle%;
+    border: 1px solid %widget%;
+    border-radius: 4px;
+    height: 8px;
+    margin: -3px 0px;
+    width: 8px;
+}
+
+VideoControls QSlider::sub-page:horizontal,
+QFrame[accessibleName="VideoControlPopup"] QSlider::sub-page:horizontal {
+    background: %accent%;
+    border-radius: 2px;
+    height: 4px;
+}
+
+VideoControls QSlider[accessibleName="VideoControlVolumeSlider"]::sub-page:horizontal,
+QFrame[accessibleName="VideoControlPopup"] QSlider[accessibleName="VideoControlVolumeSlider"]::sub-page:horizontal {
+    background: %text_hc2%;
+}
+
+VideoControls QSlider[accessibleName="VideoControlSeekSlider"]::sub-page:horizontal {
     background: %text_hc%;
 }
 
-VideoControls QSlider::sub-page:horizontal {
-    background: %text_hc%;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
+VideoControls QSlider[accessibleName="VideoControlSpeedSlider"]::sub-page:horizontal,
+VideoControls QSlider[accessibleName="VideoControlSpeedSlider"]::handle:horizontal,
+QFrame[accessibleName="VideoControlPopup"] QSlider[accessibleName="VideoControlSpeedSlider"]::sub-page:horizontal,
+QFrame[accessibleName="VideoControlPopup"] QSlider[accessibleName="VideoControlSpeedSlider"]::handle:horizontal {
+    background: %accent%;
 }
 
 /*----------------------------------------------------------------------------*/
@@ -724,11 +820,15 @@ ControlsOverlay {
 }
 /*----------------------------------------------------------------------------*/
 
-InfoBar, InfoBarProxy {
+InfoBar, InfoBarProxy,
+[accessibleName="InfoBar"], [accessibleName="InfoBarProxy"],
+QStatusBar {
     background-color: %widget%;
 }
 
-InfoBar QLabel {
+InfoBar QLabel,
+[accessibleName="InfoBar"] QLabel,
+QStatusBar QLabel {
     color: %text_hc%;
 }
 
