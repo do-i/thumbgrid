@@ -361,6 +361,8 @@ void Settings::fillVideoFormats() {
     mVideoFormatsMap.insert("video/x-msvideo",  "avi");
     mVideoFormatsMap.insert("video/quicktime",  "mov");
     mVideoFormatsMap.insert("video/x-flv",      "flv");
+    // Audio played through the same mpv player (no video track, sound only).
+    mVideoFormatsMap.insert("audio/mpeg",       "mp3");
 }
 //------------------------------------------------------------------------------
 QString Settings::mpvBinary() {

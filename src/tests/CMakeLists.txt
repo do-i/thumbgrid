@@ -105,3 +105,11 @@ add_test(
     NAME "Other file types can be shown and text files open in the viewer"
     COMMAND thumbgrid_other_file_types_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
+    behavior/test_view_mode_navigation_skips_unviewable_files.cpp
+)
+add_test(
+    NAME "Picture view navigation skips unviewable files"
+    COMMAND thumbgrid_nav_skips_unviewable_test
+)

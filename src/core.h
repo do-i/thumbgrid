@@ -173,6 +173,9 @@ private slots:
     void showInDirectory();
     void onDirectoryViewFileActivated(QString filePath);
     bool loadFileIndex(int index, bool async, bool preload);
+    bool canDisplayFile(const QString &path) const;
+    int nearestViewableIndex(int from, int step) const;
+    int nextShuffledViewable(bool forward);
     void enableDocumentView();
     void enableFolderView();
     void toggleFolderView();

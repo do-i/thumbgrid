@@ -1731,8 +1731,9 @@ void Core::nextDirectory() {
                 return;
             QFileInfo fi(next);
             mw->showMessageDirectory(fi.baseName());
-            if(model->fileCount())
-                loadFileIndex(0, false, true);
+            int index = nearestViewableIndex(0, 1);
+            if(index >= 0)
+                loadFileIndex(index, false, true);
         } else {
             mw->showMessageDirectoryEnd();
         }
@@ -1753,12 +1754,10 @@ void Core::prevDirectory(bool selectLast) {
                 return;
             QFileInfo fi(prev);
             mw->showMessageDirectory(fi.baseName());
-            if(model->fileCount()) {
-                if(selectLast)
-                    loadFileIndex(model->fileCount() - 1, false, true);
-                else
-                    loadFileIndex(0, false, true);
-            }
+            int index = selectLast ? nearestViewableIndex(model->fileCount() - 1, -1)
+                                   : nearestViewableIndex(0, 1);
+            if(index >= 0)
+                loadFileIndex(index, false, true);
         } else {
             mw->showMessageDirectoryStart();
         }
@@ -1769,18 +1768,46 @@ void Core::prevDirectory() {
     prevDirectory(false);
 }
 
+// With showOtherFileTypes the file list can contain entries thumbgrid cannot
+// render; everything else in the model already matches the supported-formats
+// filter, so the DocumentInfo probe is only needed when that setting is on.
+bool Core::canDisplayFile(const QString &path) const {
+    return !settings->showOtherFileTypes() || DocumentInfo(path).type() != DocumentType::NONE;
+}
+
+// Nearest model index at/after (step = 1) or at/before (step = -1) `from`
+// whose file can be displayed. Returns -1 if there is none in that direction.
+int Core::nearestViewableIndex(int from, int step) const {
+    for(int i = from; i >= 0 && i < model->fileCount(); i += step) {
+        if(canDisplayFile(model->filePathAt(i)))
+            return i;
+    }
+    return -1;
+}
+
+// Advances the randomizer past unviewable entries. Bounded so a folder with
+// no viewable files left cannot spin forever.
+int Core::nextShuffledViewable(bool forward) {
+    int index = forward ? randomizer.next() : randomizer.prev();
+    for(int tries = 0; tries < model->fileCount() && !canDisplayFile(model->filePathAt(index)); tries++)
+        index = forward ? randomizer.next() : randomizer.prev();
+    return index;
+}
+
 void Core::nextImage() {
     if(mw->currentViewMode() == MODE_FOLDERVIEW || (model->isEmpty() && folderEndAction != FOLDER_END_GOTO_ADJACENT))
         return;
     stopSlideshow();
     if(shuffle) {
-        loadFileIndex(randomizer.next(), true, false);
+        loadFileIndex(nextShuffledViewable(true), true, false);
         return;
     }
-    int newIndex = model->indexOfFile(state.currentFilePath) + 1;
-    if(newIndex >= model->fileCount()) {
+    int newIndex = nearestViewableIndex(model->indexOfFile(state.currentFilePath) + 1, 1);
+    if(newIndex < 0) {
         if(folderEndAction == FOLDER_END_LOOP) {
-            newIndex = 0;
+            newIndex = nearestViewableIndex(0, 1);
+            if(newIndex < 0)
+                return;
         } else if (folderEndAction == FOLDER_END_GOTO_ADJACENT) {
             nextDirectory();
             return;
@@ -1798,14 +1825,16 @@ void Core::prevImage() {
         return;
     stopSlideshow();
     if(shuffle) {
-        loadFileIndex(randomizer.prev(), true, false);
+        loadFileIndex(nextShuffledViewable(false), true, false);
         return;
     }
 
-    int newIndex = model->indexOfFile(state.currentFilePath) - 1;
+    int newIndex = nearestViewableIndex(model->indexOfFile(state.currentFilePath) - 1, -1);
     if(newIndex < 0) {
         if(folderEndAction == FOLDER_END_LOOP) {
-            newIndex = model->fileCount() - 1;
+            newIndex = nearestViewableIndex(model->fileCount() - 1, -1);
+            if(newIndex < 0)
+                return;
         } else if (folderEndAction == FOLDER_END_GOTO_ADJACENT) {
             prevDirectory(true);
             return;
@@ -1822,17 +1851,15 @@ void Core::nextImageSlideshow() {
     if(model->isEmpty() || mw->currentViewMode() == MODE_FOLDERVIEW)
         return;
     if(shuffle) {
-        loadFileIndex(randomizer.next(), false, false);
+        loadFileIndex(nextShuffledViewable(true), false, false);
     } else {
-        int newIndex = model->indexOfFile(state.currentFilePath) + 1;
-        if(newIndex >= model->fileCount()) {
-            if(loopSlideshow) {
-                newIndex = 0;
-            } else {
-                stopSlideshow();
-                mw->showMessage(tr("End of directory."));
-                return;
-            }
+        int newIndex = nearestViewableIndex(model->indexOfFile(state.currentFilePath) + 1, 1);
+        if(newIndex < 0 && loopSlideshow)
+            newIndex = nearestViewableIndex(0, 1);
+        if(newIndex < 0) {
+            stopSlideshow();
+            mw->showMessage(tr("End of directory."));
+            return;
         }
         loadFileIndex(newIndex, false, true);
     }
@@ -1858,7 +1885,10 @@ void Core::jumpToFirst() {
     if(model->isEmpty())
         return;
     stopSlideshow();
-    loadFileIndex(0, true, settings->usePreloader());
+    int index = nearestViewableIndex(0, 1);
+    if(index < 0)
+        return;
+    loadFileIndex(index, true, settings->usePreloader());
     mw->showMessageDirectoryStart();
 }
 
@@ -1866,7 +1896,10 @@ void Core::jumpToLast() {
     if(model->isEmpty())
         return;
     stopSlideshow();
-    loadFileIndex(model->fileCount() - 1, true, settings->usePreloader());
+    int index = nearestViewableIndex(model->fileCount() - 1, -1);
+    if(index < 0)
+        return;
+    loadFileIndex(index, true, settings->usePreloader());
     mw->showMessageDirectoryEnd();
 }
 

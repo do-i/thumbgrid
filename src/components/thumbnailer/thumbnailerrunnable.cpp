@@ -20,6 +20,13 @@ namespace {
         static const QSet<QString> suffixes = supportedPreviewImageSuffixes();
         return suffixes.contains(fileInfo.suffix().toLower());
     }
+
+    // Audio files are opened through the mpv video player but have no video
+    // track to grab a frame from, so they get a file-type icon instead.
+    bool isAudioSuffix(const QString &suffix) {
+        static const QSet<QString> suffixes = { "mp3" };
+        return suffixes.contains(suffix.toLower());
+    }
 }
 
 ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, int _size, bool _crop, bool _force) :
@@ -80,7 +87,8 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
     if(!image) {
         // non-media entries get a rendered file-type icon instead of a decoded picture;
         // it is cheap to draw, so it skips the disk cache entirely
-        if(imgInfo.type() == DocumentType::TEXT || imgInfo.type() == DocumentType::NONE)
+        if(imgInfo.type() == DocumentType::TEXT || imgInfo.type() == DocumentType::NONE ||
+           (imgInfo.type() == DocumentType::VIDEO && isAudioSuffix(QFileInfo(imgInfo.fileName()).suffix())))
             return generateFileTypeIcon(imgInfo, size);
         std::pair<QImage*, QSize> pair;
         if(imgInfo.type() == VIDEO)
@@ -371,8 +379,8 @@ void ThumbnailerRunnable::drawDirPreview(QImage &base, const QList<QImage> &imag
 }
 
 std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateFileTypeIcon(const DocumentInfo &imgInfo, int size) {
-    bool viewable = (imgInfo.type() == DocumentType::TEXT);
     QString suffix = QFileInfo(imgInfo.fileName()).suffix().toLower();
+    bool viewable = (imgInfo.type() == DocumentType::TEXT) || isAudioSuffix(suffix);
     QImage icon = renderFileTypeIcon(suffix, viewable, size);
     auto pixmap = new QPixmap(QPixmap::fromImage(icon));
     pixmap->setDevicePixelRatio(qApp->devicePixelRatio());
