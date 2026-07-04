@@ -47,6 +47,7 @@ signals:
     void videoPaused(bool);
     void playbackFinished();
     void playbackRestarted();
+    void volumeChanged(int value);
 
 protected:
     void initializeGL() override;

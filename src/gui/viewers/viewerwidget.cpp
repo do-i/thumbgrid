@@ -58,6 +58,9 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     connect(videoPlayer.get(), &VideoPlayer::durationChanged, this, [this](int) {
         updateVideoControlsVisibility();
     });
+    // Reflect the real audio-output volume (reported by the player) on the
+    // controls slider, so it matches the actual OS/per-app sound level.
+    connect(videoPlayer.get(), &VideoPlayer::volumeChanged, videoControls, &VideoControlsProxyWrapper::setVolume);
 
     connect(videoControls, &VideoControlsProxyWrapper::seekBackward,  this, &ViewerWidget::seekBackward);
     connect(videoControls, &VideoControlsProxyWrapper::seekForward, this, &ViewerWidget::seekForward);

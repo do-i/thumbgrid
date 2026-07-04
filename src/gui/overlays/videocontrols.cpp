@@ -36,7 +36,7 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->setupUi(this);
     this->setAttribute(Qt::WA_NoMousePropagation, true);
     setFixedHeight(26);
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     setMinimumWidth(0);
     setMaximumWidth(QWIDGETSIZE_MAX);
     ui->horizontalLayout->setContentsMargins(3, 1, 3, 1);

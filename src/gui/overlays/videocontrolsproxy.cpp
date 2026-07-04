@@ -21,7 +21,6 @@ void VideoControlsProxyWrapper::init() {
         return;
     videoControls = new VideoControls(this);
     layout.addWidget(videoControls);
-    layout.addStretch(1);
 
     connect(videoControls, &VideoControls::seekBackward,  this, &VideoControlsProxyWrapper::seekBackward);
     connect(videoControls, &VideoControls::seekForward, this, &VideoControlsProxyWrapper::seekForward);

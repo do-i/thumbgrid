@@ -86,6 +86,7 @@ inline bool VideoPlayerInitProxy::initPlayer() {
     connect(player.get(), SIGNAL(positionChanged(int)), this, SIGNAL(positionChanged(int)));
     connect(player.get(), SIGNAL(videoPaused(bool)),    this, SIGNAL(videoPaused(bool)));
     connect(player.get(), SIGNAL(playbackFinished()),   this, SIGNAL(playbackFinished()));
+    connect(player.get(), SIGNAL(volumeChanged(int)),   this, SIGNAL(volumeChanged(int)));
 
     if(eventFilterObj)
         player.get()->installEventFilter(eventFilterObj);

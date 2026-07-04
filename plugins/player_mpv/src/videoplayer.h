@@ -30,6 +30,7 @@ signals:
     void positionChanged(int value);
     void videoPaused(bool);
     void playbackFinished();
+    void volumeChanged(int value);
 
 public slots:
     virtual void show();

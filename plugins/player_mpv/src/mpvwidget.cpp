@@ -46,6 +46,9 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG);
+    // Track the actual audio-output (system / per-app) volume so the UI can
+    // reflect the real output level, not just mpv's internal software gain.
+    mpv_observe_property(mpv, 0, "ao-volume", MPV_FORMAT_DOUBLE);
     mpv_set_wakeup_callback(mpv, wakeup, this);
 }
 
@@ -129,6 +132,13 @@ void MpvWidget::handle_mpv_event(mpv_event *event) {
         } else if(strcmp(prop->name, "pause") == 0) {
             int mode = *reinterpret_cast<int*>(prop->data);
             emit videoPaused(mode == 1);
+        } else if(strcmp(prop->name, "ao-volume") == 0) {
+            // Only meaningful once the audio output is initialized; before that
+            // the property is unavailable (MPV_FORMAT_NONE) and is ignored.
+            if(prop->format == MPV_FORMAT_DOUBLE) {
+                double vol = *reinterpret_cast<double*>(prop->data);
+                emit volumeChanged(static_cast<int>(vol + 0.5));
+            }
         }
         break;
     }
@@ -178,12 +188,17 @@ bool MpvWidget::muted() {
 }
 
 int MpvWidget::volume() {
-    return mpv::qt::get_property_variant(mpv, "volume").toInt();
+    // ao-volume is the real audio-output (system / per-app) level. It is only
+    // available while audio is playing; fall back to full volume otherwise.
+    QVariant vol = mpv::qt::get_property_variant(mpv, "ao-volume");
+    if(!vol.isValid())
+        return 100;
+    return static_cast<int>(vol.toDouble() + 0.5);
 }
 
 void MpvWidget::setVolume(int vol) {
     vol = qBound(0, vol, 100);
-    mpv::qt::set_property_variant(mpv, "volume", vol);
+    mpv::qt::set_property_variant(mpv, "ao-volume", vol);
 }
 
 void MpvWidget::setPlaybackSpeed(double speed) {
