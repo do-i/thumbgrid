@@ -4,6 +4,8 @@
 #include <QColor>
 #include <QPalette>
 
+class QSettings;
+
 enum ColorSchemes {
     COLORS_SYSTEM,
     COLORS_LIGHT,
@@ -88,4 +90,10 @@ private:
 class ThemeStore {
 public:
     static ColorScheme colorScheme(ColorSchemes name);
+    // Reads a [Colors] group into a BaseColorScheme. Keys that are absent are
+    // left invalid so ColorScheme::setBaseColors() computes their variant.
+    static BaseColorScheme parseColors(QSettings &settings, int tid);
+
+private:
+    static BaseColorScheme loadTheme(const QString &path, int tid);
 };

@@ -157,6 +157,15 @@ install(FILES distrib/hicolor/scalable/apps/thumbgrid.svg
 # AppData manifest
 install(FILES distrib/thumbgrid.appdata.xml DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/metainfo)
 
+# Preset color themes. Installed to the system config dir (FHS convention for
+# editable config) so admins/packagers can adjust or add presets. The same
+# files are embedded via resources.qrc as a fallback when this dir is absent
+# (dev tree, Windows/macOS); THEMES_PATH tells the app where to look first.
+if(NOT WIN32)
+    ADD_DEFINITIONS(-DTHEMES_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid/themes")
+    install(DIRECTORY res/themes DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid)
+endif()
+
 # Install internationalization language files
 if(WIN32)
     install(DIRECTORY "${PROJECT_BINARY_DIR}/src/translations" DESTINATION "${CMAKE_INSTALL_BINDIR}")

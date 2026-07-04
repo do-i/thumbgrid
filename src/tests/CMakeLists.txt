@@ -113,3 +113,11 @@ add_test(
     NAME "Picture view navigation skips unviewable files"
     COMMAND thumbgrid_nav_skips_unviewable_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_preset_themes_test
+    behavior/test_preset_themes_load_from_files.cpp
+)
+add_test(
+    NAME "Preset themes load their colors from the extracted theme files"
+    COMMAND thumbgrid_preset_themes_test
+)

@@ -1,109 +1,117 @@
 #include "themestore.h"
 
-ColorScheme ThemeStore::colorScheme(ColorSchemes name) {
-    BaseColorScheme base = {-1};
-    QPalette p;
+#include <QSettings>
+#include <QFile>
+#include <QTemporaryFile>
+
+namespace {
+
+// Fixed preset -> file mapping. COLORS_SYSTEM / COLORS_CUSTOM are derived from
+// the palette / user config and are not file-backed.
+QString themeFileName(ColorSchemes name) {
     switch(name) {
-        case COLORS_SYSTEM:
-        case COLORS_CUSTOM:
-            base.background = p.window().color();
-            base.background_fullscreen = p.window().color();
-            base.folderview_topbar = p.window().color();
-            base.widget = p.window().color();
-            base.widget_border = p.window().color();
-            base.folderview = p.base().color();
-            base.text = p.text().color();
-            base.icons = p.text().color();
-            base.accent = p.highlight().color();
-            base.overlay = p.window().color();
-            base.overlay_text = p.text().color();
-            base.scrollbar.setHsv(p.highlight().color().hue(),
-                                  qBound(0, p.highlight().color().saturation() - 20, 240),
-                                  qBound(0, p.highlight().color().value() - 35, 240));
-            base.tid = static_cast<int>(name);
-            break;
-        case COLORS_LIGHT: // v2, works with w10 titlebars
-            base.accent = "#719ccd";
-            base.background = "#1a1a1a";
-            base.background_fullscreen = "#1a1a1a";
-            base.folderview = "#f2f2f2";
-            base.folderview_topbar = "#ffffff";
-            base.icons = "#656768";
-            base.overlay = "#1a1a1a";
-            base.overlay_text = "#d2d2d2";
-            base.text = "#353535";
-            base.scrollbar = "#aaaaaa";
-            base.widget = "#ffffff";
-            base.widget_border = "#c3c3c3";
-            base.tid = static_cast<int>(name);
-            break;
-        case COLORS_DARKBLUE:
-            base.background = "#18191a";
-            base.background_fullscreen = "#18191a";
-            base.text = "#cdd2d7";
-            base.icons = "#babec3";
-            base.widget = "#232629";
-            base.widget_border = "#26292d";
-            base.accent = "#336ca5";
-            base.folderview = "#232629";
-            base.folderview_topbar = "#31363b";
-            base.scrollbar = "#4f565c";
-            base.overlay_text = "#d2d2d2";
-            base.overlay = "#1a1a1a";
-            base.tid = static_cast<int>(name);
-            break;
-        case COLORS_BLACK:
-            base.background = "#000000";
-            base.background_fullscreen = "#000000";
-            base.text = "#b0b0b0";
-            base.icons = "#999999";
-            base.widget = "#080808";
-            base.widget_border = "#181818";
-            base.accent = "#5a5a5a";
-            base.folderview = "#111111";
-            base.folderview_topbar = "#111111";
-            base.scrollbar = "#343434";
-            base.overlay_text = "#999999";
-            base.overlay = "#000000";
-            base.tid = static_cast<int>(name);
-            break;
-        case COLORS_DARK:
-            base.background = "#1a1a1a";
-            base.background_fullscreen = "#1a1a1a";
-            base.text = "#b6b6b6";
-            base.icons = "#a4a4a4";
-            base.widget = "#252525";
-            base.widget_border = "#2c2c2c";
-            base.accent = "#8c9b81";
-            base.folderview = "#242424";
-            base.folderview_topbar = "#383838";
-            base.scrollbar = "#5a5a5a";
-            base.overlay_text = "#d2d2d2";
-            base.overlay = "#1a1a1a";
-            base.tid = static_cast<int>(name);
-            break;
-        case COLORS_LIGHT_YELLOW:
-            base.accent = "#99c1f1";
-            base.background = "#deddda";
-            base.background_fullscreen = "#9a9996";
-            base.folderview = "#deddda";
-            base.folderview_topbar = "#ffffff";
-            base.folderview_cell_bg = "#deddda";
-            base.folderview_label_bg = "#c0bfbc";
-            base.folderview_parent_icon = "#26a269";
-            base.folderview_selected_label_bg = "#99c1f1";
-            base.folderview_selection = "#badff8";
-            base.icons = "#006394";
-            base.overlay = "#f8e45c";
-            base.overlay_text = "#d2d2d2";
-            base.scrollbar = "#c0bfbc";
-            base.text = "#3d3846";
-            base.widget = "#e4e3f7";
-            base.widget_border = "#c3c3c3";
-            base.tid = static_cast<int>(name);
-            break;
+        case COLORS_LIGHT:        return QStringLiteral("light.ini");
+        case COLORS_BLACK:        return QStringLiteral("black.ini");
+        case COLORS_DARK:         return QStringLiteral("dark.ini");
+        case COLORS_DARKBLUE:     return QStringLiteral("darkblue.ini");
+        case COLORS_LIGHT_YELLOW: return QStringLiteral("light_blue.ini");
+        default:                  return QString();
     }
-    return ColorScheme(base);
+}
+
+// Prefer the installed system config copy (admin-editable), fall back to the
+// copy embedded in the binary via resources.qrc so dev/non-Linux builds work.
+QString resolveThemePath(const QString &fileName) {
+#ifdef THEMES_PATH
+    const QString systemPath = QStringLiteral(THEMES_PATH) + "/" + fileName;
+    if(QFile::exists(systemPath))
+        return systemPath;
+#endif
+    return QStringLiteral(":/res/themes/") + fileName;
+}
+
+} // namespace
+
+BaseColorScheme ThemeStore::parseColors(QSettings &settings, int tid) {
+    BaseColorScheme base = {-1};
+    base.tid = tid;
+    settings.beginGroup("Colors");
+    auto read = [&settings](const char *key, QColor &field) {
+        if(settings.contains(key)) {
+            QColor color(settings.value(key).toString());
+            if(color.isValid())
+                field = color;
+        }
+    };
+    read("background",            base.background);
+    read("background_fullscreen", base.background_fullscreen);
+    read("text",                  base.text);
+    read("icons",                 base.icons);
+    read("widget",                base.widget);
+    read("widget_border",         base.widget_border);
+    read("accent",                base.accent);
+    read("folderview",            base.folderview);
+    read("folderview_topbar",     base.folderview_topbar);
+    read("scrollbar",             base.scrollbar);
+    read("overlay_text",          base.overlay_text);
+    read("overlay",               base.overlay);
+    read("fv_label_bg",           base.folderview_label_bg);
+    read("fv_selection",          base.folderview_selection);
+    read("fv_parent_icon",        base.folderview_parent_icon);
+    read("fv_sel_label_bg",       base.folderview_selected_label_bg);
+    read("fv_cell_bg",            base.folderview_cell_bg);
+    settings.endGroup();
+    return base;
+}
+
+BaseColorScheme ThemeStore::loadTheme(const QString &path, int tid) {
+    // QSettings cannot reliably open a read-only qrc resource directly, so copy
+    // the embedded bytes to a temp file before parsing. Real filesystem paths
+    // (the installed /etc copy) are read in place.
+    if(path.startsWith(':')) {
+        QFile resource(path);
+        if(resource.open(QIODevice::ReadOnly)) {
+            QTemporaryFile tmp;
+            if(tmp.open()) {
+                tmp.write(resource.readAll());
+                tmp.flush();
+                QSettings settings(tmp.fileName(), QSettings::IniFormat);
+                return parseColors(settings, tid);
+            }
+        }
+        qWarning() << "ThemeStore: failed to read embedded theme" << path;
+        return {tid};
+    }
+    QSettings settings(path, QSettings::IniFormat);
+    return parseColors(settings, tid);
+}
+
+ColorScheme ThemeStore::colorScheme(ColorSchemes name) {
+    if(name == COLORS_SYSTEM || name == COLORS_CUSTOM) {
+        BaseColorScheme base = {-1};
+        QPalette p;
+        base.background = p.window().color();
+        base.background_fullscreen = p.window().color();
+        base.folderview_topbar = p.window().color();
+        base.widget = p.window().color();
+        base.widget_border = p.window().color();
+        base.folderview = p.base().color();
+        base.text = p.text().color();
+        base.icons = p.text().color();
+        base.accent = p.highlight().color();
+        base.overlay = p.window().color();
+        base.overlay_text = p.text().color();
+        base.scrollbar.setHsv(p.highlight().color().hue(),
+                              qBound(0, p.highlight().color().saturation() - 20, 240),
+                              qBound(0, p.highlight().color().value() - 35, 240));
+        base.tid = static_cast<int>(name);
+        return ColorScheme(base);
+    }
+
+    const QString fileName = themeFileName(name);
+    if(fileName.isEmpty())
+        return ColorScheme(BaseColorScheme{static_cast<int>(name)});
+    return ColorScheme(loadTheme(resolveThemePath(fileName), static_cast<int>(name)));
 }
 
 //---------------------------------------------------------------------
