@@ -144,6 +144,8 @@ public:
     void setEnableSmoothScroll(bool mode);
     bool useThumbnailCache();
     void setUseThumbnailCache(bool mode);
+    int thumbnailerMemCacheLimit();
+    void setThumbnailerMemCacheLimit(int limitMB);
     QStringList savedPaths();
     void setSavedPaths(QStringList paths);
     QString tmpDir();

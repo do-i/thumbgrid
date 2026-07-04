@@ -838,6 +838,18 @@ bool Settings::useThumbnailCache() {
 void Settings::setUseThumbnailCache(bool mode) {
     settings->settingsConf->setValue("thumbnailCache", mode);
 }
+
+// in-memory thumbnail cache limit in MB; 0 disables the memory cache
+int Settings::thumbnailerMemCacheLimit() {
+    int limit = settings->settingsConf->value("thumbnailerMemCacheLimit", 64).toInt();
+    if(limit < 0)
+        limit = 0;
+    return limit;
+}
+
+void Settings::setThumbnailerMemCacheLimit(int limitMB) {
+    settings->settingsConf->setValue("thumbnailerMemCacheLimit", qMax(0, limitMB));
+}
 //------------------------------------------------------------------------------
 QStringList Settings::savedPaths() {
     return settings->stateConf->value("savedPaths", QDir::homePath()).toStringList();

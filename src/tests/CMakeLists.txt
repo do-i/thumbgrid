@@ -74,6 +74,30 @@ add_test(
     COMMAND thumbgrid_shortcut_context_persistence_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_dir_thumb_disk_cache_test
+    behavior/test_dir_thumbnails_are_cached_on_disk.cpp
+)
+add_test(
+    NAME "Directory and file thumbnails are cached on disk"
+    COMMAND thumbgrid_dir_thumb_disk_cache_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_parent_nav_thumb_cache_test
+    behavior/test_returning_to_parent_reuses_cached_thumbnails.cpp
+)
+add_test(
+    NAME "Returning to the parent folder reuses cached thumbnails"
+    COMMAND thumbgrid_parent_nav_thumb_cache_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_thumbnail_mem_cache_test
+    behavior/test_thumbnail_mem_cache.cpp
+)
+add_test(
+    NAME "Thumbnails are kept in a size-limited memory cache"
+    COMMAND thumbgrid_thumbnail_mem_cache_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_other_file_types_test
     behavior/test_other_file_types_toggle.cpp
 )

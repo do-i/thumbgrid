@@ -303,6 +303,8 @@ void SettingsDialog::readSettings() {
 
     ui->memoryLimitSpinBox->setValue(settings->memoryAllocationLimit());
 
+    ui->thumbMemCacheSpinBox->setValue(settings->thumbnailerMemCacheLimit());
+
     // language
     QString langName = langs.value(settings->language());
     if(langName.isEmpty() || ui->langComboBox->findText(langName) == -1)
@@ -448,6 +450,7 @@ void SettingsDialog::saveSettings() {
     settings->setExpandLimit(ui->expandLimitSlider->value());
     settings->setThumbnailerThreadCount(ui->thumbnailerThreadsSlider->value());
     settings->setMemoryAllocationLimit(ui->memoryLimitSpinBox->value());
+    settings->setThumbnailerMemCacheLimit(ui->thumbMemCacheSpinBox->value());
 
     bool useSystemColors = ui->useSystemColorsCheckBox->isChecked();
     settings->setUseSystemColorScheme(useSystemColors);

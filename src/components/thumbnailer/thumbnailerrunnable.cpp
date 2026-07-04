@@ -139,6 +139,18 @@ int ThumbnailerRunnable::taskSize() const {
     return size;
 }
 
+bool ThumbnailerRunnable::taskCrop() const {
+    return crop;
+}
+
+bool ThumbnailerRunnable::taskPreviewFit() const {
+    return previewFit;
+}
+
+QString ThumbnailerRunnable::taskColorId() const {
+    return colorId;
+}
+
 std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, const char *format, int size, bool squared) {
     QImageReader *reader = new QImageReader(path, format);
     Qt::AspectRatioMode ARMode = squared?

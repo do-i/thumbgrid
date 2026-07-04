@@ -1,6 +1,7 @@
 #include "thumbnailer.h"
 
 #include <QDebug>
+#include <QFileInfo>
 
 namespace {
     const int thumbnailerShutdownWaitMs = 3000;
@@ -14,6 +15,47 @@ Thumbnailer::Thumbnailer() {
     if(threads > globalThreads)
         threads = globalThreads;
     pool->setMaxThreadCount(threads);
+    applyMemCacheLimit();
+    connect(settings, &Settings::settingsChanged, this, &Thumbnailer::applyMemCacheLimit);
+}
+
+// QCache cost unit is KB; a limit of 0 disables the memory cache entirely
+// (inserts are rejected, lookups miss).
+void Thumbnailer::applyMemCacheLimit() {
+    memCache.setMaxCost(static_cast<qsizetype>(settings->thumbnailerMemCacheLimit()) * 1024);
+}
+
+QString Thumbnailer::memKey(const QString &path, int size, bool crop) {
+    return QString::number(size) + (crop ? "c" : "") + QChar(0x1f) + path;
+}
+
+QString Thumbnailer::dirMemKey(const QString &path, int size, bool previewFit, const QString &colorId) {
+    return QString::number(size) + "d" + (previewFit ? "f" : "") + colorId + QChar(0x1f) + path;
+}
+
+std::shared_ptr<Thumbnail> Thumbnailer::memCacheLookup(const QString &key, const QString &path) {
+    MemCacheEntry *entry = memCache.object(key);
+    if(!entry)
+        return nullptr;
+    // same staleness rule as the disk cache: source mtime must match
+    if(entry->lastModified != QFileInfo(path).lastModified()) {
+        memCache.remove(key);
+        return nullptr;
+    }
+    return entry->thumbnail;
+}
+
+void Thumbnailer::memCacheInsert(const QString &key, std::shared_ptr<Thumbnail> thumbnail, const QString &path) {
+    if(!thumbnail || !thumbnail->pixmap() || thumbnail->pixmap()->isNull())
+        return;
+    QDateTime lastModified = QFileInfo(path).lastModified();
+    if(!lastModified.isValid())
+        return;
+    auto entry = new MemCacheEntry{thumbnail, lastModified};
+    QPixmap *pixmap = thumbnail->pixmap().get();
+    qsizetype costKB = qMax(qsizetype(1), qsizetype(pixmap->width()) * pixmap->height() * pixmap->depth() / 8 / 1024);
+    // on rejection (cost > maxCost) QCache deletes the entry itself
+    memCache.insert(key, entry, costKB);
 }
 
 Thumbnailer::~Thumbnailer() {
@@ -63,6 +105,12 @@ std::shared_ptr<Thumbnail> Thumbnailer::getThumbnail(QString filePath, int size)
 }
 
 void Thumbnailer::getThumbnailAsync(QString path, int size, bool crop, bool force) {
+    if(!force) {
+        if(auto thumbnail = memCacheLookup(memKey(path, size, crop), path)) {
+            emit thumbnailReady(thumbnail, path);
+            return;
+        }
+    }
     // Track at enqueue time: a job can sit queued before its worker starts, and
     // repeated requests for the same visible cell must not queue duplicates.
     if(!runningTasks.contains(path, size)) {
@@ -72,6 +120,13 @@ void Thumbnailer::getThumbnailAsync(QString path, int size, bool crop, bool forc
 }
 
 void Thumbnailer::getDirThumbnailAsync(QString path, int size, bool previewFit, bool crop, bool force) {
+    if(!force) {
+        QString colorId = settings->colorScheme().icons.name();
+        if(auto thumbnail = memCacheLookup(dirMemKey(path, size, previewFit, colorId), path)) {
+            emit dirThumbnailReady(thumbnail, path);
+            return;
+        }
+    }
     if(!runningTasks.contains(path, size)) {
         runningTasks.insert(path, size);
         startDirThumbnailerThread(path, size, previewFit, crop, force);
@@ -120,23 +175,27 @@ void Thumbnailer::startTask(ThumbnailerRunnable *runnable) {
     pool->start(runnable);
 }
 
-void Thumbnailer::removeQueuedTask(const QString &path, int size) {
-    ThumbnailerRunnable *runnable = queuedTasks.take(taskKey(path, size));
-    delete runnable;
-}
-
 QString Thumbnailer::taskKey(const QString &path, int size) const {
     return QString::number(size) + QChar(0x1f) + path;
 }
 
 void Thumbnailer::onTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString filePath) {
     runningTasks.remove(filePath, thumbnail->size());
-    removeQueuedTask(filePath, thumbnail->size());
+    ThumbnailerRunnable *runnable = queuedTasks.take(taskKey(filePath, thumbnail->size()));
+    if(runnable) {
+        memCacheInsert(memKey(filePath, thumbnail->size(), runnable->taskCrop()), thumbnail, filePath);
+        delete runnable;
+    }
     emit thumbnailReady(thumbnail, filePath);
 }
 
 void Thumbnailer::onDirTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString dirPath) {
     runningTasks.remove(dirPath, thumbnail->size());
-    removeQueuedTask(dirPath, thumbnail->size());
+    ThumbnailerRunnable *runnable = queuedTasks.take(taskKey(dirPath, thumbnail->size()));
+    if(runnable) {
+        memCacheInsert(dirMemKey(dirPath, thumbnail->size(), runnable->taskPreviewFit(), runnable->taskColorId()),
+                       thumbnail, dirPath);
+        delete runnable;
+    }
     emit dirThumbnailReady(thumbnail, dirPath);
 }

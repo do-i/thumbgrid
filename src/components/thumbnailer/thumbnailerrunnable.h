@@ -23,6 +23,9 @@ public:
     ~ThumbnailerRunnable();
     QString taskPath() const;
     int taskSize() const;
+    bool taskCrop() const;
+    bool taskPreviewFit() const;
+    QString taskColorId() const;
     void run();
     static std::shared_ptr<Thumbnail> generate(ThumbnailCache *cache, QString path, int size, bool crop, bool force);
     static std::shared_ptr<Thumbnail> generateDir(ThumbnailCache *cache, QString path, int size, bool crop, bool force,
