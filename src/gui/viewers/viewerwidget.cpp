@@ -55,6 +55,14 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     clickZoneOverlay = new ClickZoneOverlay(this);
 
     connect(videoPlayer.get(), &VideoPlayer::playbackFinished, this, &ViewerWidget::onVideoPlaybackFinished);
+    // The video plays inside the mpv backend's own native window, which swallows
+    // the mouse-move events our hover logic relies on, so the controls would never
+    // appear over a video. Reveal them once playback is ready (duration is known)
+    // whenever the user has the controls enabled.
+    connect(videoPlayer.get(), &VideoPlayer::durationChanged, this, [this](int) {
+        if(currentWidget == VIDEOPLAYER && settings->showVideoControls())
+            videoControls->show();
+    });
 
     connect(videoControls, &VideoControlsProxyWrapper::seekBackward,  this, &ViewerWidget::seekBackward);
     connect(videoControls, &VideoControlsProxyWrapper::seekForward, this, &ViewerWidget::seekForward);
@@ -647,6 +655,8 @@ void ViewerWidget::readSettings() {
     videoControls->onVideoMuted(!settings->playVideoSounds());
     if(!settings->showVideoControls())
         videoControls->hide();
+    else if(currentWidget == VIDEOPLAYER)
+        videoControls->show();
     if(settings->clickableEdges()) {
         imageViewer->viewport()->installEventFilter(this);
         videoPlayer->installEventFilter(this);
