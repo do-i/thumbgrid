@@ -171,6 +171,7 @@ void VideoPlayerInitProxy::setVolume(int vol) {
     if(!player)
         return;
     player->setVolume(vol);
+    settings->setVolume(player->volume());
 }
 
 int VideoPlayerInitProxy::volume() {
@@ -189,6 +190,18 @@ void VideoPlayerInitProxy::setLoopPlayback(bool mode) {
     if(!player)
         return;
     player->setLoopPlayback(mode);
+}
+
+void VideoPlayerInitProxy::setPlaybackSpeed(double speed) {
+    if(!player)
+        return;
+    player->setPlaybackSpeed(speed);
+}
+
+void VideoPlayerInitProxy::setLoopAB(int startPosition, int endPosition) {
+    if(!player)
+        return;
+    player->setLoopAB(startPosition, endPosition);
 }
 
 void VideoPlayerInitProxy::show() {

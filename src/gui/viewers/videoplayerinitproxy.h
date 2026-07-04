@@ -32,6 +32,8 @@ public:
     int volume();
     void setVideoUnscaled(bool mode);
     void setLoopPlayback(bool mode);
+    void setPlaybackSpeed(double speed);
+    void setLoopAB(int startPosition, int endPosition);
     std::shared_ptr<VideoPlayer> getPlayer();
     bool isInitialized();
 

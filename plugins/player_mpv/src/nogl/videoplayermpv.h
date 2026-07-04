@@ -35,6 +35,8 @@ public slots:
     void show();
     void hide();
     void setLoopPlayback(bool mode);
+    void setPlaybackSpeed(double speed);
+    void setLoopAB(int startPosition, int endPosition);
 
 protected:
     void paintEvent(QPaintEvent *event);

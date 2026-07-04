@@ -186,6 +186,21 @@ void MpvWidget::setVolume(int vol) {
     mpv::qt::set_property_variant(mpv, "volume", vol);
 }
 
+void MpvWidget::setPlaybackSpeed(double speed) {
+    speed = qBound(0.25, speed, 4.0);
+    mpv::qt::set_property_variant(mpv, "speed", speed);
+}
+
+void MpvWidget::setLoopAB(int startPosition, int endPosition) {
+    if(startPosition < 0 || endPosition <= startPosition) {
+        mpv::qt::set_property_variant(mpv, "ab-loop-a", "no");
+        mpv::qt::set_property_variant(mpv, "ab-loop-b", "no");
+        return;
+    }
+    mpv::qt::set_property_variant(mpv, "ab-loop-a", startPosition);
+    mpv::qt::set_property_variant(mpv, "ab-loop-b", endPosition);
+}
+
 void MpvWidget::setRepeat(bool mode) {
     if(mode)
         mpv::qt::set_property(mpv, "loop-file", "inf");

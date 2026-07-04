@@ -432,9 +432,36 @@ ChangelogWindow QTextBrowser {
 /* Video controls */
 /*----------------------------------------------------------------------------*/
 
+[accessibleName="VideoControlsRow"] {
+    background-color: %widget%;
+    border-top: 1px solid %text_lc2%;
+    min-height: 26px;
+    max-height: 26px;
+}
+
 VideoControls QLabel {
     color: %text_hc2%;
     font: bold;
+}
+
+VideoControls QPushButton[accessibleName="VideoControlTextButton"] {
+    color: %text_hc%;
+    background-color: %button%;
+    border: 0px;
+    border-radius: 3px;
+    padding: 0px;
+    font: bold;
+}
+
+VideoControls QPushButton[accessibleName="VideoControlTextButton"]:hover {
+    background-color: %button_hover%;
+    color: %text_hc2%;
+}
+
+VideoControls QPushButton[accessibleName="VideoControlTextButton"]:pressed,
+VideoControls QPushButton[accessibleName="VideoControlTextButton"][checked="true"] {
+    background-color: %button_pressed%;
+    color: %text%;
 }
 /*----------------------------------------------------------------------------*/
 VideoControls QSlider {

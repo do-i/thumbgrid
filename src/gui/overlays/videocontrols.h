@@ -1,8 +1,10 @@
 #pragma once
 
-#include "gui/customwidgets/overlaywidget.h"
 #include "settings.h"
+#include <QLabel>
 #include <QPushButton>
+#include <QSlider>
+#include <QWidget>
 
 namespace Ui {
 class VideoControls;
@@ -13,12 +15,12 @@ enum PlaybackMode {
     PLAYBACK_VIDEO
 };
 
-class VideoControls : public OverlayWidget
+class VideoControls : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit VideoControls(FloatingWidgetContainer *parent = nullptr);
+    explicit VideoControls(QWidget *parent = nullptr);
     ~VideoControls();
 
 public slots:
@@ -27,17 +29,33 @@ public slots:
     void onPlaybackPaused(bool);
     void onVideoMuted(bool);
     void setMode(PlaybackMode _mode);
+    void setVolume(int);
 
 signals:
     void seek(int pos);
     void seekForward();
     void seekBackward();
-
-private slots:
-    void readSettings();
+    void volumeChanged(int volume);
+    void playbackSpeedChanged(double speed);
+    void loopABChanged(int startPosition, int endPosition);
 
 private:
+    enum LoopABState {
+        LOOP_AB_CLEAR,
+        LOOP_AB_START_SET,
+        LOOP_AB_ACTIVE
+    };
+
+    void resetLoopAB();
+    void updateLoopButton();
+
     Ui::VideoControls *ui;
     int lastPosition;
     PlaybackMode mode;
+    QPushButton *loopABButton;
+    QSlider *volumeSlider;
+    QSlider *speedSlider;
+    QLabel *speedLabel;
+    LoopABState loopABState;
+    int loopStartPosition;
 };

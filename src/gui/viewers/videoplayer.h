@@ -22,6 +22,8 @@ public:
     virtual int volume() = 0;
     virtual void setVideoUnscaled(bool mode) = 0;
     virtual void setLoopPlayback(bool mode) = 0;
+    virtual void setPlaybackSpeed(double speed) = 0;
+    virtual void setLoopAB(int startPosition, int endPosition) = 0;
 
 signals:
     void durationChanged(int value);

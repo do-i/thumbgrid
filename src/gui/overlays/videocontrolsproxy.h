@@ -1,31 +1,35 @@
 #pragma once
 
 #include "gui/overlays/videocontrols.h"
+#include <QHBoxLayout>
 
 struct VideoControlsStateBuffer {
     int duration = 0;
     int position = 0;
+    int volume = 100;
     bool paused = true;
     bool videoMuted = true;
-    PlaybackMode mode;
+    PlaybackMode mode = PLAYBACK_VIDEO;
 };
 
-class VideoControlsProxyWrapper : public QObject {
+class VideoControlsProxyWrapper : public QWidget {
     Q_OBJECT
 public:
-    explicit VideoControlsProxyWrapper(FloatingWidgetContainer *parent = nullptr);
+    explicit VideoControlsProxyWrapper(QWidget *parent = nullptr);
     ~VideoControlsProxyWrapper();
     void init();
 
     void show();
     void hide();
     bool underMouse();
-    bool isVisible();
 
 signals:
     void seek(int pos);
     void seekForward();
     void seekBackward();
+    void volumeChanged(int volume);
+    void playbackSpeedChanged(double speed);
+    void loopABChanged(int startPosition, int endPosition);
 
 public slots:
     void setPlaybackDuration(int);
@@ -33,9 +37,10 @@ public slots:
     void setMode(PlaybackMode);
     void onPlaybackPaused(bool);
     void onVideoMuted(bool);
+    void setVolume(int);
 
 private:
-    FloatingWidgetContainer *container;
     VideoControls *videoControls;
     VideoControlsStateBuffer stateBuf;
+    QHBoxLayout layout;
 };

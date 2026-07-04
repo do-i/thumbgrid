@@ -1,40 +1,51 @@
 #include "videocontrolsproxy.h"
 
-VideoControlsProxyWrapper::VideoControlsProxyWrapper(FloatingWidgetContainer *parent)
-    : container(parent),
+VideoControlsProxyWrapper::VideoControlsProxyWrapper(QWidget *parent)
+    : QWidget(parent),
       videoControls(nullptr)
 {
+    setAccessibleName("VideoControlsRow");
+    setAttribute(Qt::WA_StyledBackground, true);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    layout.setContentsMargins(0, 0, 0, 0);
+    layout.setSpacing(0);
+    setLayout(&layout);
+    QWidget::hide();
 }
 
 VideoControlsProxyWrapper::~VideoControlsProxyWrapper() {
-    if(videoControls)
-        videoControls->deleteLater();
 }
 
 void VideoControlsProxyWrapper::init() {
     if(videoControls)
         return;
-    videoControls = new VideoControls(container);
+    videoControls = new VideoControls(this);
+    layout.addWidget(videoControls);
+    layout.addStretch(1);
 
     connect(videoControls, &VideoControls::seekBackward,  this, &VideoControlsProxyWrapper::seekBackward);
     connect(videoControls, &VideoControls::seekForward, this, &VideoControlsProxyWrapper::seekForward);
     connect(videoControls, &VideoControls::seek,      this, &VideoControlsProxyWrapper::seek);
+    connect(videoControls, &VideoControls::volumeChanged, this, &VideoControlsProxyWrapper::volumeChanged);
+    connect(videoControls, &VideoControls::playbackSpeedChanged, this, &VideoControlsProxyWrapper::playbackSpeedChanged);
+    connect(videoControls, &VideoControls::loopABChanged, this, &VideoControlsProxyWrapper::loopABChanged);
 
     videoControls->setMode(stateBuf.mode);
     videoControls->setPlaybackDuration(stateBuf.duration);
     videoControls->setPlaybackPosition(stateBuf.position);
+    videoControls->setVolume(stateBuf.volume);
     videoControls->onPlaybackPaused(stateBuf.paused);
     videoControls->onVideoMuted(stateBuf.videoMuted);
 }
 
 void VideoControlsProxyWrapper::show() {
     init();
+    QWidget::show();
     videoControls->show();
 }
 
 void VideoControlsProxyWrapper::hide() {
-    if(videoControls)
-        videoControls->hide();
+    QWidget::hide();
 }
 
 void VideoControlsProxyWrapper::setPlaybackDuration(int _duration) {
@@ -77,10 +88,14 @@ void VideoControlsProxyWrapper::onVideoMuted(bool _mode) {
     }
 }
 
-bool VideoControlsProxyWrapper::underMouse() {
-    return videoControls ? videoControls->underMouse() : false;
+void VideoControlsProxyWrapper::setVolume(int _volume) {
+    if(videoControls) {
+        videoControls->setVolume(_volume);
+    } else {
+        stateBuf.volume = _volume;
+    }
 }
 
-bool VideoControlsProxyWrapper::isVisible() {
-    return videoControls ? videoControls->isVisible() : false;
+bool VideoControlsProxyWrapper::underMouse() {
+    return QWidget::underMouse();
 }

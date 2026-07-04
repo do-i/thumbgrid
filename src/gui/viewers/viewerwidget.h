@@ -36,6 +36,7 @@ public:
     bool lockZoomEnabled();
     bool lockViewEnabled();
     ScalingFilter scalingFilter();
+    QWidget *videoControlsWidget();
 
 private:
     QVBoxLayout layout;
@@ -61,7 +62,8 @@ private:
     void disableVideoPlayer();
     void disableTextViewer();
 
-    QRect videoControlsArea();
+    bool shouldShowVideoControls();
+    void updateVideoControlsVisibility();
 
     bool eventFilter(QObject *object, QEvent *event);
 
@@ -118,6 +120,9 @@ public slots:
     void toggleMute();
     void volumeUp();
     void volumeDown();
+    void setVolume(int volume);
+    void setPlaybackSpeed(double speed);
+    void setLoopAB(int startPosition, int endPosition);
 
     void startPlayback();
     void showContextMenu();

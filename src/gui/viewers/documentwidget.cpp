@@ -25,6 +25,7 @@ DocumentWidget::DocumentWidget(std::shared_ptr<ViewerWidget> viewWidget, std::sh
     mViewWidget->setParent(this);
     layout->addWidget(mViewWidget.get());
     mViewWidget.get()->show();
+    layoutRoot->addWidget(mViewWidget->videoControlsWidget());
     mInfoBar = infoBar;
     mInfoBar->setParent(this);
     layoutRoot->addWidget(mInfoBar.get());

@@ -38,6 +38,7 @@ bool VideoPlayerMpv::showVideo(QString file) {
     mPendingReveal = true;
     QWidget::hide();
     m_mpv->command(QStringList() << "loadfile" << file);
+    m_mpv->setLoopAB(-1, -1);
     setPaused(false);
     return true;
 }
@@ -153,6 +154,14 @@ void VideoPlayerMpv::hide() {
 
 void VideoPlayerMpv::setLoopPlayback(bool mode) {
     m_mpv->setRepeat(mode);
+}
+
+void VideoPlayerMpv::setPlaybackSpeed(double speed) {
+    m_mpv->setPlaybackSpeed(speed);
+}
+
+void VideoPlayerMpv::setLoopAB(int startPosition, int endPosition) {
+    m_mpv->setLoopAB(startPosition, endPosition);
 }
 
 VideoPlayer *CreatePlayerWidget() {

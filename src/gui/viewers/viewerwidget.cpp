@@ -55,18 +55,16 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     clickZoneOverlay = new ClickZoneOverlay(this);
 
     connect(videoPlayer.get(), &VideoPlayer::playbackFinished, this, &ViewerWidget::onVideoPlaybackFinished);
-    // The video plays inside the mpv backend's own native window, which swallows
-    // the mouse-move events our hover logic relies on, so the controls would never
-    // appear over a video. Reveal them once playback is ready (duration is known)
-    // whenever the user has the controls enabled.
     connect(videoPlayer.get(), &VideoPlayer::durationChanged, this, [this](int) {
-        if(currentWidget == VIDEOPLAYER && settings->showVideoControls())
-            videoControls->show();
+        updateVideoControlsVisibility();
     });
 
     connect(videoControls, &VideoControlsProxyWrapper::seekBackward,  this, &ViewerWidget::seekBackward);
     connect(videoControls, &VideoControlsProxyWrapper::seekForward, this, &ViewerWidget::seekForward);
     connect(videoControls, &VideoControlsProxyWrapper::seek,      this, &ViewerWidget::seek);
+    connect(videoControls, &VideoControlsProxyWrapper::volumeChanged, this, &ViewerWidget::setVolume);
+    connect(videoControls, &VideoControlsProxyWrapper::playbackSpeedChanged, this, &ViewerWidget::setPlaybackSpeed);
+    connect(videoControls, &VideoControlsProxyWrapper::loopABChanged, this, &ViewerWidget::setLoopAB);
 
     enableImageViewer();
     setInteractionEnabled(true);
@@ -109,6 +107,7 @@ void ViewerWidget::enableImageViewer() {
         connect(imageViewer.get(), &ImageViewerV2::animationPaused, videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
         imageViewer->show();
         currentWidget = IMAGEVIEWER;
+        updateVideoControlsVisibility();
     }
 }
 
@@ -123,6 +122,7 @@ void ViewerWidget::enableVideoPlayer() {
         connect(videoPlayer.get(), &VideoPlayer::videoPaused,     videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
         videoPlayer->show();
         currentWidget = VIDEOPLAYER;
+        updateVideoControlsVisibility();
     }
 }
 
@@ -135,6 +135,7 @@ void ViewerWidget::disableImageViewer() {
         disconnect(imageViewer.get(), &ImageViewerV2::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         disconnect(imageViewer.get(), &ImageViewerV2::frameChanged,    videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         disconnect(imageViewer.get(), &ImageViewerV2::animationPaused, videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
+        updateVideoControlsVisibility();
     }
 }
 
@@ -160,7 +161,6 @@ void ViewerWidget::disableTextViewer() {
 void ViewerWidget::disableVideoPlayer() {
     if(currentWidget == VIDEOPLAYER) {
         currentWidget = UNSET;
-        //videoControls->hide();
         disconnect(videoPlayer.get(), &VideoPlayer::durationChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackDuration);
         disconnect(videoPlayer.get(), &VideoPlayer::positionChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         disconnect(videoPlayer.get(), &VideoPlayer::videoPaused,     videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
@@ -171,6 +171,7 @@ void ViewerWidget::disableVideoPlayer() {
         // applied to the OpenGL render-API backend; the default wid backend
         // renders into its own native window, so hiding is clean.
         videoPlayer->hide();
+        updateVideoControlsVisibility();
     }
 }
 
@@ -278,6 +279,7 @@ bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
     enableImageViewer();
     imageViewer->show();
     imageViewer->showAnimation(movie);
+    updateVideoControlsVisibility();
     showCursor();
     hideCursorTimed(false);
     return true;
@@ -287,6 +289,7 @@ bool ViewerWidget::showVideo(QString file) {
     stopPlayback();
     enableVideoPlayer();
     videoPlayer->showVideo(file);
+    updateVideoControlsVisibility();
     // Restore the pointer on every switch; it auto-hides again after the idle
     // timeout. Without this the cursor stays blanked from the previous item
     // (the mpv window doesn't track our auto-hide on its own).
@@ -428,14 +431,32 @@ void ViewerWidget::toggleMute() {
 }
 
 void ViewerWidget::volumeUp() {
-    if(currentWidget == VIDEOPLAYER)
+    if(currentWidget == VIDEOPLAYER) {
         videoPlayer->volumeUp();
+        videoControls->setVolume(videoPlayer->volume());
+    }
 }
 
 void ViewerWidget::volumeDown() {
     if(currentWidget == VIDEOPLAYER) {
         videoPlayer->volumeDown();
+        videoControls->setVolume(videoPlayer->volume());
     }
+}
+
+void ViewerWidget::setVolume(int volume) {
+    if(currentWidget == VIDEOPLAYER)
+        videoPlayer->setVolume(volume);
+}
+
+void ViewerWidget::setPlaybackSpeed(double speed) {
+    if(currentWidget == VIDEOPLAYER)
+        videoPlayer->setPlaybackSpeed(speed);
+}
+
+void ViewerWidget::setLoopAB(int startPosition, int endPosition) {
+    if(currentWidget == VIDEOPLAYER)
+        videoPlayer->setLoopAB(startPosition, endPosition);
 }
 
 bool ViewerWidget::isDisplaying() {
@@ -476,12 +497,6 @@ void ViewerWidget::mouseMoveEvent(QMouseEvent *event) {
         showCursor();
         hideCursorTimed(true);
     }
-    if(currentWidget == VIDEOPLAYER || imageViewer->hasAnimation()) {
-        if(settings->showVideoControls() && videoControlsArea().contains(event->pos()))
-            videoControls->show();
-        else
-            videoControls->hide();
-    }
     event->ignore();
 }
 
@@ -502,7 +517,6 @@ void ViewerWidget::hideCursor() {
         // force hide on wayland until we can get the cursor pos
         if(mWaylandCursorWorkaround) {
             setCursor(QCursor(Qt::BlankCursor));
-            videoControls->hide();
         } else {
             QPoint posMapped = mapFromGlobal(QCursor::pos());
             //if(settings->enableClickZoneThing())
@@ -516,24 +530,12 @@ void ViewerWidget::hideCursor() {
             // only hide when we are under viewer or player widget
             QWidget *w = qApp->widgetAt(QCursor::pos());
             if(w && (w == imageViewer.get()->viewport() || w == videoPlayer->getPlayer().get())) {
-                if(!videoControls->isVisible() || !videoControlsArea().contains(posMapped)) {
-                    setCursor(QCursor(Qt::BlankCursor));
-                    // also blank the video player's own (native) window
-                    videoPlayer->setCursor(QCursor(Qt::BlankCursor));
-                    videoControls->hide();
-                }
+                setCursor(QCursor(Qt::BlankCursor));
+                // also blank the video player's own (native) window
+                videoPlayer->setCursor(QCursor(Qt::BlankCursor));
             }
         }
     }
-}
-
-QRect ViewerWidget::videoControlsArea() {
-    QRect vcontrolsRect;
-    if(settings->panelEnabled() && settings->panelPosition() == PANEL_BOTTOM)
-        vcontrolsRect = QRect(0, 0, width(), 160); // inverted (top)
-    else
-        vcontrolsRect = QRect(0, height() - 160, width(), height());
-    return vcontrolsRect;
 }
 
 // click zone input crutch
@@ -653,10 +655,7 @@ void ViewerWidget::onFullscreenModeChanged(bool mode) {
 
 void ViewerWidget::readSettings() {
     videoControls->onVideoMuted(!settings->playVideoSounds());
-    if(!settings->showVideoControls())
-        videoControls->hide();
-    else if(currentWidget == VIDEOPLAYER)
-        videoControls->show();
+    updateVideoControlsVisibility();
     if(settings->clickableEdges()) {
         imageViewer->viewport()->installEventFilter(this);
         videoPlayer->installEventFilter(this);
@@ -720,5 +719,20 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
 
 void ViewerWidget::leaveEvent(QEvent *event) {
     QWidget::leaveEvent(event);
-    videoControls->hide();
+}
+
+QWidget *ViewerWidget::videoControlsWidget() {
+    return videoControls;
+}
+
+bool ViewerWidget::shouldShowVideoControls() {
+    return settings->showVideoControls() &&
+        (currentWidget == VIDEOPLAYER || (currentWidget == IMAGEVIEWER && imageViewer->hasAnimation()));
+}
+
+void ViewerWidget::updateVideoControlsVisibility() {
+    if(shouldShowVideoControls())
+        videoControls->show();
+    else
+        videoControls->hide();
 }

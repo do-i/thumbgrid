@@ -27,6 +27,8 @@ public:
     bool muted();
     int volume();
     void setVolume(int vol);
+    void setPlaybackSpeed(double speed);
+    void setLoopAB(int startPosition, int endPosition);
 
 signals:
     void durationChanged(int value);
