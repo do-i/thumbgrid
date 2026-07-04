@@ -81,6 +81,8 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->durationLabel->setFont(timeFont);
     ui->positionLabel->setFixedWidth(50);
     ui->durationLabel->setFixedWidth(50);
+    ui->positionLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    ui->durationLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
     loopABButton->setAccessibleName("VideoControlTextButton");
     loopABButton->setFocusPolicy(Qt::NoFocus);
@@ -131,8 +133,8 @@ VideoControls::VideoControls(QWidget *parent) :
     speedPopupLabel->setAlignment(Qt::AlignCenter);
     speedPopupLabel->setToolTip(tr("Playback speed"));
     speedPopupLayout->addWidget(speedPopupLabel);
-    speedPopupLayout->addWidget(speedSlider);
     speedPopupLayout->addWidget(resetSpeedButton);
+    speedPopupLayout->addWidget(speedSlider);
     ui->horizontalLayout->insertWidget(6, createVideoControlSeparator(this));
 
     lastPosition = -1;
