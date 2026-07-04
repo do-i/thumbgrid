@@ -121,3 +121,11 @@ add_test(
     NAME "Preset themes load their colors from the extracted theme files"
     COMMAND thumbgrid_preset_themes_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_custom_theme_persistence_test
+    behavior/test_custom_theme_persistence.cpp
+)
+add_test(
+    NAME "The custom theme round-trips through theme.ini with a [Theme] group"
+    COMMAND thumbgrid_custom_theme_persistence_test
+)

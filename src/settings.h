@@ -10,6 +10,7 @@
 #include <QColor>
 #include <QPalette>
 #include <QDir>
+#include <QFileInfo>
 #include <QKeySequence>
 #include <QMap>
 #include <QFont>

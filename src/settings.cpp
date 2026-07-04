@@ -29,6 +29,44 @@ int normalizedThemeTid(int tid) {
     return tid;
 }
 
+// Display name stored alongside the tid, mirroring the system theme files.
+QString themeName(int tid) {
+    switch(tid) {
+        case COLORS_SYSTEM:       return QStringLiteral("System");
+        case COLORS_LIGHT:        return QStringLiteral("Light");
+        case COLORS_BLACK:        return QStringLiteral("Black");
+        case COLORS_DARK:         return QStringLiteral("Dark");
+        case COLORS_DARKBLUE:     return QStringLiteral("Dark Blue");
+        case COLORS_LIGHT_YELLOW: return QStringLiteral("Light Blue");
+        default:                  return QStringLiteral("Custom");
+    }
+}
+
+// One-time migration of the pre-INI "theme.conf" (tid under [Colors]) to the new
+// "theme.ini" layout ([Theme] tid/name + [Colors]). Runs only when the new file
+// is absent so a user's custom palette survives the rename.
+void migrateLegacyThemeConf(const QString &confDir, QSettings *themeConf) {
+    const QString legacyPath = confDir + "/theme.conf";
+    if(!QFile::exists(legacyPath) || QFile::exists(confDir + "/theme.ini"))
+        return;
+    QSettings legacy(legacyPath, QSettings::IniFormat);
+    legacy.beginGroup("Colors");
+    const int tid = normalizedThemeTid(legacy.value("tid", COLORS_CUSTOM).toInt());
+    const QStringList colorKeys = legacy.childKeys();
+    themeConf->beginGroup("Theme");
+    themeConf->setValue("tid", tid);
+    themeConf->setValue("name", themeName(tid));
+    themeConf->endGroup();
+    themeConf->beginGroup("Colors");
+    for(const QString &key : colorKeys) {
+        if(key != QLatin1String("tid"))
+            themeConf->setValue(key, legacy.value(key));
+    }
+    themeConf->endGroup();
+    legacy.endGroup();
+    themeConf->sync();
+}
+
 }
 
 Settings::Settings(QObject *parent) : QObject(parent) {
@@ -37,7 +75,11 @@ Settings::Settings(QObject *parent) : QObject(parent) {
     QSettings::setDefaultFormat(QSettings::NativeFormat);
     settingsConf = new QSettings();
     stateConf = new QSettings(QCoreApplication::organizationName(), "savedState");
-    themeConf = new QSettings(QCoreApplication::organizationName(), "theme");
+    // Keep the theme as a plain INI (matching the system theme files) rather
+    // than the native "theme.conf", in the same config dir as the other configs.
+    const QString confDir = QFileInfo(settingsConf->fileName()).absolutePath();
+    themeConf = new QSettings(confDir + "/theme.ini", QSettings::IniFormat);
+    migrateLegacyThemeConf(confDir, themeConf);
 #else
     mConfDir = new QDir(QApplication::applicationDirPath() + "/conf");
     mConfDir->mkpath(QApplication::applicationDirPath() + "/conf");
@@ -254,7 +296,7 @@ void Settings::loadTheme() {
         setColorScheme(ThemeStore::colorScheme(ColorSchemes::COLORS_SYSTEM));
         return;
     }
-    int tid = normalizedThemeTid(themeConf->value("Colors/tid", "-1").toInt());
+    int tid = normalizedThemeTid(themeConf->value("Theme/tid", "-1").toInt());
     switch(tid) {
         case COLORS_BLACK:
         case COLORS_DARK:
@@ -272,6 +314,7 @@ void Settings::loadTheme() {
 //------------------------------------------------------------------------------
 ColorScheme Settings::customColorScheme() {
     BaseColorScheme base;
+    const int tid = normalizedThemeTid(themeConf->value("Theme/tid", "-1").toInt());
     themeConf->beginGroup("Colors");
         base.background            = QColor(themeConf->value("background",            "#1a1a1a").toString());
         base.background_fullscreen = QColor(themeConf->value("background_fullscreen", "#1a1a1a").toString());
@@ -285,7 +328,7 @@ ColorScheme Settings::customColorScheme() {
         base.scrollbar             = QColor(themeConf->value("scrollbar",             "#5a5a5a").toString());
         base.overlay_text          = QColor(themeConf->value("overlay_text",          "#d2d2d2").toString());
         base.overlay               = QColor(themeConf->value("overlay",               "#1a1a1a").toString());
-        base.tid                   = normalizedThemeTid(themeConf->value("tid", "-1").toInt());
+        base.tid                   = tid;
         ColorScheme defaults(base);
         base.folderview_label_bg = colorFromSettings(themeConf, "fv_label_bg",
                                                      settingsConf, "folderViewLabelBackgroundColor",
@@ -308,17 +351,20 @@ ColorScheme Settings::customColorScheme() {
 void Settings::saveTheme() {
     if(settings->useSystemColorScheme())
         return;
-    themeConf->beginGroup("Colors");
+    // Identity ([Theme] tid + name) mirrors the system theme files.
+    themeConf->beginGroup("Theme");
     themeConf->setValue("tid", mColorScheme.tid);
+    themeConf->setValue("name", themeName(mColorScheme.tid));
+    themeConf->endGroup();
     // Presets are generated from ThemeStore and must never overwrite the stored
     // custom palette, otherwise switching to a preset would discard the user's
     // custom colors. Only persist color values while the custom theme is active.
     if(mColorScheme.tid == COLORS_BLACK || mColorScheme.tid == COLORS_DARK ||
        mColorScheme.tid == COLORS_DARKBLUE || mColorScheme.tid == COLORS_LIGHT ||
        mColorScheme.tid == COLORS_LIGHT_YELLOW) {
-        themeConf->endGroup();
         return;
     }
+    themeConf->beginGroup("Colors");
     themeConf->setValue("background",            mColorScheme.background.name());
     themeConf->setValue("background_fullscreen", mColorScheme.background_fullscreen.name());
     themeConf->setValue("text",                  mColorScheme.text.name());

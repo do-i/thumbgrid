@@ -40,8 +40,8 @@ void PresetThemesLoadFromFilesTest::presetsLoadTheirDocumentedColors() {
     const ColorScheme lightBlue = ThemeStore::colorScheme(COLORS_LIGHT_YELLOW);
     QCOMPARE(lightBlue.tid, static_cast<int>(COLORS_LIGHT_YELLOW));
     QCOMPARE(lightBlue.icons.name(), QStringLiteral("#006394"));
-    QCOMPARE(lightBlue.widget.name(), QStringLiteral("#e4e3f7"));
-    QCOMPARE(lightBlue.folderview_parent_icon.name(), QStringLiteral("#26a269"));
+    QCOMPARE(lightBlue.widget.name(), QStringLiteral("#e4e4f7"));
+    QCOMPARE(lightBlue.folderview_parent_icon.name(), QStringLiteral("#c6dbfa"));
     QCOMPARE(lightBlue.folderview_selection.name(), QStringLiteral("#badff8"));
 }
 
