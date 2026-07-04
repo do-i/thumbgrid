@@ -121,7 +121,7 @@ void Thumbnailer::getThumbnailAsync(QString path, int size, bool crop, bool forc
 
 void Thumbnailer::getDirThumbnailAsync(QString path, int size, bool previewFit, bool crop, bool force) {
     if(!force) {
-        QString colorId = settings->colorScheme().icons.name();
+        QString colorId = settings->colorScheme().folderview_parent_icon.name();
         if(auto thumbnail = memCacheLookup(dirMemKey(path, size, previewFit, colorId), path)) {
             emit dirThumbnailReady(thumbnail, path);
             return;
@@ -142,7 +142,7 @@ void Thumbnailer::startThumbnailerThread(QString filePath, int size, bool crop, 
 // Builds the recolored, pre-scaled folder icon on the GUI thread (QPixmap and
 // ImageLib::recolor are not safe off-thread); the worker only composites onto it.
 QImage Thumbnailer::dirIconBase(int size) {
-    QString color = settings->colorScheme().icons.name();
+    QString color = settings->colorScheme().folderview_parent_icon.name();
     if(size == cachedIconSize && color == cachedIconColor && !cachedIconBase.isNull())
         return cachedIconBase;
 
@@ -153,7 +153,7 @@ QImage Thumbnailer::dirIconBase(int size) {
     QSize pixmapSize(qRound(size * 1.10f),
                      qRound(size * 1.10f * source.height() / static_cast<qreal>(source.width())));
     QPixmap scaled = source.scaled(pixmapSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    ImageLib::recolor(scaled, settings->colorScheme().icons);
+    ImageLib::recolor(scaled, settings->colorScheme().folderview_parent_icon);
 
     cachedIconBase = scaled.toImage();
     cachedIconSize = size;
@@ -164,7 +164,7 @@ QImage Thumbnailer::dirIconBase(int size) {
 void Thumbnailer::startDirThumbnailerThread(QString dirPath, int size, bool previewFit, bool crop, bool force) {
     auto runnable = new ThumbnailerRunnable(settings->useThumbnailCache() ? cache : nullptr, dirPath, size, crop, force,
                                             previewFit, settings->showHiddenFiles(), dirIconBase(size),
-                                            settings->colorScheme().icons.name());
+                                            settings->colorScheme().folderview_parent_icon.name());
     connect(runnable, &ThumbnailerRunnable::dirTaskEnd, this, &Thumbnailer::onDirTaskEnd);
     startTask(runnable);
 }

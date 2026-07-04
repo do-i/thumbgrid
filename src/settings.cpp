@@ -260,7 +260,7 @@ void Settings::loadTheme() {
         case COLORS_DARK:
         case COLORS_DARKBLUE:
         case COLORS_LIGHT:
-        case COLORS_YELLOW:
+        case COLORS_LIGHT_YELLOW:
             // presets are generated, never read from the stored custom palette
             setColorScheme(ThemeStore::colorScheme(static_cast<ColorSchemes>(tid)));
             break;
@@ -315,7 +315,7 @@ void Settings::saveTheme() {
     // custom colors. Only persist color values while the custom theme is active.
     if(mColorScheme.tid == COLORS_BLACK || mColorScheme.tid == COLORS_DARK ||
        mColorScheme.tid == COLORS_DARKBLUE || mColorScheme.tid == COLORS_LIGHT ||
-       mColorScheme.tid == COLORS_YELLOW) {
+       mColorScheme.tid == COLORS_LIGHT_YELLOW) {
         themeConf->endGroup();
         return;
     }
