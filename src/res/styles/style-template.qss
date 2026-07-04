@@ -502,18 +502,21 @@ VideoControls QPushButton[accessibleName="VideoControlTextButton"][checked="true
     color: %text%;
 }
 
-QFrame[accessibleName="VideoControlPopup"] {
+QFrame[accessibleName="VideoControlPopup"],
+QFrame[accessibleName="VideoControlVolumePopup"] {
     background-color: %widget%;
     border: 1px solid %text_lc2%;
     border-radius: 5px;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QLabel {
+QFrame[accessibleName="VideoControlPopup"] QLabel,
+QFrame[accessibleName="VideoControlVolumePopup"] QLabel {
     color: %text_hc2%;
     font-size: 11px;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"] {
+QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"],
+QFrame[accessibleName="VideoControlVolumePopup"] QPushButton[accessibleName="VideoControlPopupButton"] {
     color: %text_hc%;
     background-color: %button%;
     border: 1px solid %button_hover%;
@@ -522,66 +525,13 @@ QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoCont
     font-size: 11px;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover {
+QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover,
+QFrame[accessibleName="VideoControlVolumePopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover {
     background-color: %button_hover%;
     border-color: %text_lc2%;
 }
-/*----------------------------------------------------------------------------*/
-VideoControls QSlider,
-QFrame[accessibleName="VideoControlPopup"] QSlider {
-    background: transparent;
-    border: 0px;
-    margin: 0px;
-    min-height: 24px;
-    max-height: 24px;
-}
-
-VideoControls QSlider::groove:horizontal,
-QFrame[accessibleName="VideoControlPopup"] QSlider::groove:horizontal {
-    background: %slider_groove%;
-    border-radius: 4px;
-    height: 8px;
-}
-
-VideoControls QSlider::add-page:horizontal,
-QFrame[accessibleName="VideoControlPopup"] QSlider::add-page:horizontal {
-    background: %slider_groove%;
-    border-radius: 4px;
-    height: 8px;
-}
-
-VideoControls QSlider::handle:horizontal,
-QFrame[accessibleName="VideoControlPopup"] QSlider::handle:horizontal {
-    background: %slider_handle%;
-    border: 1px solid %widget%;
-    border-radius: 6px;
-    height: 12px;
-    margin: -2px 0px;
-    width: 12px;
-}
-
-VideoControls QSlider::sub-page:horizontal,
-QFrame[accessibleName="VideoControlPopup"] QSlider::sub-page:horizontal {
-    background: %accent%;
-    border-radius: 4px;
-    height: 8px;
-}
-
-VideoControls QSlider[accessibleName="VideoControlVolumeSlider"]::sub-page:horizontal,
-QFrame[accessibleName="VideoControlPopup"] QSlider[accessibleName="VideoControlVolumeSlider"]::sub-page:horizontal {
-    background: %slider_handle%;
-}
-
-VideoControls QSlider[accessibleName="VideoControlSeekSlider"]::sub-page:horizontal {
-    background: %text_hc%;
-}
-
-VideoControls QSlider[accessibleName="VideoControlSpeedSlider"]::sub-page:horizontal,
-VideoControls QSlider[accessibleName="VideoControlSpeedSlider"]::handle:horizontal,
-QFrame[accessibleName="VideoControlPopup"] QSlider[accessibleName="VideoControlSpeedSlider"]::sub-page:horizontal,
-QFrame[accessibleName="VideoControlPopup"] QSlider[accessibleName="VideoControlSpeedSlider"]::handle:horizontal {
-    background: %accent%;
-}
+/* Sliders (seek, volume, speed) use the native Fusion look, matching the
+   preference screen sliders. No custom groove/handle styling here. */
 
 /*----------------------------------------------------------------------------*/
 /* File copy - move window */

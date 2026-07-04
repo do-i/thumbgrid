@@ -44,7 +44,7 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->horizontalLayout_2->setSpacing(2);
     ui->horizontalSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
     ui->horizontalSpacer_2->changeSize(4, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
-    volumePopup->setAccessibleName("VideoControlPopup");
+    volumePopup->setAccessibleName("VideoControlVolumePopup");
     speedPopup->setAccessibleName("VideoControlPopup");
     auto *volumePopupLayout = new QVBoxLayout(volumePopup);
     volumePopupLayout->setContentsMargins(8, 8, 8, 8);
@@ -94,7 +94,10 @@ VideoControls::VideoControls(QWidget *parent) :
     volumeSlider->setFocusPolicy(Qt::NoFocus);
     volumeSlider->setToolTip(tr("Volume"));
     volumeSlider->setRange(0, 100);
-    volumeSlider->setFixedSize(180, 28);
+    volumeSlider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    volumeSlider->setMinimumWidth(180);
+    volumeSlider->setTickPosition(QSlider::TicksBelow);
+    volumeSlider->setTickInterval(10);
     volumeSlider->setValue(settings->volume());
     volumePopupLabel->setAlignment(Qt::AlignCenter);
     volumePopupLabel->setToolTip(tr("Volume"));
