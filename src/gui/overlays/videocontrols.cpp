@@ -23,8 +23,10 @@ VideoControls::VideoControls(QWidget *parent) :
     loopABButton(new QPushButton("A-B", this)),
     speedButton(new QPushButton("1.00x", this)),
     volumeMuteButton(new QPushButton(tr("Mute"), this)),
+    resetSpeedButton(new QPushButton(tr("Reset 1.00x"), this)),
     volumeSlider(new QSlider(Qt::Horizontal)),
     speedSlider(new QSlider(Qt::Horizontal)),
+    volumePopupLabel(new QLabel("100%")),
     speedPopupLabel(new QLabel("1.00x")),
     volumePopup(new QFrame(this, Qt::Popup)),
     speedPopup(new QFrame(this, Qt::Popup)),
@@ -69,8 +71,9 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->muteButton->setFixedSize(24, 24);
     ui->seekBar->setAccessibleName("VideoControlSeekSlider");
     ui->seekBar->setToolTip(tr("Seek"));
-    ui->seekBar->setMinimumSize(54, 18);
-    ui->seekBar->setMaximumHeight(18);
+    ui->seekBar->setMinimumSize(81, 24);
+    ui->seekBar->setMaximumWidth(QWIDGETSIZE_MAX);
+    ui->seekBar->setMaximumHeight(24);
     ui->seekBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     QFont timeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     timeFont.setPointSize(qMax(8, timeFont.pointSize() - 1));
@@ -91,11 +94,15 @@ VideoControls::VideoControls(QWidget *parent) :
     volumeSlider->setFocusPolicy(Qt::NoFocus);
     volumeSlider->setToolTip(tr("Volume"));
     volumeSlider->setRange(0, 100);
-    volumeSlider->setFixedSize(120, 22);
+    volumeSlider->setFixedSize(180, 28);
     volumeSlider->setValue(settings->volume());
+    volumePopupLabel->setAlignment(Qt::AlignCenter);
+    volumePopupLabel->setToolTip(tr("Volume"));
+    updateVolumeText(volumeSlider->value());
     volumeMuteButton->setAccessibleName("VideoControlPopupButton");
     volumeMuteButton->setFocusPolicy(Qt::NoFocus);
-    volumeMuteButton->setFixedSize(120, 24);
+    volumeMuteButton->setFixedSize(180, 24);
+    volumePopupLayout->addWidget(volumePopupLabel);
     volumePopupLayout->addWidget(volumeMuteButton);
     volumePopupLayout->addWidget(volumeSlider);
 
@@ -113,12 +120,16 @@ VideoControls::VideoControls(QWidget *parent) :
     speedSlider->setRange(25, 400);
     speedSlider->setSingleStep(25);
     speedSlider->setPageStep(25);
-    speedSlider->setFixedSize(120, 22);
+    speedSlider->setFixedSize(180, 28);
     speedSlider->setValue(100);
+    resetSpeedButton->setAccessibleName("VideoControlPopupButton");
+    resetSpeedButton->setFocusPolicy(Qt::NoFocus);
+    resetSpeedButton->setFixedSize(180, 24);
     speedPopupLabel->setAlignment(Qt::AlignCenter);
     speedPopupLabel->setToolTip(tr("Playback speed"));
     speedPopupLayout->addWidget(speedPopupLabel);
     speedPopupLayout->addWidget(speedSlider);
+    speedPopupLayout->addWidget(resetSpeedButton);
     ui->horizontalLayout->insertWidget(6, createVideoControlSeparator(this));
 
     lastPosition = -1;
@@ -128,7 +139,10 @@ VideoControls::VideoControls(QWidget *parent) :
         showPopupBelow(ui->muteButton, volumePopup);
     });
     connect(volumeMuteButton, &QPushButton::clicked, this, &VideoControls::toggleMuteRequested);
-    connect(volumeSlider, &QSlider::valueChanged, this, &VideoControls::volumeChanged);
+    connect(volumeSlider, &QSlider::valueChanged, this, [this](int value) {
+        updateVolumeText(value);
+        emit volumeChanged(value);
+    });
     connect(speedSlider, &QSlider::valueChanged, this, [this](int value) {
         const double speed = value / 100.0;
         updateSpeedText(value);
@@ -137,6 +151,7 @@ VideoControls::VideoControls(QWidget *parent) :
     connect(speedButton, &QPushButton::clicked, this, [this]() {
         showPopupBelow(speedButton, speedPopup);
     });
+    connect(resetSpeedButton, &QPushButton::clicked, this, &VideoControls::resetPlaybackSpeed);
     connect(loopABButton, &QPushButton::clicked, this, [this]() {
         if(loopABState == LOOP_AB_CLEAR) {
             loopABState = LOOP_AB_START_SET;
@@ -238,7 +253,9 @@ void VideoControls::onVideoMuted(bool mode) {
 
 void VideoControls::setVolume(int volume) {
     const QSignalBlocker blocker(volumeSlider);
-    volumeSlider->setValue(qBound(0, volume, 100));
+    const int clampedVolume = qBound(0, volume, 100);
+    volumeSlider->setValue(clampedVolume);
+    updateVolumeText(clampedVolume);
 }
 
 void VideoControls::resetLoopAB() {
@@ -264,6 +281,19 @@ void VideoControls::showPopupBelow(QWidget *anchor, QFrame *popup) {
     QPoint pos = anchor->mapToGlobal(QPoint(0, anchor->height() + 2));
     popup->move(pos);
     popup->show();
+}
+
+void VideoControls::resetPlaybackSpeed() {
+    if(speedSlider->value() == 100) {
+        updateSpeedText(100);
+        emit playbackSpeedChanged(1.0);
+        return;
+    }
+    speedSlider->setValue(100);
+}
+
+void VideoControls::updateVolumeText(int volume) {
+    volumePopupLabel->setText(QString::number(qBound(0, volume, 100)) + "%");
 }
 
 void VideoControls::updateSpeedText(int value) {

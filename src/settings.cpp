@@ -222,6 +222,8 @@ void Settings::loadStylesheet() {
         styleSheet.replace("%text_lc2%",             colors.text_lc2.name());
         styleSheet.replace("%scrollbar%",            colors.scrollbar.name());
         styleSheet.replace("%scrollbar_hover%",      colors.scrollbar_hover.name());
+        styleSheet.replace("%slider_groove%",        colors.text_lc2.name());
+        styleSheet.replace("%slider_handle%",        colors.text_hc2.name());
         styleSheet.replace("%folderview_button_hover%",   colors.folderview_button_hover.name());
         styleSheet.replace("%folderview_button_pressed%", colors.folderview_button_pressed.name());
         styleSheet.replace("%text_secondary_rgba%",  "rgba(" + QString::number(colors.text.red())   + ","

@@ -54,6 +54,8 @@ private:
     void resetLoopAB();
     void updateLoopButton();
     void showPopupBelow(QWidget *anchor, QFrame *popup);
+    void resetPlaybackSpeed();
+    void updateVolumeText(int volume);
     void updateSpeedText(int value);
     void updateResponsiveVisibility();
 
@@ -63,8 +65,10 @@ private:
     QPushButton *loopABButton;
     QPushButton *speedButton;
     QPushButton *volumeMuteButton;
+    QPushButton *resetSpeedButton;
     QSlider *volumeSlider;
     QSlider *speedSlider;
+    QLabel *volumePopupLabel;
     QLabel *speedPopupLabel;
     QFrame *volumePopup;
     QFrame *speedPopup;

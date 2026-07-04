@@ -532,44 +532,44 @@ QFrame[accessibleName="VideoControlPopup"] QSlider {
     background: transparent;
     border: 0px;
     margin: 0px;
-    min-height: 18px;
-    max-height: 18px;
+    min-height: 24px;
+    max-height: 24px;
 }
 
 VideoControls QSlider::groove:horizontal,
 QFrame[accessibleName="VideoControlPopup"] QSlider::groove:horizontal {
-    background: transparent;
-    border-radius: 2px;
-    height: 4px;
+    background: %slider_groove%;
+    border-radius: 4px;
+    height: 8px;
 }
 
 VideoControls QSlider::add-page:horizontal,
 QFrame[accessibleName="VideoControlPopup"] QSlider::add-page:horizontal {
-    background: %button%;
-    border-radius: 2px;
-    height: 4px;
+    background: %slider_groove%;
+    border-radius: 4px;
+    height: 8px;
 }
 
 VideoControls QSlider::handle:horizontal,
 QFrame[accessibleName="VideoControlPopup"] QSlider::handle:horizontal {
     background: %slider_handle%;
     border: 1px solid %widget%;
-    border-radius: 4px;
-    height: 8px;
-    margin: -3px 0px;
-    width: 8px;
+    border-radius: 6px;
+    height: 12px;
+    margin: -2px 0px;
+    width: 12px;
 }
 
 VideoControls QSlider::sub-page:horizontal,
 QFrame[accessibleName="VideoControlPopup"] QSlider::sub-page:horizontal {
     background: %accent%;
-    border-radius: 2px;
-    height: 4px;
+    border-radius: 4px;
+    height: 8px;
 }
 
 VideoControls QSlider[accessibleName="VideoControlVolumeSlider"]::sub-page:horizontal,
 QFrame[accessibleName="VideoControlPopup"] QSlider[accessibleName="VideoControlVolumeSlider"]::sub-page:horizontal {
-    background: %text_hc2%;
+    background: %slider_handle%;
 }
 
 VideoControls QSlider[accessibleName="VideoControlSeekSlider"]::sub-page:horizontal {
