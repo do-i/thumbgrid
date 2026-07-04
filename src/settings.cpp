@@ -524,6 +524,14 @@ void Settings::setPlayVideoSounds(bool mode) {
     settings->settingsConf->setValue("playVideoSounds", mode);
 }
 //------------------------------------------------------------------------------
+bool Settings::showVideoControls() {
+    return settings->settingsConf->value("showVideoControls", true).toBool();
+}
+
+void Settings::setShowVideoControls(bool mode) {
+    settings->settingsConf->setValue("showVideoControls", mode);
+}
+//------------------------------------------------------------------------------
 void Settings::setVolume(int vol) {
     settings->stateConf->setValue("volume", vol);
 }

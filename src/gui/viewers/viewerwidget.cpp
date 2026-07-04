@@ -469,7 +469,7 @@ void ViewerWidget::mouseMoveEvent(QMouseEvent *event) {
         hideCursorTimed(true);
     }
     if(currentWidget == VIDEOPLAYER || imageViewer->hasAnimation()) {
-        if(videoControlsArea().contains(event->pos()))
+        if(settings->showVideoControls() && videoControlsArea().contains(event->pos()))
             videoControls->show();
         else
             videoControls->hide();
@@ -645,6 +645,8 @@ void ViewerWidget::onFullscreenModeChanged(bool mode) {
 
 void ViewerWidget::readSettings() {
     videoControls->onVideoMuted(!settings->playVideoSounds());
+    if(!settings->showVideoControls())
+        videoControls->hide();
     if(settings->clickableEdges()) {
         imageViewer->viewport()->installEventFilter(this);
         videoPlayer->installEventFilter(this);
