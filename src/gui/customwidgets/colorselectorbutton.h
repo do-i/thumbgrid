@@ -16,6 +16,9 @@ public:
 
 signals:
     void colorChanged(QColor color);
+    // Emitted on Apply (and on OK if the pick differs from the last applied
+    // preview) while the picker stays open; also on Cancel to undo previews.
+    void colorApplied(QColor color);
 
 protected:
     void paintEvent(QPaintEvent *e);

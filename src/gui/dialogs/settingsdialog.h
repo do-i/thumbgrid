@@ -39,10 +39,14 @@ private:
     void setColorScheme(ColorScheme colors);
     ColorScheme collectColorScheme();
     void saveColorScheme();
+    void applyColorSchemePreview();
     void markThemeCustom();
     int selectedThemeTid() const;
     // user's custom palette, preserved while a preset is previewed
     ColorScheme mCustomColors;
+    // active palette to restore if the dialog closes with unsaved live previews
+    ColorScheme mSchemeAtOpen;
+    bool mThemePreviewed = false;
     int mPrevThemeIndex = -1;
     void readSettings();
     void readShortcuts();

@@ -1,5 +1,9 @@
 #include "colorselectorbutton.h"
 
+#include <QDialogButtonBox>
+#include <QPushButton>
+#include <QVBoxLayout>
+
 ColorSelectorButton::ColorSelectorButton(QWidget *parent) : ClickableLabel(parent) {
     connect(this, &ColorSelectorButton::clicked, this, &ColorSelectorButton::showColorSelector);
 }
@@ -18,11 +22,52 @@ QColor ColorSelectorButton::color() {
 }
 
 void ColorSelectorButton::showColorSelector() {
-    QColor newColor = QColorDialog::getColor(mColor, this, mDescription, QColorDialog::DontUseNativeDialog);
-    if(newColor.isValid()) {
+    // QColorDialog::getColor() only reports the final pick, so to support a
+    // live Apply we embed a buttonless QColorDialog in our own dialog and add
+    // an Apply / OK / Cancel box. Apply previews without closing.
+    QDialog dialog(this);
+    dialog.setWindowTitle(mDescription);
+
+    auto *picker = new QColorDialog(mColor, &dialog);
+    picker->setWindowFlags(Qt::Widget);
+    picker->setOptions(QColorDialog::NoButtons | QColorDialog::DontUseNativeDialog);
+    // QColorDialog is itself a QDialog; if a key press makes it accept/reject,
+    // forward that to the wrapper instead of it just hiding inside the layout
+    connect(picker, &QDialog::finished, &dialog, &QDialog::done);
+
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Apply
+                                         | QDialogButtonBox::Cancel, &dialog);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    auto *layout = new QVBoxLayout(&dialog);
+    layout->addWidget(picker);
+    layout->addWidget(buttons);
+
+    const QColor initialColor = mColor;
+    QColor appliedColor; // invalid until the first Apply
+    connect(buttons->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, [&]() {
+        QColor newColor = picker->currentColor();
+        // skip the app-wide re-theme when this exact color is already live
+        if(newColor == (appliedColor.isValid() ? appliedColor : initialColor))
+            return;
+        appliedColor = newColor;
         mColor = newColor;
         update();
+        emit colorApplied(mColor);
+    });
+
+    if(dialog.exec() == QDialog::Accepted) {
+        mColor = picker->currentColor();
+        update();
+        if(mColor != (appliedColor.isValid() ? appliedColor : initialColor))
+            emit colorApplied(mColor);
         emit colorChanged(mColor);
+    } else if(appliedColor.isValid() && appliedColor != initialColor) {
+        // cancel undoes any previews from this picker session
+        mColor = initialColor;
+        update();
+        emit colorApplied(mColor);
     }
 }
 

@@ -3000,12 +3000,12 @@
                       </item>
                       <item>
                        <property name="text">
-                        <string>Custom</string>
+                        <string>Light Blue</string>
                        </property>
                       </item>
                       <item>
                        <property name="text">
-                        <string>Light Blue</string>
+                        <string>Custom</string>
                        </property>
                       </item>
                      </widget>

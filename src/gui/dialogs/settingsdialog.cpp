@@ -22,17 +22,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     connect(ui->themeSelectorComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
         // leaving the custom theme: stash the current palette so previewing a
         // preset doesn't discard the user's custom colors
-        if(mPrevThemeIndex == 4 && index != 4) {
+        if(mPrevThemeIndex == 5 && index != 5) {
             mCustomColors = collectColorScheme();
             mCustomColors.tid = COLORS_CUSTOM;
         }
         switch(index) {
-            case 0: setColorScheme(ThemeStore::colorScheme(COLORS_BLACK));    break;
-            case 1: setColorScheme(ThemeStore::colorScheme(COLORS_DARK));     break;
-            case 2: setColorScheme(ThemeStore::colorScheme(COLORS_DARKBLUE)); break;
-            case 3: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));    break;
-            case 4: setColorScheme(mCustomColors);                            break;
-            case 5: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT_YELLOW));   break;
+            case 0: setColorScheme(ThemeStore::colorScheme(COLORS_BLACK));        break;
+            case 1: setColorScheme(ThemeStore::colorScheme(COLORS_DARK));         break;
+            case 2: setColorScheme(ThemeStore::colorScheme(COLORS_DARKBLUE));     break;
+            case 3: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));        break;
+            case 4: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT_YELLOW)); break;
+            case 5: setColorScheme(mCustomColors);                               break;
         }
         mPrevThemeIndex = index;
     });
@@ -78,24 +78,17 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->colorSelectorOverlay->setDescription(tr("Overlay background"));
     ui->colorSelectorOverlayText->setDescription(tr("Overlay text"));
 
+    // every ColorSelectorButton in the dialog is a theme color: OK marks the
+    // theme custom, Apply additionally re-themes the running app on the spot
     auto switchToCustom = [this](QColor) { markThemeCustom(); };
-    connect(ui->colorSelectorAccent,                        &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorBackground,                    &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorFullscreen,                    &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorFolderview,                    &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorFolderviewPanel,               &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorText,                          &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorIcons,                         &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorWidget,                        &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorWidgetBorder,                  &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorScrollbar,                     &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorOverlay,                       &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->colorSelectorOverlayText,                   &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->folderViewCellBackgroundColorSelector,      &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->folderViewLabelBackgroundColorSelector,     &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->folderViewSelectedLabelBackgroundColorSelector, &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->folderViewSelectionColorSelector,           &ColorSelectorButton::colorChanged, this, switchToCustom);
-    connect(ui->folderViewParentIconColorSelector,          &ColorSelectorButton::colorChanged, this, switchToCustom);
+    auto previewColor = [this](QColor) {
+        markThemeCustom();
+        applyColorSchemePreview();
+    };
+    for(auto *selector : findChildren<ColorSelectorButton *>()) {
+        connect(selector, &ColorSelectorButton::colorChanged, this, switchToCustom);
+        connect(selector, &ColorSelectorButton::colorApplied, this, previewColor);
+    }
 
 #ifndef USE_KDE_BLUR
     ui->blurBackgroundCheckBox->setEnabled(false);
@@ -461,6 +454,9 @@ void SettingsDialog::saveSettings() {
         settings->setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));
     else
         saveColorScheme();
+    // the saved palette becomes the new revert baseline for later previews
+    mSchemeAtOpen = settings->colorScheme();
+    mThemePreviewed = false;
     saveShortcuts();
 
     scriptManager->saveScripts();
@@ -490,8 +486,8 @@ void SettingsDialog::setColorScheme(ColorScheme colors) {
         case COLORS_BLACK:     ui->themeSelectorComboBox->setCurrentIndex(0); break;
         case COLORS_DARK:      ui->themeSelectorComboBox->setCurrentIndex(1); break;
         case COLORS_DARKBLUE:  ui->themeSelectorComboBox->setCurrentIndex(2); break;
-        case COLORS_CUSTOM:    ui->themeSelectorComboBox->setCurrentIndex(4); break;
-        case COLORS_LIGHT_YELLOW:    ui->themeSelectorComboBox->setCurrentIndex(5); break;
+        case COLORS_LIGHT_YELLOW:  ui->themeSelectorComboBox->setCurrentIndex(4); break;
+        case COLORS_CUSTOM:    ui->themeSelectorComboBox->setCurrentIndex(5); break;
         default:               ui->themeSelectorComboBox->setCurrentIndex(-1); break;
     }
     ui->colorSelectorAccent->setColor(colors.accent);
@@ -542,10 +538,18 @@ void SettingsDialog::saveColorScheme() {
     settings->saveTheme();
 }
 //------------------------------------------------------------------------------
+// Re-themes the running app from the current selector values without touching
+// disk; exec() reverts it unless the settings are saved before closing.
+void SettingsDialog::applyColorSchemePreview() {
+    settings->setColorScheme(collectColorScheme());
+    mThemePreviewed = true;
+    emit settingsChanged();
+}
+//------------------------------------------------------------------------------
 void SettingsDialog::markThemeCustom() {
     QSignalBlocker blocker(ui->themeSelectorComboBox);
-    ui->themeSelectorComboBox->setCurrentIndex(4);
-    mPrevThemeIndex = 4;
+    ui->themeSelectorComboBox->setCurrentIndex(5);
+    mPrevThemeIndex = 5;
 }
 //------------------------------------------------------------------------------
 int SettingsDialog::selectedThemeTid() const {
@@ -554,8 +558,8 @@ int SettingsDialog::selectedThemeTid() const {
         case 1: return COLORS_DARK;
         case 2: return COLORS_DARKBLUE;
         case 3: return COLORS_LIGHT;
-        case 4: return COLORS_CUSTOM;
-        case 5: return COLORS_LIGHT_YELLOW;
+        case 4: return COLORS_LIGHT_YELLOW;
+        case 5: return COLORS_CUSTOM;
         default: return COLORS_CUSTOM;
     }
 }
@@ -796,7 +800,17 @@ void SettingsDialog::onAutoResizeLimitSliderChanged(int value) {
 }
 //------------------------------------------------------------------------------
 int SettingsDialog::exec() {
-    return QDialog::exec();
+    mSchemeAtOpen = settings->colorScheme();
+    mThemePreviewed = false;
+    int res = QDialog::exec();
+    // OK and Cancel both funnel through close(), so the return value can't
+    // distinguish them; saveSettings() clears the flag when previews are kept
+    if(mThemePreviewed) {
+        mThemePreviewed = false;
+        settings->setColorScheme(mSchemeAtOpen);
+        emit settingsChanged();
+    }
+    return res;
 }
 
 void SettingsDialog::switchToPage(int number) {
