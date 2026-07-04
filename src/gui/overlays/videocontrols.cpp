@@ -75,7 +75,6 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->seekBar->setMaximumWidth(QWIDGETSIZE_MAX);
     ui->seekBar->setMaximumHeight(24);
     ui->seekBar->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-    ui->seekBar->setTickPosition(QSlider::TicksBelow);
     QFont timeFont = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     timeFont.setPointSize(qMax(8, timeFont.pointSize() - 1));
     ui->positionLabel->setFont(timeFont);
@@ -211,9 +210,6 @@ void VideoControls::setPlaybackDuration(int duration) {
         durationStr = QString::number(duration);
     }
     ui->seekBar->setRange(0, duration - 1);
-    // Keep a sensible, roughly constant number of seek ticks (~10, like the
-    // volume slider) regardless of clip length.
-    ui->seekBar->setTickInterval(qMax(1, duration / 10));
     ui->durationLabel->setText(durationStr);
     ui->positionLabel->setText(durationStr);
     updateGeometry();
