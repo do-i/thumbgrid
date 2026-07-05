@@ -17,6 +17,9 @@
 #include <QFontMetrics>
 #include <QVersionNumber>
 #include <QThread>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QSaveFile>
 #include "utils/script.h"
 #include "themestore.h"
 
@@ -347,6 +350,7 @@ public:
 private:
     explicit Settings(QObject *parent = nullptr);
     QSettings *settingsConf, *stateConf, *themeConf;
+    QString mShortcutsJsonPath;
     QDir *mTmpDir, *mThumbCacheDir, *mConfDir;
     ColorScheme mColorScheme;
     QMultiMap<QByteArray, QByteArray> mVideoFormatsMap; // [mimetype, format]

@@ -67,6 +67,94 @@ void migrateLegacyThemeConf(const QString &confDir, QSettings *themeConf) {
     themeConf->sync();
 }
 
+// Context token strings must match ActionManager::contextToString().
+QString shortcutContextToken(ViewMode context) {
+    return context == MODE_FOLDERVIEW ? QStringLiteral("folderview")
+                                      : QStringLiteral("document");
+}
+
+ViewMode shortcutContextFromToken(const QString &token) {
+    return token == QLatin1String("folderview") ? MODE_FOLDERVIEW : MODE_DOCUMENT;
+}
+
+// Serialize the per-context bindings as a nested JSON object
+// ({ context: { keySequence: action } }) and write it atomically. JSON object
+// keys are arbitrary strings, so key sequences like "=" or "Ctrl+/" need no
+// escaping (unlike the old QStringList format that hand-encoded "=" as "eq").
+void writeShortcutsJson(const QString &path,
+                        const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
+    QJsonObject root;
+    for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
+        QJsonObject bindings;
+        for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it)
+            bindings.insert(it.key(), it.value());  // keySequence -> action
+        root.insert(shortcutContextToken(ctx.key()), bindings);
+    }
+    // The config dir may not exist yet if QSettings has not flushed; QSaveFile
+    // needs the parent directory to be present.
+    QDir().mkpath(QFileInfo(path).absolutePath());
+    QSaveFile file(path);
+    if(file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+        file.commit();
+    }
+}
+
+void readShortcutsJson(const QString &path,
+                       QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
+    QFile file(path);
+    if(!file.open(QIODevice::ReadOnly))
+        return;
+    const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    for(auto ctx = root.constBegin(); ctx != root.constEnd(); ++ctx) {
+        const ViewMode mode = shortcutContextFromToken(ctx.key());
+        const QJsonObject bindings = ctx.value().toObject();
+        for(auto it = bindings.constBegin(); it != bindings.constEnd(); ++it)
+            shortcuts[mode].insert(it.key(), it.value().toString());  // keySequence -> action
+    }
+}
+
+// DEPRECATED (remove after next release): one-time migration of the old
+// "[Controls] shortcuts=" QStringList (a single comma-joined line) into the new
+// readable shortcuts.json. QSettings does the hard QStringList decode for free,
+// so this reuses the historical "context|action=key" parse (legacy context-less
+// entries were active everywhere and seed both contexts; "eq" decodes to "=").
+// Runs only when shortcuts.json is absent, then drops the stale INI key.
+void migrateLegacyShortcuts(QSettings *settingsConf, const QString &jsonPath) {
+    if(QFile::exists(jsonPath))
+        return;
+    settingsConf->beginGroup("Controls");
+    if(!settingsConf->contains("shortcuts")) {
+        settingsConf->endGroup();
+        return;
+    }
+    const QStringList in = settingsConf->value("shortcuts").toStringList();
+    QMap<ViewMode, QMap<QString, QString>> shortcuts;
+    for(int i = 0; i < in.count(); i++) {
+        QString entry = in[i];
+        bool legacy = !entry.contains('|');
+        QString ctxName;
+        if(!legacy) {
+            ctxName = entry.section('|', 0, 0);
+            entry = entry.section('|', 1);
+        }
+        QStringList pair = entry.split("=");
+        if(pair.size() < 2 || pair[0].isEmpty() || pair[1].isEmpty())
+            continue;
+        if(pair[1].endsWith("eq"))
+            pair[1] = pair[1].chopped(2) + "=";
+        if(legacy) {
+            shortcuts[MODE_DOCUMENT].insert(pair[1], pair[0]);
+            shortcuts[MODE_FOLDERVIEW].insert(pair[1], pair[0]);
+        } else {
+            shortcuts[shortcutContextFromToken(ctxName)].insert(pair[1], pair[0]);
+        }
+    }
+    settingsConf->remove("shortcuts");
+    settingsConf->endGroup();
+    writeShortcutsJson(jsonPath, shortcuts);
+}
+
 }
 
 Settings::Settings(QObject *parent) : QObject(parent) {
@@ -79,6 +167,7 @@ Settings::Settings(QObject *parent) : QObject(parent) {
     // than the native "theme.conf", in the same config dir as the other configs.
     const QString confDir = QFileInfo(settingsConf->fileName()).absolutePath();
     themeConf = new QSettings(confDir + "/theme.ini", QSettings::IniFormat);
+    mShortcutsJsonPath = confDir + "/shortcuts.json";
     migrateLegacyThemeConf(confDir, themeConf);
 #else
     mConfDir = new QDir(QApplication::applicationDirPath() + "/conf");
@@ -86,6 +175,7 @@ Settings::Settings(QObject *parent) : QObject(parent) {
     settingsConf = new QSettings(mConfDir->absolutePath() + "/" + qApp->applicationName() + ".ini", QSettings::IniFormat);
     stateConf = new QSettings(mConfDir->absolutePath() + "/savedState.ini", QSettings::IniFormat);
     themeConf = new QSettings(mConfDir->absolutePath() + "/theme.ini", QSettings::IniFormat);
+    mShortcutsJsonPath = mConfDir->absolutePath() + "/shortcuts.json";
 #endif
     fillVideoFormats();
 }
@@ -788,50 +878,16 @@ void Settings::sendChangeNotification() {
     emit settingsChanged();
 }
 //------------------------------------------------------------------------------
-// Context token strings must match ActionManager::contextToString().
+// Shortcuts live in a standalone shortcuts.json ({ context: { keySequence: action } }).
+// Older builds stored them under "[Controls] shortcuts=" as a single QStringList line;
+// migrateLegacyShortcuts() converts that to JSON once, on first read.
 void Settings::readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
-    settings->settingsConf->beginGroup("Controls");
-    const QStringList in = settings->settingsConf->value("shortcuts").toStringList();
-    for(int i = 0; i < in.count(); i++) {
-        QString entry = in[i];
-        // "context|action=key"; legacy entries lack the "context|" prefix and were
-        // active everywhere, so they are seeded into both contexts.
-        bool legacy = !entry.contains('|');
-        QString ctxName;
-        if(!legacy) {
-            ctxName = entry.section('|', 0, 0);
-            entry = entry.section('|', 1);
-        }
-        QStringList pair = entry.split("=");
-        if(pair.size() < 2 || pair[0].isEmpty() || pair[1].isEmpty())
-            continue;
-        if(pair[1].endsWith("eq"))
-            pair[1] = pair[1].chopped(2) + "=";
-        if(legacy) {
-            shortcuts[MODE_DOCUMENT].insert(pair[1], pair[0]);
-            shortcuts[MODE_FOLDERVIEW].insert(pair[1], pair[0]);
-        } else {
-            ViewMode ctx = (ctxName == "folderview") ? MODE_FOLDERVIEW : MODE_DOCUMENT;
-            shortcuts[ctx].insert(pair[1], pair[0]);
-        }
-    }
-    settings->settingsConf->endGroup();
+    migrateLegacyShortcuts(settings->settingsConf, settings->mShortcutsJsonPath);
+    readShortcutsJson(settings->mShortcutsJsonPath, shortcuts);
 }
 
 void Settings::saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
-    settings->settingsConf->beginGroup("Controls");
-    QStringList out;
-    for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
-        const QString ctxName = (ctx.key() == MODE_FOLDERVIEW) ? "folderview" : "document";
-        QMapIterator<QString, QString> i(ctx.value());
-        while(i.hasNext()) {
-            i.next();
-            const QString encodedKey = i.key().endsWith("=") ? i.key().chopped(1) + "eq" : i.key();
-            out << ctxName + "|" + i.value() + "=" + encodedKey;
-        }
-    }
-    settings->settingsConf->setValue("shortcuts", out);
-    settings->settingsConf->endGroup();
+    writeShortcutsJson(settings->mShortcutsJsonPath, shortcuts);
 }
 //------------------------------------------------------------------------------
 void Settings::readScripts(QMap<QString, Script> &scripts) {

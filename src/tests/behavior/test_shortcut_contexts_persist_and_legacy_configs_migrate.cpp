@@ -1,6 +1,13 @@
 #include "support/thumbgrid_test_support.h"
 
+#include <QFile>
+#include <QFileInfo>
 #include <QSettings>
+
+// Standalone shortcuts.json lives beside the main config file.
+static QString shortcutsJsonPath() {
+    return QFileInfo(QSettings().fileName()).absolutePath() + "/shortcuts.json";
+}
 
 // Shortcuts are stored per context on disk. New configs round-trip per context,
 // and legacy context-less configs (every binding worked everywhere) migrate into
@@ -26,12 +33,16 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::perContextBindingsRound
     // Same key, different action per context, survives a save/load cycle.
     QCOMPARE(in[MODE_DOCUMENT].value("C"), QStringLiteral("crop"));
     QCOMPARE(in[MODE_FOLDERVIEW].value("C"), QStringLiteral("copyFile"));
-    // The "=" key is encoded/decoded correctly and stays in its own context.
+    // The "=" key round-trips through JSON with no escaping and stays in its context.
     QCOMPARE(in[MODE_DOCUMENT].value("="), QStringLiteral("zoomIn"));
     QVERIFY2(!in[MODE_FOLDERVIEW].contains("="), "The = binding should not leak into the other context.");
+    QVERIFY2(QFile::exists(shortcutsJsonPath()), "Saving shortcuts must produce shortcuts.json.");
 }
 
 void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyConfigMigratesIntoBothContexts() {
+    // Simulate an upgrading install: an old "[Controls] shortcuts=" list and no
+    // shortcuts.json yet (a prior test in this binary may have created one).
+    QFile::remove(shortcutsJsonPath());
     // Write a legacy "action=key" list (no context token) the way older versions
     // did. On Linux Settings uses a default QSettings(), so a matching one here
     // shares the same backing store.
@@ -45,6 +56,9 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyConfigMigratesInt
 
     QMap<ViewMode, QMap<QString, QString>> in;
     settings->readShortcuts(in);
+
+    // The one-time migration produced the new file.
+    QVERIFY2(QFile::exists(shortcutsJsonPath()), "Legacy migration must create shortcuts.json.");
 
     // A context-less binding was active everywhere, so it seeds both contexts.
     QCOMPARE(in[MODE_DOCUMENT].value("Right"), QStringLiteral("nextImage"));
