@@ -5,6 +5,13 @@
 #
 # Interactive release manager.
 #
+# Versioning:
+#   - The version is derived entirely from the latest git tag (vYYYY.M.N) at
+#     build time (see CMakeLists.txt / cmake/GenerateAppVersion.cmake). There is
+#     no version constant in the tree to maintain, so this script only tags;
+#     it never edits or commits source. Dev builds automatically show the tag
+#     plus a "-<count>-g<hash>" suffix from `git describe`.
+#
 # Branching model:
 #   - `develop` is the integration branch. Feature branches merge into it with
 #     --ff-only (rebase onto develop first), so develop is always a linear
@@ -22,18 +29,11 @@
 #      (no direct pushes to main since the last release).
 #   2. Verifies origin/develop's tip has a green tests.yml run (via gh).
 #   3. Tags that commit and pushes main + the tag together, atomically.
-#   4. Bumps develop's fallback dev version and pushes develop.
-#
-# "Bump develop version" does step 4 on its own, with no merge or tag - for
-# syncing the CalVer fallback to the current month when releases are
-# infrequent.
 #
 # Usage:
 #   scripts/release.sh                     # interactive menu
 #   scripts/release.sh cut                 # cut a release non-interactively
 #   scripts/release.sh cut 2026.7.2        # cut an explicit version
-#   scripts/release.sh bump                # bump develop's dev version only
-#   scripts/release.sh bump 2026.8.1       # bump to an explicit version
 #   scripts/release.sh status              # show state, make no changes
 #   scripts/release.sh --dry-run ...       # show what would happen, change nothing
 #   scripts/release.sh --skip-ci-check ... # bypass the gh CI status gate
@@ -56,7 +56,7 @@ for arg in "$@"; do
         --skip-ci-check) SKIP_CI_CHECK=1 ;;
         --yes|-y) ASSUME_YES=1 ;;
         -h|--help) sed -n '2,40p' "$0"; exit 0 ;;
-        cut|bump|status) COMMAND="$arg" ;;
+        cut|status) COMMAND="$arg" ;;
         v*) EXPLICIT_VERSION="${arg#v}" ;;
         [0-9]*) EXPLICIT_VERSION="$arg" ;;
         *) echo "error: unknown argument '$arg'" >&2; exit 2 ;;
@@ -72,34 +72,6 @@ run() {
 }
 
 cd "$(git rev-parse --show-toplevel)"
-
-# Restores whatever ref was checked out before a detached-HEAD version bump,
-# even if the script errors out mid-way (set -e triggers this via EXIT).
-ORIGINAL_REF=""
-restore_original_ref() {
-    if [[ -n "$ORIGINAL_REF" ]]; then
-        git checkout --quiet "$ORIGINAL_REF" 2>/dev/null || true
-    fi
-}
-trap restore_original_ref EXIT
-
-current_ref() {
-    if git symbolic-ref -q HEAD >/dev/null; then
-        git rev-parse --abbrev-ref HEAD
-    else
-        git rev-parse HEAD
-    fi
-}
-
-read_fallback_version() {
-    # $1: committish to read from (defaults to the working tree file).
-    if [[ $# -ge 1 ]]; then
-        git show "$1:CMakeLists.txt" 2>/dev/null \
-            | sed -n 's/^set(THUMBGRID_VERSION_FALLBACK \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)).*/\1/p'
-    else
-        sed -n 's/^set(THUMBGRID_VERSION_FALLBACK \([0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\)).*/\1/p' CMakeLists.txt
-    fi
-}
 
 # Auto CalVer: major=year, minor=month, micro=sequential within the month,
 # based on today's date and existing tags.
@@ -186,9 +158,9 @@ confirm() {
 
 # If local branch $1 exists and is a strict ancestor of $2 (i.e. it has no
 # unpushed local-only commits), fast-forwards it to $2. Otherwise warns and
-# leaves it alone - we never discard local work. Without this, a local branch
-# left behind by a push-only operation (main after the ff-merge, develop after
-# the version bump) silently diverges from origin the moment this script runs.
+# leaves it alone - we never discard local work. Without this, a local main
+# left behind by the push-only ff-merge silently diverges from origin the
+# moment this script runs.
 sync_local_branch() {
     local branch="$1" new_sha="$2"
     if [[ "$DRY_RUN" == "1" ]]; then
@@ -203,35 +175,6 @@ sync_local_branch() {
             echo "Run 'git fetch origin $branch && git rebase origin/$branch' to reconcile." >&2
         fi
     fi
-}
-
-# Checks out a detached HEAD at $1, sets THUMBGRID_VERSION_FALLBACK to $2,
-# commits with message $3, pushes to $DEV_BRANCH, fast-forwards local
-# $DEV_BRANCH to match (see sync_local_branch), then restores the ref that
-# was checked out before this ran (via the ORIGINAL_REF/EXIT-trap machinery
-# above, so it's restored even on error).
-bump_version_commit() {
-    local base_sha="$1" new_version="$2" message="$3"
-    ORIGINAL_REF="$(current_ref)"
-
-    run git checkout --quiet --detach "$base_sha"
-
-    if grep -q 'set(THUMBGRID_VERSION_FALLBACK ' CMakeLists.txt; then
-        run sed -i "s|set(THUMBGRID_VERSION_FALLBACK .*)|set(THUMBGRID_VERSION_FALLBACK ${new_version})|" CMakeLists.txt
-        if [[ "$DRY_RUN" == "1" ]] || ! git diff --quiet CMakeLists.txt; then
-            run git add CMakeLists.txt
-            run git commit --quiet -m "$message"
-            run git push origin "HEAD:refs/heads/$DEV_BRANCH"
-            sync_local_branch "$DEV_BRANCH" "$(git rev-parse HEAD)"
-        else
-            echo "CMakeLists.txt fallback version is already ${new_version}; nothing to bump."
-        fi
-    else
-        echo "warning: THUMBGRID_VERSION_FALLBACK not found in CMakeLists.txt; skipping bump." >&2
-    fi
-
-    run git checkout --quiet "$ORIGINAL_REF"
-    ORIGINAL_REF=""
 }
 
 show_status() {
@@ -251,8 +194,8 @@ show_status() {
         git log --oneline "origin/$DEV_BRANCH..origin/$DEFAULT_BRANCH"
     fi
     echo
-    echo "Current $DEV_BRANCH fallback version: $(read_fallback_version "origin/$DEV_BRANCH")"
-    echo "Auto-computed version for today:   $(auto_next_version)"
+    echo "Latest tag:                      $(git describe --tags --abbrev=0 2>/dev/null || echo '(none)')"
+    echo "Auto-computed version for today: $(auto_next_version)"
 }
 
 cmd_cut() {
@@ -291,52 +234,22 @@ cmd_cut() {
     sync_local_branch "$DEFAULT_BRANCH" "$develop_sha"
     echo "Pushed $DEFAULT_BRANCH and $tag."
     echo "arch-package.yml will build the package and publish the GitHub Release."
-
-    local next_version
-    next_version="$(auto_next_version)"
-    bump_version_commit "$develop_sha" "$next_version" "Bump dev version to ${next_version}"
-
     echo
-    echo "Done. Released $tag; $DEV_BRANCH now at dev version $next_version."
-}
-
-cmd_bump() {
-    if [[ -n "$(git status --porcelain)" ]]; then
-        echo "error: working tree is dirty. Commit or stash first." >&2
-        exit 1
-    fi
-    fetch_all
-    local develop_sha version current
-    develop_sha="$(git rev-parse "origin/$DEV_BRANCH")"
-    version="${EXPLICIT_VERSION:-$(auto_next_version)}"
-    current="$(read_fallback_version "origin/$DEV_BRANCH")"
-    if [[ "$current" == "$version" ]]; then
-        echo "$DEV_BRANCH's fallback version is already $version; nothing to do."
-        exit 0
-    fi
-    echo "Will bump $DEV_BRANCH's fallback version from $current to $version (no merge, no tag)."
-    if ! confirm "Proceed?"; then
-        echo "Aborted."
-        exit 1
-    fi
-    bump_version_commit "$develop_sha" "$version" "Bump dev version to ${version}"
-    echo "Done."
+    echo "Done. Released $tag."
 }
 
 menu() {
     while true; do
         echo
         echo "thumbgrid release manager"
-        echo "  1) Cut release   ($DEV_BRANCH -> $DEFAULT_BRANCH, tag, push, bump $DEV_BRANCH)"
-        echo "  2) Bump $DEV_BRANCH version only (sync CalVer to current month, no release)"
-        echo "  3) Show status"
-        echo "  4) Quit"
-        read -rp "Select an option [1-4]: " choice
+        echo "  1) Cut release   ($DEV_BRANCH -> $DEFAULT_BRANCH, tag, push)"
+        echo "  2) Show status"
+        echo "  3) Quit"
+        read -rp "Select an option [1-3]: " choice
         case "$choice" in
             1) cmd_cut ;;
-            2) cmd_bump ;;
-            3) show_status ;;
-            4) exit 0 ;;
+            2) show_status ;;
+            3) exit 0 ;;
             *) echo "invalid choice" ;;
         esac
     done
@@ -344,7 +257,6 @@ menu() {
 
 case "$COMMAND" in
     cut) cmd_cut ;;
-    bump) cmd_bump ;;
     status) show_status ;;
     "") menu ;;
 esac

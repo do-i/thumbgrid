@@ -13,4 +13,14 @@
 //   major = year, minor = month, micro = sequential release that month (from 1).
 // Must stay monotonically increasing; drives the onUpdate()/changelog and
 // new-default-shortcut migration in core.cpp / actionmanager.cpp.
-QVersionNumber appVersion(@PROJECT_VERSION_MAJOR@, @PROJECT_VERSION_MINOR@, @PROJECT_VERSION_PATCH@);
+QVersionNumber appVersion(@APPVER_MAJOR@, @APPVER_MINOR@, @APPVER_PATCH@);
+
+// Clean release string, e.g. "2026.7.1" — shown as the version and reported as
+// QCoreApplication::applicationVersion().
+const QString appVersionShort = QStringLiteral("@APPVER_SHORT@");
+
+// Full "git describe" string. On a tagged release this equals appVersionShort;
+// on a dev build it carries the commit-count/hash suffix, e.g.
+// "2026.7.1-22-g3bafbd99", plus a "-dirty" marker while the working tree has
+// uncommitted changes. Surfaced in the About version popup.
+const QString appVersionFull = QStringLiteral("@APPVER_FULL@");

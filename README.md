@@ -249,18 +249,14 @@ via `gh` that `develop`'s tip has a passing `tests.yml` run, then fast-forwards
 atomically. Pushing the tag triggers
 [`arch-package.yml`](.github/workflows/arch-package.yml), which builds the
 Arch package and publishes a GitHub Release with **auto-generated release
-notes** (from merged PRs / commits since the previous tag). Finally it bumps
-`develop`'s fallback dev version and pushes `develop`.
+notes** (from merged PRs / commits since the previous tag). The script only
+tags — there is no version constant in the tree to bump.
 
 **Other menu items:**
 
 ```
-./scripts/release.sh bump    # bump develop's dev version only (no merge, no tag)
 ./scripts/release.sh status  # show develop/main state, make no changes
 ```
-
-"Bump" is for when releases are infrequent and you want `develop`'s CalVer
-fallback synced to the current month without actually cutting a release.
 
 Flags: `--dry-run` (preview only), `--skip-ci-check` (bypass the `gh` CI-status
 gate), `--yes` (skip the confirmation prompt).
@@ -270,9 +266,10 @@ A few notes:
 - Versions follow CalVer `YYYY.M.N`: major = year, minor = month, micro =
   sequential release within that month (from 1). The micro must stay
   monotonically increasing — it drives the in-app update/changelog logic.
-- The in-app version is captured when CMake **configures**, not on every build.
-  CI always configures fresh, so releases are correct; locally, re-run `cmake`
-  after tagging if you need `--version` to reflect a new tag.
+- The in-app version is derived from the latest git tag at **build time**
+  ([`cmake/GenerateAppVersion.cmake`](cmake/GenerateAppVersion.cmake)), so dev
+  builds show the tag plus a `-<count>-g<hash>` suffix and refresh on every
+  commit without re-running `cmake`. A build requires git history and a tag.
 - To shape the auto-generated notes (categorise by label, exclude bots, …), add
   a [`.github/release.yml`](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes).
 

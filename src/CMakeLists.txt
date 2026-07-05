@@ -26,12 +26,30 @@ set(TS_FILES
 list(TRANSFORM TS_FILES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/res/translations/)
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION ${PROJECT_BINARY_DIR}/src/translations)
 
-# Generate appversion.cpp from the template, filling in the version that the
-# root CMakeLists derived from the latest git tag (single source of truth).
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/appversion.cpp.in
-    ${CMAKE_CURRENT_BINARY_DIR}/appversion.cpp
-    @ONLY)
+# Generate appversion.cpp from the template at *build* time, so the dev-build
+# commit-count/hash suffix from "git describe" refreshes on every commit without
+# re-running CMake. The script writes the file only when the version string
+# actually changes, so this recompiles appversion.cpp only then, not every build.
+# Generate it once now too, so the file exists for the first configure/build.
+set(APPVERSION_CPP ${CMAKE_CURRENT_BINARY_DIR}/appversion.cpp)
+set(GENERATE_APPVERSION_ARGS
+    -DAPPVER_SRC=${CMAKE_CURRENT_SOURCE_DIR}
+    -DAPPVER_BIN=${CMAKE_CURRENT_BINARY_DIR}
+    -DREPO_DIR=${CMAKE_SOURCE_DIR}
+    -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
+    -P ${CMAKE_SOURCE_DIR}/cmake/GenerateAppVersion.cmake)
+execute_process(
+    COMMAND ${CMAKE_COMMAND} ${GENERATE_APPVERSION_ARGS}
+    RESULT_VARIABLE APPVERSION_GEN_RESULT)
+if(NOT APPVERSION_GEN_RESULT EQUAL 0)
+    message(FATAL_ERROR "failed to generate appversion.cpp (see above).")
+endif()
+add_custom_target(generate_appversion
+    BYPRODUCTS ${APPVERSION_CPP}
+    COMMAND ${CMAKE_COMMAND} ${GENERATE_APPVERSION_ARGS}
+    COMMENT "Resolving thumbgrid version from git"
+    VERBATIM)
+set_source_files_properties(${APPVERSION_CPP} PROPERTIES GENERATED TRUE)
 
 set(THUMBGRID_APP_TARGET thumbgrid_app_objects)
 
@@ -53,6 +71,8 @@ target_include_directories(${THUMBGRID_APP_TARGET} PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
 )
+# Re-resolve the version from git before compiling appversion.cpp each build.
+add_dependencies(${THUMBGRID_APP_TARGET} generate_appversion)
 
 # ADD EXECUTABLE
 add_executable(thumbgrid

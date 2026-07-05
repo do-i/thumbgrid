@@ -3,10 +3,12 @@ cmake_minimum_required(VERSION 3.13)
 
 # ---------------------------------------------------------------------------
 # Version: single source of truth is the latest git tag (vYYYY.M.N).
-# The fallback below is only used for source tarballs without git history
-# (e.g. some packaging contexts); scripts/release.sh updates it before tagging.
+# The numeric MAJOR.MINOR.PATCH below feeds project() (and the macOS bundle
+# version); the full "git describe" string with the commit-count/hash suffix
+# for dev builds is resolved at *build* time in cmake/GenerateAppVersion.cmake
+# so it stays fresh on every commit without re-running CMake. There is no
+# hand-maintained fallback: a build requires git history and a tag.
 # ---------------------------------------------------------------------------
-set(THUMBGRID_VERSION_FALLBACK 2026.7.2)
 find_package(Git QUIET)
 if(Git_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
     execute_process(
@@ -16,12 +18,14 @@ if(Git_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.git")
         OUTPUT_STRIP_TRAILING_WHITESPACE
         ERROR_QUIET)
 endif()
-if(THUMBGRID_GIT_TAG)
-    # Strip leading 'v'; --abbrev=0 yields a clean tag so project() stays numeric.
-    string(REGEX REPLACE "^v" "" THUMBGRID_VERSION "${THUMBGRID_GIT_TAG}")
-else()
-    set(THUMBGRID_VERSION ${THUMBGRID_VERSION_FALLBACK})
+if(NOT THUMBGRID_GIT_TAG)
+    message(FATAL_ERROR
+        "thumbgrid version could not be determined: no git tag found "
+        "(need git history with at least one vYYYY.M.N tag; use a full clone, "
+        "e.g. actions/checkout with fetch-depth: 0).")
 endif()
+# Strip leading 'v'; --abbrev=0 yields a clean tag so project() stays numeric.
+string(REGEX REPLACE "^v" "" THUMBGRID_VERSION "${THUMBGRID_GIT_TAG}")
 message(STATUS "thumbgrid version: ${THUMBGRID_VERSION}")
 
 project(thumbgrid

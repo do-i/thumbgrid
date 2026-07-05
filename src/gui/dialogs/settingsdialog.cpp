@@ -1,6 +1,10 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
+#include "appversion.h"
 #include <QSignalBlocker>
+#include <QToolButton>
+#include <QMessageBox>
+#include <QStyle>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -11,7 +15,27 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);   
     ui->aboutAppTextBrowser->viewport()->setAutoFillBackground(false);
-    ui->versionLabel->setText("" + QApplication::applicationVersion());
+    // Clean version on the label; on dev builds the full "git describe" string
+    // (commit count + hash) is revealed on hover. On a tagged release the two
+    // are identical, so skip the redundant tooltip there.
+    ui->versionLabel->setText(appVersionShort);
+    // Small info button next to the version: click it to pop up the full
+    // "git describe" string (tag + commit count + hash) in a modal. On a
+    // tagged release the build string equals the version.
+    auto *versionInfoButton = new QToolButton(this);
+    versionInfoButton->setIcon(style()->standardIcon(QStyle::SP_MessageBoxInformation));
+    versionInfoButton->setAutoRaise(true);
+    versionInfoButton->setCursor(Qt::PointingHandCursor);
+    versionInfoButton->setToolTip(tr("Show full version"));
+    versionInfoButton->setFixedSize(18, 18);
+    versionInfoButton->setIconSize(QSize(12, 12));
+    ui->horizontalLayout_41->insertWidget(
+        ui->horizontalLayout_41->indexOf(ui->versionLabel) + 1, versionInfoButton);
+    connect(versionInfoButton, &QToolButton::clicked, this, [this]() {
+        QMessageBox::information(this, tr("Version"),
+            tr("<b>thumbgrid %1</b><br><br>Build: %2")
+                .arg(appVersionShort, appVersionFull));
+    });
     ui->qtVersionLabel->setText(qVersion());
     ui->appIconLabel->setPixmap(QIcon(":/res/icons/common/logo/app/22.png").pixmap(22,22));
     ui->qtIconLabel->setPixmap(QIcon(":/res/icons/common/logo/3rdparty/qt22.png").pixmap(22,16));
