@@ -782,38 +782,38 @@ void SettingsDialog::setActionShortcuts(ActionManager::ContextMap &map, const QS
     }
 }
 //------------------------------------------------------------------------------
+// The draft holds the authoritative set of keys currently bound to an action;
+// add/delete in the key editor writes here directly, so a removed default key
+// actually stays removed (defaults are only consulted for the badge and reset).
 QStringList SettingsDialog::candidateShortcuts(ViewMode context, const QString &action) const {
-    QStringList keys = actionShortcuts(actionManager->allDefaultShortcuts().value(context), action);
-    for(const QString &key : actionShortcuts(mShortcutDraft.value(context), action)) {
-        if(!keys.contains(key))
-            keys.append(key);
-    }
-    const QString primary = mShortcutPrimary.value(context).value(action);
-    if(!primary.isEmpty() && !keys.contains(primary))
-        keys.prepend(primary);
-    keys.removeDuplicates();
-    keys.sort(Qt::CaseInsensitive);
-    return keys;
+    return actionShortcuts(mShortcutDraft.value(context), action);
+}
+//------------------------------------------------------------------------------
+QStringList SettingsDialog::defaultShortcuts(ViewMode context, const QString &action) const {
+    return actionShortcuts(actionManager->allDefaultShortcuts().value(context), action);
 }
 //------------------------------------------------------------------------------
 QString SettingsDialog::primaryShortcut(ViewMode context, const QString &action) const {
     const QStringList candidates = candidateShortcuts(context, action);
+    if(candidates.isEmpty())
+        return QString();
     const QString savedPrimary = mShortcutPrimary.value(context).value(action);
     if(candidates.contains(savedPrimary))
         return savedPrimary;
-    return candidates.isEmpty() ? QString() : candidates.first();
+    // No explicit choice yet: prefer a user override (a key that is not a system
+    // default) so custom bindings become primary; otherwise fall back to the
+    // first system default.
+    const QStringList defaults = defaultShortcuts(context, action);
+    for(const QString &key : candidates)
+        if(!defaults.contains(key))
+            return key;
+    return candidates.first();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::setPrimaryShortcut(ViewMode context, const QString &action, const QString &key) {
     if(key.isEmpty())
         return;
     mShortcutPrimary[context].insert(action, key);
-    if(shortcutEnabled(context, action)) {
-        QStringList keys = candidateShortcuts(context, action);
-        if(!keys.contains(key))
-            keys.prepend(key);
-        setActionShortcuts(mShortcutDraft[context], action, keys);
-    }
 }
 //------------------------------------------------------------------------------
 bool SettingsDialog::shortcutEnabled(ViewMode context, const QString &action) const {
@@ -825,10 +825,15 @@ void SettingsDialog::setShortcutEnabled(ViewMode context, const QString &action,
     if(enabled) {
         disabled.removeAll(action);
         mShortcutDisabled[context] = disabled;
+        // Disabling clears the draft keys, so re-enabling restores the system
+        // defaults (plus a remembered primary override, if any).
         QStringList keys = candidateShortcuts(context, action);
-        const QString primary = primaryShortcut(context, action);
-        if(!primary.isEmpty() && !keys.contains(primary))
-            keys.prepend(primary);
+        if(keys.isEmpty()) {
+            keys = defaultShortcuts(context, action);
+            const QString primary = mShortcutPrimary.value(context).value(action);
+            if(!primary.isEmpty() && !keys.contains(primary))
+                keys.append(primary);
+        }
         setActionShortcuts(mShortcutDraft[context], action, keys);
     } else {
         if(!disabled.contains(action))

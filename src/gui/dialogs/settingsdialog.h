@@ -72,6 +72,7 @@ private:
     void setActionShortcuts(ActionManager::ContextMap &map, const QString &action, const QStringList &keys);
     QStringList actionShortcuts(const ActionManager::ContextMap &map, const QString &action) const;
     QStringList candidateShortcuts(ViewMode context, const QString &action) const;
+    QStringList defaultShortcuts(ViewMode context, const QString &action) const;
     QString primaryShortcut(ViewMode context, const QString &action) const;
     void setPrimaryShortcut(ViewMode context, const QString &action, const QString &key);
     bool shortcutEnabled(ViewMode context, const QString &action) const;
