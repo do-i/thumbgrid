@@ -25,8 +25,9 @@
 #     touches them; fixes there are cherry-picked into develop/main by hand.
 #
 # What "Cut release" does:
-#   1. Fetches origin, verifies origin/main is an ancestor of origin/develop
-#      (no direct pushes to main since the last release).
+#   1. Fetches origin, refuses if local develop has unpushed commits (they'd
+#      be silently left out), and verifies origin/main is an ancestor of
+#      origin/develop (no direct pushes to main since the last release).
 #   2. Verifies origin/develop's tip has a green tests.yml run (via gh).
 #   3. Tags that commit and pushes main + the tag together, atomically.
 #
@@ -114,6 +115,24 @@ check_not_diverged() {
     fi
 }
 
+# The release always cuts from origin/$DEV_BRANCH, never the local branch.
+# If local $DEV_BRANCH has commits that were never pushed, those commits would
+# be silently left out of the release (and the tag lands on a stale commit).
+# Refuse rather than ship the wrong tree; the fix is always "push develop first".
+check_local_develop_pushed() {
+    git show-ref --verify --quiet "refs/heads/$DEV_BRANCH" || return 0
+    local ahead
+    ahead="$(git rev-list --count "origin/$DEV_BRANCH..$DEV_BRANCH")"
+    if [[ "$ahead" -gt 0 ]]; then
+        echo "error: local $DEV_BRANCH is $ahead commit(s) ahead of origin/$DEV_BRANCH." >&2
+        echo "The release cuts from origin/$DEV_BRANCH, so these commits would NOT be released:" >&2
+        git log --oneline "origin/$DEV_BRANCH..$DEV_BRANCH" >&2
+        echo >&2
+        echo "Push them first ('git push origin $DEV_BRANCH'), let CI go green, then retry." >&2
+        exit 1
+    fi
+}
+
 check_ci_status() {
     local sha="$1"
     if [[ "$SKIP_CI_CHECK" == "1" ]]; then
@@ -184,6 +203,14 @@ show_status() {
     develop_sha="$(git rev-parse "origin/$DEV_BRANCH")"
     echo "origin/$DEFAULT_BRANCH: ${main_sha:0:12}"
     echo "origin/$DEV_BRANCH:  ${develop_sha:0:12}"
+    if git show-ref --verify --quiet "refs/heads/$DEV_BRANCH"; then
+        local local_ahead
+        local_ahead="$(git rev-list --count "origin/$DEV_BRANCH..$DEV_BRANCH")"
+        if [[ "$local_ahead" -gt 0 ]]; then
+            echo "WARNING: local $DEV_BRANCH is $local_ahead commit(s) ahead of origin -" \
+                 "push before cutting or they won't be released."
+        fi
+    fi
     echo
     if git merge-base --is-ancestor "origin/$DEFAULT_BRANCH" "origin/$DEV_BRANCH"; then
         echo "Commits on $DEV_BRANCH not yet on $DEFAULT_BRANCH:"
@@ -204,6 +231,7 @@ cmd_cut() {
         exit 1
     fi
     fetch_all
+    check_local_develop_pushed
     check_not_diverged
 
     local develop_sha version tag
