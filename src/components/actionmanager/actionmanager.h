@@ -38,6 +38,7 @@ public:
     bool processEvent(QInputEvent*);
     void addShortcut(ViewMode context, const QString &keys, const QString &action);
     void resetDefaults();
+    void resetDefaults(ViewMode context);
     void resetDefaults(QString action);
     QString actionForShortcut(ViewMode context, const QString &keys);
     const QString shortcutForAction(ViewMode context, QString action);
@@ -45,6 +46,7 @@ public:
     const QList<QString> shortcutsForAction(QString action);
     QStringList actionList();
     const ShortcutMap& allShortcuts();
+    const ShortcutMap& allDefaultShortcuts();
     void removeShortcut(ViewMode context, const QString &keys);
     void removeAllShortcuts();
     void removeAllShortcuts(QString actionName);

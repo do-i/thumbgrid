@@ -2,6 +2,8 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QSettings>
 
 // Standalone shortcuts.json lives beside the main config file.
@@ -17,6 +19,7 @@ class ShortcutContextsPersistAndLegacyConfigsMigrateTest : public QObject {
 
 private slots:
     void perContextBindingsRoundTrip();
+    void legacyFolderviewJsonStillReads();
     void legacyConfigMigratesIntoBothContexts();
 };
 
@@ -37,6 +40,29 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::perContextBindingsRound
     QCOMPARE(in[MODE_DOCUMENT].value("="), QStringLiteral("zoomIn"));
     QVERIFY2(!in[MODE_FOLDERVIEW].contains("="), "The = binding should not leak into the other context.");
     QVERIFY2(QFile::exists(shortcutsJsonPath()), "Saving shortcuts must produce shortcuts.json.");
+
+    QFile file(shortcutsJsonPath());
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    QVERIFY2(root.contains("grid"), "Folder/grid shortcuts must save under the grid token.");
+    QVERIFY2(!root.contains("folderview"), "New shortcut saves should not write the legacy folderview token.");
+}
+
+void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyFolderviewJsonStillReads() {
+    QJsonObject root;
+    QJsonObject folderView;
+    folderView.insert("G", "copyFile");
+    root.insert("folderview", folderView);
+    QFile file(shortcutsJsonPath());
+    QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    file.write(QJsonDocument(root).toJson());
+    file.close();
+
+    QMap<ViewMode, QMap<QString, QString>> in;
+    settings->readShortcuts(in);
+
+    QCOMPARE(in[MODE_FOLDERVIEW].value("G"), QStringLiteral("copyFile"));
+    QVERIFY2(!in[MODE_DOCUMENT].contains("G"), "Legacy folderview JSON should stay scoped to the grid context.");
 }
 
 void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyConfigMigratesIntoBothContexts() {

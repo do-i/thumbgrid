@@ -10,6 +10,7 @@ class TheSameKeyRunsDifferentActionsPerContextTest : public QObject {
 
 private slots:
     void theSameKeyRunsDifferentActionsPerContext();
+    void resettingDefaultsCanTargetOneContext();
 };
 
 void TheSameKeyRunsDifferentActionsPerContextTest::theSameKeyRunsDifferentActionsPerContext() {
@@ -50,6 +51,19 @@ void TheSameKeyRunsDifferentActionsPerContextTest::theSameKeyRunsDifferentAction
     }
     QCOMPARE(nextImageSpy.count(), 1);
     QCOMPARE(sortByNameSpy.count(), 1);
+}
+
+void TheSameKeyRunsDifferentActionsPerContextTest::resettingDefaultsCanTargetOneContext() {
+    actionManager->removeAllShortcuts();
+    actionManager->addShortcut(MODE_DOCUMENT, "C", "nextImage");
+    actionManager->addShortcut(MODE_FOLDERVIEW, "C", "sortByName");
+
+    actionManager->resetDefaults(MODE_FOLDERVIEW);
+
+    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "C"), QStringLiteral("nextImage"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "C"), QStringLiteral("copyFile"));
+    QVERIFY2(!actionManager->allDefaultShortcuts().value(MODE_FOLDERVIEW).isEmpty(),
+             "Grid defaults should be restored without touching the document context.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(TheSameKeyRunsDifferentActionsPerContextTest)

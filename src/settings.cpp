@@ -69,12 +69,14 @@ void migrateLegacyThemeConf(const QString &confDir, QSettings *themeConf) {
 
 // Context token strings must match ActionManager::contextToString().
 QString shortcutContextToken(ViewMode context) {
-    return context == MODE_FOLDERVIEW ? QStringLiteral("folderview")
+    return context == MODE_FOLDERVIEW ? QStringLiteral("grid")
                                       : QStringLiteral("document");
 }
 
 ViewMode shortcutContextFromToken(const QString &token) {
-    return token == QLatin1String("folderview") ? MODE_FOLDERVIEW : MODE_DOCUMENT;
+    return (token == QLatin1String("grid") || token == QLatin1String("folderview"))
+        ? MODE_FOLDERVIEW
+        : MODE_DOCUMENT;
 }
 
 // Serialize the per-context bindings as a nested JSON object

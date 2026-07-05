@@ -89,7 +89,7 @@ Main window         |  Folder view   |  Thumbnails  |  Settings window
 
 ... and more.
 
-Note: you can configure every shortcut by going to __Settings > Controls__
+Note: you can configure every shortcut by going to __Settings > Shortcuts__
 
 # User interface
 
@@ -134,7 +134,7 @@ gimp "$1"
 ```
 _Note: The script file must be an executable. Also, "shebang" (`#!/bin/bash`) needs to be present._
 
-When you've created your script go to __Settings > Controls > Add__, then select it and assign a shortcut like for any regular action.
+When you've created your script go to __Settings > Shortcuts__, then select it and assign a shortcut like for any regular action.
 
 ## HiDPI (Linux / MacOS only)
 

@@ -12,6 +12,10 @@
 #include <QApplication>
 #include <QDebug>
 #include <QMenu>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include "gui/customwidgets/colorselectorbutton.h"
 #include "gui/dialogs/shortcutcreatordialog.h"
 #include "gui/dialogs/scripteditordialog.h"
@@ -59,12 +63,31 @@ private:
     // The shortcut table carries a Context column (stable token in Qt::UserRole).
     ViewMode contextAtRow(int row);
     void selectShortcutRow(const QString &shortcut, ViewMode context);
+    void setupPreferencePages();
+    QWidget* makeSettingsPage(const QString &title, QVBoxLayout **contentLayout);
+    QWidget* makeSettingsGroup(const QString &title = QString());
+    void setupShortcutsPage();
+    void updateShortcutsTable();
+    void updateShortcutsFilter();
+    void applyShortcutOverride(const QString &action, ViewMode context, const QStringList &overrideKeys);
+    void setActionShortcuts(ActionManager::ContextMap &map, const QString &action, const QStringList &keys);
+    QStringList actionShortcuts(const ActionManager::ContextMap &map, const QString &action) const;
+    QStringList splitShortcutList(const QString &text) const;
+    QString shortcutListText(const QStringList &shortcuts) const;
+    bool shortcutsEqual(QStringList a, QStringList b) const;
+    ViewMode selectedShortcutContext() const;
+    void openShortcutDetails(int row);
+    void openShortcutDetails(const QString &action, ViewMode context);
 
     void setupSidebar();
     void removeShortcutAt(int row);
     void adjustSizeToContents();
     QMap<QString, QString> langs; // <"en_US", "English">
     QButtonGroup fitModeGrp, folderEndGrp, zoomIndGrp;
+    ActionManager::ShortcutMap mShortcutDraft;
+    QComboBox *mShortcutContextComboBox = nullptr;
+    QLineEdit *mShortcutSearchEdit = nullptr;
+    bool mUpdatingShortcutsTable = false;
 
 private slots:
     void saveSettings();

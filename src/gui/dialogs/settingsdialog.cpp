@@ -5,6 +5,13 @@
 #include <QToolButton>
 #include <QMessageBox>
 #include <QStyle>
+#include <QDialogButtonBox>
+#include <QFrame>
+#include <QHeaderView>
+#include <QLabel>
+#include <QSet>
+#include <QScrollArea>
+#include <QVBoxLayout>
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -13,7 +20,8 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle(tr("Preferences — ") + qApp->applicationName());
 
-    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);   
+    setupPreferencePages();
+    setupShortcutsPage();
     ui->aboutAppTextBrowser->viewport()->setAutoFillBackground(false);
     // Clean version on the label; on dev builds the full "git describe" string
     // (commit count + hash) is revealed on hover. On a tagged release the two
@@ -176,6 +184,162 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 //------------------------------------------------------------------------------
 SettingsDialog::~SettingsDialog() {
     delete ui;
+}
+//------------------------------------------------------------------------------
+QWidget* SettingsDialog::makeSettingsPage(const QString &title, QVBoxLayout **contentLayout) {
+    QWidget *page = new QWidget(ui->stackedWidget);
+    QVBoxLayout *outer = new QVBoxLayout(page);
+    outer->setContentsMargins(0, 0, 0, 0);
+
+    QScrollArea *scrollArea = new QScrollArea(page);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    scrollArea->setWidgetResizable(true);
+    QWidget *contents = new QWidget(scrollArea);
+    QVBoxLayout *layout = new QVBoxLayout(contents);
+    layout->setSpacing(9);
+    layout->setContentsMargins(18, 9, 18, 9);
+
+    QLabel *header = new QLabel(title, contents);
+    header->setAccessibleName("SHeaderText");
+    layout->addWidget(header);
+
+    QWidget *line = new QWidget(contents);
+    line->setAccessibleName("SHeaderLine");
+    layout->addWidget(line);
+    layout->addSpacing(6);
+
+    *contentLayout = layout;
+    scrollArea->setWidget(contents);
+    outer->addWidget(scrollArea);
+    return page;
+}
+//------------------------------------------------------------------------------
+QWidget* SettingsDialog::makeSettingsGroup(const QString &title) {
+    QWidget *group = new QWidget(this);
+    group->setAccessibleName("SGroup");
+    QVBoxLayout *layout = new QVBoxLayout(group);
+    layout->setSpacing(7);
+    layout->setContentsMargins(13, 10, 13, 10);
+
+    if(!title.isEmpty()) {
+        QLabel *label = new QLabel(title, group);
+        QFont font = label->font();
+        font.setBold(true);
+        label->setFont(font);
+        layout->addWidget(label);
+    }
+    return group;
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::setupPreferencePages() {
+    ui->label_29->setText(tr("Shortcuts"));
+    ui->label_43->setText(tr("Also, you can assign shortcuts to scripts in Shortcuts."));
+    ui->startInFolderViewCheckBox->setText(tr("Start in grid view by default"));
+    ui->folderViewTopBarCheckBox->setText(tr("Show grid top bar"));
+    ui->folderViewFontSizeLabel->setText(tr("Grid filename font size:"));
+    ui->label_30->setText(tr("Grid navigation"));
+
+    QVBoxLayout *gridLayout = nullptr;
+    QWidget *gridPage = makeSettingsPage(tr("Grid"), &gridLayout);
+    QWidget *gridDisplayGroup = makeSettingsGroup(tr("Grid display"));
+    auto *gridDisplayLayout = qobject_cast<QVBoxLayout*>(gridDisplayGroup->layout());
+    gridDisplayLayout->addWidget(ui->folderViewTopBarCheckBox);
+    QHBoxLayout *fontLayout = new QHBoxLayout();
+    fontLayout->setContentsMargins(0, 0, 0, 0);
+    fontLayout->addWidget(ui->folderViewFontSizeLabel);
+    fontLayout->addWidget(ui->folderViewFontSizeSpinBox);
+    fontLayout->addStretch();
+    gridDisplayLayout->addLayout(fontLayout);
+    gridLayout->addWidget(gridDisplayGroup);
+    gridLayout->addSpacing(12);
+    gridLayout->addWidget(ui->folderNavGroup);
+    gridLayout->addStretch();
+
+    QVBoxLayout *documentLayout = nullptr;
+    QWidget *documentPage = makeSettingsPage(tr("Document"), &documentLayout);
+    documentLayout->addWidget(ui->displayGroup);
+    documentLayout->addSpacing(12);
+    documentLayout->addWidget(ui->zoomGroup);
+    documentLayout->addSpacing(12);
+    documentLayout->addWidget(ui->scalingGroup);
+    documentLayout->addSpacing(12);
+    documentLayout->addWidget(ui->videoPlaybackGroup);
+    documentLayout->addSpacing(12);
+    documentLayout->addWidget(ui->slideshowGroup);
+    documentLayout->addSpacing(12);
+    documentLayout->addWidget(ui->thumbnailPanelGroup);
+    documentLayout->addSpacing(12);
+    documentLayout->addWidget(ui->widget_12);
+    documentLayout->addStretch();
+
+    QStackedWidget *stack = ui->stackedWidget;
+    const QList<QWidget*> oldPages = {ui->General, ui->View, ui->Theme, ui->Controls,
+                                      ui->Scripts, ui->Advanced, ui->About};
+    for(QWidget *page : oldPages)
+        stack->removeWidget(page);
+
+    stack->addWidget(ui->General);
+    stack->addWidget(ui->Theme);
+    stack->addWidget(ui->Controls);
+    stack->addWidget(gridPage);
+    stack->addWidget(documentPage);
+    stack->addWidget(ui->Scripts);
+    stack->addWidget(ui->Advanced);
+    stack->addWidget(ui->About);
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::setupShortcutsPage() {
+    ui->pushButton_2->hide();
+    ui->pushButton_8->hide();
+    ui->pushButton_4->hide();
+    ui->pushButton_3->setText(tr("Reset current context"));
+
+    mShortcutContextComboBox = new QComboBox(ui->Controls);
+    mShortcutContextComboBox->addItem(tr("Grid"), ActionManager::contextToString(MODE_FOLDERVIEW));
+    mShortcutContextComboBox->addItem(tr("Document"), ActionManager::contextToString(MODE_DOCUMENT));
+
+    mShortcutSearchEdit = new QLineEdit(ui->Controls);
+    mShortcutSearchEdit->setPlaceholderText(tr("Search"));
+    mShortcutSearchEdit->setClearButtonEnabled(true);
+
+    ui->horizontalLayout_2->insertWidget(0, mShortcutContextComboBox);
+    ui->horizontalLayout_2->insertWidget(1, mShortcutSearchEdit, 1);
+
+    disconnect(ui->shortcutsTableWidget, nullptr, this, nullptr);
+    ui->shortcutsTableWidget->setColumnCount(4);
+    ui->shortcutsTableWidget->setHorizontalHeaderLabels(
+        {tr("Action"), tr("Default"), tr("Override"), QStringLiteral("...")});
+    ui->shortcutsTableWidget->setEditTriggers(QAbstractItemView::DoubleClicked |
+                                              QAbstractItemView::EditKeyPressed);
+    ui->shortcutsTableWidget->setSortingEnabled(true);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionsClickable(true);
+    ui->shortcutsTableWidget->horizontalHeader()->setSortIndicatorShown(true);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+
+    connect(mShortcutContextComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, [this]() { updateShortcutsTable(); });
+    connect(mShortcutSearchEdit, &QLineEdit::textChanged,
+            this, [this]() { updateShortcutsFilter(); });
+    connect(ui->shortcutsTableWidget, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *item) {
+        if(mUpdatingShortcutsTable || !item || item->column() != 2)
+            return;
+        const QString action = item->data(Qt::UserRole).toString();
+        applyShortcutOverride(action, selectedShortcutContext(), splitShortcutList(item->text()));
+        updateShortcutsTable();
+    });
+    connect(ui->shortcutsTableWidget, &QTableWidget::cellDoubleClicked,
+            this, [this](int row, int column) {
+        if(column == 3)
+            openShortcutDetails(row);
+    });
+    connect(ui->shortcutsTableWidget, &QTableWidget::cellClicked,
+            this, [this](int row, int column) {
+        if(column == 3)
+            openShortcutDetails(row);
+    });
 }
 //------------------------------------------------------------------------------
 // an attempt to force minimum width to fit contents
@@ -589,15 +753,188 @@ int SettingsDialog::selectedThemeTid() const {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::readShortcuts() {
+    mShortcutDraft = actionManager->allShortcuts();
+    updateShortcutsTable();
+}
+//------------------------------------------------------------------------------
+ViewMode SettingsDialog::selectedShortcutContext() const {
+    if(!mShortcutContextComboBox)
+        return MODE_FOLDERVIEW;
+    return ActionManager::contextFromString(mShortcutContextComboBox->currentData().toString());
+}
+//------------------------------------------------------------------------------
+QStringList SettingsDialog::actionShortcuts(const ActionManager::ContextMap &map, const QString &action) const {
+    QStringList keys = map.keys(action);
+    keys.sort(Qt::CaseInsensitive);
+    return keys;
+}
+//------------------------------------------------------------------------------
+QStringList SettingsDialog::splitShortcutList(const QString &text) const {
+    QString normalized = text;
+    normalized.replace(" / ", ";");
+    QStringList keys = normalized.split(';', Qt::SkipEmptyParts);
+    for(QString &key : keys)
+        key = key.trimmed();
+    keys.removeAll(QString());
+    keys.removeDuplicates();
+    return keys;
+}
+//------------------------------------------------------------------------------
+QString SettingsDialog::shortcutListText(const QStringList &shortcuts) const {
+    return shortcuts.join(" / ");
+}
+//------------------------------------------------------------------------------
+bool SettingsDialog::shortcutsEqual(QStringList a, QStringList b) const {
+    a.removeDuplicates();
+    b.removeDuplicates();
+    a.sort(Qt::CaseInsensitive);
+    b.sort(Qt::CaseInsensitive);
+    return a == b;
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::setActionShortcuts(ActionManager::ContextMap &map, const QString &action, const QStringList &keys) {
+    for(auto it = map.begin(); it != map.end();) {
+        if(it.value() == action)
+            it = map.erase(it);
+        else
+            ++it;
+    }
+
+    for(const QString &key : keys) {
+        const QString trimmed = key.trimmed();
+        if(!trimmed.isEmpty())
+            map.insert(trimmed, action);
+    }
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::applyShortcutOverride(const QString &action, ViewMode context, const QStringList &overrideKeys) {
+    const ActionManager::ContextMap defaults = actionManager->allDefaultShortcuts().value(context);
+    const QStringList defaultKeys = actionShortcuts(defaults, action);
+    const QStringList effectiveKeys = (overrideKeys.isEmpty() || shortcutsEqual(overrideKeys, defaultKeys))
+        ? defaultKeys
+        : overrideKeys;
+    setActionShortcuts(mShortcutDraft[context], action, effectiveKeys);
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::updateShortcutsTable() {
+    if(!mShortcutContextComboBox)
+        return;
+
+    mUpdatingShortcutsTable = true;
+    ui->shortcutsTableWidget->setSortingEnabled(false);
     ui->shortcutsTableWidget->clearContents();
     ui->shortcutsTableWidget->setRowCount(0);
-    const ActionManager::ShortcutMap &shortcuts = actionManager->allShortcuts();
-    for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
-        QMapIterator<QString, QString> i(ctx.value());
-        while(i.hasNext()) {
-            i.next();
-            addShortcutToTable(i.value(), i.key(), ctx.key());
+
+    const ViewMode context = selectedShortcutContext();
+    const ActionManager::ContextMap defaults = actionManager->allDefaultShortcuts().value(context);
+    const ActionManager::ContextMap active = mShortcutDraft.value(context);
+
+    QSet<QString> actions;
+    for(auto it = defaults.cbegin(); it != defaults.cend(); ++it)
+        actions.insert(it.value());
+    for(auto it = active.cbegin(); it != active.cend(); ++it)
+        actions.insert(it.value());
+
+    QStringList actionNames = actions.values();
+    actionNames.sort(Qt::CaseInsensitive);
+
+    const QBrush disabledBrush = palette().brush(QPalette::Disabled, QPalette::Text);
+    for(const QString &action : actionNames) {
+        const QStringList defaultKeys = actionShortcuts(defaults, action);
+        const QStringList activeKeys = actionShortcuts(active, action);
+        const bool hasOverride = !shortcutsEqual(defaultKeys, activeKeys);
+        const QStringList overrideKeys = hasOverride ? activeKeys : QStringList();
+
+        const int row = ui->shortcutsTableWidget->rowCount();
+        ui->shortcutsTableWidget->setRowCount(row + 1);
+
+        QTableWidgetItem *actionItem = new QTableWidgetItem(action);
+        actionItem->setData(Qt::UserRole, action);
+        actionItem->setFlags(actionItem->flags() & ~Qt::ItemIsEditable);
+        ui->shortcutsTableWidget->setItem(row, 0, actionItem);
+
+        QTableWidgetItem *defaultItem = new QTableWidgetItem(shortcutListText(defaultKeys));
+        defaultItem->setData(Qt::UserRole, action);
+        defaultItem->setFlags(defaultItem->flags() & ~Qt::ItemIsEditable);
+        if(hasOverride)
+            defaultItem->setForeground(disabledBrush);
+        ui->shortcutsTableWidget->setItem(row, 1, defaultItem);
+
+        QTableWidgetItem *overrideItem = new QTableWidgetItem(shortcutListText(overrideKeys));
+        overrideItem->setData(Qt::UserRole, action);
+        ui->shortcutsTableWidget->setItem(row, 2, overrideItem);
+
+        QTableWidgetItem *detailsItem = new QTableWidgetItem(QStringLiteral("..."));
+        detailsItem->setData(Qt::UserRole, action);
+        detailsItem->setTextAlignment(Qt::AlignCenter);
+        detailsItem->setFlags(detailsItem->flags() & ~Qt::ItemIsEditable);
+        ui->shortcutsTableWidget->setItem(row, 3, detailsItem);
+
+        QPushButton *detailsButton = new QPushButton(QStringLiteral("..."), ui->shortcutsTableWidget);
+        detailsButton->setProperty("action", action);
+        detailsButton->setProperty("context", ActionManager::contextToString(context));
+        connect(detailsButton, &QPushButton::clicked, this, [this, detailsButton]() {
+            openShortcutDetails(detailsButton->property("action").toString(),
+                                ActionManager::contextFromString(detailsButton->property("context").toString()));
+        });
+        ui->shortcutsTableWidget->setCellWidget(row, 3, detailsButton);
+    }
+
+    ui->shortcutsTableWidget->setSortingEnabled(true);
+    ui->shortcutsTableWidget->sortByColumn(0, Qt::AscendingOrder);
+    mUpdatingShortcutsTable = false;
+    updateShortcutsFilter();
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::updateShortcutsFilter() {
+    if(!mShortcutSearchEdit)
+        return;
+
+    const QString needle = mShortcutSearchEdit->text().trimmed();
+    for(int row = 0; row < ui->shortcutsTableWidget->rowCount(); row++) {
+        bool match = needle.isEmpty();
+        for(int col = 0; col < 3 && !match; col++) {
+            QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, col);
+            match = item && item->text().contains(needle, Qt::CaseInsensitive);
         }
+        ui->shortcutsTableWidget->setRowHidden(row, !match);
+    }
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::openShortcutDetails(int row) {
+    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, 0);
+    if(item)
+        openShortcutDetails(item->data(Qt::UserRole).toString(), selectedShortcutContext());
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context) {
+    const ActionManager::ContextMap defaults = actionManager->allDefaultShortcuts().value(context);
+    const ActionManager::ContextMap active = mShortcutDraft.value(context);
+    const QStringList defaultKeys = actionShortcuts(defaults, action);
+    const QStringList activeKeys = actionShortcuts(active, action);
+    const QStringList overrideKeys = shortcutsEqual(defaultKeys, activeKeys) ? QStringList() : activeKeys;
+
+    QDialog dialog(this);
+    dialog.setWindowTitle(action);
+    QVBoxLayout layout(&dialog);
+
+    QLabel defaultLabel(tr("Default: %1").arg(shortcutListText(defaultKeys)));
+    layout.addWidget(&defaultLabel);
+
+    QLabel overrideLabel(tr("Override"));
+    layout.addWidget(&overrideLabel);
+
+    QLineEdit overrideEdit(shortcutListText(overrideKeys));
+    layout.addWidget(&overrideEdit);
+
+    QDialogButtonBox buttons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    layout.addWidget(&buttons);
+    connect(&buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(&buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if(dialog.exec() == QDialog::Accepted) {
+        applyShortcutOverride(action, context, splitShortcutList(overrideEdit.text()));
+        updateShortcutsTable();
     }
 }
 //------------------------------------------------------------------------------
@@ -767,16 +1104,16 @@ void SettingsDialog::removeShortcut() {
 //------------------------------------------------------------------------------
 void SettingsDialog::saveShortcuts() {
     actionManager->removeAllShortcuts();
-    for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-        actionManager->addShortcut(contextAtRow(i),
-                                   ui->shortcutsTableWidget->item(i, 1)->text(),
-                                   ui->shortcutsTableWidget->item(i, 0)->text());
+    for(auto ctx = mShortcutDraft.cbegin(); ctx != mShortcutDraft.cend(); ++ctx) {
+        for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it)
+            actionManager->addShortcut(ctx.key(), it.key(), it.value());
     }
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::resetShortcuts() {
-    actionManager->resetDefaults();
-    readShortcuts();
+    const ViewMode context = selectedShortcutContext();
+    mShortcutDraft[context] = actionManager->allDefaultShortcuts().value(context);
+    updateShortcutsTable();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::resetZoomLevels() {

@@ -129,12 +129,14 @@ ViewMode ActionManager::currentContext() const {
 }
 //------------------------------------------------------------------------------
 QString ActionManager::contextToString(ViewMode context) {
-    return (context == MODE_FOLDERVIEW) ? QStringLiteral("folderview")
+    return (context == MODE_FOLDERVIEW) ? QStringLiteral("grid")
                                         : QStringLiteral("document");
 }
 //------------------------------------------------------------------------------
 ViewMode ActionManager::contextFromString(const QString &name) {
-    return (name == QStringLiteral("folderview")) ? MODE_FOLDERVIEW : MODE_DOCUMENT;
+    return (name == QStringLiteral("grid") || name == QStringLiteral("folderview"))
+        ? MODE_FOLDERVIEW
+        : MODE_DOCUMENT;
 }
 //------------------------------------------------------------------------------
 QStringList ActionManager::actionList() {
@@ -143,6 +145,10 @@ QStringList ActionManager::actionList() {
 //------------------------------------------------------------------------------
 const ActionManager::ShortcutMap &ActionManager::allShortcuts() {
     return actionManager->shortcuts;
+}
+//------------------------------------------------------------------------------
+const ActionManager::ShortcutMap &ActionManager::allDefaultShortcuts() {
+    return actionManager->defaults;
 }
 //------------------------------------------------------------------------------
 void ActionManager::removeAllShortcuts() {
@@ -174,6 +180,10 @@ QString ActionManager::keyForNativeScancode(quint32 scanCode) {
 //------------------------------------------------------------------------------
 void ActionManager::resetDefaults() {
     actionManager->shortcuts = actionManager->defaults;
+}
+//------------------------------------------------------------------------------
+void ActionManager::resetDefaults(ViewMode context) {
+    actionManager->shortcuts[context] = actionManager->defaults.value(context);
 }
 //------------------------------------------------------------------------------
 void ActionManager::resetDefaults(QString action) {

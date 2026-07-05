@@ -11,7 +11,7 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     // Each shortcut belongs to one context (screen). The userData holds the stable
     // context token written to disk; see ActionManager::contextToString().
     ui->contextComboBox->addItem(tr("Document"), ActionManager::contextToString(MODE_DOCUMENT));
-    ui->contextComboBox->addItem(tr("Folder"), ActionManager::contextToString(MODE_FOLDERVIEW));
+    ui->contextComboBox->addItem(tr("Grid"), ActionManager::contextToString(MODE_FOLDERVIEW));
     ui->contextComboBox->setCurrentIndex(0);
 
     actionList = appActions->getList();
