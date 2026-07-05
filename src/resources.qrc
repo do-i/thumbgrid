@@ -155,6 +155,8 @@
         <file>res/icons/common/settings/terminal32@2x.png</file>
         <file>res/icons/common/settings/view32.png</file>
         <file>res/icons/common/settings/view32@2x.png</file>
+        <file>res/icons/common/settings/grid32.png</file>
+        <file>res/icons/common/settings/document32.png</file>
         <file>res/icons/common/overlay/arrow_left_50.png</file>
         <file>res/icons/common/overlay/arrow_right_50.png</file>
         <file>res/icons/common/overlay/arrow_left_50@2x.png</file>

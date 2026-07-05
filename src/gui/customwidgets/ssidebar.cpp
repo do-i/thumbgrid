@@ -9,8 +9,8 @@ SSideBar::SSideBar(QWidget *parent) : QWidget{parent} {
     addEntry(":res/icons/common/settings/general32.png",    tr("General"));
     addEntry(":res/icons/common/settings/appearance32.png", tr("Theme"));
     addEntry(":res/icons/common/settings/shortcuts32.png",  tr("Shortcuts"));
-    addEntry(":res/icons/common/settings/view32.png",       tr("Grid"));
-    addEntry(":res/icons/common/settings/scale32.png",      tr("Document"));
+    addEntry(":res/icons/common/settings/grid32.png",       tr("Grid"));
+    addEntry(":res/icons/common/settings/document32.png",   tr("Document"));
     addEntry(":res/icons/common/settings/terminal32.png",   tr("Scripts"));
     addEntry(":res/icons/common/settings/advanced32.png",   tr("Advanced"));
     addEntry(":res/icons/common/settings/about32.png",      tr("About"));
