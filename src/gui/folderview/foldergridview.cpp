@@ -25,12 +25,16 @@ FolderGridView::FolderGridView(QWidget *parent)
     setSelectMode(ACTIVATE_BY_DOUBLECLICK);
 
     mPreviewFit = settings->folderViewPreviewFit();
+    mFolderIconColor = settings->colorScheme().folderview_parent_icon;
     connect(settings, &Settings::settingsChanged, [this]() {
         this->scene.setBackgroundBrush(settings->colorScheme().folderview);
-        // Folder thumbnails bake the child-preview layout into the pixmap, so a
-        // change to the preview fit mode requires regenerating them.
-        if(mPreviewFit != settings->folderViewPreviewFit()) {
+        // Folder thumbnails bake the child-preview layout and the recolored folder
+        // icon into the pixmap, so a change to the preview fit mode or the folder
+        // icon color (e.g. a theme switch) requires regenerating them.
+        QColor folderIconColor = settings->colorScheme().folderview_parent_icon;
+        if(mPreviewFit != settings->folderViewPreviewFit() || mFolderIconColor != folderIconColor) {
             mPreviewFit = settings->folderViewPreviewFit();
+            mFolderIconColor = folderIconColor;
             for(int i = 0; i < thumbnails.count(); i++)
                 thumbnails.at(i)->unsetThumbnail();
             loadVisibleThumbnails();
