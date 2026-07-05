@@ -8,13 +8,79 @@
 #include <QDialogButtonBox>
 #include <QFrame>
 #include <QHeaderView>
+#include <QKeyEvent>
 #include <QLabel>
+#include <QMouseEvent>
+#include <QPainter>
 #include <QSet>
 #include <QScrollArea>
+#include <QStyledItemDelegate>
+#include <QStyleOptionButton>
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <functional>
 #include "gui/customwidgets/keysequenceedit.h"
+
+namespace {
+class CenteredCheckBoxDelegate : public QStyledItemDelegate
+{
+public:
+    explicit CenteredCheckBoxDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+    void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
+        if(!index.data(Qt::CheckStateRole).isValid()) {
+            QStyledItemDelegate::paint(painter, option, index);
+            return;
+        }
+
+        QStyleOptionViewItem itemOption(option);
+        initStyleOption(&itemOption, index);
+        itemOption.features &= ~QStyleOptionViewItem::HasCheckIndicator;
+        itemOption.text.clear();
+
+        const QWidget *widget = option.widget;
+        QStyle *style = widget ? widget->style() : QApplication::style();
+        style->drawControl(QStyle::CE_ItemViewItem, &itemOption, painter, widget);
+
+        QStyleOptionButton checkOption;
+        checkOption.state = option.state & (QStyle::State_Enabled | QStyle::State_Active | QStyle::State_MouseOver);
+        const Qt::CheckState state = static_cast<Qt::CheckState>(index.data(Qt::CheckStateRole).toInt());
+        if(state == Qt::Checked)
+            checkOption.state |= QStyle::State_On;
+        else if(state == Qt::PartiallyChecked)
+            checkOption.state |= QStyle::State_NoChange;
+        else
+            checkOption.state |= QStyle::State_Off;
+
+        const QSize checkSize(
+            style->pixelMetric(QStyle::PM_IndicatorWidth, &checkOption, widget),
+            style->pixelMetric(QStyle::PM_IndicatorHeight, &checkOption, widget));
+        checkOption.rect = QStyle::alignedRect(option.direction, Qt::AlignCenter, checkSize, option.rect);
+        style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &checkOption, painter, widget);
+    }
+
+    bool editorEvent(QEvent *event, QAbstractItemModel *model, const QStyleOptionViewItem &option,
+                     const QModelIndex &index) override {
+        if(!index.data(Qt::CheckStateRole).isValid() || !(index.flags() & Qt::ItemIsUserCheckable))
+            return QStyledItemDelegate::editorEvent(event, model, option, index);
+
+        if(event->type() == QEvent::MouseButtonRelease) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+            if(mouseEvent->button() != Qt::LeftButton || !option.rect.contains(mouseEvent->pos()))
+                return false;
+        } else if(event->type() == QEvent::KeyPress) {
+            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+            if(keyEvent->key() != Qt::Key_Space && keyEvent->key() != Qt::Key_Select)
+                return false;
+        } else {
+            return false;
+        }
+
+        const Qt::CheckState state = static_cast<Qt::CheckState>(index.data(Qt::CheckStateRole).toInt());
+        return model->setData(index, state == Qt::Checked ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
+    }
+};
+}
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -312,6 +378,7 @@ void SettingsDialog::setupShortcutsPage() {
     ui->shortcutsTableWidget->setColumnCount(4);
     ui->shortcutsTableWidget->setHorizontalHeaderLabels({tr("Action"), tr("Key"), tr("Count"), tr("Enabled")});
     ui->shortcutsTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->shortcutsTableWidget->setItemDelegateForColumn(3, new CenteredCheckBoxDelegate(ui->shortcutsTableWidget));
     ui->shortcutsTableWidget->setSortingEnabled(true);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionsClickable(true);
     ui->shortcutsTableWidget->horizontalHeader()->setSortIndicatorShown(true);
