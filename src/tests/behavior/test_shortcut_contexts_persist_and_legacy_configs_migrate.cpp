@@ -19,6 +19,7 @@ class ShortcutContextsPersistAndLegacyConfigsMigrateTest : public QObject {
 
 private slots:
     void perContextBindingsRoundTrip();
+    void primaryAndDisabledMetadataRoundTrip();
     void legacyFolderviewJsonStillReads();
     void legacyConfigMigratesIntoBothContexts();
 };
@@ -46,6 +47,32 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::perContextBindingsRound
     const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
     QVERIFY2(root.contains("grid"), "Folder/grid shortcuts must save under the grid token.");
     QVERIFY2(!root.contains("folderview"), "New shortcut saves should not write the legacy folderview token.");
+}
+
+void ShortcutContextsPersistAndLegacyConfigsMigrateTest::primaryAndDisabledMetadataRoundTrip() {
+    QMap<ViewMode, QMap<QString, QString>> primary;
+    primary[MODE_FOLDERVIEW].insert("copyFile", "C");
+    primary[MODE_DOCUMENT].insert("zoomIn", "=");
+    settings->saveShortcutPrimary(primary);
+
+    QMap<ViewMode, QStringList> disabled;
+    disabled[MODE_FOLDERVIEW] = QStringList{"copyFile"};
+    settings->saveDisabledShortcuts(disabled);
+
+    QMap<ViewMode, QMap<QString, QString>> primaryIn;
+    settings->readShortcutPrimary(primaryIn);
+    QCOMPARE(primaryIn[MODE_FOLDERVIEW].value("copyFile"), QStringLiteral("C"));
+    QCOMPARE(primaryIn[MODE_DOCUMENT].value("zoomIn"), QStringLiteral("="));
+
+    QMap<ViewMode, QStringList> disabledIn;
+    settings->readDisabledShortcuts(disabledIn);
+    QCOMPARE(disabledIn[MODE_FOLDERVIEW], QStringList{"copyFile"});
+
+    QFile file(shortcutsJsonPath());
+    QVERIFY(file.open(QIODevice::ReadOnly));
+    const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    QVERIFY2(root.contains("_primary"), "Primary-key metadata must be stored in shortcuts.json.");
+    QVERIFY2(root.contains("_disabled"), "Disabled shortcut metadata must be stored in shortcuts.json.");
 }
 
 void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyFolderviewJsonStillReads() {

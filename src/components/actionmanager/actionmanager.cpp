@@ -99,7 +99,11 @@ void ActionManager::initShortcuts() {
     // Merge newer default actions into pre-existing configs, per context, so
     // upgrading users get them without resetting all shortcuts.
     auto mergeMissing = [](const QString &action, const QString &shortcut) {
+        QMap<ViewMode, QStringList> disabled;
+        settings->readDisabledShortcuts(disabled);
         for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+            if(disabled.value(ctx).contains(action))
+                continue;
             ContextMap &m = actionManager->shortcuts[ctx];
             if(!m.values().contains(action) && !m.contains(shortcut))
                 m.insert(shortcut, action);
@@ -330,6 +334,18 @@ ActionType ActionManager::validateAction(const QString &actionName) {
 //------------------------------------------------------------------------------
 void ActionManager::readShortcuts() {
     settings->readShortcuts(shortcuts);
+    QMap<ViewMode, QStringList> disabled;
+    settings->readDisabledShortcuts(disabled);
+    for(auto ctx = shortcuts.begin(); ctx != shortcuts.end(); ++ctx) {
+        const QStringList disabledActions = disabled.value(ctx.key());
+        ContextMap &m = ctx.value();
+        for(auto it = m.begin(); it != m.end();) {
+            if(disabledActions.contains(it.value()))
+                it = m.erase(it);
+            else
+                ++it;
+        }
+    }
     actionManager->validateShortcuts();
 }
 //------------------------------------------------------------------------------

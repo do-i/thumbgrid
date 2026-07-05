@@ -18,6 +18,7 @@
 #include <QVersionNumber>
 #include <QThread>
 #include <QJsonDocument>
+#include <QJsonArray>
 #include <QJsonObject>
 #include <QSaveFile>
 #include "utils/script.h"
@@ -138,6 +139,10 @@ public:
     // migrated into both contexts on read.
     void readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     void saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts);
+    void readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary);
+    void saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> &primary);
+    void readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled);
+    void saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled);
     bool panelEnabled();
     void setPanelEnabled(bool mode);
     int lastDisplay();

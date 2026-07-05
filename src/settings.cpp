@@ -79,6 +79,12 @@ ViewMode shortcutContextFromToken(const QString &token) {
         : MODE_DOCUMENT;
 }
 
+bool isShortcutContextToken(const QString &token) {
+    return token == QLatin1String("grid") ||
+           token == QLatin1String("folderview") ||
+           token == QLatin1String("document");
+}
+
 // Serialize the per-context bindings as a nested JSON object
 // ({ context: { keySequence: action } }) and write it atomically. JSON object
 // keys are arbitrary strings, so key sequences like "=" or "Ctrl+/" need no
@@ -86,6 +92,15 @@ ViewMode shortcutContextFromToken(const QString &token) {
 void writeShortcutsJson(const QString &path,
                         const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     QJsonObject root;
+    QFile existing(path);
+    if(existing.open(QIODevice::ReadOnly)) {
+        root = QJsonDocument::fromJson(existing.readAll()).object();
+        existing.close();
+    }
+    for(const QString &key : root.keys()) {
+        if(isShortcutContextToken(key))
+            root.remove(key);
+    }
     for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
         QJsonObject bindings;
         for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it)
@@ -109,10 +124,112 @@ void readShortcutsJson(const QString &path,
         return;
     const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
     for(auto ctx = root.constBegin(); ctx != root.constEnd(); ++ctx) {
+        if(!isShortcutContextToken(ctx.key()))
+            continue;
         const ViewMode mode = shortcutContextFromToken(ctx.key());
         const QJsonObject bindings = ctx.value().toObject();
         for(auto it = bindings.constBegin(); it != bindings.constEnd(); ++it)
             shortcuts[mode].insert(it.key(), it.value().toString());  // keySequence -> action
+    }
+}
+
+void writeShortcutStringMapJson(const QString &path, const QString &metadataKey,
+                                const QMap<ViewMode, QMap<QString, QString>> &values) {
+    QJsonObject root;
+    QFile existing(path);
+    if(existing.open(QIODevice::ReadOnly)) {
+        root = QJsonDocument::fromJson(existing.readAll()).object();
+        existing.close();
+    }
+
+    QJsonObject metadata;
+    for(auto ctx = values.cbegin(); ctx != values.cend(); ++ctx) {
+        QJsonObject contextValues;
+        for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it) {
+            if(!it.value().isEmpty())
+                contextValues.insert(it.key(), it.value());
+        }
+        metadata.insert(shortcutContextToken(ctx.key()), contextValues);
+    }
+    root.insert(metadataKey, metadata);
+
+    QDir().mkpath(QFileInfo(path).absolutePath());
+    QSaveFile file(path);
+    if(file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+        file.commit();
+    }
+}
+
+void readShortcutStringMapJson(const QString &path, const QString &metadataKey,
+                               QMap<ViewMode, QMap<QString, QString>> &values) {
+    values.clear();
+    QFile file(path);
+    if(!file.open(QIODevice::ReadOnly))
+        return;
+    const QJsonObject metadata = QJsonDocument::fromJson(file.readAll()).object()
+        .value(metadataKey).toObject();
+    for(auto ctx = metadata.constBegin(); ctx != metadata.constEnd(); ++ctx) {
+        if(!isShortcutContextToken(ctx.key()))
+            continue;
+        const ViewMode mode = shortcutContextFromToken(ctx.key());
+        const QJsonObject contextValues = ctx.value().toObject();
+        for(auto it = contextValues.constBegin(); it != contextValues.constEnd(); ++it)
+            values[mode].insert(it.key(), it.value().toString());
+    }
+}
+
+void writeShortcutStringListJson(const QString &path, const QString &metadataKey,
+                                 const QMap<ViewMode, QStringList> &values) {
+    QJsonObject root;
+    QFile existing(path);
+    if(existing.open(QIODevice::ReadOnly)) {
+        root = QJsonDocument::fromJson(existing.readAll()).object();
+        existing.close();
+    }
+
+    QJsonObject metadata;
+    for(auto ctx = values.cbegin(); ctx != values.cend(); ++ctx) {
+        QJsonArray actions;
+        QStringList names = ctx.value();
+        names.removeDuplicates();
+        names.sort(Qt::CaseInsensitive);
+        for(const QString &name : names) {
+            if(!name.isEmpty())
+                actions.append(name);
+        }
+        metadata.insert(shortcutContextToken(ctx.key()), actions);
+    }
+    root.insert(metadataKey, metadata);
+
+    QDir().mkpath(QFileInfo(path).absolutePath());
+    QSaveFile file(path);
+    if(file.open(QIODevice::WriteOnly)) {
+        file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+        file.commit();
+    }
+}
+
+void readShortcutStringListJson(const QString &path, const QString &metadataKey,
+                                QMap<ViewMode, QStringList> &values) {
+    values.clear();
+    QFile file(path);
+    if(!file.open(QIODevice::ReadOnly))
+        return;
+    const QJsonObject metadata = QJsonDocument::fromJson(file.readAll()).object()
+        .value(metadataKey).toObject();
+    for(auto ctx = metadata.constBegin(); ctx != metadata.constEnd(); ++ctx) {
+        if(!isShortcutContextToken(ctx.key()))
+            continue;
+        QStringList actions;
+        const QJsonArray arr = ctx.value().toArray();
+        for(const QJsonValue &value : arr) {
+            const QString action = value.toString();
+            if(!action.isEmpty())
+                actions.append(action);
+        }
+        actions.removeDuplicates();
+        values[shortcutContextFromToken(ctx.key())] = actions;
     }
 }
 
@@ -890,6 +1007,22 @@ void Settings::readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) 
 
 void Settings::saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     writeShortcutsJson(settings->mShortcutsJsonPath, shortcuts);
+}
+//------------------------------------------------------------------------------
+void Settings::readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary) {
+    readShortcutStringMapJson(settings->mShortcutsJsonPath, "_primary", primary);
+}
+
+void Settings::saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> &primary) {
+    writeShortcutStringMapJson(settings->mShortcutsJsonPath, "_primary", primary);
+}
+
+void Settings::readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled) {
+    readShortcutStringListJson(settings->mShortcutsJsonPath, "_disabled", disabled);
+}
+
+void Settings::saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled) {
+    writeShortcutStringListJson(settings->mShortcutsJsonPath, "_disabled", disabled);
 }
 //------------------------------------------------------------------------------
 void Settings::readScripts(QMap<QString, Script> &scripts) {

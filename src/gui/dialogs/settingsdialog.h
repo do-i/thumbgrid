@@ -69,12 +69,13 @@ private:
     void setupShortcutsPage();
     void updateShortcutsTable();
     void updateShortcutsFilter();
-    void applyShortcutOverride(const QString &action, ViewMode context, const QStringList &overrideKeys);
     void setActionShortcuts(ActionManager::ContextMap &map, const QString &action, const QStringList &keys);
     QStringList actionShortcuts(const ActionManager::ContextMap &map, const QString &action) const;
-    QStringList splitShortcutList(const QString &text) const;
-    QString shortcutListText(const QStringList &shortcuts) const;
-    bool shortcutsEqual(QStringList a, QStringList b) const;
+    QStringList candidateShortcuts(ViewMode context, const QString &action) const;
+    QString primaryShortcut(ViewMode context, const QString &action) const;
+    void setPrimaryShortcut(ViewMode context, const QString &action, const QString &key);
+    bool shortcutEnabled(ViewMode context, const QString &action) const;
+    void setShortcutEnabled(ViewMode context, const QString &action, bool enabled);
     ViewMode selectedShortcutContext() const;
     void openShortcutDetails(int row);
     void openShortcutDetails(const QString &action, ViewMode context);
@@ -85,6 +86,8 @@ private:
     QMap<QString, QString> langs; // <"en_US", "English">
     QButtonGroup fitModeGrp, folderEndGrp, zoomIndGrp;
     ActionManager::ShortcutMap mShortcutDraft;
+    QMap<ViewMode, QMap<QString, QString>> mShortcutPrimary;
+    QMap<ViewMode, QStringList> mShortcutDisabled;
     QComboBox *mShortcutContextComboBox = nullptr;
     QLineEdit *mShortcutSearchEdit = nullptr;
     bool mUpdatingShortcutsTable = false;
