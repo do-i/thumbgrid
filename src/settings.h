@@ -300,6 +300,10 @@ public:
     void setPrintFitToPage(bool mode);
     QString lastPrinter();
     void setLastPrinter(QString name);
+    int shortcutsSortColumn();
+    void setShortcutsSortColumn(int column);
+    Qt::SortOrder shortcutsSortOrder();
+    void setShortcutsSortOrder(Qt::SortOrder order);
     bool unloadThumbs();
     void setUnloadThumbs(bool mode);
     ThumbPanelStyle thumbPanelStyle();

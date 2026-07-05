@@ -1518,6 +1518,22 @@ void Settings::setLastPrinter(QString name) {
     stateConf->setValue("lastPrinter", name);
 }
 //------------------------------------------------------------------------------
+int Settings::shortcutsSortColumn() {
+    return stateConf->value("shortcutsSortColumn", 0).toInt();
+}
+
+void Settings::setShortcutsSortColumn(int column) {
+    stateConf->setValue("shortcutsSortColumn", column);
+}
+//------------------------------------------------------------------------------
+Qt::SortOrder Settings::shortcutsSortOrder() {
+    return static_cast<Qt::SortOrder>(stateConf->value("shortcutsSortOrder", Qt::AscendingOrder).toInt());
+}
+
+void Settings::setShortcutsSortOrder(Qt::SortOrder order) {
+    stateConf->setValue("shortcutsSortOrder", static_cast<int>(order));
+}
+//------------------------------------------------------------------------------
 bool Settings::jxlAnimation() {
     return settings->settingsConf->value("jxlAnimation", false).toBool();
 }

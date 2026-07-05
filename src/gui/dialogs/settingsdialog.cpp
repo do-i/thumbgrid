@@ -315,6 +315,13 @@ void SettingsDialog::setupShortcutsPage() {
     ui->shortcutsTableWidget->setSortingEnabled(true);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionsClickable(true);
     ui->shortcutsTableWidget->horizontalHeader()->setSortIndicatorShown(true);
+    connect(ui->shortcutsTableWidget->horizontalHeader(), &QHeaderView::sortIndicatorChanged,
+            this, [this](int column, Qt::SortOrder order) {
+        if(mUpdatingShortcutsTable)
+            return;
+        settings->setShortcutsSortColumn(column);
+        settings->setShortcutsSortOrder(order);
+    });
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
@@ -904,13 +911,13 @@ void SettingsDialog::updateShortcutsTable() {
         enabledItem->setData(Qt::UserRole, action);
         enabledItem->setFlags((enabledItem->flags() & ~Qt::ItemIsEditable) | Qt::ItemIsUserCheckable);
         enabledItem->setCheckState(enabled ? Qt::Checked : Qt::Unchecked);
-        enabledItem->setText(enabled ? tr("Enabled") : tr("Disabled"));
         enabledItem->setTextAlignment(Qt::AlignCenter);
         ui->shortcutsTableWidget->setItem(row, 3, enabledItem);
     }
 
     ui->shortcutsTableWidget->setSortingEnabled(true);
-    ui->shortcutsTableWidget->sortByColumn(0, Qt::AscendingOrder);
+    ui->shortcutsTableWidget->sortByColumn(settings->shortcutsSortColumn(),
+                                           settings->shortcutsSortOrder());
     mUpdatingShortcutsTable = false;
     updateShortcutsFilter();
 }
