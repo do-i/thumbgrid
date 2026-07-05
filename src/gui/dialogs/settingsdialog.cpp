@@ -12,6 +12,9 @@
 #include <QSet>
 #include <QScrollArea>
 #include <QVBoxLayout>
+#include <QRadioButton>
+#include <functional>
+#include "gui/customwidgets/keysequenceedit.h"
 
 SettingsDialog::SettingsDialog(QWidget *parent) :
     QDialog(parent),
@@ -306,8 +309,8 @@ void SettingsDialog::setupShortcutsPage() {
     ui->horizontalLayout_2->insertWidget(1, mShortcutSearchEdit, 1);
 
     disconnect(ui->shortcutsTableWidget, nullptr, this, nullptr);
-    ui->shortcutsTableWidget->setColumnCount(3);
-    ui->shortcutsTableWidget->setHorizontalHeaderLabels({tr("Action"), tr("Key"), tr("Enabled")});
+    ui->shortcutsTableWidget->setColumnCount(4);
+    ui->shortcutsTableWidget->setHorizontalHeaderLabels({tr("Action"), tr("Key"), tr("Count"), tr("Enabled")});
     ui->shortcutsTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->shortcutsTableWidget->setSortingEnabled(true);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionsClickable(true);
@@ -315,13 +318,14 @@ void SettingsDialog::setupShortcutsPage() {
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
 
     connect(mShortcutContextComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
             this, [this]() { updateShortcutsTable(); });
     connect(mShortcutSearchEdit, &QLineEdit::textChanged,
             this, [this]() { updateShortcutsFilter(); });
     connect(ui->shortcutsTableWidget, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *item) {
-        if(mUpdatingShortcutsTable || !item || item->column() != 2)
+        if(mUpdatingShortcutsTable || !item || item->column() != 3)
             return;
         const QString action = item->data(Qt::UserRole).toString();
         setShortcutEnabled(selectedShortcutContext(), action, item->checkState() == Qt::Checked);
@@ -886,13 +890,23 @@ void SettingsDialog::updateShortcutsTable() {
             keyItem->setForeground(disabledBrush);
         ui->shortcutsTableWidget->setItem(row, 1, keyItem);
 
+        QTableWidgetItem *countItem = new QTableWidgetItem();
+        countItem->setData(Qt::UserRole, action);
+        // Store as int so the column sorts numerically rather than lexically.
+        countItem->setData(Qt::DisplayRole, candidateShortcuts(context, action).size());
+        countItem->setFlags(countItem->flags() & ~Qt::ItemIsEditable);
+        countItem->setTextAlignment(Qt::AlignCenter);
+        if(!enabled)
+            countItem->setForeground(disabledBrush);
+        ui->shortcutsTableWidget->setItem(row, 2, countItem);
+
         QTableWidgetItem *enabledItem = new QTableWidgetItem();
         enabledItem->setData(Qt::UserRole, action);
         enabledItem->setFlags((enabledItem->flags() & ~Qt::ItemIsEditable) | Qt::ItemIsUserCheckable);
         enabledItem->setCheckState(enabled ? Qt::Checked : Qt::Unchecked);
         enabledItem->setText(enabled ? tr("Enabled") : tr("Disabled"));
         enabledItem->setTextAlignment(Qt::AlignCenter);
-        ui->shortcutsTableWidget->setItem(row, 2, enabledItem);
+        ui->shortcutsTableWidget->setItem(row, 3, enabledItem);
     }
 
     ui->shortcutsTableWidget->setSortingEnabled(true);
@@ -923,41 +937,139 @@ void SettingsDialog::openShortcutDetails(int row) {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context) {
-    const QStringList keys = candidateShortcuts(context, action);
-    if(keys.isEmpty())
-        return;
-
     QDialog dialog(this);
     dialog.setWindowTitle(action);
-    QVBoxLayout layout(&dialog);
+    QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
-    QLabel label(tr("Primary key"));
-    layout.addWidget(&label);
+    QLabel *hint = new QLabel(
+        tr("Select the primary key. Add or remove keys below; system defaults are marked."),
+        &dialog);
+    hint->setWordWrap(true);
+    mainLayout->addWidget(hint);
 
-    QButtonGroup keyGroup(&dialog);
-    const QString primary = primaryShortcut(context, action);
-    for(int i = 0; i < keys.size(); i++) {
-        QRadioButton *button = new QRadioButton(keys[i], &dialog);
-        button->setChecked(keys[i] == primary);
-        keyGroup.addButton(button, i);
-        layout.addWidget(button);
+    // Keys the default set ships with — used both for the "default" badge and,
+    // in primaryShortcut(), to decide which key wins by default.
+    const QStringList defaultKeys = defaultShortcuts(context, action);
+    const QSet<QString> defaultSet(defaultKeys.cbegin(), defaultKeys.cend());
+
+    // Working copies edited in place; committed to the model only on accept.
+    QStringList keys = candidateShortcuts(context, action);
+    QString primary = primaryShortcut(context, action);
+
+    // The key rows live in their own widget so add/remove can rebuild just them.
+    QWidget *rowsWidget = new QWidget(&dialog);
+    QVBoxLayout *rowsLayout = new QVBoxLayout(rowsWidget);
+    rowsLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->addWidget(rowsWidget);
+
+    // Recursively empty the rows layout, deferring widget deletion so it is safe
+    // to call from inside a child button's own click handler.
+    std::function<void(QLayout *)> clearLayout = [&](QLayout *layout) {
+        QLayoutItem *item;
+        while((item = layout->takeAt(0)) != nullptr) {
+            if(item->widget()) {
+                item->widget()->hide();
+                item->widget()->deleteLater();
+            } else if(item->layout()) {
+                clearLayout(item->layout());
+                item->layout()->deleteLater();
+            }
+            delete item;
+        }
+    };
+
+    std::function<void()> rebuild = [&]() {
+        clearLayout(rowsLayout);
+        if(keys.isEmpty()) {
+            rowsLayout->addWidget(new QLabel(tr("No keys assigned."), rowsWidget));
+            return;
+        }
+        for(const QString &key : keys) {
+            QHBoxLayout *row = new QHBoxLayout();
+            QRadioButton *radio = new QRadioButton(key, rowsWidget);
+            // Exclusivity is enforced by rebuild(), not Qt, so lingering
+            // deferred-deleted radios can't fight the current selection.
+            radio->setAutoExclusive(false);
+            radio->setChecked(key == primary);
+            connect(radio, &QRadioButton::clicked, &dialog, [&, key]() {
+                primary = key;
+                rebuild();
+            });
+            row->addWidget(radio);
+            if(defaultSet.contains(key)) {
+                QLabel *badge = new QLabel(tr("default"), rowsWidget);
+                badge->setEnabled(false);
+                row->addWidget(badge);
+            }
+            row->addStretch();
+            QToolButton *del = new QToolButton(rowsWidget);
+            del->setText(tr("Remove"));
+            connect(del, &QToolButton::clicked, &dialog, [&, key]() {
+                keys.removeAll(key);
+                if(primary == key)
+                    primary = keys.isEmpty() ? QString() : keys.first();
+                rebuild();
+            });
+            row->addWidget(del);
+            rowsLayout->addLayout(row);
+        }
+    };
+    rebuild();
+
+    // Add-key row: pressing a key sequence captures it and makes it primary.
+    QHBoxLayout *addRow = new QHBoxLayout();
+    addRow->addWidget(new QLabel(tr("Add key:"), &dialog));
+    KeySequenceEdit *adder = new KeySequenceEdit(&dialog);
+    addRow->addWidget(adder, 1);
+    mainLayout->addLayout(addRow);
+
+    QLabel *warning = new QLabel(&dialog);
+    warning->setWordWrap(true);
+    mainLayout->addWidget(warning);
+
+    connect(adder, &KeySequenceEdit::edited, &dialog, [&]() {
+        const QString seq = adder->sequence();
+        if(seq.isEmpty())
+            return;
+        if(keys.contains(seq)) {
+            warning->setText(tr("\"%1\" is already assigned to this action.").arg(seq));
+            return;
+        }
+        const QString clash = actionManager->actionForShortcut(context, seq);
+        warning->setText(clash.isEmpty() || clash == action
+                             ? QString()
+                             : tr("\"%1\" is also used by: %2").arg(seq, clash));
+        keys.append(seq);
+        keys.sort(Qt::CaseInsensitive);
+        primary = seq;    // newly added key becomes primary unless changed
+        rebuild();
+    });
+
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    mainLayout->addWidget(buttons);
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if(dialog.exec() != QDialog::Accepted)
+        return;
+
+    // Commit the edited key set and primary choice into the draft model.
+    setActionShortcuts(mShortcutDraft[context], action, keys);
+    if(primary.isEmpty())
+        mShortcutPrimary[context].remove(action);
+    else
+        setPrimaryShortcut(context, action, primary);
+    // Assigning keys implies the action should be active again.
+    if(!keys.isEmpty()) {
+        QStringList disabled = mShortcutDisabled.value(context);
+        if(disabled.removeAll(action) > 0)
+            mShortcutDisabled[context] = disabled;
     }
-
-    QDialogButtonBox buttons(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-    layout.addWidget(&buttons);
-    connect(&buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(&buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
-
-    if(dialog.exec() == QDialog::Accepted) {
-        QAbstractButton *checkedButton = keyGroup.checkedButton();
-        if(checkedButton)
-            setPrimaryShortcut(context, action, checkedButton->text());
-        updateShortcutsTable();
-    }
+    updateShortcutsTable();
 }
 //------------------------------------------------------------------------------
 ViewMode SettingsDialog::contextAtRow(int row) {
-    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, 2);
+    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, 3);
     return item ? ActionManager::contextFromString(item->data(Qt::UserRole).toString())
                 : MODE_DOCUMENT;
 }
