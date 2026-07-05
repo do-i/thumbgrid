@@ -111,6 +111,7 @@
         <file>res/themes/dark.ini</file>
         <file>res/themes/darkblue.ini</file>
         <file>res/themes/light_blue.ini</file>
+        <file>res/default-shortcuts.json</file>
         <file>res/icons/common/buttons/panel/settings20.png</file>
         <file>res/icons/common/buttons/panel/settings20@2x.png</file>
         <file>res/icons/common/other/folder.png</file>

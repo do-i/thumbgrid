@@ -186,6 +186,14 @@ if(NOT WIN32)
     install(DIRECTORY res/themes DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid)
 endif()
 
+# Default shortcuts. Installed to the system config dir (admin-editable, FHS
+# convention) and embedded via resources.qrc as a fallback when absent (dev
+# tree, Windows/macOS); SHORTCUTS_PATH tells the app where to look first.
+if(NOT WIN32)
+    ADD_DEFINITIONS(-DSHORTCUTS_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid")
+    install(FILES res/default-shortcuts.json DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid)
+endif()
+
 # Install internationalization language files
 if(WIN32)
     install(DIRECTORY "${PROJECT_BINARY_DIR}/src/translations" DESTINATION "${CMAKE_INSTALL_BINDIR}")

@@ -1,6 +1,43 @@
 #include "actionmanager.h"
 
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+
 ActionManager *actionManager = nullptr;
+
+namespace {
+
+// Prefer the installed system copy (admin-editable), fall back to the copy
+// embedded in the binary via resources.qrc so dev/non-Linux builds work.
+// Mirrors ThemeStore::resolveThemePath().
+QString resolveDefaultShortcutsPath() {
+#ifdef SHORTCUTS_PATH
+    const QString systemPath = QStringLiteral(SHORTCUTS_PATH) + "/default-shortcuts.json";
+    if(QFile::exists(systemPath))
+        return systemPath;
+#endif
+    return QStringLiteral(":/res/default-shortcuts.json");
+}
+
+// Replace the platform-neutral $Ctrl/$Alt/$Shift tokens in a stored key
+// sequence with the actual platform modifier names (Ctrl/Alt/Shift, or the
+// Command/Option/Shift symbols on macOS).
+QString expandModifierTokens(QString keys) {
+    keys.replace(QStringLiteral("$Ctrl"),  InputMap::keyNameCtrl());
+    keys.replace(QStringLiteral("$Shift"), InputMap::keyNameShift());
+    keys.replace(QStringLiteral("$Alt"),   InputMap::keyNameAlt());
+    return keys;
+}
+
+// Read a { keySequence: action } object into the shared default map, expanding
+// modifier tokens as it goes.
+void insertShortcutObject(const QJsonObject &obj, ActionManager::ContextMap &out) {
+    for(auto it = obj.constBegin(); it != obj.constEnd(); ++it)
+        out.insert(expandModifierTokens(it.key()), it.value().toString());
+}
+
+} // namespace
 
 ActionManager::ActionManager(QObject *parent) : QObject(parent) {
 }
@@ -19,93 +56,31 @@ ActionManager *ActionManager::getInstance() {
 }
 //------------------------------------------------------------------------------
 void ActionManager::initDefaults() {
-    // Built once, then seeded into every context. Today every shortcut works in
-    // every screen, so the two contexts start identical; users differentiate them
-    // per-context from the shortcut editor. There is no global fallback.
+    // Defaults are loaded from default-shortcuts.json (installed system copy,
+    // qrc fallback), then seeded into every context. Today every shortcut works
+    // in every screen, so the two contexts start identical; users differentiate
+    // them per-context from the shortcut editor. There is no global fallback.
+    const QString path = resolveDefaultShortcutsPath();
+    QFile file(path);
+    if(!file.open(QIODevice::ReadOnly)) {
+        qWarning() << "[ActionManager] could not open default shortcuts:" << path;
+        return;
+    }
+    QJsonParseError err;
+    const QJsonObject root = QJsonDocument::fromJson(file.readAll(), &err).object();
+    if(err.error != QJsonParseError::NoError) {
+        qWarning() << "[ActionManager] default shortcuts JSON parse error:" << err.errorString();
+        return;
+    }
+
     ContextMap d;
-    d.insert("Right", "nextImage");
-    d.insert("Left", "prevImage");
-    d.insert("XButton2", "nextImage");
-    d.insert("XButton1", "prevImage");
-    d.insert("WheelDown", "nextImage");
-    d.insert("WheelUp", "prevImage");
-    d.insert("F", "toggleFullscreen");
-    d.insert("F11", "toggleFullscreen");
-    d.insert("LMB_DoubleClick", "toggleFullscreen");
-    d.insert("Space", "toggleFitMode");
-    d.insert("1", "fitWindow");
-    d.insert("2", "fitWidth");
-    d.insert("3", "fitNormal");
-    d.insert("4", "fitWindowStretch");
-    d.insert("R", "resize");
-    d.insert("H", "flipH");
-    d.insert("V", "flipV");
-    d.insert(InputMap::keyNameCtrl() + "+R", "rotateRight");
-    d.insert(InputMap::keyNameCtrl() + "+L", "rotateLeft");
-    d.insert(InputMap::keyNameCtrl() + "+WheelUp", "zoomInCursor");
-    d.insert(InputMap::keyNameCtrl() + "+WheelDown", "zoomOutCursor");
-    d.insert("=", "zoomIn"); // [=+] key on the number row
-    d.insert(InputMap::keyNameCtrl() + "+=", "zoomIn");
-    d.insert("+", "zoomIn");
-    d.insert(InputMap::keyNameCtrl() + "++", "zoomIn");
-    d.insert("-", "zoomOut");
-    d.insert(InputMap::keyNameCtrl() + "+-", "zoomOut");
-    d.insert(InputMap::keyNameCtrl() + "+Down", "zoomOut");
-    d.insert(InputMap::keyNameCtrl() + "+Up", "zoomIn");
-    d.insert("Up", "scrollUp");
-    d.insert("Down", "scrollDown");
-    d.insert(InputMap::keyNameCtrl() + "+O", "open");
-    d.insert(InputMap::keyNameCtrl() + "+S", "save");
-    d.insert(InputMap::keyNameCtrl() + "+" + InputMap::keyNameShift() + "+S", "saveAs");
-    d.insert(InputMap::keyNameCtrl() + "+W", "setWallpaper");
-    d.insert("X", "crop");
-    d.insert(InputMap::keyNameCtrl() + "+P", "print");
-    d.insert(InputMap::keyNameAlt() + "+X", "exit");
-    d.insert(InputMap::keyNameCtrl() + "+Q", "exit");
-    d.insert("Esc", "closeFullScreenOrExit");
-    d.insert("Del", "moveToTrash");
-    d.insert(InputMap::keyNameShift() + "+Del", "removeFile");
-    d.insert("C", "copyFile");
-    d.insert("M", "moveFile");
-    d.insert("Home", "jumpToFirst");
-    d.insert("End", "jumpToLast");
-    d.insert(InputMap::keyNameCtrl() + "+Right", "seekVideoForward");
-    d.insert(InputMap::keyNameCtrl() + "+Left", "seekVideoBackward");
-    d.insert(",", "frameStepBack");
-    d.insert(".", "frameStep");
-    d.insert("Enter", "folderView");
-    d.insert("Backspace", "folderView");
-    d.insert("F5", "reloadImage");
-    d.insert(InputMap::keyNameCtrl() + "+C", "copyFileClipboard");
-    d.insert(InputMap::keyNameCtrl() + "+" + InputMap::keyNameShift() + "+C", "copyPathClipboard");
-    d.insert("F2", "renameFile");
-    d.insert("F7", "createDirectory");
-    d.insert("RMB", "contextMenu");
-    d.insert("Menu", "contextMenu");
-    d.insert("I", "toggleImageInfo");
-    d.insert(InputMap::keyNameCtrl() + "+`", "toggleShuffle");
-    d.insert(InputMap::keyNameCtrl() + "+D", "showInDirectory");
-    d.insert("`", "toggleSlideshow");
-    d.insert(InputMap::keyNameCtrl() + "+Z", "discardEdits");
-    d.insert("U", "folderView");
-    d.insert(InputMap::keyNameCtrl() + "+T", "toggleFolderViewTopBar");
-    d.insert(InputMap::keyNameCtrl() + "+B", "toggleStatusFooter");
-    d.insert(InputMap::keyNameShift() + "+Right", "nextDirectory");
-    d.insert(InputMap::keyNameShift() + "+Left", "prevDirectory");
-    d.insert(InputMap::keyNameShift() + "+F", "toggleFullscreenInfoBar");
-    d.insert(InputMap::keyNameCtrl() + "+V", "pasteFile");
-    d.insert(InputMap::keyNameCtrl() + "+X", "cutFile");
-    d.insert("F12", "openSettings");
-
+    insertShortcutObject(root.value("shortcuts").toObject(), d);
+    const QJsonObject platform = root.value("platform").toObject();
 #ifdef __APPLE__
-    d.insert(InputMap::keyNameAlt() + "+Up", "zoomIn");
-    d.insert(InputMap::keyNameAlt() + "+Down", "zoomOut");
-    d.insert(InputMap::keyNameCtrl() + "+Comma", "openSettings");
+    insertShortcutObject(platform.value("apple").toObject(), d);
 #else
-    d.insert("P", "openSettings");
+    insertShortcutObject(platform.value("default").toObject(), d);
 #endif
-
-    //d.insert("Backspace", "goUp");
 
     // Seed each context with the full default set.
     actionManager->defaults.insert(MODE_DOCUMENT, d);
