@@ -74,6 +74,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     viewers/viewerwidget.cpp
 
     folderview/foldergridview.cpp
+    folderview/gridcontextmenu.cpp
     folderview/folderview.cpp
     folderview/folderviewproxy.cpp
     folderview/filesystemmodelcustom.cpp

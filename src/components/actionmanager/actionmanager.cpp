@@ -111,6 +111,7 @@ void ActionManager::initShortcuts() {
     };
     mergeMissing("toggleStatusFooter", InputMap::keyNameCtrl() + "+B");
     mergeMissing("cutFile", InputMap::keyNameCtrl() + "+X");
+    mergeMissing("togglePlacesPanel", InputMap::keyNameCtrl() + "+E");
 }
 //------------------------------------------------------------------------------
 void ActionManager::addShortcut(ViewMode context, const QString &keys, const QString &action) {

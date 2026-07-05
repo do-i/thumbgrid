@@ -70,6 +70,12 @@
         <file>res/icons/common/menuitem/rotate-right16@2x.png</file>
         <file>res/icons/common/menuitem/settings16.png</file>
         <file>res/icons/common/menuitem/settings16@2x.png</file>
+        <file>res/icons/common/menuitem/titlebar16.png</file>
+        <file>res/icons/common/menuitem/titlebar16@2x.png</file>
+        <file>res/icons/common/menuitem/sidepanel16.png</file>
+        <file>res/icons/common/menuitem/sidepanel16@2x.png</file>
+        <file>res/icons/common/menuitem/statusbar16.png</file>
+        <file>res/icons/common/menuitem/statusbar16@2x.png</file>
         <file>res/icons/common/notifications/dir_end20.png</file>
         <file>res/icons/common/notifications/dir_end20@2x.png</file>
         <file>res/icons/common/notifications/dir_start20.png</file>

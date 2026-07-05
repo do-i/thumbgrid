@@ -228,6 +228,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::toggleStatusFooter, this, &Core::toggleStatusFooter);
     connect(actionManager, &ActionManager::pasteFile, this, &Core::pasteFile);
     connect(actionManager, &ActionManager::toggleFolderViewTopBar, this, &Core::toggleFolderViewTopBar);
+    connect(actionManager, &ActionManager::togglePlacesPanel, this, &Core::togglePlacesPanel);
 }
 
 void Core::loadTranslation() {
@@ -530,6 +531,11 @@ void Core::toggleFolderView() {
 
 void Core::toggleFolderViewTopBar() {
     settings->setFolderViewTopBar(!settings->folderViewTopBar());
+    settings->sendChangeNotification();
+}
+
+void Core::togglePlacesPanel() {
+    settings->setPlacesPanel(!settings->placesPanel());
     settings->sendChangeNotification();
 }
 

@@ -180,6 +180,7 @@ private slots:
     void enableFolderView();
     void toggleFolderView();
     void toggleFolderViewTopBar();
+    void togglePlacesPanel();
     void toggleSlideshow();
     void onPlaybackFinished();
     void setFoldersDisplay(bool mode);

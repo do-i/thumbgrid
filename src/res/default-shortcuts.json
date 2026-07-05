@@ -68,6 +68,7 @@
         "U": "folderView",
         "$Ctrl+T": "toggleFolderViewTopBar",
         "$Ctrl+B": "toggleStatusFooter",
+        "$Ctrl+E": "togglePlacesPanel",
         "$Shift+Right": "nextDirectory",
         "$Shift+Left": "prevDirectory",
         "$Shift+F": "toggleFullscreenInfoBar",

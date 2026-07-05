@@ -720,13 +720,13 @@ ThumbnailStrip QScrollBar::sub-line {
 /* Right click menu */
 /*----------------------------------------------------------------------------*/
 
-ContextMenu {
+ContextMenu, GridContextMenu {
     background-color: %widget%;
     border: 1px solid %widget_border%;
     border-radius: %contextmenu_border_radius%;
     min-width: %context_menu_width%;
 }
-ContextMenu QLabel {
+ContextMenu QLabel, GridContextMenu QLabel {
     color: %text_secondary_rgba%;
     margin: 0px 0px;
     padding: 0px 0px;

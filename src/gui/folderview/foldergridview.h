@@ -1,12 +1,12 @@
 #pragma once
 
 #include <QGraphicsWidget>
-#include <QMenu>
 #include <QContextMenuEvent>
 
 #include "gui/customwidgets/thumbnailview.h"
 #include "gui/customwidgets/thumbnailwidget.h"
 #include "gui/flowlayout.h"
+#include "gui/folderview/gridcontextmenu.h"
 #include "utils/stuff.h"
 #include "components/actionmanager/actionmanager.h"
 
@@ -47,6 +47,7 @@ public slots:
 
 private:
     FlowLayout *flowLayout;
+    GridContextMenu *contextMenu = nullptr;
     QGraphicsWidget holderWidget;
     int shiftedCol;
     void scrollToCurrent();

@@ -145,6 +145,7 @@ signals:
     void pasteFile();
     void toggleFolderViewTopBar();
     void toggleStatusFooter();
+    void togglePlacesPanel();
 };
 
 extern ActionManager *actionManager;
