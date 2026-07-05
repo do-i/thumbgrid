@@ -44,6 +44,10 @@ public:
     ColorScheme();
     ColorScheme(BaseColorScheme base);
     void setBaseColors(BaseColorScheme base);
+    // Identity of the colors that get baked into generated thumbnail pixmaps
+    // (folder icons and file-type icons). When this changes those cached
+    // pixmaps are stale and must be regenerated.
+    QString bakedThumbnailSignature() const;
     // index of theme name
     int tid;
     // base

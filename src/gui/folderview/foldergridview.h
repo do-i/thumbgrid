@@ -53,7 +53,7 @@ private:
     void scrollToCurrent();
     int lastDragTarget = -1;
     bool mPreviewFit = false;
-    QColor mFolderIconColor;
+    QString mThumbColorSignature;
 
 private slots:
     void onitemSelected();

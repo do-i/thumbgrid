@@ -25,16 +25,18 @@ FolderGridView::FolderGridView(QWidget *parent)
     setSelectMode(ACTIVATE_BY_DOUBLECLICK);
 
     mPreviewFit = settings->folderViewPreviewFit();
-    mFolderIconColor = settings->colorScheme().folderview_parent_icon;
+    mThumbColorSignature = settings->colorScheme().bakedThumbnailSignature();
     connect(settings, &Settings::settingsChanged, [this]() {
         this->scene.setBackgroundBrush(settings->colorScheme().folderview);
-        // Folder thumbnails bake the child-preview layout and the recolored folder
-        // icon into the pixmap, so a change to the preview fit mode or the folder
-        // icon color (e.g. a theme switch) requires regenerating them.
-        QColor folderIconColor = settings->colorScheme().folderview_parent_icon;
-        if(mPreviewFit != settings->folderViewPreviewFit() || mFolderIconColor != folderIconColor) {
+        // Thumbnails bake the child-preview layout and the recolored folder/
+        // file-type icons into the pixmap, so a change to the preview fit mode or
+        // to any of those theme colors (e.g. a theme switch) requires regenerating
+        // them. The thumbnailer's mem cache is dropped on the same signal, so the
+        // reload below re-renders with the new colors instead of reusing stale ones.
+        QString colorSignature = settings->colorScheme().bakedThumbnailSignature();
+        if(mPreviewFit != settings->folderViewPreviewFit() || mThumbColorSignature != colorSignature) {
             mPreviewFit = settings->folderViewPreviewFit();
-            mFolderIconColor = folderIconColor;
+            mThumbColorSignature = colorSignature;
             for(int i = 0; i < thumbnails.count(); i++)
                 thumbnails.at(i)->unsetThumbnail();
             loadVisibleThumbnails();

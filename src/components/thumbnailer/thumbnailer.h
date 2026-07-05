@@ -54,6 +54,11 @@ private:
     std::shared_ptr<Thumbnail> memCacheLookup(const QString &key, const QString &path);
     void memCacheInsert(const QString &key, std::shared_ptr<Thumbnail> thumbnail, const QString &path);
     void applyMemCacheLimit();
+    // File-type icons bake theme colors into their pixmap but (unlike image
+    // thumbnails) are keyed only by path/size, so a theme change must drop them
+    // from the mem cache or the stale-colored icon keeps being served.
+    void onSettingsChanged();
+    QString mThumbColorSignature;
 
 private slots:
     void onTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString filePath);

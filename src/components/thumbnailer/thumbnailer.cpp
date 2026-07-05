@@ -16,7 +16,20 @@ Thumbnailer::Thumbnailer() {
         threads = globalThreads;
     pool->setMaxThreadCount(threads);
     applyMemCacheLimit();
-    connect(settings, &Settings::settingsChanged, this, &Thumbnailer::applyMemCacheLimit);
+    mThumbColorSignature = settings->colorScheme().bakedThumbnailSignature();
+    connect(settings, &Settings::settingsChanged, this, &Thumbnailer::onSettingsChanged);
+}
+
+void Thumbnailer::onSettingsChanged() {
+    applyMemCacheLimit();
+    // A theme change invalidates the recolored file-type icons cached in memory.
+    // Dropping them here forces a fresh render with the new colors on re-request;
+    // image/video thumbnails simply fall back to the (color-independent) disk cache.
+    QString signature = settings->colorScheme().bakedThumbnailSignature();
+    if(signature != mThumbColorSignature) {
+        mThumbColorSignature = signature;
+        memCache.clear();
+    }
 }
 
 // QCache cost unit is KB; a limit of 0 disables the memory cache entirely

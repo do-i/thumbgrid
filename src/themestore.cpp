@@ -146,6 +146,17 @@ void ColorScheme::setBaseColors(BaseColorScheme base) {
     folderview_cell_bg           = base.folderview_cell_bg.isValid() ? base.folderview_cell_bg : folderview;
 }
 
+QString ColorScheme::bakedThumbnailSignature() const {
+    // folderview_parent_icon recolors the folder icon; widget/widget_border/
+    // text/text_lc2 are used by the rendered file-type icons. Keep this in sync
+    // with ThumbnailerRunnable::renderFileTypeIcon / dirIconBase.
+    return folderview_parent_icon.name(QColor::HexArgb) +
+           widget.name(QColor::HexArgb) +
+           widget_border.name(QColor::HexArgb) +
+           text.name(QColor::HexArgb) +
+           text_lc2.name(QColor::HexArgb);
+}
+
 void ColorScheme::createColorVariants() {
     if(widget.valueF() <= 0.45f) { // dark theme
         // top bar buttons
