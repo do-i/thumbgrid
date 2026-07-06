@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QFileInfo>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
@@ -13,15 +14,16 @@ static QString shortcutsJsonPath() {
 
 // Shortcuts are stored per context on disk. New configs round-trip per context,
 // and legacy context-less configs (every binding worked everywhere) migrate into
-// both contexts so upgrading users lose nothing.
+// the global context so upgrading users lose nothing.
 class ShortcutContextsPersistAndLegacyConfigsMigrateTest : public QObject {
     Q_OBJECT
 
 private slots:
     void perContextBindingsRoundTrip();
+    void globalBindingsRoundTripAndCollapseDuplicateContexts();
     void primaryAndDisabledMetadataRoundTrip();
     void legacyFolderviewJsonStillReads();
-    void legacyConfigMigratesIntoBothContexts();
+    void legacyConfigMigratesIntoGlobalContext();
 };
 
 void ShortcutContextsPersistAndLegacyConfigsMigrateTest::perContextBindingsRoundTrip() {
@@ -47,10 +49,62 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::perContextBindingsRound
     const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
     QVERIFY2(root.contains("grid"), "Folder/grid shortcuts must save under the grid token.");
     QVERIFY2(!root.contains("folderview"), "New shortcut saves should not write the legacy folderview token.");
+    QCOMPARE(root.value("document").toObject().value("crop").toArray().at(0).toString(), QStringLiteral("C"));
+    const QJsonArray zoomKeys = root.value("document").toObject().value("zoomIn").toArray();
+    QCOMPARE(zoomKeys.size(), 1);
+    QCOMPARE(zoomKeys.at(0).toString(), QStringLiteral("="));
+}
+
+void ShortcutContextsPersistAndLegacyConfigsMigrateTest::globalBindingsRoundTripAndCollapseDuplicateContexts() {
+    QMap<ViewMode, QMap<QString, QString>> out;
+    out[MODE_GLOBAL].insert("F", "toggleFullscreen");
+    out[MODE_DOCUMENT].insert("C", "crop");
+    out[MODE_FOLDERVIEW].insert("C", "copyFile");
+    settings->saveShortcuts(out);
+
+    QMap<ViewMode, QMap<QString, QString>> in;
+    settings->readShortcuts(in);
+
+    QCOMPARE(in[MODE_GLOBAL].value("F"), QStringLiteral("toggleFullscreen"));
+    QCOMPARE(in[MODE_DOCUMENT].value("C"), QStringLiteral("crop"));
+    QCOMPARE(in[MODE_FOLDERVIEW].value("C"), QStringLiteral("copyFile"));
+
+    QJsonObject root;
+    QJsonObject document;
+    QJsonObject grid;
+    document.insert("P", "openSettings");
+    grid.insert("P", "openSettings");
+    root.insert("document", document);
+    root.insert("grid", grid);
+    QFile file(shortcutsJsonPath());
+    QVERIFY(file.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    file.write(QJsonDocument(root).toJson());
+    file.close();
+
+    in.clear();
+    settings->readShortcuts(in);
+    QCOMPARE(in[MODE_GLOBAL].value("P"), QStringLiteral("openSettings"));
+    QVERIFY2(!in[MODE_DOCUMENT].contains("P"), "Duplicate document/grid binding should collapse to global.");
+    QVERIFY2(!in[MODE_FOLDERVIEW].contains("P"), "Duplicate document/grid binding should collapse to global.");
+
+    QFile rewritten(shortcutsJsonPath());
+    QVERIFY(rewritten.open(QIODevice::ReadOnly));
+    const QJsonObject rewrittenRoot = QJsonDocument::fromJson(rewritten.readAll()).object();
+    QCOMPARE(rewrittenRoot.value("global").toObject().value("openSettings").toArray().at(0).toString(), QStringLiteral("P"));
+    QVERIFY2(!rewrittenRoot.value("document").toObject().contains("openSettings"), "The JSON file should be rewritten without the duplicate document binding.");
+    QVERIFY2(!rewrittenRoot.value("grid").toObject().contains("openSettings"), "The JSON file should be rewritten without the duplicate grid binding.");
 }
 
 void ShortcutContextsPersistAndLegacyConfigsMigrateTest::primaryAndDisabledMetadataRoundTrip() {
+    QMap<ViewMode, QMap<QString, QString>> shortcuts;
+    shortcuts[MODE_GLOBAL].insert("F12", "openSettings");
+    shortcuts[MODE_GLOBAL].insert("P", "openSettings");
+    shortcuts[MODE_FOLDERVIEW].insert("C", "copyFile");
+    shortcuts[MODE_DOCUMENT].insert("=", "zoomIn");
+    settings->saveShortcuts(shortcuts);
+
     QMap<ViewMode, QMap<QString, QString>> primary;
+    primary[MODE_GLOBAL].insert("openSettings", "P");
     primary[MODE_FOLDERVIEW].insert("copyFile", "C");
     primary[MODE_DOCUMENT].insert("zoomIn", "=");
     settings->saveShortcutPrimary(primary);
@@ -61,6 +115,7 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::primaryAndDisabledMetad
 
     QMap<ViewMode, QMap<QString, QString>> primaryIn;
     settings->readShortcutPrimary(primaryIn);
+    QCOMPARE(primaryIn[MODE_GLOBAL].value("openSettings"), QStringLiteral("P"));
     QCOMPARE(primaryIn[MODE_FOLDERVIEW].value("copyFile"), QStringLiteral("C"));
     QCOMPARE(primaryIn[MODE_DOCUMENT].value("zoomIn"), QStringLiteral("="));
 
@@ -71,7 +126,11 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::primaryAndDisabledMetad
     QFile file(shortcutsJsonPath());
     QVERIFY(file.open(QIODevice::ReadOnly));
     const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
-    QVERIFY2(root.contains("_primary"), "Primary-key metadata must be stored in shortcuts.json.");
+    const QJsonObject openSettings = root.value("global").toObject().value("openSettings").toObject();
+    QCOMPARE(openSettings.value("primacy").toString(), QStringLiteral("P"));
+    QCOMPARE(openSettings.value("keys").toArray().at(0).toString(), QStringLiteral("F12"));
+    QCOMPARE(openSettings.value("keys").toArray().at(1).toString(), QStringLiteral("P"));
+    QVERIFY2(!root.contains("_primary"), "Primary-key metadata should be embedded in each action entry.");
     QVERIFY2(root.contains("_disabled"), "Disabled shortcut metadata must be stored in shortcuts.json.");
 }
 
@@ -90,9 +149,15 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyFolderviewJsonSti
 
     QCOMPARE(in[MODE_FOLDERVIEW].value("G"), QStringLiteral("copyFile"));
     QVERIFY2(!in[MODE_DOCUMENT].contains("G"), "Legacy folderview JSON should stay scoped to the grid context.");
+
+    QFile rewritten(shortcutsJsonPath());
+    QVERIFY(rewritten.open(QIODevice::ReadOnly));
+    const QJsonObject rewrittenRoot = QJsonDocument::fromJson(rewritten.readAll()).object();
+    QVERIFY2(!rewrittenRoot.contains("folderview"), "Legacy folderview token should be rewritten to grid.");
+    QCOMPARE(rewrittenRoot.value("grid").toObject().value("copyFile").toArray().at(0).toString(), QStringLiteral("G"));
 }
 
-void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyConfigMigratesIntoBothContexts() {
+void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyConfigMigratesIntoGlobalContext() {
     // Simulate an upgrading install: an old "[Controls] shortcuts=" list and no
     // shortcuts.json yet (a prior test in this binary may have created one).
     QFile::remove(shortcutsJsonPath());
@@ -113,12 +178,10 @@ void ShortcutContextsPersistAndLegacyConfigsMigrateTest::legacyConfigMigratesInt
     // The one-time migration produced the new file.
     QVERIFY2(QFile::exists(shortcutsJsonPath()), "Legacy migration must create shortcuts.json.");
 
-    // A context-less binding was active everywhere, so it seeds both contexts.
-    QCOMPARE(in[MODE_DOCUMENT].value("Right"), QStringLiteral("nextImage"));
-    QCOMPARE(in[MODE_FOLDERVIEW].value("Right"), QStringLiteral("nextImage"));
-    // Legacy "eq" still decodes to the "=" key in both contexts.
-    QCOMPARE(in[MODE_DOCUMENT].value("="), QStringLiteral("zoomIn"));
-    QCOMPARE(in[MODE_FOLDERVIEW].value("="), QStringLiteral("zoomIn"));
+    // A context-less binding was active everywhere, so it becomes global.
+    QCOMPARE(in[MODE_GLOBAL].value("Right"), QStringLiteral("nextImage"));
+    // Legacy "eq" still decodes to the "=" key.
+    QCOMPARE(in[MODE_GLOBAL].value("="), QStringLiteral("zoomIn"));
 }
 
 TG_BEHAVIOR_TEST_MAIN(ShortcutContextsPersistAndLegacyConfigsMigrateTest)

@@ -5,6 +5,7 @@
 #include <QMouseEvent>
 #include <QWheelEvent>
 #include <QMap>
+#include <QHash>
 #include <QDebug>
 #include <QStringList>
 #include "utils/actions.h"
@@ -23,8 +24,8 @@ class ActionManager : public QObject {
 public:
     static ActionManager* getInstance();
     ~ActionManager();
-    // Shortcuts are scoped to a context (the active ViewMode). The same key may
-    // map to different actions in different contexts; there is no global fallback.
+    // Shortcuts are scoped to a context. MODE_GLOBAL bindings work everywhere;
+    // the active view context wins when it uses the same key.
     using ContextMap = QMap<QString, QString>;                 // <shortcut, action>
     using ShortcutMap = QMap<ViewMode, ContextMap>;            // context -> bindings
 
@@ -58,6 +59,7 @@ public slots:
 private:
     explicit ActionManager(QObject *parent = nullptr);
     ShortcutMap defaults, shortcuts;
+    QMap<ViewMode, QHash<QString, QString>> shortcutLookup;
     ViewMode context = MODE_DOCUMENT;
 
     static void initDefaults();
@@ -65,6 +67,8 @@ private:
     static void initShortcuts();
     QString modifierKeys(QEvent *event);
     bool invokeActionForShortcut(ViewMode context, const QString &shortcut);
+    void rebuildShortcutLookup();
+    QString lookupActionForShortcut(ViewMode context, const QString &shortcut) const;
     void validateShortcuts();
     void readShortcuts();
     ActionType validateAction(const QString &actionName);

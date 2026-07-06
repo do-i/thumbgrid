@@ -1,15 +1,22 @@
 #include "support/thumbgrid_test_support.h"
 
+#include "gui/dialogs/settingsdialog.h"
+#include "gui/dialogs/shortcutcreatordialog.h"
+
+#include <QComboBox>
 #include <QKeyEvent>
 #include <QSignalSpy>
 
 // The point of context-aware shortcuts: one key bound in two contexts runs a
-// different action depending on which screen is active, with no global fallback.
+// different action depending on which screen is active, and a global binding is
+// used only when the active screen does not override that key.
 class TheSameKeyRunsDifferentActionsPerContextTest : public QObject {
     Q_OBJECT
 
 private slots:
     void theSameKeyRunsDifferentActionsPerContext();
+    void contextSpecificShortcutOverridesGlobalShortcut();
+    void shortcutContextDropdownsDefaultToGlobal();
     void resettingDefaultsCanTargetOneContext();
 };
 
@@ -53,6 +60,57 @@ void TheSameKeyRunsDifferentActionsPerContextTest::theSameKeyRunsDifferentAction
     QCOMPARE(sortByNameSpy.count(), 1);
 }
 
+void TheSameKeyRunsDifferentActionsPerContextTest::contextSpecificShortcutOverridesGlobalShortcut() {
+    actionManager->removeAllShortcuts();
+    actionManager->addShortcut(MODE_GLOBAL, "C", "copyFile");
+    actionManager->addShortcut(MODE_FOLDERVIEW, "C", "sortByName");
+
+    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "C"), QStringLiteral("copyFile"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "C"), QStringLiteral("sortByName"));
+
+    const quint32 scanCode = inputMap->keys().key("C");
+    QVERIFY2(scanCode != 0, "Platform input map should know a scancode for the C key.");
+
+    QSignalSpy copyFileSpy(actionManager, &ActionManager::copyFile);
+    QSignalSpy sortByNameSpy(actionManager, &ActionManager::sortByName);
+    QVERIFY(copyFileSpy.isValid() && sortByNameSpy.isValid());
+
+    actionManager->setContext(MODE_DOCUMENT);
+    {
+        QKeyEvent press(QEvent::KeyPress, Qt::Key_C, Qt::NoModifier, scanCode, 0, 0, "c");
+        QVERIFY2(actionManager->processEvent(&press), "C should fall back to the global shortcut.");
+    }
+    QCOMPARE(copyFileSpy.count(), 1);
+    QCOMPARE(sortByNameSpy.count(), 0);
+
+    actionManager->setContext(MODE_FOLDERVIEW);
+    {
+        QKeyEvent press(QEvent::KeyPress, Qt::Key_C, Qt::NoModifier, scanCode, 0, 0, "c");
+        QVERIFY2(actionManager->processEvent(&press), "C should use the grid-specific shortcut.");
+    }
+    QCOMPARE(copyFileSpy.count(), 1);
+    QCOMPARE(sortByNameSpy.count(), 1);
+}
+
+void TheSameKeyRunsDifferentActionsPerContextTest::shortcutContextDropdownsDefaultToGlobal() {
+    SettingsDialog settingsDialog;
+    QComboBox *settingsContext = nullptr;
+    for(QComboBox *combo : settingsDialog.findChildren<QComboBox *>()) {
+        if(combo->count() >= 3 && combo->itemData(0).toString() == ActionManager::contextToString(MODE_GLOBAL)) {
+            settingsContext = combo;
+            break;
+        }
+    }
+    QVERIFY2(settingsContext, "The shortcuts page should expose a context dropdown with Global.");
+    QCOMPARE(settingsContext->currentData().toString(), ActionManager::contextToString(MODE_GLOBAL));
+
+    ShortcutCreatorDialog creatorDialog;
+    QComboBox *creatorContext = creatorDialog.findChild<QComboBox *>("contextComboBox");
+    QVERIFY2(creatorContext, "The shortcut creator should expose its context dropdown.");
+    QCOMPARE(creatorContext->itemData(0).toString(), ActionManager::contextToString(MODE_GLOBAL));
+    QCOMPARE(creatorContext->currentData().toString(), ActionManager::contextToString(MODE_GLOBAL));
+}
+
 void TheSameKeyRunsDifferentActionsPerContextTest::resettingDefaultsCanTargetOneContext() {
     actionManager->removeAllShortcuts();
     actionManager->addShortcut(MODE_DOCUMENT, "C", "nextImage");
@@ -61,9 +119,10 @@ void TheSameKeyRunsDifferentActionsPerContextTest::resettingDefaultsCanTargetOne
     actionManager->resetDefaults(MODE_FOLDERVIEW);
 
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "C"), QStringLiteral("nextImage"));
-    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "C"), QStringLiteral("copyFile"));
-    QVERIFY2(!actionManager->allDefaultShortcuts().value(MODE_FOLDERVIEW).isEmpty(),
-             "Grid defaults should be restored without touching the document context.");
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "C"), QString());
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Enter"), QStringLiteral("documentView"));
+    QVERIFY2(!actionManager->allDefaultShortcuts().value(MODE_GLOBAL).isEmpty(),
+             "Global defaults should be available to restored contexts.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(TheSameKeyRunsDifferentActionsPerContextTest)

@@ -69,11 +69,15 @@ void migrateLegacyThemeConf(const QString &confDir, QSettings *themeConf) {
 
 // Context token strings must match ActionManager::contextToString().
 QString shortcutContextToken(ViewMode context) {
+    if(context == MODE_GLOBAL)
+        return QStringLiteral("global");
     return context == MODE_FOLDERVIEW ? QStringLiteral("grid")
                                       : QStringLiteral("document");
 }
 
 ViewMode shortcutContextFromToken(const QString &token) {
+    if(token == QLatin1String("global"))
+        return MODE_GLOBAL;
     return (token == QLatin1String("grid") || token == QLatin1String("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -82,29 +86,159 @@ ViewMode shortcutContextFromToken(const QString &token) {
 bool isShortcutContextToken(const QString &token) {
     return token == QLatin1String("grid") ||
            token == QLatin1String("folderview") ||
+           token == QLatin1String("global") ||
            token == QLatin1String("document");
 }
 
-// Serialize the per-context bindings as a nested JSON object
-// ({ context: { keySequence: action } }) and write it atomically. JSON object
-// keys are arbitrary strings, so key sequences like "=" or "Ctrl+/" need no
-// escaping (unlike the old QStringList format that hand-encoded "=" as "eq").
+QStringList normalizedShortcutKeys(QStringList keys) {
+    for(QString &key : keys)
+        key = key.trimmed();
+    keys.removeAll(QString());
+    keys.removeDuplicates();
+    keys.sort(Qt::CaseInsensitive);
+    return keys;
+}
+
+QJsonArray shortcutKeysToJson(const QStringList &keys) {
+    QJsonArray arr;
+    for(const QString &key : normalizedShortcutKeys(keys))
+        arr.append(key);
+    return arr;
+}
+
+QStringList shortcutKeysFromJson(const QJsonValue &value) {
+    QStringList keys;
+    const QJsonArray arr = value.isArray()
+        ? value.toArray()
+        : value.toObject().value("keys").toArray();
+    for(const QJsonValue &key : arr)
+        keys.append(key.toString());
+    return normalizedShortcutKeys(keys);
+}
+
+QString shortcutPrimaryFromEntry(const QJsonValue &value) {
+    if(!value.isObject())
+        return QString();
+    return value.toObject().value("primacy").toString().trimmed();
+}
+
+QJsonValue shortcutEntryToJson(const QStringList &keys, const QString &primary) {
+    const QJsonArray keyArray = shortcutKeysToJson(keys);
+    const QString normalizedPrimary = primary.trimmed();
+    if(normalizedPrimary.isEmpty())
+        return keyArray;
+
+    QJsonObject entry;
+    entry.insert("keys", keyArray);
+    entry.insert("primacy", normalizedPrimary);
+    return entry;
+}
+
+bool shortcutContextUsesLegacyKeyActionShape(const QJsonObject &bindings) {
+    for(auto it = bindings.constBegin(); it != bindings.constEnd(); ++it) {
+        if(it.value().isString())
+            return true;
+    }
+    return false;
+}
+
+QMap<QString, QStringList> actionToKeys(const QMap<QString, QString> &shortcutToAction) {
+    QMap<QString, QStringList> out;
+    for(auto it = shortcutToAction.cbegin(); it != shortcutToAction.cend(); ++it)
+        out[it.value()].append(it.key());
+    for(auto it = out.begin(); it != out.end(); ++it)
+        it.value() = normalizedShortcutKeys(it.value());
+    return out;
+}
+
+void insertActionKeys(QMap<QString, QString> &shortcutToAction,
+                      const QString &action,
+                      const QStringList &keys) {
+    if(action.isEmpty())
+        return;
+    for(const QString &key : normalizedShortcutKeys(keys))
+        shortcutToAction.insert(key, action);
+}
+
+void readEmbeddedShortcutPrimary(const QJsonObject &root,
+                                 QMap<ViewMode, QMap<QString, QString>> &primary) {
+    for(auto ctx = root.constBegin(); ctx != root.constEnd(); ++ctx) {
+        if(!isShortcutContextToken(ctx.key()))
+            continue;
+        const ViewMode mode = shortcutContextFromToken(ctx.key());
+        const QJsonObject bindings = ctx.value().toObject();
+        if(shortcutContextUsesLegacyKeyActionShape(bindings))
+            continue;
+        for(auto it = bindings.constBegin(); it != bindings.constEnd(); ++it) {
+            const QString primacy = shortcutPrimaryFromEntry(it.value());
+            if(!primacy.isEmpty())
+                primary[mode].insert(it.key(), primacy);
+        }
+    }
+}
+
+bool collapseGlobalShortcutDuplicates(QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
+    const QMap<ViewMode, QMap<QString, QString>> before = shortcuts;
+    QMap<QString, QString> &global = shortcuts[MODE_GLOBAL];
+    QMap<QString, QString> &document = shortcuts[MODE_DOCUMENT];
+    QMap<QString, QString> &grid = shortcuts[MODE_FOLDERVIEW];
+
+    for(auto it = document.begin(); it != document.end();) {
+        if(grid.value(it.key()) == it.value() && !global.contains(it.key())) {
+            global.insert(it.key(), it.value());
+            grid.remove(it.key());
+            it = document.erase(it);
+        } else {
+            ++it;
+        }
+    }
+
+    auto collapseAgainstGlobal = [&global](QMap<QString, QString> &context) {
+        for(auto it = context.begin(); it != context.end();) {
+            if(global.value(it.key()) == it.value())
+                it = context.erase(it);
+            else
+                ++it;
+        }
+    };
+    collapseAgainstGlobal(document);
+    collapseAgainstGlobal(grid);
+    return shortcuts != before;
+}
+
+// Serialize per-context bindings as { context: { action: [sorted keys] } }.
+// If a primary key has been chosen, the action entry becomes
+// { "keys": [sorted keys], "primacy": "key" }. JSON strings need no escaping
+// for key sequences like "=" or "Ctrl+/" (unlike the old QStringList format).
 void writeShortcutsJson(const QString &path,
                         const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     QJsonObject root;
+    QMap<ViewMode, QMap<QString, QString>> primary;
     QFile existing(path);
     if(existing.open(QIODevice::ReadOnly)) {
         root = QJsonDocument::fromJson(existing.readAll()).object();
         existing.close();
+        readEmbeddedShortcutPrimary(root, primary);
+        const QJsonObject legacyPrimary = root.value("_primary").toObject();
+        for(auto ctx = legacyPrimary.constBegin(); ctx != legacyPrimary.constEnd(); ++ctx) {
+            if(!isShortcutContextToken(ctx.key()))
+                continue;
+            const ViewMode mode = shortcutContextFromToken(ctx.key());
+            const QJsonObject contextValues = ctx.value().toObject();
+            for(auto it = contextValues.constBegin(); it != contextValues.constEnd(); ++it)
+                primary[mode].insert(it.key(), it.value().toString());
+        }
     }
     for(const QString &key : root.keys()) {
         if(isShortcutContextToken(key))
             root.remove(key);
     }
+    root.remove("_primary");
     for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
         QJsonObject bindings;
-        for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it)
-            bindings.insert(it.key(), it.value());  // keySequence -> action
+        const QMap<QString, QStringList> byAction = actionToKeys(ctx.value());
+        for(auto it = byAction.cbegin(); it != byAction.cend(); ++it)
+            bindings.insert(it.key(), shortcutEntryToJson(it.value(), primary.value(ctx.key()).value(it.key())));
         root.insert(shortcutContextToken(ctx.key()), bindings);
     }
     // The config dir may not exist yet if QSettings has not flushed; QSaveFile
@@ -117,20 +251,32 @@ void writeShortcutsJson(const QString &path,
     }
 }
 
-void readShortcutsJson(const QString &path,
+bool readShortcutsJson(const QString &path,
                        QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
-        return;
+        return false;
     const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    bool needsRewrite = root.contains("_primary");
     for(auto ctx = root.constBegin(); ctx != root.constEnd(); ++ctx) {
         if(!isShortcutContextToken(ctx.key()))
             continue;
+        if(ctx.key() == QLatin1String("folderview"))
+            needsRewrite = true;
         const ViewMode mode = shortcutContextFromToken(ctx.key());
         const QJsonObject bindings = ctx.value().toObject();
-        for(auto it = bindings.constBegin(); it != bindings.constEnd(); ++it)
-            shortcuts[mode].insert(it.key(), it.value().toString());  // keySequence -> action
+        const bool legacyShape = shortcutContextUsesLegacyKeyActionShape(bindings);
+        if(legacyShape)
+            needsRewrite = true;
+        for(auto it = bindings.constBegin(); it != bindings.constEnd(); ++it) {
+            if(legacyShape) {
+                shortcuts[mode].insert(it.key(), it.value().toString());  // keySequence -> action
+            } else {
+                insertActionKeys(shortcuts[mode], it.key(), shortcutKeysFromJson(it.value()));
+            }
+        }
     }
+    return collapseGlobalShortcutDuplicates(shortcuts) || needsRewrite;
 }
 
 void writeShortcutStringMapJson(const QString &path, const QString &metadataKey,
@@ -140,6 +286,31 @@ void writeShortcutStringMapJson(const QString &path, const QString &metadataKey,
     if(existing.open(QIODevice::ReadOnly)) {
         root = QJsonDocument::fromJson(existing.readAll()).object();
         existing.close();
+    }
+
+    if(metadataKey == QLatin1String("_primary")) {
+        root.remove("_primary");
+        for(const QString &contextKey : root.keys()) {
+            if(!isShortcutContextToken(contextKey))
+                continue;
+            const ViewMode mode = shortcutContextFromToken(contextKey);
+            QJsonObject bindings = root.value(contextKey).toObject();
+            if(shortcutContextUsesLegacyKeyActionShape(bindings))
+                continue;
+            for(const QString &action : bindings.keys()) {
+                const QStringList keys = shortcutKeysFromJson(bindings.value(action));
+                bindings.insert(action, shortcutEntryToJson(keys, values.value(mode).value(action)));
+            }
+            root.insert(contextKey, bindings);
+        }
+
+        QDir().mkpath(QFileInfo(path).absolutePath());
+        QSaveFile file(path);
+        if(file.open(QIODevice::WriteOnly)) {
+            file.write(QJsonDocument(root).toJson(QJsonDocument::Indented));
+            file.commit();
+        }
+        return;
     }
 
     QJsonObject metadata;
@@ -167,8 +338,10 @@ void readShortcutStringMapJson(const QString &path, const QString &metadataKey,
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly))
         return;
-    const QJsonObject metadata = QJsonDocument::fromJson(file.readAll()).object()
-        .value(metadataKey).toObject();
+    const QJsonObject root = QJsonDocument::fromJson(file.readAll()).object();
+    if(metadataKey == QLatin1String("_primary"))
+        readEmbeddedShortcutPrimary(root, values);
+    const QJsonObject metadata = root.value(metadataKey).toObject();
     for(auto ctx = metadata.constBegin(); ctx != metadata.constEnd(); ++ctx) {
         if(!isShortcutContextToken(ctx.key()))
             continue;
@@ -263,8 +436,7 @@ void migrateLegacyShortcuts(QSettings *settingsConf, const QString &jsonPath) {
         if(pair[1].endsWith("eq"))
             pair[1] = pair[1].chopped(2) + "=";
         if(legacy) {
-            shortcuts[MODE_DOCUMENT].insert(pair[1], pair[0]);
-            shortcuts[MODE_FOLDERVIEW].insert(pair[1], pair[0]);
+            shortcuts[MODE_GLOBAL].insert(pair[1], pair[0]);
         } else {
             shortcuts[shortcutContextFromToken(ctxName)].insert(pair[1], pair[0]);
         }
@@ -997,12 +1169,13 @@ void Settings::sendChangeNotification() {
     emit settingsChanged();
 }
 //------------------------------------------------------------------------------
-// Shortcuts live in a standalone shortcuts.json ({ context: { keySequence: action } }).
-// Older builds stored them under "[Controls] shortcuts=" as a single QStringList line;
-// migrateLegacyShortcuts() converts that to JSON once, on first read.
+// Shortcuts live in standalone shortcuts.json as action -> sorted keys per
+// context. Older builds stored them under "[Controls] shortcuts=" as a single
+// QStringList line; migrateLegacyShortcuts() converts that to JSON once.
 void Settings::readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     migrateLegacyShortcuts(settings->settingsConf, settings->mShortcutsJsonPath);
-    readShortcutsJson(settings->mShortcutsJsonPath, shortcuts);
+    if(readShortcutsJson(settings->mShortcutsJsonPath, shortcuts))
+        writeShortcutsJson(settings->mShortcutsJsonPath, shortcuts);
 }
 
 void Settings::saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {

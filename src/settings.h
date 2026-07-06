@@ -81,7 +81,8 @@ enum ImageScrolling {
 
 enum ViewMode {
     MODE_DOCUMENT,
-    MODE_FOLDERVIEW
+    MODE_FOLDERVIEW,
+    MODE_GLOBAL
 };
 
 enum FolderEndAction {
@@ -134,9 +135,8 @@ public:
     void setPanelPosition(PanelPosition);
     bool loopSlideshow();
     void setLoopSlideshow(bool mode);
-    // Shortcuts are scoped per context (ViewMode). On-disk format is a string list
-    // of "context|action=key" entries; legacy context-less "action=key" entries are
-    // migrated into both contexts on read.
+    // Shortcuts are scoped per context (ViewMode). shortcuts.json stores each
+    // context as action -> sorted keys, with optional per-action primacy.
     void readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     void saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     void readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary);

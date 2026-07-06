@@ -13,6 +13,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <QComboBox>
+#include <QHash>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -77,6 +78,8 @@ private:
     void setPrimaryShortcut(ViewMode context, const QString &action, const QString &key);
     bool shortcutEnabled(ViewMode context, const QString &action) const;
     void setShortcutEnabled(ViewMode context, const QString &action, bool enabled);
+    void rebuildShortcutDraftLookup();
+    QString draftActionForShortcut(ViewMode context, const QString &shortcut) const;
     ViewMode selectedShortcutContext() const;
     void openShortcutDetails(int row);
     void openShortcutDetails(const QString &action, ViewMode context);
@@ -87,6 +90,7 @@ private:
     QMap<QString, QString> langs; // <"en_US", "English">
     QButtonGroup fitModeGrp, folderEndGrp, zoomIndGrp;
     ActionManager::ShortcutMap mShortcutDraft;
+    QMap<ViewMode, QHash<QString, QString>> mShortcutDraftLookup;
     QMap<ViewMode, QMap<QString, QString>> mShortcutPrimary;
     QMap<ViewMode, QStringList> mShortcutDisabled;
     QComboBox *mShortcutContextComboBox = nullptr;

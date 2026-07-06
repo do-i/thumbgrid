@@ -1,6 +1,7 @@
 #include "actionmanager.h"
 
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 
@@ -30,11 +31,48 @@ QString expandModifierTokens(QString keys) {
     return keys;
 }
 
-// Read a { keySequence: action } object into the shared default map, expanding
-// modifier tokens as it goes.
+QList<ViewMode> shortcutContexts() {
+    return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW};
+}
+
+QStringList shortcutKeysFromJson(const QJsonValue &value) {
+    QStringList keys;
+    const QJsonArray arr = value.isArray()
+        ? value.toArray()
+        : value.toObject().value("keys").toArray();
+    for(const QJsonValue &key : arr) {
+        const QString shortcut = expandModifierTokens(key.toString().trimmed());
+        if(!shortcut.isEmpty() && !keys.contains(shortcut))
+            keys.append(shortcut);
+    }
+    keys.sort(Qt::CaseInsensitive);
+    return keys;
+}
+
+// Read either the new { action: [keySequence...] } default object or the
+// previous { keySequence: action } object, expanding modifier tokens as it goes.
 void insertShortcutObject(const QJsonObject &obj, ActionManager::ContextMap &out) {
-    for(auto it = obj.constBegin(); it != obj.constEnd(); ++it)
-        out.insert(expandModifierTokens(it.key()), it.value().toString());
+    for(auto it = obj.constBegin(); it != obj.constEnd(); ++it) {
+        if(it.value().isString()) {
+            out.insert(expandModifierTokens(it.key()), it.value().toString());
+            continue;
+        }
+        for(const QString &key : shortcutKeysFromJson(it.value()))
+            out.insert(key, it.key());
+    }
+}
+
+void insertPlatformShortcutObject(const QJsonObject &obj,
+                                  ActionManager::ContextMap &global,
+                                  ActionManager::ContextMap &document,
+                                  ActionManager::ContextMap &grid) {
+    if(obj.contains("global") || obj.contains("document") || obj.contains("grid")) {
+        insertShortcutObject(obj.value("global").toObject(), global);
+        insertShortcutObject(obj.value("document").toObject(), document);
+        insertShortcutObject(obj.value("grid").toObject(), grid);
+        return;
+    }
+    insertShortcutObject(obj, global);
 }
 
 } // namespace
@@ -57,9 +95,8 @@ ActionManager *ActionManager::getInstance() {
 //------------------------------------------------------------------------------
 void ActionManager::initDefaults() {
     // Defaults are loaded from default-shortcuts.json (installed system copy,
-    // qrc fallback), then seeded into every context. Today every shortcut works
-    // in every screen, so the two contexts start identical; users differentiate
-    // them per-context from the shortcut editor. There is no global fallback.
+    // qrc fallback). Shared bindings live in MODE_GLOBAL; document/grid entries
+    // are only the context-specific differences.
     const QString path = resolveDefaultShortcutsPath();
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly)) {
@@ -73,18 +110,24 @@ void ActionManager::initDefaults() {
         return;
     }
 
-    ContextMap d;
-    insertShortcutObject(root.value("shortcuts").toObject(), d);
+    ContextMap global;
+    ContextMap document;
+    ContextMap grid;
+    insertShortcutObject(root.value("shortcuts").toObject(), global);
+    insertShortcutObject(root.value("global").toObject(), global);
+    insertShortcutObject(root.value("document").toObject(), document);
+    insertShortcutObject(root.value("grid").toObject(), grid);
     const QJsonObject platform = root.value("platform").toObject();
 #ifdef __APPLE__
-    insertShortcutObject(platform.value("apple").toObject(), d);
+    const QJsonObject platformSpecific = platform.value("apple").toObject();
 #else
-    insertShortcutObject(platform.value("default").toObject(), d);
+    const QJsonObject platformSpecific = platform.value("default").toObject();
 #endif
+    insertPlatformShortcutObject(platformSpecific, global, document, grid);
 
-    // Seed each context with the full default set.
-    actionManager->defaults.insert(MODE_DOCUMENT, d);
-    actionManager->defaults.insert(MODE_FOLDERVIEW, d);
+    actionManager->defaults.insert(MODE_GLOBAL, global);
+    actionManager->defaults.insert(MODE_DOCUMENT, document);
+    actionManager->defaults.insert(MODE_FOLDERVIEW, grid);
 }
 
 //------------------------------------------------------------------------------
@@ -101,7 +144,9 @@ void ActionManager::initShortcuts() {
     auto mergeMissing = [](const QString &action, const QString &shortcut) {
         QMap<ViewMode, QStringList> disabled;
         settings->readDisabledShortcuts(disabled);
-        for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+        for(ViewMode ctx : shortcutContexts()) {
+            if(actionManager->defaults.value(ctx).key(action).isEmpty())
+                continue;
             if(disabled.value(ctx).contains(action))
                 continue;
             ContextMap &m = actionManager->shortcuts[ctx];
@@ -112,17 +157,20 @@ void ActionManager::initShortcuts() {
     mergeMissing("toggleStatusFooter", InputMap::keyNameCtrl() + "+B");
     mergeMissing("cutFile", InputMap::keyNameCtrl() + "+X");
     mergeMissing("togglePlacesPanel", InputMap::keyNameCtrl() + "+E");
+    actionManager->rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
 void ActionManager::addShortcut(ViewMode context, const QString &keys, const QString &action) {
     ActionType type = validateAction(action);
     if(type != ActionType::ACTION_INVALID) {
         actionManager->shortcuts[context].insert(keys, action);
+        actionManager->rebuildShortcutLookup();
     }
 }
 //------------------------------------------------------------------------------
 void ActionManager::removeShortcut(ViewMode context, const QString &keys) {
     actionManager->shortcuts[context].remove(keys);
+    actionManager->rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
 void ActionManager::setContext(ViewMode context) {
@@ -134,11 +182,15 @@ ViewMode ActionManager::currentContext() const {
 }
 //------------------------------------------------------------------------------
 QString ActionManager::contextToString(ViewMode context) {
+    if(context == MODE_GLOBAL)
+        return QStringLiteral("global");
     return (context == MODE_FOLDERVIEW) ? QStringLiteral("grid")
                                         : QStringLiteral("document");
 }
 //------------------------------------------------------------------------------
 ViewMode ActionManager::contextFromString(const QString &name) {
+    if(name == QStringLiteral("global"))
+        return MODE_GLOBAL;
     return (name == QStringLiteral("grid") || name == QStringLiteral("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -158,9 +210,10 @@ const ActionManager::ShortcutMap &ActionManager::allDefaultShortcuts() {
 //------------------------------------------------------------------------------
 void ActionManager::removeAllShortcuts() {
     shortcuts.clear();
+    rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
-// Removes all shortcuts for specified action. Slow (reverse map lookup).
+// Removes all shortcuts for the specified action.
 void ActionManager::removeAllShortcuts(QString actionName) {
     if(validateAction(actionName) == ActionType::ACTION_INVALID)
         return;
@@ -174,6 +227,7 @@ void ActionManager::removeAllShortcuts(QString actionName) {
                 ++i;
         }
     }
+    rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
 QString ActionManager::keyForNativeScancode(quint32 scanCode) {
@@ -185,15 +239,17 @@ QString ActionManager::keyForNativeScancode(quint32 scanCode) {
 //------------------------------------------------------------------------------
 void ActionManager::resetDefaults() {
     actionManager->shortcuts = actionManager->defaults;
+    actionManager->rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
 void ActionManager::resetDefaults(ViewMode context) {
     actionManager->shortcuts[context] = actionManager->defaults.value(context);
+    actionManager->rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
 void ActionManager::resetDefaults(QString action) {
     actionManager->removeAllShortcuts(action);
-    for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+    for(ViewMode ctx : shortcutContexts()) {
         QMapIterator<QString, QString> i(defaults[ctx]);
         while(i.hasNext()) {
             i.next();
@@ -203,6 +259,7 @@ void ActionManager::resetDefaults(QString action) {
             }
         }
     }
+    rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
 void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
@@ -233,7 +290,7 @@ void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
     // the whole app with no confirmation. Only strip it if still bound to exit,
     // so anyone who deliberately rebound MiddleButton keeps their choice.
     if(lastVer < QVersionNumber(2026,7,3)) {
-        for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+        for(ViewMode ctx : shortcutContexts()) {
             if(shortcuts[ctx].value("MiddleButton") == "exit") {
                 shortcuts[ctx].remove("MiddleButton");
                 qDebug() << "[actionManager]: removed MiddleButton=exit in" << contextToString(ctx);
@@ -241,7 +298,7 @@ void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
         }
     }
     // add new default actions, per context
-    for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+    for(ViewMode ctx : shortcutContexts()) {
         ContextMap &cur = shortcuts[ctx];
         QMapIterator<QString, QString> i(defaults[ctx]);
         while(i.hasNext()) {
@@ -257,6 +314,7 @@ void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
         }
     }
     // apply
+    rebuildShortcutLookup();
     saveShortcuts();
 }
 //------------------------------------------------------------------------------
@@ -265,12 +323,15 @@ void ActionManager::saveShortcuts() {
 }
 //------------------------------------------------------------------------------
 QString ActionManager::actionForShortcut(ViewMode context, const QString &keys) {
-    return actionManager->shortcuts[context].value(keys);
+    return actionManager->lookupActionForShortcut(context, keys);
 }
 
 // returns first shortcut that is found in the given context
 const QString ActionManager::shortcutForAction(ViewMode context, QString action) {
-    return shortcuts[context].key(action, "");
+    const QString contextKey = shortcuts[context].key(action, "");
+    if(!contextKey.isEmpty() || context == MODE_GLOBAL)
+        return contextKey;
+    return shortcuts[MODE_GLOBAL].key(action, "");
 }
 
 // returns every shortcut bound to action across all contexts
@@ -301,11 +362,27 @@ bool ActionManager::invokeAction(const QString &actionName) {
 }
 //------------------------------------------------------------------------------
 bool ActionManager::invokeActionForShortcut(ViewMode context, const QString &shortcut) {
-    const ContextMap &m = shortcuts[context];
-    if(!shortcut.isEmpty() && m.contains(shortcut)) {
-        return invokeAction(m.value(shortcut));
+    const QString action = lookupActionForShortcut(context, shortcut);
+    return action.isEmpty() ? false : invokeAction(action);
+}
+//------------------------------------------------------------------------------
+void ActionManager::rebuildShortcutLookup() {
+    shortcutLookup.clear();
+    for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
+        QHash<QString, QString> lookup;
+        for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it)
+            lookup.insert(it.key(), it.value());
+        shortcutLookup.insert(ctx.key(), lookup);
     }
-    return false;
+}
+//------------------------------------------------------------------------------
+QString ActionManager::lookupActionForShortcut(ViewMode context, const QString &shortcut) const {
+    if(shortcut.isEmpty())
+        return QString();
+    const QString contextAction = shortcutLookup.value(context).value(shortcut);
+    if(!contextAction.isEmpty() || context == MODE_GLOBAL)
+        return contextAction;
+    return shortcutLookup.value(MODE_GLOBAL).value(shortcut);
 }
 //------------------------------------------------------------------------------
 void ActionManager::validateShortcuts() {
@@ -318,6 +395,7 @@ void ActionManager::validateShortcuts() {
                 ++i;
         }
     }
+    rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
 inline

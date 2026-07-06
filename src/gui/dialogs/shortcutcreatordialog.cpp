@@ -8,8 +8,9 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     ui->setupUi(this);
     setWindowTitle("Add shortcut");
 
-    // Each shortcut belongs to one context (screen). The userData holds the stable
-    // context token written to disk; see ActionManager::contextToString().
+    // Each shortcut belongs to one context. Global bindings run in every screen;
+    // view-specific bindings override them for the same key.
+    ui->contextComboBox->addItem(tr("Global"), ActionManager::contextToString(MODE_GLOBAL));
     ui->contextComboBox->addItem(tr("Document"), ActionManager::contextToString(MODE_DOCUMENT));
     ui->contextComboBox->addItem(tr("Grid"), ActionManager::contextToString(MODE_FOLDERVIEW));
     ui->contextComboBox->setCurrentIndex(0);

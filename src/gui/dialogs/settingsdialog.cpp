@@ -364,8 +364,10 @@ void SettingsDialog::setupShortcutsPage() {
     ui->pushButton_3->setText(tr("Reset current context"));
 
     mShortcutContextComboBox = new QComboBox(ui->Controls);
+    mShortcutContextComboBox->addItem(tr("Global"), ActionManager::contextToString(MODE_GLOBAL));
     mShortcutContextComboBox->addItem(tr("Grid"), ActionManager::contextToString(MODE_FOLDERVIEW));
     mShortcutContextComboBox->addItem(tr("Document"), ActionManager::contextToString(MODE_DOCUMENT));
+    mShortcutContextComboBox->setCurrentIndex(0);
 
     mShortcutSearchEdit = new QLineEdit(ui->Controls);
     mShortcutSearchEdit->setPlaceholderText(tr("Search"));
@@ -828,6 +830,7 @@ int SettingsDialog::selectedThemeTid() const {
 //------------------------------------------------------------------------------
 void SettingsDialog::readShortcuts() {
     mShortcutDraft = actionManager->allShortcuts();
+    rebuildShortcutDraftLookup();
     settings->readShortcutPrimary(mShortcutPrimary);
     settings->readDisabledShortcuts(mShortcutDisabled);
     updateShortcutsTable();
@@ -858,6 +861,26 @@ void SettingsDialog::setActionShortcuts(ActionManager::ContextMap &map, const QS
         if(!trimmed.isEmpty())
             map.insert(trimmed, action);
     }
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::rebuildShortcutDraftLookup() {
+    mShortcutDraftLookup.clear();
+    for(auto ctx = mShortcutDraft.cbegin(); ctx != mShortcutDraft.cend(); ++ctx) {
+        QHash<QString, QString> lookup;
+        for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it)
+            lookup.insert(it.key(), it.value());
+        mShortcutDraftLookup.insert(ctx.key(), lookup);
+    }
+}
+//------------------------------------------------------------------------------
+QString SettingsDialog::draftActionForShortcut(ViewMode context, const QString &shortcut) const {
+    const QString key = shortcut.trimmed();
+    if(key.isEmpty())
+        return QString();
+    const QString contextAction = mShortcutDraftLookup.value(context).value(key);
+    if(!contextAction.isEmpty() || context == MODE_GLOBAL)
+        return contextAction;
+    return mShortcutDraftLookup.value(MODE_GLOBAL).value(key);
 }
 //------------------------------------------------------------------------------
 // The draft holds the authoritative set of keys currently bound to an action;
@@ -920,6 +943,7 @@ void SettingsDialog::setShortcutEnabled(ViewMode context, const QString &action,
         mShortcutDisabled[context] = disabled;
         setActionShortcuts(mShortcutDraft[context], action, QStringList());
     }
+    rebuildShortcutDraftLookup();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::updateShortcutsTable() {
@@ -1109,7 +1133,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
             warning->setText(tr("\"%1\" is already assigned to this action.").arg(seq));
             return;
         }
-        const QString clash = actionManager->actionForShortcut(context, seq);
+        const QString clash = draftActionForShortcut(context, seq);
         warning->setText(clash.isEmpty() || clash == action
                              ? QString()
                              : tr("\"%1\" is also used by: %2").arg(seq, clash));
@@ -1129,6 +1153,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
 
     // Commit the edited key set and primary choice into the draft model.
     setActionShortcuts(mShortcutDraft[context], action, keys);
+    rebuildShortcutDraftLookup();
     if(primary.isEmpty())
         mShortcutPrimary[context].remove(action);
     else
@@ -1253,17 +1278,22 @@ void SettingsDialog::addShortcut() {
     ShortcutCreatorDialog w;
     if(!w.exec())
         return;
-    // Only replace a binding for the same key in the same context; the same key in
-    // the other context is a separate, valid binding.
-    for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-        if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut()
-           && contextAtRow(i) == w.selectedContext()) {
-            removeShortcutAt(i);
-            break;
-        }
-    }
-    addShortcutToTable(w.selectedAction(), w.selectedShortcut(), w.selectedContext());
-    selectShortcutRow(w.selectedShortcut(), w.selectedContext());
+
+    const ViewMode context = w.selectedContext();
+    const QString key = w.selectedShortcut().trimmed();
+    const QString action = w.selectedAction();
+    if(key.isEmpty() || action.isEmpty())
+        return;
+
+    mShortcutDraft[context].remove(key);
+    mShortcutDraft[context].insert(key, action);
+    rebuildShortcutDraftLookup();
+    setPrimaryShortcut(context, action, key);
+    setShortcutEnabled(context, action, true);
+    const int index = mShortcutContextComboBox->findData(ActionManager::contextToString(context));
+    if(index != -1)
+        mShortcutContextComboBox->setCurrentIndex(index);
+    updateShortcutsTable();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::removeShortcutAt(int row) {
@@ -1273,29 +1303,7 @@ void SettingsDialog::removeShortcutAt(int row) {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::editShortcut(int row) {
-    if(row >= 0) {
-        ShortcutCreatorDialog w;
-        w.setWindowTitle(tr("Edit shortcut"));
-        w.setAction(ui->shortcutsTableWidget->item(row, 0)->text());
-        w.setShortcut(ui->shortcutsTableWidget->item(row, 1)->text());
-        w.setContext(contextAtRow(row));
-        if(!w.exec())
-            return;
-        // remove itself
-        removeShortcutAt(row);
-        // remove anything we are replacing (same key, same context)
-        for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-            if(ui->shortcutsTableWidget->item(i, 1)->text() == w.selectedShortcut()
-               && contextAtRow(i) == w.selectedContext()) {
-                removeShortcutAt(i);
-                break;
-            }
-        }
-        // re-add
-        addShortcutToTable(w.selectedAction(), w.selectedShortcut(), w.selectedContext());
-        // re-select
-        selectShortcutRow(w.selectedShortcut(), w.selectedContext());
-    }
+    openShortcutDetails(row);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::editShortcut() {
@@ -1303,7 +1311,15 @@ void SettingsDialog::editShortcut() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::removeShortcut() {
-    removeShortcutAt(ui->shortcutsTableWidget->currentRow());
+    QTableWidgetItem *item = ui->shortcutsTableWidget->item(ui->shortcutsTableWidget->currentRow(), 0);
+    if(!item)
+        return;
+    const ViewMode context = selectedShortcutContext();
+    const QString action = item->data(Qt::UserRole).toString();
+    setActionShortcuts(mShortcutDraft[context], action, QStringList());
+    rebuildShortcutDraftLookup();
+    mShortcutPrimary[context].remove(action);
+    updateShortcutsTable();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::saveShortcuts() {
@@ -1320,6 +1336,7 @@ void SettingsDialog::saveShortcuts() {
 void SettingsDialog::resetShortcuts() {
     const ViewMode context = selectedShortcutContext();
     mShortcutDraft[context] = actionManager->allDefaultShortcuts().value(context);
+    rebuildShortcutDraftLookup();
     mShortcutPrimary.remove(context);
     mShortcutDisabled.remove(context);
     updateShortcutsTable();
