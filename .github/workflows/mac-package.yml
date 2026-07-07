@@ -1,0 +1,74 @@
+name: macOS package
+
+# Build a macOS app bundle, package it as a DMG, and attach it to the GitHub
+# release whenever a version tag is pushed.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # needed to upload assets to the release
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Install build tooling
+        run: brew install cmake ninja qt opencv exiv2 mpv pkg-config create-dmg
+
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # tags needed for git describe / appversion
+          lfs: true        # fetch real image bytes; LFS pointer stubs in qrc crash at runtime
+
+      - name: Mark workspace as a safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Export Homebrew build paths
+        run: |
+          qt_prefix="$(brew --prefix qt)"
+          opencv_prefix="$(brew --prefix opencv)"
+          echo "$qt_prefix/bin" >> "$GITHUB_PATH"
+          echo "CMAKE_PREFIX_PATH=$qt_prefix;$opencv_prefix" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$(brew --prefix exiv2)/lib/pkgconfig:$(brew --prefix mpv)/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH"
+
+      - name: Build
+        run: cmake --build build
+
+      - name: Copy player plugin into app bundle
+        run: |
+          mkdir -p build/src/thumbgrid.app/Contents/lib/thumbgrid
+          cp build/lib/thumbgrid/player_mpv.so build/src/thumbgrid.app/Contents/lib/thumbgrid/
+
+      - name: Deploy Qt runtime
+        run: macdeployqt build/src/thumbgrid.app -verbose=2
+
+      - name: Create DMG
+        run: |
+          dmg_name="thumbgrid-macos-${GITHUB_REF_NAME}.dmg"
+          mkdir -p build/dmg
+          cp -R build/src/thumbgrid.app build/dmg/
+          create-dmg \
+            --volname "thumbgrid ${GITHUB_REF_NAME}" \
+            --window-pos 200 120 \
+            --window-size 600 400 \
+            --icon-size 100 \
+            --icon "thumbgrid.app" 175 120 \
+            --hide-extension "thumbgrid.app" \
+            --app-drop-link 425 120 \
+            "$dmg_name" \
+            build/dmg/
+
+      - name: Upload DMG to the release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: thumbgrid-macos-${{ github.ref_name }}.dmg
+          fail_on_unmatched_files: true
+          generate_release_notes: true
