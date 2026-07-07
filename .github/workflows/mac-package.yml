@@ -49,6 +49,36 @@ jobs:
       - name: Deploy Qt runtime
         run: macdeployqt build/src/thumbgrid.app -verbose=2
 
+      - name: Fix bundled library references
+        run: |
+          app="build/src/thumbgrid.app"
+          frameworks="$app/Contents/Frameworks"
+
+          while IFS= read -r binary; do
+            file "$binary" | grep -q 'Mach-O' || continue
+
+            otool -L "$binary" | awk '/@rpath\/lib/ { print $1 }' | while read -r dependency; do
+              library_name="${dependency##*/}"
+              [[ -e "$frameworks/$library_name" ]] || continue
+
+              case "$binary" in
+                "$frameworks"/*)
+                  replacement="@loader_path/$library_name"
+                  ;;
+                *)
+                  replacement="@executable_path/../Frameworks/$library_name"
+                  ;;
+              esac
+
+              install_name_tool -change "$dependency" "$replacement" "$binary"
+            done
+          done < <(find "$app/Contents" -type f)
+
+      - name: Sign app bundle
+        run: |
+          codesign --force --deep --sign - build/src/thumbgrid.app
+          codesign --verify --deep --strict --verbose=2 build/src/thumbgrid.app
+
       - name: Create DMG
         run: |
           dmg_name="thumbgrid-macos-${GITHUB_REF_NAME}.dmg"
