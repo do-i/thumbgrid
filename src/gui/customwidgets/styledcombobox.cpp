@@ -3,12 +3,15 @@
 StyledComboBox::StyledComboBox(QWidget *parent) : QComboBox(parent), hiResPixmap(false)
 {
     dpr = this->devicePixelRatioF();
-    connect(settings, &Settings::settingsChanged, [this]() {
+    connect(settings, &Settings::settingsChanged, this, [this]() {
         ImageLib::recolor(this->downArrow, settings->colorScheme().icons);
     });
 }
 
 void StyledComboBox::setIconPath(QString path) {
+    if(path.startsWith(":res/"))
+        path.insert(1, '/');
+
     if(dpr >= (1.0 + 0.001)) {
         path.replace(".", "@2x.");
         hiResPixmap = true;

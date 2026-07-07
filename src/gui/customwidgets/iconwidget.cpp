@@ -23,6 +23,9 @@ void IconWidget::onSettingsChanged() {
 }
 
 void IconWidget::setIconPath(QString path) {
+    if(path.startsWith(":res/"))
+        path.insert(1, '/');
+
     if(iconPath == path)
         return;
     iconPath = path;

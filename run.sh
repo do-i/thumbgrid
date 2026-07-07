@@ -71,6 +71,7 @@ install_full_deps() {
         packages=(
             build-essential
             cmake
+            git-lfs
             pkg-config
             qt6-base-dev
             qt6-tools-dev
@@ -89,6 +90,7 @@ install_full_deps() {
         packages=(
             gcc-c++
             cmake
+            git-lfs
             pkgconf-pkg-config
             qt6-qtbase-devel
             qt6-qtimageformats
@@ -105,6 +107,7 @@ install_full_deps() {
         packages=(
             base-devel
             cmake
+            git-lfs
             pkgconf
             qt6-base
             qt6-imageformats
@@ -121,6 +124,7 @@ install_full_deps() {
         packages=(
             patterns-devel-C-C++
             cmake
+            git-lfs
             pkg-config
             qt6-base-devel
             qt6-imageformats-devel
@@ -137,6 +141,7 @@ install_full_deps() {
         packages=(
             build-base
             cmake
+            git-lfs
             pkgconf
             qt6-qtbase-dev
             qt6-qtimageformats
@@ -152,6 +157,7 @@ install_full_deps() {
     elif command -v brew >/dev/null 2>&1; then
         packages=(
             cmake
+            git-lfs
             ninja
             pkg-config
             qt
@@ -165,9 +171,24 @@ install_full_deps() {
         brew install "${packages[@]}"
     else
         printf 'No supported package manager found.\n' >&2
-        printf 'Install a C++ compiler, CMake, pkg-config, Qt Widgets, Qt ImageFormats, Qt Svg, Qt Tools, plus Exiv2, OpenCV, and mpv.\n' >&2
+        printf 'Install Git LFS, a C++ compiler, CMake, pkg-config, Qt Widgets, Qt ImageFormats, Qt Svg, Qt Tools, plus Exiv2, OpenCV, and mpv.\n' >&2
         return 1
     fi
+
+    hydrate_lfs_assets
+}
+
+hydrate_lfs_assets() {
+    if [[ ! -d "$ROOT_DIR/.git" ]]; then
+        return 0
+    fi
+    if ! command -v git >/dev/null 2>&1 || ! command -v git-lfs >/dev/null 2>&1; then
+        return 0
+    fi
+
+    printf '\nFetching Git LFS assets...\n'
+    git -C "$ROOT_DIR" lfs install --local || return
+    git -C "$ROOT_DIR" lfs pull
 }
 
 require_cmake() {
