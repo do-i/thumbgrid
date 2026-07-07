@@ -6,6 +6,7 @@
 
 namespace {
     const int thumbnailerShutdownWaitMs = 3000;
+    const QString directoryThumbnailIconVersion = "folder-icon-v2";
 }
 
 Thumbnailer::Thumbnailer() {
@@ -44,7 +45,8 @@ QString Thumbnailer::memKey(const QString &path, int size, bool crop) {
 }
 
 QString Thumbnailer::dirMemKey(const QString &path, int size, bool previewFit, const QString &colorId) {
-    return QString::number(size) + "d" + (previewFit ? "f" : "") + colorId + QChar(0x1f) + path;
+    return QString::number(size) + "d" + (previewFit ? "f" : "") + colorId +
+           directoryThumbnailIconVersion + QChar(0x1f) + path;
 }
 
 std::shared_ptr<Thumbnail> Thumbnailer::memCacheLookup(const QString &key, const QString &path) {

@@ -7,6 +7,8 @@
 #include <QSet>
 
 namespace {
+    const QString directoryThumbnailIconVersion = "folder-icon-v2";
+
     QSet<QString> supportedPreviewImageSuffixes() {
         QSet<QString> suffixes;
         for(const QByteArray &format : QImageReader::supportedImageFormats())
@@ -252,13 +254,14 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cach
     return std::shared_ptr<Thumbnail>(new Thumbnail(name, "Folder", size, std::shared_ptr<QPixmap>(pixmap), false));
 }
 
-// Cache key includes the preview-fit mode and the scheme icon color, so toggling
-// either regenerates rather than serving a stale composite.
+// Cache key includes the preview-fit mode, scheme icon color, and folder icon
+// generation version, so changes regenerate rather than serving stale composites.
 QString ThumbnailerRunnable::generateDirIdString(QString path, int size, bool previewFit, const QString &colorId) {
     QString queryStr = path + QString::number(size) + "dir";
     if(previewFit)
         queryStr.append("f");
     queryStr.append(colorId);
+    queryStr.append(directoryThumbnailIconVersion);
     return QString(QCryptographicHash::hash(queryStr.toUtf8(), QCryptographicHash::Md5).toHex());
 }
 
