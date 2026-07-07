@@ -2,6 +2,7 @@
 
 #include <QDir>
 #include <QElapsedTimer>
+#include <QPainter>
 #include <QTemporaryDir>
 
 #include "components/cache/thumbnailcache.h"
@@ -23,12 +24,26 @@ static QStringList cacheFiles() {
 }
 
 static QImage folderIconBase(int size) {
+    size = qMax(1, size);
     QImage src(":/res/icons/common/other/folder.png");
     if(src.isNull())
         src = QImage(":/res/icons/common/other/folder96.png");
-    return src.scaled(qRound(size * 1.10),
-                      qRound(size * 1.10 * src.height() / (qreal)src.width()),
-                      Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+
+    int width = qMax(1, qRound(size * 1.10));
+    int height = qMax(1, qRound(size * 0.85));
+    if(!src.isNull() && src.width() > 0 && src.height() > 0) {
+        height = qMax(1, qRound(width * src.height() / static_cast<qreal>(src.width())));
+    } else {
+        src = QImage(width, height, QImage::Format_ARGB32_Premultiplied);
+        src.fill(Qt::transparent);
+        QPainter painter(&src);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::black);
+        painter.drawRoundedRect(src.rect().adjusted(1, 1, -1, -1), 8, 8);
+    }
+
+    return src.scaled(width, height, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
 void DirThumbnailsAreCachedOnDiskTest::secondGenerateDirHitsCache() {
@@ -44,6 +59,7 @@ void DirThumbnailsAreCachedOnDiskTest::secondGenerateDirHitsCache() {
     const int size = 200;
     const QImage iconBase = folderIconBase(size);
     const QString colorId = "#808080";
+    QStringList filesBefore = cacheFiles();
 
     QElapsedTimer t;
     t.start();
@@ -53,8 +69,13 @@ void DirThumbnailsAreCachedOnDiskTest::secondGenerateDirHitsCache() {
 
     QStringList filesAfterFirst = cacheFiles();
     qInfo() << "cache files after first call:" << filesAfterFirst;
-    QCOMPARE(filesAfterFirst.count(), 1);
-    QFileInfo cacheFile(settings->thumbnailCacheDir() + filesAfterFirst.first());
+    QCOMPARE(filesAfterFirst.count(), filesBefore.count() + 1);
+    QString newFile;
+    for(const QString &f : filesAfterFirst)
+        if(!filesBefore.contains(f))
+            newFile = f;
+    QVERIFY(!newFile.isEmpty());
+    QFileInfo cacheFile(settings->thumbnailCacheDir() + newFile);
     QDateTime writeTimeFirst = cacheFile.lastModified();
 
     QTest::qWait(1100); // ensure a rewrite would be visible in mtime

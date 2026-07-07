@@ -94,8 +94,6 @@ void ThumbnailView::createScrollTimeLine() {
     connect(scrollTimeLine, &QTimeLine::frameChanged, [this](int value) {
         scrollFrameTimer.start();
         this->centerOn(value);
-        // trigger repaint immediately
-        qApp->processEvents();
         lastScrollFrameTime = scrollFrameTimer.elapsed();
         if(scrollTimeLine->state() == QTimeLine::Running && lastScrollFrameTime > scrollRefreshRate) {
             scrollTimeLine->setPaused(true);

@@ -440,15 +440,19 @@ void FolderGridView::wheelEvent(QWheelEvent *event) {
             zoomOut();
     } else {
         event->accept();
-        int delta = event->pixelDelta().y();
-        if(!delta)
-            delta = event->angleDelta().y();
-        if(!delta)
+        int pixelDelta = event->pixelDelta().y();
+        if(pixelDelta) {
+            scrollPrecise(pixelDelta);
+            return;
+        }
+
+        int angleDelta = event->angleDelta().y();
+        if(!angleDelta)
             return;
         if(settings->enableSmoothScroll())
-            scrollSmooth(delta, 0.85, 1.15, true);
+            scrollSmooth(angleDelta, 0.85, 1.15, true);
         else
-            scrollPrecise(delta);
+            scrollPrecise(angleDelta);
     }
 }
 

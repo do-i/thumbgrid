@@ -13,11 +13,11 @@ public:
 
     virtual void setWatchPath(const QString& watchPath);
     virtual QString watchPath() const;
-    bool isObserving();
+    virtual bool isObserving();
 
 public Q_SLOTS:
-    void observe();
-    void stopObserving();
+    virtual void observe();
+    virtual void stopObserving();
 
 signals:
     void fileCreated(const QString& filePath);

@@ -10,6 +10,13 @@ BUILD_TYPE="${BUILD_TYPE:-Debug}"
 CMAKE_BIN="${CMAKE_BIN:-cmake}"
 APP_ARGS=("$@")
 
+if ! command -v "$CMAKE_BIN" >/dev/null 2>&1 && command -v brew >/dev/null 2>&1; then
+    BREW_CMAKE_BIN="$(brew --prefix cmake 2>/dev/null)/bin/cmake"
+    if [[ -x "$BREW_CMAKE_BIN" ]]; then
+        CMAKE_BIN="$BREW_CMAKE_BIN"
+    fi
+fi
+
 if command -v nproc >/dev/null 2>&1; then
     DEFAULT_JOBS="$(nproc)"
 else
@@ -145,12 +152,14 @@ install_full_deps() {
     elif command -v brew >/dev/null 2>&1; then
         packages=(
             cmake
+            ninja
             pkg-config
             qt
-            ksyntaxhighlighting
+            syntax-highlight
             exiv2
             opencv
             mpv
+            create-dmg
         )
         confirm_install "Homebrew" "${packages[@]}" || return 0
         brew install "${packages[@]}"
@@ -185,8 +194,28 @@ run_menu_action() {
 configure_default() {
     require_cmake || return
 
+    local cmake_args=()
+    if [[ "$(uname -s)" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
+        local qt_prefix opencv_prefix exiv2_prefix mpv_prefix
+        qt_prefix="$(brew --prefix qt 2>/dev/null || true)"
+        opencv_prefix="$(brew --prefix opencv 2>/dev/null || true)"
+        exiv2_prefix="$(brew --prefix exiv2 2>/dev/null || true)"
+        mpv_prefix="$(brew --prefix mpv 2>/dev/null || true)"
+
+        if [[ -n "$qt_prefix" && -d "$qt_prefix" ]]; then
+            PATH="$qt_prefix/bin:$PATH"
+        fi
+        if [[ -n "$qt_prefix" && -n "$opencv_prefix" ]]; then
+            cmake_args+=("-DCMAKE_PREFIX_PATH=$qt_prefix;$opencv_prefix")
+        fi
+        if [[ -n "$exiv2_prefix" && -n "$mpv_prefix" ]]; then
+            export PKG_CONFIG_PATH="$exiv2_prefix/lib/pkgconfig:$mpv_prefix/lib/pkgconfig:${PKG_CONFIG_PATH:-}"
+        fi
+    fi
+
     "$CMAKE_BIN" -S "$ROOT_DIR" -B "$BUILD_DIR" \
-        -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
+        -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+        "${cmake_args[@]}"
 }
 
 build_project() {
@@ -234,11 +263,19 @@ run_executable() {
         return 1
     fi
 
-    "$executable" "${APP_ARGS[@]}"
+    if ((${#APP_ARGS[@]})); then
+        "$executable" "${APP_ARGS[@]}"
+    else
+        "$executable"
+    fi
 }
 
 migrate_theme() {
-    "$ROOT_DIR/scripts/migrate-theme.sh" "${APP_ARGS[@]}"
+    if ((${#APP_ARGS[@]})); then
+        "$ROOT_DIR/scripts/migrate-theme.sh" "${APP_ARGS[@]}"
+    else
+        "$ROOT_DIR/scripts/migrate-theme.sh"
+    fi
 }
 
 clean_build_dir() {

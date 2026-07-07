@@ -24,6 +24,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
 
     directorymanager/watchers/directorywatcher.cpp
     directorymanager/watchers/dummywatcher.cpp
+    directorymanager/watchers/portablewatcher.cpp
     directorymanager/watchers/watcherevent.cpp
     directorymanager/watchers/watcherworker.cpp
 

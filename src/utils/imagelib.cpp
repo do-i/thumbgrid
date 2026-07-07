@@ -1,6 +1,9 @@
 #include "imagelib.h"
 
 void ImageLib::recolor(QPixmap &pixmap, QColor color) {
+    if(pixmap.isNull())
+        return;
+
     QPainter p(&pixmap);
     p.setCompositionMode(QPainter::CompositionMode_SourceIn);
     p.setBrush(color);

@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QFileInfo>
+#include <QPainter>
 
 namespace {
     const int thumbnailerShutdownWaitMs = 3000;
@@ -155,6 +156,7 @@ void Thumbnailer::startThumbnailerThread(QString filePath, int size, bool crop, 
 // Builds the recolored, pre-scaled folder icon on the GUI thread (QPixmap and
 // ImageLib::recolor are not safe off-thread); the worker only composites onto it.
 QImage Thumbnailer::dirIconBase(int size) {
+    size = qMax(1, size);
     QString color = settings->colorScheme().folderview_parent_icon.name();
     if(size == cachedIconSize && color == cachedIconColor && !cachedIconBase.isNull())
         return cachedIconBase;
@@ -163,8 +165,21 @@ QImage Thumbnailer::dirIconBase(int size) {
     if(source.isNull())
         source = QPixmap(":/res/icons/common/other/folder96.png");
 
-    QSize pixmapSize(qRound(size * 1.10f),
-                     qRound(size * 1.10f * source.height() / static_cast<qreal>(source.width())));
+    int pixmapWidth = qMax(1, qRound(size * 1.10f));
+    int pixmapHeight = qMax(1, qRound(size * 0.85f));
+    if(!source.isNull() && source.width() > 0 && source.height() > 0)
+        pixmapHeight = qMax(1, qRound(pixmapWidth * source.height() / static_cast<qreal>(source.width())));
+    else {
+        source = QPixmap(pixmapWidth, pixmapHeight);
+        source.fill(Qt::transparent);
+        QPainter painter(&source);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(Qt::black);
+        painter.drawRoundedRect(source.rect().adjusted(1, 1, -1, -1), 8, 8);
+    }
+
+    QSize pixmapSize(pixmapWidth, pixmapHeight);
     QPixmap scaled = source.scaled(pixmapSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     ImageLib::recolor(scaled, settings->colorScheme().folderview_parent_icon);
 
