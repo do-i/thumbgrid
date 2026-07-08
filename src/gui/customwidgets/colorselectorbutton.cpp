@@ -2,6 +2,7 @@
 
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include <QTimer>
 #include <QVBoxLayout>
 
 ColorSelectorButton::ColorSelectorButton(QWidget *parent) : ClickableLabel(parent) {
@@ -25,12 +26,17 @@ void ColorSelectorButton::showColorSelector() {
     // QColorDialog::getColor() only reports the final pick, so to support a
     // live Apply we embed a buttonless QColorDialog in our own dialog and add
     // an Apply / OK / Cancel box. Apply previews without closing.
+    const QColor initialColor = mColor;
     QDialog dialog(this);
     dialog.setWindowTitle(mDescription);
 
-    auto *picker = new QColorDialog(mColor, &dialog);
+    auto *picker = new QColorDialog(initialColor, &dialog);
     picker->setWindowFlags(Qt::Widget);
     picker->setOptions(QColorDialog::NoButtons | QColorDialog::DontUseNativeDialog);
+    picker->setCurrentColor(initialColor);
+    QTimer::singleShot(0, picker, [picker, initialColor]() {
+        picker->setCurrentColor(initialColor);
+    });
     // QColorDialog is itself a QDialog; if a key press makes it accept/reject,
     // forward that to the wrapper instead of it just hiding inside the layout
     connect(picker, &QDialog::finished, &dialog, &QDialog::done);
@@ -44,7 +50,6 @@ void ColorSelectorButton::showColorSelector() {
     layout->addWidget(picker);
     layout->addWidget(buttons);
 
-    const QColor initialColor = mColor;
     QColor appliedColor; // invalid until the first Apply
     connect(buttons->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, [&]() {
         QColor newColor = picker->currentColor();
