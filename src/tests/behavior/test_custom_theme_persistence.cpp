@@ -5,10 +5,11 @@
 #include "settings.h"
 #include "themestore.h"
 
-// The custom theme is persisted to theme.ini with its identity under a [Theme]
-// group (tid + name) and colors under [Colors], mirroring the system theme
-// files. This verifies the save/load round-trip in that layout, and that
-// selecting a preset never clobbers the stored custom palette.
+// The custom theme's colors are persisted to theme.ini under [Colors], mirroring
+// the system theme files. The active selection is a separate pointer in
+// thumbgrid.conf [General]/theme, so the theme file never stores which theme is
+// picked. This verifies the color save/load round-trip, and that selecting a
+// preset moves the pointer without clobbering the stored custom palette.
 class CustomThemePersistenceTest : public QObject {
     Q_OBJECT
 
@@ -18,7 +19,7 @@ private slots:
 };
 
 void CustomThemePersistenceTest::customPaletteRoundTripsThroughThemeIni() {
-    settings->setUseSystemColorScheme(false);
+    settings->setSelectedThemeTid(COLORS_CUSTOM);
 
     ColorScheme custom = ThemeStore::colorScheme(COLORS_DARK);
     custom.tid = COLORS_CUSTOM;
@@ -36,7 +37,7 @@ void CustomThemePersistenceTest::customPaletteRoundTripsThroughThemeIni() {
 }
 
 void CustomThemePersistenceTest::selectingAPresetKeepsTheStoredCustomPalette() {
-    settings->setUseSystemColorScheme(false);
+    settings->setSelectedThemeTid(COLORS_CUSTOM);
 
     // Store a custom palette first.
     ColorScheme custom = ThemeStore::colorScheme(COLORS_DARK);
@@ -45,15 +46,16 @@ void CustomThemePersistenceTest::selectingAPresetKeepsTheStoredCustomPalette() {
     settings->setColorScheme(custom);
     settings->saveTheme();
 
-    // Switch to a preset and persist: only the [Theme] identity should change,
-    // the stored [Colors] custom palette must be left untouched.
+    // Switch to a preset and persist: only the [General]/theme pointer should
+    // change, the stored [Colors] custom palette must be left untouched.
     settings->setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));
     settings->saveTheme();
 
+    // The selection pointer now names the preset...
+    QCOMPARE(settings->selectedThemeTid(), static_cast<int>(COLORS_LIGHT));
+    // ...while the stored custom palette under [Colors] survived intact.
     const ColorScheme stored = settings->customColorScheme();
-    // Persisted identity now names the preset (read back from [Theme]/tid)...
-    QCOMPARE(stored.tid, static_cast<int>(COLORS_LIGHT));
-    // ...while the custom colors under [Colors] survived intact.
+    QCOMPARE(stored.tid, static_cast<int>(COLORS_CUSTOM));
     QCOMPARE(stored.accent.name(), QStringLiteral("#654321"));
 }
 

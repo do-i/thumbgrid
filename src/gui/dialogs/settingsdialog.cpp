@@ -134,28 +134,22 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
             case 3: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT));        break;
             case 4: setColorScheme(ThemeStore::colorScheme(COLORS_LIGHT_YELLOW)); break;
             case 5: setColorScheme(mCustomColors);                               break;
+            case 6: setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));      break;
         }
+        updateThemeControls(index);
         mPrevThemeIndex = index;
     });
 
-    connect(ui->useSystemColorsCheckBox, &QCheckBox::toggled, [this](bool useSystemTheme) {
-        if(useSystemTheme) {
-            ui->themeSelectorComboBox->setCurrentIndex(-1);
-            setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));
-        }
-        else {
-            readColorScheme();
-        }
-        ui->themeSelectorComboBox->setEnabled(!useSystemTheme);
-        ui->colorConfigSubgroup->setEnabled(!useSystemTheme);
-        ui->modifySystemSchemeLabel->setVisible(useSystemTheme);
-    });
-
+    // "System" is the last dropdown entry; picking it derives the palette from
+    // the desktop and locks the colour editor. This link switches to an editable
+    // custom copy of the system colours.
     connect(ui->modifySystemSchemeLabel, &ClickableLabel::clicked, [this]() {
-        ui->useSystemColorsCheckBox->setChecked(false);
         ColorScheme custom = ThemeStore::colorScheme(COLORS_SYSTEM);
         custom.tid = COLORS_CUSTOM;
+        mCustomColors = custom;
         setColorScheme(custom);
+        updateThemeControls(ui->themeSelectorComboBox->currentIndex());
+        mPrevThemeIndex = ui->themeSelectorComboBox->currentIndex();
     });
 
     // App-wide
@@ -340,6 +334,11 @@ void SettingsDialog::setupPreferencePages() {
     documentLayout->addSpacing(12);
     documentLayout->addWidget(ui->widget_12);
     documentLayout->addStretch();
+
+    // "Other window tweaks" (window opacity + background blur) belongs with the
+    // general window settings, not the theme page; move it onto the General page.
+    ui->verticalLayout_5->insertWidget(
+        ui->verticalLayout_5->indexOf(ui->UIOptionsGroup) + 1, ui->windowTweaksGroup);
 
     QStackedWidget *stack = ui->stackedWidget;
     const QList<QWidget*> oldPages = {ui->General, ui->View, ui->Theme, ui->Controls,
@@ -590,12 +589,8 @@ void SettingsDialog::readSettings() {
     // reduce by 10x to have nice granular control in qslider
     ui->panelSizeSlider->setValue(settings->panelPreviewsSize() / 10);
 
-    ui->useSystemColorsCheckBox->setChecked(settings->useSystemColorScheme());
-    ui->modifySystemSchemeLabel->setVisible(settings->useSystemColorScheme());
-    ui->themeSelectorComboBox->setEnabled(!settings->useSystemColorScheme());
-    ui->colorConfigSubgroup->setEnabled(!settings->useSystemColorScheme());
-    
     readColorScheme();
+    updateThemeControls(ui->themeSelectorComboBox->currentIndex());
     readShortcuts();
     readScripts();
 }
@@ -712,13 +707,15 @@ void SettingsDialog::saveSettings() {
     settings->setMemoryAllocationLimit(ui->memoryLimitSpinBox->value());
     settings->setThumbnailerMemCacheLimit(ui->thumbMemCacheSpinBox->value());
 
-    bool useSystemColors = ui->useSystemColorsCheckBox->isChecked();
-    settings->setUseSystemColorScheme(useSystemColors);
-
-    if(useSystemColors)
+    // "System" (last dropdown entry) derives its palette from the desktop and is
+    // never written to the theme file; presets/custom go through saveColorScheme.
+    if(ui->themeSelectorComboBox->currentIndex() == 6) {
         settings->setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));
-    else
+        settings->saveTheme();
+    }
+    else {
         saveColorScheme();
+    }
     // the saved palette becomes the new revert baseline for later previews
     mSchemeAtOpen = settings->colorScheme();
     mThemePreviewed = false;
@@ -752,6 +749,7 @@ void SettingsDialog::setColorScheme(ColorScheme colors) {
         case COLORS_DARKBLUE:  ui->themeSelectorComboBox->setCurrentIndex(2); break;
         case COLORS_LIGHT_YELLOW:  ui->themeSelectorComboBox->setCurrentIndex(4); break;
         case COLORS_CUSTOM:    ui->themeSelectorComboBox->setCurrentIndex(5); break;
+        case COLORS_SYSTEM:    ui->themeSelectorComboBox->setCurrentIndex(6); break;
         default:               ui->themeSelectorComboBox->setCurrentIndex(-1); break;
     }
     ui->colorSelectorAccent->setColor(colors.accent);
@@ -824,8 +822,15 @@ int SettingsDialog::selectedThemeTid() const {
         case 3: return COLORS_LIGHT;
         case 4: return COLORS_LIGHT_YELLOW;
         case 5: return COLORS_CUSTOM;
+        case 6: return COLORS_SYSTEM;
         default: return COLORS_CUSTOM;
     }
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::updateThemeControls(int index) {
+    const bool system = (index == 6);  // "System" is the last dropdown entry
+    ui->colorConfigSubgroup->setEnabled(!system);
+    ui->modifySystemSchemeLabel->setVisible(system);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::readShortcuts() {

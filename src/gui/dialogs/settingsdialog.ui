@@ -3008,6 +3008,11 @@
                         <string>Custom</string>
                        </property>
                       </item>
+                      <item>
+                       <property name="text">
+                        <string>System</string>
+                       </property>
+                      </item>
                      </widget>
                     </item>
                     <item>
@@ -3025,13 +3030,6 @@
                        </size>
                       </property>
                      </spacer>
-                    </item>
-                    <item>
-                     <widget class="QCheckBox" name="useSystemColorsCheckBox">
-                      <property name="text">
-                       <string>Use system colors</string>
-                      </property>
-                     </widget>
                     </item>
                     <item>
                      <widget class="ClickableLabel" name="modifySystemSchemeLabel">

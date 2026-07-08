@@ -47,6 +47,9 @@ private:
     void applyColorSchemePreview();
     void markThemeCustom();
     int selectedThemeTid() const;
+    // Enable/disable the colour editor and toggle the "modify" hint depending on
+    // whether the "System" preset is selected in the theme dropdown.
+    void updateThemeControls(int index);
     // user's custom palette, preserved while a preset is previewed
     ColorScheme mCustomColors;
     // active palette to restore if the dialog closes with unsaved live previews

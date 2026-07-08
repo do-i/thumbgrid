@@ -269,8 +269,11 @@ public:
     bool videoPlayback();
     void setVideoPlayback(bool mode);
 
-    bool useSystemColorScheme();
-    void setUseSystemColorScheme(bool mode);
+    // Currently selected theme, stored as a readable name in [General]/theme
+    // ("system", "custom", or a preset name). The theme colours themselves live
+    // in the immutable preset files / theme.ini; only this pointer is in the config.
+    int selectedThemeTid();
+    void setSelectedThemeTid(int tid);
 
     void loadStylesheet();
 
@@ -368,6 +371,15 @@ private:
 
     void setupCache();
     void fillVideoFormats();
+
+    // Group-aware access to thumbgrid.conf: keys are stored under the UI
+    // category they belong to (General/Grid/Document/Advanced), so the on-disk
+    // config mirrors the settings dialog.
+    QVariant readSetting(const QString &key, const QVariant &defaultValue = QVariant()) const;
+    void writeSetting(const QString &key, const QVariant &value);
+    // One-time move of flat top-level keys into their category groups, and of
+    // the old useSystemColorScheme boolean / theme.ini tid into [General]/theme.
+    void migrateConfigGroups();
 
 signals:
     void settingsChanged();

@@ -126,6 +126,6 @@ thumbgrid_add_behavior_test(thumbgrid_custom_theme_persistence_test
     behavior/test_custom_theme_persistence.cpp
 )
 add_test(
-    NAME "The custom theme round-trips through theme.ini with a [Theme] group"
+    NAME "The custom theme round-trips through theme.ini and the selection pointer tracks the preset"
     COMMAND thumbgrid_custom_theme_persistence_test
 )
