@@ -652,6 +652,11 @@ void Core::pasteFile() {
     }
 
     if(cut) {
+        // A cut+paste moves the files, deleting them from the source folder, so
+        // confirm it first like the other move path (movePathsTo) does. Returning
+        // early keeps the clipboard intact so the cut selection survives a decline.
+        if(!confirmFileOperation(tr("Move"), toPaste, destDirectory))
+            return;
         interactiveMove(toPaste, destDirectory);
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
     } else {
