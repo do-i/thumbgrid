@@ -8,12 +8,14 @@
 # file lives in), so CI can package the exact tag without downloading a tarball
 # or maintaining a sha256sum. pkgver is supplied by CI via $THUMBGRID_PKGVER
 # (derived from the git tag); it falls back to a git-describe value for local
-# `makepkg` runs from this directory.
+# `makepkg` runs from this directory. pkgrel is supplied by CI via
+# $THUMBGRID_PKGREL, bumped for ABI-only rebuilds (no new app tag) so the
+# pacman repo publishes a version pacman -Syu recognizes as newer.
 
 pkgname=thumbgrid
 _srcroot="$(cd "$startdir/../.." && pwd)"
 pkgver="${THUMBGRID_PKGVER:-0}"
-pkgrel=1
+pkgrel="${THUMBGRID_PKGREL:-1}"
 pkgdesc="Qt image viewer (fork of easymodo/qimgv), full build (exiv2/opencv/mpv)"
 arch=('x86_64')
 url="https://github.com/do-i/thumbgrid"

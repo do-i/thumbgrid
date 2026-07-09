@@ -205,15 +205,43 @@ sudo cmake --install build
 
 ## Arch Linux package
 
-A minimal Qt6 PKGBUILD lives in [`packaging/arch/`](packaging/arch/). From that
-directory:
+**Recommended: pacman repo.** Add to `/etc/pacman.conf`:
+
+```ini
+[thumbgrid]
+SigLevel = Optional TrustAll
+Server = https://do-i.github.io/thumbgrid/arch/$arch
+```
+
+Then:
+
+```
+sudo pacman -Sy thumbgrid
+```
+
+Subsequent `sudo pacman -Syu` runs will pick up rebuilt thumbgrid packages
+automatically, including rebuilds triggered by Arch ABI updates to Qt,
+Exiv2, OpenCV, or mpv. The repo is published by
+[`arch-package.yml`](.github/workflows/arch-package.yml) to the `gh-pages`
+branch on every version tag, and can also be re-triggered manually
+(`workflow_dispatch` with a bumped `pkgrel`) to republish after an
+Arch-side ABI change with no thumbgrid code change.
+
+`SigLevel = Optional TrustAll` means packages are unsigned; treat this as a
+personal/low-stakes distribution method until package signing is added.
+
+**Manual fallback:** download `*.pkg.tar.zst` from a
+[GitHub Release](https://github.com/do-i/thumbgrid/releases) and install
+with `sudo pacman -U thumbgrid-*.pkg.tar.zst`. This does **not** receive
+automatic updates from `pacman -Syu` — you'd need to repeat this manually
+for every future release.
+
+**Building from source:** a minimal Qt6 PKGBUILD lives in
+[`packaging/arch/`](packaging/arch/). From that directory:
 
 ```
 makepkg -si
 ```
-
-CI also builds this package and attaches a `*.pkg.tar.zst` to the release on
-every version tag.
 
 # Releasing
 

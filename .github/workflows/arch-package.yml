@@ -1,15 +1,24 @@
 name: Arch package
 
-# Build the full-featured Arch package (Exiv2 / OpenCV / mpv) and attach it to
-# the GitHub release whenever a version tag is pushed.
+# Build the full-featured Arch package (Exiv2 / OpenCV / mpv), attach it to
+# the GitHub release on version tags, and publish/refresh the pacman repo
+# (gh-pages: arch/x86_64/) so `pacman -Syu` picks up the rebuild. Also
+# runnable manually (workflow_dispatch) with a bumped pkgrel to republish an
+# ABI-only rebuild (e.g. after an Arch mpv/exiv2/opencv/Qt update) without
+# cutting a new app version tag.
 on:
   push:
     tags:
       - 'v*'
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      pkgrel:
+        description: 'pkgrel to publish (bump for an ABI-only rebuild of the latest tag)'
+        required: false
+        default: '1'
 
 permissions:
-  contents: write   # needed to upload assets to the release
+  contents: write   # needed to upload release assets and push to gh-pages
 
 jobs:
   build:
@@ -18,7 +27,7 @@ jobs:
       image: archlinux:base-devel
     steps:
       - name: Install build tooling
-        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf exiv2 opencv mpv
+        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf exiv2 opencv mpv pacman-contrib
 
       - uses: actions/checkout@v4
         with:
@@ -34,21 +43,32 @@ jobs:
           # Let the build user own the checkout so makepkg can write src/pkg.
           chown -R builder:builder "$GITHUB_WORKSPACE"
 
-      - name: Compute pkgver from tag
+      - name: Compute pkgver / pkgrel
         id: ver
         run: |
-          ref="${GITHUB_REF_NAME}"
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            ref="${GITHUB_REF_NAME}"
+            pkgrel="1"
+          else
+            # Manual dispatch (ABI-only rebuild): republish the latest tag
+            # with the caller-supplied pkgrel so pacman -Syu sees a bump.
+            ref="$(git describe --tags --abbrev=0)"
+            pkgrel="${{ github.event.inputs.pkgrel }}"
+            pkgrel="${pkgrel:-1}"
+          fi
           # Strip leading 'v' and map '-' to '_' (pacman versions can't contain '-').
           pkgver="$(printf '%s' "$ref" | sed 's/^v//; s/-/_/g')"
           echo "pkgver=$pkgver" >> "$GITHUB_OUTPUT"
-          echo "Building pkgver=$pkgver from tag=$ref"
+          echo "pkgrel=$pkgrel" >> "$GITHUB_OUTPUT"
+          echo "Building pkgver=$pkgver pkgrel=$pkgrel from ref=$ref"
 
       - name: Build package
         working-directory: packaging/arch
         env:
           THUMBGRID_PKGVER: ${{ steps.ver.outputs.pkgver }}
+          THUMBGRID_PKGREL: ${{ steps.ver.outputs.pkgrel }}
         run: |
-          sudo -u builder --preserve-env=THUMBGRID_PKGVER \
+          sudo -u builder --preserve-env=THUMBGRID_PKGVER,THUMBGRID_PKGREL \
             makepkg -f --noconfirm --nodeps
           ls -al ./*.pkg.tar.zst
 
@@ -59,3 +79,38 @@ jobs:
           files: packaging/arch/*.pkg.tar.zst
           fail_on_unmatched_files: true
           generate_release_notes: true
+
+      - name: Publish/refresh pacman repo (gh-pages)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+          repo_url="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          work="$(mktemp -d)"
+
+          if git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git clone --branch gh-pages --single-branch "$repo_url" "$work"
+          else
+            echo "gh-pages branch does not exist yet; creating it."
+            git clone "$repo_url" "$work"
+            git -C "$work" checkout --orphan gh-pages
+            git -C "$work" rm -rf . >/dev/null 2>&1 || true
+          fi
+
+          mkdir -p "$work/arch/x86_64"
+          cp packaging/arch/*.pkg.tar.zst "$work/arch/x86_64/"
+          # repo-add merges with whatever is already in thumbgrid.db.tar.zst,
+          # so previously published packages are kept, not deleted.
+          (cd "$work/arch/x86_64" && repo-add thumbgrid.db.tar.zst *.pkg.tar.zst)
+
+          cd "$work"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No pacman repo changes to publish."
+          else
+            git commit -m "Publish thumbgrid ${{ steps.ver.outputs.pkgver }}-${{ steps.ver.outputs.pkgrel }}"
+            git push origin gh-pages
+          fi
