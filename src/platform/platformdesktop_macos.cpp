@@ -21,3 +21,9 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
     args << "end tell";
     QProcess::startDetached("osascript", args);
 }
+
+bool PlatformDesktop::setWallpaper(const QString &, QString *errorMessage) {
+    if(errorMessage)
+        *errorMessage = "Action is not supported on this platform";
+    return false;
+}

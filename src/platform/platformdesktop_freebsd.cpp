@@ -19,3 +19,19 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
     else
         QDesktopServices::openUrl(QUrl::fromLocalFile(fallbackDir));
 }
+
+bool PlatformDesktop::setWallpaper(const QString &path, QString *errorMessage) {
+    const QString session = QString::fromLocal8Bit(qgetenv("DESKTOP_SESSION")).toLower();
+    if(session.contains("plasma")) {
+        ScriptManager::runCommand("plasma-apply-wallpaperimage \"" + path + "\"");
+        return true;
+    }
+    if(session.contains("gnome")) {
+        ScriptManager::runCommand("gsettings set org.gnome.desktop.background picture-uri \"" + path + "\"");
+        return true;
+    }
+
+    if(errorMessage)
+        *errorMessage = "Action is not supported in your desktop session (\"" + session + "\")";
+    return false;
+}
