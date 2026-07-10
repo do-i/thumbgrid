@@ -10,6 +10,5 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     script.cpp
     sleep.cpp
     stuff.cpp
-    wallpapersetter.cpp
     fileoperations.cpp
 )
