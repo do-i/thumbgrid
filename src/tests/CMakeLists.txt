@@ -129,3 +129,17 @@ add_test(
     NAME "The custom theme round-trips through theme.ini and the selection pointer tracks the preset"
     COMMAND thumbgrid_custom_theme_persistence_test
 )
+
+add_executable(thumbgrid_settings_migration_gates_test
+    behavior/test_settings_migration_gates.cpp
+)
+target_include_directories(thumbgrid_settings_migration_gates_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(thumbgrid_settings_migration_gates_test PRIVATE thumbgrid_app_objects Qt6::Test)
+add_dependencies(thumbgrid_behavior_tests_all thumbgrid_settings_migration_gates_test)
+
+foreach(scenario fresh upgrade current downgrade theme-recovery shortcut-recovery)
+    add_test(
+        NAME "Settings migration gates: ${scenario}"
+        COMMAND thumbgrid_settings_migration_gates_test ${scenario}
+    )
+endforeach()

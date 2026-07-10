@@ -1,5 +1,7 @@
 #include "settings.h"
 
+#include "appversion.h"
+
 Settings *settings = nullptr;
 
 namespace {
@@ -523,7 +525,15 @@ void migrateLegacyShortcuts(QSettings *settingsConf, const QString &jsonPath) {
 
 }
 
-Settings::Settings(QObject *parent) : QObject(parent) {
+Settings::Settings(QObject *parent)
+    : QObject(parent),
+      settingsConf(nullptr),
+      stateConf(nullptr),
+      themeConf(nullptr),
+      mTmpDir(nullptr),
+      mThumbCacheDir(nullptr),
+      mConfDir(nullptr) {
+    QString confDir;
 #if defined(__linux__) || defined(__FreeBSD__)
     // config files
     QSettings::setDefaultFormat(QSettings::NativeFormat);
@@ -531,19 +541,27 @@ Settings::Settings(QObject *parent) : QObject(parent) {
     stateConf = new QSettings(QCoreApplication::organizationName(), "savedState");
     // Keep the theme as a plain INI (matching the system theme files) rather
     // than the native "theme.conf", in the same config dir as the other configs.
-    const QString confDir = QFileInfo(settingsConf->fileName()).absolutePath();
+    confDir = QFileInfo(settingsConf->fileName()).absolutePath();
     themeConf = new QSettings(confDir + "/theme.ini", QSettings::IniFormat);
     mShortcutsJsonPath = confDir + "/shortcuts.json";
-    migrateLegacyThemeConf(confDir, themeConf);
 #else
     mConfDir = new QDir(QApplication::applicationDirPath() + "/conf");
     mConfDir->mkpath(QApplication::applicationDirPath() + "/conf");
+    confDir = mConfDir->absolutePath();
     settingsConf = new QSettings(mConfDir->absolutePath() + "/" + qApp->applicationName() + ".ini", QSettings::IniFormat);
     stateConf = new QSettings(mConfDir->absolutePath() + "/savedState.ini", QSettings::IniFormat);
     themeConf = new QSettings(mConfDir->absolutePath() + "/theme.ini", QSettings::IniFormat);
     mShortcutsJsonPath = mConfDir->absolutePath() + "/shortcuts.json";
 #endif
-    migrateConfigGroups();
+    const QVersionNumber lastVer(
+        settingsConf->value(groupedKey(QLatin1String("lastVerMajor")), 0).toInt(),
+        settingsConf->value(groupedKey(QLatin1String("lastVerMinor")), 0).toInt(),
+        settingsConf->value(groupedKey(QLatin1String("lastVerMicro")), 0).toInt());
+    const bool isFirstRun = settingsConf->value(groupedKey(QLatin1String("firstRun")), true).toBool();
+    const bool hasExistingSettings = !settingsConf->allKeys().isEmpty();
+    runConfigRecoveryMigrations(confDir);
+    if((!isFirstRun || hasExistingSettings) && lastVer < appVersion)
+        runVersionedSettingsMigrations(lastVer);
     fillVideoFormats();
 }
 //------------------------------------------------------------------------------
@@ -603,6 +621,23 @@ QVariant Settings::readSetting(const QString &key, const QVariant &defaultValue)
 
 void Settings::writeSetting(const QString &key, const QVariant &value) {
     settingsConf->setValue(groupedKey(key), value);
+}
+
+void Settings::runVersionedSettingsMigrations(const QVersionNumber &lastVer) {
+    if(lastVer < QVersionNumber(2026, 7, 7))
+        migrateConfigGroups();
+}
+
+void Settings::runConfigRecoveryMigrations(const QString &confDir) {
+    // Deliberately cross-platform: importing legacy theme.conf is guarded by
+    // both the source file existing and theme.ini being absent.
+    const bool hasThemePointer = settingsConf->contains(QLatin1String("theme"));
+    migrateLegacyThemeConf(confDir, themeConf);
+    if(!hasThemePointer && themeConf->contains(QLatin1String("Theme/tid"))) {
+        const int tid = normalizedThemeTid(themeConf->value(QLatin1String("Theme/tid")).toInt());
+        settingsConf->setValue(QLatin1String("theme"), themeToken(tid));
+    }
+    themeConf->remove(QLatin1String("Theme"));
 }
 //------------------------------------------------------------------------------
 int Settings::selectedThemeTid() {

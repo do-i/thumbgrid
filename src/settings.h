@@ -377,6 +377,8 @@ private:
     // config mirrors the settings dialog.
     QVariant readSetting(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void writeSetting(const QString &key, const QVariant &value);
+    void runVersionedSettingsMigrations(const QVersionNumber &lastVer);
+    void runConfigRecoveryMigrations(const QString &confDir);
     // One-time move of flat top-level keys into their category groups, and of
     // the old useSystemColorScheme boolean / theme.ini tid into [General]/theme.
     void migrateConfigGroups();
