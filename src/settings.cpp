@@ -532,28 +532,12 @@ Settings::Settings(QObject *parent)
       stateConf(nullptr),
       themeConf(nullptr),
       mTmpDir(nullptr),
-      mThumbCacheDir(nullptr),
-      mConfDir(nullptr) {
-    QString confDir;
-#if defined(__linux__) || defined(__FreeBSD__)
-    // config files
-    QSettings::setDefaultFormat(QSettings::NativeFormat);
-    settingsConf = new QSettings();
-    stateConf = new QSettings(QCoreApplication::organizationName(), "savedState");
-    // Keep the theme as a plain INI (matching the system theme files) rather
-    // than the native "theme.conf", in the same config dir as the other configs.
-    confDir = QFileInfo(settingsConf->fileName()).absolutePath();
-    themeConf = new QSettings(confDir + "/theme.ini", QSettings::IniFormat);
-    mShortcutsJsonPath = confDir + "/shortcuts.json";
-#else
-    mConfDir = new QDir(QApplication::applicationDirPath() + "/conf");
-    mConfDir->mkpath(QApplication::applicationDirPath() + "/conf");
-    confDir = mConfDir->absolutePath();
-    settingsConf = new QSettings(mConfDir->absolutePath() + "/" + qApp->applicationName() + ".ini", QSettings::IniFormat);
-    stateConf = new QSettings(mConfDir->absolutePath() + "/savedState.ini", QSettings::IniFormat);
-    themeConf = new QSettings(mConfDir->absolutePath() + "/theme.ini", QSettings::IniFormat);
-    mShortcutsJsonPath = mConfDir->absolutePath() + "/shortcuts.json";
-#endif
+      mThumbCacheDir(nullptr) {
+    settingsConf = PlatformDesktop::createSettingsConfig();
+    stateConf = PlatformDesktop::createStateConfig();
+    const QString confDir = PlatformDesktop::settingsConfigDirectory(settingsConf);
+    themeConf = PlatformDesktop::createThemeConfig(confDir);
+    mShortcutsJsonPath = PlatformDesktop::shortcutsJsonPath(confDir);
     const QVersionNumber lastVer(
         settingsConf->value(groupedKey(QLatin1String("lastVerMajor")), 0).toInt(),
         settingsConf->value(groupedKey(QLatin1String("lastVerMinor")), 0).toInt(),
@@ -585,30 +569,22 @@ Settings *Settings::getInstance() {
 }
 //------------------------------------------------------------------------------
 void Settings::setupCache() {
-#if defined(__linux__) ||  defined(__FreeBSD__)
-    QString genericCacheLocation = QStandardPaths::writableLocation(QStandardPaths::GenericCacheLocation);
-    if(genericCacheLocation.isEmpty())
-        genericCacheLocation = QDir::homePath() + "/.cache";
-    genericCacheLocation.append("/" + QApplication::applicationName());
-    QString cacheLocation = settings->readSetting("cacheDir", genericCacheLocation).toString();
+    const QString defaultCacheLocation = PlatformDesktop::defaultCacheDirectory();
+    QString cacheLocation = defaultCacheLocation;
+    if(PlatformDesktop::cacheDirectoryIsConfigurable())
+        cacheLocation = settings->readSetting("cacheDir", defaultCacheLocation).toString();
     mTmpDir = new QDir(cacheLocation);
     mTmpDir->mkpath(mTmpDir->absolutePath());
     QFileInfo dirTest(mTmpDir->absolutePath());
     if(!dirTest.isDir() || !dirTest.isWritable() || !dirTest.exists()) {
         // fallback
         qDebug() << "Error: cache dir is not writable" << mTmpDir->absolutePath();
-        qDebug() << "Trying to use" << genericCacheLocation << "instead";
-        mTmpDir->setPath(genericCacheLocation);
+        qDebug() << "Trying to use" << defaultCacheLocation << "instead";
+        mTmpDir->setPath(defaultCacheLocation);
         mTmpDir->mkpath(mTmpDir->absolutePath());
     }
-    mThumbCacheDir = new QDir(mTmpDir->absolutePath() + "/thumbnails");
+    mThumbCacheDir = new QDir(PlatformDesktop::thumbnailCacheDirectory(mTmpDir->absolutePath()));
     mThumbCacheDir->mkpath(mThumbCacheDir->absolutePath());
-#else
-    mTmpDir = new QDir(QApplication::applicationDirPath() + "/cache");
-    mTmpDir->mkpath(mTmpDir->absolutePath());
-    mThumbCacheDir = new QDir(QApplication::applicationDirPath() + "/thumbnails");
-    mThumbCacheDir->mkpath(mThumbCacheDir->absolutePath());
-#endif
 }
 //------------------------------------------------------------------------------
 void Settings::sync() {

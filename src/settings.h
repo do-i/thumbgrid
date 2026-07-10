@@ -363,7 +363,7 @@ private:
     explicit Settings(QObject *parent = nullptr);
     QSettings *settingsConf, *stateConf, *themeConf;
     QString mShortcutsJsonPath;
-    QDir *mTmpDir, *mThumbCacheDir, *mConfDir;
+    QDir *mTmpDir, *mThumbCacheDir;
     ColorScheme mColorScheme;
     QMultiMap<QByteArray, QByteArray> mVideoFormatsMap; // [mimetype, format]
     void loadTheme();

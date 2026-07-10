@@ -8,6 +8,7 @@
 #include <QCoreApplication>
 #include <QGuiApplication>
 #include <QProcess>
+#include <QSettings>
 #include <QUrl>
 
 #include <cwchar>
@@ -25,8 +26,29 @@ void PlatformDesktop::applyHighDpiPolicy() {
 #endif
 }
 
+bool PlatformDesktop::cacheDirectoryIsConfigurable() {
+    return false;
+}
+
 QString PlatformDesktop::contextMenuBorderRadius() {
     return "0px";
+}
+
+QSettings *PlatformDesktop::createSettingsConfig() {
+    const QString configDir = settingsConfigDirectory(nullptr);
+    return new QSettings(configDir + "/" + QCoreApplication::applicationName() + ".ini", QSettings::IniFormat);
+}
+
+QSettings *PlatformDesktop::createStateConfig() {
+    return new QSettings(settingsConfigDirectory(nullptr) + "/savedState.ini", QSettings::IniFormat);
+}
+
+QSettings *PlatformDesktop::createThemeConfig(const QString &configDir) {
+    return new QSettings(configDir + "/theme.ini", QSettings::IniFormat);
+}
+
+QString PlatformDesktop::defaultCacheDirectory() {
+    return QCoreApplication::applicationDirPath() + "/cache";
 }
 
 QString PlatformDesktop::defaultMpvBinary() {
@@ -35,6 +57,12 @@ QString PlatformDesktop::defaultMpvBinary() {
 
 void PlatformDesktop::prepareApplicationEnvironment() {
     qputenv("QT_PLUGIN_PATH", "");
+}
+
+QString PlatformDesktop::settingsConfigDirectory(const QSettings *) {
+    const QString configDir = QCoreApplication::applicationDirPath() + "/conf";
+    QDir().mkpath(configDir);
+    return configDir;
 }
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {
@@ -46,6 +74,10 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
     QStringList args;
     args << "/select," << QDir::toNativeSeparators(selectedPath);
     QProcess::startDetached("explorer", args);
+}
+
+QString PlatformDesktop::shortcutsJsonPath(const QString &configDir) {
+    return configDir + "/shortcuts.json";
 }
 
 bool PlatformDesktop::setWallpaper(const QString &path, QString *errorMessage) {
@@ -72,4 +104,8 @@ bool PlatformDesktop::setWallpaper(const QString &path, QString *errorMessage) {
                           const_cast<wchar_t *>(wallpaperPath.c_str()),
                           SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
     return true;
+}
+
+QString PlatformDesktop::thumbnailCacheDirectory(const QString &) {
+    return QCoreApplication::applicationDirPath() + "/thumbnails";
 }
