@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include "platform/platformdesktop.h"
+
 // TODO: nuke this and rewrite
 
 MW::MW(QWidget *parent)
@@ -562,9 +564,8 @@ QString MW::getSaveFileName(QString filePath) {
     if(writerFormats.contains("avif")) filters.append("AVIF (*.avif *.avifs)");
     if(writerFormats.contains("tif"))  filters.append("TIFF (*.tif *.tiff)");
     if(writerFormats.contains("bmp"))  filters.append("BMP (*.bmp)");
-#ifdef _WIN32
-    if(writerFormats.contains("ico"))  filters.append("Icon Files (*.ico)");
-#endif
+    if(PlatformDesktop::supportsIcoSaveFormat() && writerFormats.contains("ico"))
+        filters.append("Icon Files (*.ico)");
     if(writerFormats.contains("ppm"))  filters.append("PPM (*.ppm)");
     if(writerFormats.contains("xbm"))  filters.append("XBM (*.xbm)");
     if(writerFormats.contains("xpm"))  filters.append("XPM (*.xpm)");

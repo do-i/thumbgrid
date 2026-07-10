@@ -55,6 +55,22 @@ QString PlatformDesktop::defaultMpvBinary() {
     return QCoreApplication::applicationDirPath() + "/mpv.exe";
 }
 
+QString PlatformDesktop::folderViewInitialRootPath() {
+    return QString();
+}
+
+QString PlatformDesktop::folderViewRootPathFor(const QString &) {
+    return QString();
+}
+
+bool PlatformDesktop::isWaylandPlatform() {
+    return false;
+}
+
+bool PlatformDesktop::needsWaylandCursorWorkaround() {
+    return false;
+}
+
 void PlatformDesktop::prepareApplicationEnvironment() {
     qputenv("QT_PLUGIN_PATH", "");
 }
@@ -63,6 +79,10 @@ QString PlatformDesktop::settingsConfigDirectory(const QSettings *) {
     const QString configDir = QCoreApplication::applicationDirPath() + "/conf";
     QDir().mkpath(configDir);
     return configDir;
+}
+
+bool PlatformDesktop::shouldIgnoreWheelEvent(QWheelEvent *) {
+    return false;
 }
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {
@@ -78,6 +98,14 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
 
 QString PlatformDesktop::shortcutsJsonPath(const QString &configDir) {
     return configDir + "/shortcuts.json";
+}
+
+int PlatformDesktop::slidePanelUpdateInterval() {
+    return 8;
+}
+
+bool PlatformDesktop::supportsIcoSaveFormat() {
+    return true;
 }
 
 bool PlatformDesktop::setWallpaper(const QString &path, QString *errorMessage) {

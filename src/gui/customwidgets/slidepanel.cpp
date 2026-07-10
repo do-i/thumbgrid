@@ -1,5 +1,7 @@
 #include "slidepanel.h"
 
+#include "platform/platformdesktop.h"
+
 SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
     : FloatingWidget(parent) ,
       panelSize(50),
@@ -22,12 +24,7 @@ SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
     timeline.setEasingCurve(QEasingCurve::Linear);
     timeline.setStartFrame(0);
     timeline.setEndFrame(ANIMATION_DURATION);
-    // For some reason 16 feels janky on windows. Linux is fine.
-#ifdef _WIN32
-    timeline.setUpdateInterval(8);
-#else
-    timeline.setUpdateInterval(16);
-#endif
+    timeline.setUpdateInterval(PlatformDesktop::slidePanelUpdateInterval());
 
     connect(&timeline, &QTimeLine::frameChanged, this, &SlidePanel::animationUpdate);
     connect(&timeline, &QTimeLine::finished, this, &SlidePanel::onAnimationFinish);

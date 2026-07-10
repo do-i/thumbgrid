@@ -5,6 +5,8 @@
 
 #include "viewerwidget.h"
 
+#include "platform/platformdesktop.h"
+
 ViewerWidget::ViewerWidget(QWidget *parent)
     : FloatingWidgetContainer(parent),
       imageViewer(nullptr),
@@ -18,12 +20,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
 {
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
-#ifdef Q_OS_LINUX
-    // we cant check cursor position on wayland until the mouse is moved
-    // use this to skip cursor check once
-    if(qgetenv("XDG_SESSION_TYPE") == "wayland")
-        mWaylandCursorWorkaround = true;
-#endif
+    mWaylandCursorWorkaround = PlatformDesktop::needsWaylandCursorWorkaround();
     layout.setContentsMargins(0, 0, 0, 0);
     layout.setSpacing(0);
     this->setLayout(&layout);

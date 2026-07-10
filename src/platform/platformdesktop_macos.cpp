@@ -8,6 +8,7 @@
 #include <QSettings>
 #include <QStyleFactory>
 #include <QUrl>
+#include <QWheelEvent>
 
 void PlatformDesktop::applyApplicationStyle(QApplication *app) {
     if(QStyleFactory::keys().contains("Fusion"))
@@ -46,6 +47,22 @@ QString PlatformDesktop::defaultMpvBinary() {
     return QString();
 }
 
+QString PlatformDesktop::folderViewInitialRootPath() {
+    return QDir::homePath();
+}
+
+QString PlatformDesktop::folderViewRootPathFor(const QString &) {
+    return QString();
+}
+
+bool PlatformDesktop::isWaylandPlatform() {
+    return false;
+}
+
+bool PlatformDesktop::needsWaylandCursorWorkaround() {
+    return false;
+}
+
 void PlatformDesktop::prepareApplicationEnvironment() {
 }
 
@@ -53,6 +70,10 @@ QString PlatformDesktop::settingsConfigDirectory(const QSettings *) {
     const QString configDir = QCoreApplication::applicationDirPath() + "/conf";
     QDir().mkpath(configDir);
     return configDir;
+}
+
+bool PlatformDesktop::shouldIgnoreWheelEvent(QWheelEvent *event) {
+    return event->phase() == Qt::ScrollBegin || event->phase() == Qt::ScrollEnd;
 }
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {
@@ -75,6 +96,14 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
 
 QString PlatformDesktop::shortcutsJsonPath(const QString &configDir) {
     return configDir + "/shortcuts.json";
+}
+
+int PlatformDesktop::slidePanelUpdateInterval() {
+    return 16;
+}
+
+bool PlatformDesktop::supportsIcoSaveFormat() {
+    return false;
 }
 
 bool PlatformDesktop::setWallpaper(const QString &, QString *errorMessage) {

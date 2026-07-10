@@ -51,11 +51,31 @@ QString PlatformDesktop::defaultMpvBinary() {
     return "/usr/local/bin/mpv";
 }
 
+QString PlatformDesktop::folderViewInitialRootPath() {
+    return QDir::homePath();
+}
+
+QString PlatformDesktop::folderViewRootPathFor(const QString &) {
+    return QString();
+}
+
+bool PlatformDesktop::isWaylandPlatform() {
+    return qApp->platformName() == "wayland";
+}
+
+bool PlatformDesktop::needsWaylandCursorWorkaround() {
+    return false;
+}
+
 void PlatformDesktop::prepareApplicationEnvironment() {
 }
 
 QString PlatformDesktop::settingsConfigDirectory(const QSettings *settingsConfig) {
     return QFileInfo(settingsConfig->fileName()).absolutePath();
+}
+
+bool PlatformDesktop::shouldIgnoreWheelEvent(QWheelEvent *) {
+    return false;
 }
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {
@@ -75,6 +95,14 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
 
 QString PlatformDesktop::shortcutsJsonPath(const QString &configDir) {
     return configDir + "/shortcuts.json";
+}
+
+int PlatformDesktop::slidePanelUpdateInterval() {
+    return 16;
+}
+
+bool PlatformDesktop::supportsIcoSaveFormat() {
+    return false;
 }
 
 bool PlatformDesktop::setWallpaper(const QString &path, QString *errorMessage) {

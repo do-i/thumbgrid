@@ -1,6 +1,8 @@
 #include "folderview.h"
 #include "ui_folderview.h"
 
+#include "platform/platformdesktop.h"
+
 FolderView::FolderView(QWidget *parent) :
     FloatingWidgetContainer(parent),
     ui(new Ui::FolderView)
@@ -24,13 +26,11 @@ FolderView::FolderView(QWidget *parent) :
     header->hideSection(2); // type
     header->hideSection(3); // mod date
 
-#ifdef _WIN32
-    dirModel->setRootPath("");
-#else
-    dirModel->setRootPath(QDir::homePath());
-    QModelIndex idx = dirModel->index(dirModel->rootPath());
-    ui->dirTreeView->setRootIndex(idx);
-#endif
+    dirModel->setRootPath(PlatformDesktop::folderViewInitialRootPath());
+    if(!dirModel->rootPath().isEmpty()) {
+        QModelIndex idx = dirModel->index(dirModel->rootPath());
+        ui->dirTreeView->setRootIndex(idx);
+    }
     // -------------------------------
     ui->upButton->setAction("goUp");
     ui->upButton->setIconPath(":res/icons/common/buttons/panel/up16.png");
@@ -280,19 +280,12 @@ void FolderView::onRootBtn() {
 }
 
 void FolderView::setDirectoryPath(QString path) {
-#ifdef __linux
-    if(path.startsWith(QDir::homePath())) {
-        if(dirModel->rootPath() != QDir::homePath()) {
-            dirModel->setRootPath(QDir::homePath());
-            QModelIndex idx = dirModel->index(dirModel->rootPath());
-            ui->dirTreeView->setRootIndex(idx);
-        }
-    } else {
-        dirModel->setRootPath("/");
+    const QString rootPath = PlatformDesktop::folderViewRootPathFor(path);
+    if(!rootPath.isEmpty() && dirModel->rootPath() != rootPath) {
+        dirModel->setRootPath(rootPath);
         QModelIndex idx = dirModel->index(dirModel->rootPath());
         ui->dirTreeView->setRootIndex(idx);
     }
-#endif
     ui->pathLabel->setText(path);
 
     if(ui->dirTreeView->currentIndex().data() == path)

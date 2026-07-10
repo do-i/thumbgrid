@@ -1,4 +1,7 @@
 #include "imageviewerv2.h"
+
+#include "platform/platformdesktop.h"
+
 #include "utils/imagelib.h"
 
 ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
@@ -33,8 +36,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAcceptDrops(false);
 
-    if(qApp->platformName() == "wayland")
-        wayland = true;
+    wayland = PlatformDesktop::isWaylandPlatform();
 
     dpr = this->devicePixelRatioF();
     hs = horizontalScrollBar();
@@ -590,14 +592,10 @@ void ImageViewerV2::mouseReleaseEvent(QMouseEvent *event) {
 // warning for future me:
 // for some reason in qgraphicsview wheelEvent is followed by moveEvent (wtf?)
 void ImageViewerV2::wheelEvent(QWheelEvent *event) {
-    #ifdef __APPLE__
-    // this event goes off during force touch with Qt::ScrollPhase being set to begin/end
-    // lets filter these
-    if(event->phase() == Qt::ScrollBegin || event->phase() == Qt::ScrollEnd) {
+    if(PlatformDesktop::shouldIgnoreWheelEvent(event)) {
         event->accept();
         return;
     }
-    #endif
 
     if(event->buttons() & Qt::RightButton) {
         event->accept();
