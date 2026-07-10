@@ -5,6 +5,14 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+QString PlatformDesktop::contextMenuBorderRadius() {
+    return "3px";
+}
+
+QString PlatformDesktop::defaultMpvBinary() {
+    return "/usr/local/bin/mpv";
+}
+
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {
     if(selectedPath.isEmpty()) {
         QDesktopServices::openUrl(QUrl::fromLocalFile(fallbackDir));

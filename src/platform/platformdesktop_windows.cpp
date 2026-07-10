@@ -2,6 +2,7 @@
 
 #include <QDesktopServices>
 #include <QDir>
+#include <QCoreApplication>
 #include <QProcess>
 #include <QUrl>
 
@@ -9,6 +10,14 @@
 #include <string>
 
 #include <windows.h>
+
+QString PlatformDesktop::contextMenuBorderRadius() {
+    return "0px";
+}
+
+QString PlatformDesktop::defaultMpvBinary() {
+    return QCoreApplication::applicationDirPath() + "/mpv.exe";
+}
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {
     if(selectedPath.isEmpty()) {

@@ -4,6 +4,14 @@
 #include <QProcess>
 #include <QUrl>
 
+QString PlatformDesktop::contextMenuBorderRadius() {
+    return "3px";
+}
+
+QString PlatformDesktop::defaultMpvBinary() {
+    return QString();
+}
+
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {
     if(selectedPath.isEmpty()) {
         QDesktopServices::openUrl(QUrl::fromLocalFile(fallbackDir));

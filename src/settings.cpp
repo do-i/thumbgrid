@@ -1,4 +1,5 @@
 #include "settings.h"
+#include "platform/platformdesktop.h"
 
 #include "appversion.h"
 
@@ -794,12 +795,7 @@ void Settings::loadStylesheet() {
         styleSheet.replace("%rename_overlay_width%", QString::number(rename_overlay_width)+"px");
 
         styleSheet.replace("%icontheme%",  "light");
-        // Qt::Popup can't do transparency under windows, use square window
-#ifdef _WIN32
-        styleSheet.replace("%contextmenu_border_radius%",  "0px");
-#else
-        styleSheet.replace("%contextmenu_border_radius%",  "3px");
-#endif
+        styleSheet.replace("%contextmenu_border_radius%",  PlatformDesktop::contextMenuBorderRadius());
         styleSheet.replace("%sys_window%",    sys_window.name());
         styleSheet.replace("%sys_window_tinted%",    sys_window_tinted.name());
         styleSheet.replace("%sys_window_tinted_lc%", sys_window_tinted_lc.name());
@@ -984,13 +980,7 @@ void Settings::fillVideoFormats() {
 QString Settings::mpvBinary() {
     QString mpvPath = settings->readSetting("mpvBinary", "").toString();
     if(!QFile::exists(mpvPath)) {
-    #ifdef _WIN32
-        mpvPath = QCoreApplication::applicationDirPath() + "/mpv.exe";
-    #elif defined __linux__
-        mpvPath = "/usr/bin/mpv";
-    #elif defined __FreeBSD__
-        mpvPath = "/usr/local/bin/mpv";
-    #endif
+        mpvPath = PlatformDesktop::defaultMpvBinary();
         if(!QFile::exists(mpvPath))
             mpvPath = "";
     }
