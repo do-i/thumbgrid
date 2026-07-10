@@ -7,6 +7,8 @@
 
 #include "core.h"
 
+#include "platform/platformdesktop.h"
+
 #include <QInputDialog>
 #include <QLineEdit>
 
@@ -937,36 +939,7 @@ void Core::showOpenDialog() {
 void Core::showInDirectory() {
     if(!model)
         return;
-    if(selectedPath().isEmpty()) {
-        QDesktopServices::openUrl(QUrl::fromLocalFile(model->directoryPath()));
-        return;
-    }
-#if defined(__linux__) || defined(__FreeBSD__)
-    QString fm = ScriptManager::runCommand("xdg-mime query default inode/directory");
-    if(fm.contains("dolphin"))
-        ScriptManager::runCommandDetached("dolphin --select " + selectedPath());
-    else if(fm.contains("nautilus"))
-        ScriptManager::runCommandDetached("nautilus --select " + selectedPath());
-    else
-        QDesktopServices::openUrl(QUrl::fromLocalFile(model->directoryPath()));
-#elif __WIN32
-    QStringList args;
-    args << "/select," << QDir::toNativeSeparators(selectedPath());
-    QProcess::startDetached("explorer", args);
-#elif __APPLE__
-    QStringList args;
-    args << "-e";
-    args << "tell application \"Finder\"";
-    args << "-e";
-    args << "activate";
-    args << "-e";
-    args << "select POSIX file \""+selectedPath()+"\"";
-    args << "-e";
-    args << "end tell";
-    QProcess::startDetached("osascript", args);
-#else
-    QDesktopServices::openUrl(QUrl::fromLocalFile(model->directoryPath()));
-#endif
+    PlatformDesktop::showInDirectory(selectedPath(), model->directoryPath());
 }
 
 void Core::interactiveCopy(QList<QString> paths, QString destDirectory) {

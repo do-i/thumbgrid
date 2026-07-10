@@ -53,10 +53,30 @@ set_source_files_properties(${APPVERSION_CPP} PROPERTIES GENERATED TRUE)
 
 set(THUMBGRID_APP_TARGET thumbgrid_app_objects)
 
+set(PLATFORM_DESKTOP_IMPLEMENTATIONS
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_linux.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_freebsd.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_macos.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_windows.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_fallback.cpp
+)
+if(WIN32)
+    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_windows.cpp)
+elseif(APPLE)
+    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_macos.cpp)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_freebsd.cpp)
+elseif(UNIX)
+    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_linux.cpp)
+else()
+    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_fallback.cpp)
+endif()
+
 # ADD APPLICATION OBJECTS
 add_library(${THUMBGRID_APP_TARGET} OBJECT
     ${CMAKE_CURRENT_BINARY_DIR}/appversion.cpp
     core.cpp
+    ${PLATFORM_DESKTOP_SOURCE}
     settings.cpp
     themestore.cpp
     sharedresources.cpp
@@ -73,6 +93,15 @@ target_include_directories(${THUMBGRID_APP_TARGET} PUBLIC
 )
 # Re-resolve the version from git before compiling appversion.cpp each build.
 add_dependencies(${THUMBGRID_APP_TARGET} generate_appversion)
+
+add_custom_target(validate_platform_impls ALL
+    COMMAND ${CMAKE_COMMAND}
+        -DPLATFORM_HEADER=${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop.h
+        "-DPLATFORM_IMPLEMENTATIONS=${PLATFORM_DESKTOP_IMPLEMENTATIONS}"
+        -P ${CMAKE_SOURCE_DIR}/cmake/ValidatePlatformImpls.cmake
+    COMMENT "Validating platform implementation contracts"
+    VERBATIM)
+add_dependencies(${THUMBGRID_APP_TARGET} validate_platform_impls)
 
 # ADD EXECUTABLE
 add_executable(thumbgrid
