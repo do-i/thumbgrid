@@ -1,8 +1,12 @@
 #include "platformdesktop.h"
 
+#include "proxystyle.h"
+
+#include <QApplication>
 #include <QDesktopServices>
 #include <QDir>
 #include <QCoreApplication>
+#include <QGuiApplication>
 #include <QProcess>
 #include <QUrl>
 
@@ -11,12 +15,26 @@
 
 #include <windows.h>
 
+void PlatformDesktop::applyApplicationStyle(QApplication *app) {
+    app->setStyle(new ProxyStyle);
+}
+
+void PlatformDesktop::applyHighDpiPolicy() {
+#if (QT_VERSION_MAJOR == 6)
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
+#endif
+}
+
 QString PlatformDesktop::contextMenuBorderRadius() {
     return "0px";
 }
 
 QString PlatformDesktop::defaultMpvBinary() {
     return QCoreApplication::applicationDirPath() + "/mpv.exe";
+}
+
+void PlatformDesktop::prepareApplicationEnvironment() {
+    qputenv("QT_PLUGIN_PATH", "");
 }
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {

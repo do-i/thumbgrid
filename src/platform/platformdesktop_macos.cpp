@@ -1,8 +1,18 @@
 #include "platformdesktop.h"
 
+#include <QApplication>
 #include <QDesktopServices>
 #include <QProcess>
+#include <QStyleFactory>
 #include <QUrl>
+
+void PlatformDesktop::applyApplicationStyle(QApplication *app) {
+    if(QStyleFactory::keys().contains("Fusion"))
+        app->setStyle(QStyleFactory::create("Fusion"));
+}
+
+void PlatformDesktop::applyHighDpiPolicy() {
+}
 
 QString PlatformDesktop::contextMenuBorderRadius() {
     return "3px";
@@ -10,6 +20,9 @@ QString PlatformDesktop::contextMenuBorderRadius() {
 
 QString PlatformDesktop::defaultMpvBinary() {
     return QString();
+}
+
+void PlatformDesktop::prepareApplicationEnvironment() {
 }
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {

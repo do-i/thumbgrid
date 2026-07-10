@@ -1,9 +1,18 @@
 #include "platformdesktop.h"
 
 #include "components/scriptmanager/scriptmanager.h"
+#include "proxystyle.h"
 
+#include <QApplication>
 #include <QDesktopServices>
 #include <QUrl>
+
+void PlatformDesktop::applyApplicationStyle(QApplication *app) {
+    app->setStyle(new ProxyStyle);
+}
+
+void PlatformDesktop::applyHighDpiPolicy() {
+}
 
 QString PlatformDesktop::contextMenuBorderRadius() {
     return "3px";
@@ -11,6 +20,9 @@ QString PlatformDesktop::contextMenuBorderRadius() {
 
 QString PlatformDesktop::defaultMpvBinary() {
     return "/usr/bin/mpv";
+}
+
+void PlatformDesktop::prepareApplicationEnvironment() {
 }
 
 void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString &fallbackDir) {

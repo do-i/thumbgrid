@@ -1,17 +1,16 @@
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QStyleFactory>
 #include <QEvent>
 #include <QIcon>
 
 #include "appversion.h"
+#include "platform/platformdesktop.h"
 #include "settings.h"
 #include "components/actionmanager/actionmanager.h"
 #include "utils/inputmap.h"
 #include "utils/actions.h"
 #include "utils/cmdoptionsrunner.h"
 #include "sharedresources.h"
-#include "proxystyle.h"
 #include "core.h"
 
 #ifdef __APPLE__
@@ -36,13 +35,7 @@ QDataStream& operator>>(QDataStream& in, Script& v) {
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
 
-    // force some env variables
-
-#ifdef _WIN32
-    // if this is set by other app, platform plugin may fail to load
-    // https://github.com/easymodo/qimgv/issues/410
-    qputenv("QT_PLUGIN_PATH","");
-#endif
+    PlatformDesktop::prepareApplicationEnvironment();
 
     // for hidpi testing
     //qputenv("QT_SCALE_FACTOR","1.5");
@@ -56,14 +49,7 @@ int main(int argc, char *argv[]) {
     QGuiApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 #endif
 
-    // Qt6 hidpi rendering on windows still has artifacts
-    // This disables it for scale factors < 1.75
-    // In this case only fonts are scaled
-#ifdef _WIN32
-#if (QT_VERSION_MAJOR == 6)
-    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::RoundPreferFloor);
-#endif
-#endif
+    PlatformDesktop::applyHighDpiPolicy();
 
     //qDebug() << qgetenv("QT_SCALE_FACTOR");
     //qDebug() << qgetenv("QT_SCREEN_SCALE_FACTORS");
@@ -71,14 +57,10 @@ int main(int argc, char *argv[]) {
 
 #ifdef __APPLE__
     MacOSApplication a(argc, argv);
-    // default to "fusion" if available ("macos" has layout bugs, weird comboboxes etc)
-    if(QStyleFactory::keys().contains("Fusion"))
-        a.setStyle(QStyleFactory::create("Fusion"));
 #else
     QApplication a(argc, argv);
-    // use some style workarounds
-    a.setStyle(new ProxyStyle);
 #endif
+    PlatformDesktop::applyApplicationStyle(&a);
 
     QCoreApplication::setOrganizationName("thumbgrid");
     QCoreApplication::setOrganizationDomain("github.com/do-i/thumbgrid");
