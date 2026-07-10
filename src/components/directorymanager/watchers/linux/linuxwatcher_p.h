@@ -8,7 +8,7 @@
 #include <QDebug>
 #include <QTimer>
 
-class LinuxFsEvent;
+#include "linuxfsevent.h"
 
 class LinuxWatcherPrivate : public DirectoryWatcherPrivate {
     Q_OBJECT
