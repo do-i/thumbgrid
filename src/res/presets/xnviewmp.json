@@ -1,0 +1,47 @@
+{
+    "_meta": {
+        "id": "xnviewmp",
+        "name": "XnView MP-style",
+        "description": "Shortcuts modeled on XnView MP conventions",
+        "os": ["linux", "windows", "macos"],
+        "order": 20,
+        "source": "Illustrative partial reconstruction of XnView MP documented defaults",
+        "notice": "Independent reconstruction; 'XnView MP' is a trademark of its owner; not affiliated or endorsed."
+    },
+    "global": {
+        "closeFullScreenOrExit": ["Esc"],
+        "contextMenu": ["Menu", "RMB"],
+        "toggleFullscreen": ["F11"],
+        "moveToTrash": ["Del"],
+        "removeFile": ["$Shift+Del"],
+        "renameFile": ["F2"],
+        "open": ["$Ctrl+O"],
+        "exit": ["$Ctrl+Q"],
+        "copyFileClipboard": ["$Ctrl+C"],
+        "cutFile": ["$Ctrl+X"],
+        "pasteFile": ["$Ctrl+V"]
+    },
+    "document": {
+        "nextImage": ["Space", "PgDown", "Right"],
+        "prevImage": ["PgUp", "Left"],
+        "folderView": ["Backspace", "Enter"],
+        "zoomIn": ["+", "="],
+        "zoomOut": ["-"],
+        "rotateLeft": ["L"],
+        "rotateRight": ["R"],
+        "flipH": ["H"],
+        "flipV": ["V"],
+        "toggleImageInfo": ["I"],
+        "jumpToFirst": ["Home"],
+        "jumpToLast": ["End"],
+        "print": ["$Ctrl+P"],
+        "save": ["$Ctrl+S"],
+        "saveAs": ["$Ctrl+$Shift+S"],
+        "discardEdits": ["$Ctrl+Z"]
+    },
+    "grid": {
+        "documentView": ["Enter"],
+        "goUp": ["Backspace"],
+        "createDirectory": ["F7"]
+    }
+}

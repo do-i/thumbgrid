@@ -16,6 +16,7 @@ private slots:
     void firstRunSeedsShortcutsFromQimgv();
     void availablePresetsAreOsFiltered();
     void applyingPresetSwitchesMappingAndTracksModified();
+    void xnviewmpPresetLoadsRepresentativeBindings();
 };
 
 // (1) The scan-code map is now data, loaded from keymap_<os>.json.
@@ -53,6 +54,7 @@ void ShortcutPresetsAndKeymapsPocTest::availablePresetsAreOsFiltered() {
 
     QVERIFY2(ids.contains("qimgv"), "qimgv is cross-platform and always present.");
     QVERIFY2(ids.contains("gwenview"), "gwenview targets linux and should be offered here.");
+    QVERIFY2(ids.contains("xnviewmp"), "xnviewmp is cross-platform and should be offered here.");
     QVERIFY2(!ids.contains("irfanview"),
              "irfanview targets windows only; excluded on this (linux) build.");
 }
@@ -72,6 +74,17 @@ void ShortcutPresetsAndKeymapsPocTest::applyingPresetSwitchesMappingAndTracksMod
     actionManager->addShortcut(MODE_DOCUMENT, "Z", "crop");
     actionManager->saveShortcuts();
     QVERIFY2(settings->shortcutsModified(), "Editing a binding diverges from the preset.");
+}
+
+// (5) The newly-authored xnviewmp preset parses and applies like any other.
+void ShortcutPresetsAndKeymapsPocTest::xnviewmpPresetLoadsRepresentativeBindings() {
+    actionManager->applyPreset("xnviewmp");
+
+    QCOMPARE(actionManager->selectedPreset(), QStringLiteral("xnviewmp"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "Right"), QStringLiteral("nextImage"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "L"), QStringLiteral("rotateLeft"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_GLOBAL, "Del"), QStringLiteral("moveToTrash"));
+    QVERIFY2(!settings->shortcutsModified(), "Right after applyPreset the mapping equals the preset.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(ShortcutPresetsAndKeymapsPocTest)
