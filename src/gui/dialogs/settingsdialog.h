@@ -71,6 +71,10 @@ private:
     QWidget* makeSettingsPage(const QString &title, QVBoxLayout **contentLayout);
     QWidget* makeSettingsGroup(const QString &title = QString());
     void setupShortcutsPage();
+    // Repopulates the preset dropdown from ActionManager::availablePresets(),
+    // selects the active preset, and labels it "(modified)" if the active
+    // mapping has diverged from it.
+    void refreshShortcutPresetCombo();
     void updateShortcutsTable();
     void updateShortcutsFilter();
     void setActionShortcuts(ActionManager::ContextMap &map, const QString &action, const QStringList &keys);
@@ -98,6 +102,7 @@ private:
     QMap<ViewMode, QStringList> mShortcutDisabled;
     QComboBox *mShortcutContextComboBox = nullptr;
     QLineEdit *mShortcutSearchEdit = nullptr;
+    QComboBox *mShortcutPresetComboBox = nullptr;
     bool mUpdatingShortcutsTable = false;
 
 private slots:

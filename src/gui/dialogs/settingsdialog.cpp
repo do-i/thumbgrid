@@ -362,6 +362,37 @@ void SettingsDialog::setupShortcutsPage() {
     ui->pushButton_4->hide();
     ui->pushButton_3->setText(tr("Reset current context"));
 
+    // Preset selector: switching presets replaces the whole active mapping, so
+    // it lives above the per-context toolbar, confirm-gated, and applies (and
+    // persists) immediately rather than going through the dialog's Apply/OK.
+    QLabel *presetLabel = new QLabel(tr("Shortcut preset:"), ui->Controls);
+    mShortcutPresetComboBox = new QComboBox(ui->Controls);
+    mShortcutPresetComboBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    QHBoxLayout *presetRow = new QHBoxLayout();
+    presetRow->addWidget(presetLabel);
+    presetRow->addWidget(mShortcutPresetComboBox);
+    presetRow->addStretch(1);
+    ui->verticalLayout_33->insertLayout(0, presetRow);
+
+    connect(mShortcutPresetComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
+        const QString id = mShortcutPresetComboBox->itemData(index).toString();
+        if(id.isEmpty() || id == ActionManager::selectedPreset())
+            return;
+        const QMessageBox::StandardButton reply = QMessageBox::question(this,
+            tr("Switch shortcut preset"),
+            tr("Switching to \"%1\" replaces all current keyboard/mouse shortcuts "
+               "with that preset's bindings. This cannot be undone from this dialog. Continue?")
+                .arg(mShortcutPresetComboBox->itemText(index)),
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if(reply != QMessageBox::Yes) {
+            refreshShortcutPresetCombo(); // revert the displayed selection
+            return;
+        }
+        actionManager->applyPreset(id);
+        readShortcuts(); // reloads the draft/table and relabels the combo (modified -> false)
+    });
+    refreshShortcutPresetCombo();
+
     mShortcutContextComboBox = new QComboBox(ui->Controls);
     mShortcutContextComboBox->addItem(tr("Global"), ActionManager::contextToString(MODE_GLOBAL));
     mShortcutContextComboBox->addItem(tr("Grid"), ActionManager::contextToString(MODE_FOLDERVIEW));
@@ -416,6 +447,33 @@ void SettingsDialog::setupShortcutsPage() {
         if(column == 1)
             openShortcutDetails(row);
     });
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::refreshShortcutPresetCombo() {
+    if(!mShortcutPresetComboBox)
+        return;
+    const QString current = ActionManager::selectedPreset();
+    const QList<PresetInfo> presets = ActionManager::availablePresets();
+
+    QSignalBlocker blocker(mShortcutPresetComboBox);
+    mShortcutPresetComboBox->clear();
+    int selectIndex = -1;
+    for(const PresetInfo &p : presets) {
+        QString label = p.name;
+        if(p.id == current && settings->shortcutsModified())
+            label += tr(" (modified)");
+        mShortcutPresetComboBox->addItem(label, p.id);
+        if(p.id == current)
+            selectIndex = mShortcutPresetComboBox->count() - 1;
+    }
+    if(selectIndex < 0) {
+        // The stored preset isn't offered on this platform/build (e.g. a config
+        // carried over from another OS, or a preset pruned from this build).
+        // Show it rather than silently switching; the active mapping is unaffected.
+        mShortcutPresetComboBox->addItem(tr("%1 (unavailable)").arg(current), current);
+        selectIndex = mShortcutPresetComboBox->count() - 1;
+    }
+    mShortcutPresetComboBox->setCurrentIndex(selectIndex);
 }
 //------------------------------------------------------------------------------
 // an attempt to force minimum width to fit contents
@@ -839,6 +897,7 @@ void SettingsDialog::readShortcuts() {
     settings->readShortcutPrimary(mShortcutPrimary);
     settings->readDisabledShortcuts(mShortcutDisabled);
     updateShortcutsTable();
+    refreshShortcutPresetCombo();
 }
 //------------------------------------------------------------------------------
 ViewMode SettingsDialog::selectedShortcutContext() const {
