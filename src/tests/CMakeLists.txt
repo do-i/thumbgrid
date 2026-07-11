@@ -50,6 +50,14 @@ add_test(
     COMMAND thumbgrid_open_picture_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_document_transparency_grid_test
+    behavior/test_document_view_transparency_grid.cpp
+)
+add_test(
+    NAME "Document view shows checker grid behind transparent images"
+    COMMAND thumbgrid_document_transparency_grid_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_return_from_picture_test
     behavior/test_returning_from_picture_view_shows_the_same_folder_selection.cpp
 )

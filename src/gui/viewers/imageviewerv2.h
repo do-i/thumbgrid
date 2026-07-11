@@ -186,6 +186,7 @@ private:
     void stopPosAnimation();
     QPointF sceneRoundPos(QPointF scenePoint) const;
     QRectF sceneRoundRect(QRectF sceneRect) const;
+    QRectF displayedImageSceneRect() const;
     void doZoom(float newScale);
     void swapToOriginalPixmap();
     void setZoomAnchor(QPoint viewportPos);

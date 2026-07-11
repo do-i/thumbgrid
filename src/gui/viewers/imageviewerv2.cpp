@@ -153,6 +153,7 @@ void ImageViewerV2::readSettings() {
     }
     // set bg color
     onFullscreenModeChanged(mIsFullscreen);
+    scene->update();
     updateMinScale();
     setScalingFilter(settings->scalingFilter());
     setFitMode(imageFitModeDefault);
@@ -369,6 +370,8 @@ void ImageViewerV2::setScaledPixmap(std::unique_ptr<QPixmap> newFrame) {
         return;
     pixmapScaled = std::move(newFrame);
     pixmapScaled->setDevicePixelRatio(dpr);
+    pixmapItemScaled.setOffset(pixmapItem.sceneBoundingRect().topLeft());
+    pixmapItemScaled.setScale(1.0f);
     pixmapItemScaled.setPixmap(*pixmapScaled);
     pixmapItem.hide();
     pixmapItemScaled.show();
@@ -700,7 +703,7 @@ void ImageViewerV2::drawBackground(QPainter *painter, const QRectF &rect) {
     QGraphicsView::drawBackground(painter, rect);
     if(!isDisplaying() || !transparencyGrid || !pixmap->hasAlphaChannel())
         return;
-    ImageLib::drawTransparencyGrid(painter, pixmapItem.sceneBoundingRect());
+    ImageLib::drawTransparencyGrid(painter, displayedImageSceneRect());
 }
 
 // simple pan behavior (cursor stops at the screen edges)
@@ -1277,6 +1280,11 @@ QPointF ImageViewerV2::sceneRoundPos(QPointF scenePoint) const {
 QRectF ImageViewerV2::sceneRoundRect(QRectF sceneRect) const {
     QRectF rounded = QRectF(sceneRoundPos(sceneRect.topLeft()), sceneRect.size());
     return QRectF(sceneRoundPos(sceneRect.topLeft()), sceneRect.size());
+}
+
+QRectF ImageViewerV2::displayedImageSceneRect() const {
+    const QGraphicsPixmapItem *item = pixmapItemScaled.isVisible() ? &pixmapItemScaled : &pixmapItem;
+    return item->sceneBoundingRect();
 }
 
 // size as it appears on screen (rounded)
