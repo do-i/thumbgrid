@@ -30,18 +30,21 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
 
 )
 
-if(APPLE)
-    #target_sources(thumbgrid PRIVATE
-    #    directorymanager/watchers/linux/linuxfsevent.cpp
-    #    directorymanager/watchers/linux/linuxwatcher.cpp
-    #    directorymanager/watchers/linux/linuxworker.cpp)
-elseif(UNIX)
+if(WIN32)
     target_sources(${THUMBGRID_APP_TARGET} PRIVATE
+        directorymanager/watchers/directorywatcher_factory_windows.cpp
+        directorymanager/watchers/windows/windowswatcher.cpp
+        directorymanager/watchers/windows/windowsworker.cpp)
+elseif(APPLE)
+    target_sources(${THUMBGRID_APP_TARGET} PRIVATE
+        directorymanager/watchers/directorywatcher_factory_macos.cpp)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
+    target_sources(${THUMBGRID_APP_TARGET} PRIVATE
+        directorymanager/watchers/directorywatcher_factory_linux.cpp
         directorymanager/watchers/linux/linuxfsevent.cpp
         directorymanager/watchers/linux/linuxwatcher.cpp
         directorymanager/watchers/linux/linuxworker.cpp)
-elseif(WIN32)
+else()
     target_sources(${THUMBGRID_APP_TARGET} PRIVATE
-        directorymanager/watchers/windows/windowswatcher.cpp
-        directorymanager/watchers/windows/windowsworker.cpp)
+        directorymanager/watchers/directorywatcher_factory_fallback.cpp)
 endif()

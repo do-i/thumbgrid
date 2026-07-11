@@ -21,21 +21,24 @@ minor, low-risk conditionals alone unless they get in the way.
     `src/utils/fileoperations_fallback.cpp`.
   - CMake selects one platform source in `src/utils/CMakeLists.txt`.
 
-- `src/utils/inputmap.cpp`
-  - Contains Windows and Linux/FreeBSD native scan-code maps inside
-    `InputMap::initKeyMap()`.
-  - Also contains Apple-specific modifier display names for Ctrl, Alt, and
-    Shift.
-  - Good candidate for platform files such as `inputmap_windows.cpp`,
-    `inputmap_unix.cpp`, and `inputmap_macos.cpp`, or a data-driven keymap.
+- `src/utils/inputmap.cpp` - done
+  - The native scan-code tables and macOS modifier names are now data-driven
+    keymap resources.
+  - The common implementation only selects the per-OS resource path and loads
+    the JSON mapping.
 
-- `src/components/directorymanager/watchers/directorywatcher.cpp`
-  - Contains compile-time includes and factory selection for `LinuxWatcher`,
-    `WindowsWatcher`, `PortableWatcher`, and `DummyWatcher`.
-  - The concrete watcher implementations are already split by platform, so this
-    is mostly a factory cleanup target.
-  - Could move platform selection into CMake-selected factory files if the goal
-    is to remove platform macros from common source.
+- `src/components/directorymanager/watchers/directorywatcher.cpp` - done
+  - Common watcher lifecycle code no longer includes concrete platform
+    watchers or platform selection macros.
+  - `DirectoryWatcher::newInstance()` now lives in CMake-selected factory
+    sources:
+    `directorywatcher_factory_linux.cpp`,
+    `directorywatcher_factory_windows.cpp`,
+    `directorywatcher_factory_macos.cpp`,
+    `directorywatcher_factory_fallback.cpp`.
+  - CMake selects the native Linux/FreeBSD and Windows watcher sources only
+    when their factory is selected; macOS uses `PortableWatcher`, and unknown
+    platforms use `DummyWatcher`.
 
 ### Smaller Mixed-Platform Conditionals
 
@@ -76,19 +79,19 @@ minor, low-risk conditionals alone unless they get in the way.
 
 ## Suggested Order
 
-1. Split `src/utils/fileoperations.cpp`.
+1. Split `src/utils/fileoperations.cpp`. - done
    - Keep common validation and operation flow in one file.
    - Move trash implementation and any truly platform-specific permission checks
      into platform files.
    - Add CMake validation similar to the `PlatformDesktop` contract if the split
      creates required per-platform functions.
 
-2. Split or data-drive `src/utils/inputmap.cpp`.
+2. Split or data-drive `src/utils/inputmap.cpp`. - done
    - Move large native scan-code tables out of common logic.
    - Decide whether macOS modifier symbols belong in the same platform layer or
      in a smaller display-name helper.
 
-3. Simplify `src/components/directorymanager/watchers/directorywatcher.cpp`.
+3. Simplify `src/components/directorymanager/watchers/directorywatcher.cpp`. - done
    - Leave it alone if a small compile-time factory is acceptable.
    - Otherwise create per-platform factory files selected by CMake.
 

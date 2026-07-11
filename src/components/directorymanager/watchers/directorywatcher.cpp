@@ -1,19 +1,5 @@
 #include "directorywatcher_p.h"
 
-#if defined(__linux__) || defined(__FreeBSD__)
-#include "linux/linuxwatcher.h"
-#elif _WIN32
-#include "windows/windowswatcher.h"
-#elif __APPLE__
-#include "portablewatcher.h"
-#elif __unix__
-// TODO: implement this
-#include "dummywatcher.h"
-#else
-// TODO: implement this
-#include "dummywatcher.h"
-#endif
-
 #define TAG         "[DirectoryWatcher]"
 
 DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher* qq, WatcherWorker* w) :
@@ -26,26 +12,6 @@ DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher* qq, WatcherWo
 DirectoryWatcher::~DirectoryWatcher() {
     delete d_ptr;
     d_ptr = nullptr;
-}
-
-// Move this function to some creational class
-DirectoryWatcher *DirectoryWatcher::newInstance()
-{
-    DirectoryWatcher* watcher;
-
-#if defined(__linux__) || defined(__FreeBSD__)
-        watcher = new LinuxWatcher();
-#elif _WIN32
-        watcher = new WindowsWatcher();
-#elif __APPLE__
-        watcher = new PortableWatcher();
-#elif __unix__
-        watcher = new DummyWatcher();
-#else
-        watcher = new DummyWatcher();
-#endif
-
-    return watcher;
 }
 
 void DirectoryWatcher::setWatchPath(const QString& path) {
