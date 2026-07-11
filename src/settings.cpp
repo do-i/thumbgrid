@@ -704,10 +704,13 @@ void Settings::loadStylesheet() {
 
         // --- color scheme ---------------------------------------------
         auto colors = settings->colorScheme();
-        // tint color for system windows
-        QPalette p;
-        QColor sys_text = p.text().color();
-        QColor sys_window = p.window().color();
+        // tint color for settings dialog panels; sourced from the active
+        // color scheme (not a fresh native QPalette) so it follows the
+        // selected theme. For COLORS_SYSTEM, colors.widget already equals
+        // QPalette().window().color() (see ThemeStore::colorScheme()), so
+        // this preserves that theme's look unchanged.
+        QColor sys_text = colors.text;
+        QColor sys_window = colors.widget;
         QColor sys_window_tinted, sys_window_tinted_lc, sys_window_tinted_lc2, sys_window_tinted_hc, sys_window_tinted_hc2;
         if(sys_window.valueF() <= 0.45f) {
             // dark system theme
@@ -788,6 +791,7 @@ void Settings::loadStylesheet() {
         styleSheet.replace("%panel_button%",         colors.panel_button.name());
         styleSheet.replace("%panel_button_hover%",   colors.panel_button_hover.name());
         styleSheet.replace("%panel_button_pressed%", colors.panel_button_pressed.name());
+        styleSheet.replace("%background%",           colors.background.name());
         styleSheet.replace("%widget%",               colors.widget.name());
         styleSheet.replace("%widget_border%",        colors.widget_border.name());
         styleSheet.replace("%folderview%",           colors.folderview.name());

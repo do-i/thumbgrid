@@ -1,6 +1,24 @@
 /*----------------------------------------------------------------------------*/
 /* Settings window */
 
+SettingsDialog {
+    background-color: %background%;
+}
+
+SettingsDialog QScrollArea {
+    background-color: %background%;
+    border: none;
+}
+
+SettingsDialog QScrollArea > QWidget,
+SettingsDialog #scrollAreaWidgetContents,
+SettingsDialog #scrollAreaWidgetContents_2,
+SettingsDialog #scrollAreaWidgetContents_3,
+SettingsDialog #scrollAreaWidgetContents_4,
+SettingsDialog #scrollAreaWidgetContents_5 {
+    background-color: %background%;
+}
+
 SettingsDialog QPushButton {
     min-height: %button_height%;
 }
@@ -987,4 +1005,148 @@ PrintDialog QCheckBox {
 PrintDialog QRadioButton:hover,
 PrintDialog QCheckBox:hover {
     /*  background-color: %sys_window_tinted%;  */
+}
+
+/*----------------------------------------------------------------------------*/
+/* Secondary dialogs (Resize, File Replace, Script Editor, Shortcut Creator,  */
+/* Print, message boxes) - plain Qt widgets, themed to match the main window  */
+/*----------------------------------------------------------------------------*/
+ResizeDialog,
+FileReplaceDialog,
+ScriptEditorDialog,
+ShortcutCreatorDialog,
+PrintDialog,
+QMessageBox {
+    background-color: %background%;
+}
+
+ResizeDialog QLabel,
+FileReplaceDialog QLabel,
+ScriptEditorDialog QLabel,
+ShortcutCreatorDialog QLabel,
+PrintDialog QLabel,
+QMessageBox QLabel {
+    color: %text%;
+}
+
+ResizeDialog QGroupBox,
+PrintDialog QGroupBox {
+    background-color: %widget%;
+    border: 1px solid %button%;
+    border-radius: 3px;
+    padding: 6px 10px 8px 10px;
+}
+
+ResizeDialog QCheckBox,
+FileReplaceDialog QCheckBox,
+ScriptEditorDialog QCheckBox,
+PrintDialog QCheckBox,
+QMessageBox QCheckBox,
+ResizeDialog QRadioButton,
+ShortcutCreatorDialog QRadioButton {
+    color: %text%;
+    padding: 4px;
+}
+
+ResizeDialog QComboBox,
+ShortcutCreatorDialog QComboBox {
+    color: %text%;
+    background-color: %button%;
+    border: 1px solid %button%;
+    border-radius: 3px;
+    padding: 4px 8px 4px 8px;
+}
+
+ResizeDialog QComboBox:hover,
+ShortcutCreatorDialog QComboBox:hover {
+    background-color: %button_hover%;
+    border-color: %button_hover%;
+}
+
+ResizeDialog QComboBox::drop-down,
+ShortcutCreatorDialog QComboBox::drop-down {
+    border: 0px;
+}
+
+ResizeDialog QComboBox QAbstractItemView,
+ShortcutCreatorDialog QComboBox QAbstractItemView {
+    padding: 5px 0px;
+    background-color: %widget%;
+    border: 1px solid %accent%;
+}
+
+ResizeDialog QComboBox QAbstractItemView::item,
+ShortcutCreatorDialog QComboBox QAbstractItemView::item {
+    border-radius: 1px;
+    padding: 2px 5px;
+    color: %text%;
+    min-height: 22px;
+}
+
+ResizeDialog QComboBox QAbstractItemView::item:selected,
+ShortcutCreatorDialog QComboBox QAbstractItemView::item:selected {
+    background-color: %accent_hover_rgba%;
+}
+
+ResizeDialog QSpinBox,
+ResizeDialog QDoubleSpinBox {
+    color: %text%;
+    background-color: %button%;
+    border: 2px solid %button%;
+    border-radius: 3px;
+    padding: 2 0 2 0;
+    min-height: 20px;
+}
+
+ResizeDialog QSpinBox:hover,
+ResizeDialog QDoubleSpinBox:hover,
+ResizeDialog QSpinBox:focus,
+ResizeDialog QDoubleSpinBox:focus {
+    background-color: %button_hover%;
+    border-color: %button_hover%;
+}
+
+ScriptEditorDialog QLineEdit {
+    background-color: %button%;
+    color: %text%;
+    border: 2px solid %button%;
+    border-radius: 3px;
+    padding: 4px 6px 4px 6px;
+}
+
+ScriptEditorDialog QLineEdit:hover,
+ScriptEditorDialog QLineEdit:focus {
+    background-color: %button_hover%;
+    border-color: %button_hover%;
+}
+
+ResizeDialog QPushButton,
+FileReplaceDialog QPushButton,
+ScriptEditorDialog QPushButton,
+ShortcutCreatorDialog QPushButton,
+PrintDialog QPushButton,
+QMessageBox QPushButton {
+    color: %text%;
+    background-color: %button%;
+    border-radius: 3px;
+    padding: 6px 14px 6px 14px;
+    min-width: 70px;
+}
+
+ResizeDialog QPushButton:hover,
+FileReplaceDialog QPushButton:hover,
+ScriptEditorDialog QPushButton:hover,
+ShortcutCreatorDialog QPushButton:hover,
+PrintDialog QPushButton:hover,
+QMessageBox QPushButton:hover {
+    background-color: %button_hover%;
+}
+
+ResizeDialog QPushButton:pressed,
+FileReplaceDialog QPushButton:pressed,
+ScriptEditorDialog QPushButton:pressed,
+ShortcutCreatorDialog QPushButton:pressed,
+PrintDialog QPushButton:pressed,
+QMessageBox QPushButton:pressed {
+    background-color: %button_pressed%;
 }
