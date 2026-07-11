@@ -19,11 +19,11 @@ fi
 
 if command -v nproc >/dev/null 2>&1; then
     DEFAULT_JOBS="$(nproc)"
+    if (( DEFAULT_JOBS > 2 )); then
+        DEFAULT_JOBS=2
+    fi
 else
-    DEFAULT_JOBS=4
-fi
-if (( DEFAULT_JOBS > 2 )); then
-    DEFAULT_JOBS=2
+    DEFAULT_JOBS=1
 fi
 JOBS="${JOBS:-$DEFAULT_JOBS}"
 
