@@ -337,12 +337,17 @@ void ActionManager::saveShortcuts() {
 }
 
 // Overwrite the active mapping with a preset and persist. Destructive — the UI
-// gates this behind a confirm dialog.
+// gates this behind a confirm dialog. Also clears per-action _disabled/_primary
+// metadata: those are customizations layered on top of a mapping, same as the
+// bindings themselves, so a preset switch resets them too (otherwise a
+// previously-disabled action would silently stay disabled under the new preset).
 void ActionManager::applyPreset(const QString &id) {
     settings->setSelectedPreset(id);
     initDefaults();                                   // reload defaults from `id`
     actionManager->shortcuts = actionManager->defaults;
     actionManager->rebuildShortcutLookup();
+    settings->saveDisabledShortcuts(QMap<ViewMode, QStringList>());
+    settings->saveShortcutPrimary(QMap<ViewMode, QMap<QString, QString>>());
     actionManager->saveShortcuts();                   // recomputes modified -> false
 }
 

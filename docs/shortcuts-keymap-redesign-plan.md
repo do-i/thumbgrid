@@ -386,12 +386,16 @@ genuinely destructive action).
 
 ## Presets to Author
 
-| id | display label | os | source scheme | notes |
-|----|---------------|----|---------------|-------|
-| `qimgv` | `qimgv` | linux, windows, macos | current `default-shortcuts.json` | default + first-run seed |
-| `gwenview` | `Gwenview-style` | linux | KDE Gwenview defaults | KDE/Linux app |
-| `xnviewmp` | `XnView MP-style` | linux, windows, macos | XnView MP defaults | cross-platform |
-| `irfanview` | `IrfanView-style` | windows | IrfanView defaults | Windows-only app |
+| id | display label | os | source scheme | notes | status |
+|----|---------------|----|---------------|-------|--------|
+| `qimgv` | `qimgv` | linux, windows, macos | current `default-shortcuts.json` | default + first-run seed | authored |
+| `gwenview` | `Gwenview-style` | linux | KDE Gwenview defaults | KDE/Linux app | authored (illustrative partial) |
+| `xnviewmp` | `XnView MP-style` | linux, windows, macos | XnView MP defaults | cross-platform | **not yet authored** |
+| `irfanview` | `IrfanView-style` | windows | IrfanView defaults | Windows-only app | authored (illustrative partial) |
+
+`xnviewmp.json` does not exist yet — it's listed here as the planned fourth
+preset, not something already in the tree. Don't assume it's present without
+checking `src/res/presets/`.
 
 Display labels use the `-style` convention (see **Naming & Attribution**); the
 `id` is the short slug used in `[Shortcuts]/preset` and the resource filename.
@@ -434,9 +438,14 @@ treat exact fidelity as best-effort, noted in each file's `_meta.source`.
 6. **`src/gui/dialogs/settingsdialog.{h,cpp,ui}`**: a "Shortcut preset" combobox on
    the Controls page (parallel to the theme selector), populated from
    `availablePresets()` (already OS-filtered) → confirm dialog → `applyPreset()` →
-   refresh the shortcut table. Reflect `modified` in the label (e.g.
-   "qimgv (modified)"); annotate a stored preset that isn't in the current OS's
-   list ("… (other platform)"). Deeper editor UX is untouched.
+   refresh the shortcut table. Reflect `modified` by mirroring the Theme page's own
+   combobox convention: a separator + dedicated **"Custom"** entry appears and is
+   auto-selected once the active mapping diverges from its preset, rather than
+   decorating the preset's own label (e.g. not "qimgv (modified)"). "Custom"
+   carries the same id as the active preset, so reselecting it is a no-op.
+   Annotate a stored preset that isn't offered on this platform/build (e.g. a
+   config carried over from another OS) as "… (unavailable)" instead of silently
+   switching. Deeper editor UX is untouched.
 7. **`src/CMakeLists.txt`**: drop the `default-shortcuts.json` install and the
    `SHORTCUTS_PATH` define. Add a `PRESETS_PATH` define + install the presets dir
    to `${SYSCONFDIR}/thumbgrid/presets` (admin-editable, mirroring `THEMES_PATH`).
@@ -512,6 +521,10 @@ treat exact fidelity as best-effort, noted in each file's `_meta.source`.
   safety for a destructive action.
 - **Preset naming**: ship the default as `qimgv` (per this plan) vs. a
   `thumbgrid` id that happens to equal the qimgv scheme.
+- ~~**qimgv display label**: plain `qimgv` vs. `qimgv-style` for list consistency.~~
+  **Resolved: plain `qimgv`.** It isn't a third-party reconstruction — the
+  `-style` qualifier exists to signal "this emulates a different app," which
+  doesn't apply to thumbgrid's own upstream project.
 - **Foreign-OS presets in the selector**: hide them entirely vs. reveal behind a
   "show other platforms" toggle (this plan assumes hidden by default, revealable).
 - **Per-OS first-run default**: keep `qimgv` as the default seed on every OS

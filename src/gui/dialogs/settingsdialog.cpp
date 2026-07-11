@@ -22,6 +22,10 @@
 #include "gui/customwidgets/keysequenceedit.h"
 
 namespace {
+// Marks the "Custom" entry in the shortcut-preset combobox so it can be told
+// apart from a real preset row that happens to carry the same preset id.
+constexpr int kCustomPresetEntryRole = Qt::UserRole + 1;
+
 class CenteredCheckBoxDelegate : public QStyledItemDelegate
 {
 public:
@@ -375,9 +379,17 @@ void SettingsDialog::setupShortcutsPage() {
     ui->verticalLayout_33->insertLayout(0, presetRow);
 
     connect(mShortcutPresetComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        const QString id = mShortcutPresetComboBox->itemData(index).toString();
-        if(id.isEmpty() || id == ActionManager::selectedPreset())
+        // "Custom" is a status display, not a selectable action: it carries the
+        // active preset's id so re-picking it would otherwise look identical to
+        // re-picking that same preset's own row, which must NOT be a no-op (that
+        // case means "discard my edits and go back to the clean preset").
+        if(mShortcutPresetComboBox->itemData(index, kCustomPresetEntryRole).toBool())
             return;
+        const QString id = mShortcutPresetComboBox->itemData(index).toString();
+        if(id.isEmpty())
+            return;
+        if(id == ActionManager::selectedPreset() && !settings->shortcutsModified())
+            return; // already exactly this preset with nothing to discard
         const QMessageBox::StandardButton reply = QMessageBox::question(this,
             tr("Switch shortcut preset"),
             tr("Switching to \"%1\" replaces all current keyboard/mouse shortcuts "
@@ -457,23 +469,35 @@ void SettingsDialog::refreshShortcutPresetCombo() {
 
     QSignalBlocker blocker(mShortcutPresetComboBox);
     mShortcutPresetComboBox->clear();
-    int selectIndex = -1;
+    int currentPresetIndex = -1;
     for(const PresetInfo &p : presets) {
-        QString label = p.name;
-        if(p.id == current && settings->shortcutsModified())
-            label += tr(" (modified)");
-        mShortcutPresetComboBox->addItem(label, p.id);
+        mShortcutPresetComboBox->addItem(p.name, p.id);
         if(p.id == current)
-            selectIndex = mShortcutPresetComboBox->count() - 1;
+            currentPresetIndex = mShortcutPresetComboBox->count() - 1;
     }
-    if(selectIndex < 0) {
+
+    if(currentPresetIndex < 0) {
         // The stored preset isn't offered on this platform/build (e.g. a config
         // carried over from another OS, or a preset pruned from this build).
         // Show it rather than silently switching; the active mapping is unaffected.
         mShortcutPresetComboBox->addItem(tr("%1 (unavailable)").arg(current), current);
-        selectIndex = mShortcutPresetComboBox->count() - 1;
+        mShortcutPresetComboBox->setCurrentIndex(mShortcutPresetComboBox->count() - 1);
+        return;
     }
-    mShortcutPresetComboBox->setCurrentIndex(selectIndex);
+
+    if(settings->shortcutsModified()) {
+        // Mirrors the Theme page combobox: editing away from a preset selects a
+        // dedicated "Custom" entry instead of decorating the preset's own label.
+        // Tagged with kCustomPresetEntryRole so the change handler can tell "you
+        // reselected the status display" apart from "you reselected the
+        // underlying preset row" (which should still offer to discard edits).
+        mShortcutPresetComboBox->insertSeparator(mShortcutPresetComboBox->count());
+        mShortcutPresetComboBox->addItem(tr("Custom"), current);
+        mShortcutPresetComboBox->setItemData(mShortcutPresetComboBox->count() - 1, true, kCustomPresetEntryRole);
+        mShortcutPresetComboBox->setCurrentIndex(mShortcutPresetComboBox->count() - 1);
+    } else {
+        mShortcutPresetComboBox->setCurrentIndex(currentPresetIndex);
+    }
 }
 //------------------------------------------------------------------------------
 // an attempt to force minimum width to fit contents
@@ -778,6 +802,7 @@ void SettingsDialog::saveSettings() {
     mSchemeAtOpen = settings->colorScheme();
     mThemePreviewed = false;
     saveShortcuts();
+    refreshShortcutPresetCombo(); // reflect Custom/clean immediately, not just on reopen
 
     scriptManager->saveScripts();
     emit settingsChanged();
