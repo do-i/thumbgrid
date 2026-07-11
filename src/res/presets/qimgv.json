@@ -1,5 +1,17 @@
 {
-    "_comment": "Default keyboard/mouse shortcuts. $Ctrl/$Alt/$Shift are placeholders replaced at load with the platform modifier names (Ctrl/Alt/Shift, or the Command/Option/Shift symbols on macOS). Global bindings work in every view; document/grid bindings are context-specific and override a global binding that uses the same key. Context objects map actions to sorted key lists; user configs may store an action as { keys: [...], primacy: key } when a primary key is selected. Installed to /etc/thumbgrid/default-shortcuts.json (admin-editable) with a copy embedded in the binary as a fallback.",
+    "_meta": {
+        "id": "qimgv",
+        "name": "qimgv",
+        "description": "thumbgrid's ancestor scheme; default and first-run seed",
+        "os": [
+            "linux",
+            "windows",
+            "macos"
+        ],
+        "order": 0,
+        "source": "thumbgrid/qimgv default shortcuts",
+        "notice": "Default scheme inherited from qimgv (thumbgrid is a qimgv fork)."
+    },
     "global": {
         "closeFullScreenOrExit": [
             "Esc"
@@ -210,7 +222,7 @@
         ]
     },
     "platform": {
-        "apple": {
+        "macos": {
             "openSettings": [
                 "$Ctrl+Comma"
             ],

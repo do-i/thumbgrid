@@ -14,10 +14,13 @@ public:
     static QString keyNameShift();
 
 private:
-    void initKeyMap();
-    void initModMap();
+    // Loads the native scan-code map and modifier display names from the
+    // per-OS keymap resource (src/res/keymaps/keymap_<os>.json) selected at
+    // compile time. Replaces the old hardcoded initKeyMap()/initModMap().
+    void loadFromResource();
     QMap<quint32, QString> keyMap;
     QMap<QString, Qt::KeyboardModifier> modMap;
+    QString ctrlName = "Ctrl", altName = "Alt", shiftName = "Shift";
 };
 
 extern InputMap *inputMap;

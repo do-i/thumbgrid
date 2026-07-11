@@ -1,0 +1,47 @@
+{
+    "_meta": {
+        "id": "gwenview",
+        "name": "Gwenview-style",
+        "description": "Shortcuts modeled on KDE Gwenview conventions",
+        "os": ["linux"],
+        "order": 10,
+        "source": "Illustrative partial reconstruction of Gwenview defaults",
+        "notice": "Independent reconstruction; 'Gwenview' is a trademark of its owners; not affiliated or endorsed."
+    },
+    "global": {
+        "closeFullScreenOrExit": ["Esc"],
+        "contextMenu": ["Menu", "RMB"],
+        "toggleFullscreen": ["F11", "LMB_DoubleClick"],
+        "moveToTrash": ["Del"],
+        "removeFile": ["$Shift+Del"],
+        "open": ["$Ctrl+O"],
+        "exit": ["$Ctrl+Q"],
+        "renameFile": ["F2"],
+        "copyFileClipboard": ["$Ctrl+C"],
+        "cutFile": ["$Ctrl+X"],
+        "pasteFile": ["$Ctrl+V"],
+        "showInDirectory": ["$Ctrl+D"],
+        "openSettings": ["$Ctrl+$Shift+Comma"]
+    },
+    "document": {
+        "nextImage": ["Space", "PgDown", "Right"],
+        "prevImage": ["PgUp", "Left"],
+        "goUp": ["Backspace"],
+        "zoomIn": ["+", "=", "$Ctrl++"],
+        "zoomOut": ["-", "$Ctrl+-"],
+        "fitWindow": ["1"],
+        "fitWidth": ["2"],
+        "fitNormal": ["3"],
+        "rotateLeft": ["$Ctrl+L"],
+        "rotateRight": ["$Ctrl+R"],
+        "jumpToFirst": ["Home"],
+        "jumpToLast": ["End"],
+        "save": ["$Ctrl+S"],
+        "saveAs": ["$Ctrl+$Shift+S"]
+    },
+    "grid": {
+        "documentView": ["Enter"],
+        "goUp": ["Backspace"],
+        "createDirectory": ["F10"]
+    }
+}

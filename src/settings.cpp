@@ -106,6 +106,8 @@ QString settingGroupFor(const QString &key) {
         {"jxlAnimation", "Advanced"}, {"mpvBinary", "Advanced"}, {"JPEGSaveQuality", "Advanced"},
         {"thumbnailerThreads", "Advanced"}, {"thumbnailerMemCacheLimit", "Advanced"},
         {"memoryAllocationLimit", "Advanced"}, {"cacheDir", "Advanced"},
+        // Shortcuts (preset pointer + dirty flag; the mapping lives in shortcuts.json)
+        {"preset", "Shortcuts"}, {"modified", "Shortcuts"},
     };
     return groups.value(key);
 }
@@ -1329,6 +1331,26 @@ void Settings::readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) 
 
 void Settings::saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     writeShortcutsJson(settings->mShortcutsJsonPath, shortcuts);
+}
+//------------------------------------------------------------------------------
+QString Settings::selectedPreset() {
+    return settings->readSetting("preset", QStringLiteral("qimgv")).toString();
+}
+
+void Settings::setSelectedPreset(const QString &id) {
+    settings->writeSetting("preset", id);
+}
+
+bool Settings::shortcutsModified() {
+    return settings->readSetting("modified", false).toBool();
+}
+
+void Settings::setShortcutsModified(bool modified) {
+    settings->writeSetting("modified", modified);
+}
+
+bool Settings::shortcutsJsonExists() {
+    return QFile::exists(settings->mShortcutsJsonPath);
 }
 //------------------------------------------------------------------------------
 void Settings::readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary) {

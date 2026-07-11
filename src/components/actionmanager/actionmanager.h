@@ -12,6 +12,7 @@
 #include "shortcutbuilder.h"
 #include "components/scriptmanager/scriptmanager.h"
 #include "settings.h"
+#include "shortcutpresetstore.h"
 
 enum ActionType {
     ACTION_INVALID,
@@ -54,6 +55,10 @@ public:
     QString keyForNativeScancode(quint32 scanCode);
     void adjustFromVersion(QVersionNumber lastVer);
     void saveShortcuts();
+    // Preset selection (delegates to ShortcutPresetStore + Settings).
+    static QList<PresetInfo> availablePresets();
+    static QString selectedPreset();
+    void applyPreset(const QString &id);
 public slots:
     bool invokeAction(const QString &actionName);
 private:

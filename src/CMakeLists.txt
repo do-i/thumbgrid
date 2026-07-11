@@ -79,6 +79,7 @@ add_library(${THUMBGRID_APP_TARGET} OBJECT
     ${PLATFORM_DESKTOP_SOURCE}
     settings.cpp
     themestore.cpp
+    shortcutpresetstore.cpp
     sharedresources.cpp
     shortcutbuilder.cpp
     proxystyle.cpp
@@ -216,12 +217,63 @@ if(NOT WIN32)
     install(DIRECTORY res/themes DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid)
 endif()
 
-# Default shortcuts. Installed to the system config dir (admin-editable, FHS
-# convention) and embedded via resources.qrc as a fallback when absent (dev
-# tree, Windows/macOS); SHORTCUTS_PATH tells the app where to look first.
+# Shortcut presets are seed catalogs (the active mapping is the user's
+# shortcuts.json). Which presets get embedded is inferred per-target-OS from each
+# file's _meta.os via string(JSON) (needs CMake >= 3.19); qimgv is always
+# embedded because it is the default and first-run seed. Override the set with
+# -DTHUMBGRID_PRESETS="qimgv;xnviewmp". PRESETS_PATH lets admins/packagers add
+# presets at runtime (mirrors THEMES_PATH).
+if(WIN32)
+    set(THUMBGRID_TARGET_OS "windows")
+elseif(APPLE)
+    set(THUMBGRID_TARGET_OS "macos")
+else()
+    set(THUMBGRID_TARGET_OS "linux")  # incl. *BSD (shares keymap_linux)
+endif()
+
+file(GLOB _preset_files CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/res/presets/*.json")
+set(THUMBGRID_PRESET_FILES "")
+foreach(_pf IN LISTS _preset_files)
+    file(READ "${_pf}" _pj)
+    string(JSON _pid ERROR_VARIABLE _e1 GET "${_pj}" _meta id)
+    if(_e1)
+        continue()  # not a preset file (no _meta.id)
+    endif()
+    set(_supported FALSE)
+    string(JSON _oslen ERROR_VARIABLE _e2 LENGTH "${_pj}" _meta os)
+    if(NOT _e2 AND _oslen GREATER 0)
+        math(EXPR _oslast "${_oslen} - 1")
+        foreach(_i RANGE 0 ${_oslast})
+            string(JSON _osi GET "${_pj}" _meta os ${_i})
+            if(_osi STREQUAL THUMBGRID_TARGET_OS)
+                set(_supported TRUE)
+                break()
+            endif()
+        endforeach()
+    endif()
+    # THUMBGRID_PRESETS override (explicit id list) wins if provided
+    if(DEFINED THUMBGRID_PRESETS)
+        if(_pid IN_LIST THUMBGRID_PRESETS)
+            set(_supported TRUE)
+        else()
+            set(_supported FALSE)
+        endif()
+    endif()
+    if(_supported OR _pid STREQUAL "qimgv")  # qimgv always embedded
+        list(APPEND THUMBGRID_PRESET_FILES "${_pf}")
+        message(STATUS "thumbgrid preset embedded: ${_pid}")
+    endif()
+endforeach()
+
+qt_add_resources(${THUMBGRID_APP_TARGET} "shortcut_presets"
+    PREFIX "/"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}"
+    FILES ${THUMBGRID_PRESET_FILES})
+
 if(NOT WIN32)
-    ADD_DEFINITIONS(-DSHORTCUTS_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid")
-    install(FILES res/default-shortcuts.json DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid)
+    ADD_DEFINITIONS(-DPRESETS_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid/presets")
+    install(DIRECTORY res/presets DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid
+            FILES_MATCHING PATTERN "*.json")
 endif()
 
 # Install internationalization language files

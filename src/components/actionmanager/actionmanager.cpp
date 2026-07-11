@@ -4,21 +4,21 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include "shortcutpresetstore.h"
 
 ActionManager *actionManager = nullptr;
 
 namespace {
 
-// Prefer the installed system copy (admin-editable), fall back to the copy
-// embedded in the binary via resources.qrc so dev/non-Linux builds work.
-// Mirrors ThemeStore::resolveThemePath().
-QString resolveDefaultShortcutsPath() {
-#ifdef SHORTCUTS_PATH
-    const QString systemPath = QStringLiteral(SHORTCUTS_PATH) + "/default-shortcuts.json";
-    if(QFile::exists(systemPath))
-        return systemPath;
-#endif
-    return QStringLiteral(":/res/default-shortcuts.json");
+// Resolve the selected preset to a file path (system PRESETS_PATH dir, else the
+// embedded qrc copy), falling back to qimgv (always embedded) if the selected
+// preset resolves nowhere — e.g. a config naming a preset not compiled into this
+// build. The active mapping in shortcuts.json is never touched by this.
+QString resolveSelectedPresetPath() {
+    QString path = ShortcutPresetStore::resolvePath(settings->selectedPreset());
+    if(path.isEmpty())
+        path = ShortcutPresetStore::resolvePath(QStringLiteral("qimgv"));
+    return path;
 }
 
 // Replace the platform-neutral $Ctrl/$Alt/$Shift tokens in a stored key
@@ -94,13 +94,13 @@ ActionManager *ActionManager::getInstance() {
 }
 //------------------------------------------------------------------------------
 void ActionManager::initDefaults() {
-    // Defaults are loaded from default-shortcuts.json (installed system copy,
-    // qrc fallback). Shared bindings live in MODE_GLOBAL; document/grid entries
-    // are only the context-specific differences.
-    const QString path = resolveDefaultShortcutsPath();
+    // Defaults are loaded from the selected preset (system PRESETS_PATH dir or
+    // embedded qrc, resolved by ShortcutPresetStore). Shared bindings live in
+    // MODE_GLOBAL; document/grid entries are only context-specific differences.
+    const QString path = resolveSelectedPresetPath();
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "[ActionManager] could not open default shortcuts:" << path;
+        qWarning() << "[ActionManager] could not open preset:" << path;
         return;
     }
     QJsonParseError err;
@@ -117,12 +117,15 @@ void ActionManager::initDefaults() {
     insertShortcutObject(root.value("global").toObject(), global);
     insertShortcutObject(root.value("document").toObject(), document);
     insertShortcutObject(root.value("grid").toObject(), grid);
+    // Per-OS overrides: pick the current-OS block (windows/macos/linux), falling
+    // back to "default". (Legacy preset files used "apple"; treat it as macos.)
     const QJsonObject platform = root.value("platform").toObject();
-#ifdef __APPLE__
-    const QJsonObject platformSpecific = platform.value("apple").toObject();
-#else
-    const QJsonObject platformSpecific = platform.value("default").toObject();
-#endif
+    const QString osToken = ShortcutPresetStore::currentOsToken();
+    QJsonObject platformSpecific = platform.value(osToken).toObject();
+    if(platformSpecific.isEmpty() && osToken == QStringLiteral("macos"))
+        platformSpecific = platform.value("apple").toObject();
+    if(platformSpecific.isEmpty())
+        platformSpecific = platform.value("default").toObject();
     insertPlatformShortcutObject(platformSpecific, global, document, grid);
 
     actionManager->defaults.insert(MODE_GLOBAL, global);
@@ -132,12 +135,19 @@ void ActionManager::initDefaults() {
 
 //------------------------------------------------------------------------------
 void ActionManager::initShortcuts() {
+    // First run: no shortcuts.json yet. Materialize it from the selected preset
+    // (default qimgv) and record the preset pointer + clean modified flag.
+    const bool firstRun = !settings->shortcutsJsonExists();
     actionManager->readShortcuts();
     bool empty = true;
     for(auto it = actionManager->shortcuts.cbegin(); it != actionManager->shortcuts.cend(); ++it)
         if(!it.value().isEmpty()) { empty = false; break; }
     if(empty)
         actionManager->resetDefaults();
+    if(firstRun) {
+        settings->setSelectedPreset(settings->selectedPreset()); // persist default id
+        actionManager->saveShortcuts();                          // write shortcuts.json
+    }
 
     // Merge newer default actions into pre-existing configs, per context, so
     // upgrading users get them without resetting all shortcuts.
@@ -320,6 +330,28 @@ void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
 //------------------------------------------------------------------------------
 void ActionManager::saveShortcuts() {
     settings->saveShortcuts(actionManager->shortcuts);
+    // Self-correcting dirty flag: modified iff the active mapping differs from the
+    // selected preset (defaults holds the loaded selected preset). Reverting to
+    // the preset scheme clears it; there is no sticky one-way bit.
+    settings->setShortcutsModified(actionManager->shortcuts != actionManager->defaults);
+}
+
+// Overwrite the active mapping with a preset and persist. Destructive — the UI
+// gates this behind a confirm dialog.
+void ActionManager::applyPreset(const QString &id) {
+    settings->setSelectedPreset(id);
+    initDefaults();                                   // reload defaults from `id`
+    actionManager->shortcuts = actionManager->defaults;
+    actionManager->rebuildShortcutLookup();
+    actionManager->saveShortcuts();                   // recomputes modified -> false
+}
+
+QList<PresetInfo> ActionManager::availablePresets() {
+    return ShortcutPresetStore::available(true);
+}
+
+QString ActionManager::selectedPreset() {
+    return settings->selectedPreset();
 }
 //------------------------------------------------------------------------------
 QString ActionManager::actionForShortcut(ViewMode context, const QString &keys) {

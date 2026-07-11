@@ -82,6 +82,14 @@ add_test(
     COMMAND thumbgrid_shortcut_context_persistence_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_shortcut_presets_keymaps_poc
+    behavior/test_shortcut_presets_and_keymaps_poc.cpp
+)
+add_test(
+    NAME "Shortcut presets and keymaps load from resources"
+    COMMAND thumbgrid_shortcut_presets_keymaps_poc
+)
+
 thumbgrid_add_behavior_test(thumbgrid_dir_thumb_disk_cache_test
     behavior/test_dir_thumbnails_are_cached_on_disk.cpp
 )

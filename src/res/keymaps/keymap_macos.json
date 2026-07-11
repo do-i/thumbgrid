@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "platform": "macos",
+    "note": "native QKeyEvent::nativeScanCode() -> canonical key name"
+  },
+  "keys": {},
+  "modifiers": {
+    "ctrl": "⌘",
+    "alt": "⌥",
+    "shift": "⇧"
+  }
+}

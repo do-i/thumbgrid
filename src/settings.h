@@ -143,6 +143,14 @@ public:
     void saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> &primary);
     void readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled);
     void saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled);
+    // [Shortcuts] pointers: selected preset id and whether the active mapping has
+    // diverged from it. Only these pointers live in the .conf; the mapping is in
+    // shortcuts.json.
+    QString selectedPreset();
+    void setSelectedPreset(const QString &id);
+    bool shortcutsModified();
+    void setShortcutsModified(bool modified);
+    bool shortcutsJsonExists();
     bool panelEnabled();
     void setPanelEnabled(bool mode);
     int lastDisplay();
