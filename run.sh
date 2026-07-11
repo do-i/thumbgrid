@@ -64,6 +64,15 @@ confirm_install() {
     esac
 }
 
+run_pm_install() {
+    local pm_name="$1"
+    local -n install_cmd_ref="$2"
+    shift 2
+
+    confirm_install "$pm_name" "$@" || return 0
+    run_as_root "${install_cmd_ref[@]}" "$@"
+}
+
 install_full_deps() {
     local packages=()
 
@@ -101,8 +110,8 @@ install_full_deps() {
             opencv-devel
             mpv-libs-devel
         )
-        confirm_install "dnf" "${packages[@]}" || return 0
-        run_as_root dnf install -y "${packages[@]}"
+        local dnf_cmd=(dnf install -y)
+        run_pm_install "dnf" dnf_cmd "${packages[@]}"
     elif command -v pacman >/dev/null 2>&1; then
         packages=(
             base-devel
@@ -118,8 +127,8 @@ install_full_deps() {
             opencv
             mpv
         )
-        confirm_install "pacman" "${packages[@]}" || return 0
-        run_as_root pacman -S --needed "${packages[@]}"
+        local pacman_cmd=(pacman -S --needed)
+        run_pm_install "pacman" pacman_cmd "${packages[@]}"
     elif command -v zypper >/dev/null 2>&1; then
         packages=(
             patterns-devel-C-C++
@@ -135,8 +144,8 @@ install_full_deps() {
             opencv-devel
             mpv-devel
         )
-        confirm_install "zypper" "${packages[@]}" || return 0
-        run_as_root zypper install -y "${packages[@]}"
+        local zypper_cmd=(zypper install -y)
+        run_pm_install "zypper" zypper_cmd "${packages[@]}"
     elif command -v apk >/dev/null 2>&1; then
         packages=(
             build-base
@@ -152,8 +161,8 @@ install_full_deps() {
             opencv-dev
             mpv-dev
         )
-        confirm_install "apk" "${packages[@]}" || return 0
-        run_as_root apk add "${packages[@]}"
+        local apk_cmd=(apk add)
+        run_pm_install "apk" apk_cmd "${packages[@]}"
     elif command -v brew >/dev/null 2>&1; then
         packages=(
             cmake
