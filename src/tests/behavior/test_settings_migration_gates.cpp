@@ -1,6 +1,7 @@
 #include "appversion.h"
 #include "settings.h"
 #include "themestore.h"
+#include "components/actionmanager/actionmanager.h"
 #include "components/scaler/scalerrequest.h"
 #include "sourcecontainers/image.h"
 #include "sourcecontainers/thumbnail.h"
@@ -11,6 +12,9 @@
 #include <QApplication>
 #include <QFile>
 #include <QFileInfo>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QMap>
 #include <QSettings>
 #include <QStandardPaths>
@@ -149,6 +153,42 @@ bool shortcutPresetPointerIsRecovered() {
                    "Missing shortcut preset pointer should be backfilled as qimgv.");
 }
 
+// Actions introduced after an old install's lastVersion (toggleStatusFooter
+// 1.0.3, cutFile 1.0.4, togglePlacesPanel 1.0.6) must still reach an upgrading
+// user's shortcuts.json even with the old per-action mergeMissing() calls
+// gone: adjustFromVersion()'s generic backfill loop, seeded from the qimgv
+// preset, is now the sole mechanism.
+bool shortcutNewActionsBackfillWithoutMergeMissing() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(1, 0, 2));
+    conf.sync();
+
+    QJsonObject global;
+    global.insert("copyFile", QJsonArray{QStringLiteral("C")});
+    global.insert("open", QJsonArray{QStringLiteral("$Ctrl+O")});
+    QJsonObject root;
+    root.insert("global", global);
+    QFile shortcutsFile(configDir() + "/shortcuts.json");
+    if(!require(shortcutsFile.open(QIODevice::WriteOnly | QIODevice::Truncate),
+                "Failed to write the pre-existing shortcuts.json fixture."))
+        return false;
+    shortcutsFile.write(QJsonDocument(root).toJson());
+    shortcutsFile.close();
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+
+    // Simulate the Core::onUpdate() upgrade path for a user last seen on 1.0.2.
+    actionManager->adjustFromVersion(QVersionNumber(1, 0, 2));
+
+    return require(actionManager->actionForShortcut(MODE_GLOBAL, "Ctrl+B") == QLatin1String("toggleStatusFooter"),
+                   "toggleStatusFooter should be backfilled from the qimgv preset without mergeMissing.") &&
+           require(actionManager->actionForShortcut(MODE_GLOBAL, "Ctrl+X") == QLatin1String("cutFile"),
+                   "cutFile should be backfilled from the qimgv preset without mergeMissing.") &&
+           require(actionManager->actionForShortcut(MODE_GLOBAL, "Ctrl+E") == QLatin1String("togglePlacesPanel"),
+                   "togglePlacesPanel should be backfilled from the qimgv preset without mergeMissing.");
+}
+
 bool runScenario(const QString &scenario) {
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
@@ -164,6 +204,8 @@ bool runScenario(const QString &scenario) {
         return shortcutRecoveryStaysLazyAndImportsOnRead();
     if(scenario == QLatin1String("shortcut-preset-recovery"))
         return shortcutPresetPointerIsRecovered();
+    if(scenario == QLatin1String("shortcut-new-action-backfill"))
+        return shortcutNewActionsBackfillWithoutMergeMissing();
     return fail("Unknown scenario: " + scenario);
 }
 

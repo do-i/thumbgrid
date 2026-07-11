@@ -148,25 +148,6 @@ void ActionManager::initShortcuts() {
         settings->setSelectedPreset(settings->selectedPreset()); // persist default id
         actionManager->saveShortcuts();                          // write shortcuts.json
     }
-
-    // Merge newer default actions into pre-existing configs, per context, so
-    // upgrading users get them without resetting all shortcuts.
-    auto mergeMissing = [](const QString &action, const QString &shortcut) {
-        QMap<ViewMode, QStringList> disabled;
-        settings->readDisabledShortcuts(disabled);
-        for(ViewMode ctx : shortcutContexts()) {
-            if(actionManager->defaults.value(ctx).key(action).isEmpty())
-                continue;
-            if(disabled.value(ctx).contains(action))
-                continue;
-            ContextMap &m = actionManager->shortcuts[ctx];
-            if(!m.values().contains(action) && !m.contains(shortcut))
-                m.insert(shortcut, action);
-        }
-    };
-    mergeMissing("toggleStatusFooter", InputMap::keyNameCtrl() + "+B");
-    mergeMissing("cutFile", InputMap::keyNameCtrl() + "+X");
-    mergeMissing("togglePlacesPanel", InputMap::keyNameCtrl() + "+E");
     actionManager->rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
