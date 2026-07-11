@@ -212,7 +212,8 @@ run_menu_action() {
     exit "$status"
 }
 
-configure_default() {
+configure_project() {
+    local build_testing="$1"
     require_cmake || return
 
     local cmake_args=()
@@ -236,27 +237,17 @@ configure_default() {
 
     "$CMAKE_BIN" -S "$ROOT_DIR" -B "$BUILD_DIR" \
         -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
+        -DBUILD_TESTING="$build_testing" \
         "${cmake_args[@]}"
 }
 
 build_project() {
-    require_cmake || return
-
-    if [[ ! -f "$BUILD_DIR/CMakeCache.txt" ]]; then
-        printf 'No CMake build directory found. Configuring a full build first.\n'
-        configure_default || return
-    fi
-
+    configure_project OFF || return
     "$CMAKE_BIN" --build "$BUILD_DIR" --parallel "$JOBS"
 }
 
-test_project() {
-    require_cmake || return
-
-    "$CMAKE_BIN" -S "$ROOT_DIR" -B "$BUILD_DIR" \
-        -DCMAKE_BUILD_TYPE="$BUILD_TYPE" \
-        -DBUILD_TESTING=ON || return
-
+full_build_project() {
+    configure_project ON || return
     "$CMAKE_BIN" --build "$BUILD_DIR" --parallel "$JOBS" || return
     "$CMAKE_BIN" --build "$BUILD_DIR" --target test --parallel "$JOBS"
 }
@@ -318,22 +309,22 @@ clean_build_dir() {
 }
 
 print_header
-printf '  i) Init   - install full dependencies\n'
-printf '  b) Build\n'
-printf '  t) Test\n'
+printf '  i) Init       - install full dependencies\n'
+printf '  b) Build      - build only, skip tests\n'
+printf '  f) Full build - build and run tests\n'
 printf '  r) Run\n'
-printf '  c) Clean  - delete build directory\n'
-printf '  m) Migrate - migrate custom theme and colors\n'
+printf '  c) Clean      - delete build directory\n'
+printf '  m) Migrate    - migrate custom theme and colors\n'
 printf '  q) Quit\n\n'
 
 # Single keypress, no Enter needed. Each choice runs once and then exits
-# (run_menu_action exits for i/b/r/c), so the menu does not loop.
-read -rsn1 -p "Choose [i/b/t/c/r/m/q]: " choice
+# (run_menu_action exits for i/b/f/r/c), so the menu does not loop.
+read -rsn1 -p "Choose [i/b/f/c/r/m/q]: " choice
 printf '%s\n\n' "$choice"
 case "$choice" in
     i|I) run_menu_action install_full_deps ;;
     b|B) run_menu_action build_project ;;
-    t|T) run_menu_action test_project ;;
+    f|F) run_menu_action full_build_project ;;
     r|R) run_menu_action run_executable ;;
     c|C) run_menu_action clean_build_dir ;;
     m|M) run_menu_action migrate_theme ;;
