@@ -5,6 +5,16 @@ SettingsDialog {
     background-color: %background%;
 }
 
+/* Plain QLabel/QCheckBox/QRadioButton text has no palette applied anywhere in
+   the app, so without an explicit color it renders in the default (light-
+   theme-oriented) system text color - unreadable against dark backgrounds.
+   More specific selectors below (SNoteText, SHeaderText, etc.) still win. */
+SettingsDialog QLabel,
+SettingsDialog QCheckBox,
+SettingsDialog QRadioButton {
+    color: %text%;
+}
+
 SettingsDialog QScrollArea {
     background-color: %background%;
     border: none;
