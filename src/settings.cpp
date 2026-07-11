@@ -617,6 +617,10 @@ void Settings::runConfigRecoveryMigrations(const QString &confDir) {
         settingsConf->setValue(QLatin1String("theme"), themeToken(tid));
     }
     themeConf->remove(QLatin1String("Theme"));
+
+    const QString presetKey = groupedKey(QStringLiteral("preset"));
+    if(!settingsConf->contains(presetKey))
+        settingsConf->setValue(presetKey, QStringLiteral("qimgv"));
 }
 //------------------------------------------------------------------------------
 int Settings::selectedThemeTid() {

@@ -137,6 +137,18 @@ bool shortcutRecoveryStaysLazyAndImportsOnRead() {
                    "Legacy eq shortcut should decode to '='.");
 }
 
+bool shortcutPresetPointerIsRecovered() {
+    QSettings conf;
+    seedExistingConfig(conf, appVersion);
+    conf.sync();
+
+    Settings::getInstance();
+
+    QSettings after;
+    return require(after.value("Shortcuts/preset").toString() == QLatin1String("qimgv"),
+                   "Missing shortcut preset pointer should be backfilled as qimgv.");
+}
+
 bool runScenario(const QString &scenario) {
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
@@ -150,6 +162,8 @@ bool runScenario(const QString &scenario) {
         return themeRecoveryPreservesSelectionPointer();
     if(scenario == QLatin1String("shortcut-recovery"))
         return shortcutRecoveryStaysLazyAndImportsOnRead();
+    if(scenario == QLatin1String("shortcut-preset-recovery"))
+        return shortcutPresetPointerIsRecovered();
     return fail("Unknown scenario: " + scenario);
 }
 
