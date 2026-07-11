@@ -37,6 +37,64 @@ renamed from `qimgv/` to `src/`, so upstream paths need remapping.
 - Add an SPDX + copyright header to files you substantially change or add,
   alongside the existing upstream attribution.
 
+## Releasing
+
+The git tag is the single source of truth for the version.
+
+**Branching model:**
+
+- `develop` is the integration branch. Feature branches merge into it with
+  `--ff-only` (rebase onto `develop` first), so `develop` stays a linear
+  history sitting directly on top of `main`.
+- `main` never receives commits directly — a GitHub ruleset blocks
+  force-pushes and deletion, and `release.sh` itself refuses to release if
+  `main` has diverged (e.g. from an accidental direct push). `main` only
+  advances by a fast-forward of `develop`, done by the release script.
+- `release-<version>` branches are created manually, ad hoc, only to patch an
+  already-shipped version with a critical fix. `release.sh` never creates,
+  reads, or touches these; fixes there are cherry-picked into `develop`/`main`
+  by hand as needed.
+
+**Cutting a release**, from anywhere with a clean working tree:
+
+```
+./scripts/release.sh             # interactive menu
+./scripts/release.sh cut         # cut a release non-interactively
+./scripts/release.sh cut 2026.7.2  # cut an explicit version instead of auto-CalVer
+./scripts/release.sh --dry-run cut # preview the steps, change nothing
+```
+
+"Cut release" fetches `origin`, verifies `origin/main` is an ancestor of
+`origin/develop` (aborting with the offending commits listed if not), checks
+via `gh` that `develop`'s tip has a passing `tests.yml` run, then fast-forwards
+`main` to that commit, tags it, and pushes `main` + the tag together
+atomically. Pushing the tag triggers
+[`arch-package.yml`](.github/workflows/arch-package.yml), which builds the
+Arch package and publishes a GitHub Release with **auto-generated release
+notes** (from merged PRs / commits since the previous tag). The script only
+tags — there is no version constant in the tree to bump.
+
+**Other menu items:**
+
+```
+./scripts/release.sh status  # show develop/main state, make no changes
+```
+
+Flags: `--dry-run` (preview only), `--skip-ci-check` (bypass the `gh` CI-status
+gate), `--yes` (skip the confirmation prompt).
+
+A few notes:
+
+- Versions follow CalVer `YYYY.M.N`: major = year, minor = month, micro =
+  sequential release within that month (from 1). The micro must stay
+  monotonically increasing — it drives the in-app update/changelog logic.
+- The in-app version is derived from the latest git tag at **build time**
+  ([`cmake/GenerateAppVersion.cmake`](cmake/GenerateAppVersion.cmake)), so dev
+  builds show the tag plus a `-<count>-g<hash>` suffix and refresh on every
+  commit without re-running `cmake`. A build requires git history and a tag.
+- To shape the auto-generated notes (categorise by label, exclude bots, …), add
+  a [`.github/release.yml`](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes).
+
 ## Attribution
 
 Please retain credit to easymodo and the qimgv contributors in any
