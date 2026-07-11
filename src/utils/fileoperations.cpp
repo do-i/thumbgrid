@@ -1,4 +1,5 @@
 #include "fileoperations.h"
+#include "fileoperations_platform.h"
 
 QString FileOperations::generateHash(const QString &str) {
     return QString(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
@@ -22,19 +23,13 @@ void FileOperations::checkCanRemove(const QString &filePath, FileOpResult &resul
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
         return;
     }
-#ifdef Q_OS_WIN32
-    if(!file.isWritable()) {
+    if(!FileOperationsPlatform::canRemoveSource(file)) {
         result = FileOpResult::SOURCE_NOT_WRITABLE;
         return;
     }
-#endif
 
     QFileInfo parent(file.absolutePath());
-    bool parentWritable = parent.exists() && parent.isDir() && parent.isWritable();
-#ifndef Q_OS_WIN32
-    parentWritable = parentWritable && parent.isExecutable();
-#endif
-    if(!parentWritable) {
+    if(!FileOperationsPlatform::isWritableParentDirectory(parent)) {
         result = FileOpResult::PARENT_DIRECTORY_NOT_WRITABLE;
         return;
     }
@@ -114,12 +109,10 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
     }
     QFileInfo destFile(destDirPath + "/" + srcFile.fileName());
     if(destFile.exists()) {
-#ifdef Q_OS_WIN32
-        if(!destFile.isWritable()) {
+        if(!FileOperationsPlatform::canReplaceExistingDestination(destFile)) {
             result = FileOpResult::DESTINATION_NOT_WRITABLE;
             return;
         }
-#endif
         if(destFile.isDir()) {
             result = FileOpResult::DESTINATION_DIR_EXISTS;
             return;
@@ -170,12 +163,10 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
         return;
     }
-    #ifdef Q_OS_WIN32
-    if(!srcFile.isWritable()) {
+    if(!FileOperationsPlatform::canRemoveSource(srcFile)) {
         result = FileOpResult::SOURCE_NOT_WRITABLE;
         return;
     }
-    #endif
     QFileInfo destDir(destDirPath);
     if(!destDir.exists()) {
         result = FileOpResult::DESTINATION_DOES_NOT_EXIST;
@@ -187,12 +178,10 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
     }
     QFileInfo destFile(destDirPath + "/" + srcFile.fileName());
     if(destFile.exists()) {
-#ifdef Q_OS_WIN32
-        if(!destFile.isWritable()) {
+        if(!FileOperationsPlatform::canReplaceExistingDestination(destFile)) {
             result = FileOpResult::DESTINATION_NOT_WRITABLE;
             return;
         }
-#endif
         if(destFile.isDir()) {
             result = FileOpResult::DESTINATION_DIR_EXISTS;
             return;
@@ -319,12 +308,10 @@ void FileOperations::rename(const QString &srcFilePath, const QString &newName, 
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
         return;
     }
-#ifdef Q_OS_WIN32
-    if(!srcFile.isWritable()) {
+    if(!FileOperationsPlatform::canRemoveSource(srcFile)) {
         result = FileOpResult::SOURCE_NOT_WRITABLE;
         return;
     }
-#endif
     if(newName.isEmpty() || newName == srcFile.fileName()) {
         result = FileOpResult::NOTHING_TO_DO;
         return;
@@ -332,10 +319,8 @@ void FileOperations::rename(const QString &srcFilePath, const QString &newName, 
     QString newFilePath = srcFile.absolutePath() + "/" + newName;
     QFileInfo destFile(newFilePath);
     if(destFile.exists()) {
-#ifdef Q_OS_WIN32
-        if(!destFile.isWritable())
+        if(!FileOperationsPlatform::canReplaceExistingDestination(destFile))
             result = FileOpResult::DESTINATION_NOT_WRITABLE;
-#endif
         if(destFile.isDir()) {
             result = FileOpResult::DESTINATION_DIR_EXISTS;
             return;
@@ -380,127 +365,9 @@ void FileOperations::moveToTrash(const QString &filePath, FileOpResult &result) 
     if(result != FileOpResult::SUCCESS)
         return;
 
-    if(moveToTrashImpl(filePath))
+    if(FileOperationsPlatform::moveToTrash(filePath))
         result = FileOpResult::SUCCESS;
     else
         result = FileOpResult::OTHER_ERROR;
     return;
 }
-
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-bool FileOperations::moveToTrashImpl(const QString &filePath) {
-    return QFile::moveToTrash(filePath);
-}
-#else
-#ifdef Q_OS_LINUX
-bool FileOperations::moveToTrashImpl(const QString &filePath) {
-    #ifdef QT_GUI_LIB
-    bool TrashInitialized = false;
-    QString TrashPath;
-    QString TrashPathInfo;
-    QString TrashPathFiles;
-    if(!TrashInitialized) {
-        QStringList paths;
-        const char* xdg_data_home = getenv( "XDG_DATA_HOME" );
-        if(xdg_data_home) {
-            qDebug() << "XDG_DATA_HOME not yet tested";
-            QString xdgTrash( xdg_data_home );
-            paths.append(xdgTrash + "/Trash");
-        }
-        QString home = QStandardPaths::writableLocation( QStandardPaths::HomeLocation );
-        paths.append( home + "/.local/share/Trash" );
-        paths.append( home + "/.trash" );
-        foreach( QString path, paths ){
-            if( TrashPath.isEmpty() ){
-                QDir dir( path );
-                if( dir.exists() ){
-                    TrashPath = path;
-                }
-            }
-        }
-        if( TrashPath.isEmpty() )
-            qDebug() << "Can`t detect trash folder";
-        TrashPathInfo = TrashPath + "/info";
-        TrashPathFiles = TrashPath + "/files";
-        if( !QDir( TrashPathInfo ).exists() || !QDir( TrashPathFiles ).exists() )
-            qDebug() << "Trash doesn`t look like FreeDesktop.org Trash specification";
-        TrashInitialized = true;
-    }
-    if( TrashPath.isEmpty() || !QDir( TrashPathInfo ).exists() || !QDir( TrashPathFiles ).exists() )
-        return false;
-    QFileInfo original( filePath );
-    if( !original.exists() ) {
-        qDebug() << "File doesn`t exist, cant move to trash";
-        return false;
-    }
-    QString info;
-    info += "[Trash Info]\nPath=";
-    info += original.absoluteFilePath();
-    info += "\nDeletionDate=";
-    info += QDateTime::currentDateTime().toString("yyyy-MM-ddThh:mm:ss");
-    info += "\n";
-    QString trashname = original.fileName();
-    QString infopath = TrashPathInfo + "/" + trashname + ".trashinfo";
-    QString filepath = TrashPathFiles + "/" + trashname;
-    int nr = 1;
-    while( QFileInfo( infopath ).exists() || QFileInfo( filepath ).exists() ){
-        nr++;
-        trashname = original.baseName() + "." + QString::number( nr );
-        if( !original.completeSuffix().isEmpty() ){
-            trashname += QString( "." ) + original.completeSuffix();
-        }
-        infopath = TrashPathInfo + "/" + trashname + ".trashinfo";
-        filepath = TrashPathFiles + "/" + trashname;
-    }
-    QDir dir;
-    if( !dir.rename( original.absoluteFilePath(), filepath ) ){
-        qDebug() << "move to trash failed";
-        return false;
-    }
-    QFile infoFile(infopath);
-    if( !infoFile.open(QIODevice::WriteOnly | QIODevice::Text) ) {
-        QFile::rename(filepath, original.absoluteFilePath());
-        return false;
-    }
-    QTextStream out(&infoFile);
-    out.setCodec("UTF-8");
-    out.setGenerateByteOrderMark(false);
-    out << info;
-    infoFile.close();
-    #else
-    Q_UNUSED( file );
-    qDebug() << "Trash in server-mode not supported";
-    #endif
-    return true;
-}
-#endif
-
-#ifdef Q_OS_WIN32
-bool FileOperations::moveToTrashImpl(const QString &file) {
-    QFileInfo fileinfo( file );
-    if( !fileinfo.exists() )
-        return false;
-    WCHAR* from = (WCHAR*) calloc((size_t)fileinfo.absoluteFilePath().length() + 2, sizeof(WCHAR));
-    fileinfo.absoluteFilePath().toWCharArray(from);    
-    SHFILEOPSTRUCTW fileop;
-    memset( &fileop, 0, sizeof( fileop ) );
-    fileop.wFunc = FO_DELETE;
-    fileop.pFrom = from;
-    fileop.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_NOERRORUI | FOF_SILENT;
-    int rv = SHFileOperationW( &fileop );
-    free(from);
-    if( 0 != rv ){
-        qDebug() << rv << QString::number( rv ).toInt( nullptr, 8 );
-        qDebug() << "move to trash failed";
-        return false;
-    }
-    return true;
-}
-#endif
-
-#ifdef Q_OS_MAC
-bool FileOperations::moveToTrashImpl(const QString &file) { // todo
-    return false;
-}
-#endif
-#endif

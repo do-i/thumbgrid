@@ -5,13 +5,7 @@
 #include <QString>
 #include <QFileInfo>
 #include <QDir>
-#include <QDateTime>
-#include <QStandardPaths>
 #include <QtGlobal>
-
-#ifdef Q_OS_WIN32
-#include "windows.h"
-#endif
 
 enum FileOpResult {
     SUCCESS,
@@ -44,6 +38,5 @@ public:
     static QString decodeResult(const FileOpResult &result);
 
 private:
-    static bool moveToTrashImpl(const QString &path);
     static QString generateHash(const QString &str);
 };
