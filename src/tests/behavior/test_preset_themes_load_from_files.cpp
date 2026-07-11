@@ -21,7 +21,7 @@ void PresetThemesLoadFromFilesTest::presetsLoadTheirDocumentedColors() {
     const ColorScheme light = ThemeStore::colorScheme(COLORS_LIGHT);
     QCOMPARE(light.tid, static_cast<int>(COLORS_LIGHT));
     QCOMPARE(light.accent.name(), QStringLiteral("#719ccd"));
-    QCOMPARE(light.background.name(), QStringLiteral("#1a1a1a"));
+    QCOMPARE(light.background.name(), QStringLiteral("#f2f2f2"));
     QCOMPARE(light.widget.name(), QStringLiteral("#ffffff"));
 
     const ColorScheme black = ThemeStore::colorScheme(COLORS_BLACK);
