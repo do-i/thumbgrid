@@ -379,54 +379,28 @@ void Core::close() {
 }
 
 void Core::removePermanent() {
-    auto paths = currentSelection();
-    if(!paths.count())
-        return;
-    if(!confirmRemovePossible(paths, false))
-        return;
-    if(settings->confirmDelete()) {
-        QString msg;
-        if(paths.count() > 1)
-            msg = tr("Delete ") + QString::number(paths.count()) + tr(" items permanently?");
-        else
-            msg = tr("Delete item permanently?");
-        if(!mw->showConfirmation(tr("Delete permanently"), msg))
-            return;
-    }
-    FileOpResult result;
-    int successCount = 0;
-    for(auto path : paths) {
-        QFileInfo fi(path);
-        if(fi.isDir())
-            model->removeDir(path, false, true, result);
-        else
-            result = removeFile(path, false);
-        if(result == FileOpResult::SUCCESS)
-            successCount++;
-    }
-    if(paths.count() == 1) {
-        if(result == FileOpResult::SUCCESS)
-            mw->showMessageSuccess(tr("File removed"));
-        else
-            outputError(result);
-    } else if(paths.count() > 1) {
-        mw->showMessageSuccess(tr("Removed: ") + QString::number(successCount) + tr(" files"));
-    }
+    removeSelection(false);
 }
 
 void Core::moveToTrash() {
+    removeSelection(true);
+}
+
+void Core::removeSelection(bool trash) {
     auto paths = currentSelection();
     if(!paths.count())
         return;
-    if(!confirmRemovePossible(paths, true))
+    if(!confirmRemovePossible(paths, trash))
         return;
-    if(settings->confirmTrash()) {
+    if(trash ? settings->confirmTrash() : settings->confirmDelete()) {
         QString msg;
-        if(paths.count() > 1)
-            msg = tr("Move ") + QString::number(paths.count()) + tr(" items to trash?");
+        if(trash)
+            msg = (paths.count() > 1) ? tr("Move ") + QString::number(paths.count()) + tr(" items to trash?")
+                                      : tr("Move item to trash?");
         else
-            msg = tr("Move item to trash?");
-        if(!mw->showConfirmation(tr("Move to trash"), msg))
+            msg = (paths.count() > 1) ? tr("Delete ") + QString::number(paths.count()) + tr(" items permanently?")
+                                      : tr("Delete item permanently?");
+        if(!mw->showConfirmation(trash ? tr("Move to trash") : tr("Delete permanently"), msg))
             return;
     }
     FileOpResult result;
@@ -434,19 +408,22 @@ void Core::moveToTrash() {
     for(auto path : paths) {
         QFileInfo fi(path);
         if(fi.isDir())
-            model->removeDir(path, true, true, result);
+            model->removeDir(path, trash, true, result);
         else
-            result = removeFile(path, true);
+            result = removeFile(path, trash);
         if(result == FileOpResult::SUCCESS)
             successCount++;
     }
     if(paths.count() == 1) {
         if(result == FileOpResult::SUCCESS)
-            mw->showMessageSuccess(tr("Moved to trash"));
+            mw->showMessageSuccess(trash ? tr("Moved to trash") : tr("File removed"));
         else
             outputError(result);
     } else if(paths.count() > 1) {
-        mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
+        if(trash)
+            mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
+        else
+            mw->showMessageSuccess(tr("Removed: ") + QString::number(successCount) + tr(" files"));
     }
 }
 
@@ -1140,6 +1117,25 @@ void Core::convertSelectionToFormat(QString format) {
         mw->showError(tr("Could not convert file(s)"));
 }
 
+// Copies or moves the selected file, asking about an existing destination.
+FileOpResult Core::doCurrentFileOp(QString destDirectory, bool move) {
+    FileOpResult result;
+    auto op = [&](bool force) {
+        if(move)
+            model->moveFileTo(selectedPath(), destDirectory, force, result);
+        else
+            model->copyFileTo(selectedPath(), destDirectory, force, result);
+    };
+    op(false);
+    if(result == FileOpResult::SUCCESS) {
+        mw->showMessageSuccess(move ? tr("File moved.") : tr("File copied."));
+    } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
+        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
+            op(true);
+    }
+    return result;
+}
+
 void Core::moveCurrentFile(QString destDirectory) {
     if(model->isEmpty())
         return;
@@ -1147,14 +1143,7 @@ void Core::moveCurrentFile(QString destDirectory) {
     mw->setUpdatesEnabled(false);
     // move fails during file playback, so we close it temporarily
     mw->closeImage();
-    FileOpResult result;
-    model->moveFileTo(selectedPath(), destDirectory, false, result);
-    if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(tr("File moved."));
-    } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
-            model->moveFileTo(selectedPath(), destDirectory, true, result);
-    }
+    FileOpResult result = doCurrentFileOp(destDirectory, true);
     if(result != FileOpResult::SUCCESS) {
         guiSetImage(model->getImage(selectedPath()));
         updateInfoString();
@@ -1168,14 +1157,7 @@ void Core::moveCurrentFile(QString destDirectory) {
 void Core::copyCurrentFile(QString destDirectory) {
     if(model->isEmpty())
         return;
-    FileOpResult result;
-    model->copyFileTo(selectedPath(), destDirectory, false, result);
-    if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(tr("File copied."));
-    } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
-            model->copyFileTo(selectedPath(), destDirectory, true, result);
-    }
+    FileOpResult result = doCurrentFileOp(destDirectory, false);
     if(result != FileOpResult::SUCCESS && result != FileOpResult::DESTINATION_FILE_EXISTS)
         outputError(result);
 }

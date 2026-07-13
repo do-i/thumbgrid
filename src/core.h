@@ -103,6 +103,8 @@ private:
                          const QString &srcPath, const QString &dstPath, DialogResult &overwriteFiles);
     bool confirmFileOperation(QString action, QList<QString> paths, QString destDirectory);
     bool confirmRemovePossible(QList<QString> paths, bool trash);
+    void removeSelection(bool trash);
+    FileOpResult doCurrentFileOp(QString destDirectory, bool move);
 
 private slots:
     void readSettings();

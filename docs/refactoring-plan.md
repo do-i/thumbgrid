@@ -10,21 +10,21 @@ nothing and absent from `src/gui/CMakeLists.txt`, so it is not even compiled.
 It is a stale copy of `ThumbnailWidget` (it redefines the `ThumbnailStyle`
 enum). Delete both files.
 
-## 2. Deduplicate Core file operations — [ ]
+## 2. Deduplicate Core file operations — [x]
 
 All in `src/core.cpp`:
 
-- [ ] `doInteractiveCopy` / `doInteractiveMove`: ~85-line near-identical
+- [x] `doInteractiveCopy` / `doInteractiveMove`: ~85-line near-identical
       recursive functions. Merge into one that takes the operation as a
       parameter; move additionally removes the source dir afterwards.
-- [ ] Within the merged function, the symlink and single-file branches repeat
+- [x] Within the merged function, the symlink and single-file branches repeat
       the same "attempt → replace-dialog on DESTINATION_FILE_EXISTS → retry →
       report → reset flag" block four times. Extract a helper.
-- [ ] `removePermanent` / `moveToTrash`: identical except a `trash` bool and
+- [x] `removePermanent` / `moveToTrash`: identical except a `trash` bool and
       three strings. Merge.
-- [ ] `moveCurrentFile` / `copyCurrentFile`: same shape, share the
+- [x] `moveCurrentFile` / `copyCurrentFile`: same shape, share the
       exists/overwrite flow.
-- [ ] Replace the pasted `mw->showError(decodeResult(...)); qDebug() << ...`
+- [x] Replace the pasted `mw->showError(decodeResult(...)); qDebug() << ...`
       idiom with the existing `outputError()`.
 
 ## 3. Extract file-operation code from Core — [ ]
