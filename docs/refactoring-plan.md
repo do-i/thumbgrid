@@ -35,13 +35,16 @@ editing, and dialog orchestration. Extract the interactive file-operation code
 dedicated `FileOperationsController` owned by Core. Do this after item 2 so the
 moved code is already deduplicated.
 
-## 4. Reduce settings.cpp boilerplate — [ ]
+## 4. Reduce settings.cpp boilerplate — [x] (no change needed)
 
 `src/settings.cpp` (2031 lines) hand-writes ~230 getters/setters around
-QSettings. A full descriptor-table rewrite is high-risk; instead introduce
-small typed helpers (`getBool(key, def)` / `setValue(key, v)` pattern) that
-collapse the common cases without changing the public API. Full descriptor
-rewrite stays out of scope.
+QSettings. On closer inspection the typed-helper layer this item asked for
+already exists: every trivial accessor is a one-liner over
+`readSetting(key, default)` / `writeSetting(key, value)`, and the remaining
+raw `settingsConf` accesses are deliberate (migration, theme tokens, the
+Scripts array group). Collapsing the ~110 remaining one-line accessor
+*methods* would require macros or codegen, which trades greppability and
+debuggability for line count — not worth it. No change made.
 
 ## 5. Split SettingsDialog setup — [ ]
 
