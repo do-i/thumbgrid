@@ -3,7 +3,7 @@
 Findings from a codebase survey (2026-07-13), ordered by payoff. Each item is
 committed separately; this file tracks progress.
 
-## 1. Delete dead ThumbnailWidgetCmp — [ ]
+## 1. Delete dead ThumbnailWidgetCmp — [x]
 
 `src/gui/customwidgets/thumbnailwidgetcmp.{h,cpp}` (~570 lines) is referenced by
 nothing and absent from `src/gui/CMakeLists.txt`, so it is not even compiled.
