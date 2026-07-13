@@ -71,6 +71,10 @@ private:
     QWidget* makeSettingsPage(const QString &title, QVBoxLayout **contentLayout);
     QWidget* makeSettingsGroup(const QString &title = QString());
     void setupShortcutsPage();
+    void setupAboutPage();
+    void setupThemePage();
+    void setupFeatureToggles();
+    void setupMiscControls();
     // Repopulates the preset dropdown from ActionManager::availablePresets(),
     // selects the active preset, and labels it "(modified)" if the active
     // mapping has diverged from it.

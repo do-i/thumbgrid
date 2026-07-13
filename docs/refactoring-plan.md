@@ -46,7 +46,7 @@ Scripts array group). Collapsing the ~110 remaining one-line accessor
 *methods* would require macros or codegen, which trades greppability and
 debuggability for line count — not worth it. No change made.
 
-## 5. Split SettingsDialog setup — [ ]
+## 5. Split SettingsDialog setup — [x]
 
 `src/gui/dialogs/settingsdialog.cpp`: 161-line constructor plus 134-line
 `readSettings` and 129-line `saveSettings`. Split the constructor into

@@ -95,6 +95,19 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     setupPreferencePages();
     setupShortcutsPage();
+    setupAboutPage();
+    setupThemePage();
+    setupFeatureToggles();
+    setupSidebar();
+    setupMiscControls();
+
+    connect(this, &SettingsDialog::settingsChanged, settings, &Settings::sendChangeNotification);
+    readSettings();
+
+    adjustSizeToContents();
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::setupAboutPage() {
     ui->aboutAppTextBrowser->viewport()->setAutoFillBackground(false);
     // Clean version on the label; on dev builds the full "git describe" string
     // (commit count + hash) is revealed on hover. On a tagged release the two
@@ -120,7 +133,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui->qtVersionLabel->setText(qVersion());
     ui->appIconLabel->setPixmap(QIcon(":/res/icons/common/logo/app/22.png").pixmap(22,22));
     ui->qtIconLabel->setPixmap(QIcon(":/res/icons/common/logo/3rdparty/qt22.png").pixmap(22,16));
-
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::setupThemePage() {
     // fake combobox that acts as a menu button
     // less code than using pushbutton with menu
     // will be replaced with something custom later
@@ -188,7 +203,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
         connect(selector, &ColorSelectorButton::colorChanged, this, switchToCustom);
         connect(selector, &ColorSelectorButton::colorApplied, this, previewColor);
     }
-
+}
+//------------------------------------------------------------------------------
+// Compile-time feature gates: disable or hide controls for features this
+// build was configured without.
+void SettingsDialog::setupFeatureToggles() {
 #ifndef USE_KDE_BLUR
     ui->blurBackgroundCheckBox->setEnabled(false);
 #endif
@@ -213,9 +232,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     if(!settings->supportedFormats().contains("jxl"))
         ui->animatedJxlCheckBox->hide();
-
-    setupSidebar();
-
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::setupMiscControls() {
     // setup radioBtn groups
     fitModeGrp.addButton(ui->fitModeWindow);
     fitModeGrp.addButton(ui->fitModeWidth);
@@ -242,11 +261,6 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     // insert system language entry manually at the beginning
     langs.insert("system", "System language");
     ui->langComboBox->insertItem(0, "System language");
-
-    connect(this, &SettingsDialog::settingsChanged, settings, &Settings::sendChangeNotification);
-    readSettings();
-
-    adjustSizeToContents();
 }
 //------------------------------------------------------------------------------
 SettingsDialog::~SettingsDialog() {
