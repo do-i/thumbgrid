@@ -52,12 +52,14 @@ debuggability for line count — not worth it. No change made.
 `readSettings` and 129-line `saveSettings`. Split the constructor into
 per-page `setupXxxPage()` methods so each page's wiring lives in one place.
 
-## 6. Smaller items — [ ]
+## 6. Smaller items — [x]
 
-- [ ] `Settings::loadStylesheet()` (139 lines): split the stylesheet assembly
-      into per-widget-group helpers.
-- [ ] `ImageViewerV2::wheelEvent` (94 lines): split scroll/zoom dispatch into
-      named handlers.
-- [ ] `ContextMenu` vs `GridContextMenu`: evaluate a shared base class; they
-      have diverged, so only do this if it genuinely simplifies. Record the
-      decision here either way.
+- [x] `Settings::loadStylesheet()` (139 lines): split into
+      `replaceStylesheetMetrics()` / `replaceStylesheetColors()` helpers.
+- [x] `ImageViewerV2::wheelEvent` (94 lines): split into `isWheelScroll()`,
+      `trackpadScroll()`, `wheelScroll()`.
+- [x] `ContextMenu` vs `GridContextMenu`: evaluated and declined. They share
+      a surface API but differ in 262 of 372 lines, and gridcontextmenu.cpp
+      has uncommitted local changes in flight; a shared base class would
+      save little and entangle that work. Revisit only if the two menus
+      start growing parallel features again.
