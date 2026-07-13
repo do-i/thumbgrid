@@ -3,6 +3,7 @@
 target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     directorymodel.cpp
     directorypresenter.cpp
+    fileoperationscontroller.cpp
 
     scriptmanager/scriptmanager.cpp
     actionmanager/actionmanager.cpp

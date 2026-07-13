@@ -27,7 +27,7 @@ All in `src/core.cpp`:
 - [x] Replace the pasted `mw->showError(decodeResult(...)); qDebug() << ...`
       idiom with the existing `outputError()`.
 
-## 3. Extract file-operation code from Core — [ ]
+## 3. Extract file-operation code from Core — [x]
 
 Core (1964 lines) mixes navigation, slideshow, clipboard, DnD, file ops, image
 editing, and dialog orchestration. Extract the interactive file-operation code

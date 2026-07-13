@@ -12,6 +12,7 @@
 #include "settings.h"
 #include "components/directorymodel.h"
 #include "components/directorypresenter.h"
+#include "components/fileoperationscontroller.h"
 #include "components/scriptmanager/scriptmanager.h"
 #include "gui/mainwindow.h"
 #include "utils/randomizer.h"
@@ -67,6 +68,7 @@ private:
     std::shared_ptr<DirectoryModel> model;
 
     DirectoryPresenter thumbPanelPresenter, folderViewPresenter;
+    FileOperationsController *fileOps = nullptr;
 
     void rotateByDegrees(int degrees);
     void reset();
@@ -98,13 +100,6 @@ private:
     template<typename... Args>
     void edit_template(bool save, QString actionName, const std::function<QImage*(std::shared_ptr<const QImage>, Args...)>& func, Args&&... as);
 
-    void doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles);
-    void doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
-                         const QString &srcPath, const QString &dstPath, DialogResult &overwriteFiles);
-    bool confirmFileOperation(QString action, QList<QString> paths, QString destDirectory);
-    bool confirmRemovePossible(QList<QString> paths, bool trash);
-    void removeSelection(bool trash);
-    FileOpResult doCurrentFileOp(QString destDirectory, bool move);
 
 private slots:
     void readSettings();
@@ -124,10 +119,6 @@ private slots:
     void onScalingFinished(QPixmap* scaled, ScalerRequest req);
     void copyCurrentFile(QString destDirectory);
     void moveCurrentFile(QString destDirectory);
-    void copyPathsTo(QList<QString> paths, QString destDirectory);
-    void interactiveCopy(QList<QString> paths, QString destDirectory);
-    void interactiveMove(QList<QString> paths, QString destDirectory);
-    void movePathsTo(QList<QString> paths, QString destDirectory);
     void convertSelectionToFormat(QString format);
     FileOpResult removeFile(QString fileName, bool trash);
     void onFileRemoved(QString filePath, int index);

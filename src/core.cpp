@@ -75,6 +75,7 @@ void Core::initGui() {
 
 void Core::attachModel(DirectoryModel *_model) {
     model.reset(_model);
+    fileOps->setModel(model);
     thumbPanelPresenter.setModel(model);
     folderViewPresenter.setShowParentDir(true);
     folderViewPresenter.setModel(model);
@@ -85,6 +86,11 @@ void Core::attachModel(DirectoryModel *_model) {
 }
 
 void Core::initComponents() {
+    fileOps = new FileOperationsController(mw, this);
+    // single-file removal goes through Core, which closes playing media first
+    fileOps->setRemoveFileHandler([this](QString path, bool trash) {
+        return removeFile(path, trash);
+    });
     attachModel(new DirectoryModel());
 }
 
@@ -107,7 +113,7 @@ void Core::connectComponents() {
             this, qOverload<QList<QString>>(&Core::onDraggedOut));
 
     connect(&folderViewPresenter, &DirectoryPresenter::droppedInto,
-            this, qOverload<QList<QString>,QString>(&Core::movePathsTo));
+            fileOps, &FileOperationsController::movePathsTo);
     connect(&folderViewPresenter, &DirectoryPresenter::statusTextChanged,
             mw, &MW::setFolderStatusText);
 
@@ -117,8 +123,8 @@ void Core::connectComponents() {
     connect(mw, &MW::droppedIn,             this, &Core::onDropIn);
     connect(mw, &MW::copyRequested,         this, &Core::copyCurrentFile);
     connect(mw, &MW::moveRequested,         this, &Core::moveCurrentFile);
-    connect(mw, &MW::copyUrlsRequested,     this, qOverload<QList<QString>, QString>(&Core::copyPathsTo));
-    connect(mw, &MW::moveUrlsRequested,     this, &Core::movePathsTo);
+    connect(mw, &MW::copyUrlsRequested,     fileOps, &FileOperationsController::copyPathsTo);
+    connect(mw, &MW::moveUrlsRequested,     fileOps, &FileOperationsController::movePathsTo);
     connect(mw, &MW::convertFormatRequested, this, &Core::convertSelectionToFormat);
     connect(mw, &MW::cropRequested,         this, &Core::crop);
     connect(mw, &MW::cropAndSaveRequested,  this, &Core::cropAndSave);
@@ -379,69 +385,13 @@ void Core::close() {
 }
 
 void Core::removePermanent() {
-    removeSelection(false);
+    fileOps->removePaths(currentSelection(), false);
 }
 
 void Core::moveToTrash() {
-    removeSelection(true);
+    fileOps->removePaths(currentSelection(), true);
 }
 
-void Core::removeSelection(bool trash) {
-    auto paths = currentSelection();
-    if(!paths.count())
-        return;
-    if(!confirmRemovePossible(paths, trash))
-        return;
-    if(trash ? settings->confirmTrash() : settings->confirmDelete()) {
-        QString msg;
-        if(trash)
-            msg = (paths.count() > 1) ? tr("Move ") + QString::number(paths.count()) + tr(" items to trash?")
-                                      : tr("Move item to trash?");
-        else
-            msg = (paths.count() > 1) ? tr("Delete ") + QString::number(paths.count()) + tr(" items permanently?")
-                                      : tr("Delete item permanently?");
-        if(!mw->showConfirmation(trash ? tr("Move to trash") : tr("Delete permanently"), msg))
-            return;
-    }
-    FileOpResult result;
-    int successCount = 0;
-    for(auto path : paths) {
-        QFileInfo fi(path);
-        if(fi.isDir())
-            model->removeDir(path, trash, true, result);
-        else
-            result = removeFile(path, trash);
-        if(result == FileOpResult::SUCCESS)
-            successCount++;
-    }
-    if(paths.count() == 1) {
-        if(result == FileOpResult::SUCCESS)
-            mw->showMessageSuccess(trash ? tr("Moved to trash") : tr("File removed"));
-        else
-            outputError(result);
-    } else if(paths.count() > 1) {
-        if(trash)
-            mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
-        else
-            mw->showMessageSuccess(tr("Removed: ") + QString::number(successCount) + tr(" files"));
-    }
-}
-
-bool Core::confirmRemovePossible(QList<QString> paths, bool trash) {
-    FileOpResult result;
-    for(const auto &path : paths) {
-        FileOperations::checkCanRemove(path, result);
-        if(result == FileOpResult::SUCCESS)
-            continue;
-
-        const QString title = trash ? tr("Cannot move to trash") : tr("Cannot delete");
-        QString msg = FileOperations::decodeResult(result);
-        msg += "\n\n" + QDir::toNativeSeparators(path);
-        mw->showErrorDialog(title, msg);
-        return false;
-    }
-    return true;
-}
 
 void Core::reloadImage() {
     reloadImage(selectedPath());
@@ -630,12 +580,11 @@ void Core::pasteFile() {
         // A cut+paste moves the files, deleting them from the source folder, so
         // confirm it first like the other move path (movePathsTo) does. Returning
         // early keeps the clipboard intact so the cut selection survives a decline.
-        if(!confirmFileOperation(tr("Move"), toPaste, destDirectory))
+        if(!fileOps->movePathsTo(toPaste, destDirectory))
             return;
-        interactiveMove(toPaste, destDirectory);
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
     } else {
-        interactiveCopy(toPaste, destDirectory);
+        fileOps->interactiveCopy(toPaste, destDirectory);
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items pasted").arg(toPaste.count()) : tr("Item pasted"));
     }
     // Clear the clipboard once the paste is done. For a move this stops a second
@@ -915,225 +864,13 @@ void Core::showInDirectory() {
     PlatformDesktop::showInDirectory(selectedPath(), model->directoryPath());
 }
 
-void Core::interactiveCopy(QList<QString> paths, QString destDirectory) {
-    DialogResult overwriteFiles;
-    for(auto path : paths) {
-        doInteractiveCopyMove(path, destDirectory, false, overwriteFiles);
-        if(overwriteFiles.cancel)
-            return;
-    }
-}
-
-void Core::interactiveMove(QList<QString> paths, QString destDirectory) {
-    DialogResult overwriteFiles;
-    for(auto path : paths) {
-        doInteractiveCopyMove(path, destDirectory, true, overwriteFiles);
-        if(overwriteFiles.cancel)
-            return;
-    }
-}
-
-// Single copy/move attempt; on DESTINATION_FILE_EXISTS asks via the replace
-// dialog (unless an "all" answer is active) and retries with force.
-void Core::doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
-                           const QString &srcPath, const QString &dstPath, DialogResult &overwriteFiles) {
-    FileOpResult result;
-    op(overwriteFiles, result);
-    if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(overwriteFiles.all) // skipping all
-            return;
-        overwriteFiles = mw->fileReplaceDialog(srcPath, dstPath, FILE_TO_FILE, true);
-        if(!overwriteFiles || overwriteFiles.cancel)
-            return;
-        op(true, result);
-    }
-    if(!(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles))
-        outputError(result);
-    if(!overwriteFiles.all) // attempt done; reset temporary flag
-        overwriteFiles.yes = false;
-}
-
-// todo: replacing DIR with a FILE?
-void Core::doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles) {
-    QFileInfo srcFi(path);
-    QString dstPath = destDirectory + "/" + srcFi.fileName();
-// SYMLINK (operate on the link itself, never dereference into the target) =====================
-    if(srcFi.isSymLink()) {
-        doInteractiveOp([&](bool force, FileOpResult &result) {
-            if(move)
-                model->moveSymLinkTo(path, destDirectory, force, result);
-            else
-                FileOperations::copySymLinkTo(path, destDirectory, force, result);
-        }, srcFi.absoluteFilePath(), dstPath, overwriteFiles);
-        return;
-    }
-// SINGLE FILE ================================================================================
-    if(!srcFi.isDir()) {
-        doInteractiveOp([&](bool force, FileOpResult &result) {
-            if(move)
-                model->moveFileTo(path, destDirectory, force, result);
-            else
-                FileOperations::copyFileTo(path, destDirectory, force, result);
-        }, srcFi.absoluteFilePath(), dstPath, overwriteFiles);
-        return;
-    }
-// DIR (RECURSIVE) ============================================================================
-    QDir srcDir(srcFi.absoluteFilePath());
-    QFileInfo dstFi(destDirectory + "/" + srcFi.baseName());
-    QDir dstDir(dstFi.absoluteFilePath());
-    if(dstFi.exists() && !dstFi.isDir()) { // overwriting file with a folder
-        if(!overwriteFiles && !overwriteFiles.all) {
-            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), dstFi.absoluteFilePath(), DIR_TO_FILE, true);
-            if(!overwriteFiles || overwriteFiles.cancel)
-                return;
-            if(!overwriteFiles.all) // reset temp flag right away
-                overwriteFiles.yes = false;
-        }
-        // remove dst file; give up if not writable
-        FileOpResult result;
-        FileOperations::removeFile(dstFi.absoluteFilePath(), result);
-        if(result != FileOpResult::SUCCESS) {
-            outputError(result);
-            return;
-        }
-    } else if(!dstDir.mkpath(".")) {
-        mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qDebug() << "Could not create directory " << dstDir.absolutePath();
-        return;
-    }
-    // copy / move all contents
-    // TODO: skip symlinks? test
-    QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
-    for(auto entry : entryList) {
-        doInteractiveCopyMove(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), move, overwriteFiles);
-        if(overwriteFiles.cancel)
-            return;
-    }
-    if(move) {
-        FileOpResult dirRmRes;
-        model->removeDir(srcDir.absolutePath(), false, false, dirRmRes);
-    }
-}
-
-// -----------------------------------------------------------------------------------
-
-bool Core::confirmFileOperation(QString action, QList<QString> paths, QString destDirectory) {
-    if(paths.isEmpty())
-        return false;
-
-    QString destination = QDir::toNativeSeparators(destDirectory);
-    QString msg;
-    if(paths.count() == 1) {
-        QFileInfo fi(paths.first());
-        QString itemName = fi.fileName();
-        if(itemName.isEmpty())
-            itemName = paths.first();
-        msg = tr("%1 \"%2\" to \"%3\"?").arg(action, itemName, destination);
-    } else {
-        msg = tr("%1 %2 items to \"%3\"?").arg(action).arg(paths.count()).arg(destination);
-    }
-
-    return mw->showConfirmation(action, msg);
-}
-
-void Core::copyPathsTo(QList<QString> paths, QString destDirectory) {
-    if(!confirmFileOperation(tr("Copy"), paths, destDirectory))
-        return;
-    interactiveCopy(paths, destDirectory);
-}
-
-void Core::movePathsTo(QList<QString> paths, QString destDirectory) {
-    if(!confirmFileOperation(tr("Move"), paths, destDirectory))
-        return;
-    interactiveMove(paths, destDirectory);
-}
-
 // Converts the currently selected file(s) to another image format.
 // The converted copy is written next to the original (same base name, new extension).
 // Only static images are supported; animated images and video are skipped.
 void Core::convertSelectionToFormat(QString format) {
     if(!model || model->isEmpty())
         return;
-    QList<QString> selection = currentSelection();
-    if(selection.isEmpty())
-        return;
-
-    // normalize the target extension
-    QString ext = format.toLower();
-    if(ext == "jpeg")
-        ext = "jpg";
-
-    struct ConvertJob {
-        QString src;
-        QString dest;
-        std::shared_ptr<Image> img;
-    };
-    QList<ConvertJob> jobs;
-    int skipped = 0;
-    bool overwrites = false;
-
-    for(const QString &path : selection) {
-        QFileInfo fi(path);
-        QString srcExt = fi.suffix().toLower();
-        // already in the target format
-        if(srcExt == ext || (ext == "jpg" && srcExt == "jpeg")) {
-            skipped++;
-            continue;
-        }
-        auto img = model->getImage(path);
-        if(!img || img->type() != STATIC) {
-            skipped++;
-            continue;
-        }
-        QString dest = fi.absolutePath() + "/" + fi.completeBaseName() + "." + ext;
-        if(QFileInfo::exists(dest))
-            overwrites = true;
-        jobs.append({path, dest, img});
-    }
-
-    if(jobs.isEmpty()) {
-        mw->showMessage(tr("Nothing to convert"));
-        return;
-    }
-    if(overwrites && !mw->showConfirmation(tr("Convert"),
-            tr("Some files already exist and will be overwritten.\n\nContinue?")))
-        return;
-
-    int converted = 0, failed = 0;
-    for(const ConvertJob &job : jobs) {
-        // make sure the image is cached so DirectoryModel::saveFile can access it
-        model->updateImage(job.src, job.img);
-        if(model->saveFile(job.src, job.dest))
-            converted++;
-        else
-            failed++;
-    }
-
-    if(converted && !failed)
-        mw->showMessageSuccess(tr("Converted %1 file(s)").arg(converted));
-    else if(converted && failed)
-        mw->showWarning(tr("Converted %1, failed %2").arg(converted).arg(failed));
-    else
-        mw->showError(tr("Could not convert file(s)"));
-}
-
-// Copies or moves the selected file, asking about an existing destination.
-FileOpResult Core::doCurrentFileOp(QString destDirectory, bool move) {
-    FileOpResult result;
-    auto op = [&](bool force) {
-        if(move)
-            model->moveFileTo(selectedPath(), destDirectory, force, result);
-        else
-            model->copyFileTo(selectedPath(), destDirectory, force, result);
-    };
-    op(false);
-    if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(move ? tr("File moved.") : tr("File copied."));
-    } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
-            op(true);
-    }
-    return result;
+    fileOps->convertToFormat(currentSelection(), format);
 }
 
 void Core::moveCurrentFile(QString destDirectory) {
@@ -1143,7 +880,7 @@ void Core::moveCurrentFile(QString destDirectory) {
     mw->setUpdatesEnabled(false);
     // move fails during file playback, so we close it temporarily
     mw->closeImage();
-    FileOpResult result = doCurrentFileOp(destDirectory, true);
+    FileOpResult result = fileOps->copyOrMoveFile(selectedPath(), destDirectory, true);
     if(result != FileOpResult::SUCCESS) {
         guiSetImage(model->getImage(selectedPath()));
         updateInfoString();
@@ -1157,7 +894,7 @@ void Core::moveCurrentFile(QString destDirectory) {
 void Core::copyCurrentFile(QString destDirectory) {
     if(model->isEmpty())
         return;
-    FileOpResult result = doCurrentFileOp(destDirectory, false);
+    FileOpResult result = fileOps->copyOrMoveFile(selectedPath(), destDirectory, false);
     if(result != FileOpResult::SUCCESS && result != FileOpResult::DESTINATION_FILE_EXISTS)
         outputError(result);
 }
