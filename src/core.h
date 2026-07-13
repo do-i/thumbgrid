@@ -98,8 +98,9 @@ private:
     template<typename... Args>
     void edit_template(bool save, QString actionName, const std::function<QImage*(std::shared_ptr<const QImage>, Args...)>& func, Args&&... as);
 
-    void doInteractiveCopy(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
-    void doInteractiveMove(QString path, QString destDirectory, DialogResult &overwriteAllFiles);
+    void doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles);
+    void doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
+                         const QString &srcPath, const QString &dstPath, DialogResult &overwriteFiles);
     bool confirmFileOperation(QString action, QList<QString> paths, QString destDirectory);
     bool confirmRemovePossible(QList<QString> paths, bool trash);
 

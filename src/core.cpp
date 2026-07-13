@@ -941,144 +941,66 @@ void Core::showInDirectory() {
 void Core::interactiveCopy(QList<QString> paths, QString destDirectory) {
     DialogResult overwriteFiles;
     for(auto path : paths) {
-        doInteractiveCopy(path, destDirectory, overwriteFiles);
+        doInteractiveCopyMove(path, destDirectory, false, overwriteFiles);
         if(overwriteFiles.cancel)
             return;
     }
 }
-
-// todo: replacing DIR with a FILE?
-void Core::doInteractiveCopy(QString path, QString destDirectory, DialogResult &overwriteFiles) {
-    QFileInfo srcFi(path);
-// SYMLINK (recreate the link, never dereference into the target) ==============================
-    if(srcFi.isSymLink()) {
-        FileOpResult result;
-        FileOperations::copySymLinkTo(path, destDirectory, overwriteFiles, result);
-        if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-            if(overwriteFiles.all)
-                return;
-            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
-            if(!overwriteFiles || overwriteFiles.cancel)
-                return;
-            FileOperations::copySymLinkTo(path, destDirectory, true, result);
-        }
-        if(result != FileOpResult::SUCCESS && !(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles)) {
-            mw->showError(FileOperations::decodeResult(result));
-            qDebug() << FileOperations::decodeResult(result);
-        }
-        if(!overwriteFiles.all)
-            overwriteFiles.yes = false;
-        return;
-    }
-// SINGLE FILE COPY ===========================================================================
-    if(!srcFi.isDir()) {
-        FileOpResult result;
-        FileOperations::copyFileTo(path, destDirectory, overwriteFiles, result);
-        if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-            if(overwriteFiles.all) // skipping all
-                return;
-            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
-            if(!overwriteFiles || overwriteFiles.cancel)
-                return;
-            FileOperations::copyFileTo(path, destDirectory, true, result);
-        }
-        if(result != FileOpResult::SUCCESS && !(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles)) {
-            mw->showError(FileOperations::decodeResult(result));
-            qDebug() << FileOperations::decodeResult(result);
-        }
-        if(!overwriteFiles.all) // copy attempt done; reset temporary flag
-            overwriteFiles.yes = false;
-        return;
-    }
-// DIR COPY (RECURSIVE) =======================================================================
-    QDir srcDir(srcFi.absoluteFilePath());
-    QFileInfo dstFi(destDirectory + "/" + srcFi.baseName());
-    QDir dstDir(dstFi.absoluteFilePath());
-    if(dstFi.exists() && !dstFi.isDir()) { // overwriting file with a folder
-        if(!overwriteFiles && !overwriteFiles.all) {
-            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), dstFi.absoluteFilePath(), DIR_TO_FILE, true);
-            if(!overwriteFiles || overwriteFiles.cancel)
-                return;
-            if(!overwriteFiles.all) // reset temp flag right away
-                overwriteFiles.yes = false;
-        }
-        // remove dst file; give up if not writable
-        FileOpResult result;
-        FileOperations::removeFile(dstFi.absoluteFilePath(), result);
-        if(result != FileOpResult::SUCCESS) {
-            mw->showError(FileOperations::decodeResult(result));
-            qDebug() << FileOperations::decodeResult(result);
-            return;
-        }
-    } else if(!dstDir.mkpath(".")) {
-        mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qDebug() << "Could not create directory " << dstDir.absolutePath();
-        return;
-    }
-    // copy all contents
-    // TODO: skip symlinks? test
-    QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
-    for(auto entry : entryList) {
-        doInteractiveCopy(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), overwriteFiles);
-        if(overwriteFiles.cancel)
-            return;
-    }
-}
-// -----------------------------------------------------------------------------------
 
 void Core::interactiveMove(QList<QString> paths, QString destDirectory) {
     DialogResult overwriteFiles;
     for(auto path : paths) {
-        doInteractiveMove(path, destDirectory, overwriteFiles);
+        doInteractiveCopyMove(path, destDirectory, true, overwriteFiles);
         if(overwriteFiles.cancel)
             return;
     }
 }
 
+// Single copy/move attempt; on DESTINATION_FILE_EXISTS asks via the replace
+// dialog (unless an "all" answer is active) and retries with force.
+void Core::doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
+                           const QString &srcPath, const QString &dstPath, DialogResult &overwriteFiles) {
+    FileOpResult result;
+    op(overwriteFiles, result);
+    if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
+        if(overwriteFiles.all) // skipping all
+            return;
+        overwriteFiles = mw->fileReplaceDialog(srcPath, dstPath, FILE_TO_FILE, true);
+        if(!overwriteFiles || overwriteFiles.cancel)
+            return;
+        op(true, result);
+    }
+    if(!(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles))
+        outputError(result);
+    if(!overwriteFiles.all) // attempt done; reset temporary flag
+        overwriteFiles.yes = false;
+}
+
 // todo: replacing DIR with a FILE?
-void Core::doInteractiveMove(QString path, QString destDirectory, DialogResult &overwriteFiles) {
+void Core::doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles) {
     QFileInfo srcFi(path);
-// SYMLINK (move the link itself, never dereference into the target) ===========================
+    QString dstPath = destDirectory + "/" + srcFi.fileName();
+// SYMLINK (operate on the link itself, never dereference into the target) =====================
     if(srcFi.isSymLink()) {
-        FileOpResult result;
-        model->moveSymLinkTo(path, destDirectory, overwriteFiles, result);
-        if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-            if(overwriteFiles.all)
-                return;
-            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
-            if(!overwriteFiles || overwriteFiles.cancel)
-                return;
-            model->moveSymLinkTo(path, destDirectory, true, result);
-        }
-        if(result != FileOpResult::SUCCESS && !(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles)) {
-            mw->showError(FileOperations::decodeResult(result));
-            qDebug() << FileOperations::decodeResult(result);
-        }
-        if(!overwriteFiles.all)
-            overwriteFiles.yes = false;
+        doInteractiveOp([&](bool force, FileOpResult &result) {
+            if(move)
+                model->moveSymLinkTo(path, destDirectory, force, result);
+            else
+                FileOperations::copySymLinkTo(path, destDirectory, force, result);
+        }, srcFi.absoluteFilePath(), dstPath, overwriteFiles);
         return;
     }
-// SINGLE FILE MOVE ===========================================================================
+// SINGLE FILE ================================================================================
     if(!srcFi.isDir()) {
-        FileOpResult result;
-        model->moveFileTo(path, destDirectory, overwriteFiles, result);
-        if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-            if(overwriteFiles.all) // skipping all
-                return;
-            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), destDirectory + "/" + srcFi.fileName(), FILE_TO_FILE, true);
-            if(!overwriteFiles || overwriteFiles.cancel)
-                return;
-            model->moveFileTo(path, destDirectory, true, result);
-        }
-        if(result != FileOpResult::SUCCESS && !(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles)) {
-            mw->showError(FileOperations::decodeResult(result));
-            qDebug() << FileOperations::decodeResult(result);
-        }
-        if(!overwriteFiles.all) // move attempt done; reset temporary flag
-            overwriteFiles.yes = false;
+        doInteractiveOp([&](bool force, FileOpResult &result) {
+            if(move)
+                model->moveFileTo(path, destDirectory, force, result);
+            else
+                FileOperations::copyFileTo(path, destDirectory, force, result);
+        }, srcFi.absoluteFilePath(), dstPath, overwriteFiles);
         return;
     }
-// DIR MOVE (RECURSIVE) =======================================================================
+// DIR (RECURSIVE) ============================================================================
     QDir srcDir(srcFi.absoluteFilePath());
     QFileInfo dstFi(destDirectory + "/" + srcFi.baseName());
     QDir dstDir(dstFi.absoluteFilePath());
@@ -1094,8 +1016,7 @@ void Core::doInteractiveMove(QString path, QString destDirectory, DialogResult &
         FileOpResult result;
         FileOperations::removeFile(dstFi.absoluteFilePath(), result);
         if(result != FileOpResult::SUCCESS) {
-            mw->showError(FileOperations::decodeResult(result));
-            qDebug() << FileOperations::decodeResult(result);
+            outputError(result);
             return;
         }
     } else if(!dstDir.mkpath(".")) {
@@ -1103,16 +1024,18 @@ void Core::doInteractiveMove(QString path, QString destDirectory, DialogResult &
         qDebug() << "Could not create directory " << dstDir.absolutePath();
         return;
     }
-    // move all contents
+    // copy / move all contents
     // TODO: skip symlinks? test
     QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
     for(auto entry : entryList) {
-        doInteractiveMove(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), overwriteFiles);
+        doInteractiveCopyMove(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), move, overwriteFiles);
         if(overwriteFiles.cancel)
             return;
     }
-    FileOpResult dirRmRes;
-    model->removeDir(srcDir.absolutePath(), false, false, dirRmRes);
+    if(move) {
+        FileOpResult dirRmRes;
+        model->removeDir(srcDir.absolutePath(), false, false, dirRmRes);
+    }
 }
 
 // -----------------------------------------------------------------------------------
