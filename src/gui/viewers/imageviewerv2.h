@@ -111,6 +111,9 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent *event);
     virtual void resizeEvent(QResizeEvent* event);
     void wheelEvent(QWheelEvent *event);
+    bool isWheelScroll(QWheelEvent *event);
+    void trackpadScroll(QWheelEvent *event);
+    void wheelScroll(QWheelEvent *event);
     void showEvent(QShowEvent *event);
     void drawBackground(QPainter *painter, const QRectF &rect);
 

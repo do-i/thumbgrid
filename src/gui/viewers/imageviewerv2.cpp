@@ -609,84 +609,94 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event) {
         else if(angleDelta < 0)
             zoomOutCursor();
     } else if(event->modifiers() == Qt::NoModifier) {
-        QPoint pixelDelta = event->pixelDelta();
-        QPoint angleDelta = event->angleDelta();
-        /* for reference
-         * linux
-         *   trackpad/xorg:
-         *     pixelDelta = (x,y) OR (0,0)
-         *     angleDelta = (x*scale,y*scale) OR (x,y)
-         *   trackpad/wayland:
-         *     pixelDelta = (x,y)
-         *     angleDelta = (x*scale,y*scale)
-         *   wheel:
-         *     pixelDelta = (0,0)     - libinput <= 1.18
-         *     pixelDelta = (0,120*m) - libinput 1.19
-         *     angleDelta = (0,120*m)
-         * -----------------------------------------
-         * macOS
-         *   trackpad:
-         *     pixelDelta = (x,y)
-         *     angleDelta = (x*scale,y*scale)
-         *   wheel:
-         *     pixelDelta = (0,y*scrollAccel)
-         *     angleDelta = (0,120*m)
-         * -----------------------------------------
-         * windows
-         *   trackpad:
-         *     pixelDelta = (0,0)
-         *     angleDelta = (x,y)
-         *   wheel:
-         *     pixelDelta = (0,0)
-         *     AngleDelta = (0,120*m)
-         */
-
-        bool isWheel = true;
-        if(trackpadDetection) {
-            if(wayland) // we should have scroll phase support
-                isWheel = (event->phase() == Qt::NoScrollPhase);
-            else // fallback to guesswork
-                isWheel = angleDelta.y() && (abs(angleDelta.y())>=120 && !(angleDelta.y() % 60)) && lastTouchpadScroll.elapsed() > 250;
-        }
-        //qDebug() << "isWheel:" << isWheel << " angle / pixel delta:" << angleDelta << pixelDelta << lastTouchpadScroll.elapsed() << event->phase();
-
-        if(!isWheel) {
-            lastTouchpadScroll.restart();
-            event->accept();
-            if(settings->imageScrolling() != ImageScrolling::SCROLL_NONE) {
-                // scroll (high precision)
-                stopPosAnimation();
-                // one of these (pixel/angleDelta) may be multiplied by some scale value
-                // we'll use whichever is larger
-                int dx = abs(angleDelta.x()) > abs(pixelDelta.x()) ? angleDelta.x() : pixelDelta.x();
-                int dy = abs(angleDelta.y()) > abs(pixelDelta.y()) ? angleDelta.y() : pixelDelta.y();
-                hs->setValue(hs->value() - dx * TRACKPAD_SCROLL_MULTIPLIER);
-                vs->setValue(vs->value() - dy * TRACKPAD_SCROLL_MULTIPLIER);
-                centerIfNecessary();
-                snapToEdges();
-            }
-        } else if(isWheel && settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL) {
-            // scroll by interval
-            bool scrollable = false;
-            QRect imgRect = scaledRectR();
-            // shift by 2px in case of img edge misalignment
-            // todo: maybe even increase it to skip small distance scrolls?
-            if((event->angleDelta().y() < 0 && imgRect.bottom() > height() + 2) ||
-               (event->angleDelta().y() > 0 && imgRect.top()    < -2))
-            {
-                event->accept();
-                scroll(0, -angleDelta.y() * WHEEL_SCROLL_MULTIPLIER * settings->mouseScrollingSpeed(), true);
-            } else {
-                event->ignore(); // not scrollable; passthrough event
-            }
+        if(!isWheelScroll(event)) {
+            trackpadScroll(event);
+        } else if(settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL) {
+            wheelScroll(event);
         } else {
-           event->ignore();
-           QWidget::wheelEvent(event);
+            event->ignore();
+            QWidget::wheelEvent(event);
         }
         saveViewportPos();
     } else {
         event->ignore();
         QWidget::wheelEvent(event);
+    }
+}
+
+// Distinguishes mouse-wheel events from trackpad scrolling.
+bool ImageViewerV2::isWheelScroll(QWheelEvent *event) {
+    /* for reference
+     * linux
+     *   trackpad/xorg:
+     *     pixelDelta = (x,y) OR (0,0)
+     *     angleDelta = (x*scale,y*scale) OR (x,y)
+     *   trackpad/wayland:
+     *     pixelDelta = (x,y)
+     *     angleDelta = (x*scale,y*scale)
+     *   wheel:
+     *     pixelDelta = (0,0)     - libinput <= 1.18
+     *     pixelDelta = (0,120*m) - libinput 1.19
+     *     angleDelta = (0,120*m)
+     * -----------------------------------------
+     * macOS
+     *   trackpad:
+     *     pixelDelta = (x,y)
+     *     angleDelta = (x*scale,y*scale)
+     *   wheel:
+     *     pixelDelta = (0,y*scrollAccel)
+     *     angleDelta = (0,120*m)
+     * -----------------------------------------
+     * windows
+     *   trackpad:
+     *     pixelDelta = (0,0)
+     *     angleDelta = (x,y)
+     *   wheel:
+     *     pixelDelta = (0,0)
+     *     AngleDelta = (0,120*m)
+     */
+    if(!trackpadDetection)
+        return true;
+    if(wayland) // we should have scroll phase support
+        return event->phase() == Qt::NoScrollPhase;
+    // fallback to guesswork
+    QPoint angleDelta = event->angleDelta();
+    return angleDelta.y() && (abs(angleDelta.y())>=120 && !(angleDelta.y() % 60)) && lastTouchpadScroll.elapsed() > 250;
+}
+
+// High-precision trackpad scroll.
+void ImageViewerV2::trackpadScroll(QWheelEvent *event) {
+    lastTouchpadScroll.restart();
+    event->accept();
+    if(settings->imageScrolling() == ImageScrolling::SCROLL_NONE)
+        return;
+    stopPosAnimation();
+    QPoint pixelDelta = event->pixelDelta();
+    QPoint angleDelta = event->angleDelta();
+    // one of these (pixel/angleDelta) may be multiplied by some scale value
+    // we'll use whichever is larger
+    int dx = abs(angleDelta.x()) > abs(pixelDelta.x()) ? angleDelta.x() : pixelDelta.x();
+    int dy = abs(angleDelta.y()) > abs(pixelDelta.y()) ? angleDelta.y() : pixelDelta.y();
+    hs->setValue(hs->value() - dx * TRACKPAD_SCROLL_MULTIPLIER);
+    vs->setValue(vs->value() - dy * TRACKPAD_SCROLL_MULTIPLIER);
+    centerIfNecessary();
+    snapToEdges();
+}
+
+// Mouse-wheel scroll by interval; ignores the event (passthrough) when the
+// image has nothing left to scroll to.
+void ImageViewerV2::wheelScroll(QWheelEvent *event) {
+    QPoint angleDelta = event->angleDelta();
+    QRect imgRect = scaledRectR();
+    // shift by 2px in case of img edge misalignment
+    // todo: maybe even increase it to skip small distance scrolls?
+    if((event->angleDelta().y() < 0 && imgRect.bottom() > height() + 2) ||
+       (event->angleDelta().y() > 0 && imgRect.top()    < -2))
+    {
+        event->accept();
+        scroll(0, -angleDelta.y() * WHEEL_SCROLL_MULTIPLIER * settings->mouseScrollingSpeed(), true);
+    } else {
+        event->ignore(); // not scrollable; passthrough event
     }
 }
 
