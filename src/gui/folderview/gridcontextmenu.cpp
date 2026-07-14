@@ -54,6 +54,20 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     statusBar->setAction("toggleStatusFooter");
     mainLayout->addWidget(statusBar);
 
+    // thin divider between the view toggles and app-level actions
+    auto *separator2 = new QWidget(mainPage);
+    separator2->setAccessibleName("HLineSeparator");
+    separator2->setFixedHeight(1);
+    separator2->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    auto *sepLayout2 = new QVBoxLayout();
+    sepLayout2->setContentsMargins(11, 4, 11, 4);
+    sepLayout2->addWidget(separator2);
+    mainLayout->addLayout(sepLayout2);
+
+    auto *settingsItem = makeItem(tr("Settings"), ":/res/icons/common/menuitem/settings16.png");
+    settingsItem->setAction("openSettings");
+    mainLayout->addWidget(settingsItem);
+
     stack->addWidget(mainPage);
 
     // --------------------------------------------------------------- convert
