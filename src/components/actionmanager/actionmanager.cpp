@@ -329,7 +329,12 @@ void ActionManager::applyPreset(const QString &id) {
     actionManager->rebuildShortcutLookup();
     settings->saveDisabledShortcuts(QMap<ViewMode, QStringList>());
     settings->saveShortcutPrimary(QMap<ViewMode, QMap<QString, QString>>());
-    actionManager->saveShortcuts();                   // recomputes modified -> false
+    actionManager->saveShortcuts();
+    // Selecting a preset is never "modified", by definition — force it rather than
+    // leaning on saveShortcuts()'s derived shortcuts==defaults comparison, which is
+    // one JSON-roundtrip-quirk away from staying true and pinning the combo on
+    // "Custom" right after a clean preset switch.
+    settings->setShortcutsModified(false);
 }
 
 QList<PresetInfo> ActionManager::availablePresets() {
