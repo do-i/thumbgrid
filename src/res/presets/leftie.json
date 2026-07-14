@@ -1,0 +1,180 @@
+{
+    "_meta": {
+        "id": "leftie",
+        "name": "Leftie",
+        "description": "User-defined preset cloned from local shortcuts.json",
+        "os": [
+            "linux",
+            "windows",
+            "macos"
+        ],
+        "order": 50,
+        "source": "Snapshot of a user-customized thumbgrid shortcuts.json"
+    },
+    "global": {
+        "closeFullScreenOrExit": [
+            "Esc"
+        ],
+        "contextMenu": [
+            "Menu",
+            "RMB"
+        ],
+        "copyFile": [
+            "C"
+        ],
+        "copyFileClipboard": [
+            "Ctrl+C"
+        ],
+        "copyPathClipboard": [
+            "Ctrl+Shift+C"
+        ],
+        "createDirectory": [
+            "F7"
+        ],
+        "crop": [
+            "Shift+X"
+        ],
+        "cutFile": [
+            "Ctrl+X"
+        ],
+        "discardEdits": [
+            "Ctrl+Z"
+        ],
+        "exit": [
+            "Alt+X",
+            "Ctrl+Q"
+        ],
+        "fitNormal": [
+            "1"
+        ],
+        "fitWindow": [
+            "0",
+            "W"
+        ],
+        "flipH": [
+            "J"
+        ],
+        "flipV": [
+            "K"
+        ],
+        "folderView": [
+            "U"
+        ],
+        "frameStep": [
+            "."
+        ],
+        "frameStepBack": [
+            ","
+        ],
+        "jumpToFirst": [
+            "Home"
+        ],
+        "jumpToLast": [
+            "End"
+        ],
+        "moveFile": [
+            "M"
+        ],
+        "moveToTrash": [
+            "Del"
+        ],
+        "nextDirectory": [
+            "Shift+Right"
+        ],
+        "nextImage": [
+            "PgDown",
+            "Right",
+            "WheelDown",
+            "XButton2"
+        ],
+        "open": [
+            "Ctrl+O"
+        ],
+        "openSettings": [
+            "F12",
+            "P"
+        ],
+        "pasteFile": [
+            "Ctrl+V"
+        ],
+        "prevDirectory": [
+            "Shift+Left"
+        ],
+        "prevImage": [
+            "Left",
+            "PgUp",
+            "WheelUp",
+            "XButton1"
+        ],
+        "reloadImage": [
+            "F5"
+        ],
+        "removeFile": [
+            "Shift+Del"
+        ],
+        "renameFile": [
+            "F2"
+        ],
+        "resize": [
+            "Shift+S"
+        ],
+        "rotateLeft": [
+            "H"
+        ],
+        "rotateRight": [
+            "L"
+        ],
+        "saveAs": [
+            "Ctrl+S"
+        ],
+        "seekVideoBackward": [
+            "Ctrl+Left"
+        ],
+        "seekVideoForward": [
+            "Ctrl+Right"
+        ],
+        "showInDirectory": [
+            "Ctrl+D"
+        ],
+        "toggleFolderViewTopBar": [
+            "Ctrl+T"
+        ],
+        "toggleFullscreen": [
+            "F",
+            "F11",
+            "LMB_DoubleClick"
+        ],
+        "toggleFullscreenInfoBar": [
+            "Shift+F"
+        ],
+        "togglePlacesPanel": [
+            "Ctrl+E"
+        ],
+        "toggleShuffle": [
+            "Ctrl+`"
+        ],
+        "toggleSlideshow": [
+            "`"
+        ],
+        "toggleStatusFooter": [
+            "Ctrl+B"
+        ],
+        "zoomIn": [
+            "Ctrl++",
+            "Ctrl+=",
+            "I"
+        ],
+        "zoomInCursor": [
+            "Ctrl+WheelUp"
+        ],
+        "zoomOut": [
+            "Ctrl+-",
+            "O"
+        ],
+        "zoomOutCursor": [
+            "Ctrl+WheelDown"
+        ]
+    },
+    "document": {},
+    "grid": {}
+}
