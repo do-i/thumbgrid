@@ -201,6 +201,14 @@ const ActionManager::ShortcutMap &ActionManager::allDefaultShortcuts() {
 //------------------------------------------------------------------------------
 void ActionManager::removeAllShortcuts() {
     shortcuts.clear();
+    // Re-seed all context keys (empty maps), not just the ones a caller happens to
+    // repopulate. A preset with an empty document/grid section (e.g. leftie.json,
+    // which only defines "global") would otherwise leave those keys missing from
+    // `shortcuts` while `defaults` always carries all three from initDefaults(),
+    // making shortcuts != defaults spuriously true and pinning the preset combo on
+    // "Custom" right after a clean preset switch + Apply/OK.
+    for(ViewMode ctx : shortcutContexts())
+        shortcuts.insert(ctx, ContextMap());
     rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------

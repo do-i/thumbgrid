@@ -23,26 +23,64 @@
             "C"
         ],
         "copyFileClipboard": [
-            "Ctrl+C"
+            "$Ctrl+C"
         ],
         "copyPathClipboard": [
-            "Ctrl+Shift+C"
-        ],
-        "createDirectory": [
-            "F7"
-        ],
-        "crop": [
-            "Shift+X"
+            "$Ctrl+$Shift+C"
         ],
         "cutFile": [
-            "Ctrl+X"
-        ],
-        "discardEdits": [
-            "Ctrl+Z"
+            "$Ctrl+X"
         ],
         "exit": [
-            "Alt+X",
-            "Ctrl+Q"
+            "$Alt+X",
+            "$Ctrl+Q"
+        ],
+        "moveFile": [
+            "M"
+        ],
+        "moveToTrash": [
+            "Del"
+        ],
+        "open": [
+            "$Ctrl+O"
+        ],
+        "openSettings": [
+            "F12",
+            "P"
+        ],
+        "pasteFile": [
+            "$Ctrl+V"
+        ],
+        "removeFile": [
+            "$Shift+Del"
+        ],
+        "renameFile": [
+            "F2"
+        ],
+        "showInDirectory": [
+            "$Ctrl+D"
+        ],
+        "toggleFullscreen": [
+            "F",
+            "F11",
+            "LMB_DoubleClick"
+        ],
+        "togglePlacesPanel": [
+            "$Ctrl+E"
+        ],
+        "toggleShuffle": [
+            "$Ctrl+`"
+        ],
+        "toggleStatusFooter": [
+            "$Ctrl+B"
+        ]
+    },
+    "document": {
+        "crop": [
+            "$Shift+X"
+        ],
+        "discardEdits": [
+            "$Ctrl+Z"
         ],
         "fitNormal": [
             "1"
@@ -72,14 +110,8 @@
         "jumpToLast": [
             "End"
         ],
-        "moveFile": [
-            "M"
-        ],
-        "moveToTrash": [
-            "Del"
-        ],
         "nextDirectory": [
-            "Shift+Right"
+            "$Shift+Right"
         ],
         "nextImage": [
             "PgDown",
@@ -87,18 +119,8 @@
             "WheelDown",
             "XButton2"
         ],
-        "open": [
-            "Ctrl+O"
-        ],
-        "openSettings": [
-            "F12",
-            "P"
-        ],
-        "pasteFile": [
-            "Ctrl+V"
-        ],
         "prevDirectory": [
-            "Shift+Left"
+            "$Shift+Left"
         ],
         "prevImage": [
             "Left",
@@ -109,14 +131,8 @@
         "reloadImage": [
             "F5"
         ],
-        "removeFile": [
-            "Shift+Del"
-        ],
-        "renameFile": [
-            "F2"
-        ],
         "resize": [
-            "Shift+S"
+            "$Shift+S"
         ],
         "rotateLeft": [
             "H"
@@ -125,56 +141,48 @@
             "L"
         ],
         "saveAs": [
-            "Ctrl+S"
+            "$Ctrl+S"
         ],
         "seekVideoBackward": [
-            "Ctrl+Left"
+            "$Ctrl+Left"
         ],
         "seekVideoForward": [
-            "Ctrl+Right"
-        ],
-        "showInDirectory": [
-            "Ctrl+D"
-        ],
-        "toggleFolderViewTopBar": [
-            "Ctrl+T"
-        ],
-        "toggleFullscreen": [
-            "F",
-            "F11",
-            "LMB_DoubleClick"
+            "$Ctrl+Right"
         ],
         "toggleFullscreenInfoBar": [
-            "Shift+F"
-        ],
-        "togglePlacesPanel": [
-            "Ctrl+E"
-        ],
-        "toggleShuffle": [
-            "Ctrl+`"
+            "$Shift+F"
         ],
         "toggleSlideshow": [
             "`"
         ],
-        "toggleStatusFooter": [
-            "Ctrl+B"
-        ],
         "zoomIn": [
-            "Ctrl++",
-            "Ctrl+=",
+            "$Ctrl++",
+            "$Ctrl+=",
             "I"
         ],
         "zoomInCursor": [
-            "Ctrl+WheelUp"
+            "$Ctrl+WheelUp"
         ],
         "zoomOut": [
-            "Ctrl+-",
+            "$Ctrl+-",
             "O"
         ],
         "zoomOutCursor": [
-            "Ctrl+WheelDown"
+            "$Ctrl+WheelDown"
         ]
     },
-    "document": {},
-    "grid": {}
+    "grid": {
+        "createDirectory": [
+            "F7"
+        ],
+        "nextDirectory": [
+            "$Shift+Right"
+        ],
+        "prevDirectory": [
+            "$Shift+Left"
+        ],
+        "toggleFolderViewTopBar": [
+            "$Ctrl+T"
+        ]
+    }
 }

@@ -17,6 +17,7 @@ private slots:
     void availablePresetsAreOsFiltered();
     void applyingPresetSwitchesMappingAndTracksModified();
     void xnviewmpPresetLoadsRepresentativeBindings();
+    void presetWithEmptyContextSurvivesDialogRoundTrip();
 };
 
 // (1) The scan-code map is now data, loaded from keymap_<os>.json.
@@ -85,6 +86,41 @@ void ShortcutPresetsAndKeymapsPocTest::xnviewmpPresetLoadsRepresentativeBindings
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "L"), QStringLiteral("rotateLeft"));
     QCOMPARE(actionManager->actionForShortcut(MODE_GLOBAL, "Del"), QStringLiteral("moveToTrash"));
     QVERIFY2(!settings->shortcutsModified(), "Right after applyPreset the mapping equals the preset.");
+}
+
+// (6) SettingsDialog::saveShortcuts() rebuilds the active mapping via
+// removeAllShortcuts() + addShortcut() from its draft on every Apply/OK, even
+// when the Controls tab was untouched. The rebuild loop never touches a
+// context whose draft is empty, so removeAllShortcuts() must re-seed every
+// context key itself; otherwise a preset with an empty or missing section
+// (e.g. the windows-only irfanview.json has no "grid") comes back with fewer
+// context keys than `defaults`, the shortcuts != defaults comparison in
+// saveShortcuts() turns spuriously true, and the preset combo shows "Custom"
+// right after a clean preset switch.
+void ShortcutPresetsAndKeymapsPocTest::presetWithEmptyContextSurvivesDialogRoundTrip() {
+    actionManager->applyPreset("leftie");
+    QVERIFY2(!settings->shortcutsModified(), "Right after applyPreset the mapping equals the preset.");
+
+    // Leftie's context split survived loading (not everything under global).
+    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "Right"), QStringLiteral("nextImage"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "F7"), QStringLiteral("createDirectory"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Right"), QString());
+
+    // Mirror SettingsDialog::saveShortcuts(): rebuild the active mapping from a
+    // draft copy of the current shortcuts, as happens unconditionally on Apply/OK.
+    const ActionManager::ShortcutMap draft = actionManager->allShortcuts();
+    actionManager->removeAllShortcuts();
+    for(ViewMode ctx : {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW})
+        QVERIFY2(actionManager->allShortcuts().contains(ctx),
+                 "removeAllShortcuts() must keep every context key present so a "
+                 "bindingless context still round-trips equal to defaults.");
+    for(auto ctx = draft.cbegin(); ctx != draft.cend(); ++ctx)
+        for(auto it = ctx.value().cbegin(); it != ctx.value().cend(); ++it)
+            actionManager->addShortcut(ctx.key(), it.key(), it.value());
+    actionManager->saveShortcuts();
+
+    QVERIFY2(!settings->shortcutsModified(),
+             "A no-op dialog round-trip must not spuriously mark the mapping as Custom.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(ShortcutPresetsAndKeymapsPocTest)

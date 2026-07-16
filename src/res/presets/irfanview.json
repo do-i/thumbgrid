@@ -9,10 +9,12 @@
         "notice": "Independent reconstruction; 'IrfanView' is a trademark of its owner; not affiliated."
     },
     "global": {
-        "nextImage": ["Space", "Right"],
-        "prevImage": ["Backspace", "Left"],
         "toggleFullscreen": ["Enter"],
         "openSettings": ["P"],
         "moveToTrash": ["Del"]
+    },
+    "document": {
+        "nextImage": ["Space", "Right"],
+        "prevImage": ["Backspace", "Left"]
     }
 }
