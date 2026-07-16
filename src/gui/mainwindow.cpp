@@ -486,14 +486,17 @@ void MW::mouseReleaseEvent(QMouseEvent *event) {
 
 void MW::mouseDoubleClickEvent(QMouseEvent *event) {
     event->accept();
-    QMouseEvent *fakePressEvent = new QMouseEvent(
+    QMouseEvent fakePressEvent(
         QEvent::MouseButtonPress,
-        event->pos(),
+        event->position(),
+        event->scenePosition(),
+        event->globalPosition(),
         event->button(),
         event->buttons(),
-        event->modifiers()
+        event->modifiers(),
+        event->pointingDevice()
     );
-    actionManager->processEvent(fakePressEvent);
+    actionManager->processEvent(&fakePressEvent);
     actionManager->processEvent(event);
 }
 
