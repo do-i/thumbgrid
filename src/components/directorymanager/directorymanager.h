@@ -93,12 +93,20 @@ private:
     std::vector<FSEntry> fileEntryVec, dirEntryVec;
     // path -> index lookup tables; kept in sync with the vectors so that
     // indexOfFile()/containsFile() are O(1) instead of a linear scan
-    // (those are hot: called once per thumbnail while scrolling large dirs)
-    QHash<QString, int> fileIndexCache, dirIndexCache;
+    // (those are hot: called once per thumbnail while scrolling large dirs).
+    // Mutations mark the cache dirty rather than rebuilding it eagerly, so a
+    // burst of watcher events (e.g. many files added at once) coalesces into
+    // a single rebuild the next time an index is actually read, instead of
+    // one full O(N) rebuild per event.
+    mutable QHash<QString, int> fileIndexCache, dirIndexCache;
+    mutable bool fileIndexCacheDirty = false;
+    mutable bool dirIndexCacheDirty = false;
     const FSEntry defaultEntry;
     QString mDirectoryPath;
-    void rebuildFileIndexCache();
-    void rebuildDirIndexCache();
+    void rebuildFileIndexCache() const;
+    void rebuildDirIndexCache() const;
+    void ensureFileIndexCache() const;
+    void ensureDirIndexCache() const;
 
     DirectoryWatcher* watcher;
     void readSettings();
