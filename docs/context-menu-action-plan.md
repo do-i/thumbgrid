@@ -30,28 +30,35 @@ refactor with clear spec, Opus 4.8 = behavioral risk / design judgment needed.
 The view only knows indices; paths and types live behind the presenter/model. Add a
 small value struct and a computation helper where both are visible:
 
-- [ ] `SelectionInfo { int total; int fileCount; int dirCount; bool allConvertibleImages;
+- [x] `SelectionInfo { int total; int fileCount; int dirCount; bool allConvertibleImages;
       bool anyConvertible; }` (name/shape at implementer's discretion), computed in
       `DirectoryPresenter` next to `selectedPaths()`
       (`src/components/directorypresenter.cpp:231-256`), which already handles the
       parent-dir offset and dir/file index split.
-- [ ] "Convertible image" test = extension-based best effort:
+      Done: struct is `SelectionInfo { int fileCount; int dirCount; bool allConvertible;
+      int total(); }` in `idirectoryview.h`; `anyConvertible` dropped as unused by C4.
+- [x] "Convertible image" test = extension-based best effort:
       `QImageReader::supportedImageFormats()` + `jfif`, minus formats conversion always
       skips in practice (gif is effectively always ANIMATED; conversion only accepts
       `DocumentType::STATIC`, see `fileoperationscontroller.cpp:263-267`). Do **not**
       load images here — the authoritative STATIC check stays in `convertToFormat`;
       the menu gate is a fast predictor. Put the predicate in a shared spot
       (`DocumentInfo` or a small helper in `utils/`) so C2 reuses it.
-- [ ] "Folder contains ≥1 convertible image" = shallow `QDirIterator` over the selected
+      Done: `DocumentInfo::isConvertibleImageFile`; also excludes `apng` and `pdf`.
+- [x] "Folder contains ≥1 convertible image" = shallow `QDirIterator` over the selected
       dir, extension predicate, stop at first hit, hard cap on entries examined
       (~1000) so opening the menu on a huge directory never stalls. Compute lazily —
       only when the menu is about to show, not on every selection change.
-- [ ] Plumbing to the view: `FolderGridView::contextMenuEvent` needs the info but has
+      Done: `DocumentInfo::dirContainsConvertibleImage`; provider is called on demand,
+      not on selection change. Scan includes hidden files (matches app dir scan).
+- [x] Plumbing to the view: `FolderGridView::contextMenuEvent` needs the info but has
       no model access. Preferred shape: presenter injects a provider
       (`std::function<SelectionInfo()>`) into the view via
       `DirectoryPresenter::setView(...)`, mirroring how the remove handler is injected
       into `FileOperationsController` (`core.cpp:95-96`). Avoid new signal round-trips
       through the `FolderView`/`FolderViewProxy`/`MW` chain for a synchronous query.
+      Done: `IDirectoryView::setSelectionInfoProvider` (defaulted no-op) plumbed through
+      ThumbnailView/FolderView/FolderViewProxy; consumed by FolderGridView in C4.
 
 Why Opus: the dir/file index math, parent-entry offset, and the lazy/capped folder scan
 all have edge cases (recursive mode, `..` tile, "show other files" toggle), and the
@@ -59,19 +66,27 @@ predictor-vs-authority split is a design decision that must stay coherent with C
 
 ## C2. Folder-aware conversion — **Opus 4.8**
 
-- [ ] `FileOperationsController::convertToFormat`
+- [x] `FileOperationsController::convertToFormat`
       (`src/components/fileoperationscontroller.cpp:237-298`): expand any directory in
       `paths` to its directly contained convertible images (non-recursive, same shared
       predicate as C1) before the existing per-file loop; keep per-file STATIC
       verification as the authority. Report skipped/expanded counts in the existing
       summary message.
-- [ ] Risk to verify: the loop uses `model->getImage(path)`; images inside a selected
+      Done: directories expanded via `QDirIterator(QDir::Files | QDir::Hidden)`;
+      existing converted/failed summary message kept as-is (no new counts added).
+- [x] Risk to verify: the loop uses `model->getImage(path)`; images inside a selected
       subfolder are not entries of the current directory model. Confirm
       `DirectoryModel::getImage` can load an out-of-model path (it routes through
       `Loader`), or load via `DocumentInfo`/`ImageFactory` directly for expanded paths.
       This is the behavioral crux of the item — test it first.
-- [ ] Overwrite prompting must keep working for expanded paths (converted copy lands
+      Done: `getImage` loads out-of-model paths fine (cache miss → sync load). The
+      *save* side was the real crux: `saveFile` hard-fails for non-model paths, so
+      expanded files now save directly via `job.img->save(job.dest)` when
+      `!model->containsFile(job.src)`.
+- [x] Overwrite prompting must keep working for expanded paths (converted copy lands
       next to the source, inside the subfolder).
+      Done: overwrite detection uses `QFileInfo::exists(dest)` on the expanded path, so
+      the pre-existing confirmation covers subfolder destinations unchanged.
 
 ## C3. New menu items wired to existing actions — **Sonnet 5**
 
