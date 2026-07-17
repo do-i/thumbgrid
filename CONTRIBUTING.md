@@ -37,6 +37,31 @@ renamed from `qimgv/` to `src/`, so upstream paths need remapping.
 - Add an SPDX + copyright header to files you substantially change or add,
   alongside the existing upstream attribution.
 
+### Ownership
+
+Make ownership explicit in the type; a reader should never have to guess who
+frees an object.
+
+- **QObjects / QWidgets** → rely on **Qt parent ownership**. Construct with a
+  parent (`new Foo(this)`) and let the parent destroy the child. Don't wrap a
+  parented QObject in a smart pointer and don't `delete` it manually.
+- **Everything else that is owned** → express ownership in the type:
+  `std::unique_ptr<T>` for a single owner (use it for factory returns, and where
+  a null return signals "none"), `std::shared_ptr<T>` for genuinely shared
+  ownership, or a plain **value** where the type is cheap to copy or move
+  (`QImage`/`QPixmap` are implicitly shared — returning them by value is cheap
+  and leak-proof). Prefer value/`unique_ptr` returns over `new T` returning a
+  raw pointer.
+- **Raw pointers (`T*`) are non-owning observers only.** A raw pointer may
+  borrow an object for the duration of a call (e.g. a `const QImage*` argument
+  a function only reads), but it must never be the thing responsible for
+  `delete`. If you find a `new`/`delete` pair spanning a raw pointer, convert it
+  to one of the owning forms above.
+- **Crossing a thread boundary via a queued signal** is the one place a raw
+  owning pointer is still tolerated (Qt queued connections can't move a
+  `unique_ptr`): `release()` into the signal and have the receiving slot adopt
+  it immediately. Keep that hand-off obvious and localised.
+
 ## Releasing
 
 The git tag is the single source of truth for the version.
