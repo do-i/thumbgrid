@@ -473,6 +473,13 @@ int ThumbnailWidget::labelBlockHeight() const {
     return textHeight * (mShowInfo ? 2 : 1) + (mShowInfo ? 2 : 0);
 }
 
+QRectF ThumbnailWidget::labelGeometry() const {
+    // labelBackgroundRect() spans the cell width along the bottom for every
+    // labeled style, and stays valid (a bottom strip derived from the cell
+    // bounds) even when labels are hidden, so it works as the editor anchor.
+    return labelBackgroundRect();
+}
+
 void ThumbnailWidget::drawSingleLineText(QPainter *painter, QRect rect, const QString& text, const QColor &color) {
     QFontMetrics fm(font);
     bool fits = !(fm.horizontalAdvance(text) > rect.width());

@@ -52,6 +52,12 @@ FolderGridView::FolderGridView(QWidget *parent)
     contextMenu = new GridContextMenu(this);
     connect(contextMenu, &GridContextMenu::convertFormatRequested,
             this, &FolderGridView::convertFormatRequested);
+
+    // keep the in-place rename editor glued to its cell while the view scrolls
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, [this] {
+        if(renameIndex >= 0)
+            positionRenameEditor();
+    });
 }
 
 void FolderGridView::dropEvent(QDropEvent *event) {
@@ -116,6 +122,7 @@ void FolderGridView::show() {
 
 // probably unneeded
 void FolderGridView::hide() {
+    cancelRename();
     ThumbnailView::hide();
     clearFocus();
 }
@@ -364,6 +371,8 @@ void FolderGridView::removeItemFromLayout(int pos) {
 }
 
 void FolderGridView::removeAll() {
+    // the widgets backing the editor's cell are about to be destroyed
+    cancelRename();
     flowLayout->clear();
     qDeleteAll(thumbnails);
     thumbnails.clear();
@@ -458,6 +467,85 @@ void FolderGridView::wheelEvent(QWheelEvent *event) {
     }
 }
 
+void FolderGridView::startRename(const QString& name) {
+    int idx = lastSelected();
+    if(!checkRange(idx))
+        return;
+    if(!renameEditor) {
+        renameEditor = new QLineEdit(viewport());
+        renameEditor->setContextMenuPolicy(Qt::NoContextMenu);
+        const auto &cs = settings->colorScheme();
+        renameEditor->setStyleSheet(QStringLiteral(
+            "QLineEdit { background: %1; color: %2; border: 1px solid %3;"
+            " border-radius: 2px; padding: 1px 3px; }")
+            .arg(cs.widget.name(), cs.text.name(), cs.accent.name()));
+        renameEditor->installEventFilter(this);
+    }
+    renameIndex = idx;
+    renameEditor->setText(name);
+    // preselect the base name, leaving the extension untouched
+    int dot = name.lastIndexOf('.');
+    if(dot <= 0)
+        dot = name.length();
+    renameEditor->setSelection(0, dot);
+    positionRenameEditor();
+    renameEditor->show();
+    renameEditor->raise();
+    renameEditor->setFocus(Qt::OtherFocusReason);
+}
+
+void FolderGridView::positionRenameEditor() {
+    if(!renameEditor || !checkRange(renameIndex))
+        return;
+    ThumbnailWidget *thumb = thumbnails.at(renameIndex);
+    QRect rect = mapFromScene(thumb->mapToScene(thumb->labelGeometry())).boundingRect();
+    int minH = renameEditor->minimumSizeHint().height();
+    if(rect.height() < minH) {
+        int cy = rect.center().y();
+        rect.setTop(cy - minH / 2);
+        rect.setHeight(minH);
+    }
+    renameEditor->setGeometry(rect);
+}
+
+void FolderGridView::commitRename() {
+    if(!renameEditor || renameIndex < 0)
+        return;
+    QString newName = renameEditor->text().trimmed();
+    renameIndex = -1; // clear before hide() so the focus-out filter is a no-op
+    renameEditor->hide();
+    setFocus();
+    if(!newName.isEmpty())
+        emit renameRequested(newName);
+}
+
+void FolderGridView::cancelRename() {
+    if(!renameEditor || renameIndex < 0)
+        return;
+    renameIndex = -1;
+    renameEditor->hide();
+    setFocus();
+}
+
+bool FolderGridView::eventFilter(QObject *o, QEvent *ev) {
+    if(renameEditor && o == renameEditor) {
+        if(ev->type() == QEvent::KeyPress) {
+            auto *ke = static_cast<QKeyEvent*>(ev);
+            if(ke->key() == Qt::Key_Escape) {
+                cancelRename();
+                return true;
+            }
+            if(ke->key() == Qt::Key_Return || ke->key() == Qt::Key_Enter) {
+                commitRename();
+                return true;
+            }
+        } else if(ev->type() == QEvent::FocusOut) {
+            cancelRename();
+        }
+    }
+    return ThumbnailView::eventFilter(o, ev);
+}
+
 void FolderGridView::contextMenuEvent(QContextMenuEvent *event) {
     // a right-press already selected the item under the cursor (see ThumbnailView).
     // The view toggles are always available; file-op entries are gated on the selection.
@@ -503,5 +591,7 @@ void FolderGridView::resizeEvent(QResizeEvent *event) {
         fitSceneToContents();
         //focusOn(selectedIndex());
         loadVisibleThumbnailsDelayed();
+        if(renameIndex >= 0)
+            positionRenameEditor();
     }
 }

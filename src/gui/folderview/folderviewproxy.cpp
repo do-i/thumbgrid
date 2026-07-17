@@ -40,6 +40,7 @@ void FolderViewProxy::init() {
     connect(folderView.get(), &FolderView::draggedOver, this, &FolderViewProxy::draggedOver);
     connect(folderView.get(), &FolderView::selectionChanged, this, &FolderViewProxy::selectionChanged);
     connect(folderView.get(), &FolderView::convertFormatRequested, this, &FolderViewProxy::convertFormatRequested);
+    connect(folderView.get(), &FolderView::renameRequested, this, &FolderViewProxy::renameRequested);
 
     folderView->show();
 
@@ -196,6 +197,11 @@ void FolderViewProxy::setStatusFooterVisible(bool mode) {
     statusFooterVisible = mode;
     if(statusFooter)
         statusFooter->setVisible(mode);
+}
+
+void FolderViewProxy::startRename(const QString& name) {
+    if(folderView)
+        folderView->startRename(name);
 }
 
 void FolderViewProxy::showEvent(QShowEvent *event) {

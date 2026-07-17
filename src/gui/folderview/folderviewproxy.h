@@ -38,6 +38,7 @@ public slots:
     void onSortingChanged(SortingMode mode);
     void setStatusText(const QString& text);
     void setStatusFooterVisible(bool mode);
+    void startRename(const QString& name);
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -56,6 +57,7 @@ signals:
     void draggedOver(int) override;
     void selectionChanged();
     void convertFormatRequested(const QString& format);
+    void renameRequested(const QString& name);
 
 private:
     std::shared_ptr<FolderView> folderView;

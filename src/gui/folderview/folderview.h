@@ -45,6 +45,7 @@ public slots:
     void addItem();
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
+    void startRename(const QString& name);
 
 
 protected:
@@ -71,6 +72,7 @@ signals:
     void draggedOver(int) override;
     void selectionChanged();
     void convertFormatRequested(const QString& format);
+    void renameRequested(const QString& name);
 
 private slots:
     void onSortingSelected(int);

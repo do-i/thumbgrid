@@ -76,6 +76,7 @@ FolderView::FolderView(QWidget *parent) :
     connect(ui->thumbnailGrid, &FolderGridView::droppedInto,     this, &FolderView::droppedInto);
     connect(ui->thumbnailGrid, &FolderGridView::selectionChanged, this, &FolderView::selectionChanged);
     connect(ui->thumbnailGrid, &FolderGridView::convertFormatRequested, this, &FolderView::convertFormatRequested);
+    connect(ui->thumbnailGrid, &FolderGridView::renameRequested, this, &FolderView::renameRequested);
 
     connect(ui->bookmarksWidget, &BookmarksWidget::bookmarkClicked, this, &FolderView::onBookmarkClicked);
 
@@ -263,6 +264,10 @@ void FolderView::select(int index) {
 
 QList<int> FolderView::selection() {
     return ui->thumbnailGrid->selection();
+}
+
+void FolderView::startRename(const QString& name) {
+    ui->thumbnailGrid->startRename(name);
 }
 
 void FolderView::focusOn(int index) {

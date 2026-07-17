@@ -170,6 +170,14 @@ add_test(
     COMMAND thumbgrid_grid_rename_selection_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_grid_inline_rename_test
+    behavior/test_grid_inline_rename.cpp
+)
+add_test(
+    NAME "Grid rename edits the name in place over the cell"
+    COMMAND thumbgrid_grid_inline_rename_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_convert_folder_selection_test
     behavior/test_convert_folder_selection.cpp
 )

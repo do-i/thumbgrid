@@ -62,6 +62,8 @@ public:
     void setLabelBackgroundColor(const QColor &color);
     void setCellBackgroundColor(const QColor &color);
     int thumbnailSize();
+    // label region in item coordinates; used to position the in-place rename editor
+    QRectF labelGeometry() const;
     void reset();
     void unsetThumbnail();
 
