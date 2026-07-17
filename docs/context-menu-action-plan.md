@@ -173,18 +173,49 @@ template: `QTemporaryDir` + `tgtest::writeImage` + `Core::loadPath/showGui` +
 `thumbgrid_add_behavior_test`). These are the first tests exercising file-op menu
 paths — keep each narrow:
 
-- [ ] Gating: selections of {image}, {video}, {folder-with-image},
+- [x] Gating: selections of {image}, {video}, {folder-with-image},
       {folder-without-image}, {image+video}, {two images} → assert menu item
       enabled/disabled states (query the `ContextMenuItem` children directly; no
       synthetic right-click needed).
-- [ ] Delete: select file → invoke `removeFile` action path → file gone from disk,
+      Done: `test_grid_context_menu_gating.cpp`. Added `setObjectName("menuConvert"
+      /"menuRename"/"menuMove"/"menuTrash"/"menuDelete")` to the gated
+      `ContextMenuItem`s in `GridContextMenu`'s constructor so tests can find them.
+      Used a `.gif` file instead of a real video for the "not convertible" case
+      (the gate predicate is extension-only, so a video fixture would exercise the
+      same code path with more setup). A synthetic context-menu event turned out
+      to be necessary after all, not just a direct `ContextMenuItem` query: the
+      items only reflect the *current* selection once `GridContextMenu::
+      setSelectionInfo` runs, which happens in `FolderGridView::contextMenuEvent`;
+      querying the freshly-constructed items without ever opening the menu just
+      reads their default-enabled state. Delivering the `QContextMenuEvent` to
+      `grid` itself is a no-op — `QGraphicsView` only forwards context-menu
+      events that arrive on its *viewport* — so the test sends it to
+      `grid->viewport()`. Covers: single png, single gif, two pngs, png+gif,
+      folder-with-image, folder-without-image, and (in place of the empty-selection
+      case, which turned out reachable) selecting only the ".." parent tile, which
+      `DirectoryPresenter::selectionInfo()` treats as an empty selection.
+- [x] Delete: select file → invoke `removeFile` action path → file gone from disk,
       `grid->itemCount()` drops. Use **permanent** delete in tests (trash would
       pollute the test user's real trash; behavior-test HOME redirection exists but
       trash dirs are still messy — see behavior-test isolation notes).
-- [ ] Rename: single file and single folder rename via `Core::renameCurrentSelection`,
+      Done: `test_grid_delete_selection.cpp`. Disables both `confirmDelete` and
+      `confirmTrash` first so the confirmation dialog (which would block under
+      offscreen) never appears; invokes via `actionManager->invokeAction
+      ("removeFile")`, permanent delete only.
+- [x] Rename: single file and single folder rename via `Core::renameCurrentSelection`,
       assert on-disk name + model entry.
-- [ ] Folder-aware convert (C2): folder containing one png + one txt, convert selection
+      Done: `test_grid_rename_selection.cpp`. `renameCurrentSelection` is a private
+      slot, invoked via `QMetaObject::invokeMethod`; both the file and folder rename
+      cases work end-to-end with no product change needed.
+- [x] Folder-aware convert (C2): folder containing one png + one txt, convert selection
       to jpg → exactly one new jpg inside the folder.
+      Done: `test_convert_folder_selection.cpp`, via `QMetaObject::invokeMethod` on
+      `Core::convertSelectionToFormat` (also a private slot). Had to add one more
+      image directly in the gallery folder (outside the selected subfolder):
+      `DirectoryModel::isEmpty()` (fed by the top-level file count only) short-
+      circuits `convertSelectionToFormat` before it even looks at the selection, so
+      a gallery containing only a subfolder and no top-level files never reaches
+      the conversion code at all.
 
 ## C7. Verification (end of implementation)
 
