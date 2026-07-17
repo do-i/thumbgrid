@@ -3,11 +3,11 @@
 Cache::Cache() {
 }
 
-bool Cache::contains(QString path) const {
+bool Cache::contains(const QString& path) const {
     return items.contains(path);
 }
 
-bool Cache::insert(std::shared_ptr<Image> img) {
+bool Cache::insert(const std::shared_ptr<Image>& img) {
     if(img) {
         if(items.contains(img->filePath())) {
             return false;
@@ -20,7 +20,7 @@ bool Cache::insert(std::shared_ptr<Image> img) {
     return true;
 }
 
-void Cache::remove(QString path) {
+void Cache::remove(const QString& path) {
     if(items.contains(path)) {
         items[path]->lock();
         auto *item = items.take(path);
@@ -29,14 +29,14 @@ void Cache::remove(QString path) {
 }
 
 void Cache::clear() {
-    for(auto path : items.keys()) {
+    for(const auto& path : items.keys()) {
         items[path]->lock();
         auto item = items.take(path);
         delete item;
     }
 }
 
-std::shared_ptr<Image> Cache::get(QString path) {
+std::shared_ptr<Image> Cache::get(const QString& path) {
     if(items.contains(path)) {
         CacheItem *item = items.value(path);
         return item->getContents();
@@ -44,7 +44,7 @@ std::shared_ptr<Image> Cache::get(QString path) {
     return nullptr;
 }
 
-bool Cache::reserve(QString path) {
+bool Cache::reserve(const QString& path) {
     if(items.contains(path)) {
         items[path]->lock();
         return true;
@@ -52,7 +52,7 @@ bool Cache::reserve(QString path) {
     return false;
 }
 
-bool Cache::release(QString path) {
+bool Cache::release(const QString& path) {
     if(items.contains(path)) {
         items[path]->unlock();
         return true;
@@ -61,8 +61,8 @@ bool Cache::release(QString path) {
 }
 
 // removes all items except the ones in list
-void Cache::trimTo(QStringList pathList) {
-    for(auto path : items.keys()) {
+void Cache::trimTo(const QStringList& pathList) {
+    for(const auto& path : items.keys()) {
         if(!pathList.contains(path)) {
             items[path]->lock();
             auto *item = items.take(path);

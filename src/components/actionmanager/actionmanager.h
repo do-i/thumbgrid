@@ -41,19 +41,19 @@ public:
     void addShortcut(ViewMode context, const QString &keys, const QString &action);
     void resetDefaults();
     void resetDefaults(ViewMode context);
-    void resetDefaults(QString action);
+    void resetDefaults(const QString& action);
     QString actionForShortcut(ViewMode context, const QString &keys);
-    const QString shortcutForAction(ViewMode context, QString action);
+    const QString shortcutForAction(ViewMode context, const QString& action);
     // Returns every shortcut bound to action across all contexts (used for key filters).
-    const QStringList shortcutsForAction(QString action);
+    const QStringList shortcutsForAction(const QString& action);
     QStringList actionList();
     const ShortcutMap& allShortcuts();
     const ShortcutMap& allDefaultShortcuts();
     void removeShortcut(ViewMode context, const QString &keys);
     void removeAllShortcuts();
-    void removeAllShortcuts(QString actionName);
+    void removeAllShortcuts(const QString& actionName);
     QString keyForNativeScancode(quint32 scanCode);
-    void adjustFromVersion(QVersionNumber lastVer);
+    void adjustFromVersion(const QVersionNumber& lastVer);
     void saveShortcuts();
     // Preset selection (delegates to ShortcutPresetStore + Settings).
     static QList<PresetInfo> availablePresets();

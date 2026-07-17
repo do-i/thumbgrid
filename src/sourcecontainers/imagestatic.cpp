@@ -1,8 +1,10 @@
 #include "imagestatic.h"
 #include <time.h>
 
+#include <utility>
+
 ImageStatic::ImageStatic(QString _path)
-    : Image(_path)
+    : Image(std::move(_path))
 {
     load();
 }
@@ -73,7 +75,7 @@ void ImageStatic::loadICO() {
     mLoaded = true;
 }
 
-QString ImageStatic::generateHash(QString str) {
+QString ImageStatic::generateHash(const QString& str) {
     return QString(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
 }
 

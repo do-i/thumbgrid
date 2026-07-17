@@ -1,11 +1,13 @@
 #include "cacheitem.h"
 
+#include <utility>
+
 CacheItem::CacheItem() {
     sem = new QSemaphore(1);
 }
 
 CacheItem::CacheItem(std::shared_ptr<Image> _contents) {
-    contents = _contents;
+    contents = std::move(_contents);
     sem = new QSemaphore(1);
 }
 

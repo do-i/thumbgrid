@@ -17,8 +17,8 @@ public:
     void setRequest(ScalerRequest r);
     void run() override;
 signals:
-    void started(ScalerRequest);
-    void finished(QImage*, ScalerRequest);
+    void started(const ScalerRequest&);
+    void finished(QImage*, const ScalerRequest&);
 
 private:
     ScalerRequest req;

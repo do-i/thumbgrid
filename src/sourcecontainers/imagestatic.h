@@ -36,5 +36,5 @@ private:
     std::shared_ptr<const QImage> image, imageEdited;
     void loadGeneric();
     void loadICO();
-    QString generateHash(QString str);
+    QString generateHash(const QString& str);
 };

@@ -1,5 +1,7 @@
 #include "scaler.h"
 
+#include <utility>
+
 /* What this should do in theory:
  * 1 request comes
  * 2 we run it
@@ -26,7 +28,7 @@ Scaler::Scaler(Cache *_cache, QObject *parent)
     connect(this, &Scaler::acceptScalingResult, this, &Scaler::slotForwardScaledResult, Qt::QueuedConnection);
 }
 
-void Scaler::requestScaled(ScalerRequest req) {
+void Scaler::requestScaled(const ScalerRequest& req) {
     sem->acquire(1);
     if(!running) {
 //////////////////////////////////
@@ -78,7 +80,7 @@ void Scaler::requestScaled(ScalerRequest req) {
     sem->release(1);
 }
 
-void Scaler::onTaskStart(ScalerRequest req) {
+void Scaler::onTaskStart(const ScalerRequest& req) {
     sem->acquire(1);
     running = true;
     // clear buffered flag if there were no requests after us
@@ -90,7 +92,7 @@ void Scaler::onTaskStart(ScalerRequest req) {
     sem->release(1);
 }
 
-void Scaler::onTaskFinish(QImage *scaled, ScalerRequest req) {
+void Scaler::onTaskFinish(QImage *scaled, const ScalerRequest& req) {
     sem->acquire(1);
     running = false;
     if(buffered && bufferedRequest.image == req.image) {
@@ -120,10 +122,10 @@ void Scaler::slotForwardScaledResult(QImage *image, ScalerRequest req) {
     QPixmap *pixmap = new QPixmap();
     *pixmap = QPixmap::fromImage(*image);
     delete image;
-    emit scalingFinished(pixmap, req);
+    emit scalingFinished(pixmap, std::move(req));
 }
 
 void Scaler::startRequest(ScalerRequest req) {
-    runnable->setRequest(req);
+    runnable->setRequest(std::move(req));
     pool->start(runnable);
 }

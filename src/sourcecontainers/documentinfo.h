@@ -27,7 +27,7 @@ enum DocumentType { NONE, STATIC, ANIMATED, VIDEO, TEXT };
 
 class DocumentInfo {
 public:
-    DocumentInfo(QString path);
+    DocumentInfo(const QString& path);
     ~DocumentInfo();
     
     QString directoryPath() const;

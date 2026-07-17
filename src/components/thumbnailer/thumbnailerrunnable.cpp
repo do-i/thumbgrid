@@ -5,6 +5,7 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QSet>
+#include <utility>
 
 namespace {
     const QString directoryThumbnailIconVersion = "folder-icon-v2";
@@ -32,7 +33,7 @@ namespace {
 }
 
 ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, int _size, bool _crop, bool _force) :
-    path(_path),
+    path(std::move(_path)),
     size(_size),
     crop(_crop),
     force(_force),
@@ -42,7 +43,7 @@ ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, 
 
 ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, int _size, bool _crop, bool _force,
                                          bool _previewFit, bool _showHidden, QImage _iconBase, QString _colorId) :
-    path(_path),
+    path(std::move(_path)),
     size(_size),
     crop(_crop),
     force(_force),
@@ -50,8 +51,8 @@ ThumbnailerRunnable::ThumbnailerRunnable(ThumbnailCache* _cache, QString _path, 
     isDir(true),
     previewFit(_previewFit),
     showHidden(_showHidden),
-    iconBase(_iconBase),
-    colorId(_colorId)
+    iconBase(std::move(_iconBase)),
+    colorId(std::move(_colorId))
 {
 }
 
@@ -65,7 +66,7 @@ void ThumbnailerRunnable::run() {
     }
 }
 
-QString ThumbnailerRunnable::generateIdString(QString path, int size, bool crop) {
+QString ThumbnailerRunnable::generateIdString(const QString& path, int size, bool crop) {
     QString queryStr = path + QString::number(size);
     if(crop)
         queryStr.append("s");
@@ -73,7 +74,7 @@ QString ThumbnailerRunnable::generateIdString(QString path, int size, bool crop)
     return queryStr;
 }
 
-std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, QString path, int size, bool crop, bool force) {
+std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, const QString& path, int size, bool crop, bool force) {
     DocumentInfo imgInfo(path);
     QString thumbnailId = generateIdString(path, size, crop);
     std::unique_ptr<QImage> image;
@@ -161,7 +162,7 @@ QString ThumbnailerRunnable::taskColorId() const {
     return colorId;
 }
 
-std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, const char *format, int size, bool squared) {
+std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(const QString& path, const char *format, int size, bool squared) {
     QImageReader *reader = new QImageReader(path, format);
     Qt::AspectRatioMode ARMode = squared?
                 (Qt::KeepAspectRatioByExpanding):(Qt::KeepAspectRatio);
@@ -224,7 +225,7 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(QString path, con
     return std::make_pair(result, originalSize);
 }
 
-std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cache, QString path, int size, bool crop, bool force,
+std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cache, const QString& path, int size, bool crop, bool force,
                                                             bool previewFit, bool showHidden, const QImage &iconBase, const QString &colorId) {
     QString name = QFileInfo(path).fileName();
     QString thumbnailId = generateDirIdString(path, size, previewFit, colorId);
@@ -256,7 +257,7 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cach
 
 // Cache key includes the preview-fit mode, scheme icon color, and folder icon
 // generation version, so changes regenerate rather than serving stale composites.
-QString ThumbnailerRunnable::generateDirIdString(QString path, int size, bool previewFit, const QString &colorId) {
+QString ThumbnailerRunnable::generateDirIdString(const QString& path, int size, bool previewFit, const QString &colorId) {
     QString queryStr = path + QString::number(size) + "dir";
     if(previewFit)
         queryStr.append("f");
@@ -507,7 +508,7 @@ QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewa
     return icon;
 }
 
-std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(QString path, int size, bool squared) {
+std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(const QString& path, int size, bool squared) {
     QFileInfo fi(path);
     QImageReader reader;
     QString tmpFilePath = settings->tmpDir() + fi.fileName() + ".png";

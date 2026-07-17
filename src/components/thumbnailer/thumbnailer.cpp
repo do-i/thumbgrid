@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFileInfo>
 #include <QPainter>
+#include <utility>
 
 namespace {
     const int thumbnailerShutdownWaitMs = 3000;
@@ -61,7 +62,7 @@ std::shared_ptr<Thumbnail> Thumbnailer::memCacheLookup(const QString &key, const
     return entry->thumbnail;
 }
 
-void Thumbnailer::memCacheInsert(const QString &key, std::shared_ptr<Thumbnail> thumbnail, const QString &path) {
+void Thumbnailer::memCacheInsert(const QString &key, const std::shared_ptr<Thumbnail>& thumbnail, const QString &path) {
     if(!thumbnail || !thumbnail->pixmap() || thumbnail->pixmap()->isNull())
         return;
     QDateTime lastModified = QFileInfo(path).lastModified();
@@ -117,10 +118,10 @@ void Thumbnailer::keepOnlyQueuedTasks(const QList<QPair<QString, int>> &tasks) {
 }
 
 std::shared_ptr<Thumbnail> Thumbnailer::getThumbnail(QString filePath, int size) {
-    return ThumbnailerRunnable::generate(nullptr, filePath, size, false, false);
+    return ThumbnailerRunnable::generate(nullptr, std::move(filePath), size, false, false);
 }
 
-void Thumbnailer::getThumbnailAsync(QString path, int size, bool crop, bool force) {
+void Thumbnailer::getThumbnailAsync(const QString& path, int size, bool crop, bool force) {
     if(!force) {
         if(auto thumbnail = memCacheLookup(memKey(path, size, crop), path)) {
             emit thumbnailReady(thumbnail, path);
@@ -135,7 +136,7 @@ void Thumbnailer::getThumbnailAsync(QString path, int size, bool crop, bool forc
     }
 }
 
-void Thumbnailer::getDirThumbnailAsync(QString path, int size, bool previewFit, bool crop, bool force) {
+void Thumbnailer::getDirThumbnailAsync(const QString& path, int size, bool previewFit, bool crop, bool force) {
     if(!force) {
         QString colorId = settings->colorScheme().folderview_parent_icon.name();
         if(auto thumbnail = memCacheLookup(dirMemKey(path, size, previewFit, colorId), path)) {
@@ -150,7 +151,7 @@ void Thumbnailer::getDirThumbnailAsync(QString path, int size, bool previewFit, 
 }
 
 void Thumbnailer::startThumbnailerThread(QString filePath, int size, bool crop, bool force) {
-    auto runnable = new ThumbnailerRunnable(settings->useThumbnailCache() ? cache : nullptr, filePath, size, crop, force);
+    auto runnable = new ThumbnailerRunnable(settings->useThumbnailCache() ? cache : nullptr, std::move(filePath), size, crop, force);
     connect(runnable, &ThumbnailerRunnable::taskEnd, this, &Thumbnailer::onTaskEnd);
     startTask(runnable);
 }
@@ -192,7 +193,7 @@ QImage Thumbnailer::dirIconBase(int size) {
 }
 
 void Thumbnailer::startDirThumbnailerThread(QString dirPath, int size, bool previewFit, bool crop, bool force) {
-    auto runnable = new ThumbnailerRunnable(settings->useThumbnailCache() ? cache : nullptr, dirPath, size, crop, force,
+    auto runnable = new ThumbnailerRunnable(settings->useThumbnailCache() ? cache : nullptr, std::move(dirPath), size, crop, force,
                                             previewFit, settings->showHiddenFiles(), dirIconBase(size),
                                             settings->colorScheme().folderview_parent_icon.name());
     connect(runnable, &ThumbnailerRunnable::dirTaskEnd, this, &Thumbnailer::onDirTaskEnd);
@@ -209,7 +210,7 @@ QString Thumbnailer::taskKey(const QString &path, int size) const {
     return QString::number(size) + QChar(0x1f) + path;
 }
 
-void Thumbnailer::onTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString filePath) {
+void Thumbnailer::onTaskEnd(const std::shared_ptr<Thumbnail>& thumbnail, const QString& filePath) {
     runningTasks.remove(filePath, thumbnail->size());
     ThumbnailerRunnable *runnable = queuedTasks.take(taskKey(filePath, thumbnail->size()));
     if(runnable) {
@@ -219,7 +220,7 @@ void Thumbnailer::onTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString filePa
     emit thumbnailReady(thumbnail, filePath);
 }
 
-void Thumbnailer::onDirTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString dirPath) {
+void Thumbnailer::onDirTaskEnd(const std::shared_ptr<Thumbnail>& thumbnail, const QString& dirPath) {
     runningTasks.remove(dirPath, thumbnail->size());
     ThumbnailerRunnable *runnable = queuedTasks.take(taskKey(dirPath, thumbnail->size()));
     if(runnable) {

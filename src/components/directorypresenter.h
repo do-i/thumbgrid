@@ -14,19 +14,19 @@ public:
     explicit DirectoryPresenter(QObject *parent = nullptr);
 
     void setView(std::shared_ptr<IDirectoryView>);
-    void setModel(std::shared_ptr<DirectoryModel> newModel);
+    void setModel(const std::shared_ptr<DirectoryModel>& newModel);
     void unsetModel();
 
     void selectAndFocus(int index);
-    void selectAndFocus(QString path);
+    void selectAndFocus(const QString& path);
 
-    void onFileRemoved(QString filePath, int index);
-    void onFileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
+    void onFileRemoved(const QString& filePath, int index);
+    void onFileRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo);
     void onFileAdded(QString filePath);
     void onFileModified(QString filePath);
 
-    void onDirRemoved(QString dirPath, int index);
-    void onDirRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
+    void onDirRemoved(const QString& dirPath, int index);
+    void onDirRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo);
     void onDirAdded(QString dirPath);
 
     bool showDirs();
@@ -37,19 +37,19 @@ public:
 
 
 signals:
-    void dirActivated(QString dirPath);
+    void dirActivated(const QString& dirPath);
     void parentDirActivated();
-    void fileActivated(QString filePath);
-    void draggedOut(QStringList);
-    void droppedInto(QStringList, QString);
-    void statusTextChanged(QString text);
+    void fileActivated(const QString& filePath);
+    void draggedOut(const QStringList&);
+    void droppedInto(const QStringList&, const QString&);
+    void statusTextChanged(const QString& text);
 
 public slots:
     void disconnectView();
     void reloadModel();
 
 private slots:
-    void generateThumbnails(QList<int>, int, bool, bool);
+    void generateThumbnails(const QList<int>&, int, bool, bool);
     void onThumbnailReady(std::shared_ptr<Thumbnail> thumb, QString filePath);
     void onDirThumbnailReady(std::shared_ptr<Thumbnail> thumb, QString dirPath);
     void populateView();

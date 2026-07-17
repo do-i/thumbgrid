@@ -15,8 +15,8 @@ public:
 
     Scaler *scaler;
 
-    void load(QString filePath, bool asyncHint);
-    void preload(QString filePath);
+    void load(const QString& filePath, bool asyncHint);
+    void preload(const QString& filePath);
 
     int fileCount() const;
     int dirCount() const;
@@ -31,7 +31,7 @@ public:
     QString lastFile() const;
     QDateTime lastModified(QString filePath) const;
 
-    bool forceInsert(QString filePath);
+    bool forceInsert(const QString& filePath);
     void copyFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
     void moveFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
     void copySymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result);
@@ -48,9 +48,9 @@ public:
     bool loaderBusy() const;
 
     std::shared_ptr<Image> getImageAt(int index);
-    std::shared_ptr<Image> getImage(QString filePath);
+    std::shared_ptr<Image> getImage(const QString& filePath);
 
-    void updateImage(QString filePath, std::shared_ptr<Image> img);
+    void updateImage(const QString& filePath, const std::shared_ptr<Image>& img);
 
     void setSortingMode(SortingMode mode);
     SortingMode sortingMode() const;
@@ -59,9 +59,9 @@ public:
     void unload(QString filePath);
     bool isLoaded(int index) const;
     bool isLoaded(QString filePath) const;
-    void reload(QString filePath);
+    void reload(const QString& filePath);
     QString filePathAt(int index) const;
-    void unloadExcept(QString filePath, bool keepNearby);
+    void unloadExcept(const QString& filePath, bool keepNearby);
     const FSEntry &fileEntryAt(int index) const;
 
     int totalCount() const;
@@ -76,19 +76,19 @@ public:
     bool containsDir(QString dirPath) const;
     FileListSource source();
 signals:
-    void fileRemoved(QString filePath, int index);
-    void fileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
-    void fileAdded(QString filePath);
-    void fileModified(QString filePath);
-    void dirRemoved(QString dirPath, int index);
-    void dirRenamed(QString dirPath, int indexFrom, QString toPath, int indexTo);
-    void dirAdded(QString dirPath);
-    void loaded(QString filePath);
+    void fileRemoved(const QString& filePath, int index);
+    void fileRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo);
+    void fileAdded(const QString& filePath);
+    void fileModified(const QString& filePath);
+    void dirRemoved(const QString& dirPath, int index);
+    void dirRenamed(const QString& dirPath, int indexFrom, const QString& toPath, int indexTo);
+    void dirAdded(const QString& dirPath);
+    void loaded(const QString& filePath);
     void loadFailed(const QString &path);
     void sortingChanged(SortingMode);
     void indexChanged(int oldIndex, int index);
-    void imageReady(std::shared_ptr<Image> img, const QString&);
-    void imageUpdated(QString filePath);
+    void imageReady(const std::shared_ptr<Image>& img, const QString&);
+    void imageUpdated(const QString& filePath);
 
 private:
     DirectoryManager dirManager;
@@ -97,10 +97,10 @@ private:
     FileListSource fileListSource;
 
 private slots:
-    void onImageReady(std::shared_ptr<Image> img, const QString &path);
+    void onImageReady(const std::shared_ptr<Image>& img, const QString &path);
     void onSortingChanged();
     void onFileAdded(QString filePath);
-    void onFileRemoved(QString filePath, int index);
-    void onFileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
-    void onFileModified(QString filePath);
+    void onFileRemoved(const QString& filePath, int index);
+    void onFileRenamed(const QString& fromPath, int indexFrom, QString toPath, int indexTo);
+    void onFileModified(const QString& filePath);
 };

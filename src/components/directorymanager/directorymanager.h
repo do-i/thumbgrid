@@ -41,34 +41,34 @@ class DirectoryManager : public QObject {
 public:
     DirectoryManager();
     // ignored if the same dir is already opened
-    bool setDirectory(QString);
-    bool setDirectoryRecursive(QString);
+    bool setDirectory(const QString&);
+    bool setDirectoryRecursive(const QString&);
     QString directoryPath() const;
-    int indexOfFile(QString filePath) const;
-    int indexOfDir(QString dirPath) const;
+    int indexOfFile(const QString& filePath) const;
+    int indexOfDir(const QString& dirPath) const;
     QString filePathAt(int index) const;
     unsigned long fileCount() const;
     unsigned long dirCount() const;
-    inline bool isSupportedFile(QString filePath) const;
+    inline bool isSupportedFile(const QString& filePath) const;
     bool isEmpty() const;
-    bool containsFile(QString filePath) const;
+    bool containsFile(const QString& filePath) const;
     QString fileNameAt(int index) const;
     QString prevOfFile(QString filePath) const;
     QString nextOfFile(QString filePath) const;
     QString prevOfDir(QString filePath) const;
     QString nextOfDir(QString filePath) const;
     void sortEntryLists();
-    QDateTime lastModified(QString filePath) const;
+    QDateTime lastModified(const QString& filePath) const;
 
     QString firstFile() const;
     QString lastFile() const;
     void setSortingMode(SortingMode mode);
     SortingMode sortingMode() const;
-    bool isFile(QString path) const;
-    bool isDir(QString path) const;
+    bool isFile(const QString& path) const;
+    bool isDir(const QString& path) const;
 
     unsigned long totalCount() const;
-    bool containsDir(QString dirPath) const;
+    bool containsDir(const QString& dirPath) const;
     const FSEntry &fileEntryAt(int index) const;
     QString dirPathAt(int index) const;
     QString dirNameAt(int index) const;
@@ -108,7 +108,7 @@ private:
     bool mIncludeOtherFiles = false;
     SortingMode mSortingMode;
     FileListSource mListSource;
-    void loadEntryList(QString directoryPath, bool recursive);
+    void loadEntryList(const QString& directoryPath, bool recursive);
 
     bool path_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
     bool path_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
@@ -119,29 +119,29 @@ private:
     CompareFunction compareFunction();
     bool size_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
     bool size_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
-    void startFileWatcher(QString directoryPath);
+    void startFileWatcher(const QString& directoryPath);
     void stopFileWatcher();
 
-    void addEntriesFromDirectory(std::vector<FSEntry> &entryVec, QString directoryPath);
-    void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, QString directoryPath);
+    void addEntriesFromDirectory(std::vector<FSEntry> &entryVec, const QString& directoryPath);
+    void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, const QString& directoryPath);
     bool checkFileRange(int index) const;
     bool checkDirRange(int index) const;
 
 private slots:
-    void onFileAddedExternal(QString fileName);
-    void onFileRemovedExternal(QString fileName);
-    void onFileModifiedExternal(QString fileName);
-    void onFileRenamedExternal(QString oldFileName, QString newFileName);
+    void onFileAddedExternal(const QString& fileName);
+    void onFileRemovedExternal(const QString& fileName);
+    void onFileModifiedExternal(const QString& fileName);
+    void onFileRenamedExternal(const QString& oldFileName, const QString& newFileName);
 
 signals:
     void loaded(const QString &path);
     void sortingChanged();
-    void fileRemoved(QString filePath, int);
-    void fileModified(QString filePath);
-    void fileAdded(QString filePath);
-    void fileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
+    void fileRemoved(const QString& filePath, int);
+    void fileModified(const QString& filePath);
+    void fileAdded(const QString& filePath);
+    void fileRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo);
 
-    void dirRemoved(QString dirPath, int);
-    void dirAdded(QString dirPath);
-    void dirRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo);
+    void dirRemoved(const QString& dirPath, int);
+    void dirAdded(const QString& dirPath);
+    void dirRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo);
 };

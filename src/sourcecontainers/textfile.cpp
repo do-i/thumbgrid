@@ -1,6 +1,8 @@
 #include "textfile.h"
 
-TextFile::TextFile(QString path) : Image(path) {
+#include <utility>
+
+TextFile::TextFile(QString path) : Image(std::move(path)) {
     TextFile::load();
 }
 

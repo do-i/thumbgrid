@@ -27,16 +27,16 @@ public:
     bool taskPreviewFit() const;
     QString taskColorId() const;
     void run() override;
-    static std::shared_ptr<Thumbnail> generate(ThumbnailCache *cache, QString path, int size, bool crop, bool force);
-    static std::shared_ptr<Thumbnail> generateDir(ThumbnailCache *cache, QString path, int size, bool crop, bool force,
+    static std::shared_ptr<Thumbnail> generate(ThumbnailCache *cache, const QString& path, int size, bool crop, bool force);
+    static std::shared_ptr<Thumbnail> generateDir(ThumbnailCache *cache, const QString& path, int size, bool crop, bool force,
                                                   bool previewFit, bool showHidden, const QImage &iconBase, const QString &colorId);
     static std::shared_ptr<Thumbnail> generateFileTypeIcon(const DocumentInfo &imgInfo, int size);
     static QImage renderFileTypeIcon(const QString &suffix, bool viewable, int size);
 private:
-    static QString generateIdString(QString path, int size, bool crop);
-    static QString generateDirIdString(QString path, int size, bool previewFit, const QString &colorId);
-    static std::pair<QImage*, QSize> createThumbnail(QString path, const char* format, int size, bool crop);
-    static std::pair<QImage*, QSize> createVideoThumbnail(QString path, int size, bool crop);
+    static QString generateIdString(const QString& path, int size, bool crop);
+    static QString generateDirIdString(const QString& path, int size, bool previewFit, const QString &colorId);
+    static std::pair<QImage*, QSize> createThumbnail(const QString& path, const char* format, int size, bool crop);
+    static std::pair<QImage*, QSize> createVideoThumbnail(const QString& path, int size, bool crop);
     static QList<QImage> dirPreviewImages(ThumbnailCache *cache, const QString &path, int targetSize, bool crop, bool showHidden);
     static void drawDirPreview(QImage &base, const QList<QImage> &images, bool previewFit);
     QString path;

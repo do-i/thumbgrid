@@ -1,8 +1,10 @@
 #include "thumbnail.h"
 
-Thumbnail::Thumbnail(QString _name, QString _info, int _size, std::shared_ptr<QPixmap> _pixmap, bool _transparencyGridEligible)
-    : mName(_name),
-      mInfo(_info),
+#include <utility>
+
+Thumbnail::Thumbnail(QString _name, QString _info, int _size, const std::shared_ptr<QPixmap>& _pixmap, bool _transparencyGridEligible)
+    : mName(std::move(_name)),
+      mInfo(std::move(_info)),
       mPixmap(_pixmap),
       mSize(_size),
       mHasAlphaChannel(false),

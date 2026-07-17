@@ -2,6 +2,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QImageReader>
+#include <utility>
 
 namespace {
     QString formattedSize(qint64 bytes) {
@@ -62,7 +63,7 @@ void DirectoryPresenter::unsetModel() {
 void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> _view) {
     if(view)
         return;
-    view = _view;
+    view = std::move(_view);
     if(model)
         view->populate(parentOffset() + (mShowDirs ? model->totalCount() : model->fileCount()));
     connect(dynamic_cast<QObject *>(view.get()), SIGNAL(itemActivated(int)),
@@ -79,7 +80,7 @@ void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> _view) {
             this, SLOT(onSelectionChanged()));
 }
 
-void DirectoryPresenter::setModel(std::shared_ptr<DirectoryModel> newModel) {
+void DirectoryPresenter::setModel(const std::shared_ptr<DirectoryModel>& newModel) {
     if(model)
         unsetModel();
     if(!newModel)
@@ -119,7 +120,7 @@ void DirectoryPresenter::disconnectView() {
 
 //------------------------------------------------------------------------------
 
-void DirectoryPresenter::onFileRemoved(QString filePath, int index) {
+void DirectoryPresenter::onFileRemoved(const QString& filePath, int index) {
     Q_UNUSED(filePath)
     if(!view)
         return;
@@ -127,7 +128,7 @@ void DirectoryPresenter::onFileRemoved(QString filePath, int index) {
     emitStatusText();
 }
 
-void DirectoryPresenter::onFileRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo) {
+void DirectoryPresenter::onFileRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo) {
     Q_UNUSED(fromPath)
     Q_UNUSED(toPath)
     if(!view)
@@ -157,7 +158,7 @@ void DirectoryPresenter::onFileRenamed(QString fromPath, int indexFrom, QString 
 void DirectoryPresenter::onFileAdded(QString filePath) {
     if(!view)
         return;
-    int index = model->indexOfFile(filePath);
+    int index = model->indexOfFile(std::move(filePath));
     view->insertItem(parentOffset() + (mShowDirs ? model->dirCount() + index : index));
     emitStatusText();
 }
@@ -165,11 +166,11 @@ void DirectoryPresenter::onFileAdded(QString filePath) {
 void DirectoryPresenter::onFileModified(QString filePath) {
     if(!view)
         return;
-    int index = model->indexOfFile(filePath);
+    int index = model->indexOfFile(std::move(filePath));
     view->reloadItem(parentOffset() + (mShowDirs ? model->dirCount() + index : index));
 }
 
-void DirectoryPresenter::onDirRemoved(QString dirPath, int index) {
+void DirectoryPresenter::onDirRemoved(const QString& dirPath, int index) {
     Q_UNUSED(dirPath)
     if(!view || !mShowDirs)
         return;
@@ -177,7 +178,7 @@ void DirectoryPresenter::onDirRemoved(QString dirPath, int index) {
     emitStatusText();
 }
 
-void DirectoryPresenter::onDirRenamed(QString fromPath, int indexFrom, QString toPath, int indexTo) {
+void DirectoryPresenter::onDirRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo) {
     Q_UNUSED(fromPath)
     Q_UNUSED(toPath)
     if(!view || !mShowDirs)
@@ -202,7 +203,7 @@ void DirectoryPresenter::onDirRenamed(QString fromPath, int indexFrom, QString t
 void DirectoryPresenter::onDirAdded(QString dirPath) {
     if(!view || !mShowDirs)
         return;
-    int index = model->indexOfDir(dirPath);
+    int index = model->indexOfDir(std::move(dirPath));
     view->insertItem(parentOffset() + index);
     emitStatusText();
 }
@@ -286,7 +287,7 @@ void DirectoryPresenter::emitStatusText() {
     emit statusTextChanged(statusText());
 }
 
-void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool crop, bool force) {
+void DirectoryPresenter::generateThumbnails(const QList<int>& indexes, int size, bool crop, bool force) {
     if(!view || !model)
         return;
     int offset = parentOffset();
@@ -331,19 +332,19 @@ void DirectoryPresenter::generateThumbnails(QList<int> indexes, int size, bool c
 void DirectoryPresenter::onThumbnailReady(std::shared_ptr<Thumbnail> thumb, QString filePath) {
     if(!view || !model)
         return;
-    int index = model->indexOfFile(filePath);
+    int index = model->indexOfFile(std::move(filePath));
     if(index == -1)
         return;
-    view->setThumbnail(parentOffset() + (mShowDirs ? model->dirCount() + index : index), thumb);
+    view->setThumbnail(parentOffset() + (mShowDirs ? model->dirCount() + index : index), std::move(thumb));
 }
 
 void DirectoryPresenter::onDirThumbnailReady(std::shared_ptr<Thumbnail> thumb, QString dirPath) {
     if(!view || !model)
         return;
-    int index = model->indexOfDir(dirPath);
+    int index = model->indexOfDir(std::move(dirPath));
     if(index == -1)
         return;
-    view->setThumbnail(parentOffset() + index, thumb);
+    view->setThumbnail(parentOffset() + index, std::move(thumb));
 }
 
 void DirectoryPresenter::onItemActivated(int absoluteIndex) {
@@ -435,7 +436,7 @@ void DirectoryPresenter::onDroppedInto(const QMimeData *data, QObject *source, i
     emit droppedInto(pathList, destDir);
 }
 
-void DirectoryPresenter::selectAndFocus(QString path) {
+void DirectoryPresenter::selectAndFocus(const QString& path) {
     if(!model || !view || path.isEmpty())
         return;
     if(model->containsDir(path) && showDirs()) {

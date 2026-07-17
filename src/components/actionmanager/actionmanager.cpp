@@ -213,7 +213,7 @@ void ActionManager::removeAllShortcuts() {
 }
 //------------------------------------------------------------------------------
 // Removes all shortcuts for the specified action.
-void ActionManager::removeAllShortcuts(QString actionName) {
+void ActionManager::removeAllShortcuts(const QString& actionName) {
     if(validateAction(actionName) == ActionType::ACTION_INVALID)
         return;
 
@@ -246,7 +246,7 @@ void ActionManager::resetDefaults(ViewMode context) {
     actionManager->rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
-void ActionManager::resetDefaults(QString action) {
+void ActionManager::resetDefaults(const QString& action) {
     actionManager->removeAllShortcuts(action);
     for(ViewMode ctx : shortcutContexts()) {
         QMapIterator<QString, QString> i(defaults[ctx]);
@@ -261,7 +261,7 @@ void ActionManager::resetDefaults(QString action) {
     rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
-void ActionManager::adjustFromVersion(QVersionNumber lastVer) {
+void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
     // swap Ctrl-P & P
     if(lastVer < QVersionNumber(0,9,2)) {
         actionManager->resetDefaults("print");
@@ -358,7 +358,7 @@ QString ActionManager::actionForShortcut(ViewMode context, const QString &keys) 
 }
 
 // returns first shortcut that is found in the given context
-const QString ActionManager::shortcutForAction(ViewMode context, QString action) {
+const QString ActionManager::shortcutForAction(ViewMode context, const QString& action) {
     const QString contextKey = shortcuts[context].key(action, "");
     if(!contextKey.isEmpty() || context == MODE_GLOBAL)
         return contextKey;
@@ -366,7 +366,7 @@ const QString ActionManager::shortcutForAction(ViewMode context, QString action)
 }
 
 // returns every shortcut bound to action across all contexts
-const QStringList ActionManager::shortcutsForAction(QString action) {
+const QStringList ActionManager::shortcutsForAction(const QString& action) {
     QStringList keys;
     for(auto it = shortcuts.cbegin(); it != shortcuts.cend(); ++it) {
         const QStringList ctxKeys = it.value().keys(action);

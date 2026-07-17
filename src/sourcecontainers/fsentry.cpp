@@ -1,5 +1,7 @@
 #include "fsentry.h"
 
+#include <utility>
+
 FSEntry::FSEntry() {
 }
 
@@ -21,23 +23,23 @@ FSEntry::FSEntry(const QString &path) {
 }
 
 FSEntry::FSEntry( QString _path, QString _name, std::uintmax_t _size, std::filesystem::file_time_type _modifyTime, bool _isDirectory)
-    : path(_path),
-      name(_name),
+    : path(std::move(_path)),
+      name(std::move(_name)),
       size(_size),
       modifyTime(_modifyTime),
       isDirectory(_isDirectory)
 {
 }
 FSEntry::FSEntry( QString _path, QString _name, std::uintmax_t _size, bool _isDirectory)
-    : path(_path),
-      name(_name),
+    : path(std::move(_path)),
+      name(std::move(_name)),
       size(_size),
       isDirectory(_isDirectory)
 {
 }
 FSEntry::FSEntry( QString _path, QString _name, bool _isDirectory)
-    : path(_path),
-      name(_name),
+    : path(std::move(_path)),
+      name(std::move(_name)),
       isDirectory(_isDirectory)
 {
 }

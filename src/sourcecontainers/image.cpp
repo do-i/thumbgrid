@@ -1,6 +1,6 @@
 #include "image.h"
 
-Image::Image(QString _path)
+Image::Image(const QString& _path)
     : mDocInfo(new DocumentInfo(_path)),
       mLoaded(false),
       mEdited(false),

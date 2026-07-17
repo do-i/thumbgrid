@@ -10,7 +10,7 @@
 
 class Image {
 public:
-    Image(QString);
+    Image(const QString&);
     Image(std::unique_ptr<DocumentInfo>);
     virtual ~Image() = 0;
     virtual std::unique_ptr<QPixmap> getPixmap() = 0;

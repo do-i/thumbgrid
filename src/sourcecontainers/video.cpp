@@ -1,6 +1,8 @@
 #include "video.h"
 
-Video::Video(QString _path) : Image(_path) {
+#include <utility>
+
+Video::Video(QString _path) : Image(std::move(_path)) {
     Video::load();
 }
 

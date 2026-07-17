@@ -6,7 +6,7 @@
 
 class Thumbnail {
 public:
-    Thumbnail(QString _name, QString _info, int _size, std::shared_ptr<QPixmap> _pixmap, bool _transparencyGridEligible = true);
+    Thumbnail(QString _name, QString _info, int _size, const std::shared_ptr<QPixmap>& _pixmap, bool _transparencyGridEligible = true);
     QString name();
     QString info();
     int size();

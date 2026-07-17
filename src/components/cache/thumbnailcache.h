@@ -15,7 +15,7 @@ public:
 
     void saveThumbnail(QImage *image, QString id);
     QImage* readThumbnail(QString id);
-    QString thumbnailPath(QString id);
+    QString thumbnailPath(const QString& id);
     bool exists(QString id);
 
 signals:

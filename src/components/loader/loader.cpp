@@ -1,5 +1,7 @@
 #include "loader.h"
 
+#include <utility>
+
 Loader::Loader() {
     pool = new QThreadPool(this);
     pool->setMaxThreadCount(2);
@@ -14,25 +16,25 @@ bool Loader::isBusy() const {
     return (tasks.count() != 0);
 }
 
-bool Loader::isLoading(QString path) {
+bool Loader::isLoading(const QString& path) {
     return tasks.contains(path);
 }
 
 std::shared_ptr<Image> Loader::load(QString path) {
-    return ImageFactory::createImage(path);
+    return ImageFactory::createImage(std::move(path));
 }
 
 // clears all buffered tasks before loading
 void Loader::loadAsyncPriority(QString path) {
     clearPool();
-    doLoadAsync(path, 1);
+    doLoadAsync(std::move(path), 1);
 }
 
 void Loader::loadAsync(QString path) {
-    doLoadAsync(path, 0);
+    doLoadAsync(std::move(path), 0);
 }
 
-void Loader::doLoadAsync(QString path, int priority) {
+void Loader::doLoadAsync(const QString& path, int priority) {
     if(tasks.contains(path)) {
         return;
     }
@@ -44,7 +46,7 @@ void Loader::doLoadAsync(QString path, int priority) {
     pool->start(runnable, priority);
 }
 
-void Loader::onLoadFinished(std::shared_ptr<Image> image, const QString &path) {
+void Loader::onLoadFinished(const std::shared_ptr<Image>& image, const QString &path) {
     auto task = tasks.take(path);
     delete task;
     if(!image)

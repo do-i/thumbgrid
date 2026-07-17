@@ -1,6 +1,6 @@
 #include "documentinfo.h"
 
-DocumentInfo::DocumentInfo(QString path)
+DocumentInfo::DocumentInfo(const QString& path)
     : mDocumentType(DocumentType::NONE),
       mOrientation(0),
       mFormat(""),

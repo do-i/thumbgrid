@@ -23,8 +23,8 @@ public:
     void waitForDone();
 
 public slots:
-    void getThumbnailAsync(QString path, int size, bool crop, bool force);
-    void getDirThumbnailAsync(QString path, int size, bool previewFit, bool crop, bool force);
+    void getThumbnailAsync(const QString& path, int size, bool crop, bool force);
+    void getDirThumbnailAsync(const QString& path, int size, bool previewFit, bool crop, bool force);
 
 private:
     ThumbnailCache *cache;
@@ -52,7 +52,7 @@ private:
     static QString memKey(const QString &path, int size, bool crop);
     static QString dirMemKey(const QString &path, int size, bool previewFit, const QString &colorId);
     std::shared_ptr<Thumbnail> memCacheLookup(const QString &key, const QString &path);
-    void memCacheInsert(const QString &key, std::shared_ptr<Thumbnail> thumbnail, const QString &path);
+    void memCacheInsert(const QString &key, const std::shared_ptr<Thumbnail>& thumbnail, const QString &path);
     void applyMemCacheLimit();
     // File-type icons bake theme colors into their pixmap but (unlike image
     // thumbnails) are keyed only by path/size, so a theme change must drop them
@@ -61,10 +61,10 @@ private:
     QString mThumbColorSignature;
 
 private slots:
-    void onTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString filePath);
-    void onDirTaskEnd(std::shared_ptr<Thumbnail> thumbnail, QString dirPath);
+    void onTaskEnd(const std::shared_ptr<Thumbnail>& thumbnail, const QString& filePath);
+    void onDirTaskEnd(const std::shared_ptr<Thumbnail>& thumbnail, const QString& dirPath);
 
 signals:
-    void thumbnailReady(std::shared_ptr<Thumbnail> thumbnail, QString filePath);
-    void dirThumbnailReady(std::shared_ptr<Thumbnail> thumbnail, QString dirPath);
+    void thumbnailReady(const std::shared_ptr<Thumbnail>& thumbnail, const QString& filePath);
+    void dirThumbnailReady(const std::shared_ptr<Thumbnail>& thumbnail, const QString& dirPath);
 };

@@ -1,10 +1,12 @@
 #include "imageanimated.h"
 #include <time.h>
 
+#include <utility>
+
 // TODO: this class is kinda useless now. redesign?
 
 ImageAnimated::ImageAnimated(QString _path)
-    : Image(_path)
+    : Image(std::move(_path))
 {
     mSize.setWidth(0);
     mSize.setHeight(0);
