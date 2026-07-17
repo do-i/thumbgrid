@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QMap>
+#include <QSet>
 #include <QSemaphore>
 #include <QMutexLocker>
 #include "sourcecontainers/image.h"
@@ -25,4 +26,6 @@ public:
 
 private:
     QMap<QString, CacheItem*> items;
+    // locks & deletes the entry at it, returning the iterator to the next entry
+    QMap<QString, CacheItem*>::iterator eraseEntry(QMap<QString, CacheItem*>::iterator it);
 };
