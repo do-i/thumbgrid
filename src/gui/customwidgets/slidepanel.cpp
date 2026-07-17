@@ -1,6 +1,7 @@
 #include "slidepanel.h"
 
 #include "platform/platformdesktop.h"
+#include "utils/logging.h"
 
 SlidePanel::SlidePanel(FloatingWidgetContainer *parent)
     : FloatingWidget(parent) ,
@@ -85,7 +86,7 @@ void SlidePanel::show() {
         QWidget::show();
         QWidget::raise();
     } else {
-        qDebug() << "Warning: Trying to show panel containing no widget!";
+        qCWarning(logGui) << "Warning: Trying to show panel containing no widget!";
     }
 }
 

@@ -3,6 +3,7 @@
 #include "platform/platformdesktop.h"
 
 #include "utils/imagelib.h"
+#include "utils/logging.h"
 
 ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
     pixmap(nullptr),
@@ -115,7 +116,7 @@ bool ImageViewerV2::eventFilter(QObject *o, QEvent *ev) {
 void ImageViewerV2::onDPRChanged() {
     if(dpr == this->devicePixelRatioF())
         return;
-    qDebug() << "DPR CHANGED " << dpr << " >> " << this->devicePixelRatioF();
+    qCDebug(logGui) << "DPR CHANGED " << dpr << " >> " << this->devicePixelRatioF();
     dpr = this->devicePixelRatioF();
     zoomThreshold = static_cast<int>(dpr * 4.);
     if(pixmap) {
@@ -218,7 +219,7 @@ void ImageViewerV2::onAnimationTimer() {
         }
     } else {
         if(!movie->jumpToNextFrame()) {
-            qDebug() << "[Error] QMovie:" << movie->lastErrorString();
+            qCWarning(logGui) << "[Error] QMovie:" << movie->lastErrorString();
             this->stopAnimation();
             return;
         }
@@ -263,7 +264,7 @@ bool ImageViewerV2::showAnimationFrame(int frame) {
         movie->jumpToFrame(0);
     while(frame != movie->currentFrameNumber()) {
         if(!movie->jumpToNextFrame()) {
-            qDebug() << "[Error] QMovie:" << movie->lastErrorString();
+            qCWarning(logGui) << "[Error] QMovie:" << movie->lastErrorString();
             break;
         }
     }

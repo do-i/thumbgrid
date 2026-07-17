@@ -2,6 +2,7 @@
 
 #include <utility>
 #include "components/actionmanager/actionmanager.h"
+#include "utils/logging.h"
 
 CentralWidget::CentralWidget(std::shared_ptr<DocumentWidget> _docWidget, std::shared_ptr<FolderViewProxy> _folderView, QWidget *parent)
     : QStackedWidget(parent),
@@ -10,7 +11,7 @@ CentralWidget::CentralWidget(std::shared_ptr<DocumentWidget> _docWidget, std::sh
 {
     setMouseTracking(true);
     if(!documentView || !folderView)
-        qDebug() << "[CentralWidget] Error: child widget is null. We will crash now.  Bye.";
+        qCWarning(logGui) << "[CentralWidget] Error: child widget is null. We will crash now.  Bye.";
 
     // docWidget - 0, folderView - 1
     addWidget(documentView.get());

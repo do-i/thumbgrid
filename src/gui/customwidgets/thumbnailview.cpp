@@ -1,4 +1,5 @@
 #include "thumbnailview.h"
+#include "utils/logging.h"
 
 ThumbnailView::ThumbnailView(Qt::Orientation _orientation, QWidget *parent)
     : QGraphicsView(parent),
@@ -238,7 +239,7 @@ void ThumbnailView::populate(int newCount) {
         // reuse existing items
         auto currentCount = thumbnails.count();
         if(currentCount > newCount) {
-            qDebug() << this << "removing";
+            qCDebug(logGui) << this << "removing";
             for(auto i = currentCount - 1; i >= newCount; i--) {
                 //removeItemFromLayout(i); // slow. is this needed?
                 delete thumbnails.takeLast();
@@ -252,7 +253,7 @@ void ThumbnailView::populate(int newCount) {
             QList<ThumbnailWidget*>::iterator i;
             for(i = thumbnails.begin(); i != thumbnails.end(); ++i)
                 (*i)->reset();
-            qDebug() << this << "adding";
+            qCDebug(logGui) << this << "adding";
             for(auto i = currentCount; i < newCount; i++) {
                 ThumbnailWidget *widget = createThumbnailWidget();
                 widget->setThumbnailSize(mThumbnailSize);

@@ -1,4 +1,5 @@
 #include "videoplayerinitproxy.h"
+#include "utils/logging.h"
 
 #ifdef _QIMGV_PLAYER_PLUGIN
     #define QIMGV_PLAYER_PLUGIN _QIMGV_PLAYER_PLUGIN
@@ -58,7 +59,7 @@ inline bool VideoPlayerInitProxy::initPlayer() {
         }
     }
     if(playerLib.fileName().isEmpty()) {
-        qDebug() << "Could not find" << libFile << "in the following directories:" << libDirs;
+        qCWarning(logVideo) << "Could not find" << libFile << "in the following directories:" << libDirs;
         return false;
     }
 
@@ -70,7 +71,7 @@ inline bool VideoPlayerInitProxy::initPlayer() {
         player.reset(pl);
     }
     if(!player) {
-        qDebug() << "Could not load:" << playerLib.fileName() << ". Wrong plugin version?";
+        qCWarning(logVideo) << "Could not load:" << playerLib.fileName() << ". Wrong plugin version?";
         return false;
     }
 
