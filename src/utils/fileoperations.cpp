@@ -109,14 +109,17 @@ FileOpResult FileOperations::backupExistingDestination(const QFileInfo &destFile
 }
 
 // Shared by copyFileTo()/moveFileTo(): restores mtime/atime after a QFile::copy(), which
-// (unlike a rename) does not preserve them.
-void FileOperations::restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime) {
+// (unlike a rename) does not preserve them. Returns false (leaving the timestamps untouched)
+// if filePath could not be reopened.
+bool FileOperations::restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime) {
     QFile dstF(filePath);
-    dstF.open(QIODevice::ReadWrite);
+    if(!dstF.open(QIODevice::ReadWrite))
+        return false;
     // dstF.setFileTime(srcBirthTime, QFileDevice::FileBirthTime); // TODO: does not work (linux)
     dstF.setFileTime(modTime, QFileDevice::FileModificationTime);
     dstF.setFileTime(readTime, QFileDevice::FileAccessTime);
     dstF.close();
+    return true;
 }
 
 void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result) {
@@ -150,7 +153,10 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
     auto srcReadTime = srcFile.lastRead();
     if(QFile::copy(srcFile.absoluteFilePath(), destFile.absoluteFilePath())) {
         result = FileOpResult::SUCCESS;
-        restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime);
+        if(!restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime)) {
+            result = FileOpResult::OTHER_ERROR;
+            return;
+        }
         // ok; remove the backup
         if(exists)
             QFile::remove(tmpPath);
@@ -202,7 +208,10 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         if(removeResult == FileOpResult::SUCCESS) {
             // OK
             result = FileOpResult::SUCCESS;
-            restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime);
+            if(!restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime)) {
+                result = FileOpResult::OTHER_ERROR;
+                return;
+            }
             // remove backup
             if(exists)
                 QFile::remove(tmpPath);

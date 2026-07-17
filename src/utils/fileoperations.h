@@ -46,6 +46,8 @@ private:
     // mean "proceed" (with tmpPath/backedUp set only when destFile existed); any other
     // FileOpResult means bail out with that result.
     static FileOpResult backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp);
-    // shared "restore mtime/atime after a QFile::copy()" step for copyFileTo()/moveFileTo()
-    static void restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime);
+    // shared "restore mtime/atime after a QFile::copy()" step for copyFileTo()/moveFileTo();
+    // returns false if filePath could not be reopened, in which case the timestamps were
+    // left untouched
+    static bool restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime);
 };
