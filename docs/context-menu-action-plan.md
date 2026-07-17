@@ -154,14 +154,16 @@ invokes through `actionManager` — use it, do not hand-roll signal chains.
 
 ## C5. Shortcut/preset sweep — **Haiku 4.5**
 
-- [ ] The wired actions already have global/document bindings; check each preset in
+- [x] The wired actions already have global/document bindings; check each preset in
       `src/res/presets/*.json` for `grid`-section coverage so the menu's shortcut
       labels aren't blank in grid context. Follow preset authoring rules: context
       sections + `$Ctrl` tokens, never expanded modifiers, never flat/global dumps.
       Note: `leftie.json` has uncommitted local edits — don't clobber them blindly.
-- [ ] No new action registrations expected; if C3 discovers a missing action name it
+      Done: qimgv.json has all four in global (fallback covers grid); gwenview.json added moveFile to grid [M]; irfanview.json added grid section with renameFile [F2], moveFile [M], removeFile [$Shift+Del]; xnviewmp.json added moveFile to grid [M]; leftie.json has all four globally (fallback covers grid, no edits made due to uncommitted edits). All grid bindings use keys consistent with qimgv defaults.
+- [x] No new action registrations expected; if C3 discovers a missing action name it
       gets registered in `Actions::init` with the current version number (per the
       established pattern) as part of C3, not here.
+      Done: confirmed all four actions (renameFile, moveFile, moveToTrash, removeFile) already registered in Actions::init; no new registrations needed.
 
 ## C6. Behavior tests — **Sonnet 5**
 
