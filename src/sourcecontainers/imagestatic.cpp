@@ -1,4 +1,5 @@
 #include "imagestatic.h"
+#include "utils/safesave.h"
 #include <time.h>
 
 #include <utility>
@@ -75,13 +76,8 @@ void ImageStatic::loadICO() {
     mLoaded = true;
 }
 
-QString ImageStatic::generateHash(const QString& str) {
-    return QString(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
-}
-
 // TODO: move saving to directorymodel
 bool ImageStatic::save(QString destPath) {
-    QString tmpPath = destPath + "_" + generateHash(destPath);
     QFileInfo fi(destPath);
     QString ext = fi.suffix();
     // png compression note from libpng
@@ -92,21 +88,6 @@ bool ImageStatic::save(QString destPath) {
         quality = 30;
     else if(ext.compare("jpg", Qt::CaseInsensitive) == 0 || ext.compare("jpeg", Qt::CaseInsensitive) == 0)
         quality = settings->JPEGSaveQuality();
-
-    bool backupExists = false, success = false, originalExists = false;
-
-    if(QFile::exists(destPath))
-        originalExists = true;
-
-    // backup the original file if possible
-    if(originalExists) {
-        QFile::remove(tmpPath);
-        if(!QFile::copy(destPath, tmpPath)) {
-            qDebug() << "ImageStatic::save() - Could not create file backup.";
-            return false;
-        }
-        backupExists = true;
-    }
 
 #ifdef USE_EXIV2
     // Qt's QImage::save() drops all metadata, so grab the source file's
@@ -130,25 +111,15 @@ bool ImageStatic::save(QString destPath) {
 #endif
 
     // save file
-    if(isEdited()) {
-        success = imageEdited->save(destPath, ext.toStdString().c_str(), quality);
-        image.swap(imageEdited);
-        discardEditedImage();
-    } else {
-        success = image->save(destPath, ext.toStdString().c_str(), quality);
-    }
-    if(backupExists) {
-        if(success) {
-            // everything ok - remove the backup
-            QFile file(tmpPath);
-            file.remove();
-        } else if(originalExists) {
-            // revert on fail
-            QFile::remove(mDocInfo->filePath());
-            QFile::copy(tmpPath, mDocInfo->filePath());
-            QFile::remove(tmpPath);
+    bool success = SafeSave::withBackup(destPath, mDocInfo->filePath(), [&]() {
+        if(isEdited()) {
+            bool ok = imageEdited->save(destPath, ext.toStdString().c_str(), quality);
+            image.swap(imageEdited);
+            discardEditedImage();
+            return ok;
         }
-    }
+        return image->save(destPath, ext.toStdString().c_str(), quality);
+    });
 
 #ifdef USE_EXIV2
     // Re-attach the source metadata that QImage::save() stripped. Best-effort:

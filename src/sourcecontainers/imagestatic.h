@@ -3,7 +3,6 @@
 #include <QImage>
 #include <QImageWriter>
 #include <QSemaphore>
-#include <QCryptographicHash>
 #include "image.h"
 #include "utils/imagelib.h"
 #include <settings.h>
@@ -36,5 +35,4 @@ private:
     std::shared_ptr<const QImage> image, imageEdited;
     void loadGeneric();
     void loadICO();
-    QString generateHash(const QString& str);
 };

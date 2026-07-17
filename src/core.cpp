@@ -8,6 +8,7 @@
 #include "core.h"
 
 #include "platform/platformdesktop.h"
+#include "utils/safesave.h"
 
 #include <QInputDialog>
 #include <QLineEdit>
@@ -641,10 +642,6 @@ void Core::openFromClipboard() {
         if(destPath.isEmpty())
             return;
 
-
-        // ------- temporarily copypasted from ImageStatic (needs refactoring)
-
-        QString tmpPath = destPath + "_" + QString(QCryptographicHash::hash(destPath.toUtf8(), QCryptographicHash::Md5).toHex());
         QFileInfo fi(destPath);
         QString ext = fi.suffix();
         int quality = 95;
@@ -653,36 +650,9 @@ void Core::openFromClipboard() {
         else if(ext.compare("jpg", Qt::CaseInsensitive) == 0 || ext.compare("jpeg", Qt::CaseInsensitive) == 0)
             quality = settings->JPEGSaveQuality();
 
-        bool backupExists = false, success = false, originalExists = false;
-
-        if(QFile::exists(destPath))
-            originalExists = true;
-
-        // backup the original file if possible
-        if(originalExists) {
-            QFile::remove(tmpPath);
-            if(!QFile::copy(destPath, tmpPath)) {
-                qDebug() << "Could not create file backup.";
-                return;
-            }
-            backupExists = true;
-        }
-        // save file
-        success = image.save(destPath, ext.toStdString().c_str(), quality);
-
-        if(backupExists) {
-            if(success) {
-                // everything ok - remove the backup
-                QFile file(tmpPath);
-                file.remove();
-            } else if(originalExists) {
-                // revert on fail
-                QFile::remove(destPath);
-                QFile::copy(tmpPath, destPath);
-                QFile::remove(tmpPath);
-            }
-        }
-        // ------------------------------------------
+        bool success = SafeSave::withBackup(destPath, destPath, [&]() {
+            return image.save(destPath, ext.toStdString().c_str(), quality);
+        });
         if(success)
             loadPath(destPath);
     }
