@@ -1,5 +1,7 @@
 #include "mainwindow.h"
 
+#include <utility>
+
 #include "platform/platformdesktop.h"
 
 // TODO: nuke this and rewrite
@@ -263,7 +265,7 @@ void MW::showImage(std::unique_ptr<QPixmap> pixmap) {
     updateCropPanelData();
 }
 
-void MW::showAnimation(std::shared_ptr<QMovie> movie) {
+void MW::showAnimation(const std::shared_ptr<QMovie>& movie) {
     if(settings->autoResizeWindow())
         preShowResize(movie->frameRect().size());
     viewerWidget->showAnimation(movie);
@@ -273,11 +275,11 @@ void MW::showAnimation(std::shared_ptr<QMovie> movie) {
 void MW::showVideo(QString file) {
     if(settings->autoResizeWindow())
         preShowResize(QSize()); // tmp. find a way to get this though mpv BEFORE playback
-    viewerWidget->showVideo(file);
+    viewerWidget->showVideo(std::move(file));
 }
 
 void MW::showText(QString file) {
-    viewerWidget->showText(file);
+    viewerWidget->showText(std::move(file));
 }
 
 void MW::showContextMenu() {
@@ -348,7 +350,7 @@ void MW::toggleRenameOverlay(QString currentName) {
         setupRenameOverlay();
     if(renameOverlay->isHidden()) {
         renameOverlay->setBackdropEnabled((centralWidget->currentViewMode() == MODE_FOLDERVIEW));
-        renameOverlay->setName(currentName);
+        renameOverlay->setName(std::move(currentName));
         renameOverlay->show();
     } else {
         renameOverlay->hide();
@@ -539,7 +541,7 @@ void MW::showDefault() {
 }
 
 void MW::showSaveDialog(QString filePath) {
-    QString newFilePath = getSaveFileName(filePath);
+    QString newFilePath = getSaveFileName(std::move(filePath));
     if(!newFilePath.isEmpty())
         emit saveAsRequested(newFilePath);
 }
@@ -567,7 +569,7 @@ QString MW::getSaveFileName(QString filePath) {
     if(writerFormats.contains("dds"))  filters.append("DDS (*.dds)");
     if(writerFormats.contains("wbmp")) filters.append("WBMP (*.wbmp)");
     // add everything else from imagewriter
-    for(auto fmt : writerFormats) {
+    for(const auto& fmt : writerFormats) {
         if(filters.filter(fmt).isEmpty())
             filters.append(fmt.toUpper() + " (*." + fmt + ")");
     }
@@ -576,7 +578,7 @@ QString MW::getSaveFileName(QString filePath) {
     // find matching filter for the current image
     QString selectedFilter = "JPEG (*.jpg *.jpeg *jpe *jfif)";
     QFileInfo fi(filePath);
-    for(auto filter : filters) {
+    for(const auto& filter : filters) {
         if(filter.contains(fi.suffix().toLower())) {
             selectedFilter = filter;
             break;
@@ -610,8 +612,8 @@ void MW::showResizeDialog(QSize initialSize) {
 DialogResult MW::fileReplaceDialog(QString src, QString dst, FileReplaceMode mode, bool multiple) {
     FileReplaceDialog dialog(this);
     dialog.setModal(true);
-    dialog.setSource(src);
-    dialog.setDestination(dst);
+    dialog.setSource(std::move(src));
+    dialog.setDestination(std::move(dst));
     dialog.setMode(mode);
     dialog.setMulti(multiple);
 
@@ -697,7 +699,7 @@ void MW::showChangelogWindow() {
 }
 
 void MW::showChangelogWindow(QString text) {
-    changelogWindow->setText(text);
+    changelogWindow->setText(std::move(text));
     changelogWindow->show();
 }
 
@@ -786,8 +788,8 @@ void MW::closeFullScreenOrExit() {
 void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, int _imageDepth, qint64 _fileSize, bool slideshow, bool shuffle, bool edited) {
     info.index = _index;
     info.fileCount = _fileCount;
-    info.fileName = _fileName;
-    info.filePath = _filePath;
+    info.fileName = std::move(_fileName);
+    info.filePath = std::move(_filePath);
     info.imageSize = _imageSize;
     info.imageDepth = _imageDepth;
     info.fileSize = _fileSize;
@@ -798,7 +800,7 @@ void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _
 }
 
 void MW::setFolderStatusText(QString text) {
-    folderStatusText = text;
+    folderStatusText = std::move(text);
     updateStatusFooters();
 }
 
@@ -921,7 +923,7 @@ void MW::onInfoUpdated() {
 // TODO!!! buffer this in mw
 void MW::setExifInfo(QMap<QString, QString> info) {
     if(imageInfoOverlay)
-        imageInfoOverlay->setExifInfo(info);
+        imageInfoOverlay->setExifInfo(std::move(info));
 }
 
 std::shared_ptr<FolderViewProxy> MW::getFolderView() {
@@ -934,7 +936,7 @@ std::shared_ptr<ThumbnailStripProxy> MW::getThumbnailPanel() {
 
 // todo: this is crap
 void MW::showMessageDirectory(QString dirName) {
-    floatingMessage->showMessage(dirName, FloatingMessageIcon::ICON_DIRECTORY, 1700);
+    floatingMessage->showMessage(std::move(dirName), FloatingMessageIcon::ICON_DIRECTORY, 1700);
 }
 
 void MW::showMessageDirectoryEnd() {
@@ -960,26 +962,26 @@ void MW::showMessageFitOriginal() {
 }
 
 void MW::showMessage(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::NO_ICON, 1500);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::NO_ICON, 1500);
 }
 
 void MW::showMessage(QString text, int duration) {
-    floatingMessage->showMessage(text, FloatingMessageIcon::NO_ICON, duration);
+    floatingMessage->showMessage(std::move(text), FloatingMessageIcon::NO_ICON, duration);
 }
 
 void MW::showMessageSuccess(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_SUCCESS, 1500);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_SUCCESS, 1500);
 }
 
 void MW::showWarning(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_WARNING, 1500);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_WARNING, 1500);
 }
 
 void MW::showError(QString text) {
-    floatingMessage->showMessage(text,  FloatingMessageIcon::ICON_ERROR, 2800);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_ERROR, 2800);
 }
 
-bool MW::showConfirmation(QString title, QString msg) {
+bool MW::showConfirmation(const QString& title, const QString& msg) {
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(title);
     msgBox.setText(msg);
@@ -994,7 +996,7 @@ bool MW::showConfirmation(QString title, QString msg) {
         return false;
 }
 
-void MW::showErrorDialog(QString title, QString msg) {
+void MW::showErrorDialog(const QString& title, const QString& msg) {
     QMessageBox msgBox(this);
     msgBox.setWindowTitle(title);
     msgBox.setText(msg);

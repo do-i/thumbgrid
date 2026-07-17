@@ -62,14 +62,14 @@ signals:
     void draggedOut() override;
     void draggedToBookmarks(QList<int>) override;
     void sortingSelected(SortingMode);
-    void directorySelected(QString path);
+    void directorySelected(const QString& path);
     void showFoldersChanged(bool mode);
-    void copyUrlsRequested(QStringList, QString path);
-    void moveUrlsRequested(QStringList, QString path);
+    void copyUrlsRequested(const QStringList&, const QString& path);
+    void moveUrlsRequested(const QStringList&, const QString& path);
     void droppedInto(const QMimeData*, QObject*, int) override;
     void draggedOver(int) override;
     void selectionChanged();
-    void convertFormatRequested(QString format);
+    void convertFormatRequested(const QString& format);
 
 private slots:
     void onSortingSelected(int);

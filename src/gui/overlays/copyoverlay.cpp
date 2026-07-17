@@ -85,7 +85,7 @@ void CopyOverlay::createShortcuts() {
         shortcuts.insert(QString::number(i + 1), i);
 }
 
-void CopyOverlay::requestFileOperation(QString path) {
+void CopyOverlay::requestFileOperation(const QString& path) {
     if(mode == OVERLAY_COPY)
         emit copyRequested(path);
     else
@@ -127,7 +127,7 @@ void CopyOverlay::createDefaultPaths() {
     }
     if (paths.count() == 1 && paths.at(0) == home) {
         QDir dir(home);
-        for(auto mfi : dir.entryInfoList()) {
+        for(const auto& mfi : dir.entryInfoList()) {
             if (paths.count() >= maxPathCount) {
                 break;
             }

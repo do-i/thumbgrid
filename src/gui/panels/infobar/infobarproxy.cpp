@@ -18,7 +18,7 @@ InfoBarProxy::~InfoBarProxy() {
         infoBar->deleteLater();
 }
 
-void InfoBarProxy::setInfo(QString position, QString fileName, QString info) {
+void InfoBarProxy::setInfo(const QString& position, const QString& fileName, const QString& info) {
     if(infoBar) {
         infoBar->setInfo(position, fileName, info);
     } else {
@@ -28,7 +28,7 @@ void InfoBarProxy::setInfo(QString position, QString fileName, QString info) {
     }
 }
 
-void InfoBarProxy::setStatusText(QString text) {
+void InfoBarProxy::setStatusText(const QString& text) {
     if(infoBar) {
         infoBar->setStatusText(text);
     } else {

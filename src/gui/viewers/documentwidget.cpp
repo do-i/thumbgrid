@@ -1,5 +1,7 @@
 #include "documentwidget.h"
 
+#include <utility>
+
 DocumentWidget::DocumentWidget(std::shared_ptr<ViewerWidget> viewWidget, std::shared_ptr<InfoBarProxy> infoBar, QWidget *parent)
     : FloatingWidgetContainer(parent),
       mainPanel(nullptr),
@@ -21,12 +23,12 @@ DocumentWidget::DocumentWidget(std::shared_ptr<ViewerWidget> viewWidget, std::sh
     setLayout(layoutRoot);
     setAttribute(Qt::WA_TranslucentBackground, true);
     setMouseTracking(true);
-    mViewWidget = viewWidget;
+    mViewWidget = std::move(viewWidget);
     mViewWidget->setParent(this);
     layout->addWidget(mViewWidget.get());
     mViewWidget.get()->show();
     layoutRoot->addWidget(mViewWidget->videoControlsWidget());
-    mInfoBar = infoBar;
+    mInfoBar = std::move(infoBar);
     mInfoBar->setParent(this);
     layoutRoot->addWidget(mInfoBar.get());
     setFocusProxy(mViewWidget.get());

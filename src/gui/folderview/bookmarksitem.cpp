@@ -1,7 +1,9 @@
 #include "bookmarksitem.h"
 
+#include <utility>
+
 BookmarksItem::BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent)
-    : QWidget(parent), dirName(_dirName), dirPath(_dirPath), mHighlighted(false)
+    : QWidget(parent), dirName(std::move(_dirName)), dirPath(std::move(_dirPath)), mHighlighted(false)
 {
     this->setContentsMargins(0,0,0,0);
     layout.setContentsMargins(10,6,10,6);
@@ -71,7 +73,7 @@ void BookmarksItem::paintEvent(QPaintEvent *event) {
 void BookmarksItem::dropEvent(QDropEvent *event) {
     QStringList paths;
     // TODO: QUrl gave me some issues previosly, test
-    for(auto url : event->mimeData()->urls())
+    for(const auto& url : event->mimeData()->urls())
         paths << url.toLocalFile();
     emit droppedIn(paths, dirPath);
 }

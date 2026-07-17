@@ -15,9 +15,9 @@ class MenuItem : public QWidget {
 public:
     MenuItem(QWidget *parent = nullptr);
     ~MenuItem() override;
-    void setText(QString mTextLabel);
+    void setText(const QString& mTextLabel);
     QString text();
-    void setShortcutText(QString mTextLabel);
+    void setShortcutText(const QString& mTextLabel);
     QString shortcut();
     void setIconPath(QString path);
     void setPassthroughClicks(bool mode);

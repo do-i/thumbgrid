@@ -50,7 +50,7 @@ inline bool VideoPlayerInitProxy::initPlayer() {
         return true;
 
     QFileInfo pluginFile;
-    for(auto dir : libDirs) {
+    for(const auto& dir : libDirs) {
         pluginFile.setFile(dir + "/" + libFile);
         if(pluginFile.isFile() && pluginFile.isReadable()) {
             playerLib.setFileName(pluginFile.absoluteFilePath());
@@ -215,7 +215,7 @@ void VideoPlayerInitProxy::show() {
         errorLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         //errorLabel->setAlignment(Qt::AlignVCenter);
         QString errString = "Could not load " + libFile + " from:";
-        for(auto path : libDirs)
+        for(const auto& path : libDirs)
             errString.append("\n" + path + "/");
         errorLabel->setText(errString);
         layout.addWidget(errorLabel);

@@ -65,7 +65,7 @@ void ShortcutCreatorDialog::setAction(QString action) {
        cbox->setCurrentIndex(index);
 }
 
-void ShortcutCreatorDialog::setShortcut(QString shortcut) {
+void ShortcutCreatorDialog::setShortcut(const QString& shortcut) {
     ui->sequenceEdit->setText(shortcut);
 }
 

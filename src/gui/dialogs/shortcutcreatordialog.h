@@ -25,7 +25,7 @@ public:
     QString selectedShortcut();
     ViewMode selectedContext();
     void setAction(QString);
-    void setShortcut(QString);
+    void setShortcut(const QString&);
     void setContext(ViewMode);
 
 private slots:

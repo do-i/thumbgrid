@@ -20,8 +20,8 @@ public:
     ~InfoBar() override;
 
 public slots:
-    void setInfo(QString position, QString fileName, QString info);
-    void setStatusText(QString text);
+    void setInfo(const QString& position, const QString& fileName, const QString& info);
+    void setStatusText(const QString& text);
     void readSettings();
 protected:
     void paintEvent(QPaintEvent *event) override;

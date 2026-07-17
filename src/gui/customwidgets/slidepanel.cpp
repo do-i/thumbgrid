@@ -63,7 +63,7 @@ void SlidePanel::setLayoutManaged(bool mode) {
         recalculateGeometry();
 }
 
-void SlidePanel::setWidget(std::shared_ptr<QWidget> w) {
+void SlidePanel::setWidget(const std::shared_ptr<QWidget>& w) {
     if(!w)
         return;
     if(hasWidget())

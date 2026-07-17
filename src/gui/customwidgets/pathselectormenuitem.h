@@ -12,13 +12,13 @@ public:
     QString path();
 
 public slots:
-    void setDirectory(QString path);
+    void setDirectory(const QString& path);
 
 protected:
     void onPress() override;
 
 signals:
-    void directorySelected(QString);
+    void directorySelected(const QString&);
 
 private:
     QString mDirectory;

@@ -5,6 +5,8 @@
 
 #include "viewerwidget.h"
 
+#include <utility>
+
 #include "platform/platformdesktop.h"
 
 ViewerWidget::ViewerWidget(QWidget *parent)
@@ -273,7 +275,7 @@ bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap) {
     return true;
 }
 
-bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
+bool ViewerWidget::showAnimation(const std::shared_ptr<QMovie>& movie) {
     if(!movie)
         return false;
     stopPlayback();
@@ -289,7 +291,7 @@ bool ViewerWidget::showAnimation(std::shared_ptr<QMovie> movie) {
 bool ViewerWidget::showVideo(QString file) {
     stopPlayback();
     enableVideoPlayer();
-    videoPlayer->showVideo(file);
+    videoPlayer->showVideo(std::move(file));
     updateVideoControlsVisibility();
     // Restore the pointer on every switch; it auto-hides again after the idle
     // timeout. Without this the cursor stays blanked from the previous item
@@ -299,7 +301,7 @@ bool ViewerWidget::showVideo(QString file) {
     return true;
 }
 
-bool ViewerWidget::showText(QString file) {
+bool ViewerWidget::showText(const QString& file) {
     stopPlayback();
     enableTextViewer();
     bool ok = textViewer->showFile(file);

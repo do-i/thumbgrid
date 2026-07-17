@@ -81,5 +81,5 @@ protected:
 
 signals:
     void thumbnailSizeChanged(int);
-    void convertFormatRequested(QString format);
+    void convertFormatRequested(const QString& format);
 };

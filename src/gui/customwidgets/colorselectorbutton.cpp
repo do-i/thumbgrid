@@ -4,6 +4,7 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QVBoxLayout>
+#include <utility>
 
 ColorSelectorButton::ColorSelectorButton(QWidget *parent) : ClickableLabel(parent) {
     connect(this, &ColorSelectorButton::clicked, this, &ColorSelectorButton::showColorSelector);
@@ -15,7 +16,7 @@ void ColorSelectorButton::setColor(QColor &newColor) {
 }
 
 void ColorSelectorButton::setDescription(QString text) {
-    this->mDescription = text;
+    this->mDescription = std::move(text);
 }
 
 QColor ColorSelectorButton::color() {

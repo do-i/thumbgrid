@@ -32,15 +32,15 @@ public slots:
     void hide();
 
 signals:
-    void copyRequested(QString);
-    void moveRequested(QString);
+    void copyRequested(const QString&);
+    void moveRequested(const QString&);
 
 protected:
     void keyPressEvent(QKeyEvent *event) override;
 
     bool focusNextPrevChild(bool) override;
 private slots:
-    void requestFileOperation(QString path);
+    void requestFileOperation(const QString& path);
     void readSettings();
 
 private:

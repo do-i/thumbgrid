@@ -174,7 +174,7 @@ void FolderViewProxy::onSortingChanged(SortingMode mode) {
     }
 }
 
-void FolderViewProxy::setStatusText(QString text) {
+void FolderViewProxy::setStatusText(const QString& text) {
     statusText = text;
     if(statusFooter)
         statusFooter->setStatusText(text);

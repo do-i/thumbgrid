@@ -16,17 +16,17 @@ public:
     ~BookmarksWidget() override;
 
 public slots:
-    void addBookmark(QString directoryPath);
+    void addBookmark(const QString& directoryPath);
 
-    void removeBookmark(QString dirPath);
-    void onPathChanged(QString path);
+    void removeBookmark(const QString& dirPath);
+    void onPathChanged(const QString& path);
 private slots:
     void readSettings();
 
     void saveBookmarks();
 signals:
-    void bookmarkClicked(QString dirPath);
-    void droppedIn(QStringList paths, QString dirPath);
+    void bookmarkClicked(const QString& dirPath);
+    void droppedIn(const QStringList& paths, const QString& dirPath);
 
 protected:
     void dropEvent(QDropEvent *event) override;

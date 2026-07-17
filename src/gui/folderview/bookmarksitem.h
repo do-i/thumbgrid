@@ -23,9 +23,9 @@ public slots:
     void setHighlighted(bool mode);
 
 signals:
-    void clicked(QString dirPath);
-    void removeClicked(QString dirPath);
-    void droppedIn(QStringList paths, QString dirPath);
+    void clicked(const QString& dirPath);
+    void removeClicked(const QString& dirPath);
+    void droppedIn(const QStringList& paths, const QString& dirPath);
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event) override;

@@ -35,7 +35,7 @@ public slots:
     void addItem();
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
-    void setStatusText(QString text);
+    void setStatusText(const QString& text);
     void setStatusFooterVisible(bool mode);
 
 protected:
@@ -48,13 +48,13 @@ signals:
     void draggedToBookmarks(QList<int>) override;
     void sortingSelected(SortingMode);
     void showFoldersChanged(bool mode);
-    void directorySelected(QString);
-    void copyUrlsRequested(QStringList, QString path);
-    void moveUrlsRequested(QStringList, QString path);
+    void directorySelected(const QString&);
+    void copyUrlsRequested(const QStringList&, const QString& path);
+    void moveUrlsRequested(const QStringList&, const QString& path);
     void droppedInto(const QMimeData*, QObject*, int) override;
     void draggedOver(int) override;
     void selectionChanged();
-    void convertFormatRequested(QString format);
+    void convertFormatRequested(const QString& format);
 
 private:
     std::shared_ptr<FolderView> folderView;
