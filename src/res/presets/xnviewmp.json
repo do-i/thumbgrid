@@ -40,8 +40,9 @@
         "discardEdits": ["$Ctrl+Z"]
     },
     "grid": {
+        "createDirectory": ["F7"],
         "documentView": ["Enter"],
         "goUp": ["Backspace"],
-        "createDirectory": ["F7"]
+        "moveFile": ["M"]
     }
 }

@@ -40,8 +40,9 @@
         "saveAs": ["$Ctrl+$Shift+S"]
     },
     "grid": {
+        "createDirectory": ["F10"],
         "documentView": ["Enter"],
         "goUp": ["Backspace"],
-        "createDirectory": ["F10"]
+        "moveFile": ["M"]
     }
 }

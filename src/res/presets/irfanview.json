@@ -16,5 +16,10 @@
     "document": {
         "nextImage": ["Space", "Right"],
         "prevImage": ["Backspace", "Left"]
+    },
+    "grid": {
+        "moveFile": ["M"],
+        "removeFile": ["$Shift+Del"],
+        "renameFile": ["F2"]
     }
 }
