@@ -1,5 +1,6 @@
 #include "windowswatcher_p.h"
 #include "windowsworker.h"
+#include "utils/logging.h"
 
 QString lastError() {
     char buffer[1024];
@@ -44,12 +45,12 @@ HANDLE WindowsWatcherPrivate::requestDirectoryHandle(const QString& path)
         {
             if (GetLastError() == ERROR_SHARING_VIOLATION)
             {
-                qDebug() << "ERROR_SHARING_VIOLATION waiting for 1 sec";
+                qCWarning(logDirManager) << "ERROR_SHARING_VIOLATION waiting for 1 sec";
                 QThread::sleep(1);
             }
             else
             {
-                qDebug() << lastError();
+                qCWarning(logDirManager) << lastError();
                 return INVALID_HANDLE_VALUE;
             }
         }
@@ -95,7 +96,7 @@ void WindowsWatcherPrivate::dispatchNotify(PFILE_NOTIFY_INFORMATION notify) {
             break;
 
         default:
-            qDebug() << "Some error, notify->Action" << notify->Action;
+            qCWarning(logDirManager) << "Some error, notify->Action" << notify->Action;
     }
 }
 
@@ -127,7 +128,7 @@ void WindowsWatcher::setWatchPath(const QString &path) {
     HANDLE hDirectory = d->requestDirectoryHandle(path);
     if (hDirectory == INVALID_HANDLE_VALUE)
     {
-        qDebug() << "requestDirectoryHandle: INVALID_HANDLE_VALUE";
+        qCWarning(logDirManager) << "requestDirectoryHandle: INVALID_HANDLE_VALUE";
         return;
     }
 

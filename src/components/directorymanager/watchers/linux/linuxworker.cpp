@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include "linuxworker.h"
+#include "utils/logging.h"
 
 #define TAG         "[LinuxWatcherWorker]"
 #define TIMEOUT     300 // ms
@@ -28,7 +29,7 @@ void LinuxWorker::run() {
 #endif
 
     if (fd == -1) {
-        qDebug() << TAG << "File descriptor isn't set! Stopping";
+        qCWarning(logDirManager) << TAG << "File descriptor isn't set! Stopping";
         emit finished();
         return;
     }
@@ -64,7 +65,7 @@ void LinuxWorker::run() {
 
 void LinuxWorker::handleErrorCode(int code) {
     if (code == -1) {
-        qDebug() << TAG << strerror(errno);
+        qCWarning(logDirManager) << TAG << strerror(errno);
         emit error(strerror(errno));
     }
 }

@@ -1,6 +1,7 @@
 #include "directorymanager.h"
 
 #include <utility>
+#include "utils/logging.h"
 
 namespace fs = std::filesystem;
 
@@ -133,11 +134,11 @@ bool DirectoryManager::validateDirectory(const QString& dirPath) const {
         return false;
     }
     if(!std::filesystem::exists(toStdString(dirPath))) {
-        qDebug() << "[DirectoryManager] Error - path does not exist.";
+        qCWarning(logDirManager) << "[DirectoryManager] Error - path does not exist.";
         return false;
     }
     if(!std::filesystem::is_directory(toStdString(dirPath))) {
-        qDebug() << "[DirectoryManager] Error - path is not a directory.";
+        qCWarning(logDirManager) << "[DirectoryManager] Error - path is not a directory.";
         return false;
     }
     return true;
@@ -148,7 +149,7 @@ bool DirectoryManager::setDirectory(const QString& dirPath) {
         return false;
     QDir dir(dirPath);
     if(!dir.isReadable()) {
-        qDebug() << "[DirectoryManager] Error - cannot read directory.";
+        qCWarning(logDirManager) << "[DirectoryManager] Error - cannot read directory.";
         return false;
     }
     mListSource = SOURCE_DIRECTORY;
@@ -365,12 +366,12 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, c
     std::error_code ec;
     fs::directory_iterator it(toStdString(directoryPath), fs::directory_options::skip_permission_denied, ec);
     if(ec) {
-        qDebug() << "[DirectoryManager]" << directoryPath << QString::fromStdString(ec.message());
+        qCWarning(logDirManager) << "[DirectoryManager]" << directoryPath << QString::fromStdString(ec.message());
         return;
     }
     for(fs::directory_iterator end; it != end; it.increment(ec)) {
         if(ec) { // increment failure invalidates the iterator; nothing more to read
-            qDebug() << "[DirectoryManager]" << QString::fromStdString(ec.message());
+            qCWarning(logDirManager) << "[DirectoryManager]" << QString::fromStdString(ec.message());
             break;
         }
         const auto &entry = *it;
@@ -407,12 +408,12 @@ void DirectoryManager::addEntriesFromDirectoryRecursive(std::vector<FSEntry> &en
     std::error_code ec;
     fs::recursive_directory_iterator it(toStdString(directoryPath), fs::directory_options::skip_permission_denied, ec);
     if(ec) {
-        qDebug() << "[DirectoryManager]" << directoryPath << QString::fromStdString(ec.message());
+        qCWarning(logDirManager) << "[DirectoryManager]" << directoryPath << QString::fromStdString(ec.message());
         return;
     }
     for(fs::recursive_directory_iterator end; it != end; it.increment(ec)) {
         if(ec) {
-            qDebug() << "[DirectoryManager]" << QString::fromStdString(ec.message());
+            qCWarning(logDirManager) << "[DirectoryManager]" << QString::fromStdString(ec.message());
             break;
         }
         const auto &entry = *it;
@@ -486,7 +487,7 @@ bool DirectoryManager::forceInsertFileEntry(const QString &filePath) {
     QString fileName = QFileInfo(filePath).fileName();
     insertFileEntrySorted(statFileEntry(filePath, fileName));
     if(!directoryPath().isEmpty()) {
-        qDebug() << "fileIns" << filePath << directoryPath();
+        qCDebug(logDirManager) << "fileIns" << filePath << directoryPath();
         emit fileAdded(filePath);
     }
     return true;
@@ -498,7 +499,7 @@ void DirectoryManager::removeFileEntry(const QString &filePath) {
         return;
     fileEntryVec.erase(fileEntryVec.begin() + index);
     fileIndexCacheDirty = true;
-    qDebug() << "fileRem" << filePath;
+    qCDebug(logDirManager) << "fileRem" << filePath;
     emit fileRemoved(filePath, index);
 }
 
@@ -509,7 +510,7 @@ void DirectoryManager::updateFileEntry(const QString &filePath) {
     FSEntry newEntry(filePath);
     if(fileEntryVec.at(index).modifyTime != newEntry.modifyTime)
         fileEntryVec.at(index) = newEntry;
-    qDebug() << "fileMod" << filePath;
+    qCDebug(logDirManager) << "fileMod" << filePath;
     emit fileModified(filePath);
 }
 
@@ -538,7 +539,7 @@ void DirectoryManager::renameFileEntry(const QString &oldFilePath, const QString
     fileEntryVec.erase(fileEntryVec.begin() + oldIndex);
     // insert
     insertFileEntrySorted(statFileEntry(newFilePath, newFileName));
-    qDebug() << "fileRen" << oldFilePath << newFilePath;
+    qCDebug(logDirManager) << "fileRen" << oldFilePath << newFilePath;
     emit fileRenamed(oldFilePath, oldIndex, newFilePath, indexOfFile(newFilePath));
 }
 
@@ -554,7 +555,7 @@ bool DirectoryManager::insertDirEntry(const QString &dirPath) {
     FSEntry.isDirectory = true;
     insert_sorted(dirEntryVec, FSEntry, compareFunction());
     dirIndexCacheDirty = true;
-    qDebug() << "dirIns" << dirPath;
+    qCDebug(logDirManager) << "dirIns" << dirPath;
     emit dirAdded(dirPath);
     return true;
 }
@@ -565,7 +566,7 @@ void DirectoryManager::removeDirEntry(const QString &dirPath) {
         return;
     dirEntryVec.erase(dirEntryVec.begin() + index);
     dirIndexCacheDirty = true;
-    qDebug() << "dirRem" << dirPath;
+    qCDebug(logDirManager) << "dirRem" << dirPath;
     emit dirRemoved(dirPath, index);
 }
 
@@ -584,7 +585,7 @@ void DirectoryManager::renameDirEntry(const QString &oldDirPath, const QString &
     FSEntry.isDirectory = true;
     insert_sorted(dirEntryVec, FSEntry, compareFunction());
     dirIndexCacheDirty = true;
-    qDebug() << "dirRen" << oldDirPath << newDirPath;
+    qCDebug(logDirManager) << "dirRen" << oldDirPath << newDirPath;
     emit dirRenamed(oldDirPath, oldIndex, newDirPath, indexOfDir(newDirPath));
 }
 

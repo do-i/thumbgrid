@@ -5,6 +5,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include "shortcutpresetstore.h"
+#include "utils/logging.h"
 
 ActionManager *actionManager = nullptr;
 
@@ -251,7 +252,7 @@ void ActionManager::resetDefaults(const QString& action) {
             i.next();
             if(i.value() == action) {
                 shortcuts[ctx].insert(i.key(), i.value());
-                qDebug() << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "] in" << contextToString(ctx);
+                qCDebug(logSettings) << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "] in" << contextToString(ctx);
             }
         }
     }
@@ -266,7 +267,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
     }
     // swap WheelUp/WheelDown. derp
     if(lastVer < QVersionNumber(1,0,1)) {
-        qDebug() << "[actionManager]: swapping WheelUp/WheelDown";
+        qCDebug(logSettings) << "[actionManager]: swapping WheelUp/WheelDown";
         for(auto ctx = shortcuts.begin(); ctx != shortcuts.end(); ++ctx) {
             ContextMap swapped;
             QMapIterator<QString, QString> i(ctx.value());
@@ -289,7 +290,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
         for(ViewMode ctx : shortcutContexts()) {
             if(shortcuts[ctx].value("MiddleButton") == "exit") {
                 shortcuts[ctx].remove("MiddleButton");
-                qDebug() << "[actionManager]: removed MiddleButton=exit in" << contextToString(ctx);
+                qCDebug(logSettings) << "[actionManager]: removed MiddleButton=exit in" << contextToString(ctx);
             }
         }
     }
@@ -302,9 +303,9 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             if(appActions->getMap().value(i.value()) > lastVer) {
                 if(!cur.contains(i.key())) {
                     cur.insert(i.key(), i.value());
-                    qDebug() << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "] in" << contextToString(ctx);
+                    qCDebug(logSettings) << "[ActionManager] new action " << i.value() << " - assigning as [" << i.key() << "] in" << contextToString(ctx);
                 } else if(i.value() != cur.value(i.key())) {
-                    qDebug() << "[ActionManager] new action " << i.value() << " - shortcut [" << i.key() << "] already assigned to " << cur.value(i.key());
+                    qCDebug(logSettings) << "[ActionManager] new action " << i.value() << " - shortcut [" << i.key() << "] already assigned to " << cur.value(i.key());
                 }
             }
         }

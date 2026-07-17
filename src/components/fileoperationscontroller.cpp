@@ -2,6 +2,7 @@
 
 #include <utility>
 #include "utils/fileoperations.h"
+#include "utils/logging.h"
 
 FileOperationsController::FileOperationsController(MW *mw, QObject *parent)
     : QObject(parent),
@@ -21,7 +22,7 @@ void FileOperationsController::outputError(const FileOpResult &error) const {
     if(error == FileOpResult::SUCCESS || error == FileOpResult::NOTHING_TO_DO)
         return;
     mw->showError(FileOperations::decodeResult(error));
-    qDebug() << FileOperations::decodeResult(error);
+    qCWarning(logCore) << FileOperations::decodeResult(error);
 }
 
 bool FileOperationsController::copyPathsTo(const QStringList& paths, const QString& destDirectory) {
@@ -141,7 +142,7 @@ void FileOperationsController::doInteractiveCopyMove(QString path, QString destD
         }
     } else if(!dstDir.mkpath(".")) {
         mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qDebug() << "Could not create directory " << dstDir.absolutePath();
+        qCWarning(logCore) << "Could not create directory " << dstDir.absolutePath();
         return;
     }
     // copy / move all contents

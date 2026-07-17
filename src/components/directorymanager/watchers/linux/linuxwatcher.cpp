@@ -4,6 +4,7 @@
 
 #include "linuxwatcher_p.h"
 #include "linuxworker.h"
+#include "utils/logging.h"
 
 #define TAG                 "[LinuxDirectoryWatcher]"
 #define INOTIFY_EVENT_MASK  IN_CREATE | IN_MODIFY | IN_DELETE | IN_MOVE
@@ -180,7 +181,7 @@ LinuxWatcher::~LinuxWatcher() {
     Q_D(LinuxWatcher);
     int removeStatusCode = inotify_rm_watch(d->watcher, d->watchObject);
     if (removeStatusCode != 0) {
-        qDebug() << TAG << "Cannot remove inotify watcher instance:" << strerror(errno);
+        qCWarning(logDirManager) << TAG << "Cannot remove inotify watcher instance:" << strerror(errno);
     }
 }
 
@@ -192,13 +193,13 @@ void LinuxWatcher::setWatchPath(const QString& path) {
     if (d->watchObject != -1) {
         int status = inotify_rm_watch(d->watcher, d->watchObject);
         if (status == -1) {
-            qDebug() << TAG << "Error:" << strerror(errno);
+            qCWarning(logDirManager) << TAG << "Error:" << strerror(errno);
         }
     }
 
     // Add new path to be watched by inotify
     d->watchObject = inotify_add_watch(d->watcher, path.toStdString().data(), INOTIFY_EVENT_MASK);
     if (d->watchObject == -1) {
-        qDebug() << TAG << "Error:" << strerror(errno);
+        qCWarning(logDirManager) << TAG << "Error:" << strerror(errno);
     }
 }

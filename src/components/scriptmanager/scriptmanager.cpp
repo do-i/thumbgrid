@@ -1,6 +1,7 @@
 #include "scriptmanager.h"
 
 #include <utility>
+#include "utils/logging.h"
 
 ScriptManager *scriptManager = nullptr;
 
@@ -36,7 +37,7 @@ void ScriptManager::runScript(const QString &scriptName, std::shared_ptr<Image> 
         if(script.blocking) {
             exec.start(program, arguments);
             if(!exec.waitForStarted()) {
-                qDebug() << "Unable not run application/script." << program << " Make sure it is an executable.";
+                qCWarning(logCore) << "Unable not run application/script." << program << " Make sure it is an executable.";
             }
             exec.waitForFinished(10000);
         } else {
@@ -52,7 +53,7 @@ void ScriptManager::runScript(const QString &scriptName, std::shared_ptr<Image> 
             }
         }
     } else {
-        qDebug() << "[ScriptManager] File " << scriptName << " does not exist.";
+        qCWarning(logCore) << "[ScriptManager] File " << scriptName << " does not exist.";
     }
 }
 
@@ -143,7 +144,7 @@ void ScriptManager::saveScripts() {
 // replaces if it already exists
 void ScriptManager::addScript(const QString& scriptName, const Script& script) {
     if(scripts.contains(scriptName)) {
-        qDebug() << "[ScriptManager] Replacing script" << scriptName;
+        qCDebug(logCore) << "[ScriptManager] Replacing script" << scriptName;
         scripts.remove(scriptName);
     }
     scripts.insert(scriptName, script);

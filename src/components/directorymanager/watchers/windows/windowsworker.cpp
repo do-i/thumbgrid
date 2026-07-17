@@ -1,4 +1,5 @@
 #include "windowsworker.h"
+#include "utils/logging.h"
 
 WindowsWorker::WindowsWorker() : WatcherWorker() {
 
@@ -26,7 +27,7 @@ void WindowsWorker::run() {
     ovl.hEvent = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
 
     if(!ovl.hEvent) {
-        qDebug() << "[WindowsWorker] CreateEvent failed?";
+        qCWarning(logDirManager) << "[WindowsWorker] CreateEvent failed?";
     }
 
     ::ResetEvent(ovl.hEvent); // is this needed?
@@ -45,7 +46,7 @@ void WindowsWorker::run() {
         if(!bPending) {
             error = GetLastError();
             if(error == ERROR_IO_INCOMPLETE) {
-                qDebug() << "ERROR_IO_INCOMPLETE";
+                qCWarning(logDirManager) << "ERROR_IO_INCOMPLETE";
                 continue;
             }
         }

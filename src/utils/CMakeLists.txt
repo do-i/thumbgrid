@@ -11,6 +11,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     script.cpp
     stuff.cpp
     fileoperations.cpp
+    logging.cpp
 )
 
 if(WIN32)
