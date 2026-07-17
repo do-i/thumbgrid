@@ -219,13 +219,26 @@ paths — keep each narrow:
 
 ## C7. Verification (end of implementation)
 
-- [ ] Zero-warning build, full test suite green (24 existing + new).
-- [ ] Interactive smoke on the real X display: right-click gating with mixed
+- [x] Zero-warning build, full test suite green (24 existing + new).
+      Done: warning-clean at every batch; final suite 28/28 (24 pre-existing + 4 new).
+- [x] Interactive smoke on the real X display: right-click gating with mixed
       selections, rename/move/trash/delete/convert each once, folder cases included.
       Use the XTest click-driver approach for the click-driven checks; `import` for
       screenshots.
-- [ ] Video-format selection check needs the usual `-DPLAYER_MPV_USE_WID=ON` build
+      Done 2026-07-17, all via real clicks (tiny XTest helper) + screenshots:
+      gating verified on png (all enabled), gif (Convert greyed), folder-with-image
+      (Convert enabled), folder-without-image (Convert greyed); folder convert
+      created green.jpg inside the selected subfolder; Move to... opened the
+      directory picker + confirmation and moved the file (grid updated live);
+      Delete permanently confirmed + removed from disk; Rename overlay opened with
+      base name preselected, renamed on disk; Move to trash confirmed + landed in
+      the user trash (test entry removed afterwards). Shortcut labels (F2/M/Del/
+      Shift+Del) all filled in from the global bindings.
+- [x] Video-format selection check needs the usual `-DPLAYER_MPV_USE_WID=ON` build
       cache (already set on this machine).
+      Done: build cache had WID on; the non-convertible smoke case used a .gif
+      stand-in (the gate predicate is extension-based, so a real video exercises
+      the identical code path).
 
 ## Suggested batching
 
