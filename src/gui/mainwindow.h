@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QWidget>
 #include <QHBoxLayout>
-#include <QMessageBox>
 #include <QFileDialog>
 #include <QMimeData>
 #include <QImageWriter>

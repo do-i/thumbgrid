@@ -1030,6 +1030,21 @@ QMessageBox {
     background-color: %background%;
 }
 
+/* Custom themed replacement for QMessageBox (frameless, rounded). */
+CustomMessageBox {
+    background-color: %widget%;
+    border: 1px solid %widget_border%;
+    border-radius: %contextmenu_border_radius%;
+}
+CustomMessageBox QLabel {
+    color: %text%;
+}
+CustomMessageBox QLabel[accessibleName="DialogTitle"] {
+    color: %text_hc%;
+    font-size: %font_large%;
+    font-weight: bold;
+}
+
 ResizeDialog QLabel,
 FileReplaceDialog QLabel,
 ScriptEditorDialog QLabel,
@@ -1135,7 +1150,8 @@ FileReplaceDialog QPushButton,
 ScriptEditorDialog QPushButton,
 ShortcutCreatorDialog QPushButton,
 PrintDialog QPushButton,
-QMessageBox QPushButton {
+QMessageBox QPushButton,
+CustomMessageBox QPushButton {
     color: %text%;
     background-color: %button%;
     border-radius: 3px;
@@ -1148,7 +1164,8 @@ FileReplaceDialog QPushButton:hover,
 ScriptEditorDialog QPushButton:hover,
 ShortcutCreatorDialog QPushButton:hover,
 PrintDialog QPushButton:hover,
-QMessageBox QPushButton:hover {
+QMessageBox QPushButton:hover,
+CustomMessageBox QPushButton:hover {
     background-color: %button_hover%;
 }
 
@@ -1157,6 +1174,13 @@ FileReplaceDialog QPushButton:pressed,
 ScriptEditorDialog QPushButton:pressed,
 ShortcutCreatorDialog QPushButton:pressed,
 PrintDialog QPushButton:pressed,
-QMessageBox QPushButton:pressed {
+QMessageBox QPushButton:pressed,
+CustomMessageBox QPushButton:pressed {
     background-color: %button_pressed%;
+}
+
+CustomMessageBox QPushButton:default,
+CustomMessageBox QPushButton:focus {
+    background-color: %accent%;
+    color: %text_hc%;
 }

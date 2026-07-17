@@ -3,6 +3,7 @@
 #include <utility>
 
 #include "platform/platformdesktop.h"
+#include "gui/dialogs/custommessagebox.h"
 
 // TODO: nuke this and rewrite
 
@@ -991,29 +992,11 @@ void MW::showError(QString text) {
 }
 
 bool MW::showConfirmation(const QString& title, const QString& msg) {
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle(title);
-    msgBox.setText(msg);
-    msgBox.setIcon(QMessageBox::Warning);
-    msgBox.setStandardButtons(QMessageBox::Yes);
-    msgBox.addButton(QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Yes);
-    msgBox.setModal(true);
-    if(msgBox.exec() == QMessageBox::Yes)
-        return true;
-    else
-        return false;
+    return CustomMessageBox::confirm(this, title, msg);
 }
 
 void MW::showErrorDialog(const QString& title, const QString& msg) {
-    QMessageBox msgBox(this);
-    msgBox.setWindowTitle(title);
-    msgBox.setText(msg);
-    msgBox.setIcon(QMessageBox::Critical);
-    msgBox.setStandardButtons(QMessageBox::Cancel);
-    msgBox.setDefaultButton(QMessageBox::Cancel);
-    msgBox.setModal(true);
-    msgBox.exec();
+    CustomMessageBox::message(this, title, msg);
 }
 
 void MW::readSettings() {

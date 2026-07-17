@@ -30,6 +30,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     customwidgets/entryinfoitem.cpp
     customwidgets/ssidebar.cpp
 
+    dialogs/custommessagebox.cpp
     dialogs/filereplacedialog.cpp
     dialogs/resizedialog.cpp
     dialogs/scripteditordialog.cpp
