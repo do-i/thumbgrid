@@ -233,7 +233,6 @@ std::unique_ptr<QImage> ImageLib::scaled_CV(const std::shared_ptr<const QImage>&
             *dest = QtOcv::mat2Image(dstMat_sharpened, order, source->format());
         }
     }
-    //qDebug() << "Filter:" << filter << " sharpen=" << sharpen << " source size:" << source->size() << "->" << (float)destSize.width() / source->width() << ": " << t.elapsed() << " ms.";
     return dest;
 }
 #endif

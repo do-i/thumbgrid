@@ -38,7 +38,6 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent) {
     setWidget(thumbnailStrip);
 
     readSettings();
-    //connect(settings, SIGNAL(settingsChanged()), this, SLOT(readSettings()));
 }
 
 MainPanel::~MainPanel() {

@@ -55,12 +55,10 @@ void VideoPlayerMpv::onPlaybackRestarted() {
 
 void VideoPlayerMpv::seek(int pos) {
     m_mpv->command(QVariantList() << "seek" << pos << "absolute");
-    //qDebug() << "seek(): " << pos << " sec";
 }
 
 void VideoPlayerMpv::seekRelative(int pos) {
     m_mpv->command(QVariantList() << "seek" << pos << "relative");
-    //qDebug() << "seekRelative(): " << pos << " sec";
 }
 
 void VideoPlayerMpv::pauseResume() {

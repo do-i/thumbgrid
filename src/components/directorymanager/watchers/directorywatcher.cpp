@@ -32,7 +32,6 @@ void DirectoryWatcher::observe()
         d->worker->setRunning(true);
         d->workerThread->start();
     }
-    //qDebug() << TAG << "Observing path:" << d->currentDirectory;
 }
 
 void DirectoryWatcher::stopObserving()

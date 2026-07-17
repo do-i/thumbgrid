@@ -51,9 +51,6 @@ int main(int argc, char *argv[]) {
 
     PlatformDesktop::applyHighDpiPolicy();
 
-    //qDebug() << qgetenv("QT_SCALE_FACTOR");
-    //qDebug() << qgetenv("QT_SCREEN_SCALE_FACTORS");
-    //qDebug() << qgetenv("QT_ENABLE_HIGHDPI_SCALING");
 
 #ifdef __APPLE__
     MacOSApplication a(argc, argv);

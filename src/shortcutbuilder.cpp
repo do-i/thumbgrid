@@ -120,7 +120,6 @@ QString ShortcutBuilder::fromEventNativeScanCode(QKeyEvent *event) {
         sequence.prepend(modifierKeys(event));
     }
 
-    //qDebug() << "RESULT:" << sequence;
     return sequence;
 }
 //------------------------------------------------------------------------------

@@ -10,6 +10,5 @@ void LoaderRunnable::run() {
     //QElapsedTimer t;
     //t.start();
     auto image = ImageFactory::createImage(path);
-    //qDebug() << "L: " << t.elapsed();
     emit finished(image, path);
 }

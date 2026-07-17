@@ -205,7 +205,6 @@ GridInfo FlowLayout::doLayout(const QRectF &geom, bool applyNewGeometry) const {
             m_items.at(i)->setGeometry(QRectF(QPointF(leftMargin + x, topMargin + y), itemSize));
         x = next_x + spacing(Qt::Horizontal);
     }
-    //qDebug() << "elapsed: " << t.elapsed();
     return GridInfo(columns, rows, topMargin + y + itemSize.height() + bottomMargin);
 }
 

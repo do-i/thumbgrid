@@ -175,7 +175,6 @@ void DocumentWidget::enterEvent(QEnterEvent *event) {
 
 void DocumentWidget::leaveEvent(QEvent *event) {
     QWidget::leaveEvent(event);
-    //qDebug() << cursor().pos() << this->rect();
     // this misfires on hidpi.
     //instead do the panel hiding in MW::leaveEvent  (it works properly in root window)
     //mainPanel->hide();

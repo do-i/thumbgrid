@@ -283,7 +283,6 @@ void ThumbnailView::populate(int newCount) {
     updateLayout();
     fitSceneToContents();
     resetViewport();
-    //qDebug() << "_______POPULATE" << this << t.elapsed();
     // wait for layout before updating
     // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
@@ -504,7 +503,6 @@ void ThumbnailView::wheelEvent(QWheelEvent *event) {
         else // fallback to guesswork
             isWheel = angleDelta && (abs(angleDelta)>=120 && !(angleDelta % 60)) && lastTouchpadScroll.elapsed() > 250;
     }
-    //qDebug() << "isWheel:" << isWheel << " angle / pixel delta:" << angleDelta << pixelDelta << lastTouchpadScroll.elapsed() << event->phase() << " wayland:" << wayland;
 
     if(isWheel) {
         angleDelta *= settings->mouseScrollingSpeed();

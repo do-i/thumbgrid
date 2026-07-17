@@ -20,7 +20,6 @@ void ScalerRunnable::run() {
     } else {
         scaled = ImageLib::scaled(req.image->getImage(), req.size, req.filter);
     }
-    //qDebug() << ">> " << req.size << ": " << t.elapsed();
     // ownership is transferred to the receiving slot via the queued signal (Scaler::onTaskFinish)
     emit finished(scaled.release(), req);
 }
