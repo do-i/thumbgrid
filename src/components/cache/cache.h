@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QDebug>
-#include <QMap>
+#include <QHash>
 #include <QSet>
 #include <QSemaphore>
 #include <QMutexLocker>
@@ -22,10 +22,9 @@ public:
     std::shared_ptr<Image> get(const QString& path);
     bool release(const QString& path);
     bool reserve(const QString& path);
-    const QStringList keys() const;
 
 private:
-    QMap<QString, std::shared_ptr<CacheItem>> items;
+    QHash<QString, std::shared_ptr<CacheItem>> items;
     // locks & erases the entry at it, returning the iterator to the next entry
-    QMap<QString, std::shared_ptr<CacheItem>>::iterator eraseEntry(QMap<QString, std::shared_ptr<CacheItem>>::iterator it);
+    QHash<QString, std::shared_ptr<CacheItem>>::iterator eraseEntry(QHash<QString, std::shared_ptr<CacheItem>>::iterator it);
 };

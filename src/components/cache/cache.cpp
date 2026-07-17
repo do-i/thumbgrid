@@ -1,4 +1,5 @@
 #include "cache.h"
+#include "utils/logging.h"
 
 Cache::Cache() {
 }
@@ -14,6 +15,7 @@ bool Cache::insert(const std::shared_ptr<Image>& img) {
             return false;
         }
         items.insert(img->filePath(), std::make_shared<CacheItem>(img));
+        qCDebug(logCache) << "insert" << img->filePath();
         return true;
     }
     return false;
@@ -21,18 +23,21 @@ bool Cache::insert(const std::shared_ptr<Image>& img) {
 
 // locks & erases the item at it (destroying it once no reserver holds it),
 // returning the iterator to the next entry
-QMap<QString, std::shared_ptr<CacheItem>>::iterator Cache::eraseEntry(QMap<QString, std::shared_ptr<CacheItem>>::iterator it) {
+QHash<QString, std::shared_ptr<CacheItem>>::iterator Cache::eraseEntry(QHash<QString, std::shared_ptr<CacheItem>>::iterator it) {
     it.value()->lock();
     return items.erase(it);
 }
 
 void Cache::remove(const QString& path) {
     auto it = items.find(path);
-    if(it != items.end())
+    if(it != items.end()) {
+        qCDebug(logCache) << "remove" << path;
         eraseEntry(it);
+    }
 }
 
 void Cache::clear() {
+    qCDebug(logCache) << "clear" << items.count() << "items";
     for(auto it = items.begin(); it != items.end();)
         it = eraseEntry(it);
 }
@@ -65,14 +70,15 @@ bool Cache::release(const QString& path) {
 // removes all items except the ones in pathList
 void Cache::trimTo(const QStringList& pathList) {
     const QSet<QString> keep(pathList.begin(), pathList.end());
+    int evicted = 0;
     for(auto it = items.begin(); it != items.end();) {
-        if(keep.contains(it.key()))
+        if(keep.contains(it.key())) {
             ++it;
-        else
+        } else {
             it = eraseEntry(it);
+            evicted++;
+        }
     }
-}
-
-const QStringList Cache::keys() const {
-    return items.keys();
+    if(evicted)
+        qCDebug(logCache) << "trimTo evicted" << evicted << "items," << items.count() << "kept";
 }

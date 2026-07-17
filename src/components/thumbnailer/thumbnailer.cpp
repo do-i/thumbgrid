@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QPainter>
 #include <utility>
+#include "utils/logging.h"
 
 namespace {
     const int thumbnailerShutdownWaitMs = 3000;
@@ -31,6 +32,7 @@ void Thumbnailer::onSettingsChanged() {
     QString signature = settings->colorScheme().bakedThumbnailSignature();
     if(signature != mThumbColorSignature) {
         mThumbColorSignature = signature;
+        qCDebug(logThumbnailer) << "color scheme changed, dropping mem cache";
         memCache.clear();
     }
 }
@@ -78,7 +80,7 @@ void Thumbnailer::memCacheInsert(const QString &key, const std::shared_ptr<Thumb
 Thumbnailer::~Thumbnailer() {
     clearTasks();
     if(!pool->waitForDone(thumbnailerShutdownWaitMs)) {
-        qWarning() << "Thumbnailer: timed out waiting for thumbnail workers; leaking remaining tasks to avoid hanging exit";
+        qCWarning(logThumbnailer) << "timed out waiting for thumbnail workers; leaking remaining tasks to avoid hanging exit";
         // Running tasks may still touch the pool and cache; intentionally leave
         // both alive on this rare timeout path instead of blocking shutdown.
         pool->setParent(nullptr);
@@ -201,6 +203,7 @@ void Thumbnailer::startDirThumbnailerThread(QString dirPath, int size, bool prev
 }
 
 void Thumbnailer::startTask(ThumbnailerRunnable *runnable) {
+    qCDebug(logThumbnailer) << "queue" << runnable->taskPath() << runnable->taskSize();
     runnable->setAutoDelete(false);
     queuedTasks.insert(taskKey(runnable->taskPath(), runnable->taskSize()), runnable);
     pool->start(runnable);
