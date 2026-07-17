@@ -13,16 +13,16 @@ bool Cache::insert(const std::shared_ptr<Image>& img) {
         if(it != items.end()) {
             return false;
         }
-        items.insert(img->filePath(), new CacheItem(img));
+        items.insert(img->filePath(), std::make_shared<CacheItem>(img));
         return true;
     }
     return false;
 }
 
-// locks & deletes the item at it, returning the iterator to the next entry
-QMap<QString, CacheItem*>::iterator Cache::eraseEntry(QMap<QString, CacheItem*>::iterator it) {
+// locks & erases the item at it (destroying it once no reserver holds it),
+// returning the iterator to the next entry
+QMap<QString, std::shared_ptr<CacheItem>>::iterator Cache::eraseEntry(QMap<QString, std::shared_ptr<CacheItem>>::iterator it) {
     it.value()->lock();
-    delete it.value();
     return items.erase(it);
 }
 

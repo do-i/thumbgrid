@@ -25,7 +25,7 @@ public:
     const QStringList keys() const;
 
 private:
-    QMap<QString, CacheItem*> items;
-    // locks & deletes the entry at it, returning the iterator to the next entry
-    QMap<QString, CacheItem*>::iterator eraseEntry(QMap<QString, CacheItem*>::iterator it);
+    QMap<QString, std::shared_ptr<CacheItem>> items;
+    // locks & erases the entry at it, returning the iterator to the next entry
+    QMap<QString, std::shared_ptr<CacheItem>>::iterator eraseEntry(QMap<QString, std::shared_ptr<CacheItem>>::iterator it);
 };
