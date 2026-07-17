@@ -424,12 +424,8 @@ void MW::restoreWindowGeometry() {
 }
 
 void MW::updateCurrentDisplay() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    currentDisplay = desktopWidget.screenNumber(this);
-#else
     auto screens = qApp->screens();
     currentDisplay = screens.indexOf(this->window()->screen());
-#endif
 }
 
 void MW::onWindowGeometryChanged() {
@@ -438,11 +434,7 @@ void MW::onWindowGeometryChanged() {
 }
 
 void MW::saveCurrentDisplay() {
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    settings->setLastDisplay(desktopWidget.screenNumber(this));
-#else
     settings->setLastDisplay(qApp->screens().indexOf(this->window()->screen()));
-#endif
 }
 
 //#############################################################
@@ -655,11 +647,7 @@ void MW::showFullScreen() {
         saveWindowGeometry();
     auto screens = qApp->screens();
     // todo: why check the screen again?
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    int _currentDisplay = desktopWidget.screenNumber(this);
-#else
     int _currentDisplay = screens.indexOf(this->window()->screen());
-#endif
     //move to target screen
     if(screens.count() > currentDisplay && currentDisplay != _currentDisplay) {
         this->move(screens.at(currentDisplay)->geometry().x(),

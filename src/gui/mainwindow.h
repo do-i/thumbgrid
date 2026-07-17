@@ -10,10 +10,6 @@
 #include <QImageWriter>
 #include <QWindow>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-#include <QDesktopWidget>
-#endif
-
 #include "gui/customwidgets/floatingwidgetcontainer.h"
 #include "gui/viewers/viewerwidget.h"
 #include "gui/overlays/controlsoverlay.h"
@@ -117,9 +113,6 @@ private:
     PanelPosition panelPosition;
     CurrentInfo info;
     QString folderStatusText;
-#if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
-    QDesktopWidget desktopWidget;
-#endif
 
     void saveWindowGeometry();
     void restoreWindowGeometry();
