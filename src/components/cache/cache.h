@@ -21,7 +21,7 @@ public:
     std::shared_ptr<Image> get(QString path);
     bool release(QString path);
     bool reserve(QString path);
-    const QList<QString> keys() const;
+    const QStringList keys() const;
 
 private:
     QMap<QString, CacheItem*> items;

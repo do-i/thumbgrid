@@ -211,7 +211,7 @@ void DirectoryModel::unload(QString filePath) {
 }
 
 void DirectoryModel::unloadExcept(QString filePath, bool keepNearby) {
-    QList<QString> list;
+    QStringList list;
     list << filePath;
     if(keepNearby)  {
         list << prevOf(filePath);

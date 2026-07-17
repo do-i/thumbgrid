@@ -163,7 +163,7 @@ void FolderView::onTreeViewTabOut() {
 }
 
 // TODO: ask what to do
-void FolderView::onDroppedInByIndex(QList<QString> paths, QModelIndex index) {
+void FolderView::onDroppedInByIndex(QStringList paths, QModelIndex index) {
     emit moveUrlsRequested(paths, dirModel->filePath(index));
 }
 

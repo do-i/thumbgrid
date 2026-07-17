@@ -16,7 +16,7 @@ const QMap<QString, QVersionNumber> &Actions::getMap() {
     return mActions;
 }
 
-QList<QString> Actions::getList() {
+QStringList Actions::getList() {
     return mActions.keys();
 }
 

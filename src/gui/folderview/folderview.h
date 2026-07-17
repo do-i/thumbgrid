@@ -64,8 +64,8 @@ signals:
     void sortingSelected(SortingMode);
     void directorySelected(QString path);
     void showFoldersChanged(bool mode);
-    void copyUrlsRequested(QList<QString>, QString path);
-    void moveUrlsRequested(QList<QString>, QString path);
+    void copyUrlsRequested(QStringList, QString path);
+    void moveUrlsRequested(QStringList, QString path);
     void droppedInto(const QMimeData*, QObject*, int) override;
     void draggedOver(int) override;
     void selectionChanged();
@@ -76,7 +76,7 @@ private slots:
     void readSettings();
 
     void onTreeViewClicked(QModelIndex index);
-    void onDroppedInByIndex(QList<QString>, QModelIndex index);
+    void onDroppedInByIndex(QStringList, QModelIndex index);
     void toggleBookmarks();
     void toggleFilesystemView();
     void setPlacesPanel(bool mode);

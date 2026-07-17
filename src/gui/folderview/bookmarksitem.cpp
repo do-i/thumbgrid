@@ -69,7 +69,7 @@ void BookmarksItem::paintEvent(QPaintEvent *event) {
 }
 
 void BookmarksItem::dropEvent(QDropEvent *event) {
-    QList<QString> paths;
+    QStringList paths;
     // TODO: QUrl gave me some issues previosly, test
     for(auto url : event->mimeData()->urls())
         paths << url.toLocalFile();

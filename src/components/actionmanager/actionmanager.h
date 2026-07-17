@@ -45,7 +45,7 @@ public:
     QString actionForShortcut(ViewMode context, const QString &keys);
     const QString shortcutForAction(ViewMode context, QString action);
     // Returns every shortcut bound to action across all contexts (used for key filters).
-    const QList<QString> shortcutsForAction(QString action);
+    const QStringList shortcutsForAction(QString action);
     QStringList actionList();
     const ShortcutMap& allShortcuts();
     const ShortcutMap& allDefaultShortcuts();

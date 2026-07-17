@@ -366,10 +366,10 @@ const QString ActionManager::shortcutForAction(ViewMode context, QString action)
 }
 
 // returns every shortcut bound to action across all contexts
-const QList<QString> ActionManager::shortcutsForAction(QString action) {
-    QList<QString> keys;
+const QStringList ActionManager::shortcutsForAction(QString action) {
+    QStringList keys;
     for(auto it = shortcuts.cbegin(); it != shortcuts.cend(); ++it) {
-        const QList<QString> ctxKeys = it.value().keys(action);
+        const QStringList ctxKeys = it.value().keys(action);
         for(const QString &k : ctxKeys)
             if(!keys.contains(k))
                 keys.append(k);

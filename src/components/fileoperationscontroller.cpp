@@ -22,21 +22,21 @@ void FileOperationsController::outputError(const FileOpResult &error) const {
     qDebug() << FileOperations::decodeResult(error);
 }
 
-bool FileOperationsController::copyPathsTo(QList<QString> paths, QString destDirectory) {
+bool FileOperationsController::copyPathsTo(QStringList paths, QString destDirectory) {
     if(!confirmFileOperation(tr("Copy"), paths, destDirectory))
         return false;
     interactiveCopy(paths, destDirectory);
     return true;
 }
 
-bool FileOperationsController::movePathsTo(QList<QString> paths, QString destDirectory) {
+bool FileOperationsController::movePathsTo(QStringList paths, QString destDirectory) {
     if(!confirmFileOperation(tr("Move"), paths, destDirectory))
         return false;
     interactiveMove(paths, destDirectory);
     return true;
 }
 
-bool FileOperationsController::confirmFileOperation(QString action, QList<QString> paths, QString destDirectory) {
+bool FileOperationsController::confirmFileOperation(QString action, QStringList paths, QString destDirectory) {
     if(paths.isEmpty())
         return false;
 
@@ -55,7 +55,7 @@ bool FileOperationsController::confirmFileOperation(QString action, QList<QStrin
     return mw->showConfirmation(action, msg);
 }
 
-void FileOperationsController::interactiveCopy(QList<QString> paths, QString destDirectory) {
+void FileOperationsController::interactiveCopy(QStringList paths, QString destDirectory) {
     DialogResult overwriteFiles;
     for(auto path : paths) {
         doInteractiveCopyMove(path, destDirectory, false, overwriteFiles);
@@ -64,7 +64,7 @@ void FileOperationsController::interactiveCopy(QList<QString> paths, QString des
     }
 }
 
-void FileOperationsController::interactiveMove(QList<QString> paths, QString destDirectory) {
+void FileOperationsController::interactiveMove(QStringList paths, QString destDirectory) {
     DialogResult overwriteFiles;
     for(auto path : paths) {
         doInteractiveCopyMove(path, destDirectory, true, overwriteFiles);
@@ -175,7 +175,7 @@ FileOpResult FileOperationsController::copyOrMoveFile(const QString &path, const
     return result;
 }
 
-bool FileOperationsController::confirmRemovePossible(QList<QString> paths, bool trash) {
+bool FileOperationsController::confirmRemovePossible(QStringList paths, bool trash) {
     FileOpResult result;
     for(const auto &path : paths) {
         FileOperations::checkCanRemove(path, result);
@@ -191,7 +191,7 @@ bool FileOperationsController::confirmRemovePossible(QList<QString> paths, bool 
     return true;
 }
 
-void FileOperationsController::removePaths(QList<QString> paths, bool trash) {
+void FileOperationsController::removePaths(QStringList paths, bool trash) {
     if(!paths.count())
         return;
     if(!confirmRemovePossible(paths, trash))
@@ -231,7 +231,7 @@ void FileOperationsController::removePaths(QList<QString> paths, bool trash) {
     }
 }
 
-void FileOperationsController::convertToFormat(QList<QString> paths, QString format) {
+void FileOperationsController::convertToFormat(QStringList paths, QString format) {
     if(!model || paths.isEmpty())
         return;
 

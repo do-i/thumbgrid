@@ -25,7 +25,7 @@ public:
     void saveScripts();
     void removeScript(QString scriptName);
     const QMap<QString, Script> &allScripts();
-    QList<QString> scriptNames();
+    QStringList scriptNames();
     Script getScript(QString scriptName);
     void addScript(QString scriptName, Script script);
     static QStringList splitCommandLine(const QString &cmdLine);

@@ -95,7 +95,7 @@ private:
     bool saveFile(const QString &filePath);
 
     std::shared_ptr<ImageStatic> getEditableImage(const QString &filePath);
-    QList<QString> currentSelection();
+    QStringList currentSelection();
 
     template<typename... Args>
     void edit_template(bool save, QString actionName, const std::function<QImage*(std::shared_ptr<const QImage>, Args...)>& func, Args&&... as);
@@ -158,7 +158,7 @@ private slots:
     void showRenameDialog();
     void createDirectory();
     void onDraggedOut();
-    void onDraggedOut(QList<QString> paths);
+    void onDraggedOut(QStringList paths);
     void onDropIn(const QMimeData *mimeData, QObject* source);
     void toggleShuffle();
     void onModelLoaded();

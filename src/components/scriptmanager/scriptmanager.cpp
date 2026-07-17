@@ -155,7 +155,7 @@ const QMap<QString, Script> &ScriptManager::allScripts() {
     return scriptManager->scripts;
 }
 
-QList<QString> ScriptManager::scriptNames() {
+QStringList ScriptManager::scriptNames() {
     return scriptManager->scripts.keys();
 }
 

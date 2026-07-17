@@ -227,8 +227,8 @@ void DirectoryPresenter::setShowParentDir(bool mode) {
     emitStatusText();
 }
 
-QList<QString> DirectoryPresenter::selectedPaths() const {
-    QList<QString> paths;
+QStringList DirectoryPresenter::selectedPaths() const {
+    QStringList paths;
     if(!view || !model)
         return paths;
     int offset = parentOffset();
@@ -257,7 +257,7 @@ QString DirectoryPresenter::statusText() const {
     if(!view || !model)
         return "";
 
-    QList<QString> paths = selectedPaths();
+    QStringList paths = selectedPaths();
     qint64 selectedBytes = 0;
     QStringList selectedNames;
     QStringList selectedDetails;

@@ -110,7 +110,7 @@ void Core::connectComponents() {
             this, &Core::loadParentDir);
 
     connect(&folderViewPresenter, &DirectoryPresenter::draggedOut,
-            this, qOverload<QList<QString>>(&Core::onDraggedOut));
+            this, qOverload<QStringList>(&Core::onDraggedOut));
 
     connect(&folderViewPresenter, &DirectoryPresenter::droppedInto,
             fileOps, &FileOperationsController::movePathsTo);
@@ -490,7 +490,7 @@ void Core::cutFileClipboard() {
 // file list, using the cross-desktop "x-special/gnome-copied-files" + KDE markers
 // so the operation interoperates with file managers (and our own pasteFile()).
 void Core::copySelectionToClipboard(bool cut) {
-    QList<QString> paths = currentSelection();
+    QStringList paths = currentSelection();
     if(paths.isEmpty())
         return;
 
@@ -531,7 +531,7 @@ void Core::pasteFile() {
     QString destDirectory = model ? model->directoryPath() : "";
 
     // gather local file paths from the clipboard
-    QList<QString> paths;
+    QStringList paths;
     if(mimeData->hasUrls()) {
         for(auto &url : mimeData->urls()) {
             QString localPath = url.toLocalFile();
@@ -557,7 +557,7 @@ void Core::pasteFile() {
     }
 
     // drop entries that are already in the destination (nothing to do there)
-    QList<QString> toPaste;
+    QStringList toPaste;
     QDir destDir(destDirectory);
     for(auto &path : paths) {
         QFileInfo fi(path);
@@ -593,7 +593,7 @@ void Core::copyPathClipboard() {
     if(model->isEmpty())
         return;
     // copy every selected path (one per line) so it covers a multi-selection in folder view
-    QList<QString> paths = currentSelection();
+    QStringList paths = currentSelection();
     if(paths.isEmpty())
         return;
     QApplication::clipboard()->setText(paths.join("\n"));
@@ -709,7 +709,7 @@ void Core::onDraggedOut() {
     onDraggedOut(currentSelection());
 }
 
-void Core::onDraggedOut(QList<QString> paths) {
+void Core::onDraggedOut(QStringList paths) {
     if(paths.isEmpty())
         return;
     QMimeData *mimeData;
@@ -1040,13 +1040,13 @@ QString Core::selectedPath() {
         return state.currentFilePath;
 }
 
-QList<QString> Core::currentSelection() {
+QStringList Core::currentSelection() {
     if(!model)
-        return QList<QString>();
+        return QStringList();
     else if(mw->currentViewMode() == MODE_FOLDERVIEW)
         return folderViewPresenter.selectedPaths();
     else
-        return QList<QString>() << state.currentFilePath;
+        return QStringList() << state.currentFilePath;
 }
 
 //------------------------

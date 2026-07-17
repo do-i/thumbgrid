@@ -33,15 +33,15 @@ public:
     void setShowDirs(bool mode);
     void setShowParentDir(bool mode);
 
-    QList<QString> selectedPaths() const;
+    QStringList selectedPaths() const;
 
 
 signals:
     void dirActivated(QString dirPath);
     void parentDirActivated();
     void fileActivated(QString filePath);
-    void draggedOut(QList<QString>);
-    void droppedInto(QList<QString>, QString);
+    void draggedOut(QStringList);
+    void droppedInto(QStringList, QString);
     void statusTextChanged(QString text);
 
 public slots:

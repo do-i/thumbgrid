@@ -71,6 +71,6 @@ void Cache::trimTo(QStringList pathList) {
     }
 }
 
-const QList<QString> Cache::keys() const {
+const QStringList Cache::keys() const {
     return items.keys();
 }

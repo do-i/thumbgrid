@@ -33,5 +33,5 @@ private slots:
 
 private:
     Ui::ShortcutCreatorDialog *ui;
-    QList<QString> actionList, scriptList;
+    QStringList actionList, scriptList;
 };

@@ -10,7 +10,7 @@ public:
     Actions();
     static Actions *getInstance();
     const QMap<QString, QVersionNumber> &getMap();
-    QList<QString> getList();
+    QStringList getList();
 
 private:
     void init();

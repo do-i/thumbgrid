@@ -20,17 +20,17 @@ public:
     void setRemoveFileHandler(std::function<FileOpResult(QString, bool)> handler);
 
 public slots:
-    bool copyPathsTo(QList<QString> paths, QString destDirectory);
-    bool movePathsTo(QList<QString> paths, QString destDirectory);
-    void interactiveCopy(QList<QString> paths, QString destDirectory);
-    void interactiveMove(QList<QString> paths, QString destDirectory);
+    bool copyPathsTo(QStringList paths, QString destDirectory);
+    bool movePathsTo(QStringList paths, QString destDirectory);
+    void interactiveCopy(QStringList paths, QString destDirectory);
+    void interactiveMove(QStringList paths, QString destDirectory);
     FileOpResult copyOrMoveFile(const QString &path, const QString &destDirectory, bool move);
-    void removePaths(QList<QString> paths, bool trash);
-    void convertToFormat(QList<QString> paths, QString format);
+    void removePaths(QStringList paths, bool trash);
+    void convertToFormat(QStringList paths, QString format);
 
 private:
-    bool confirmFileOperation(QString action, QList<QString> paths, QString destDirectory);
-    bool confirmRemovePossible(QList<QString> paths, bool trash);
+    bool confirmFileOperation(QString action, QStringList paths, QString destDirectory);
+    bool confirmRemovePossible(QStringList paths, bool trash);
     void doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles);
     void doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
                          const QString &srcPath, const QString &dstPath, DialogResult &overwriteFiles);

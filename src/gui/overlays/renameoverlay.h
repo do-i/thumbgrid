@@ -42,6 +42,6 @@ private:
     Ui::RenameOverlay *ui;
     bool backdrop = false;
     QString origName;
-    QList<QString> keyFilter;
+    QStringList keyFilter;
     void selectName();
 };
