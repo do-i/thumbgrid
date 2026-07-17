@@ -8,7 +8,6 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     inputmap.cpp
     randomizer.cpp
     script.cpp
-    sleep.cpp
     stuff.cpp
     fileoperations.cpp
 )
