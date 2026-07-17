@@ -27,19 +27,23 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     mainLayout->setSpacing(2);
 
     convertItem = makeItem(tr("Convert to..."), ":/res/icons/common/menuitem/image-crop16.png");
+    convertItem->setObjectName("menuConvert");
     convertItem->setPassthroughClicks(false); // keep the menu open, just switch page
     connect(convertItem, &ContextMenuItem::pressed, this, &GridContextMenu::switchToConvertPage);
     mainLayout->addWidget(convertItem);
 
     renameItem = makeItem(tr("Rename..."), ":/res/icons/common/overlay/edit16.png");
+    renameItem->setObjectName("menuRename");
     renameItem->setAction("renameFile");
     mainLayout->addWidget(renameItem);
 
     moveItem = makeItem(tr("Move to..."), ":/res/icons/common/menuitem/move16.png");
+    moveItem->setObjectName("menuMove");
     moveItem->setAction("moveFile");
     mainLayout->addWidget(moveItem);
 
     trashItem = makeItem(tr("Move to trash"), ":/res/icons/common/menuitem/trash16.png");
+    trashItem->setObjectName("menuTrash");
     trashItem->setAction("moveToTrash");
     mainLayout->addWidget(trashItem);
 
@@ -47,6 +51,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
 
     // destructive and not undoable; relies on the confirmation dialog downstream
     deleteItem = makeItem(tr("Delete permanently"), ":/res/icons/common/menuitem/trash16.png");
+    deleteItem->setObjectName("menuDelete");
     deleteItem->setAction("removeFile");
     mainLayout->addWidget(deleteItem);
 

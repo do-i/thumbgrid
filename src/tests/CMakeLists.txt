@@ -146,6 +146,38 @@ add_test(
     COMMAND thumbgrid_custom_theme_persistence_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_grid_context_menu_gating_test
+    behavior/test_grid_context_menu_gating.cpp
+)
+add_test(
+    NAME "Grid context menu gates file-op items on selection"
+    COMMAND thumbgrid_grid_context_menu_gating_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_grid_delete_selection_test
+    behavior/test_grid_delete_selection.cpp
+)
+add_test(
+    NAME "Grid permanent delete removes the selected file"
+    COMMAND thumbgrid_grid_delete_selection_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_grid_rename_selection_test
+    behavior/test_grid_rename_selection.cpp
+)
+add_test(
+    NAME "Grid rename renames the selected file and folder"
+    COMMAND thumbgrid_grid_rename_selection_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_convert_folder_selection_test
+    behavior/test_convert_folder_selection.cpp
+)
+add_test(
+    NAME "Converting a selected folder converts its convertible images"
+    COMMAND thumbgrid_convert_folder_selection_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )
