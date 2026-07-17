@@ -1,5 +1,6 @@
 #include "documentinfo.h"
 #include "utils/logging.h"
+#include "utils/pathstring.h"
 
 DocumentInfo::DocumentInfo(const QString& path)
     : mDocumentType(DocumentType::NONE),

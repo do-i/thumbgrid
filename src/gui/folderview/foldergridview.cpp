@@ -1,5 +1,7 @@
 #include "foldergridview.h"
 
+#include <algorithm>
+
 // TODO: create a base class for this and the one on panel
 
 namespace {
@@ -473,7 +475,7 @@ void FolderGridView::zoomOut() {
 }
 
 void FolderGridView::setThumbnailSize(int newSize) {
-    newSize = clamp(newSize, THUMBNAIL_SIZE_MIN, THUMBNAIL_SIZE_MAX);
+    newSize = std::clamp(newSize, THUMBNAIL_SIZE_MIN, THUMBNAIL_SIZE_MAX);
     mThumbnailSize = newSize;
     for(int i = 0; i < thumbnails.count(); i++) {
         thumbnails.at(i)->setThumbnailSize(newSize);

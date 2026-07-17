@@ -18,7 +18,6 @@
 
 #include "settings.h"
 #include "watchers/directorywatcher.h"
-#include "utils/stuff.h"
 #include "sourcecontainers/fsentry.h"
 
 #ifdef Q_OS_WIN32

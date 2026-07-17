@@ -1,7 +1,6 @@
 #pragma once
 #include <QString>
 #include <filesystem>
-#include "utils/stuff.h"
 
 class FSEntry {
 public:

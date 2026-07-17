@@ -1,5 +1,7 @@
 #include "fsentry.h"
 
+#include "utils/pathstring.h"
+
 #include <utility>
 
 FSEntry::FSEntry() {

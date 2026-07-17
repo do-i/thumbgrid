@@ -5,7 +5,6 @@
 #include <QPixmap>
 #include <memory>
 #include "utils/imagelib.h"
-#include "utils/stuff.h"
 #include "sourcecontainers/documentinfo.h"
 
 class Image {

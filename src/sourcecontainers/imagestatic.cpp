@@ -4,6 +4,7 @@
 
 #include <utility>
 #include "utils/logging.h"
+#include "utils/pathstring.h"
 
 ImageStatic::ImageStatic(QString _path)
     : Image(std::move(_path))

@@ -9,7 +9,6 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     randomizer.cpp
     safesave.cpp
     script.cpp
-    stuff.cpp
     fileoperations.cpp
     logging.cpp
 )

@@ -2,6 +2,7 @@
 
 #include <utility>
 #include "utils/logging.h"
+#include "utils/pathstring.h"
 
 namespace fs = std::filesystem;
 
