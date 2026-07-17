@@ -3,6 +3,7 @@
 #include <time.h>
 
 #include <utility>
+#include "utils/logging.h"
 
 ImageStatic::ImageStatic(QString _path)
     : Image(std::move(_path))
@@ -140,7 +141,7 @@ bool ImageStatic::save(QString destPath) {
                 dstImage->writeMetadata();
             }
         } catch(...) {
-            qDebug() << "ImageStatic::save() - could not write metadata to" << destPath;
+            qCWarning(logLoader) << "ImageStatic::save() - could not write metadata to" << destPath;
         }
     }
 #endif

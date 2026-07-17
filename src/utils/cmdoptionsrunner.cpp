@@ -1,10 +1,11 @@
 #include "cmdoptionsrunner.h"
+#include "utils/logging.h"
 
 void CmdOptionsRunner::generateThumbs(const QString& dirPath, int size) {
     if(size <= 50 || size > 400) {
-        qDebug() << "Error: Invalid thumbnail size.";
-        qDebug() << "Please specify a value between [50, 400].";
-        qDebug() << "Example:  thumbgrid --gen-thumbs=/home/user/Pictures/ --gen-thumbs-size=120";
+        qCWarning(logCore) << "Error: Invalid thumbnail size.";
+        qCWarning(logCore) << "Please specify a value between [50, 400].";
+        qCWarning(logCore) << "Example:  thumbgrid --gen-thumbs=/home/user/Pictures/ --gen-thumbs-size=120";
         QCoreApplication::exit(1);
         return;
     }
@@ -12,23 +13,23 @@ void CmdOptionsRunner::generateThumbs(const QString& dirPath, int size) {
     Thumbnailer th;
     DirectoryManager dm;
     if(!dm.setDirectoryRecursive(dirPath)) {
-        qDebug() << "Error: Invalid path.";
+        qCWarning(logCore) << "Error: Invalid path.";
         QCoreApplication::exit(1);
         return;
     }
 
     auto list = dm.fileList();
 
-    qDebug() << "\nDirectory:" << dirPath;
-    qDebug() << "File count:" << list.size();
-    qDebug() << "Size limit:" << size << "x" << size << "px";
-    qDebug() << "Generating thumbnails...";
+    qCDebug(logCore) << "\nDirectory:" << dirPath;
+    qCDebug(logCore) << "File count:" << list.size();
+    qCDebug(logCore) << "Size limit:" << size << "x" << size << "px";
+    qCDebug(logCore) << "Generating thumbnails...";
 
     for(const auto& path : list)
         th.getThumbnailAsync(path, size, false, false);
 
     th.waitForDone();
-    qDebug() << "\nDone.";
+    qCDebug(logCore) << "\nDone.";
     QCoreApplication::quit();
 }
 
@@ -46,10 +47,10 @@ void CmdOptionsRunner::showBuildOptions() {
 #ifdef USE_OPENCV
     features << "USE_OPENCV";
 #endif
-    qDebug() << "\nEnabled build options:";
+    qCDebug(logCore) << "\nEnabled build options:";
     if(!features.count())
-        qDebug() << "   --";
+        qCDebug(logCore) << "   --";
     for(int i = 0; i < features.count(); i++)
-        qDebug() << "   " << features.at(i);
+        qCDebug(logCore) << "   " << features.at(i);
     QCoreApplication::quit();
 }

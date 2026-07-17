@@ -1,4 +1,5 @@
 #include "randomizer.h"
+#include "utils/logging.h"
 
 Randomizer::Randomizer() {
     setCount(0);
@@ -48,12 +49,12 @@ void Randomizer::fill() {
 }
 
 void Randomizer::print() {
-    qDebug() << "---vector---";
+    qCDebug(logCore) << "---vector---";
     std::vector<int>::iterator it;
     for (it = vec.begin(); it != vec.end(); ++it) {
         std::cout << *it << std::endl;
     }
-    qDebug() << "----end----";
+    qCDebug(logCore) << "----end----";
 }
 
 int Randomizer::next() {

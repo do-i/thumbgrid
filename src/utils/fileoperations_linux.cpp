@@ -11,6 +11,7 @@
 #include <QtGlobal>
 
 #include <cstdlib>
+#include "utils/logging.h"
 
 bool FileOperationsPlatform::canRemoveSource(const QFileInfo &) {
     return true;
@@ -37,7 +38,7 @@ bool FileOperationsPlatform::moveToTrash(const QString &filePath) {
         QStringList paths;
         const char* xdg_data_home = getenv( "XDG_DATA_HOME" );
         if(xdg_data_home) {
-            qDebug() << "XDG_DATA_HOME not yet tested";
+            qCDebug(logCore) << "XDG_DATA_HOME not yet tested";
             QString xdgTrash( xdg_data_home );
             paths.append(xdgTrash + "/Trash");
         }
@@ -53,18 +54,18 @@ bool FileOperationsPlatform::moveToTrash(const QString &filePath) {
             }
         }
         if( TrashPath.isEmpty() )
-            qDebug() << "Can`t detect trash folder";
+            qCWarning(logCore) << "Can`t detect trash folder";
         TrashPathInfo = TrashPath + "/info";
         TrashPathFiles = TrashPath + "/files";
         if( !QDir( TrashPathInfo ).exists() || !QDir( TrashPathFiles ).exists() )
-            qDebug() << "Trash doesn`t look like FreeDesktop.org Trash specification";
+            qCWarning(logCore) << "Trash doesn`t look like FreeDesktop.org Trash specification";
         TrashInitialized = true;
     }
     if( TrashPath.isEmpty() || !QDir( TrashPathInfo ).exists() || !QDir( TrashPathFiles ).exists() )
         return false;
     QFileInfo original( filePath );
     if( !original.exists() ) {
-        qDebug() << "File doesn`t exist, cant move to trash";
+        qCWarning(logCore) << "File doesn`t exist, cant move to trash";
         return false;
     }
     QString info;
@@ -88,7 +89,7 @@ bool FileOperationsPlatform::moveToTrash(const QString &filePath) {
     }
     QDir dir;
     if( !dir.rename( original.absoluteFilePath(), filepath ) ){
-        qDebug() << "move to trash failed";
+        qCWarning(logCore) << "move to trash failed";
         return false;
     }
     QFile infoFile(infopath);
@@ -104,7 +105,7 @@ bool FileOperationsPlatform::moveToTrash(const QString &filePath) {
     return true;
 #else
     Q_UNUSED(filePath)
-    qDebug() << "Trash in server-mode not supported";
+    qCWarning(logCore) << "Trash in server-mode not supported";
     return false;
 #endif
 #endif

@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QCryptographicHash>
+#include "utils/logging.h"
 
 namespace SafeSave {
 
@@ -14,7 +15,7 @@ bool withBackup(const QString &destPath, const QString &restorePath, const std::
     if(originalExists) {
         QFile::remove(tmpPath);
         if(!QFile::copy(destPath, tmpPath)) {
-            qDebug() << "SafeSave::withBackup() - could not create file backup for" << destPath;
+            qCWarning(logCore) << "SafeSave::withBackup() - could not create file backup for" << destPath;
             return false;
         }
         backupExists = true;

@@ -2,6 +2,7 @@
 #include <time.h>
 
 #include <utility>
+#include "utils/logging.h"
 
 // TODO: this class is kinda useless now. redesign?
 
@@ -49,17 +50,17 @@ bool ImageAnimated::save(QString destPath) {
     QFile file(mPath);
     if(file.exists()) {
         if(!file.copy(destPath)) {
-            qDebug() << "Unable to save file.";
+            qCWarning(logLoader) << "Unable to save file.";
             return false;
         } else {
-            qDebug() << destPath << this->filePath();
+            qCDebug(logLoader) << destPath << this->filePath();
             if(destPath == this->filePath()) {
                 mDocInfo->refresh();
             }
             return true;
         }
     } else {
-        qDebug() << "Unable to save file. Perhaps the source file was deleted?";
+        qCWarning(logLoader) << "Unable to save file. Perhaps the source file was deleted?";
         return false;
     }
 }

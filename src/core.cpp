@@ -9,6 +9,7 @@
 
 #include "platform/platformdesktop.h"
 #include "utils/safesave.h"
+#include "utils/logging.h"
 
 #include <QInputDialog>
 #include <QLineEdit>
@@ -256,9 +257,9 @@ void Core::loadTranslation() {
     QString trFile = trPath + "/" + localeName;
     QString trFileFallback = trPathFallback + "/" + localeName;
     if(!translator->load(trFile)) {
-        qDebug() << "Could not load translation file: " << trFile;
+        qCWarning(logCore) << "Could not load translation file: " << trFile;
         if(!translator->load(trFileFallback)) {
-            qDebug() << "Could not load translation file: " << trFileFallback;
+            qCWarning(logCore) << "Could not load translation file: " << trFileFallback;
             return;
         }
     }
@@ -281,7 +282,7 @@ void Core::onUpdate() {
 
     actionManager->adjustFromVersion(lastVer);
 
-    qDebug() << "Updated: " << settings->lastVersion().toString() << ">" << appVersion.toString();
+    qCDebug(logCore) << "Updated: " << settings->lastVersion().toString() << ">" << appVersion.toString();
     mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + " > " + appVersion.toString(), 4000);
     settings->setLastVersion(appVersion);
 }
@@ -609,20 +610,20 @@ void Core::openFromClipboard() {
     auto mimeData = cb->mimeData();
     if(!mimeData)
         return;
-    qDebug() << "=====================================";
-    qDebug() << "hasUrls:" << mimeData->hasUrls();
-    qDebug() << "hasImage:" << mimeData->hasImage();
-    qDebug() << "hasText:" << mimeData->hasText();
+    qCDebug(logCore) << "=====================================";
+    qCDebug(logCore) << "hasUrls:" << mimeData->hasUrls();
+    qCDebug(logCore) << "hasImage:" << mimeData->hasImage();
+    qCDebug(logCore) << "hasText:" << mimeData->hasText();
 
-    qDebug() << "TEXT:" << cb->text();
+    qCDebug(logCore) << "TEXT:" << cb->text();
 
     // try opening url
     if(mimeData->hasUrls()) {
         auto url = mimeData->urls().first();
         QString path = url.toLocalFile();
         if(path.isEmpty()) {
-            qDebug() << "Could not load url:" << url;
-            qDebug() << "Currently only local files are supported.";
+            qCWarning(logCore) << "Could not load url:" << url;
+            qCWarning(logCore) << "Currently only local files are supported.";
         } else if(loadPath(path)) {
             return;
         }
@@ -815,7 +816,7 @@ void Core::outputError(const FileOpResult &error) const {
     if(error == FileOpResult::SUCCESS || error == FileOpResult::NOTHING_TO_DO)
         return;
     mw->showError(FileOperations::decodeResult(error));
-    qDebug() << FileOperations::decodeResult(error);
+    qCWarning(logCore) << FileOperations::decodeResult(error);
 }
 
 void Core::showOpenDialog() {
@@ -1162,7 +1163,7 @@ bool Core::loadPath(QString path) {
             state.delayModel = true;
     } else {
         mw->showError(tr("Could not open path: ") + path);
-        qDebug() << "Could not open path: " << path;
+        qCWarning(logCore) << "Could not open path: " << path;
         return false;
     }
     if(!state.delayModel && !setDirectory(state.directoryPath))

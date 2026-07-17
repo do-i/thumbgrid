@@ -1,4 +1,5 @@
 #include "documentinfo.h"
+#include "utils/logging.h"
 
 DocumentInfo::DocumentInfo(const QString& path)
     : mDocumentType(DocumentType::NONE),
@@ -9,7 +10,7 @@ DocumentInfo::DocumentInfo(const QString& path)
 {
     fileInfo.setFile(path);
     if(!fileInfo.isFile()) {
-        qDebug() << "FileInfo: cannot open: " << path;
+        qCWarning(logLoader) << "FileInfo: cannot open: " << path;
         return;
     }
     detectFormat();
@@ -101,7 +102,7 @@ void DocumentInfo::detectFormat() {
         mDocumentType = detectAnimatedJxl() ? DocumentType::ANIMATED : DocumentType::STATIC;
         if(mDocumentType == DocumentType::ANIMATED && !settings->jxlAnimation()) {
             mDocumentType = DocumentType::NONE;
-            qDebug() << "animated jxl is off; skipping file";
+            qCDebug(logLoader) << "animated jxl is off; skipping file";
         }
     } else if(mimeName == "image/avif") {
         mFormat = "avif";
@@ -294,19 +295,19 @@ void DocumentInfo::loadExifTags() {
 #if not EXIV2_TEST_VERSION(0, 28, 0)
 #ifdef __WIN32
     catch (Exiv2::BasicError<wchar_t>& e) {
-        qDebug() << "Caught Exiv2::BasicError exception:\n" << e.what() << "\n";
+        qCWarning(logLoader) << "Caught Exiv2::BasicError exception:\n" << e.what() << "\n";
         return;
     }
 #else
     catch (Exiv2::BasicError<char>& e) {
-        qDebug() << "Caught Exiv2::BasicError exception:\n" << e.what() << "\n";
+        qCWarning(logLoader) << "Caught Exiv2::BasicError exception:\n" << e.what() << "\n";
         return;
     }
 #endif
 #endif
 
     catch (Exiv2::Error& e) {
-        qDebug() << "Caught Exiv2 exception:\n" << e.what() << "\n";
+        qCWarning(logLoader) << "Caught Exiv2 exception:\n" << e.what() << "\n";
         return;
     }
 #endif
@@ -352,7 +353,7 @@ void DocumentInfo::loadAllTags() {
             allTags.insert(QString::fromStdString(it->key()), QString::fromStdString(os.str()));
         }
     } catch(...) {
-        qDebug() << "DocumentInfo::loadAllTags() - exiv2 failed to read" << fileInfo.filePath();
+        qCWarning(logLoader) << "DocumentInfo::loadAllTags() - exiv2 failed to read" << fileInfo.filePath();
     }
 #endif
 }
@@ -379,7 +380,7 @@ bool DocumentInfo::stripMetadata() {
         allTags.clear();
         return true;
     } catch(...) {
-        qDebug() << "DocumentInfo::stripMetadata() - exiv2 failed to write" << fileInfo.filePath();
+        qCWarning(logLoader) << "DocumentInfo::stripMetadata() - exiv2 failed to write" << fileInfo.filePath();
         return false;
     }
 #else

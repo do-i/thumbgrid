@@ -2,6 +2,7 @@
 #include "platform/platformdesktop.h"
 
 #include "appversion.h"
+#include "utils/logging.h"
 
 Settings *settings = nullptr;
 
@@ -585,8 +586,8 @@ void Settings::setupCache() {
     QFileInfo dirTest(mTmpDir->absolutePath());
     if(!dirTest.isDir() || !dirTest.isWritable() || !dirTest.exists()) {
         // fallback
-        qDebug() << "Error: cache dir is not writable" << mTmpDir->absolutePath();
-        qDebug() << "Trying to use" << defaultCacheLocation << "instead";
+        qCWarning(logSettings) << "Error: cache dir is not writable" << mTmpDir->absolutePath();
+        qCWarning(logSettings) << "Trying to use" << defaultCacheLocation << "instead";
         mTmpDir->setPath(defaultCacheLocation);
         mTmpDir->mkpath(mTmpDir->absolutePath());
     }
@@ -1292,7 +1293,7 @@ void Settings::setPanelPinned(bool mode) {
 ImageFitMode Settings::imageFitMode() {
     int mode = settings->readSetting("defaultFitMode", 0).toInt();
     if(mode < 0 || mode > 3) {
-        qDebug() << "Settings: Invalid fit mode ( " + QString::number(mode) + " ). Resetting to default.";
+        qCWarning(logSettings) << "Settings: Invalid fit mode ( " + QString::number(mode) + " ). Resetting to default.";
         mode = 0;
     }
     return static_cast<ImageFitMode>(mode);
@@ -1301,7 +1302,7 @@ ImageFitMode Settings::imageFitMode() {
 void Settings::setImageFitMode(ImageFitMode mode) {
     int modeInt = static_cast<ImageFitMode>(mode);
     if(modeInt < 0 || modeInt > 3) {
-        qDebug() << "Settings: Invalid fit mode ( " + QString::number(modeInt) + " ). Resetting to default.";
+        qCWarning(logSettings) << "Settings: Invalid fit mode ( " + QString::number(modeInt) + " ). Resetting to default.";
         modeInt = 0;
     }
     settings->writeSetting("defaultFitMode", modeInt);

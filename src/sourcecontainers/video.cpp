@@ -1,6 +1,7 @@
 #include "video.h"
 
 #include <utility>
+#include "utils/logging.h"
 
 Video::Video(QString _path) : Image(std::move(_path)) {
     Video::load();
@@ -19,23 +20,23 @@ void Video::load() {
 
 bool Video::save(QString destPath) {
     Q_UNUSED(destPath)
-    qDebug() << "Saving video is unsupported.";
+    qCWarning(logVideo) << "Saving video is unsupported.";
     return false;
 }
 
 bool Video::save() {
-    qDebug() << "Saving video is unsupported.";
+    qCWarning(logVideo) << "Saving video is unsupported.";
     return false;
 }
 
 std::unique_ptr<QPixmap> Video::getPixmap() {
-    qDebug() << "[Video] getPixmap() is not implemented.";
+    qCWarning(logVideo) << "[Video] getPixmap() is not implemented.";
     //TODO: find out some easy way to get frames from video source
     return nullptr;
 }
 
 std::shared_ptr<const QImage> Video::getImage() {
-    qDebug() << "[Video] getImage() is not implemented.";
+    qCWarning(logVideo) << "[Video] getImage() is not implemented.";
     //TODO: find out some easy way to get frames from video source
     return nullptr;
 }

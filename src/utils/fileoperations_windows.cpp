@@ -5,6 +5,7 @@
 #include <QFileInfo>
 #include <QString>
 #include <QtGlobal>
+#include "utils/logging.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 15, 0)
 #include <cstdlib>
@@ -41,8 +42,8 @@ bool FileOperationsPlatform::moveToTrash(const QString &filePath) {
     int rv = SHFileOperationW( &fileop );
     free(from);
     if( 0 != rv ){
-        qDebug() << rv << QString::number( rv ).toInt( nullptr, 8 );
-        qDebug() << "move to trash failed";
+        qCWarning(logCore) << rv << QString::number( rv ).toInt( nullptr, 8 );
+        qCWarning(logCore) << "move to trash failed";
         return false;
     }
     return true;
