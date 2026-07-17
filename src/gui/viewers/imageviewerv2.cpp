@@ -1040,7 +1040,6 @@ void ImageViewerV2::scrollToX(int x) {
     centerIfNecessary();
     snapToEdges();
     update();
-    qApp->processEvents();
 }
 
 // used by scrollTimeLine
@@ -1049,7 +1048,6 @@ void ImageViewerV2::scrollToY(int y) {
     centerIfNecessary();
     snapToEdges();
     update();
-    qApp->processEvents();
 }
 
 void ImageViewerV2::onScrollTimelineFinished() {
