@@ -62,6 +62,17 @@ frees an object.
   `unique_ptr`): `release()` into the signal and have the receiving slot adopt
   it immediately. Keep that hand-off obvious and localised.
 
+### Naming
+
+- **Member variables** get an `m` prefix: `mFoo`. No trailing underscores.
+- **Parameters and locals** are plain camelCase: `foo`. No leading underscores —
+  the historical `_foo` constructor-parameter style existed only to dodge
+  shadowing an unprefixed member, which `mFoo` already solves
+  (`Foo(int foo) : mFoo(foo)`).
+- The codebase predates this convention and is mixed (`mFoo`/`foo`, `_foo`/`foo`).
+  **Rename only opportunistically** — when already editing the class for another
+  reason — never in bulk renaming sweeps.
+
 ## Releasing
 
 The git tag is the single source of truth for the version.

@@ -100,9 +100,11 @@ in bulk, ideally when already working in the affected file. Highest-value candid
 
 ## T7. Open decisions (not code yet)
 
-- [ ] **Naming convention** (§5 residue): members are mixed `mFoo`/`foo`, params mixed `_foo`/`foo`.
+- [x] **Naming convention** (§5 residue): members are mixed `mFoo`/`foo`, params mixed `_foo`/`foo`.
       Decide (suggest: `m` prefix for members, no leading underscores) and document in
       CONTRIBUTING.md next to the Ownership section; rename only opportunistically.
+      Decided 2026-07-17: `mFoo` members, plain `foo` params/locals, no underscores;
+      documented in CONTRIBUTING "Naming". Renames stay opportunistic-only.
 - [ ] **Enum-size warnings** (§4 residue, ~30 sites): deliberately skipped as low-value; keep
       skipping unless a header is being edited anyway.
 
