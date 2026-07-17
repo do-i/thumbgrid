@@ -122,6 +122,9 @@ private:
     void startFileWatcher(const QString& directoryPath);
     void stopFileWatcher();
 
+    // shared prologue for setDirectory()/setDirectoryRecursive(): empty/exists/is_directory checks
+    bool validateDirectory(const QString& dirPath) const;
+
     void addEntriesFromDirectory(std::vector<FSEntry> &entryVec, const QString& directoryPath);
     void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, const QString& directoryPath);
     bool checkFileRange(int index) const;

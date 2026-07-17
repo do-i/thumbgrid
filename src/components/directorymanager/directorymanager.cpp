@@ -105,7 +105,7 @@ void DirectoryManager::readSettings() {
     mIncludeOtherFiles = settings->showOtherFileTypes();
 }
 
-bool DirectoryManager::setDirectory(const QString& dirPath) {
+bool DirectoryManager::validateDirectory(const QString& dirPath) const {
     if(dirPath.isEmpty()) {
         return false;
     }
@@ -117,6 +117,12 @@ bool DirectoryManager::setDirectory(const QString& dirPath) {
         qDebug() << "[DirectoryManager] Error - path is not a directory.";
         return false;
     }
+    return true;
+}
+
+bool DirectoryManager::setDirectory(const QString& dirPath) {
+    if(!validateDirectory(dirPath))
+        return false;
     QDir dir(dirPath);
     if(!dir.isReadable()) {
         qDebug() << "[DirectoryManager] Error - cannot read directory.";
@@ -133,17 +139,8 @@ bool DirectoryManager::setDirectory(const QString& dirPath) {
 }
 
 bool DirectoryManager::setDirectoryRecursive(const QString& dirPath) {
-    if(dirPath.isEmpty()) {
+    if(!validateDirectory(dirPath))
         return false;
-    }
-    if(!std::filesystem::exists(toStdString(dirPath))) {
-        qDebug() << "[DirectoryManager] Error - path does not exist.";
-        return false;
-    }
-    if(!std::filesystem::is_directory(toStdString(dirPath))) {
-        qDebug() << "[DirectoryManager] Error - path is not a directory.";
-        return false;
-    }
     stopFileWatcher();
     mListSource = SOURCE_DIRECTORY_RECURSIVE;
     mDirectoryPath = dirPath;
@@ -285,19 +282,15 @@ bool DirectoryManager::isSupportedFile(const QString& path) const {
 }
 
 bool DirectoryManager::isFile(const QString& path) const {
-    if(!std::filesystem::exists(toStdString(path)))
-        return false;
-    if(!std::filesystem::is_regular_file(toStdString(path)))
-        return false;
-    return true;
+    std::error_code ec;
+    auto st = fs::status(toStdString(path), ec);
+    return !ec && fs::is_regular_file(st);
 }
 
 bool DirectoryManager::isDir(const QString& path) const {
-    if(!std::filesystem::exists(toStdString(path)))
-        return false;
-    if(!std::filesystem::is_directory(toStdString(path)))
-        return false;
-    return true;
+    std::error_code ec;
+    auto st = fs::status(toStdString(path), ec);
+    return !ec && fs::is_directory(st);
 }
 
 bool DirectoryManager::isEmpty() const {
@@ -472,9 +465,9 @@ bool DirectoryManager::forceInsertFileEntry(const QString &filePath) {
 }
 
 void DirectoryManager::removeFileEntry(const QString &filePath) {
-    if(!containsFile(filePath))
-        return;
     int index = indexOfFile(filePath);
+    if(index < 0)
+        return;
     fileEntryVec.erase(fileEntryVec.begin() + index);
     rebuildFileIndexCache();
     qDebug() << "fileRem" << filePath;
@@ -482,10 +475,10 @@ void DirectoryManager::removeFileEntry(const QString &filePath) {
 }
 
 void DirectoryManager::updateFileEntry(const QString &filePath) {
-    if(!containsFile(filePath))
+    int index = indexOfFile(filePath);
+    if(index < 0)
         return;
     FSEntry newEntry(filePath);
-    int index = indexOfFile(filePath);
     if(fileEntryVec.at(index).modifyTime != newEntry.modifyTime)
         fileEntryVec.at(index) = newEntry;
     qDebug() << "fileMod" << filePath;
@@ -506,8 +499,8 @@ void DirectoryManager::renameFileEntry(const QString &oldFilePath, const QString
         removeFileEntry(oldFilePath);
         return;
     }
-    if(containsFile(newFilePath)) {
-        int replaceIndex = indexOfFile(newFilePath);
+    int replaceIndex = indexOfFile(newFilePath);
+    if(replaceIndex >= 0) {
         fileEntryVec.erase(fileEntryVec.begin() + replaceIndex);
         rebuildFileIndexCache();
         emit fileRemoved(newFilePath, replaceIndex);
@@ -548,9 +541,9 @@ bool DirectoryManager::insertDirEntry(const QString &dirPath) {
 }
 
 void DirectoryManager::removeDirEntry(const QString &dirPath) {
-    if(!containsDir(dirPath))
-        return;
     int index = indexOfDir(dirPath);
+    if(index < 0)
+        return;
     dirEntryVec.erase(dirEntryVec.begin() + index);
     rebuildDirIndexCache();
     qDebug() << "dirRem" << dirPath;
@@ -558,12 +551,12 @@ void DirectoryManager::removeDirEntry(const QString &dirPath) {
 }
 
 void DirectoryManager::renameDirEntry(const QString &oldDirPath, const QString &newDirName) {
-    if(!containsDir(oldDirPath))
+    int oldIndex = indexOfDir(oldDirPath);
+    if(oldIndex < 0)
         return;
     QFileInfo fi(oldDirPath);
     QString newDirPath = fi.absolutePath() + "/" + newDirName;
     // remove the old one
-    int oldIndex = indexOfDir(oldDirPath);
     dirEntryVec.erase(dirEntryVec.begin() + oldIndex);
     // insert
     FSEntry FSEntry;
