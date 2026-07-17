@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
 
     // wait for event queue to catch up before showing window
     // this avoids white background flicker on windows (or not?)
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
 
     core.showGui();

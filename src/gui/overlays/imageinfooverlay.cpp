@@ -58,6 +58,7 @@ void ImageInfoOverlay::setExifInfo(const QMap<QString, QString>& info) {
 
     if(!isHidden() && entryCount != info.count()) {
         // wait for layout change
+        // FIXME: re-entrancy hazard (processEvents)
         qApp->processEvents();
         // reposition
         recalculateGeometry();

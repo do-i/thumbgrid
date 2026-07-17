@@ -702,6 +702,7 @@ void ImageViewerV2::wheelScroll(QWheelEvent *event) {
 void ImageViewerV2::showEvent(QShowEvent *event) {
     QGraphicsView::showEvent(event);
     // ensure we are properly resized
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
     // reapply fitmode to fix viewport position
     if(imageFitMode == FIT_ORIGINAL)

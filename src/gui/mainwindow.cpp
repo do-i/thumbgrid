@@ -255,6 +255,7 @@ void MW::preShowResize(QSize sz) {
         setGeometry(newGeom);
     else // setGeometry wont work on hidden windows, so we just save for it to be restored later
         settings->setWindowGeometry(newGeom);
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents(); // not needed anymore with patched qt?
 }
 
@@ -657,6 +658,7 @@ void MW::showFullScreen() {
     }
     QWidget::showFullScreen();
     // try to repaint sooner
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
     emit fullscreenStateChanged(true);
 }
@@ -667,6 +669,7 @@ void MW::showWindowed() {
     restoreWindowGeometry();
     QWidget::show();
     // try to repaint sooner
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
     emit fullscreenStateChanged(false);
 }

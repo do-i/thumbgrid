@@ -66,6 +66,7 @@ void Core::showGui() {
         mw->showDefault();
     // TODO: this is unreliable.
     // how to make it wait until a window is shown?
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
     QTimer::singleShot(50, mw, SLOT(setupFullUi()));
 }

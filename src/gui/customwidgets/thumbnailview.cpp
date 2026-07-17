@@ -217,6 +217,7 @@ void ThumbnailView::show() {
 void ThumbnailView::showEvent(QShowEvent *event) {
     QGraphicsView::showEvent(event);
     // ensure we are properly resized
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
     updateScrollbarIndicator();
     loadVisibleThumbnails();
@@ -224,6 +225,7 @@ void ThumbnailView::showEvent(QShowEvent *event) {
 
 void ThumbnailView::populate(int newCount) {
     // wait for possible queued layout events before removing items
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
 
     clearSelection();
@@ -283,6 +285,7 @@ void ThumbnailView::populate(int newCount) {
     resetViewport();
     //qDebug() << "_______POPULATE" << this << t.elapsed();
     // wait for layout before updating
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
     this->setUpdatesEnabled(true);
     loadVisibleThumbnails();

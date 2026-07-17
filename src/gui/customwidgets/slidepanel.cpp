@@ -115,6 +115,7 @@ void SlidePanel::animationUpdate(int frame) {
         setProperty("pos", startPosition + newPosOffset);
         fadeEffect->setOpacity(1 - value);
     }
+    // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
 }
 
