@@ -15,7 +15,7 @@ class ScalerRunnable : public QObject, public QRunnable
 public:
     explicit ScalerRunnable();
     void setRequest(ScalerRequest r);
-    void run();
+    void run() override;
 signals:
     void started(ScalerRequest);
     void finished(QImage*, ScalerRequest);

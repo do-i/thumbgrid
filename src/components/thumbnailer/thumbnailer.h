@@ -16,7 +16,7 @@ class Thumbnailer : public QObject
     Q_OBJECT
 public:
     explicit Thumbnailer();
-    ~Thumbnailer();
+    ~Thumbnailer() override;
     static std::shared_ptr<Thumbnail> getThumbnail(QString filePath, int size);
     void clearTasks();
     void keepOnlyQueuedTasks(const QList<QPair<QString, int>> &tasks);

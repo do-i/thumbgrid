@@ -18,7 +18,7 @@ class ChangelogWindow : public OverlayWidget {
     Q_OBJECT
 public:
     explicit ChangelogWindow(FloatingWidgetContainer *parent);
-    ~ChangelogWindow();
+    ~ChangelogWindow() override;
     void setText(QString text);
 
 public slots:
@@ -26,9 +26,9 @@ public slots:
     void hide();
 
 protected:
-    void paintEvent(QPaintEvent *);
-    void wheelEvent(QWheelEvent *);
-    void keyPressEvent(QKeyEvent *);
+    void paintEvent(QPaintEvent *) override;
+    void wheelEvent(QWheelEvent *) override;
+    void keyPressEvent(QKeyEvent *) override;
 
 private:
     Ui::ChangelogWindow *ui;

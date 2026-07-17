@@ -8,8 +8,8 @@ class LinuxWatcher : public DirectoryWatcher {
     Q_OBJECT
 public:
     explicit LinuxWatcher();
-    virtual ~LinuxWatcher();
-    virtual void setWatchPath(const QString& p);
+    ~LinuxWatcher() override;
+    void setWatchPath(const QString& p) override;
 
 private:
     Q_DECLARE_PRIVATE(LinuxWatcher)

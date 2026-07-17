@@ -13,7 +13,7 @@ class InfoBarProxy : public QWidget {
     Q_OBJECT
 public:
     explicit InfoBarProxy(QWidget *parent = nullptr);
-    ~InfoBarProxy();
+    ~InfoBarProxy() override;
 
     void init();
 public slots:
@@ -22,7 +22,7 @@ public slots:
     void readSettings();
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     InfoBarStateBuffer stateBuf;

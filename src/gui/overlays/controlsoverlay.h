@@ -25,11 +25,11 @@ private:
     void fitToContents();
 
 protected:
-    virtual void recalculateGeometry();
+    void recalculateGeometry() override;
 #if QT_VERSION > QT_VERSION_CHECK(6,0,0)
-    void enterEvent(QEnterEvent *event);
+    void enterEvent(QEnterEvent *event) override;
 #else
     void enterEvent(QEvent *event);
 #endif
-    void leaveEvent(QEvent *event);
+    void leaveEvent(QEvent *event) override;
 };

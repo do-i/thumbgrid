@@ -33,11 +33,11 @@ class SettingsDialog : public QDialog
 
 public:
     explicit SettingsDialog(QWidget *parent = nullptr);
-    ~SettingsDialog();
+    ~SettingsDialog() override;
     void switchToPage(int number);
 
 public slots:
-    int exec();
+    int exec() override;
 
 private:
     void readColorScheme();

@@ -9,7 +9,7 @@ class LoaderRunnable: public QObject, public QRunnable
     Q_OBJECT
 public:
     LoaderRunnable(QString _path);
-    void run();
+    void run() override;
 private:
     QString path;
 signals:

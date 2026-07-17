@@ -35,7 +35,7 @@ class ImageViewerV2 : public QGraphicsView
     Q_OBJECT
 public:
     ImageViewerV2(QWidget* parent = nullptr);
-    ~ImageViewerV2();
+    ~ImageViewerV2() override;
     virtual ImageFitMode fitMode() const;
     virtual QRect scaledRectR() const;
     virtual float currentScale() const;
@@ -106,18 +106,18 @@ public slots:
     bool lockViewEnabled();
 
 protected:
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void mouseReleaseEvent(QMouseEvent *event);
-    virtual void resizeEvent(QResizeEvent* event);
-    void wheelEvent(QWheelEvent *event);
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void wheelEvent(QWheelEvent *event) override;
     bool isWheelScroll(QWheelEvent *event);
     void trackpadScroll(QWheelEvent *event);
     void wheelScroll(QWheelEvent *event);
-    void showEvent(QShowEvent *event);
-    void drawBackground(QPainter *painter, const QRectF &rect);
+    void showEvent(QShowEvent *event) override;
+    void drawBackground(QPainter *painter, const QRectF &rect) override;
 
-    bool eventFilter(QObject *o, QEvent *ev);
+    bool eventFilter(QObject *o, QEvent *ev) override;
 protected slots:
     void onAnimationTimer();
 

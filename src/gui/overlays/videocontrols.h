@@ -22,10 +22,10 @@ class VideoControls : public QWidget
 
 public:
     explicit VideoControls(QWidget *parent = nullptr);
-    ~VideoControls();
+    ~VideoControls() override;
 
 protected:
-    void resizeEvent(QResizeEvent *event);
+    void resizeEvent(QResizeEvent *event) override;
 
 public slots:
     void setPlaybackDuration(int);

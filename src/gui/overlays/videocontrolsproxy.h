@@ -16,7 +16,7 @@ class VideoControlsProxyWrapper : public QWidget {
     Q_OBJECT
 public:
     explicit VideoControlsProxyWrapper(QWidget *parent = nullptr);
-    ~VideoControlsProxyWrapper();
+    ~VideoControlsProxyWrapper() override;
     void init();
 
     void show();

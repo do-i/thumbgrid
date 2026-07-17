@@ -30,7 +30,7 @@ public:
     QVector<QSharedPointer<WatcherEvent>> watcherEvents;
 
 protected:
-    virtual void timerEvent(QTimerEvent* timerEvent) override;
+    void timerEvent(QTimerEvent* timerEvent) override;
 
 private slots:
     void dispatchFilesystemEvent(LinuxFsEvent *e);

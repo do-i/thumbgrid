@@ -24,7 +24,7 @@ class ActionManager : public QObject {
     Q_OBJECT
 public:
     static ActionManager* getInstance();
-    ~ActionManager();
+    ~ActionManager() override;
     // Shortcuts are scoped to a context. MODE_GLOBAL bindings work everywhere;
     // the active view context wins when it uses the same key.
     using ContextMap = QMap<QString, QString>;                 // <shortcut, action>

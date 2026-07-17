@@ -17,15 +17,15 @@ class InfoBar : public QWidget
 
 public:
     explicit InfoBar(QWidget *parent = nullptr);
-    ~InfoBar();
+    ~InfoBar() override;
 
 public slots:
     void setInfo(QString position, QString fileName, QString info);
     void setStatusText(QString text);
     void readSettings();
 protected:
-    void paintEvent(QPaintEvent *event);
-    void wheelEvent(QWheelEvent *event);
+    void paintEvent(QPaintEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
 private:
     Ui::InfoBar *ui;
 };

@@ -12,7 +12,7 @@ public:
     void setDescriptor(int desc);
     void handleErrorCode(int code);
 
-    virtual void run() override;
+    void run() override;
 
 signals:
     void fileEvent(LinuxFsEvent* event);

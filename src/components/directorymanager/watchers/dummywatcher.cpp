@@ -8,7 +8,7 @@
 class DummyWatcherWorker : public WatcherWorker {
   public:
     DummyWatcherWorker() {}
-    virtual void run() override {
+    void run() override {
         qDebug() << TAG << MESSAGE;
     }
 };

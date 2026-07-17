@@ -14,14 +14,14 @@ class ImageInfoOverlay : public OverlayWidget
 
 public:
     explicit ImageInfoOverlay(FloatingWidgetContainer *parent = nullptr);
-    ~ImageInfoOverlay();
+    ~ImageInfoOverlay() override;
     void setExifInfo(QMap<QString, QString>);
 
 public slots:
     void show();
 
 protected:
-    void wheelEvent(QWheelEvent *event);
+    void wheelEvent(QWheelEvent *event) override;
 private:
     Ui::ImageInfoOverlay *ui;
     QList<EntryInfoItem*> entries;

@@ -21,7 +21,7 @@ signals:
     void colorApplied(QColor color);
 
 protected:
-    void paintEvent(QPaintEvent *e);
+    void paintEvent(QPaintEvent *e) override;
 
 private slots:
     void showColorSelector();

@@ -107,7 +107,7 @@ class Settings : public QObject
     Q_OBJECT
 public:
     static Settings* getInstance();
-    ~Settings();
+    ~Settings() override;
     QStringList supportedMimeTypes();
     QList<QByteArray> supportedFormats();
     QString supportedFormatsFilter();

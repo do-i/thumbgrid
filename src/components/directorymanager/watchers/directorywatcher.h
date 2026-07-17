@@ -9,7 +9,7 @@ class DirectoryWatcher : public QObject {
 public:
     static DirectoryWatcher* newInstance();
 
-    virtual ~DirectoryWatcher();
+    ~DirectoryWatcher() override;
 
     virtual void setWatchPath(const QString& watchPath);
     virtual QString watchPath() const;
