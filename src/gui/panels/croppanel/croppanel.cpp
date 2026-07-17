@@ -219,7 +219,7 @@ void CropPanel::paintEvent(QPaintEvent *) {
 void CropPanel::show() {
     QWidget::show();
     // stackoverflow sorcery
-    QTimer::singleShot(0,ui->width,SLOT(setFocus()));
+    QTimer::singleShot(0, ui->width, qOverload<>(&QWidget::setFocus));
 }
 
 void CropPanel::keyPressEvent(QKeyEvent *event) {

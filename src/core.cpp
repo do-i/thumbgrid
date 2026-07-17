@@ -68,7 +68,7 @@ void Core::showGui() {
     // how to make it wait until a window is shown?
     // FIXME: re-entrancy hazard (processEvents)
     qApp->processEvents();
-    QTimer::singleShot(50, mw, SLOT(setupFullUi()));
+    QTimer::singleShot(50, mw, &MW::setupFullUi);
 }
 
 // create MainWindow and all widgets
@@ -1490,7 +1490,7 @@ void Core::onModelItemReady(const std::shared_ptr<Image>& img, const QString &pa
         if(state.delayModel) {
             this->showGui();
             state.delayModel = false;
-            QTimer::singleShot(40, this, SLOT(modelDelayLoad()));
+            QTimer::singleShot(40, this, &Core::modelDelayLoad);
         }
         model->unloadExcept(state.currentFilePath, settings->usePreloader());
     }

@@ -30,7 +30,7 @@ RenameOverlay::~RenameOverlay() {
 void RenameOverlay::show() {
     selectName();
     OverlayWidget::show();
-    QTimer::singleShot(0, ui->fileName, SLOT(setFocus()));
+    QTimer::singleShot(0, ui->fileName, qOverload<>(&QWidget::setFocus));
 }
 
 void RenameOverlay::hide() {

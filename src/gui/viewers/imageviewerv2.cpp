@@ -833,7 +833,7 @@ void ImageViewerV2::fitWindow() {
         // - unless when called from eventloop
         if(scrollBarWorkaround) {
             scrollBarWorkaround = false;
-            QTimer::singleShot(0, this, SLOT(centerOnPixmap()));
+            QTimer::singleShot(0, this, &ImageViewerV2::centerOnPixmap);
         } else {
             centerOnPixmap();
         }
@@ -859,7 +859,7 @@ void ImageViewerV2::fitWindowStretch() {
     // Handle scrollbar workaround similar to fitWindow()
     if(scrollBarWorkaround) {
         scrollBarWorkaround = false;
-        QTimer::singleShot(0, this, SLOT(centerOnPixmap()));
+        QTimer::singleShot(0, this, &ImageViewerV2::centerOnPixmap);
     } else {
         centerOnPixmap();
     }

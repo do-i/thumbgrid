@@ -83,11 +83,11 @@ inline bool VideoPlayerInitProxy::initPlayer() {
     layout.addWidget(player.get());
     player->hide();
     setFocusProxy(player.get());
-    connect(player.get(), SIGNAL(durationChanged(int)), this, SIGNAL(durationChanged(int)));
-    connect(player.get(), SIGNAL(positionChanged(int)), this, SIGNAL(positionChanged(int)));
-    connect(player.get(), SIGNAL(videoPaused(bool)),    this, SIGNAL(videoPaused(bool)));
-    connect(player.get(), SIGNAL(playbackFinished()),   this, SIGNAL(playbackFinished()));
-    connect(player.get(), SIGNAL(volumeChanged(int)),   this, SIGNAL(volumeChanged(int)));
+    connect(player.get(), &VideoPlayer::durationChanged, this, &VideoPlayer::durationChanged);
+    connect(player.get(), &VideoPlayer::positionChanged, this, &VideoPlayer::positionChanged);
+    connect(player.get(), &VideoPlayer::videoPaused,     this, &VideoPlayer::videoPaused);
+    connect(player.get(), &VideoPlayer::playbackFinished, this, &VideoPlayer::playbackFinished);
+    connect(player.get(), &VideoPlayer::volumeChanged,   this, &VideoPlayer::volumeChanged);
 
     if(eventFilterObj)
         player.get()->installEventFilter(eventFilterObj);
