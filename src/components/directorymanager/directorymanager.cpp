@@ -4,6 +4,27 @@
 
 namespace fs = std::filesystem;
 
+namespace {
+// Stats a scanned directory_entry as a non-directory file and fills out `out`.
+// Returns false (leaving `out` untouched) if the entry vanished mid-scan.
+// Shared by addEntriesFromDirectory() and addEntriesFromDirectoryRecursive().
+bool tryMakeFileEntry(const fs::directory_entry &entry, const QString &name, const QString &path, FSEntry &out) {
+    std::error_code ec;
+    std::uintmax_t size = entry.file_size(ec);
+    if(ec)
+        return false;
+    auto modifyTime = entry.last_write_time(ec);
+    if(ec)
+        return false;
+    out.name = name;
+    out.path = path;
+    out.isDirectory = false;
+    out.size = size;
+    out.modifyTime = modifyTime;
+    return true;
+}
+}
+
 DirectoryManager::DirectoryManager() :
     watcher(nullptr),
     mSortingMode(SORT_NAME)
@@ -54,19 +75,21 @@ bool DirectoryManager::size_entry_compare_reverse(const FSEntry& e1, const FSEnt
     return e1.size > e2.size;
 }
 
-CompareFunction DirectoryManager::compareFunction() {
-    CompareFunction cmpFn = &DirectoryManager::path_entry_compare;
-    if(mSortingMode == SortingMode::SORT_NAME_DESC)
-        cmpFn = &DirectoryManager::path_entry_compare_reverse;
-    if(mSortingMode == SortingMode::SORT_TIME)
-        cmpFn = &DirectoryManager::date_entry_compare;
-    if(mSortingMode == SortingMode::SORT_TIME_DESC)
-        cmpFn = &DirectoryManager::date_entry_compare_reverse;
-    if(mSortingMode == SortingMode::SORT_SIZE)
-        cmpFn = &DirectoryManager::size_entry_compare;
-    if(mSortingMode == SortingMode::SORT_SIZE_DESC)
-        cmpFn = &DirectoryManager::size_entry_compare_reverse;
-    return cmpFn;
+DirectoryManager::CompareFn DirectoryManager::compareFunction() {
+    switch(mSortingMode) {
+    case SortingMode::SORT_NAME_DESC:
+        return [this](const FSEntry &e1, const FSEntry &e2) { return path_entry_compare_reverse(e1, e2); };
+    case SortingMode::SORT_TIME:
+        return [this](const FSEntry &e1, const FSEntry &e2) { return date_entry_compare(e1, e2); };
+    case SortingMode::SORT_TIME_DESC:
+        return [this](const FSEntry &e1, const FSEntry &e2) { return date_entry_compare_reverse(e1, e2); };
+    case SortingMode::SORT_SIZE:
+        return [this](const FSEntry &e1, const FSEntry &e2) { return size_entry_compare(e1, e2); };
+    case SortingMode::SORT_SIZE_DESC:
+        return [this](const FSEntry &e1, const FSEntry &e2) { return size_entry_compare_reverse(e1, e2); };
+    default:
+        return [this](const FSEntry &e1, const FSEntry &e2) { return path_entry_compare(e1, e2); };
+    }
 }
 
 void DirectoryManager::startFileWatcher(const QString& directoryPath) {
@@ -356,19 +379,9 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, c
             dirEntryVec.emplace_back(newEntry);
         } else if(match.hasMatch() || mIncludeOtherFiles) {
             // the file may vanish mid-scan; skip it instead of aborting the whole listing
-            std::uintmax_t size = entry.file_size(entryEc);
-            if(entryEc)
-                continue;
-            auto modifyTime = entry.last_write_time(entryEc);
-            if(entryEc)
-                continue;
             FSEntry newEntry;
-            newEntry.name = name;
-            newEntry.path = path;
-            newEntry.isDirectory = false;
-            newEntry.size = size;
-            newEntry.modifyTime = modifyTime;
-            entryVec.emplace_back(newEntry);
+            if(tryMakeFileEntry(entry, name, path, newEntry))
+                entryVec.emplace_back(newEntry);
         }
     }
 }
@@ -392,29 +405,19 @@ void DirectoryManager::addEntriesFromDirectoryRecursive(std::vector<FSEntry> &en
         match = regex.match(name);
         std::error_code entryEc;
         if(!entry.is_directory(entryEc) && !entryEc && (match.hasMatch() || mIncludeOtherFiles)) {
-            std::uintmax_t size = entry.file_size(entryEc);
-            if(entryEc)
-                continue;
-            auto modifyTime = entry.last_write_time(entryEc);
-            if(entryEc)
-                continue;
             FSEntry newEntry;
-            newEntry.name = name;
-            newEntry.path = path;
-            newEntry.isDirectory = false;
-            newEntry.size = size;
-            newEntry.modifyTime = modifyTime;
-            entryVec.emplace_back(newEntry);
+            if(tryMakeFileEntry(entry, name, path, newEntry))
+                entryVec.emplace_back(newEntry);
         }
     }
 }
 
 void DirectoryManager::sortEntryLists() {
     if(settings->sortFolders())
-        std::sort(dirEntryVec.begin(), dirEntryVec.end(), std::bind(compareFunction(), this, std::placeholders::_1, std::placeholders::_2));
+        std::sort(dirEntryVec.begin(), dirEntryVec.end(), compareFunction());
     else
-        std::sort(dirEntryVec.begin(), dirEntryVec.end(), std::bind(&DirectoryManager::path_entry_compare, this, std::placeholders::_1, std::placeholders::_2));
-    std::sort(fileEntryVec.begin(), fileEntryVec.end(), std::bind(compareFunction(), this, std::placeholders::_1, std::placeholders::_2));
+        std::sort(dirEntryVec.begin(), dirEntryVec.end(), [this](const FSEntry &e1, const FSEntry &e2) { return path_entry_compare(e1, e2); });
+    std::sort(fileEntryVec.begin(), fileEntryVec.end(), compareFunction());
     rebuildFileIndexCache();
     rebuildDirIndexCache();
 }
@@ -441,11 +444,10 @@ bool DirectoryManager::insertFileEntry(const QString &filePath) {
     return forceInsertFileEntry(filePath);
 }
 
-// skips filename regex check
-bool DirectoryManager::forceInsertFileEntry(const QString &filePath) {
-    if(!this->isFile(filePath) || containsFile(filePath))
-        return false;
-    // the file can vanish between the isFile() check and the stat calls (fs watcher races)
+// stat()s filePath and builds the resulting FSEntry; the file can vanish
+// between the caller's isFile() check and these stat calls (fs watcher races),
+// so failures are tolerated and just fall back to a size/time of 0.
+FSEntry DirectoryManager::statFileEntry(const QString &filePath, const QString &fileName) const {
     std::error_code ec;
     std::uintmax_t size = fs::file_size(toStdString(filePath), ec);
     if(ec)
@@ -453,10 +455,20 @@ bool DirectoryManager::forceInsertFileEntry(const QString &filePath) {
     auto modifyTime = fs::last_write_time(toStdString(filePath), ec);
     if(ec)
         modifyTime = fs::file_time_type();
-    QString fileName = QFileInfo(filePath).fileName();
-    FSEntry FSEntry(filePath, fileName, size, modifyTime, false);
-    insert_sorted(fileEntryVec, FSEntry, std::bind(compareFunction(), this, std::placeholders::_1, std::placeholders::_2));
+    return FSEntry(filePath, fileName, size, modifyTime, false);
+}
+
+void DirectoryManager::insertFileEntrySorted(const FSEntry &entry) {
+    insert_sorted(fileEntryVec, entry, compareFunction());
     rebuildFileIndexCache();
+}
+
+// skips filename regex check
+bool DirectoryManager::forceInsertFileEntry(const QString &filePath) {
+    if(!this->isFile(filePath) || containsFile(filePath))
+        return false;
+    QString fileName = QFileInfo(filePath).fileName();
+    insertFileEntrySorted(statFileEntry(filePath, fileName));
     if(!directoryPath().isEmpty()) {
         qDebug() << "fileIns" << filePath << directoryPath();
         emit fileAdded(filePath);
@@ -509,16 +521,7 @@ void DirectoryManager::renameFileEntry(const QString &oldFilePath, const QString
     int oldIndex = indexOfFile(oldFilePath);
     fileEntryVec.erase(fileEntryVec.begin() + oldIndex);
     // insert
-    std::error_code ec;
-    std::uintmax_t size = fs::file_size(toStdString(newFilePath), ec);
-    if(ec)
-        size = 0;
-    auto modifyTime = fs::last_write_time(toStdString(newFilePath), ec);
-    if(ec)
-        modifyTime = fs::file_time_type();
-    FSEntry FSEntry(newFilePath, newFileName, size, modifyTime, false);
-    insert_sorted(fileEntryVec, FSEntry, std::bind(compareFunction(), this, std::placeholders::_1, std::placeholders::_2));
-    rebuildFileIndexCache();
+    insertFileEntrySorted(statFileEntry(newFilePath, newFileName));
     qDebug() << "fileRen" << oldFilePath << newFilePath;
     emit fileRenamed(oldFilePath, oldIndex, newFilePath, indexOfFile(newFilePath));
 }
@@ -533,7 +536,7 @@ bool DirectoryManager::insertDirEntry(const QString &dirPath) {
     FSEntry.name = dirName;
     FSEntry.path = dirPath;
     FSEntry.isDirectory = true;
-    insert_sorted(dirEntryVec, FSEntry, std::bind(compareFunction(), this, std::placeholders::_1, std::placeholders::_2));
+    insert_sorted(dirEntryVec, FSEntry, compareFunction());
     rebuildDirIndexCache();
     qDebug() << "dirIns" << dirPath;
     emit dirAdded(dirPath);
@@ -563,7 +566,7 @@ void DirectoryManager::renameDirEntry(const QString &oldDirPath, const QString &
     FSEntry.name = newDirName;
     FSEntry.path = newDirPath;
     FSEntry.isDirectory = true;
-    insert_sorted(dirEntryVec, FSEntry, std::bind(compareFunction(), this, std::placeholders::_1, std::placeholders::_2));
+    insert_sorted(dirEntryVec, FSEntry, compareFunction());
     rebuildDirIndexCache();
     qDebug() << "dirRen" << oldDirPath << newDirPath;
     emit dirRenamed(oldDirPath, oldIndex, newDirPath, indexOfDir(newDirPath));

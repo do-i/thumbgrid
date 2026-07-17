@@ -14,6 +14,7 @@
 #include <iostream>
 #include <filesystem>
 #include <algorithm>
+#include <functional>
 
 #include "settings.h"
 #include "watchers/directorywatcher.h"
@@ -29,10 +30,6 @@ enum FileListSource { // rename? wip
     SOURCE_DIRECTORY_RECURSIVE,
     SOURCE_LIST
 };
-
-class DirectoryManager;
-
-typedef bool (DirectoryManager::*CompareFunction)(const FSEntry &e1, const FSEntry &e2) const;
 
 //TODO: rename? EntrySomething?
 
@@ -116,7 +113,8 @@ private:
     bool name_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
     bool date_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
     bool date_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
-    CompareFunction compareFunction();
+    using CompareFn = std::function<bool(const FSEntry&, const FSEntry&)>;
+    CompareFn compareFunction();
     bool size_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
     bool size_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
     void startFileWatcher(const QString& directoryPath);
@@ -129,6 +127,13 @@ private:
     void addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, const QString& directoryPath);
     bool checkFileRange(int index) const;
     bool checkDirRange(int index) const;
+
+    // stat()s filePath (races with an external delete are tolerated - see
+    // forceInsertFileEntry()) and builds the resulting FSEntry
+    FSEntry statFileEntry(const QString &filePath, const QString &fileName) const;
+    // inserts a file entry in sorted position and refreshes the file index cache;
+    // shared by forceInsertFileEntry() and renameFileEntry()
+    void insertFileEntrySorted(const FSEntry &entry);
 
 private slots:
     void onFileAddedExternal(const QString& fileName);
