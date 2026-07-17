@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QMutex>
 #include <QDebug>
+#include <memory>
 #include "settings.h"
 #include "sourcecontainers/thumbnail.h"
 
@@ -14,7 +15,8 @@ public:
     explicit ThumbnailCache();
 
     void saveThumbnail(QImage *image, QString id);
-    QImage* readThumbnail(QString id);
+    // returns nullptr when no valid cached thumbnail exists
+    std::unique_ptr<QImage> readThumbnail(QString id);
     QString thumbnailPath(const QString& id);
     bool exists(QString id);
 

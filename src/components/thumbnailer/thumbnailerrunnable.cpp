@@ -82,7 +82,7 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
     QString time = QString::number(imgInfo.lastModified().toMSecsSinceEpoch());
 
     if(!force && cache) {
-        image.reset(cache->readThumbnail(thumbnailId));
+        image = cache->readThumbnail(thumbnailId);
         if(image && image->text("lastModified") != time)
             image.reset(nullptr);
     }
@@ -235,7 +235,7 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cach
 
     std::unique_ptr<QImage> composite;
     if(!force && cache) {
-        composite.reset(cache->readThumbnail(thumbnailId));
+        composite = cache->readThumbnail(thumbnailId);
         if(composite && composite->text("lastModified") != time)
             composite.reset(nullptr);
     }
@@ -289,7 +289,7 @@ QList<QImage> ThumbnailerRunnable::dirPreviewImages(ThumbnailCache *cache, const
         // the grid) as the preview tile, avoiding a fresh decode. Falls back below.
         if(cache) {
             QString childId = generateIdString(entry.absoluteFilePath(), targetSize, crop);
-            std::unique_ptr<QImage> cached(cache->readThumbnail(childId));
+            std::unique_ptr<QImage> cached = cache->readThumbnail(childId);
             if(cached && !cached->isNull() &&
                cached->text("lastModified") == QString::number(entry.lastModified().toMSecsSinceEpoch())) {
                 images << *cached;

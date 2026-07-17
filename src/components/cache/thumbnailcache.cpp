@@ -23,18 +23,13 @@ void ThumbnailCache::saveThumbnail(QImage *image, QString id) {
     }
 }
 
-QImage *ThumbnailCache::readThumbnail(QString id) {
+std::unique_ptr<QImage> ThumbnailCache::readThumbnail(QString id) {
     QString filePath = thumbnailPath(std::move(id));
     QFileInfo file(filePath);
     if(file.exists() && file.isReadable()) {
-        QImage *thumb = new QImage();
-        if(thumb->load(filePath)) {
+        auto thumb = std::make_unique<QImage>();
+        if(thumb->load(filePath))
             return thumb;
-        } else {
-            delete thumb;
-            return nullptr;
-        }
-    } else {
-        return nullptr;
     }
+    return nullptr;
 }
