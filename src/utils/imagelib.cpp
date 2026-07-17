@@ -23,81 +23,81 @@ void ImageLib::drawTransparencyGrid(QPainter *painter, const QRectF &rect) {
     painter->drawTiledPixmap(rect, pattern);
 }
 
-QImage *ImageLib::rotatedRaw(const QImage *src, int grad) {
+std::unique_ptr<QImage> ImageLib::rotatedRaw(const QImage *src, int grad) {
     if(!src)
-        return new QImage();
-    QImage *img = new QImage();
+        return std::make_unique<QImage>();
+    auto img = std::make_unique<QImage>();
     QTransform transform;
     transform.rotate(grad);
     *img = src->transformed(transform, Qt::SmoothTransformation);
     return img;
 }
 //------------------------------------------------------------------------------
-QImage *ImageLib::rotated(const std::shared_ptr<const QImage>& src, int grad) {
+std::unique_ptr<QImage> ImageLib::rotated(const std::shared_ptr<const QImage>& src, int grad) {
     return rotatedRaw(src.get(), grad);
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::croppedRaw(const QImage *src, QRect newRect) {
+std::unique_ptr<QImage> ImageLib::croppedRaw(const QImage *src, QRect newRect) {
     if(src && src->rect().contains(newRect, false)) {
-        QImage *img = new QImage(newRect.size(), src->format());
+        auto img = std::make_unique<QImage>(newRect.size(), src->format());
         *img = src->copy(newRect);
         return img;
     } else {
-        return new QImage();
+        return std::make_unique<QImage>();
     }
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::cropped(const std::shared_ptr<const QImage>& src, QRect newRect) {
+std::unique_ptr<QImage> ImageLib::cropped(const std::shared_ptr<const QImage>& src, QRect newRect) {
     return croppedRaw(src.get(), newRect);
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::flippedHRaw(const QImage *src) {
+std::unique_ptr<QImage> ImageLib::flippedHRaw(const QImage *src) {
     if(!src)
-        return new QImage();
+        return std::make_unique<QImage>();
     else
-        return new QImage(src->flipped(Qt::Horizontal));
+        return std::make_unique<QImage>(src->flipped(Qt::Horizontal));
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::flippedH(const std::shared_ptr<const QImage>& src) {
+std::unique_ptr<QImage> ImageLib::flippedH(const std::shared_ptr<const QImage>& src) {
     return flippedHRaw(src.get());
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::flippedVRaw(const QImage *src) {
+std::unique_ptr<QImage> ImageLib::flippedVRaw(const QImage *src) {
     if(!src)
-        return new QImage();
+        return std::make_unique<QImage>();
     else
-        return new QImage(src->flipped(Qt::Vertical));
+        return std::make_unique<QImage>(src->flipped(Qt::Vertical));
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::flippedV(const std::shared_ptr<const QImage>& src) {
+std::unique_ptr<QImage> ImageLib::flippedV(const std::shared_ptr<const QImage>& src) {
     return flippedVRaw(src.get());
 }
 //------------------------------------------------------------------------------
 std::unique_ptr<const QImage> ImageLib::exifRotated(std::unique_ptr<const QImage> src, int orientation) {
     switch(orientation) {
     case 1: {
-        src.reset(ImageLib::flippedHRaw(src.get()));
+        src = ImageLib::flippedHRaw(src.get());
     } break;
     case 2: {
-        src.reset(ImageLib::flippedVRaw(src.get()));
+        src = ImageLib::flippedVRaw(src.get());
     } break;
     case 3: {
-        src.reset(ImageLib::flippedHRaw(src.get()));
-        src.reset(ImageLib::flippedVRaw(src.get()));
+        src = ImageLib::flippedHRaw(src.get());
+        src = ImageLib::flippedVRaw(src.get());
     } break;
     case 4: {
-        src.reset(ImageLib::rotatedRaw(src.get(), 90));
+        src = ImageLib::rotatedRaw(src.get(), 90);
     } break;
     case 5: {
-        src.reset(ImageLib::flippedHRaw(src.get()));
-        src.reset(ImageLib::rotatedRaw(src.get(), 90));
+        src = ImageLib::flippedHRaw(src.get());
+        src = ImageLib::rotatedRaw(src.get(), 90);
     } break;
     case 6: {
-        src.reset(ImageLib::flippedVRaw(src.get()));
-        src.reset(ImageLib::rotatedRaw(src.get(), 90));
+        src = ImageLib::flippedVRaw(src.get());
+        src = ImageLib::rotatedRaw(src.get(), 90);
     } break;
     case 7: {
-        src.reset(ImageLib::rotatedRaw(src.get(), -90));
+        src = ImageLib::rotatedRaw(src.get(), -90);
     } break;
     default: {
     } break;
@@ -108,28 +108,28 @@ std::unique_ptr<const QImage> ImageLib::exifRotated(std::unique_ptr<const QImage
 std::unique_ptr<QImage> ImageLib::exifRotated(std::unique_ptr<QImage> src, int orientation) {
     switch(orientation) {
     case 1: {
-        src.reset(ImageLib::flippedHRaw(src.get()));
+        src = ImageLib::flippedHRaw(src.get());
     } break;
     case 2: {
-        src.reset(ImageLib::flippedVRaw(src.get()));
+        src = ImageLib::flippedVRaw(src.get());
     } break;
     case 3: {
-        src.reset(ImageLib::flippedHRaw(src.get()));
-        src.reset(ImageLib::flippedVRaw(src.get()));
+        src = ImageLib::flippedHRaw(src.get());
+        src = ImageLib::flippedVRaw(src.get());
     } break;
     case 4: {
-        src.reset(ImageLib::rotatedRaw(src.get(), 90));
+        src = ImageLib::rotatedRaw(src.get(), 90);
     } break;
     case 5: {
-        src.reset(ImageLib::flippedHRaw(src.get()));
-        src.reset(ImageLib::rotatedRaw(src.get(), 90));
+        src = ImageLib::flippedHRaw(src.get());
+        src = ImageLib::rotatedRaw(src.get(), 90);
     } break;
     case 6: {
-        src.reset(ImageLib::flippedVRaw(src.get()));
-        src.reset(ImageLib::rotatedRaw(src.get(), 90));
+        src = ImageLib::flippedVRaw(src.get());
+        src = ImageLib::rotatedRaw(src.get(), 90);
     } break;
     case 7: {
-        src.reset(ImageLib::rotatedRaw(src.get(), -90));
+        src = ImageLib::rotatedRaw(src.get(), -90);
     } break;
     default: {
     } break;
@@ -155,9 +155,9 @@ QImage *ImageLib::cropped(QRect newRect, QRect targetRes, bool upscaled) {
 }
 */
 
-QImage* ImageLib::scaled(const std::shared_ptr<const QImage>& source, QSize destSize, ScalingFilter filter) {
+std::unique_ptr<QImage> ImageLib::scaled(const std::shared_ptr<const QImage>& source, QSize destSize, ScalingFilter filter) {
     if(!source)
-        return new QImage();
+        return std::make_unique<QImage>();
     auto scaleTarget = source;
     if(source->format() == QImage::Format_Indexed8) {
         auto newFmt = QImage::Format_RGB32;
@@ -187,10 +187,10 @@ QImage* ImageLib::scaled(const std::shared_ptr<const QImage>& source, QSize dest
     }
 }
 
-QImage* ImageLib::scaled_Qt(const std::shared_ptr<const QImage>& source, QSize destSize, bool smooth) {
+std::unique_ptr<QImage> ImageLib::scaled_Qt(const std::shared_ptr<const QImage>& source, QSize destSize, bool smooth) {
     if(!source)
-        return new QImage();
-    QImage *dest = new QImage();
+        return std::make_unique<QImage>();
+    auto dest = std::make_unique<QImage>();
     Qt::TransformationMode mode = smooth ? Qt::SmoothTransformation : Qt::FastTransformation;
     *dest = source->scaled(destSize.width(), destSize.height(), Qt::IgnoreAspectRatio, mode);
     return dest;
@@ -198,13 +198,13 @@ QImage* ImageLib::scaled_Qt(const std::shared_ptr<const QImage>& source, QSize d
 
 #ifdef USE_OPENCV
 // this probably leaks, needs checking
-QImage* ImageLib::scaled_CV(const std::shared_ptr<const QImage>& source, QSize destSize, cv::InterpolationFlags filter, int sharpen) {
+std::unique_ptr<QImage> ImageLib::scaled_CV(const std::shared_ptr<const QImage>& source, QSize destSize, cv::InterpolationFlags filter, int sharpen) {
     if(!source)
-        return new QImage();
+        return std::make_unique<QImage>();
     QtOcv::MatColorOrder order;
     cv::Mat srcMat = QtOcv::image2Mat_shared(*source.get(), &order);
     cv::Size destSizeCv(destSize.width(), destSize.height());
-    QImage *dest = new QImage();
+    auto dest = std::make_unique<QImage>();
     if(destSize == source->size()) {
         // TODO: should this return a copy?
         //result.reset(new StaticImageContainer(std::make_shared<cv::Mat>(srcMat)));

@@ -905,7 +905,7 @@ std::shared_ptr<ImageStatic> Core::getEditableImage(const QString &filePath) {
 }
 
 template<typename... Args>
-void Core::edit_template(bool save, QString action, const std::function<QImage*(std::shared_ptr<const QImage>, Args...)>& editFunc, Args&&... as) {
+void Core::edit_template(bool save, QString action, const std::function<std::unique_ptr<QImage>(std::shared_ptr<const QImage>, Args...)>& editFunc, Args&&... as) {
     if(model->isEmpty())
         return;
     if(save && !mw->showConfirmation(action, tr("Perform action \"") + action + "\"? \n\n" + tr("Changes will be saved immediately.")))
@@ -914,7 +914,7 @@ void Core::edit_template(bool save, QString action, const std::function<QImage*(
         auto img = getEditableImage(path);
         if(!img)
             continue;
-        img->setEditedImage(std::unique_ptr<const QImage>( editFunc(img->getImage(), std::forward<Args>(as)...) ));
+        img->setEditedImage(std::unique_ptr<const QImage>( editFunc(img->getImage(), std::forward<Args>(as)...).release() ));
         model->updateImage(path, std::static_pointer_cast<Image>(img));
         if(save) {
             saveFile(path);

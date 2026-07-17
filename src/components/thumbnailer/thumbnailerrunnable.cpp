@@ -213,7 +213,7 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(const QString& pa
             QRect scaledRect(QPoint(0,0), scaledSize);
             clip.moveCenter(scaledRect.center());
             QImage scaled = QImage(fullSize->scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-            result = ImageLib::croppedRaw(&scaled, clip);
+            result = ImageLib::croppedRaw(&scaled, clip).release();
         } else {
             result = new QImage(fullSize->scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         }

@@ -14,12 +14,13 @@ void ScalerRunnable::run() {
     emit started(req);
     //QElapsedTimer t;
     //t.start();
-    QImage *scaled = nullptr;
+    std::unique_ptr<QImage> scaled;
     if(req.filter == 0 || (req.size.width() > req.image->width() && !settings->smoothUpscaling())) {
         scaled = ImageLib::scaled(req.image->getImage(), req.size, QI_FILTER_NEAREST);
     } else {
         scaled = ImageLib::scaled(req.image->getImage(), req.size, req.filter);
     }
     //qDebug() << ">> " << req.size << ": " << t.elapsed();
-    emit finished(scaled, req);
+    // ownership is transferred to the receiving slot via the queued signal (Scaler::onTaskFinish)
+    emit finished(scaled.release(), req);
 }

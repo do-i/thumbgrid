@@ -16,26 +16,26 @@
 
 class ImageLib {
     public:
-        static QImage *rotatedRaw(const QImage *src, int grad);
-        static QImage *rotated(const std::shared_ptr<const QImage>& src, int grad);
+        static std::unique_ptr<QImage> rotatedRaw(const QImage *src, int grad);
+        static std::unique_ptr<QImage> rotated(const std::shared_ptr<const QImage>& src, int grad);
 
-        static QImage *croppedRaw(const QImage *src, QRect newRect);
-        static QImage *cropped(const std::shared_ptr<const QImage>& src, QRect newRect);
+        static std::unique_ptr<QImage> croppedRaw(const QImage *src, QRect newRect);
+        static std::unique_ptr<QImage> cropped(const std::shared_ptr<const QImage>& src, QRect newRect);
 
-        static QImage *flippedHRaw(const QImage *src);
-        static QImage *flippedH(const std::shared_ptr<const QImage>& src);
+        static std::unique_ptr<QImage> flippedHRaw(const QImage *src);
+        static std::unique_ptr<QImage> flippedH(const std::shared_ptr<const QImage>& src);
 
-        static QImage *flippedVRaw(const QImage *src);
-        static QImage *flippedV(const std::shared_ptr<const QImage>& src);
+        static std::unique_ptr<QImage> flippedVRaw(const QImage *src);
+        static std::unique_ptr<QImage> flippedV(const std::shared_ptr<const QImage>& src);
 
-        static QImage *scaled(const std::shared_ptr<const QImage>& source, QSize destSize, ScalingFilter filter);
+        static std::unique_ptr<QImage> scaled(const std::shared_ptr<const QImage>& source, QSize destSize, ScalingFilter filter);
 
-        static QImage *scaled_Qt(const QImage *source, QSize destSize, bool smooth);
-        static QImage *scaled_Qt(const std::shared_ptr<const QImage>& source, QSize destSize, bool smooth);
+        static std::unique_ptr<QImage> scaled_Qt(const QImage *source, QSize destSize, bool smooth);
+        static std::unique_ptr<QImage> scaled_Qt(const std::shared_ptr<const QImage>& source, QSize destSize, bool smooth);
         static void drawTransparencyGrid(QPainter *painter, const QRectF &rect);
 
 #ifdef USE_OPENCV
-        static QImage *scaled_CV(const std::shared_ptr<const QImage>& source, QSize destSize, cv::InterpolationFlags filter, int sharpen);
+        static std::unique_ptr<QImage> scaled_CV(const std::shared_ptr<const QImage>& source, QSize destSize, cv::InterpolationFlags filter, int sharpen);
 #endif
         static std::unique_ptr<const QImage> exifRotated(std::unique_ptr<const QImage> src, int orientation);
         static std::unique_ptr<QImage> exifRotated(std::unique_ptr<QImage> src, int orientation);
