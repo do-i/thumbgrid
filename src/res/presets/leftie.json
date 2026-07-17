@@ -175,6 +175,9 @@
         "createDirectory": [
             "F7"
         ],
+        "folderView": [
+            "U"
+        ],
         "nextDirectory": [
             "$Shift+Right"
         ],
