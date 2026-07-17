@@ -1,6 +1,6 @@
 #include "cmdoptionsrunner.h"
 
-void CmdOptionsRunner::generateThumbs(QString dirPath, int size) {
+void CmdOptionsRunner::generateThumbs(const QString& dirPath, int size) {
     if(size <= 50 || size > 400) {
         qDebug() << "Error: Invalid thumbnail size.";
         qDebug() << "Please specify a value between [50, 400].";
@@ -24,7 +24,7 @@ void CmdOptionsRunner::generateThumbs(QString dirPath, int size) {
     qDebug() << "Size limit:" << size << "x" << size << "px";
     qDebug() << "Generating thumbnails...";
 
-    for(auto path : list)
+    for(const auto& path : list)
         th.getThumbnailAsync(path, size, false, false);
 
     th.waitForDone();

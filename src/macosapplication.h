@@ -18,5 +18,5 @@ protected:
         return true;
     }
 signals:
-    void fileOpened(QString filePath);
+    void fileOpened(const QString& filePath);
 };

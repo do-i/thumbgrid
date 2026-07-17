@@ -974,7 +974,7 @@ QString Settings::mpvBinary() {
     return mpvPath;
 }
 
-void Settings::setMpvBinary(QString path) {
+void Settings::setMpvBinary(const QString& path) {
     if(QFile::exists(path)) {
         settings->writeSetting("mpvBinary", path);
     }
@@ -1453,7 +1453,7 @@ QStringList Settings::savedPaths() {
     return settings->stateConf->value("savedPaths", QDir::homePath()).toStringList();
 }
 
-void Settings::setSavedPaths(QStringList paths) {
+void Settings::setSavedPaths(const QStringList& paths) {
     settings->stateConf->setValue("savedPaths", paths);
 }
 //------------------------------------------------------------------------------
@@ -1461,7 +1461,7 @@ QStringList Settings::bookmarks() {
     return settings->stateConf->value("bookmarks").toStringList();
 }
 
-void Settings::setBookmarks(QStringList paths) {
+void Settings::setBookmarks(const QStringList& paths) {
     settings->stateConf->setValue("bookmarks", paths);
 }
 //------------------------------------------------------------------------------
@@ -1863,7 +1863,7 @@ QString Settings::lastPrinter() {
     return stateConf->value("lastPrinter", "").toString();
 }
 
-void Settings::setLastPrinter(QString name) {
+void Settings::setLastPrinter(const QString& name) {
     stateConf->setValue("lastPrinter", name);
 }
 //------------------------------------------------------------------------------
@@ -1943,7 +1943,7 @@ QString Settings::language() {
     return readSetting("language", "en_US").toString();
 }
 
-void Settings::setLanguage(QString lang) {
+void Settings::setLanguage(const QString& lang) {
     writeSetting("language", lang);
 }
 //------------------------------------------------------------------------------
@@ -1962,7 +1962,7 @@ QString Settings::zoomLevels() {
     return readSetting("fixedZoomLevels", defaultZoomLevels()).toString();
 }
 
-void Settings::setZoomLevels(QString levels) {
+void Settings::setZoomLevels(const QString& levels) {
     writeSetting("fixedZoomLevels", levels);
 }
 //------------------------------------------------------------------------------

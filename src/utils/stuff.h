@@ -11,5 +11,5 @@
 #endif
 
 int clamp(int x, int lower, int upper);
-StdString toStdString(QString str);
+StdString toStdString(const QString& str);
 QString fromStdString(StdString str);

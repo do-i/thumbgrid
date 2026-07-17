@@ -33,7 +33,7 @@ QImage *ImageLib::rotatedRaw(const QImage *src, int grad) {
     return img;
 }
 //------------------------------------------------------------------------------
-QImage *ImageLib::rotated(std::shared_ptr<const QImage> src, int grad) {
+QImage *ImageLib::rotated(const std::shared_ptr<const QImage>& src, int grad) {
     return rotatedRaw(src.get(), grad);
 }
 //------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ QImage* ImageLib::croppedRaw(const QImage *src, QRect newRect) {
     }
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::cropped(std::shared_ptr<const QImage> src, QRect newRect) {
+QImage* ImageLib::cropped(const std::shared_ptr<const QImage>& src, QRect newRect) {
     return croppedRaw(src.get(), newRect);
 }
 //------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ QImage* ImageLib::flippedHRaw(const QImage *src) {
         return new QImage(src->flipped(Qt::Horizontal));
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::flippedH(std::shared_ptr<const QImage> src) {
+QImage* ImageLib::flippedH(const std::shared_ptr<const QImage>& src) {
     return flippedHRaw(src.get());
 }
 //------------------------------------------------------------------------------
@@ -69,7 +69,7 @@ QImage* ImageLib::flippedVRaw(const QImage *src) {
         return new QImage(src->flipped(Qt::Vertical));
 }
 //------------------------------------------------------------------------------
-QImage* ImageLib::flippedV(std::shared_ptr<const QImage> src) {
+QImage* ImageLib::flippedV(const std::shared_ptr<const QImage>& src) {
     return flippedVRaw(src.get());
 }
 //------------------------------------------------------------------------------
@@ -155,7 +155,7 @@ QImage *ImageLib::cropped(QRect newRect, QRect targetRes, bool upscaled) {
 }
 */
 
-QImage* ImageLib::scaled(std::shared_ptr<const QImage> source, QSize destSize, ScalingFilter filter) {
+QImage* ImageLib::scaled(const std::shared_ptr<const QImage>& source, QSize destSize, ScalingFilter filter) {
     if(!source)
         return new QImage();
     auto scaleTarget = source;
@@ -187,7 +187,7 @@ QImage* ImageLib::scaled(std::shared_ptr<const QImage> source, QSize destSize, S
     }
 }
 
-QImage* ImageLib::scaled_Qt(std::shared_ptr<const QImage> source, QSize destSize, bool smooth) {
+QImage* ImageLib::scaled_Qt(const std::shared_ptr<const QImage>& source, QSize destSize, bool smooth) {
     if(!source)
         return new QImage();
     QImage *dest = new QImage();
@@ -198,7 +198,7 @@ QImage* ImageLib::scaled_Qt(std::shared_ptr<const QImage> source, QSize destSize
 
 #ifdef USE_OPENCV
 // this probably leaks, needs checking
-QImage* ImageLib::scaled_CV(std::shared_ptr<const QImage> source, QSize destSize, cv::InterpolationFlags filter, int sharpen) {
+QImage* ImageLib::scaled_CV(const std::shared_ptr<const QImage>& source, QSize destSize, cv::InterpolationFlags filter, int sharpen) {
     if(!source)
         return new QImage();
     QtOcv::MatColorOrder order;
