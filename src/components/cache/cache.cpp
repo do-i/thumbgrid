@@ -16,8 +16,7 @@ bool Cache::insert(const std::shared_ptr<Image>& img) {
         items.insert(img->filePath(), new CacheItem(img));
         return true;
     }
-    // TODO: what state returns here ??
-    return true;
+    return false;
 }
 
 // locks & deletes the item at it, returning the iterator to the next entry
