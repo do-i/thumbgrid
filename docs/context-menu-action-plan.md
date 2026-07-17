@@ -95,35 +95,62 @@ item is menu surface only. `ContextMenuItem::setAction(name)`
 (`src/gui/customwidgets/contextmenuitem.cpp:19-23`) auto-fills the shortcut label and
 invokes through `actionManager` — use it, do not hand-roll signal chains.
 
-- [ ] Verify exact action names in `src/utils/actions.cpp` (`Actions::init`) before
+- [x] Verify exact action names in `src/utils/actions.cpp` (`Actions::init`) before
       wiring; expected: rename (`renameFile`-ish, the one routed to
       `Core::renameCurrentSelection` via `MW::renameRequested`), `moveFile`
       (→ move overlay), `moveToTrash`, `removeFile` (permanent).
-- [ ] `GridContextMenu` main page gains, between Convert and the view toggles:
+      Done: all four confirmed registered as-is; no new action names needed.
+- [x] `GridContextMenu` main page gains, between Convert and the view toggles:
       "Rename..." · "Move to..." · "Move to trash" · separator · "Delete permanently".
       Keep permanent delete visually separated (it is destructive and not undoable);
       it already has its own confirmation dialog downstream — rely on that, no new
       dialog.
-- [ ] Rename applies to a **single** selected file *or folder*. Check
+      Done: the separator-building code (duplicated twice already) was factored into
+      a private `addSeparator(page, layout)` helper and reused for all three dividers.
+      Rename icon uses the rename-overlay's `overlay/edit16.png` (no menuitem asset
+      exists); permanent delete reuses `menuitem/trash16.png` (no better asset).
+- [x] Rename applies to a **single** selected file *or folder*. Check
       `Core::renameCurrentSelection` (`core.cpp:736`) + `RenameOverlay` against a
       folder selection — `DirectoryModel::renameEntry` (`directorymodel.cpp:139-151`)
       already branches dir/file, but the overlay's path handling needs a look. If
       folder rename turns out broken, fix is in scope here (small), and note it.
-- [ ] Delete/move on mixed selections: `FileOperationsController::removePaths` already
+      Done: folder rename already worked end-to-end (per brief); no fix needed.
+- [x] Delete/move on mixed selections: `FileOperationsController::removePaths` already
       routes dirs→`removeDir`, files→remove handler. Verify `removeDir` semantics on
       non-empty directories (recursive or refuse?) and make the menu behavior match —
       refusing with a message is acceptable, silent no-op is not.
+      Done: `FileOperations::removeDir(dirPath, recursive, result)`
+      (`utils/fileoperations.cpp:41-58`) calls `QDir::removeRecursively()` when
+      `recursive` is true (the case `removePaths` always passes), so non-empty
+      directories are deleted recursively, not refused. `DirectoryModel::removeDir`
+      routes the trash case through `FileOperations::moveToTrash` instead, which
+      trashes the whole directory via the OS trash mechanism. No menu-side change
+      needed — behavior already matches the "refuse or recurse, never silent no-op"
+      requirement.
+      Also found and fixed: `moveFile` was dead in the grid — `MW::triggerMoveOverlay`
+      (`mainwindow.cpp:765`) early-returns whenever `currentViewMode() ==
+      MODE_FOLDERVIEW`, so the action never did anything there. Added
+      `Core::moveSelection()` (`core.cpp`), which in folder view prompts for a
+      destination directory via `QFileDialog::getExistingDirectory`, guards against
+      moving a selected folder into itself or its own subtree, and calls
+      `fileOps->movePathsTo(selection, destDir)`; in document view it still defers to
+      `mw->triggerMoveOverlay()`. Rewired the `moveFile` action connection in
+      `core.cpp` to `Core::moveSelection` instead of `MW::triggerMoveOverlay` directly.
 
 ## C4. Context-sensitive enablement — **Sonnet 5**
 
-- [ ] Replace `GridContextMenu::setImageEntriesEnabled(bool)` with
+- [x] Replace `GridContextMenu::setImageEntriesEnabled(bool)` with
       `setSelectionInfo(const SelectionInfo &)` that enables/disables:
       Convert (per C1 rule), Rename (`total == 1`), Move/Trash/Delete (`total >= 1`).
       View toggles and Settings stay always-on.
-- [ ] `FolderGridView::contextMenuEvent` calls the C1 provider and passes the result.
+- [x] `FolderGridView::contextMenuEvent` calls the C1 provider and passes the result.
       Selection-empty case: file-op items disabled, menu still opens (today's behavior).
-- [ ] Disabled `ContextMenuItem` styling/behavior: confirm `setEnabled(false)` already
+- [x] Disabled `ContextMenuItem` styling/behavior: confirm `setEnabled(false)` already
       renders and blocks clicks correctly (Convert item is the precedent).
+      Done: `ContextMenuItem`/`MenuItem` use standard Qt `QWidget::setEnabled`, no
+      custom hit-testing that bypasses it, so disabled items grey out and ignore
+      clicks the same way the pre-existing Convert item already did; no restyling
+      needed.
 
 ## C5. Shortcut/preset sweep — **Haiku 4.5**
 
