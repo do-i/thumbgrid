@@ -230,10 +230,7 @@ void ActionManager::removeAllShortcuts(const QString& actionName) {
 }
 //------------------------------------------------------------------------------
 QString ActionManager::keyForNativeScancode(quint32 scanCode) {
-    if(inputMap->keys().contains(scanCode)) {
-        return inputMap->keys()[scanCode];
-    }
-    return "";
+    return inputMap->keys().value(scanCode);
 }
 //------------------------------------------------------------------------------
 void ActionManager::resetDefaults() {
