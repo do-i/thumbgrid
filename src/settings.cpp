@@ -32,41 +32,46 @@ int normalizedThemeTid(int tid) {
     return tid;
 }
 
+// Single source of truth for the tid <-> display-name/token mapping used by
+// themeName()/themeToken()/themeTidFromToken() below. Any tid not listed here
+// (notably COLORS_CUSTOM) falls back to the "Custom"/"custom" pair.
+struct ThemeIdMapping {
+    int tid;
+    const char *name;  // display name, mirrors the system theme files
+    const char *token; // lowercase token stored in [General]/theme
+};
+
+constexpr ThemeIdMapping kThemeIdMappings[] = {
+    { COLORS_SYSTEM,       "System",     "system" },
+    { COLORS_LIGHT,        "Light",      "light" },
+    { COLORS_BLACK,        "Black",      "black" },
+    { COLORS_DARK,         "Dark",       "dark" },
+    { COLORS_DARKBLUE,     "Dark Blue",  "darkblue" },
+    { COLORS_LIGHT_YELLOW, "Light Blue", "light_yellow" },
+};
+
 // Display name stored alongside the tid, mirroring the system theme files.
 QString themeName(int tid) {
-    switch(tid) {
-        case COLORS_SYSTEM:       return QStringLiteral("System");
-        case COLORS_LIGHT:        return QStringLiteral("Light");
-        case COLORS_BLACK:        return QStringLiteral("Black");
-        case COLORS_DARK:         return QStringLiteral("Dark");
-        case COLORS_DARKBLUE:     return QStringLiteral("Dark Blue");
-        case COLORS_LIGHT_YELLOW: return QStringLiteral("Light Blue");
-        default:                  return QStringLiteral("Custom");
-    }
+    for(const auto &m : kThemeIdMappings)
+        if(m.tid == tid)
+            return QString::fromLatin1(m.name);
+    return QStringLiteral("Custom");
 }
 
 // Lowercase token stored in [General]/theme. Presets use their file basename so
 // the pointer reads naturally in the .ini; "system"/"custom" are derived.
 QString themeToken(int tid) {
-    switch(tid) {
-        case COLORS_SYSTEM:       return QStringLiteral("system");
-        case COLORS_LIGHT:        return QStringLiteral("light");
-        case COLORS_BLACK:        return QStringLiteral("black");
-        case COLORS_DARK:         return QStringLiteral("dark");
-        case COLORS_DARKBLUE:     return QStringLiteral("darkblue");
-        case COLORS_LIGHT_YELLOW: return QStringLiteral("light_yellow");
-        default:                  return QStringLiteral("custom");
-    }
+    for(const auto &m : kThemeIdMappings)
+        if(m.tid == tid)
+            return QString::fromLatin1(m.token);
+    return QStringLiteral("custom");
 }
 
 int themeTidFromToken(const QString &token) {
     const QString t = token.trimmed().toLower();
-    if(t == QLatin1String("system"))       return COLORS_SYSTEM;
-    if(t == QLatin1String("light"))        return COLORS_LIGHT;
-    if(t == QLatin1String("black"))        return COLORS_BLACK;
-    if(t == QLatin1String("dark"))         return COLORS_DARK;
-    if(t == QLatin1String("darkblue"))     return COLORS_DARKBLUE;
-    if(t == QLatin1String("light_yellow")) return COLORS_LIGHT_YELLOW;
+    for(const auto &m : kThemeIdMappings)
+        if(t == QLatin1String(m.token))
+            return m.tid;
     return COLORS_CUSTOM;
 }
 
