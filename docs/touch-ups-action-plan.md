@@ -15,24 +15,27 @@ Opus 4.8 = behavioral risk.
 Session 1 swept core.cpp, settingsdialog.cpp, viewerwidget.cpp, imageviewerv2.cpp, imagelib.h
 but did not touch:
 
-- [ ] `src/settings.cpp` (~34 comment-code lines) and `src/components/actionmanager/actionmanager.cpp` (~21)
-- [ ] Commented-out `qDebug()` lines that session 5 deliberately left (they are dead code, not live
+- [x] `src/settings.cpp` (~34 comment-code lines) and `src/components/actionmanager/actionmanager.cpp` (~21)
+      — re-checked 2026-07-17: both already clean, remaining `//` lines are all explanatory comments
+- [x] Commented-out `qDebug()` lines that session 5 deliberately left (they are dead code, not live
       logging): main.cpp, shortcutbuilder.cpp, imagelib.cpp, loaderrunnable.cpp, scalerrunnable.cpp,
       flowlayout.cpp, documentwidget.cpp, thumbnailview.cpp, scaler.cpp, directorywatcher.cpp,
-      windowsworker.cpp
-- [ ] `src/gui/panels/mainpanel/mainpanel.cpp:41` — one commented-out old-style connect
+      windowsworker.cpp (also the two videoplayermpv.cpp copies in plugins/)
+- [x] `src/gui/panels/mainpanel/mainpanel.cpp:41` — one commented-out old-style connect
 
 Same rule as before: delete disabled code, keep comments that explain behavior.
 
 ## T2. Modernize the remaining string-based connects — **Sonnet 5**
 
-- [ ] **`src/gui/viewers/videoplayerinitproxy.cpp:86-90`** — five signal→signal forwards still use
+- [x] **`src/gui/viewers/videoplayerinitproxy.cpp:86-90`** — five signal→signal forwards still use
       SIGNAL/SIGNAL. Session 2's skip reason ("requires lambdas") was incorrect: signal-to-signal
       pointer-to-member connects are legal — `connect(player.get(), &VideoPlayer::durationChanged,
       this, &VideoPlayerInitProxy::durationChanged)`. The `VideoPlayer` base-class header is already
       included; verify against the mpv plugin build (`plugins/player_mpv`) and the video smoke path
       (this machine needs `-DPLAYER_MPV_USE_WID=ON`, already set in build cache).
-- [ ] **Six `QTimer::singleShot(..., SLOT(...))` string forms** — `src/core.cpp:71,1493`,
+      Done: converted to base-class pointer-to-member; also removed the proxy's dead
+      `playbackFinished()` re-declaration (no Q_OBJECT in that class, so it had no moc backing).
+- [x] **Six `QTimer::singleShot(..., SLOT(...))` string forms** — `src/core.cpp:71,1493`,
       `src/gui/viewers/imageviewerv2.cpp:836,862`, `src/gui/panels/croppanel/croppanel.cpp:222`,
       `src/gui/overlays/renameoverlay.cpp:33` → pointer-to-member overload.
 - [ ] **`src/components/directorypresenter.cpp:69-80`** (optional, larger): six connects go through
@@ -45,32 +48,40 @@ Same rule as before: delete disabled code, keep comments that explain behavior.
 
 ## T3. Finish ownership in the thumbnailer chain — **Sonnet 5**
 
-- [ ] `ThumbnailerRunnable::createThumbnail` still returns `std::pair<QImage*, QSize>` (raw owning
+- [x] `ThumbnailerRunnable::createThumbnail` still returns `std::pair<QImage*, QSize>` (raw owning
       pointer), and session 6's ImageLib conversion bridges into it with `.release()`
       (`src/components/thumbnailer/thumbnailerrunnable.cpp:213-218`). Convert the pair to hold
       `std::unique_ptr<QImage>` (or return a small struct), and follow through to where the
       Thumbnail object adopts the pixmap. Same drill as session 6's ImageLib work; the chain is
       threaded but the data flow stays identical.
-- [ ] While there: `Scaler::finished(QImage*, ...)` queued-signal raw hand-off is the documented
+- [x] While there: `Scaler::finished(QImage*, ...)` queued-signal raw hand-off is the documented
       tolerated exception (see CONTRIBUTING "Ownership") — leave it, but confirm the receiving
       `Scaler::onTaskFinish` adopts into a smart pointer immediately.
+      Done: it didn't adopt (manual delete/forward); now adopts into unique_ptr on entry and
+      releases only across the queued acceptScalingResult hop; slotForwardScaledResult adopts too.
 
 ## T4. Retire `utils/stuff.{h,cpp}` — **Haiku 4.5**
 
 Deferred by session 5 (was optional there):
 
-- [ ] Replace `clamp()` callers with `std::clamp` and delete the function.
-- [ ] Move `toStdString`/`fromStdString` (and the `StdString` typedef) into a purpose-named header
+- [x] Replace `clamp()` callers with `std::clamp` and delete the function.
+- [x] Move `toStdString`/`fromStdString` (and the `StdString` typedef) into a purpose-named header
       (e.g. `utils/pathstring.h`); update includes; delete `stuff.{h,cpp}` + CMake entry.
+      Done: header-only inline helpers; `#define StdString` became a `using` alias; includes moved
+      into the four .cpp files that actually use the helpers (the old header includes were unused).
 
 ## T5. Misc small polish — **Haiku 4.5** (fold into any of the above sessions)
 
-- [ ] `Cache` uses `QMap` (ordered, O(log n)) where `QHash` suffices — swap container; `keys()`
+- [x] `Cache` uses `QMap` (ordered, O(log n)) where `QHash` suffices — swap container; `keys()`
       callers don't rely on ordering (verify `Cache::keys()`'s one caller).
-- [ ] `const QStringList Cache::keys() const` — drop the useless top-level `const` on the return type.
-- [ ] `logCache` / `logThumbnailer` categories are declared but unused — either add the missing
+- [x] `const QStringList Cache::keys() const` — drop the useless top-level `const` on the return type.
+      Done both: swapped to QHash; `keys()` turned out to have zero callers, so it was deleted
+      outright instead of fixing its return type.
+- [x] `logCache` / `logThumbnailer` categories are declared but unused — either add the missing
       qCDebug coverage in cache.cpp/thumbnailer*.cpp (preferred; both subsystems are currently
       silent) or drop the two categories.
+      Done: qCDebug in Cache insert/remove/clear/trimTo and Thumbnailer queue/mem-cache-drop;
+      the shutdown-timeout qWarning became qCWarning(logThumbnailer).
 
 ## T6. The 18 kept processEvents sites — **Opus 4.8** (opportunistic, one site at a time)
 
