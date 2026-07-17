@@ -85,6 +85,40 @@ QString FileOperations::decodeResult(const FileOpResult &result) {
     return nullptr;
 }
 
+// Shared by copyFileTo()/moveFileTo(): if destFile already exists, validates it can be
+// replaced and (when force is set) moves it aside to a hash-suffixed tmp path so a failed
+// copy/move can restore it. Returns SUCCESS to mean "proceed"; any other FileOpResult means
+// the caller should bail out with that result.
+FileOpResult FileOperations::backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp) {
+    backedUp = false;
+    if(!destFile.exists())
+        return FileOpResult::SUCCESS;
+    if(!FileOperationsPlatform::canReplaceExistingDestination(destFile))
+        return FileOpResult::DESTINATION_NOT_WRITABLE;
+    if(destFile.isDir())
+        return FileOpResult::DESTINATION_DIR_EXISTS;
+    if(!force)
+        return FileOpResult::DESTINATION_FILE_EXISTS;
+    // remove just in case it exists
+    tmpPath = destFile.absoluteFilePath() + "_" + generateHash(destFile.absoluteFilePath());
+    QFile::remove(tmpPath);
+    // move backup
+    QFile::rename(destFile.absoluteFilePath(), tmpPath);
+    backedUp = true;
+    return FileOpResult::SUCCESS;
+}
+
+// Shared by copyFileTo()/moveFileTo(): restores mtime/atime after a QFile::copy(), which
+// (unlike a rename) does not preserve them.
+void FileOperations::restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime) {
+    QFile dstF(filePath);
+    dstF.open(QIODevice::ReadWrite);
+    // dstF.setFileTime(srcBirthTime, QFileDevice::FileBirthTime); // TODO: does not work (linux)
+    dstF.setFileTime(modTime, QFileDevice::FileModificationTime);
+    dstF.setFileTime(readTime, QFileDevice::FileAccessTime);
+    dstF.close();
+}
+
 void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result) {
     QFileInfo srcFile(srcFilePath);
     QString tmpPath;
@@ -108,37 +142,15 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
         return;
     }
     QFileInfo destFile(destDirPath + "/" + srcFile.fileName());
-    if(destFile.exists()) {
-        if(!FileOperationsPlatform::canReplaceExistingDestination(destFile)) {
-            result = FileOpResult::DESTINATION_NOT_WRITABLE;
-            return;
-        }
-        if(destFile.isDir()) {
-            result = FileOpResult::DESTINATION_DIR_EXISTS;
-            return;
-        }
-        if(!force) {
-            result = FileOpResult::DESTINATION_FILE_EXISTS;
-            return;
-        }
-        // remove just in case it exists
-        tmpPath = destFile.absoluteFilePath() + "_" + generateHash(destFile.absoluteFilePath());
-        QFile::remove(tmpPath);
-        // move backup
-        QFile::rename(destFile.absoluteFilePath(), tmpPath);
-        exists = true;
-    }
+    result = backupExistingDestination(destFile, force, tmpPath, exists);
+    if(result != FileOpResult::SUCCESS)
+        return;
     // copy
     auto srcModTime = srcFile.lastModified();
     auto srcReadTime = srcFile.lastRead();
     if(QFile::copy(srcFile.absoluteFilePath(), destFile.absoluteFilePath())) {
         result = FileOpResult::SUCCESS;
-        // restore timestamps
-        QFile dstF(destFile.absoluteFilePath());
-        dstF.open(QIODevice::ReadWrite);
-        dstF.setFileTime(srcModTime, QFileDevice::FileModificationTime);
-        dstF.setFileTime(srcReadTime, QFileDevice::FileAccessTime);
-        dstF.close();
+        restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime);
         // ok; remove the backup
         if(exists)
             QFile::remove(tmpPath);
@@ -177,25 +189,9 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         return;
     }
     QFileInfo destFile(destDirPath + "/" + srcFile.fileName());
-    if(destFile.exists()) {
-        if(!FileOperationsPlatform::canReplaceExistingDestination(destFile)) {
-            result = FileOpResult::DESTINATION_NOT_WRITABLE;
-            return;
-        }
-        if(destFile.isDir()) {
-            result = FileOpResult::DESTINATION_DIR_EXISTS;
-            return;
-        }
-        if(!force) {
-            result = FileOpResult::DESTINATION_FILE_EXISTS;
-            return;
-        }
-        tmpPath = destFile.absoluteFilePath() + "_" + generateHash(destFile.absoluteFilePath());
-        QFile::remove(tmpPath);
-        // move backup
-        QFile::rename(destFile.absoluteFilePath(), tmpPath);
-        exists = true;
-    }
+    result = backupExistingDestination(destFile, force, tmpPath, exists);
+    if(result != FileOpResult::SUCCESS)
+        return;
     // move
     auto srcModTime = srcFile.lastModified();
     auto srcReadTime = srcFile.lastRead();
@@ -206,13 +202,7 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         if(removeResult == FileOpResult::SUCCESS) {
             // OK
             result = FileOpResult::SUCCESS;
-            // restore timestamps
-            QFile dstF(destFile.absoluteFilePath());
-            dstF.open(QIODevice::ReadWrite);
-            // dstF.setFileTime(srcBirthTime, QFileDevice::FileBirthTime); // TODO: does not work (linux)
-            dstF.setFileTime(srcModTime, QFileDevice::FileModificationTime);
-            dstF.setFileTime(srcReadTime, QFileDevice::FileAccessTime);
-            dstF.close();
+            restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime);
             // remove backup
             if(exists)
                 QFile::remove(tmpPath);

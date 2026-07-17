@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QCryptographicHash>
+#include <QDateTime>
 #include <QDebug>
 #include <QString>
 #include <QFileInfo>
@@ -39,4 +40,12 @@ public:
 
 private:
     static QString generateHash(const QString &str);
+    // shared "back up an existing destination file" step for copyFileTo()/moveFileTo():
+    // validates destFile can be replaced and, if force is set, moves it aside to a
+    // hash-suffixed tmp path so a failed copy/move can restore it. Returns SUCCESS to
+    // mean "proceed" (with tmpPath/backedUp set only when destFile existed); any other
+    // FileOpResult means bail out with that result.
+    static FileOpResult backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp);
+    // shared "restore mtime/atime after a QFile::copy()" step for copyFileTo()/moveFileTo()
+    static void restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime);
 };
