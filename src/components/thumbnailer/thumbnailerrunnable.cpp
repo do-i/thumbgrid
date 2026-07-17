@@ -93,12 +93,12 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
         if(imgInfo.type() == DocumentType::TEXT || imgInfo.type() == DocumentType::NONE ||
            (imgInfo.type() == DocumentType::VIDEO && isAudioSuffix(QFileInfo(imgInfo.fileName()).suffix())))
             return generateFileTypeIcon(imgInfo, size);
-        std::pair<QImage*, QSize> pair;
+        std::pair<std::unique_ptr<QImage>, QSize> pair;
         if(imgInfo.type() == VIDEO)
             pair = createVideoThumbnail(path, size, crop);
         else
             pair = createThumbnail(imgInfo.filePath(), imgInfo.format().toStdString().c_str(), size, crop);
-        image.reset(pair.first);
+        image = std::move(pair.first);
         QSize originalSize = pair.second;
 
         image = ImageLib::exifRotated(std::move(image), imgInfo.exifOrientation());
@@ -162,11 +162,11 @@ QString ThumbnailerRunnable::taskColorId() const {
     return colorId;
 }
 
-std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(const QString& path, const char *format, int size, bool squared) {
-    QImageReader *reader = new QImageReader(path, format);
+std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createThumbnail(const QString& path, const char *format, int size, bool squared) {
+    auto reader = std::make_unique<QImageReader>(path, format);
     Qt::AspectRatioMode ARMode = squared?
                 (Qt::KeepAspectRatioByExpanding):(Qt::KeepAspectRatio);
-    QImage *result = nullptr;
+    std::unique_ptr<QImage> result;
     QSize originalSize;
     bool indexed = (reader->imageFormat() == QImage::Format_Indexed8);
     bool manualResize = indexed || !reader->supportsOption(QImageIOHandler::Size);
@@ -180,31 +180,27 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(const QString& pa
             reader->setScaledClipRect(clip);
         }
         originalSize = reader->size();
-        result = new QImage();
-        if(!reader->read(result)) {
+        result = std::make_unique<QImage>();
+        if(!reader->read(result.get())) {
             // If read() returns false there's no guarantee that size conversion worked properly.
             // So we fallback to manual.
             // Se far I've seen this happen only on some weird (corrupted?) jpeg saved from camera
             manualResize = true;
-            delete result;
-            result = nullptr;
+            result.reset();
             // Force reset reader because it is really finicky
             // and can fail on the second read attempt (yeah wtf)
             reader->setFileName("");
-            delete reader;
-            reader = new QImageReader(path, format);
+            reader = std::make_unique<QImageReader>(path, format);
         }
     }
     if(manualResize) { // manual resize & crop. slower but should just work
-        QImage *fullSize = new QImage();
-        reader->read(fullSize);
+        auto fullSize = std::make_unique<QImage>();
+        reader->read(fullSize.get());
         if(indexed) {
             auto newFmt = QImage::Format_RGB32;
             if(fullSize->hasAlphaChannel())
                 newFmt = QImage::Format_ARGB32;
-            auto tmp = new QImage(fullSize->convertToFormat(newFmt));
-            delete fullSize;
-            fullSize = tmp;
+            fullSize = std::make_unique<QImage>(fullSize->convertToFormat(newFmt));
         }
         originalSize = fullSize->size();
         QSize scaledSize = fullSize->size().scaled(size, size, ARMode);
@@ -212,17 +208,15 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createThumbnail(const QString& pa
             QRect clip(0, 0, size, size);
             QRect scaledRect(QPoint(0,0), scaledSize);
             clip.moveCenter(scaledRect.center());
-            QImage scaled = QImage(fullSize->scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-            result = ImageLib::croppedRaw(&scaled, clip).release();
+            QImage scaled = fullSize->scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+            result = ImageLib::croppedRaw(&scaled, clip);
         } else {
-            result = new QImage(fullSize->scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
+            result = std::make_unique<QImage>(fullSize->scaled(scaledSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         }
-        delete fullSize;
     }
     // force reader to close file so it can be deleted later
     reader->setFileName("");
-    delete reader;
-    return std::make_pair(result, originalSize);
+    return std::make_pair(std::move(result), originalSize);
 }
 
 std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cache, const QString& path, int size, bool crop, bool force,
@@ -508,7 +502,7 @@ QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewa
     return icon;
 }
 
-std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(const QString& path, int size, bool squared) {
+std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbnail(const QString& path, int size, bool squared) {
     QFileInfo fi(path);
     QImageReader reader;
     QString tmpFilePath = settings->tmpDir() + fi.fileName() + ".png";
@@ -534,7 +528,6 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(const QStrin
     reader.setFormat("png");
     Qt::AspectRatioMode ARMode = squared?
                 (Qt::KeepAspectRatioByExpanding):(Qt::KeepAspectRatio);
-    QImage *result = nullptr;
 
     // scale & crop
     QSize scaledSize = reader.size().scaled(size, size, ARMode);
@@ -546,7 +539,7 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(const QStrin
         reader.setScaledClipRect(clip);
     }
     QSize originalSize = reader.size();
-    result = new QImage(reader.read());
+    auto result = std::make_unique<QImage>(reader.read());
 
     // force reader to close file so it can be deleted later
     reader.setFileName("");
@@ -555,5 +548,5 @@ std::pair<QImage*, QSize> ThumbnailerRunnable::createVideoThumbnail(const QStrin
     QFile tmpFile(tmpFilePath);
     tmpFile.remove();
 
-    return std::make_pair(result, originalSize);
+    return std::make_pair(std::move(result), originalSize);
 }

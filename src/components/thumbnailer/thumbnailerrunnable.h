@@ -35,8 +35,8 @@ public:
 private:
     static QString generateIdString(const QString& path, int size, bool crop);
     static QString generateDirIdString(const QString& path, int size, bool previewFit, const QString &colorId);
-    static std::pair<QImage*, QSize> createThumbnail(const QString& path, const char* format, int size, bool crop);
-    static std::pair<QImage*, QSize> createVideoThumbnail(const QString& path, int size, bool crop);
+    static std::pair<std::unique_ptr<QImage>, QSize> createThumbnail(const QString& path, const char* format, int size, bool crop);
+    static std::pair<std::unique_ptr<QImage>, QSize> createVideoThumbnail(const QString& path, int size, bool crop);
     static QList<QImage> dirPreviewImages(ThumbnailCache *cache, const QString &path, int targetSize, bool crop, bool showHidden);
     static void drawDirPreview(QImage &base, const QList<QImage> &images, bool previewFit);
     QString path;

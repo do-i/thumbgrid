@@ -1,5 +1,6 @@
 #include "scaler.h"
 
+#include <memory>
 #include <utility>
 
 /* What this should do in theory:
@@ -86,21 +87,20 @@ void Scaler::onTaskStart(const ScalerRequest& req) {
 }
 
 void Scaler::onTaskFinish(QImage *scaled, const ScalerRequest& req) {
+    // adopt the raw hand-off from ScalerRunnable::finished immediately;
+    // released again only across the queued acceptScalingResult hop
+    // (the tolerated exception, see CONTRIBUTING "Ownership")
+    std::unique_ptr<QImage> image(scaled);
     sem->acquire(1);
     running = false;
-    if(buffered && bufferedRequest.image == req.image) {
-    } else {
-        QString name = req.image->fileName();
+    if(!buffered || bufferedRequest.image != req.image)
         cache->release(req.image->fileName());
-    }
     if(buffered) {
-        delete scaled;
-        //startRequest(bufferedRequest);
         emit startBufferedRequest();
         sem->release(1);
     } else {
         sem->release(1);
-        emit acceptScalingResult(scaled, req);
+        emit acceptScalingResult(image.release(), req);
     }
 }
 
@@ -109,9 +109,8 @@ void Scaler::slotStartBufferedRequest() {
 }
 
 void Scaler::slotForwardScaledResult(QImage *image, ScalerRequest req) {
-    QPixmap *pixmap = new QPixmap();
-    *pixmap = QPixmap::fromImage(*image);
-    delete image;
+    std::unique_ptr<QImage> scaled(image);
+    QPixmap *pixmap = new QPixmap(QPixmap::fromImage(*scaled));
     emit scalingFinished(pixmap, std::move(req));
 }
 
