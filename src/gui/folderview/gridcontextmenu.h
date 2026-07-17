@@ -8,14 +8,18 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include "gui/customwidgets/contextmenuitem.h"
+#include "gui/idirectoryview.h"
 
 class GridContextMenu : public QWidget {
     Q_OBJECT
 public:
     explicit GridContextMenu(QWidget *parent = nullptr);
 
-    // Convert entries only make sense with a selection.
-    void setImageEntriesEnabled(bool mode);
+    // Gates each file-op entry on what's selected: Convert needs every item to
+    // be (or contain) a convertible image, Rename needs exactly one item,
+    // Move/Trash/Delete need at least one. View toggles and Settings are
+    // always enabled.
+    void setSelectionInfo(const SelectionInfo &info);
 
 public slots:
     void showAt(QPoint pos);

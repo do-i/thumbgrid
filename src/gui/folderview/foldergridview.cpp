@@ -460,8 +460,8 @@ void FolderGridView::wheelEvent(QWheelEvent *event) {
 
 void FolderGridView::contextMenuEvent(QContextMenuEvent *event) {
     // a right-press already selected the item under the cursor (see ThumbnailView).
-    // The view toggles are always available; the Convert entry needs a selection.
-    contextMenu->setImageEntriesEnabled(!selection().isEmpty());
+    // The view toggles are always available; file-op entries are gated on the selection.
+    contextMenu->setSelectionInfo(selectionInfo());
     contextMenu->showAt(event->globalPos());
     event->accept();
 }

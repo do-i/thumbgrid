@@ -123,8 +123,12 @@ void GridContextMenu::addSeparator(QWidget *page, QVBoxLayout *layout) {
     layout->addLayout(sepLayout);
 }
 
-void GridContextMenu::setImageEntriesEnabled(bool mode) {
-    convertItem->setEnabled(mode);
+void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
+    convertItem->setEnabled(info.total() > 0 && info.allConvertible);
+    renameItem->setEnabled(info.total() == 1);
+    moveItem->setEnabled(info.total() > 0);
+    trashItem->setEnabled(info.total() > 0);
+    deleteItem->setEnabled(info.total() > 0);
 }
 
 void GridContextMenu::switchToMainPage() {
