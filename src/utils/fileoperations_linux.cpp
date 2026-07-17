@@ -44,7 +44,7 @@ bool FileOperationsPlatform::moveToTrash(const QString &filePath) {
         QString home = QStandardPaths::writableLocation( QStandardPaths::HomeLocation );
         paths.append( home + "/.local/share/Trash" );
         paths.append( home + "/.trash" );
-        foreach( QString path, paths ){
+        for( const auto &path : std::as_const(paths) ){
             if( TrashPath.isEmpty() ){
                 QDir dir( path );
                 if( dir.exists() ){

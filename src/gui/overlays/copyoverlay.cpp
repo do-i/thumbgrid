@@ -127,13 +127,13 @@ void CopyOverlay::createDefaultPaths() {
     }
     if (paths.count() == 1 && paths.at(0) == home) {
         QDir dir(home);
-        foreach(QFileInfo mfi, dir.entryInfoList()) {
+        for(auto mfi : dir.entryInfoList()) {
             if (paths.count() >= maxPathCount) {
                 break;
             }
             if(mfi.isFile()) {
                 continue;
-            } 
+            }
             else {
                 if(mfi.fileName() == "."  
                 || mfi.fileName() ==  ".."
