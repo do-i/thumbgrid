@@ -31,9 +31,14 @@ protected:
 private:
     QStackedWidget *stack;
     ContextMenuItem *convertItem;
+    ContextMenuItem *renameItem;
+    ContextMenuItem *moveItem;
+    ContextMenuItem *trashItem;
+    ContextMenuItem *deleteItem;
 
     ContextMenuItem *makeItem(const QString &text, const QString &iconPath);
     void addConvertFormat(QVBoxLayout *layout, const QString &label, const QString &format);
+    void addSeparator(QWidget *page, QVBoxLayout *layout);
     void switchToMainPage();
     void switchToConvertPage();
     void clampToScreen(QRect &geom);

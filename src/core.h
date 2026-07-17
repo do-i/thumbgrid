@@ -119,6 +119,7 @@ private slots:
     void onScalingFinished(QPixmap* scaled, const ScalerRequest& req);
     void copyCurrentFile(const QString& destDirectory);
     void moveCurrentFile(const QString& destDirectory);
+    void moveSelection();
     void convertSelectionToFormat(QString format);
     FileOpResult removeFile(const QString& fileName, bool trash);
     void onFileRemoved(const QString& filePath, int index);

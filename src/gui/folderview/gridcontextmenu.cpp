@@ -31,15 +31,27 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     connect(convertItem, &ContextMenuItem::pressed, this, &GridContextMenu::switchToConvertPage);
     mainLayout->addWidget(convertItem);
 
-    // thin divider between the file action and the view toggles
-    auto *separator = new QWidget(mainPage);
-    separator->setAccessibleName("HLineSeparator");
-    separator->setFixedHeight(1);
-    separator->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    auto *sepLayout = new QVBoxLayout();
-    sepLayout->setContentsMargins(11, 4, 11, 4);
-    sepLayout->addWidget(separator);
-    mainLayout->addLayout(sepLayout);
+    renameItem = makeItem(tr("Rename..."), ":/res/icons/common/overlay/edit16.png");
+    renameItem->setAction("renameFile");
+    mainLayout->addWidget(renameItem);
+
+    moveItem = makeItem(tr("Move to..."), ":/res/icons/common/menuitem/move16.png");
+    moveItem->setAction("moveFile");
+    mainLayout->addWidget(moveItem);
+
+    trashItem = makeItem(tr("Move to trash"), ":/res/icons/common/menuitem/trash16.png");
+    trashItem->setAction("moveToTrash");
+    mainLayout->addWidget(trashItem);
+
+    addSeparator(mainPage, mainLayout);
+
+    // destructive and not undoable; relies on the confirmation dialog downstream
+    deleteItem = makeItem(tr("Delete permanently"), ":/res/icons/common/menuitem/trash16.png");
+    deleteItem->setAction("removeFile");
+    mainLayout->addWidget(deleteItem);
+
+    // thin divider between the file actions and the view toggles
+    addSeparator(mainPage, mainLayout);
 
     // view toggles - each drives an action so the shortcut text fills in itself
     auto *topBar = makeItem(tr("Header title bar"), ":/res/icons/common/menuitem/titlebar16.png");
@@ -55,14 +67,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     mainLayout->addWidget(statusBar);
 
     // thin divider between the view toggles and app-level actions
-    auto *separator2 = new QWidget(mainPage);
-    separator2->setAccessibleName("HLineSeparator");
-    separator2->setFixedHeight(1);
-    separator2->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    auto *sepLayout2 = new QVBoxLayout();
-    sepLayout2->setContentsMargins(11, 4, 11, 4);
-    sepLayout2->addWidget(separator2);
-    mainLayout->addLayout(sepLayout2);
+    addSeparator(mainPage, mainLayout);
 
     auto *settingsItem = makeItem(tr("Settings"), ":/res/icons/common/menuitem/settings16.png");
     settingsItem->setAction("openSettings");
@@ -105,6 +110,17 @@ void GridContextMenu::addConvertFormat(QVBoxLayout *layout, const QString &label
         emit convertFormatRequested(format);
     });
     layout->addWidget(item);
+}
+
+void GridContextMenu::addSeparator(QWidget *page, QVBoxLayout *layout) {
+    auto *separator = new QWidget(page);
+    separator->setAccessibleName("HLineSeparator");
+    separator->setFixedHeight(1);
+    separator->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    auto *sepLayout = new QVBoxLayout();
+    sepLayout->setContentsMargins(11, 4, 11, 4);
+    sepLayout->addWidget(separator);
+    layout->addLayout(sepLayout);
 }
 
 void GridContextMenu::setImageEntriesEnabled(bool mode) {

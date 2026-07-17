@@ -13,6 +13,7 @@
 
 #include <QInputDialog>
 #include <QLineEdit>
+#include <QFileDialog>
 #include <utility>
 
 Core::Core()
@@ -195,7 +196,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::removeFile, this, &Core::removePermanent);
     connect(actionManager, &ActionManager::moveToTrash, this, &Core::moveToTrash);
     connect(actionManager, &ActionManager::copyFile, mw, &MW::triggerCopyOverlay);
-    connect(actionManager, &ActionManager::moveFile, mw, &MW::triggerMoveOverlay);
+    connect(actionManager, &ActionManager::moveFile, this, &Core::moveSelection);
     connect(actionManager, &ActionManager::jumpToFirst, this, &Core::jumpToFirst);
     connect(actionManager, &ActionManager::jumpToLast, this, &Core::jumpToLast);
     connect(actionManager, &ActionManager::runScript, this, &Core::runScript);
@@ -855,6 +856,30 @@ void Core::moveCurrentFile(const QString& destDirectory) {
     }
     mw->setUpdatesEnabled(true);
     mw->repaint();
+}
+
+// In folder view there is no move overlay; ask for a destination directly.
+// Document view keeps the overlay flow.
+void Core::moveSelection() {
+    if(mw->currentViewMode() == MODE_FOLDERVIEW) {
+        if(!model)
+            return;
+        QStringList selection = currentSelection();
+        if(selection.isEmpty())
+            return;
+        QString destDir = QFileDialog::getExistingDirectory(mw, tr("Move to..."), model->directoryPath());
+        if(destDir.isEmpty())
+            return;
+        for(const auto& path : selection) {
+            if(destDir == path || destDir.startsWith(path + "/")) {
+                mw->showError(tr("Cannot move a folder into itself"));
+                return;
+            }
+        }
+        fileOps->movePathsTo(selection, destDir);
+    } else {
+        mw->triggerMoveOverlay();
+    }
 }
 
 void Core::copyCurrentFile(const QString& destDirectory) {
