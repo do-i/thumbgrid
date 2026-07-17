@@ -32,6 +32,7 @@ public slots:
     void removeItem(int index) override;
     void reloadItem(int index) override;
     void setDragHover(int) override;
+    void setSelectionInfoProvider(std::function<SelectionInfo()> provider) override;
     void addItem();
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
@@ -61,6 +62,7 @@ private:
     std::shared_ptr<InfoBarProxy> statusFooter;
     QVBoxLayout layout;
     FolderViewStateBuffer stateBuf;
+    std::function<SelectionInfo()> selectionInfoProvider;
     QMutex m;
     QString statusText;
     bool statusFooterVisible = false;

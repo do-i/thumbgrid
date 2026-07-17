@@ -1,6 +1,7 @@
 #include "documentinfo.h"
 #include "utils/logging.h"
 #include "utils/pathstring.h"
+#include <QDirIterator>
 
 DocumentInfo::DocumentInfo(const QString& path)
     : mDocumentType(DocumentType::NONE),
@@ -154,6 +155,35 @@ bool DocumentInfo::isTextDocument(const QMimeType &mimeType, const QString &suff
         "license", "copying", "notice", "readme", "changelog", "authors", "todo", "install", "news"
     };
     return textFileNames.contains(fileName.toLower());
+}
+
+// Extension-based best-effort predictor used to gate "Convert to...". gif and
+// apng are practically always animated (conversion only accepts STATIC images),
+// and pdf is excluded app-wide, so they are rejected here even though Qt may
+// list them. The authoritative STATIC check stays in convertToFormat.
+bool DocumentInfo::isConvertibleImageFile(const QString &filePath) {
+    QString suffix = QFileInfo(filePath).suffix().toLower();
+    if(suffix.isEmpty())
+        return false;
+    if(suffix == "jfif")
+        return true;
+    if(suffix == "gif" || suffix == "apng" || suffix == "pdf")
+        return false;
+    return QImageReader::supportedImageFormats().contains(suffix.toUtf8());
+}
+
+// Shallow (non-recursive) scan for the menu gate; the app's directory scan
+// includes hidden files, so we match that. Capped at maxEntries files so
+// opening a context menu on a huge directory never stalls.
+bool DocumentInfo::dirContainsConvertibleImage(const QString &dirPath, int maxEntries) {
+    QDirIterator it(dirPath, QDir::Files | QDir::Hidden);
+    int examined = 0;
+    while(it.hasNext() && examined < maxEntries) {
+        if(isConvertibleImageFile(it.next()))
+            return true;
+        examined++;
+    }
+    return false;
 }
 
 inline

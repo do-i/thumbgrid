@@ -364,6 +364,14 @@ void ThumbnailView::setThumbnail(int pos, std::shared_ptr<Thumbnail> thumb) {
     }
 }
 
+void ThumbnailView::setSelectionInfoProvider(std::function<SelectionInfo()> provider) {
+    mSelectionInfoProvider = std::move(provider);
+}
+
+SelectionInfo ThumbnailView::selectionInfo() const {
+    return mSelectionInfoProvider ? mSelectionInfoProvider() : SelectionInfo{};
+}
+
 void ThumbnailView::unloadAllThumbnails() {
     for(int i = 0; i < thumbnails.count(); i++) {
         thumbnails.at(i)->unsetThumbnail();

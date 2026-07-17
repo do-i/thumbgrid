@@ -52,6 +52,12 @@ public:
 
     static bool isTextDocument(const QMimeType &mimeType, const QString &suffix, const QString &fileName);
 
+    // Fast, extension-based predictor for "can be converted to another image
+    // format". The authoritative check stays in the conversion flow
+    // (img->type() == STATIC); this only gates the menu without loading files.
+    static bool isConvertibleImageFile(const QString &filePath);
+    static bool dirContainsConvertibleImage(const QString &dirPath, int maxEntries = 1000);
+
 private:
     QFileInfo fileInfo;
     DocumentType mDocumentType;

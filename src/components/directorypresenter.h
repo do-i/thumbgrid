@@ -34,6 +34,7 @@ public:
     void setShowParentDir(bool mode);
 
     QStringList selectedPaths() const;
+    SelectionInfo selectionInfo() const;
 
 
 signals:

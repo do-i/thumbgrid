@@ -1,4 +1,5 @@
 ﻿#include "directorypresenter.h"
+#include "sourcecontainers/documentinfo.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QImageReader>
@@ -78,6 +79,7 @@ void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> _view) {
             this, SLOT(onDroppedInto(const QMimeData*,QObject*,int)));
     connect(dynamic_cast<QObject *>(view.get()), SIGNAL(selectionChanged()),
             this, SLOT(onSelectionChanged()));
+    view->setSelectionInfoProvider([this]() { return selectionInfo(); });
 }
 
 void DirectoryPresenter::setModel(const std::shared_ptr<DirectoryModel>& newModel) {
@@ -252,6 +254,34 @@ QStringList DirectoryPresenter::selectedPaths() const {
         }
     }
     return paths;
+}
+
+SelectionInfo DirectoryPresenter::selectionInfo() const {
+    SelectionInfo info;
+    if(!view || !model)
+        return info;
+    int offset = parentOffset();
+    bool allConvertible = true;
+    for(auto i : view->selection()) {
+        if(i < offset)
+            continue;
+        i -= offset;
+        if(mShowDirs && i < model->dirCount()) {
+            info.dirCount++;
+            // skip the (disk-touching) folder scan once the selection can no
+            // longer be all-convertible
+            if(allConvertible && !DocumentInfo::dirContainsConvertibleImage(model->dirPathAt(i)))
+                allConvertible = false;
+        } else {
+            QString path = mShowDirs ? model->filePathAt(i - model->dirCount())
+                                     : model->filePathAt(i);
+            info.fileCount++;
+            if(allConvertible && !DocumentInfo::isConvertibleImageFile(path))
+                allConvertible = false;
+        }
+    }
+    info.allConvertible = allConvertible && info.total() > 0;
+    return info;
 }
 
 QString DirectoryPresenter::statusText() const {

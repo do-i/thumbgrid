@@ -356,6 +356,10 @@ void FolderView::setDragHover(int index) {
     ui->thumbnailGrid->setDragHover(index);
 }
 
+void FolderView::setSelectionInfoProvider(std::function<SelectionInfo()> provider) {
+    ui->thumbnailGrid->setSelectionInfoProvider(std::move(provider));
+}
+
 // prevent passthrough to parent
 void FolderView::wheelEvent(QWheelEvent *event) {
     event->accept();

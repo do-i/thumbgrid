@@ -55,6 +55,8 @@ void FolderViewProxy::init() {
     qApp->processEvents();
     folderView->focusOnSelection();
     folderView->onSortingChanged(stateBuf.sortingMode);
+    if(selectionInfoProvider)
+        folderView->setSelectionInfoProvider(selectionInfoProvider);
 }
 
 void FolderViewProxy::populate(int count) {
@@ -150,6 +152,14 @@ void FolderViewProxy::reloadItem(int index) {
 void FolderViewProxy::setDragHover(int index) {
     if(folderView)
         folderView->setDragHover(index);
+}
+
+void FolderViewProxy::setSelectionInfoProvider(std::function<SelectionInfo()> provider) {
+    if(folderView) {
+        folderView->setSelectionInfoProvider(std::move(provider));
+    } else {
+        selectionInfoProvider = std::move(provider);
+    }
 }
 
 void FolderViewProxy::addItem() {

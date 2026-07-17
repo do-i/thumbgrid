@@ -65,6 +65,7 @@ public slots:
     void removeItem(int index) override;
     void reloadItem(int index) override;
     void setDragHover(int index) override;
+    void setSelectionInfoProvider(std::function<SelectionInfo()> provider) override;
 
 signals:
     void itemActivated(int) override;
@@ -81,6 +82,7 @@ private:
 
     int mDrawScrollbarIndicator, lastScrollFrameTime;
     QList<int> mSelection;
+    std::function<SelectionInfo()> mSelectionInfoProvider;
 
     bool mCropThumbnails, mouseReleaseSelect;
     ThumbnailSelectMode selectMode;
@@ -122,6 +124,8 @@ protected:
     bool atSceneEnd();
 
     bool checkRange(int pos);
+
+    SelectionInfo selectionInfo() const;
 
     virtual ThumbnailWidget *createThumbnailWidget() = 0;
     virtual void addItemToLayout(ThumbnailWidget* widget, int pos) = 0;
