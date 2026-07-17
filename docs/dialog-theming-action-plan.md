@@ -36,12 +36,11 @@ the `CustomMessageBox` block of `style-template.qss`.
 These are color-themed by the QSS `QMessageBox` rules but still show a native
 title bar + native severity icon. Route them through `CustomMessageBox`.
 
-- [ ] `src/gui/dialogs/settingsdialog.cpp:129` — `QMessageBox::information` (version
+- [x] `src/gui/dialogs/settingsdialog.cpp:129` — `QMessageBox::information` (version
       popup) → `CustomMessageBox::message(this, tr("Version"), ...)`.
-- [ ] `src/gui/dialogs/settingsdialog.cpp:404` — `QMessageBox::question` (reset
-      settings confirmation) → `CustomMessageBox::confirm(this, ...)`.
-
-After this, `#include <QMessageBox>` can be dropped from `settingsdialog.cpp`.
+- [x] `src/gui/dialogs/settingsdialog.cpp:404` — `QMessageBox::question` (switch
+      shortcut preset confirmation) → `CustomMessageBox::confirm(this, ...)`.
+- [x] `#include <QMessageBox>` dropped from `settingsdialog.cpp`.
 
 ## D2. `QInputDialog` text prompt — **easy, high value**
 

@@ -3,7 +3,7 @@
 #include "appversion.h"
 #include <QSignalBlocker>
 #include <QToolButton>
-#include <QMessageBox>
+#include "gui/dialogs/custommessagebox.h"
 #include <QStyle>
 #include <QDialogButtonBox>
 #include <QFrame>
@@ -126,7 +126,7 @@ void SettingsDialog::setupAboutPage() {
     ui->horizontalLayout_41->insertWidget(
         ui->horizontalLayout_41->indexOf(ui->versionLabel) + 1, versionInfoButton);
     connect(versionInfoButton, &QToolButton::clicked, this, [this]() {
-        QMessageBox::information(this, tr("Version"),
+        CustomMessageBox::message(this, tr("Version"),
             tr("<b>thumbgrid %1</b><br><br>Build: %2")
                 .arg(appVersionShort, appVersionFull));
     });
@@ -401,13 +401,12 @@ void SettingsDialog::setupShortcutsPage() {
             return;
         if(id == ActionManager::selectedPreset() && !settings->shortcutsModified())
             return; // already exactly this preset with nothing to discard
-        const QMessageBox::StandardButton reply = QMessageBox::question(this,
+        const bool proceed = CustomMessageBox::confirm(this,
             tr("Switch shortcut preset"),
             tr("Switching to \"%1\" replaces all current keyboard/mouse shortcuts "
                "with that preset's bindings. This cannot be undone from this dialog. Continue?")
-                .arg(mShortcutPresetComboBox->itemText(index)),
-            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-        if(reply != QMessageBox::Yes) {
+                .arg(mShortcutPresetComboBox->itemText(index)));
+        if(!proceed) {
             refreshShortcutPresetCombo(); // revert the displayed selection
             return;
         }
