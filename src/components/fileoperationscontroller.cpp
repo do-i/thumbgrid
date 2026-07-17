@@ -1,8 +1,10 @@
 #include "fileoperationscontroller.h"
 
 #include <utility>
+#include <QDirIterator>
 #include "utils/fileoperations.h"
 #include "utils/logging.h"
+#include "sourcecontainers/documentinfo.h"
 
 FileOperationsController::FileOperationsController(MW *mw, QObject *parent)
     : QObject(parent),
@@ -248,11 +250,28 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
         QString dest;
         std::shared_ptr<Image> img;
     };
+    // Expand any selected directory to its directly contained convertible
+    // images (non-recursive); a folder with nothing convertible contributes
+    // nothing and falls through to the "Nothing to convert" message below.
+    QStringList expandedPaths;
+    for(const QString &path : paths) {
+        if(QFileInfo(path).isDir()) {
+            QDirIterator it(path, QDir::Files | QDir::Hidden);
+            while(it.hasNext()) {
+                QString entry = it.next();
+                if(DocumentInfo::isConvertibleImageFile(entry))
+                    expandedPaths << entry;
+            }
+        } else {
+            expandedPaths << path;
+        }
+    }
+
     QList<ConvertJob> jobs;
     int skipped = 0;
     bool overwrites = false;
 
-    for(const QString &path : paths) {
+    for(const QString &path : expandedPaths) {
         QFileInfo fi(path);
         QString srcExt = fi.suffix().toLower();
         // already in the target format
@@ -281,9 +300,18 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
 
     int converted = 0, failed = 0;
     for(const ConvertJob &job : jobs) {
-        // make sure the image is cached so DirectoryModel::saveFile can access it
-        model->updateImage(job.src, job.img);
-        if(model->saveFile(job.src, job.dest))
+        bool ok;
+        if(model->containsFile(job.src)) {
+            // make sure the image is cached so DirectoryModel::saveFile can access it
+            model->updateImage(job.src, job.img);
+            ok = model->saveFile(job.src, job.dest);
+        } else {
+            // files expanded from a selected subfolder are not entries of the
+            // open directory, so saveFile would reject them; save directly,
+            // bypassing model bookkeeping (nothing in the model to update)
+            ok = job.img->save(job.dest);
+        }
+        if(ok)
             converted++;
         else
             failed++;
