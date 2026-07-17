@@ -655,7 +655,7 @@ void ThumbnailView::scrollSmooth(int angleDelta) {
 void ThumbnailView::mousePressEvent(QMouseEvent *event) {
     mouseReleaseSelect = false;
     dragStartPos = QPoint(0,0);
-    ThumbnailWidget *item = dynamic_cast<ThumbnailWidget*>(itemAt(event->pos()));
+    ThumbnailWidget *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(event->pos()));
     if(item) {
         int index = thumbnails.indexOf(item);
         if(event->button() == Qt::LeftButton) {
@@ -693,7 +693,7 @@ void ThumbnailView::mouseMoveEvent(QMouseEvent *event) {
     if(event->buttons() != Qt::LeftButton || !selection().count())
         return;
     if(QLineF(dragStartPos, event->pos()).length() >= 40) {
-        auto *item = dynamic_cast<ThumbnailWidget*>(itemAt(dragStartPos));
+        auto *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(dragStartPos));
         if(item && selection().contains(thumbnails.indexOf(item)))
             emit draggedOut();
     }
@@ -702,7 +702,7 @@ void ThumbnailView::mouseMoveEvent(QMouseEvent *event) {
 void ThumbnailView::mouseReleaseEvent(QMouseEvent *event) {
     QGraphicsView::mouseReleaseEvent(event);
     if(mouseReleaseSelect && QLineF(dragStartPos, event->pos()).length() < 40) {
-        ThumbnailWidget *item = dynamic_cast<ThumbnailWidget*>(itemAt(event->pos()));
+        ThumbnailWidget *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(event->pos()));
         if(item) {
             int index = thumbnails.indexOf(item);
             select(index);
@@ -712,7 +712,7 @@ void ThumbnailView::mouseReleaseEvent(QMouseEvent *event) {
 
 void ThumbnailView::mouseDoubleClickEvent(QMouseEvent *event) {
     if(event->button() == Qt::LeftButton) {
-        ThumbnailWidget *item = dynamic_cast<ThumbnailWidget*>(itemAt(event->pos()));
+        ThumbnailWidget *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(event->pos()));
         if(item) {
             emit itemActivated(thumbnails.indexOf(item));
             return;
