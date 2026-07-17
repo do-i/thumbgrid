@@ -214,9 +214,6 @@ void SettingsDialog::setupFeatureToggles() {
 
 #ifndef USE_MPV
     ui->videoPlaybackGroup->setEnabled(false);
-    //ui->novideoInfoLabel->setHidden(false);
-#else
-    //ui->novideoInfoLabel->setHidden(true);
 #endif
 
 #ifdef USE_OPENCV
@@ -535,15 +532,7 @@ void SettingsDialog::adjustSizeToContents() {
     ui->scrollAreaWidgetContents_3->layout()->activate();
     ui->scrollArea_3->setMinimumWidth(ui->scrollAreaWidgetContents_3->minimumSizeHint().width());
     // container
-    //ui->stackedWidget->layout()->activate();
     this->setMinimumWidth(sizeHint().width() + 22);
-
-    //qDebug() << "window:" << this->sizeHint() << this->minimumSizeHint() << this->size();
-    //qDebug() << "stackedwidget:" << ui->stackedWidget->sizeHint() << ui->stackedWidget->minimumSizeHint() << ui->stackedWidget->size();
-    //qDebug() << "scrollarea:" << ui->scrollArea->sizeHint() << ui->scrollArea->minimumSizeHint() << ui->scrollArea->size();
-    //qDebug() << "scrollareawidget:" << ui->scrollAreaWidgetContents->sizeHint() << ui->scrollAreaWidgetContents->minimumSizeHint() << ui->scrollAreaWidgetContents->size();
-    //qDebug() << "grid" << ui->gridLayout_15->sizeHint();
-    //qDebug() << "wtf" << ui->startInFolderViewCheckBox->sizeHint() << ui->startInFolderViewCheckBox->minimumSizeHint();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::resetToDesktopTheme() {

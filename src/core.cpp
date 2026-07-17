@@ -280,15 +280,11 @@ void Core::onUpdate() {
     actionManager->adjustFromVersion(lastVer);
 
     qDebug() << "Updated: " << settings->lastVersion().toString() << ">" << appVersion.toString();
-    // TODO: finish changelogs
-    //if(settings->showChangelogs())
-    //    mw->showChangelogWindow();
     mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + " > " + appVersion.toString(), 4000);
     settings->setLastVersion(appVersion);
 }
 
 void Core::onFirstRun() {
-    //mw->showSomeSortOfWelcomeScreen();
     mw->showMessage(tr("Welcome to ") + qApp->applicationName() + tr(" version ") + appVersion.toString() + "!", 4000);
     settings->setFirstRun(false);
     settings->setLastVersion(appVersion);
@@ -727,10 +723,8 @@ void Core::onDraggedOut(QList<QString> paths) {
             urlList << QUrl::fromLocalFile(path);
         mimeData->setUrls(urlList);
     }
-    //auto thumb = Thumbnailer::getThumbnail(paths.last(), 100);
     mDrag = new QDrag(this);
     mDrag->setMimeData(mimeData);
-    //mDrag->setPixmap(*thumb->pixmap().get());
     mDrag->exec(Qt::CopyAction | Qt::MoveAction | Qt::LinkAction, Qt::CopyAction);
 }
 
@@ -743,7 +737,6 @@ QMimeData *Core::getMimeDataForImage(std::shared_ptr<Image> img, MimeDataTarget 
         if(img->isEdited()) {
             // TODO: cleanup temp files
             // meanwhile use generic name
-            //path = settings->cacheDir() + img->baseName() + ".png";
             path = settings->tmpDir() + "image.png";
             // use faster compression for drag'n'drop
             int pngQuality = (target == TARGET_DROP) ? 80 : 30;

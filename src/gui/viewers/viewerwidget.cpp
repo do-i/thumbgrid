@@ -336,8 +336,6 @@ void ViewerWidget::stopPlayback() {
     if(currentWidget == IMAGEVIEWER && imageViewer->hasAnimation())
         imageViewer->stopAnimation();
     if(currentWidget == VIDEOPLAYER) {
-        // stopping is visibly slower
-        //videoPlayer->stop();
         videoPlayer->setPaused(true);
     }
 }
@@ -346,8 +344,6 @@ void ViewerWidget::startPlayback() {
     if(currentWidget == IMAGEVIEWER && imageViewer->hasAnimation())
         imageViewer->startAnimation();
     if(currentWidget == VIDEOPLAYER) {
-        // stopping is visibly slower
-        //videoPlayer->stop();
         videoPlayer->setPaused(false);
     }
 }

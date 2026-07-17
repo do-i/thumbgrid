@@ -28,7 +28,6 @@ class ImageLib {
         static QImage *flippedVRaw(const QImage *src);
         static QImage *flippedV(std::shared_ptr<const QImage> src);
 
-        //static QImage *scaled(const QImage *source, QSize destSize, ScalingFilter filter);
         static QImage *scaled(std::shared_ptr<const QImage> source, QSize destSize, ScalingFilter filter);
 
         static QImage *scaled_Qt(const QImage *source, QSize destSize, bool smooth);
