@@ -30,6 +30,15 @@ QString resolveThemePath(const QString &fileName) {
     return QStringLiteral(":/res/themes/") + fileName;
 }
 
+// Offset a color's HSV value by delta (clamped), preserving hue/saturation.
+// Used to derive table surface colors from the widget background when a preset
+// omits the explicit table_* keys.
+QColor valueOffset(const QColor &c, int delta) {
+    QColor r;
+    r.setHsv(c.hue(), c.saturation(), qBound(0, c.value() + delta, 255));
+    return r;
+}
+
 } // namespace
 
 BaseColorScheme ThemeStore::parseColors(QSettings &settings, int tid) {
@@ -60,6 +69,11 @@ BaseColorScheme ThemeStore::parseColors(QSettings &settings, int tid) {
     read("fv_parent_icon",        base.folderview_parent_icon);
     read("fv_sel_label_bg",       base.folderview_selected_label_bg);
     read("fv_cell_bg",            base.folderview_cell_bg);
+    read("table_bg",              base.table_bg);
+    read("table_bg_alt",          base.table_bg_alt);
+    read("table_header",          base.table_header);
+    read("table_text",            base.table_text);
+    read("table_border",          base.table_border);
     settings.endGroup();
     return base;
 }
@@ -144,6 +158,24 @@ void ColorScheme::setBaseColors(BaseColorScheme base) {
     folderview_parent_icon       = base.folderview_parent_icon.isValid() ? base.folderview_parent_icon : icons;
     folderview_selected_label_bg = base.folderview_selected_label_bg.isValid() ? base.folderview_selected_label_bg : folderview_label_bg;
     folderview_cell_bg           = base.folderview_cell_bg.isValid() ? base.folderview_cell_bg : folderview;
+
+    // Settings dialog shortcuts table. Presets/custom configs that omit these
+    // keys must still render a themed table (not native white), so derive the
+    // surface from the widget background: dark themes get a slightly-lighter
+    // surface with a lighter header/gridline; light themes keep the native-ish
+    // white look with a light-gray header and grid.
+    if(widget.valueF() <= 0.45f) { // dark
+        table_bg     = base.table_bg.isValid()     ? base.table_bg     : valueOffset(widget, 8);
+        table_bg_alt = base.table_bg_alt.isValid() ? base.table_bg_alt : valueOffset(table_bg, 6);
+        table_header = base.table_header.isValid() ? base.table_header : valueOffset(widget, 18);
+        table_border = base.table_border.isValid() ? base.table_border : valueOffset(widget, 30);
+    } else { // light
+        table_bg     = base.table_bg.isValid()     ? base.table_bg     : widget;
+        table_bg_alt = base.table_bg_alt.isValid() ? base.table_bg_alt : valueOffset(widget, -6);
+        table_header = base.table_header.isValid() ? base.table_header : valueOffset(widget, -10);
+        table_border = base.table_border.isValid() ? base.table_border : valueOffset(widget, -22);
+    }
+    table_text = base.table_text.isValid() ? base.table_text : text;
 }
 
 QString ColorScheme::bakedThumbnailSignature() const {

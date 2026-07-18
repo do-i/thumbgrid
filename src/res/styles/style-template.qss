@@ -1177,6 +1177,43 @@ SettingsDialog QComboBox QAbstractItemView::item:selected {
     background-color: %accent_hover_rgba%;
 }
 
+/* Shortcuts table (Shortcuts tab). Without these rules it renders native white
+   on every theme; colors come from the per-preset table_* keys (derived from
+   the widget surface when a preset omits them). */
+SettingsDialog QTableWidget {
+    background-color: %table_bg%;
+    alternate-background-color: %table_bg_alt%;
+    color: %table_text%;
+    gridline-color: %table_border%;
+    border: 1px solid %table_border%;
+    border-radius: 3px;
+}
+
+SettingsDialog QTableWidget::item {
+    padding: 3px 5px;
+}
+
+SettingsDialog QTableWidget::item:selected {
+    background-color: %accent_hover_rgba%;
+    color: %table_text%;
+}
+
+SettingsDialog QHeaderView::section {
+    background-color: %table_header%;
+    color: %table_text%;
+    border: none;
+    border-right: 1px solid %table_border%;
+    border-bottom: 1px solid %table_border%;
+    padding: 4px 6px;
+}
+
+SettingsDialog QTableWidget QTableCornerButton::section {
+    background-color: %table_header%;
+    border: none;
+    border-right: 1px solid %table_border%;
+    border-bottom: 1px solid %table_border%;
+}
+
 ResizeDialog QSpinBox,
 ResizeDialog QDoubleSpinBox {
     color: %text%;

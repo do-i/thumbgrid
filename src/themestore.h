@@ -37,6 +37,12 @@ struct BaseColorScheme {
     QColor scrollbar;
     QColor overlay_text;
     QColor overlay;
+    // Settings dialog shortcuts table (optional; derived when absent)
+    QColor table_bg;
+    QColor table_bg_alt;
+    QColor table_header;
+    QColor table_text;
+    QColor table_border;
 };
 
 class ColorScheme {
@@ -85,6 +91,12 @@ public:
     QColor folderview_button_hover;
     QColor folderview_button_pressed;
     QColor input_field_focus;
+    // Settings dialog shortcuts table
+    QColor table_bg;
+    QColor table_bg_alt;
+    QColor table_header;
+    QColor table_text;
+    QColor table_border;
 
 
 private:

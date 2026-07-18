@@ -826,6 +826,11 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
     styleSheet.replace("%slider_handle%",        colors.text_hc2.name());
     styleSheet.replace("%folderview_button_hover%",   colors.folderview_button_hover.name());
     styleSheet.replace("%folderview_button_pressed%", colors.folderview_button_pressed.name());
+    styleSheet.replace("%table_bg%",             colors.table_bg.name());
+    styleSheet.replace("%table_bg_alt%",         colors.table_bg_alt.name());
+    styleSheet.replace("%table_header%",         colors.table_header.name());
+    styleSheet.replace("%table_text%",           colors.table_text.name());
+    styleSheet.replace("%table_border%",         colors.table_border.name());
     styleSheet.replace("%text_secondary_rgba%",  "rgba(" + QString::number(colors.text.red())   + ","
                                                          + QString::number(colors.text.green()) + ","
                                                          + QString::number(colors.text.blue())  + ",62%)");
