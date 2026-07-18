@@ -103,10 +103,16 @@ boat.
 
 ---
 
-## Suggested order
+## Status (2026-07-17)
 
-1. **D1 + D2** — small, removes the remaining native message/input popups. (quick)
-2. **D5 FileReplaceDialog** — most user-visible of the framed dialogs (fires on
-   every copy/move conflict).
-3. **D3** — only after deciding native-vs-themed file pickers.
-4. **D4 / rest of D5** — cosmetic polish.
+- **D1** ✅ Settings version/preset-switch popups → `CustomMessageBox`.
+- **D2** ✅ New Folder prompt → `CustomMessageBox::getText`.
+- **D3** ✅ Decided: file pickers stay native.
+- **D4** ✅ Color-picker wrapper body themed (native frame kept).
+- **D5** ✅ FileReplaceDialog converted to frameless themed; other 5 dialogs +
+  Changelog deferred by decision (native frames, content already themed).
+
+Remaining open items are all **deferred by decision**, not pending work: the D5
+frameless conversion of Settings / Resize / ScriptEditor / ShortcutCreator /
+Print / Changelog. Revisit only if a fully bespoke (frameless) window look is
+wanted across the app.
