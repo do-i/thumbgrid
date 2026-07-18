@@ -48,6 +48,8 @@ void ColorSelectorButton::showColorSelector() {
     connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
+    for(auto *b : buttons->buttons()) b->setCursor(Qt::PointingHandCursor);
+
     auto *layout = new QVBoxLayout(&dialog);
     layout->addWidget(picker);
     layout->addWidget(buttons);
