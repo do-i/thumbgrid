@@ -87,8 +87,8 @@ bool CustomMessageBox::confirm(QWidget *parent, const QString& title, const QStr
     CustomMessageBox box(parent);
     box.setTitle(title);
     box.setText(text);
-    box.addButton(rejectText, false);
     box.addButton(acceptText, true, true);
+    box.addButton(rejectText, false);
     return box.exec() == QDialog::Accepted;
 }
 
@@ -106,8 +106,8 @@ QString CustomMessageBox::getText(QWidget *parent, const QString& title, const Q
     CustomMessageBox box(parent);
     box.setTitle(title);
     box.setText(label);
-    box.addButton(tr("Cancel"), false);
     box.addButton(tr("OK"), true, true);
+    box.addButton(tr("Cancel"), false);
     QLineEdit *field = box.addInput(initialValue); // added last so it keeps focus
     const bool accepted = box.exec() == QDialog::Accepted;
     if(ok)

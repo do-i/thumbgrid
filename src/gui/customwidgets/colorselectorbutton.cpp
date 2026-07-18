@@ -1,6 +1,6 @@
 #include "colorselectorbutton.h"
 
-#include <QDialogButtonBox>
+#include <QHBoxLayout>
 #include <QPushButton>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -43,24 +43,34 @@ void ColorSelectorButton::showColorSelector() {
     // forward that to the wrapper instead of it just hiding inside the layout
     connect(picker, &QDialog::finished, &dialog, &QDialog::done);
 
-    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Apply
-                                         | QDialogButtonBox::Cancel, &dialog);
-    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    // Plain buttons instead of QDialogButtonBox: the box's visual order is
+    // style-driven and can't be forced via QSS, so lay out OK, Cancel, Apply
+    // ourselves (accept-first, Apply last/optional to match the rest of the app).
+    auto *okButton = new QPushButton(tr("OK"), &dialog);
+    auto *cancelButton = new QPushButton(tr("Cancel"), &dialog);
+    auto *applyButton = new QPushButton(tr("Apply"), &dialog);
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
 
     // match CustomMessageBox buttons: no stock icons, hand cursor, accent on OK
-    for(auto *b : buttons->buttons()) {
+    for(auto *b : {okButton, cancelButton, applyButton}) {
         b->setCursor(Qt::PointingHandCursor);
         b->setIcon(QIcon());
     }
-    buttons->button(QDialogButtonBox::Ok)->setDefault(true);
+    okButton->setDefault(true);
+
+    auto *buttonRow = new QHBoxLayout();
+    buttonRow->addStretch(1);
+    buttonRow->addWidget(okButton);
+    buttonRow->addWidget(cancelButton);
+    buttonRow->addWidget(applyButton);
 
     auto *layout = new QVBoxLayout(&dialog);
     layout->addWidget(picker);
-    layout->addWidget(buttons);
+    layout->addLayout(buttonRow);
 
     QColor appliedColor; // invalid until the first Apply
-    connect(buttons->button(QDialogButtonBox::Apply), &QPushButton::clicked, this, [&]() {
+    connect(applyButton, &QPushButton::clicked, this, [&]() {
         QColor newColor = picker->currentColor();
         // skip the app-wide re-theme when this exact color is already live
         if(newColor == (appliedColor.isValid() ? appliedColor : initialColor))
