@@ -10,9 +10,8 @@
 #include "platform/platformdesktop.h"
 #include "utils/safesave.h"
 #include "utils/logging.h"
+#include "gui/dialogs/custommessagebox.h"
 
-#include <QInputDialog>
-#include <QLineEdit>
 #include <QFileDialog>
 #include <utility>
 
@@ -1086,8 +1085,8 @@ void Core::createDirectory() {
     if(parentDir.isEmpty())
         return;
     bool ok = false;
-    QString name = QInputDialog::getText(mw, tr("New Folder"), tr("Folder name:"),
-                                         QLineEdit::Normal, tr("New Folder"), &ok);
+    QString name = CustomMessageBox::getText(mw, tr("New Folder"), tr("Folder name:"),
+                                             tr("New Folder"), &ok);
     if(!ok)
         return;
     name = name.trimmed();

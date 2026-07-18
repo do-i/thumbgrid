@@ -44,10 +44,11 @@ title bar + native severity icon. Route them through `CustomMessageBox`.
 
 ## D2. `QInputDialog` text prompt — **easy, high value**
 
-- [ ] `src/core.cpp:1089` — `QInputDialog::getText(...)` for the "New Folder" name.
-      This is a stock modal with native chrome. Add a small themed input variant
-      (a `CustomMessageBox` with a `QLineEdit` in the body, returning the entered
-      text) and use it here. Reuses the same frameless themed shell.
+- [x] `src/core.cpp:1089` — `QInputDialog::getText(...)` for the "New Folder" name
+      → `CustomMessageBox::getText(...)`. Added `addInput()` + `getText()` to
+      `CustomMessageBox` (themed `QLineEdit` in the body, Enter accepts, initial
+      text pre-selected) plus `CustomMessageBox QLineEdit` QSS rules. `QInputDialog`
+      / `QLineEdit` includes dropped from `core.cpp`.
 
 ## D3. Native `QFileDialog` usage — **design decision, then larger effort**
 

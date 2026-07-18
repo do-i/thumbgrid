@@ -3,6 +3,7 @@
 #include <QDialog>
 
 class QLabel;
+class QLineEdit;
 class QPushButton;
 class QHBoxLayout;
 class QVBoxLayout;
@@ -19,6 +20,9 @@ public:
 
     void setTitle(const QString& title);
     void setText(const QString& text);
+    // Adds a single-line text field to the body and returns it. Its content
+    // is selected and focused so the user can type/replace immediately.
+    QLineEdit* addInput(const QString& initialValue = QString());
     // role == true accepts the dialog, false rejects it. The first button
     // added with makeDefault triggers on Enter and receives initial focus.
     QPushButton* addButton(const QString& text, bool acceptRole, bool makeDefault = false);
@@ -30,6 +34,10 @@ public:
     // Single-button notice (info / error). Blocks until dismissed.
     static void message(QWidget *parent, const QString& title, const QString& text,
                         const QString& buttonText = QObject::tr("OK"));
+    // Themed replacement for QInputDialog::getText. Returns the entered text;
+    // when *ok is provided it reports whether the accept button was chosen.
+    static QString getText(QWidget *parent, const QString& title, const QString& label,
+                           const QString& initialValue = QString(), bool *ok = nullptr);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -40,6 +48,7 @@ private:
 
     QLabel      *titleLabel;
     QLabel      *textLabel;
+    QLineEdit   *inputField;
     QVBoxLayout *rootLayout;
     QHBoxLayout *buttonLayout;
 };

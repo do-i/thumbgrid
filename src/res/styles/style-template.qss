@@ -1044,6 +1044,17 @@ CustomMessageBox QLabel[accessibleName="DialogTitle"] {
     font-size: %font_large%;
     font-weight: bold;
 }
+CustomMessageBox QLineEdit {
+    color: %text%;
+    background-color: %button%;
+    border: 1px solid %widget_border%;
+    border-radius: 3px;
+    padding: 5px 8px 5px 8px;
+    selection-background-color: %accent%;
+}
+CustomMessageBox QLineEdit:focus {
+    border-color: %accent%;
+}
 
 ResizeDialog QLabel,
 FileReplaceDialog QLabel,

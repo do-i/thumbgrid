@@ -1,6 +1,7 @@
 #include "custommessagebox.h"
 
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -12,6 +13,7 @@ CustomMessageBox::CustomMessageBox(QWidget *parent)
     : QDialog(parent),
       titleLabel(new QLabel(this)),
       textLabel(new QLabel(this)),
+      inputField(nullptr),
       rootLayout(new QVBoxLayout(this)),
       buttonLayout(new QHBoxLayout())
 {
@@ -51,6 +53,20 @@ void CustomMessageBox::setText(const QString& text) {
     textLabel->setVisible(!text.isEmpty());
 }
 
+QLineEdit* CustomMessageBox::addInput(const QString& initialValue) {
+    if(!inputField) {
+        inputField = new QLineEdit(this);
+        // Sit above the button row (last item in the root layout).
+        rootLayout->insertWidget(rootLayout->count() - 1, inputField);
+        // Enter in the field accepts the dialog.
+        connect(inputField, &QLineEdit::returnPressed, this, &QDialog::accept);
+    }
+    inputField->setText(initialValue);
+    inputField->selectAll();
+    inputField->setFocus(Qt::OtherFocusReason);
+    return inputField;
+}
+
 QPushButton* CustomMessageBox::addButton(const QString& text, bool acceptRole, bool makeDefault) {
     auto *button = new QPushButton(text, this);
     button->setCursor(Qt::PointingHandCursor);
@@ -83,6 +99,20 @@ void CustomMessageBox::message(QWidget *parent, const QString& title, const QStr
     box.setText(text);
     box.addButton(buttonText, true, true);
     box.exec();
+}
+
+QString CustomMessageBox::getText(QWidget *parent, const QString& title, const QString& label,
+                                  const QString& initialValue, bool *ok) {
+    CustomMessageBox box(parent);
+    box.setTitle(title);
+    box.setText(label);
+    box.addButton(tr("Cancel"), false);
+    box.addButton(tr("OK"), true, true);
+    QLineEdit *field = box.addInput(initialValue); // added last so it keeps focus
+    const bool accepted = box.exec() == QDialog::Accepted;
+    if(ok)
+        *ok = accepted;
+    return accepted ? field->text() : QString();
 }
 
 void CustomMessageBox::paintEvent(QPaintEvent *event) {
