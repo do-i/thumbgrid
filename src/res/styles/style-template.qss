@@ -1029,6 +1029,37 @@ QMessageBox {
     background-color: %background%;
 }
 
+/* Wrapper QDialog around the embedded (non-native) QColorDialog in
+   colorselectorbutton.cpp. Keeps its native frame like the other secondary
+   dialogs, but themes the body so the picker's labels/spinboxes stay legible. */
+QDialog#ColorPickerDialog {
+    background-color: %background%;
+}
+QDialog#ColorPickerDialog QLabel {
+    color: %text%;
+}
+QDialog#ColorPickerDialog QPushButton {
+    color: %text%;
+    background-color: %button%;
+    border-radius: 3px;
+    padding: 5px 12px 5px 12px;
+    min-width: 60px;
+}
+QDialog#ColorPickerDialog QPushButton:hover {
+    background-color: %button_hover%;
+}
+QDialog#ColorPickerDialog QPushButton:pressed {
+    background-color: %button_pressed%;
+}
+QDialog#ColorPickerDialog QSpinBox,
+QDialog#ColorPickerDialog QLineEdit {
+    color: %text%;
+    background-color: %button%;
+    border: 1px solid %widget_border%;
+    border-radius: 3px;
+    padding: 2px 4px 2px 4px;
+}
+
 /* FileReplaceDialog is frameless (see filereplacedialog.cpp): give it the same
    rounded themed body as CustomMessageBox instead of a flat filled rectangle. */
 FileReplaceDialog {

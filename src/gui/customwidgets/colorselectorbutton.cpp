@@ -29,6 +29,7 @@ void ColorSelectorButton::showColorSelector() {
     // an Apply / OK / Cancel box. Apply previews without closing.
     const QColor initialColor = mColor;
     QDialog dialog(this);
+    dialog.setObjectName(QStringLiteral("ColorPickerDialog"));
     dialog.setWindowTitle(mDescription);
 
     auto *picker = new QColorDialog(initialColor, &dialog);

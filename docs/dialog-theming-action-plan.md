@@ -64,12 +64,15 @@ Call sites (for reference, should any future change revisit this):
 `settingsdialog.cpp:1442`, `printdialog.cpp:72` (pdf location),
 `pathselectormenuitem.cpp:12`.
 
-## D4. `QColorDialog` — **low priority**
+## D4. `QColorDialog` — **done (body themed, native frame kept)**
 
-- [ ] `src/gui/customwidgets/colorselectorbutton.cpp:34` — already embedded with
-      `DontUseNativeDialog` inside a custom dialog, so the outer shell is ours,
-      but `QColorDialog`'s own internal controls aren't fully QSS-styled. Polish
-      only if the settings color picker looks out of place.
+- [x] `src/gui/customwidgets/colorselectorbutton.cpp` — the embedded
+      (`DontUseNativeDialog`) `QColorDialog` sits in a plain wrapper `QDialog`
+      that had no theming, so its labels/spinboxes rendered with the default
+      palette. Gave the wrapper `objectName("ColorPickerDialog")` and added
+      `QDialog#ColorPickerDialog` QSS (background, labels, buttons, spin/line
+      edits) so the picker body matches the app. Native frame kept, consistent
+      with the D5 decision.
 
 ## D5. Themed-but-native-framed `QDialog` subclasses — **optional consistency pass**
 
