@@ -74,6 +74,14 @@ add_test(
     COMMAND thumbgrid_shortcut_context_dispatch_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_script_shortcut_binding_test
+    behavior/test_a_script_can_be_bound_to_a_shortcut.cpp
+)
+add_test(
+    NAME "A script can be bound to a shortcut"
+    COMMAND thumbgrid_script_shortcut_binding_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_shortcut_context_persistence_test
     behavior/test_shortcut_contexts_persist_and_legacy_configs_migrate.cpp
 )

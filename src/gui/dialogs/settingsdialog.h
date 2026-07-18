@@ -62,11 +62,7 @@ private:
     Ui::SettingsDialog *ui;
 
     void saveShortcuts();
-    void addShortcutToTable(const QString &action, const QString &shortcut, ViewMode context);
     void addScriptToList(const QString &name);
-    // The shortcut table carries a Context column (stable token in Qt::UserRole).
-    ViewMode contextAtRow(int row);
-    void selectShortcutRow(const QString &shortcut, ViewMode context);
     void setupPreferencePages();
     QWidget* makeSettingsPage(const QString &title, QVBoxLayout **contentLayout);
     QWidget* makeSettingsGroup(const QString &title = QString());
@@ -96,7 +92,6 @@ private:
     void openShortcutDetails(const QString &action, ViewMode context);
 
     void setupSidebar();
-    void removeShortcutAt(int row);
     void adjustSizeToContents();
     QMap<QString, QString> langs; // <"en_US", "English">
     QButtonGroup fitModeGrp, folderEndGrp, zoomIndGrp;

@@ -322,7 +322,7 @@ QWidget* SettingsDialog::makeSettingsGroup(const QString &title) {
 //------------------------------------------------------------------------------
 void SettingsDialog::setupPreferencePages() {
     ui->label_29->setText(tr("Shortcuts"));
-    ui->label_43->setText(tr("Also, you can assign shortcuts to scripts in Shortcuts."));
+    ui->label_43->setText(tr("Every script is also listed on the Shortcuts page, where you can assign it a key."));
     ui->startInFolderViewCheckBox->setText(tr("Start in grid view by default"));
     ui->folderViewTopBarCheckBox->setText(tr("Show grid top bar"));
     ui->folderViewFontSizeLabel->setText(tr("Grid filename font size:"));
@@ -383,9 +383,15 @@ void SettingsDialog::setupPreferencePages() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::setupShortcutsPage() {
+    // The pre-redesign Add/Edit/Remove trio stays hidden; "+ New shortcut"
+    // below is the single entry point into ShortcutCreatorDialog.
     ui->pushButton_2->hide();
     ui->pushButton_8->hide();
     ui->pushButton_4->hide();
+
+    ui->newShortcutButton->setText(tr("+ New shortcut"));
+    ui->newShortcutButton->setCursor(Qt::PointingHandCursor);
+    connect(ui->newShortcutButton, &QPushButton::clicked, this, &SettingsDialog::addShortcut);
 
     // Preset selector: switching presets replaces the whole active mapping, so
     // it lives above the per-context toolbar, confirm-gated, and applies (and
@@ -1065,6 +1071,14 @@ void SettingsDialog::updateShortcutsTable() {
         actions.insert(it.value());
     for(auto it = active.cbegin(); it != active.cend(); ++it)
         actions.insert(it.value());
+    // Scripts are Global-only actions and are usually unbound, so they would
+    // otherwise never get a row to click. Seed them so they are discoverable
+    // (and bindable) here rather than needing the creator dialog.
+    if(context == MODE_GLOBAL && scriptManager) {
+        const QStringList names = scriptManager->scriptNames();
+        for(const QString &name : names)
+            actions.insert(QStringLiteral("s:") + name);
+    }
 
     QStringList actionNames = actions.values();
     actionNames.sort(Qt::CaseInsensitive);
@@ -1077,8 +1091,16 @@ void SettingsDialog::updateShortcutsTable() {
         const int row = ui->shortcutsTableWidget->rowCount();
         ui->shortcutsTableWidget->setRowCount(row + 1);
 
-        QTableWidgetItem *actionItem = new QTableWidgetItem(action);
+        // Script actions are stored as "s:<name>"; show the bare name with a
+        // "(script)" tag so the row does not read as a misspelled action.
+        // Qt::UserRole always keeps the real action id - every lookup uses it.
+        const bool isScript = action.startsWith(QStringLiteral("s:"));
+        const QString label = isScript ? tr("%1  (script)").arg(action.mid(2)) : action;
+
+        QTableWidgetItem *actionItem = new QTableWidgetItem(label);
         actionItem->setData(Qt::UserRole, action);
+        if(isScript)
+            actionItem->setToolTip(tr("User script \"%1\"").arg(action.mid(2)));
         actionItem->setFlags(actionItem->flags() & ~Qt::ItemIsEditable);
         ui->shortcutsTableWidget->setItem(row, 0, actionItem);
 
@@ -1137,7 +1159,9 @@ void SettingsDialog::openShortcutDetails(int row) {
 //------------------------------------------------------------------------------
 void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context) {
     QDialog dialog(this);
-    dialog.setWindowTitle(action);
+    dialog.setWindowTitle(action.startsWith(QStringLiteral("s:"))
+                              ? tr("%1  (script)").arg(action.mid(2))
+                              : action);
     QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
     QLabel *hint = new QLabel(
@@ -1268,23 +1292,6 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     updateShortcutsTable();
 }
 //------------------------------------------------------------------------------
-ViewMode SettingsDialog::contextAtRow(int row) {
-    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, 3);
-    return item ? ActionManager::contextFromString(item->data(Qt::UserRole).toString())
-                : MODE_DOCUMENT;
-}
-//------------------------------------------------------------------------------
-// Selects the row matching both the shortcut and its context (the same key may
-// appear once per context).
-void SettingsDialog::selectShortcutRow(const QString &shortcut, ViewMode context) {
-    for(int i = 0; i < ui->shortcutsTableWidget->rowCount(); i++) {
-        if(ui->shortcutsTableWidget->item(i, 1)->text() == shortcut && contextAtRow(i) == context) {
-            ui->shortcutsTableWidget->selectRow(i);
-            return;
-        }
-    }
-}
-//------------------------------------------------------------------------------
 void SettingsDialog::readScripts() {
     ui->scriptsListWidget->clear();
     const QMap<QString, Script> scripts = scriptManager->allScripts();
@@ -1394,28 +1401,6 @@ void SettingsDialog::removeScript(const QString& name) {
     readScripts();
 }
 //------------------------------------------------------------------------------
-// does not check if the shortcut already there
-void SettingsDialog::addShortcutToTable(const QString &action, const QString &shortcut, ViewMode context) {
-    if(action.isEmpty() || shortcut.isEmpty())
-        return;
-
-    int row = ui->shortcutsTableWidget->rowCount();
-    ui->shortcutsTableWidget->setRowCount(row + 1);
-    QTableWidgetItem *actionItem = new QTableWidgetItem(action);
-    actionItem->setTextAlignment(Qt::AlignCenter);
-    ui->shortcutsTableWidget->setItem(row, 0, actionItem);
-    QTableWidgetItem *shortcutItem = new QTableWidgetItem(shortcut);
-    shortcutItem->setTextAlignment(Qt::AlignCenter);
-    ui->shortcutsTableWidget->setItem(row, 1, shortcutItem);
-    QTableWidgetItem *contextItem = new QTableWidgetItem(
-        (context == MODE_FOLDERVIEW) ? tr("Folder") : tr("Document"));
-    contextItem->setTextAlignment(Qt::AlignCenter);
-    contextItem->setData(Qt::UserRole, ActionManager::contextToString(context));
-    ui->shortcutsTableWidget->setItem(row, 2, contextItem);
-    // EFFICIENCY
-    ui->shortcutsTableWidget->sortByColumn(0, Qt::AscendingOrder);
-}
-//------------------------------------------------------------------------------
 void SettingsDialog::addShortcut() {
     ShortcutCreatorDialog w;
     if(!w.exec())
@@ -1436,12 +1421,6 @@ void SettingsDialog::addShortcut() {
     if(index != -1)
         mShortcutContextComboBox->setCurrentIndex(index);
     updateShortcutsTable();
-}
-//------------------------------------------------------------------------------
-void SettingsDialog::removeShortcutAt(int row) {
-    if(row > 0 && row >= ui->shortcutsTableWidget->rowCount())
-        return;
-    ui->shortcutsTableWidget->removeRow(row);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::editShortcut(int row) {
