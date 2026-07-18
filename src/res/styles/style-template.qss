@@ -1247,6 +1247,7 @@ SettingsDialog QPushButton#applyButton:pressed {
 CustomMessageBox QPushButton:default,
 CustomMessageBox QPushButton:focus,
 FileReplaceDialog QPushButton:default,
+ScriptEditorDialog QPushButton:default,
 QDialog#ColorPickerDialog QPushButton:default,
 SettingsDialog QPushButton#OK:default {
     background-color: %accent%;

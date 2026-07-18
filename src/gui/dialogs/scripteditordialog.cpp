@@ -1,6 +1,9 @@
 #include "scripteditordialog.h"
 #include "ui_scripteditordialog.h"
 
+#include <QPushButton>
+#include <QIcon>
+
 ScriptEditorDialog::ScriptEditorDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ScriptEditorDialog),
@@ -9,6 +12,15 @@ ScriptEditorDialog::ScriptEditorDialog(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle(tr("New application/script"));
     ui->keywordsLabel->setText(tr("Keywords:") + " %file%");
+
+    // match the standard dialog buttons: accept is the accented default,
+    // hand cursor on both, no stock icons
+    ui->acceptButton->setDefault(true);
+    for(auto *b : {ui->acceptButton, ui->cancelButton}) {
+        b->setCursor(Qt::PointingHandCursor);
+        b->setIcon(QIcon());
+    }
+
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
     this->onNameChanged(ui->nameLineEdit->text());
 }
@@ -22,6 +34,15 @@ ScriptEditorDialog::ScriptEditorDialog(const QString& name, const Script& script
     this->setWindowTitle(tr("Edit"));
     this->onNameChanged(ui->nameLineEdit->text());
     editTarget = name;
+
+    // match the standard dialog buttons: accept is the accented default,
+    // hand cursor on both, no stock icons
+    ui->acceptButton->setDefault(true);
+    for(auto *b : {ui->acceptButton, ui->cancelButton}) {
+        b->setCursor(Qt::PointingHandCursor);
+        b->setIcon(QIcon());
+    }
+
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
     ui->nameLineEdit->setText(name);
     ui->pathLineEdit->setText(script.command);
