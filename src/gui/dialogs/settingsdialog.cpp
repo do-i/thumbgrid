@@ -258,6 +258,13 @@ void SettingsDialog::setupMiscControls() {
     // insert system language entry manually at the beginning
     langs.insert("system", "System language");
     ui->langComboBox->insertItem(0, "System language");
+
+    // match CustomMessageBox's dialog buttons: OK is the accented default,
+    // all three get the pointing-hand cursor
+    ui->OK->setDefault(true);
+    ui->OK->setCursor(Qt::PointingHandCursor);
+    ui->Cancel->setCursor(Qt::PointingHandCursor);
+    ui->applyButton->setCursor(Qt::PointingHandCursor);
 }
 //------------------------------------------------------------------------------
 SettingsDialog::~SettingsDialog() {

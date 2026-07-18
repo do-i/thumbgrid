@@ -1193,7 +1193,10 @@ ShortcutCreatorDialog QPushButton,
 PrintDialog QPushButton,
 QMessageBox QPushButton,
 CustomMessageBox QPushButton,
-QDialog#ColorPickerDialog QPushButton {
+QDialog#ColorPickerDialog QPushButton,
+SettingsDialog QPushButton#OK,
+SettingsDialog QPushButton#Cancel,
+SettingsDialog QPushButton#applyButton {
     color: %text%;
     background-color: %button%;
     border-radius: 3px;
@@ -1209,7 +1212,10 @@ ShortcutCreatorDialog QPushButton:hover,
 PrintDialog QPushButton:hover,
 QMessageBox QPushButton:hover,
 CustomMessageBox QPushButton:hover,
-QDialog#ColorPickerDialog QPushButton:hover {
+QDialog#ColorPickerDialog QPushButton:hover,
+SettingsDialog QPushButton#OK:hover,
+SettingsDialog QPushButton#Cancel:hover,
+SettingsDialog QPushButton#applyButton:hover {
     background-color: %button_hover%;
 }
 
@@ -1220,14 +1226,18 @@ ShortcutCreatorDialog QPushButton:pressed,
 PrintDialog QPushButton:pressed,
 QMessageBox QPushButton:pressed,
 CustomMessageBox QPushButton:pressed,
-QDialog#ColorPickerDialog QPushButton:pressed {
+QDialog#ColorPickerDialog QPushButton:pressed,
+SettingsDialog QPushButton#OK:pressed,
+SettingsDialog QPushButton#Cancel:pressed,
+SettingsDialog QPushButton#applyButton:pressed {
     background-color: %button_pressed%;
 }
 
 CustomMessageBox QPushButton:default,
 CustomMessageBox QPushButton:focus,
 FileReplaceDialog QPushButton:default,
-QDialog#ColorPickerDialog QPushButton:default {
+QDialog#ColorPickerDialog QPushButton:default,
+SettingsDialog QPushButton#OK:default {
     background-color: %accent%;
     color: %text_hc%;
 }

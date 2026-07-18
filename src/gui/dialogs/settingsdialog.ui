@@ -5363,16 +5363,16 @@ li.checked::marker { content: &quot;\2612&quot;; }
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButton">
+           <widget class="QPushButton" name="Cancel">
             <property name="text">
-             <string>Apply</string>
+             <string>Cancel</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="Cancel">
+           <widget class="QPushButton" name="applyButton">
             <property name="text">
-             <string>Cancel</string>
+             <string>Apply</string>
             </property>
            </widget>
           </item>
@@ -5460,7 +5460,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </hints>
   </connection>
   <connection>
-   <sender>pushButton</sender>
+   <sender>applyButton</sender>
    <signal>clicked()</signal>
    <receiver>SettingsDialog</receiver>
    <slot>saveSettings()</slot>
