@@ -110,8 +110,12 @@
         <file>res/icons/common/logo/app/22.png</file>
         <file>res/icons/common/logo/app/22@2x.png</file>
         <file>res/icons/dark/other/collapsed.png</file>
+        <file>res/icons/dark/other/dropDownArrow.png</file>
+        <file>res/icons/dark/other/dropDownArrow@2x.png</file>
         <file>res/icons/dark/other/expanded.png</file>
         <file>res/icons/light/other/collapsed.png</file>
+        <file>res/icons/light/other/dropDownArrow.png</file>
+        <file>res/icons/light/other/dropDownArrow@2x.png</file>
         <file>res/icons/light/other/expanded.png</file>
         <file>res/styles/style-template.qss</file>
         <file>res/themes/light.ini</file>

@@ -414,7 +414,7 @@ SidePanel QComboBox {
     background-color: %button%;
     border: 1px solid %button%;
     border-radius: 3px;
-    padding: 4px 8px 4px 8px;
+    padding: 4px 24px 4px 8px;
 }
 
 SidePanel QComboBox:hover {
@@ -423,7 +423,12 @@ SidePanel QComboBox:hover {
 }
 
 SidePanel QComboBox::drop-down {
+    width: 20px;
     border: 0px;
+}
+
+SidePanel QComboBox::down-arrow {
+    image: url(:/res/icons/%icontheme%/other/dropDownArrow.png);
 }
 
 /* dropdown menus */
@@ -1122,11 +1127,11 @@ SettingsDialog QComboBox {
     background-color: %button%;
     border: 1px solid %button%;
     border-radius: 3px;
-    padding: 4px 8px 4px 8px;
+    padding: 4px 24px 4px 8px;
 }
 
 SettingsDialog QComboBox {
-    min-height: %button_height%;
+    min-height: %combobox_height%;
 }
 
 ResizeDialog QComboBox:hover,
@@ -1139,7 +1144,14 @@ SettingsDialog QComboBox:hover {
 ResizeDialog QComboBox::drop-down,
 ShortcutCreatorDialog QComboBox::drop-down,
 SettingsDialog QComboBox::drop-down {
+    width: 20px;
     border: 0px;
+}
+
+ResizeDialog QComboBox::down-arrow,
+ShortcutCreatorDialog QComboBox::down-arrow,
+SettingsDialog QComboBox::down-arrow {
+    image: url(:/res/icons/%icontheme%/other/dropDownArrow.png);
 }
 
 ResizeDialog QComboBox QAbstractItemView,

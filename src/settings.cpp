@@ -735,6 +735,8 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
 
     // todo
     int button_height = text_height + text_padding_large * 2;
+    // settings dropdowns read as too tall at the full button height; trim ~10%
+    int combobox_height = qRound(button_height * 0.9);
 
     // pseudo-dpi to scale some widget widths
     int text_height_base = 22;
@@ -746,6 +748,7 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
     styleSheet.replace("%font_small%", QString::number(font_small)+"pt");
     styleSheet.replace("%font_large%", QString::number(font_large)+"pt");
     styleSheet.replace("%button_height%", QString::number(button_height)+"px");
+    styleSheet.replace("%combobox_height%", QString::number(combobox_height)+"px");
     styleSheet.replace("%top_panel_height%", QString::number(top_panel_height)+"px");
     styleSheet.replace("%overlay_header_size%", QString::number(overlay_header_size)+"px");
     styleSheet.replace("%context_menu_width%", QString::number(context_menu_width)+"px");
@@ -780,7 +783,10 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
         sys_window_tinted_hc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 50);
     }
 
-    styleSheet.replace("%icontheme%",  "light");
+    // pick the icon variant from the app theme's own background (not the OS
+    // palette) so %icontheme% tracks the selected color scheme, including
+    // for COLORS_SYSTEM where colors.background follows the OS anyway.
+    styleSheet.replace("%icontheme%",  colors.background.valueF() <= 0.45f ? "dark" : "light");
     styleSheet.replace("%sys_window%",    sys_window.name());
     styleSheet.replace("%sys_window_tinted%",    sys_window_tinted.name());
     styleSheet.replace("%sys_window_tinted_lc%", sys_window_tinted_lc.name());
