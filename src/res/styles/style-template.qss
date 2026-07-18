@@ -33,6 +33,11 @@ SettingsDialog QPushButton {
     min-height: %button_height%;
 }
 
+SettingsDialog QTextBrowser {
+    color: %text%;
+    background: transparent;
+}
+
 [accessibleName="SLine"] {
     background-color: %sys_window_tinted%;
     min-height: 1px;
