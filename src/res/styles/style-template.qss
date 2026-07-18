@@ -30,10 +30,6 @@ SettingsDialog QScrollArea > QWidget {
     background-color: %background%;
 }
 
-SettingsDialog QPushButton {
-    min-height: %button_height%;
-}
-
 SettingsDialog QTextBrowser {
     color: %text%;
     background: transparent;
@@ -1257,13 +1253,14 @@ CustomMessageBox QPushButton,
 QDialog#ColorPickerDialog QPushButton,
 SettingsDialog QPushButton#OK,
 SettingsDialog QPushButton#Cancel,
-SettingsDialog QPushButton#applyButton {
+SettingsDialog QPushButton#applyButton,
+QPushButton[accessibleName="SDialogButton"] {
     color: %text%;
     background-color: %button%;
     border-radius: 3px;
-    padding: 6px 14px 6px 14px;
+    padding: 2px 14px 2px 14px;
     min-width: 70px;
-    min-height: 0px;
+    min-height: %button_height%;
 }
 
 ResizeDialog QPushButton:hover,
@@ -1276,7 +1273,8 @@ CustomMessageBox QPushButton:hover,
 QDialog#ColorPickerDialog QPushButton:hover,
 SettingsDialog QPushButton#OK:hover,
 SettingsDialog QPushButton#Cancel:hover,
-SettingsDialog QPushButton#applyButton:hover {
+SettingsDialog QPushButton#applyButton:hover,
+QPushButton[accessibleName="SDialogButton"]:hover {
     background-color: %button_hover%;
 }
 
@@ -1290,7 +1288,8 @@ CustomMessageBox QPushButton:pressed,
 QDialog#ColorPickerDialog QPushButton:pressed,
 SettingsDialog QPushButton#OK:pressed,
 SettingsDialog QPushButton#Cancel:pressed,
-SettingsDialog QPushButton#applyButton:pressed {
+SettingsDialog QPushButton#applyButton:pressed,
+QPushButton[accessibleName="SDialogButton"]:pressed {
     background-color: %button_pressed%;
 }
 
@@ -1303,6 +1302,14 @@ SettingsDialog QPushButton#OK:default {
     background-color: %accent%;
     color: %text_hc%;
 }
+
+/* Deliberately NOT accented: the SDialogButton marker tags generic in-page
+   buttons ("+ New", "Load defaults", "..."), which are never a dialog's accept
+   action. It is kept out of the :default group above because Qt's stylesheet
+   style treats autoDefault buttons as :default, and every QPushButton in a
+   QDialog is autoDefault by default - so including the marker there would
+   paint every tagged button with the accent color. Accept buttons get the
+   accent from their own explicit per-dialog selectors instead. */
 
 /*----------------------------------------------------------------------------*/
 /* Scripts tab - list + per-row edit / delete icon buttons */

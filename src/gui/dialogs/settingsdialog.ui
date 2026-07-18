@@ -2637,6 +2637,9 @@
                        <property name="text">
                         <string>Load defaults</string>
                        </property>
+                       <property name="accessibleName">
+                        <string notr="true">SDialogButton</string>
+                       </property>
                       </widget>
                      </item>
                      <item>
@@ -4510,6 +4513,9 @@
                  <property name="text">
                   <string>+ New</string>
                  </property>
+                 <property name="accessibleName">
+                  <string notr="true">SDialogButton</string>
+                 </property>
                 </widget>
                </item>
                <item>
@@ -5104,6 +5110,9 @@
                       </property>
                       <property name="text">
                        <string>...</string>
+                      </property>
+                      <property name="accessibleName">
+                       <string notr="true">SDialogButton</string>
                       </property>
                      </widget>
                     </item>
