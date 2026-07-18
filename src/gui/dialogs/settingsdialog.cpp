@@ -382,7 +382,6 @@ void SettingsDialog::setupShortcutsPage() {
     ui->pushButton_2->hide();
     ui->pushButton_8->hide();
     ui->pushButton_4->hide();
-    ui->pushButton_3->setText(tr("Reset current context"));
 
     // Preset selector: switching presets replaces the whole active mapping, so
     // it lives above the per-context toolbar, confirm-gated, and applies (and
@@ -1429,15 +1428,6 @@ void SettingsDialog::saveShortcuts() {
     actionManager->saveShortcuts();
     settings->saveShortcutPrimary(mShortcutPrimary);
     settings->saveDisabledShortcuts(mShortcutDisabled);
-}
-//------------------------------------------------------------------------------
-void SettingsDialog::resetShortcuts() {
-    const ViewMode context = selectedShortcutContext();
-    mShortcutDraft[context] = actionManager->allDefaultShortcuts().value(context);
-    rebuildShortcutDraftLookup();
-    mShortcutPrimary.remove(context);
-    mShortcutDisabled.remove(context);
-    updateShortcutsTable();
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::resetZoomLevels() {

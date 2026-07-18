@@ -4102,19 +4102,6 @@
                  </property>
                 </spacer>
                </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_3">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text">
-                  <string>Reset to defaults</string>
-                 </property>
-                </widget>
-               </item>
               </layout>
              </item>
              <item>
@@ -5588,22 +5575,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_3</sender>
-   <signal>clicked()</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>resetShortcuts()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>760</x>
-     <y>100</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>587</x>
-     <y>72</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>zoomStepSlider</sender>
    <signal>valueChanged(int)</signal>
    <receiver>SettingsDialog</receiver>
@@ -5849,7 +5820,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <slot>accentColorDialog()</slot>
   <slot>removeShortcut()</slot>
   <slot>addShortcut()</slot>
-  <slot>resetShortcuts()</slot>
   <slot>selectMpvPath()</slot>
   <slot>onMaxZoomSliderChanged(int)</slot>
   <slot>onMaxZoomResolutionSliderChanged(int)</slot>
