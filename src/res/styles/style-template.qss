@@ -1199,6 +1199,7 @@ QDialog#ColorPickerDialog QPushButton {
     border-radius: 3px;
     padding: 6px 14px 6px 14px;
     min-width: 70px;
+    min-height: 0px;
 }
 
 ResizeDialog QPushButton:hover,
