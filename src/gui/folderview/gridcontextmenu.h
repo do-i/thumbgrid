@@ -43,6 +43,7 @@ private:
     ContextMenuItem *makeItem(const QString &text, const QString &iconPath);
     void addConvertFormat(QVBoxLayout *layout, const QString &label, const QString &format);
     void addSeparator(QWidget *page, QVBoxLayout *layout);
+    void setCurrentPage(int index);
     void switchToMainPage();
     void switchToConvertPage();
     void clampToScreen(QRect &geom);

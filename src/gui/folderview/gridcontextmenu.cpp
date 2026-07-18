@@ -95,6 +95,11 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     addConvertFormat(convertLayout, "PNG",  "png");
     addConvertFormat(convertLayout, "WebP", "webp");
 
+    // Safety net: if the page still ends up taller than its items (e.g. a
+    // future item count change), the surplus goes below the items instead
+    // of being distributed between them by the QVBoxLayout spacing.
+    convertLayout->addStretch(1);
+
     stack->addWidget(convertPage);
 
     switchToMainPage();
@@ -136,12 +141,47 @@ void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
     deleteItem->setEnabled(info.total() > 0);
 }
 
+// The stack holds pages of very different heights (11-row main page vs.
+// 4-row convert page). QStackedLayout's sizeHint() is the max over *all*
+// pages, except it zeroes out a page's contribution on axes where that
+// page's size policy is Ignored - so the trick to make the popup track
+// only the visible page is to mark every other page Ignored/Ignored and
+// the visible one Preferred/Preferred before asking for a new sizeHint.
+void GridContextMenu::setCurrentPage(int index) {
+    for(int i = 0; i < stack->count(); ++i) {
+        QWidget *page = stack->widget(i);
+        bool current = (i == index);
+        page->setSizePolicy(current ? QSizePolicy::Preferred : QSizePolicy::Ignored,
+                             current ? QSizePolicy::Preferred : QSizePolicy::Ignored);
+    }
+
+    stack->setCurrentIndex(index);
+
+    // setSizePolicy() already calls updateGeometry(), but activate the
+    // layouts explicitly so the new sizeHint is computed fresh rather than
+    // reused from a cached value further up the chain.
+    if(QLayout *pageLayout = stack->currentWidget()->layout())
+        pageLayout->activate();
+    stack->updateGeometry();
+    layout()->activate();
+    adjustSize();
+
+    if(isVisible()) {
+        // adjustSize() keeps the top-left corner fixed and grows/shrinks
+        // toward bottom-right, so re-clamp in case switching to a taller
+        // page (e.g. "Back" to the main page) pushed it off-screen.
+        QRect geom = geometry();
+        clampToScreen(geom);
+        setGeometry(geom);
+    }
+}
+
 void GridContextMenu::switchToMainPage() {
-    stack->setCurrentIndex(0);
+    setCurrentPage(0);
 }
 
 void GridContextMenu::switchToConvertPage() {
-    stack->setCurrentIndex(1);
+    setCurrentPage(1);
 }
 
 void GridContextMenu::showAt(QPoint pos) {
