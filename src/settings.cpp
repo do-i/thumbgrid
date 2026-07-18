@@ -735,8 +735,11 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
 
     // todo
     int button_height = text_height + text_padding_large * 2;
-    // settings dropdowns read as too tall at the full button height; trim ~10%
-    int combobox_height = qRound(button_height * 0.9);
+    // settings dropdowns want a tight ~1px margin above/below the text, not a
+    // fraction of button_height (that left ~0.35*text_height of slack before
+    // the QSS padding even stacks on top). Floor keeps small fonts from
+    // clipping descenders.
+    int combobox_height = qMax(text_height + 2, 18);
 
     // pseudo-dpi to scale some widget widths
     int text_height_base = 22;
