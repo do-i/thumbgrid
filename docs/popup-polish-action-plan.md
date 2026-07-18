@@ -157,6 +157,14 @@ verified from the same screenshots; P1 is independent QSS + one C++ line.
 
 ## Status
 
-- [ ] P1 — button parity: settings popups vs color picker (Haiku 4.5)
-- [ ] P2 — convert page item spacing (Sonnet 5)
-- [ ] P3 — dedicated convert icon (Opus 4.8)
+- [x] P1 — button parity: settings popups vs color picker (Haiku 4.5) —
+      done 2026-07-17; needed a follow-up beyond the QSS regroup: the
+      QDialogButtonBox buttons carried stock theme icons and OK wasn't
+      marked default, fixed in colorselectorbutton.cpp (icons cleared,
+      setDefault(true)). Verified via screenshots against the
+      preset-switch popup.
+- [x] P2 — convert page item spacing (Sonnet 5) — done 2026-07-17;
+      Ignored/Preferred size-policy swap + adjustSize on page switch,
+      verified via screenshots (compact 4-row convert page, main page
+      restores correctly).
+- [ ] P3 — dedicated convert icon (Opus 4.8) — in progress
