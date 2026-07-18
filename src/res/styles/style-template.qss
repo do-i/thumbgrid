@@ -1022,12 +1022,24 @@ PrintDialog QCheckBox:hover {
 /* Print, message boxes) - plain Qt widgets, themed to match the main window  */
 /*----------------------------------------------------------------------------*/
 ResizeDialog,
-FileReplaceDialog,
 ScriptEditorDialog,
 ShortcutCreatorDialog,
 PrintDialog,
 QMessageBox {
     background-color: %background%;
+}
+
+/* FileReplaceDialog is frameless (see filereplacedialog.cpp): give it the same
+   rounded themed body as CustomMessageBox instead of a flat filled rectangle. */
+FileReplaceDialog {
+    background-color: %widget%;
+    border: 1px solid %widget_border%;
+    border-radius: %contextmenu_border_radius%;
+}
+FileReplaceDialog QLabel[accessibleName="DialogTitle"] {
+    color: %text_hc%;
+    font-size: %font_large%;
+    font-weight: bold;
 }
 
 /* Custom themed replacement for QMessageBox (frameless, rounded). */
@@ -1191,7 +1203,8 @@ CustomMessageBox QPushButton:pressed {
 }
 
 CustomMessageBox QPushButton:default,
-CustomMessageBox QPushButton:focus {
+CustomMessageBox QPushButton:focus,
+FileReplaceDialog QPushButton:default {
     background-color: %accent%;
     color: %text_hc%;
 }

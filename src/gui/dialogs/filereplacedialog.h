@@ -47,6 +47,11 @@ private slots:
     void onNoClicked();
     void onCancelClicked();
 
+protected:
+    void paintEvent(QPaintEvent *event) override;
+    void showEvent(QShowEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+
 private:
     Ui::FileReplaceDialog *ui;
     bool multi;

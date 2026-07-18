@@ -50,28 +50,19 @@ title bar + native severity icon. Route them through `CustomMessageBox`.
       text pre-selected) plus `CustomMessageBox QLineEdit` QSS rules. `QInputDialog`
       / `QLineEdit` includes dropped from `core.cpp`.
 
-## D3. Native `QFileDialog` usage — **design decision, then larger effort**
+## D3. Native `QFileDialog` usage — **decided: keep native**
 
-All file pickers currently use the **native** OS dialog (none set
+All file pickers use the **native** OS dialog (none set
 `QFileDialog::DontUseNativeDialog`), so they follow the desktop theme, not the
-app theme. Native pickers are usually *preferred* (recent files, places sidebar,
-DE integration), so decide per-call whether consistency is worth losing that.
-Making them app-themed means `DontUseNativeDialog` + QSS for the many internal
-`QFileDialog` sub-widgets (splitter, tree/list views, sidebar, line edits).
+app theme. **Decision (2026-07-17): keep them native** — native pickers preserve
+Recent/Places integration users expect, and Qt's non-native dialog is only
+partially covered by the app QSS. Left as-is intentionally; not a defect.
 
-- [ ] `src/core.cpp:870` — `getExistingDirectory` ("Move to…")
-- [ ] `src/core.cpp:16` include / call site — general move/copy pickers
-- [ ] `src/gui/mainwindow.cpp:594` — `getSaveFileName` ("Save File as…")
-- [ ] `src/gui/mainwindow.cpp:601` — open dialog
-- [ ] `src/gui/folderview/folderview.cpp:333` — add-bookmark directory picker
-- [ ] `src/gui/dialogs/scripteditordialog.cpp:75` — script path picker
-- [ ] `src/gui/dialogs/settingsdialog.cpp:1442` — settings path picker
-- [ ] `src/gui/dialogs/printdialog.cpp:72` — `getSaveFileName` (pdf location)
-- [ ] `src/gui/customwidgets/pathselectormenuitem.cpp:12` — path picker
-
-Recommendation: leave these native unless full visual consistency is a hard
-requirement. If pursued, do it once behind a shared helper so all call sites get
-the same themed picker.
+Call sites (for reference, should any future change revisit this):
+`core.cpp:870` (Move to…), `mainwindow.cpp:594` (Save as), `mainwindow.cpp:601`
+(Open), `folderview.cpp:333` (add bookmark), `scripteditordialog.cpp:75`,
+`settingsdialog.cpp:1442`, `printdialog.cpp:72` (pdf location),
+`pathselectormenuitem.cpp:12`.
 
 ## D4. `QColorDialog` — **low priority**
 
@@ -86,20 +77,22 @@ These already get scheme colors on their content, but each is a normal top-level
 `QDialog` with the OS title bar and frame — so next to `CustomMessageBox` / the
 context menu they still read as "system dialogs."
 
-- [ ] `SettingsDialog`  (`src/gui/dialogs/settingsdialog.*`)
-- [ ] `ResizeDialog`    (`src/gui/dialogs/resizedialog.*`)
-- [ ] `FileReplaceDialog` (`src/gui/dialogs/filereplacedialog.*`) — used by
-      `MW::fileReplaceDialog` for copy/move overwrite conflicts.
-- [ ] `ScriptEditorDialog` (`src/gui/dialogs/scripteditordialog.*`)
-- [ ] `ShortcutCreatorDialog` (`src/gui/dialogs/shortcutcreatordialog.*`)
-- [ ] `PrintDialog`     (`src/gui/dialogs/printdialog.*`)
+- [x] `FileReplaceDialog` (`src/gui/dialogs/filereplacedialog.*`) — used by
+      `MW::fileReplaceDialog` for copy/move overwrite conflicts. **Converted** to
+      frameless + translucent + rounded (`PE_Widget` paint pass), bold themed
+      title, accent default button, `startSystemMove()` drag, centered on parent.
+- [ ] `SettingsDialog`  (`src/gui/dialogs/settingsdialog.*`) — deferred (native frame)
+- [ ] `ResizeDialog`    (`src/gui/dialogs/resizedialog.*`) — deferred (native frame)
+- [ ] `ScriptEditorDialog` (`src/gui/dialogs/scripteditordialog.*`) — deferred
+- [ ] `ShortcutCreatorDialog` (`src/gui/dialogs/shortcutcreatordialog.*`) — deferred
+- [ ] `PrintDialog`     (`src/gui/dialogs/printdialog.*`) — deferred
+- [ ] `ChangelogWindow` (`src/gui/overlays/changelogwindow.*`) — deferred
 
-Full frameless theming here means: `Qt::FramelessWindowHint` +
-`WA_TranslucentBackground` + a `PE_Widget` paint pass (as `CustomMessageBox`/
-`ContextMenu` do) + a custom draggable title strip. Bigger effort and mostly
-cosmetic — schedule only if a fully bespoke window look is wanted. `ChangelogWindow`
-(`src/gui/overlays/changelogwindow.*`) is a separate top-level window in the same
-boat.
+**Decision (2026-07-17): FileReplaceDialog only.** The rest keep their native
+frames for now (content already themed). Full frameless theming means
+`Qt::FramelessWindowHint` + `WA_TranslucentBackground` + a `PE_Widget` paint pass
++ a draggable title strip — bigger effort, cosmetic-only, and riskier on complex
+dialogs like Settings; revisit if a fully bespoke window look is wanted.
 
 ---
 
