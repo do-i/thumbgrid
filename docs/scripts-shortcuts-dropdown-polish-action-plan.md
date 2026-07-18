@@ -204,8 +204,29 @@ T3 strictly before T2).
 
 ## Status
 
-- [ ] T1 — script editor dialog standard buttons (Haiku 4.5)
-- [ ] T2 — scripts screen redesign: + New / pencil / x (Opus 4.8)
-- [ ] T3 — remove "Reset current context" (Haiku 4.5)
-- [ ] T4 — shortcuts table per-preset colors (Opus 4.8)
-- [ ] T5 — dropdowns: −10% height + down arrow (Sonnet 5)
+- [x] T1 — script editor dialog standard buttons (Haiku 4.5) — done
+      2026-07-18; setDefault + cursor + no icons in both constructors,
+      accent :default QSS rule; verified Create dialog on light theme.
+- [x] T2 — scripts screen redesign: + New / pencil / x (Opus 4.8) — done
+      2026-07-18; new ScriptRowWidget (label + IconButton pencil/x, theme
+      recolored) attached via setItemWidget, item text moved to
+      Qt::UserRole (fixes doubled text), removeScript refactored to
+      name-based, list themed with the T4 %table_*% placeholders; all
+      flows (+ New / pencil / x / double-click) exercised in sandbox on
+      dark + light. Agent hit a session limit mid-run and was resumed to
+      finish the last two fixes.
+- [x] T3 — remove "Reset current context" (Haiku 4.5) — done 2026-07-18;
+      pushButton_3 + resetShortcuts() removed (sole caller), verified
+      Shortcuts tab layout.
+- [x] T4 — shortcuts table per-preset colors (Opus 4.8) — done
+      2026-07-18; table_bg/bg_alt/header/text/border keys wired
+      end-to-end with HSV-derived fallbacks; NOTE: live presets are
+      src/res/themes/*.ini — the theme-presets/*.conf files are dead
+      (unreferenced); verified Dark/Dark Blue/Black/Light/Light Blue.
+      Finding: preset changes only apply to the open settings dialog
+      after Apply/OK.
+- [x] T5 — dropdowns: −10% height + down arrow (Sonnet 5) — done
+      2026-07-18; %combobox_height% placeholder, light/dark
+      dropDownArrow assets from the magenta placeholder alpha,
+      %icontheme% now follows theme background luminance (also fixes
+      branch icons on dark themes); verified both themes.
