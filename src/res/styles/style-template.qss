@@ -33,10 +33,6 @@ SettingsDialog QPushButton {
     min-height: %button_height%;
 }
 
-SettingsDialog QComboBox {
-    /*min-height: 20px;*/
-}
-
 [accessibleName="SLine"] {
     background-color: %sys_window_tinted%;
     min-height: 1px;
@@ -1115,7 +1111,8 @@ ShortcutCreatorDialog QRadioButton {
 }
 
 ResizeDialog QComboBox,
-ShortcutCreatorDialog QComboBox {
+ShortcutCreatorDialog QComboBox,
+SettingsDialog QComboBox {
     color: %text%;
     background-color: %button%;
     border: 1px solid %button%;
@@ -1123,26 +1120,34 @@ ShortcutCreatorDialog QComboBox {
     padding: 4px 8px 4px 8px;
 }
 
+SettingsDialog QComboBox {
+    min-height: %button_height%;
+}
+
 ResizeDialog QComboBox:hover,
-ShortcutCreatorDialog QComboBox:hover {
+ShortcutCreatorDialog QComboBox:hover,
+SettingsDialog QComboBox:hover {
     background-color: %button_hover%;
     border-color: %button_hover%;
 }
 
 ResizeDialog QComboBox::drop-down,
-ShortcutCreatorDialog QComboBox::drop-down {
+ShortcutCreatorDialog QComboBox::drop-down,
+SettingsDialog QComboBox::drop-down {
     border: 0px;
 }
 
 ResizeDialog QComboBox QAbstractItemView,
-ShortcutCreatorDialog QComboBox QAbstractItemView {
+ShortcutCreatorDialog QComboBox QAbstractItemView,
+SettingsDialog QComboBox QAbstractItemView {
     padding: 5px 0px;
     background-color: %widget%;
     border: 1px solid %accent%;
 }
 
 ResizeDialog QComboBox QAbstractItemView::item,
-ShortcutCreatorDialog QComboBox QAbstractItemView::item {
+ShortcutCreatorDialog QComboBox QAbstractItemView::item,
+SettingsDialog QComboBox QAbstractItemView::item {
     border-radius: 1px;
     padding: 2px 5px;
     color: %text%;
@@ -1150,7 +1155,8 @@ ShortcutCreatorDialog QComboBox QAbstractItemView::item {
 }
 
 ResizeDialog QComboBox QAbstractItemView::item:selected,
-ShortcutCreatorDialog QComboBox QAbstractItemView::item:selected {
+ShortcutCreatorDialog QComboBox QAbstractItemView::item:selected,
+SettingsDialog QComboBox QAbstractItemView::item:selected {
     background-color: %accent_hover_rgba%;
 }
 
