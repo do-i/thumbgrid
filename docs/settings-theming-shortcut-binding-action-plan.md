@@ -346,10 +346,65 @@ U6's cleanup step goes first so U5 doesn't build on dead helpers.
 
 ## Status
 
-- [ ] U1 — Grid/Document page backgrounds (Haiku 4.5)
-- [ ] U2 — combobox height → 1–2 px text margin (Sonnet 5)
-- [ ] U3 — unify button height across settings + dialogs (Sonnet 5)
-- [ ] U4 — theme "+ New" and other untagged settings buttons (Haiku 4.5)
-- [ ] U5 — make scripts bindable: "+ New shortcut" + script rows (Opus 4.8)
-- [ ] U6 — add/move shortcuts between contexts + stale-helper cleanup (Opus 4.8)
-- [ ] U7 — app-wide regression pass (Sonnet 5)
+All items done 2026-07-18. Verification ran offscreen via a throwaway
+`settings_shot` tool (QT_QPA_PLATFORM=offscreen + the behavior-test harness),
+built on top of `src/tests/support/thumbgrid_test_support.h`. It rendered the
+settings dialog page-by-page to PNG without touching the user's live X session
+— worth rebuilding if this area is revisited, since driving the real GUI here
+proved both intrusive and unreliable.
+
+- [x] U1 — Grid/Document page backgrounds (Haiku 4.5) — done 2026-07-18,
+      commit 6f0d030a. **Gotcha found:** the first attempt wrote the .ui
+      property as `<string>` without `notr="true"`, so uic emitted
+      `setAccessibleName` inside `retranslateUi()` — which runs after the
+      widget is parented and polished — and the QSS attribute selector never
+      matched. It fixed Grid/Document but silently un-themed General, Theme,
+      Advanced and About. Every accessibleName in this repo must use
+      `notr="true"`. Verified by pixel diff: page bg 239,239,239 → 26,26,26 on
+      Grid/Document, byte-identical elsewhere.
+- [x] U2 — combobox height (Sonnet 5) — done 2026-07-18, commit 41ea6446.
+      `combobox_height` is now `qMax(text_height + 2, 18)` and the shared rule's
+      vertical padding 4px → 2px. Measured 33px → 25px. Note `text_height` is
+      `fm.height()` (full line box), so `+2` is the true floor: going tighter
+      clips CJK entries in the language dropdown, which fill the em box. The
+      residual ~8px gap around Latin capitals is font ascent/descent headroom,
+      not removable padding.
+- [x] U3 — unify button height (Sonnet 5) — done 2026-07-18, commit d1d5889c.
+      Bare `SettingsDialog QPushButton` min-height rule deleted; shared group
+      gained `QPushButton[accessibleName="SDialogButton"]`, padding 6px → 2px,
+      min-height 0 → `%button_height%`. Settings OK/Cancel/Apply render
+      byte-identical to before.
+- [x] U4 — theme "+ New" and untagged settings buttons (Haiku 4.5) — done
+      2026-07-18, commit d1d5889c. Tagged `newScriptButton`,
+      `resetZoomLevelsButton`, `pushButton_5`. **Gotcha found:** the marker must
+      NOT go in the `:default` accent group — Qt's stylesheet style treats
+      autoDefault buttons as `:default`, and every QPushButton in a QDialog is
+      autoDefault, so every tagged button rendered accent-green. Accept buttons
+      keep the accent via their own explicit per-dialog selectors.
+- [x] U5 — scripts bindable (Opus 4.8) — done 2026-07-18, commit d82be0b2.
+      "+ New shortcut" button wired to the existing `addShortcut()`; unbound
+      scripts seeded as Global rows labelled `<name>  (script)` with the real
+      `s:<name>` id kept in `Qt::UserRole`. Covered by behavior test
+      `test_a_script_can_be_bound_to_a_shortcut.cpp` (fabricates a real
+      QKeyEvent and asserts `runScript` fires with the de-prefixed name);
+      confirmed non-vacuous by mutation.
+- [x] U6 — move/copy between contexts + stale-helper cleanup (Opus 4.8) — done
+      2026-07-18, commit d82be0b2 (cleanup) and 15c2ecee (transfer). Dead
+      `addShortcutToTable`/`contextAtRow`/`selectShortcutRow`/`removeShortcutAt`
+      deleted (zero callers). Right-click row menu offers Move to…/Copy to…,
+      carrying keys, primary choice and enabled state across all three parallel
+      per-context structures, confirm-gated with explicit widen/narrow wording.
+      Script bindings are allowed to move (dispatch is context-independent); a
+      hole was fixed on the way — disabled actions now seed rows too, so an
+      unchecked action can always be re-enabled. Covered by
+      `test_a_shortcut_can_be_moved_between_contexts.cpp`; 3 of 4 cases fail
+      with the transfer mutated out.
+- [x] U7 — app-wide regression pass (Sonnet 5) — done 2026-07-18. All settings
+      pages plus ResizeDialog, FileReplaceDialog, PrintDialog, CustomMessageBox
+      and ColorPickerDialog rendered across all six presets. No regressions.
+      One pre-existing clipped group-box title in ResizeDialog was surfaced and
+      A/B-confirmed against commit 70fbbeaa as NOT caused by this batch — its
+      likely cause is a stale `<minimumSize>` in resizedialog.ui. Not fixed;
+      candidate for a follow-up.
+
+Final state: 31/31 behavior tests pass, full build clean, fresh clone builds.
