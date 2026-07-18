@@ -82,6 +82,14 @@ add_test(
     COMMAND thumbgrid_script_shortcut_binding_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_shortcut_context_transfer_test
+    behavior/test_a_shortcut_can_be_moved_between_contexts.cpp
+)
+add_test(
+    NAME "A shortcut can be moved or copied between contexts"
+    COMMAND thumbgrid_shortcut_context_transfer_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_shortcut_context_persistence_test
     behavior/test_shortcut_contexts_persist_and_legacy_configs_migrate.cpp
 )

@@ -485,6 +485,11 @@ void SettingsDialog::setupShortcutsPage() {
         if(column == 1)
             openShortcutDetails(row);
     });
+    // The context combo above the table is only a filter over separate
+    // per-context maps, so retargeting a binding needs a row-level command.
+    ui->shortcutsTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->shortcutsTableWidget, &QWidget::customContextMenuRequested,
+            this, &SettingsDialog::showShortcutRowMenu);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::refreshShortcutPresetCombo() {
@@ -943,6 +948,21 @@ void SettingsDialog::readShortcuts() {
     refreshShortcutPresetCombo();
 }
 //------------------------------------------------------------------------------
+namespace {
+// User-facing context names, matching the labels in the context combo boxes.
+QString contextLabel(ViewMode context) {
+    if(context == MODE_GLOBAL)
+        return QObject::tr("Global");
+    return (context == MODE_FOLDERVIEW) ? QObject::tr("Grid") : QObject::tr("Document");
+}
+// Script actions are stored as "s:<name>"; never show the raw id to the user.
+QString shortcutActionLabel(const QString &action) {
+    return action.startsWith(QStringLiteral("s:"))
+               ? QObject::tr("%1  (script)").arg(action.mid(2))
+               : action;
+}
+}    // namespace
+//------------------------------------------------------------------------------
 ViewMode SettingsDialog::selectedShortcutContext() const {
     if(!mShortcutContextComboBox)
         return MODE_FOLDERVIEW;
@@ -1071,6 +1091,13 @@ void SettingsDialog::updateShortcutsTable() {
         actions.insert(it.value());
     for(auto it = active.cbegin(); it != active.cend(); ++it)
         actions.insert(it.value());
+    // A disabled action has no keys in the draft, so nothing above would list
+    // it. Without this the Enabled checkbox would be a one-way door for any
+    // action that has no defaults here - notably a script moved into this
+    // context and then switched off.
+    const QStringList disabledHere = mShortcutDisabled.value(context);
+    for(const QString &action : disabledHere)
+        actions.insert(action);
     // Scripts are Global-only actions and are usually unbound, so they would
     // otherwise never get a row to click. Seed them so they are discoverable
     // (and bindable) here rather than needing the creator dialog.
@@ -1290,6 +1317,153 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
             mShortcutDisabled[context] = disabled;
     }
     updateShortcutsTable();
+}
+//------------------------------------------------------------------------------
+QMap<QString, QString> SettingsDialog::shortcutTransferClashes(const QString &action,
+                                                               ViewMode src, ViewMode dst) const {
+    QMap<QString, QString> clashes;
+    if(src == dst)
+        return clashes;
+    const QStringList keys = candidateShortcuts(src, action);
+    for(const QString &key : keys) {
+        // draftActionForShortcut() resolves a non-global context against Global
+        // too, so this also catches "the destination would shadow a global key".
+        const QString taken = draftActionForShortcut(dst, key);
+        if(!taken.isEmpty() && taken != action)
+            clashes.insert(key, taken);
+    }
+    return clashes;
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::applyShortcutTransfer(const QString &action, ViewMode src, ViewMode dst, bool move) {
+    if(action.isEmpty() || src == dst)
+        return;
+    const QStringList keys = candidateShortcuts(src, action);
+    if(keys.isEmpty())
+        return;    // nothing bound here to relocate
+    const QString primary = primaryShortcut(src, action);
+
+    // Union rather than replace: the destination may already hold its own keys
+    // for this action and a copy must not quietly drop them. Keys the
+    // destination gave to a different action are taken over by the insert -
+    // transferShortcut() has already had the user confirm that.
+    QStringList target = candidateShortcuts(dst, action);
+    for(const QString &key : keys)
+        if(!target.contains(key))
+            target.append(key);
+    target.sort(Qt::CaseInsensitive);
+    setActionShortcuts(mShortcutDraft[dst], action, target);
+
+    // The chosen primary key travels with the binding; otherwise the
+    // destination falls back to "first default" and the key shown in the table
+    // silently changes under the user.
+    if(!primary.isEmpty())
+        setPrimaryShortcut(dst, action, primary);
+
+    // A transfer into a context where the action was switched off would arrive
+    // dead, so it implies "enabled" at the destination.
+    QStringList dstDisabled = mShortcutDisabled.value(dst);
+    if(dstDisabled.removeAll(action) > 0)
+        mShortcutDisabled[dst] = dstDisabled;
+
+    if(move) {
+        setActionShortcuts(mShortcutDraft[src], action, QStringList());
+        // Both parallel maps must follow the keys out. A left-behind primary is
+        // not cosmetic: setShortcutEnabled() re-adds the remembered primary when
+        // the action is switched back on, which would resurrect the moved key.
+        mShortcutPrimary[src].remove(action);
+        QStringList srcDisabled = mShortcutDisabled.value(src);
+        if(srcDisabled.removeAll(action) > 0)
+            mShortcutDisabled[src] = srcDisabled;
+    }
+
+    rebuildShortcutDraftLookup();
+    updateShortcutsTable();
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::transferShortcut(const QString &action, ViewMode src, ViewMode dst, bool move) {
+    if(action.isEmpty() || src == dst || candidateShortcuts(src, action).isEmpty())
+        return;
+
+    QStringList lines;
+    lines << (move ? tr("Move \"%1\" from %2 to %3.") : tr("Copy \"%1\" from %2 to %3."))
+                 .arg(shortcutActionLabel(action), contextLabel(src), contextLabel(dst));
+
+    // Global bindings run in every screen and a view-specific binding overrides
+    // the same key, so crossing the Global boundary changes where the shortcut
+    // reaches. Spell that out instead of changing behaviour silently.
+    if(dst == MODE_GLOBAL)
+        lines << tr("This widens its reach: it will run in every screen, not only in the %1 view "
+                    "(a view-specific binding for the same key still overrides it).")
+                     .arg(contextLabel(src));
+    else if(src == MODE_GLOBAL && move)
+        lines << tr("This narrows its reach: it runs in every screen today, and afterwards "
+                    "it will run only in the %1 view.").arg(contextLabel(dst));
+    else if(src == MODE_GLOBAL)
+        lines << tr("The global binding stays as it is; the %1 copy simply overrides it "
+                    "while that view is active.").arg(contextLabel(dst));
+    else
+        lines << (move ? tr("It will run only in the %1 view instead of the %2 view.")
+                             .arg(contextLabel(dst), contextLabel(src))
+                       : tr("It will run in the %1 view as well as the %2 view.")
+                             .arg(contextLabel(dst), contextLabel(src)));
+
+    const QMap<QString, QString> clashes = shortcutTransferClashes(action, src, dst);
+    for(auto it = clashes.cbegin(); it != clashes.cend(); ++it)
+        lines << tr("\"%1\" is also used by: %2").arg(it.key(), shortcutActionLabel(it.value()));
+    if(!clashes.isEmpty())
+        lines << tr("Continuing takes those keys over in the %1 context.").arg(contextLabel(dst));
+
+    lines << tr("Continue?");
+    if(!CustomMessageBox::confirm(this, move ? tr("Move shortcut") : tr("Copy shortcut"),
+                                  lines.join(QStringLiteral("\n\n"))))
+        return;
+    applyShortcutTransfer(action, src, dst, move);
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
+    QWidget *viewport = ui->shortcutsTableWidget->viewport();
+    const QPoint local = viewport->mapFrom(ui->shortcutsTableWidget, pos);
+    const int row = ui->shortcutsTableWidget->rowAt(local.y());
+    QTableWidgetItem *item = (row < 0) ? nullptr : ui->shortcutsTableWidget->item(row, 0);
+    if(!item)
+        return;
+    // Column 0 carries the real action id in UserRole (script rows show a label).
+    const QString action = item->data(Qt::UserRole).toString();
+    const ViewMode src = selectedShortcutContext();
+
+    QMenu menu(this);
+    menu.addAction(tr("Edit keys..."), this, [this, action, src]() {
+        openShortcutDetails(action, src);
+    });
+    menu.addSeparator();
+
+    QMenu *moveMenu = menu.addMenu(tr("Move to"));
+    QMenu *copyMenu = menu.addMenu(tr("Copy to"));
+    if(candidateShortcuts(src, action).isEmpty()) {
+        // Keep the entries on screen but disabled, so the reason is visible
+        // rather than the commands just being absent.
+        const QString reason = tr("No keys bound in %1").arg(contextLabel(src));
+        moveMenu->addAction(reason)->setEnabled(false);
+        copyMenu->addAction(reason)->setEnabled(false);
+    } else {
+        // Script actions ("s:<name>") are deliberately not excluded: dispatch
+        // treats them like any other action in any context, and the table lists
+        // every action the destination's draft map holds, so a moved script
+        // still gets a row there and stays undoable.
+        const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT};
+        for(ViewMode dst : contexts) {
+            if(dst == src)
+                continue;
+            moveMenu->addAction(contextLabel(dst), this, [this, action, src, dst]() {
+                transferShortcut(action, src, dst, true);
+            });
+            copyMenu->addAction(contextLabel(dst), this, [this, action, src, dst]() {
+                transferShortcut(action, src, dst, false);
+            });
+        }
+    }
+    menu.exec(viewport->mapToGlobal(local));
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::readScripts() {

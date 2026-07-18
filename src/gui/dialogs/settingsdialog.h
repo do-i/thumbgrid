@@ -36,6 +36,27 @@ public:
     ~SettingsDialog() override;
     void switchToPage(int number);
 
+    // --- Shortcuts page: the draft binding model -----------------------------
+    // Everything here reads and writes the in-dialog draft only; nothing reaches
+    // ActionManager until Apply/OK commits it through saveShortcuts(). Public
+    // because the table's row context menu drives the transfer commands and the
+    // behavior tests exercise them without going through a modal menu.
+    QStringList candidateShortcuts(ViewMode context, const QString &action) const;
+    QString primaryShortcut(ViewMode context, const QString &action) const;
+    void setPrimaryShortcut(ViewMode context, const QString &action, const QString &key);
+    bool shortcutEnabled(ViewMode context, const QString &action) const;
+    void setShortcutEnabled(ViewMode context, const QString &action, bool enabled);
+    // Keys that `action` holds in `src` which `dst` has already given to some
+    // *other* action, as key -> conflicting action. Empty means a clean transfer.
+    // Non-global destinations also report keys taken by a Global binding, since
+    // the new view-specific binding would shadow it.
+    QMap<QString, QString> shortcutTransferClashes(const QString &action, ViewMode src, ViewMode dst) const;
+    // Draft-map surgery behind Move to.../Copy to...: carries the action's key
+    // set, its primary-key choice and its enabled state across contexts, and for
+    // a move clears all three in the source. Does not prompt - transferShortcut()
+    // is the confirm-gated wrapper the menu uses.
+    void applyShortcutTransfer(const QString &action, ViewMode src, ViewMode dst, bool move);
+
 public slots:
     int exec() override;
 
@@ -79,17 +100,16 @@ private:
     void updateShortcutsFilter();
     void setActionShortcuts(ActionManager::ContextMap &map, const QString &action, const QStringList &keys);
     QStringList actionShortcuts(const ActionManager::ContextMap &map, const QString &action) const;
-    QStringList candidateShortcuts(ViewMode context, const QString &action) const;
     QStringList defaultShortcuts(ViewMode context, const QString &action) const;
-    QString primaryShortcut(ViewMode context, const QString &action) const;
-    void setPrimaryShortcut(ViewMode context, const QString &action, const QString &key);
-    bool shortcutEnabled(ViewMode context, const QString &action) const;
-    void setShortcutEnabled(ViewMode context, const QString &action, bool enabled);
     void rebuildShortcutDraftLookup();
     QString draftActionForShortcut(ViewMode context, const QString &shortcut) const;
     ViewMode selectedShortcutContext() const;
     void openShortcutDetails(int row);
     void openShortcutDetails(const QString &action, ViewMode context);
+    // Right-click on a shortcuts-table row: edit keys, plus Move to.../Copy to...
+    void showShortcutRowMenu(const QPoint &pos);
+    // Explains the scope change (and any key it would take over), then applies.
+    void transferShortcut(const QString &action, ViewMode src, ViewMode dst, bool move);
 
     void setupSidebar();
     void adjustSizeToContents();
