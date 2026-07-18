@@ -167,4 +167,8 @@ verified from the same screenshots; P1 is independent QSS + one C++ line.
       Ignored/Preferred size-policy swap + adjustSize on page switch,
       verified via screenshots (compact 4-row convert page, main page
       restores correctly).
-- [ ] P3 — dedicated convert icon (Opus 4.8) — in progress
+- [x] P3 — dedicated convert icon (Opus 4.8) — done 2026-07-17; circular
+      two-arrow glyph (file-frame motif rejected: too close to copy/move
+      at 16 px), authored via ImageMagick from a 4x master, 3 visual
+      iterations; convert16.png + @2x registered in resources.qrc, wired
+      into both the menu entry and the format rows, verified in-app.
