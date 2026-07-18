@@ -1302,3 +1302,42 @@ SettingsDialog QPushButton#OK:default {
     background-color: %accent%;
     color: %text_hc%;
 }
+
+/*----------------------------------------------------------------------------*/
+/* Scripts tab - list + per-row edit / delete icon buttons */
+/*----------------------------------------------------------------------------*/
+
+SettingsDialog QListWidget#scriptsListWidget {
+    background-color: %table_bg%;
+    alternate-background-color: %table_bg_alt%;
+    color: %table_text%;
+    border: 1px solid %table_border%;
+}
+
+SettingsDialog QListWidget#scriptsListWidget::item {
+    padding: 0px;
+}
+
+SettingsDialog QListWidget#scriptsListWidget::item:selected {
+    background-color: %accent_hover_rgba%;
+}
+
+SettingsDialog #scriptRow {
+    background: transparent;
+}
+
+SettingsDialog #scriptRowLabel {
+    background: transparent;
+    color: %table_text%;
+}
+
+SettingsDialog #scriptRowEdit,
+SettingsDialog #scriptRowDelete {
+    background-color: transparent;
+    border-radius: 3px;
+}
+
+SettingsDialog #scriptRowEdit:hover,
+SettingsDialog #scriptRowDelete:hover {
+    background-color: %accent_hover_rgba%;
+}

@@ -4497,23 +4497,9 @@
                 <number>0</number>
                </property>
                <item>
-                <widget class="QPushButton" name="pushButton_9">
+                <widget class="QPushButton" name="newScriptButton">
                  <property name="text">
-                  <string>Add</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_6">
-                 <property name="text">
-                  <string>Edit</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <widget class="QPushButton" name="pushButton_7">
-                 <property name="text">
-                  <string>Remove</string>
+                  <string>+ New</string>
                  </property>
                 </widget>
                </item>
@@ -5511,7 +5497,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_9</sender>
+   <sender>newScriptButton</sender>
    <signal>clicked()</signal>
    <receiver>SettingsDialog</receiver>
    <slot>addScript()</slot>
@@ -5703,22 +5689,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </hints>
   </connection>
   <connection>
-   <sender>pushButton_6</sender>
-   <signal>clicked()</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>editScript()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>271</x>
-     <y>31</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>2</x>
-     <y>127</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>scriptsListWidget</sender>
    <signal>itemDoubleClicked(QListWidgetItem*)</signal>
    <receiver>SettingsDialog</receiver>
@@ -5731,22 +5701,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <hint type="destinationlabel">
      <x>118</x>
      <y>5</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>pushButton_7</sender>
-   <signal>clicked()</signal>
-   <receiver>SettingsDialog</receiver>
-   <slot>removeScript()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>271</x>
-     <y>31</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>7</x>
-     <y>18</y>
     </hint>
    </hints>
   </connection>

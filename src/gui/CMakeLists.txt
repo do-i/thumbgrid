@@ -14,6 +14,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     customwidgets/floatingwidgetcontainer.cpp
     customwidgets/iconbutton.cpp
     customwidgets/iconwidget.cpp
+    customwidgets/scriptrowwidget.cpp
     customwidgets/keysequenceedit.cpp
     customwidgets/menuitem.cpp
     customwidgets/overlaywidget.cpp

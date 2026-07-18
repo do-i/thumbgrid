@@ -4,6 +4,9 @@
 #include <QSignalBlocker>
 #include <QToolButton>
 #include "gui/dialogs/custommessagebox.h"
+#include "gui/customwidgets/iconbutton.h"
+#include "gui/customwidgets/scriptrowwidget.h"
+#include <QHBoxLayout>
 #include <QStyle>
 #include <QDialogButtonBox>
 #include <QFrame>
@@ -1297,10 +1300,55 @@ void SettingsDialog::addScriptToList(const QString &name) {
         return;
 
     QListWidget *list = ui->scriptsListWidget;
-    QListWidgetItem *nameItem = new QListWidgetItem(name);
-    nameItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
-    list->insertItem(ui->scriptsListWidget->count(), nameItem);
-    list->sortItems(Qt::AscendingOrder);
+    // The item text is left empty so it doesn't render underneath the row
+    // widget's label (that caused ghosted/doubled text). The script name lives
+    // in Qt::UserRole and in the row widget's label; handlers read it from the
+    // data role or from the explicit-name lambdas below.
+    QListWidgetItem *nameItem = new QListWidgetItem();
+    nameItem->setData(Qt::UserRole, name);
+    nameItem->setSizeHint(QSize(0, 26));
+    list->insertItem(list->count(), nameItem);
+
+    // Row widget: name label + stretch + pencil (edit) + x (delete). The
+    // container stays opaque so its icon-button children receive their own
+    // clicks; its single/double clicks are re-emitted to drive selection and
+    // the edit path (keeping double-click-to-edit working).
+    ScriptRowWidget *row = new ScriptRowWidget();
+    row->setObjectName(QStringLiteral("scriptRow"));
+    connect(row, &ScriptRowWidget::clicked, this,
+            [this, nameItem]() { ui->scriptsListWidget->setCurrentItem(nameItem); });
+    connect(row, &ScriptRowWidget::doubleClicked, this,
+            [this, name]() { editScript(name); });
+    QHBoxLayout *rowLayout = new QHBoxLayout(row);
+    rowLayout->setContentsMargins(8, 0, 4, 0);
+    rowLayout->setSpacing(2);
+
+    QLabel *nameLabel = new QLabel(name, row);
+    nameLabel->setObjectName(QStringLiteral("scriptRowLabel"));
+    // Let clicks on the label reach the row container (for selection / edit).
+    nameLabel->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    rowLayout->addWidget(nameLabel);
+    rowLayout->addStretch(1);
+
+    IconButton *editBtn = new IconButton(row);
+    editBtn->setObjectName(QStringLiteral("scriptRowEdit"));
+    editBtn->setIconPath(QStringLiteral(":res/icons/common/overlay/edit16.png"));
+    editBtn->setFixedSize(22, 22);
+    editBtn->setCursor(Qt::PointingHandCursor);
+    editBtn->setToolTip(tr("Edit"));
+    connect(editBtn, &IconButton::clicked, this, [this, name]() { editScript(name); });
+    rowLayout->addWidget(editBtn);
+
+    IconButton *deleteBtn = new IconButton(row);
+    deleteBtn->setObjectName(QStringLiteral("scriptRowDelete"));
+    deleteBtn->setIconPath(QStringLiteral(":res/icons/common/overlay/close16.png"));
+    deleteBtn->setFixedSize(22, 22);
+    deleteBtn->setCursor(Qt::PointingHandCursor);
+    deleteBtn->setToolTip(tr("Delete"));
+    connect(deleteBtn, &IconButton::clicked, this, [this, name]() { removeScript(name); });
+    rowLayout->addWidget(deleteBtn);
+
+    list->setItemWidget(nameItem, row);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::addScript() {
@@ -1314,16 +1362,14 @@ void SettingsDialog::addScript() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::editScript() {
-    int row = ui->scriptsListWidget->currentRow();
-    if(row >= 0) {
-        QString name = ui->scriptsListWidget->currentItem()->text();
-        editScript(name);
-    }
+    QListWidgetItem *item = ui->scriptsListWidget->currentItem();
+    if(item)
+        editScript(item);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::editScript(QListWidgetItem* item) {
     if(item) {
-        editScript(item->text());
+        editScript(item->data(Qt::UserRole).toString());
     }
 }
 //------------------------------------------------------------------------------
@@ -1337,16 +1383,14 @@ void SettingsDialog::editScript(const QString& name) {
     }
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::removeScript() {
-    int row = ui->scriptsListWidget->currentRow();
-    if(row >= 0) {
-        QString scriptName = ui->scriptsListWidget->currentItem()->text();
-        delete ui->scriptsListWidget->takeItem(row);
-        saveShortcuts();
-        actionManager->removeAllShortcuts("s:"+scriptName);
-        readShortcuts();
-        scriptManager->removeScript(scriptName);
-    }
+void SettingsDialog::removeScript(const QString& name) {
+    if(name.isEmpty() || !scriptManager->scriptExists(name))
+        return;
+    saveShortcuts();
+    actionManager->removeAllShortcuts("s:" + name);
+    readShortcuts();
+    scriptManager->removeScript(name);
+    readScripts();
 }
 //------------------------------------------------------------------------------
 // does not check if the shortcut already there
