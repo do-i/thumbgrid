@@ -311,6 +311,9 @@
                 <height>1272</height>
                </rect>
               </property>
+              <property name="accessibleName">
+                <string notr="true">SPageContents</string>
+               </property>
               <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
                <property name="spacing">
                 <number>9</number>
@@ -1994,6 +1997,9 @@
                 <height>867</height>
                </rect>
               </property>
+              <property name="accessibleName">
+                <string notr="true">SPageContents</string>
+               </property>
               <layout class="QVBoxLayout" name="verticalLayout_27">
                <property name="spacing">
                 <number>9</number>
@@ -2882,6 +2888,9 @@
                 <height>694</height>
                </rect>
               </property>
+              <property name="accessibleName">
+                <string notr="true">SPageContents</string>
+               </property>
               <layout class="QVBoxLayout" name="verticalLayout_25">
                <property name="spacing">
                 <number>9</number>
@@ -4560,6 +4569,9 @@
                 <height>615</height>
                </rect>
               </property>
+              <property name="accessibleName">
+                <string notr="true">SPageContents</string>
+               </property>
               <layout class="QVBoxLayout" name="verticalLayout_31">
                <property name="spacing">
                 <number>9</number>
@@ -5163,6 +5175,9 @@
                 <height>274</height>
                </rect>
               </property>
+              <property name="accessibleName">
+                <string notr="true">SPageContents</string>
+               </property>
               <layout class="QVBoxLayout" name="verticalLayout_32">
                <property name="spacing">
                 <number>9</number>

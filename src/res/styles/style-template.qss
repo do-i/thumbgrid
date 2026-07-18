@@ -20,12 +20,13 @@ SettingsDialog QScrollArea {
     border: none;
 }
 
-SettingsDialog QScrollArea > QWidget,
-SettingsDialog #scrollAreaWidgetContents,
-SettingsDialog #scrollAreaWidgetContents_2,
-SettingsDialog #scrollAreaWidgetContents_3,
-SettingsDialog #scrollAreaWidgetContents_4,
-SettingsDialog #scrollAreaWidgetContents_5 {
+SettingsDialog QScrollArea > QWidget {
+    background-color: %background%;
+}
+
+/* Programmatic settings pages (Grid, Document) have no object name, so we use
+   accessibleName to match them with the UI-based pages. */
+[accessibleName="SPageContents"] {
     background-color: %background%;
 }
 
