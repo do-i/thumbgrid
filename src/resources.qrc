@@ -56,6 +56,8 @@
         <file>res/icons/common/menuitem/folder16@2x.png</file>
         <file>res/icons/common/menuitem/folderview16.png</file>
         <file>res/icons/common/menuitem/folderview16@2x.png</file>
+        <file>res/icons/common/menuitem/convert16.png</file>
+        <file>res/icons/common/menuitem/convert16@2x.png</file>
         <file>res/icons/common/menuitem/image-crop16.png</file>
         <file>res/icons/common/menuitem/image-crop16@2x.png</file>
         <file>res/icons/common/menuitem/move16.png</file>

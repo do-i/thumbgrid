@@ -26,7 +26,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(2);
 
-    convertItem = makeItem(tr("Convert to..."), ":/res/icons/common/menuitem/image-crop16.png");
+    convertItem = makeItem(tr("Convert to..."), ":/res/icons/common/menuitem/convert16.png");
     convertItem->setObjectName("menuConvert");
     convertItem->setPassthroughClicks(false); // keep the menu open, just switch page
     connect(convertItem, &ContextMenuItem::pressed, this, &GridContextMenu::switchToConvertPage);
@@ -115,7 +115,7 @@ ContextMenuItem *GridContextMenu::makeItem(const QString &text, const QString &i
 }
 
 void GridContextMenu::addConvertFormat(QVBoxLayout *layout, const QString &label, const QString &format) {
-    auto *item = makeItem(label, ":/res/icons/common/menuitem/image-crop16.png");
+    auto *item = makeItem(label, ":/res/icons/common/menuitem/convert16.png");
     connect(item, &ContextMenuItem::pressed, this, [this, format]() {
         emit convertFormatRequested(format);
     });
