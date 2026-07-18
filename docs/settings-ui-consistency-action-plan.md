@@ -191,8 +191,24 @@ button sizes; S3 builds on S1's row; S4 and S5 are independent.
 
 ## Status
 
-- [ ] S1 — settings OK/Cancel/Apply style + order (Sonnet 5)
-- [ ] S2 — shrink nested-dialog buttons / min-height leak (Haiku 4.5)
-- [ ] S3 — global button order OK, Cancel, [Apply] (Sonnet 5)
-- [ ] S4 — theme all settings dropdowns (Sonnet 5)
-- [ ] S5 — About screen text color on dark themes (Haiku 4.5, step 3 → Sonnet 5)
+- [x] S1 — settings OK/Cancel/Apply style + order (Sonnet 5) — done
+      2026-07-18; reorder + rename pushButton→applyButton + objectName-scoped
+      QSS; verified on light-blue and dark themes.
+- [x] S2 — shrink nested-dialog buttons / min-height leak (Haiku 4.5) — done
+      2026-07-18; `min-height: 0px` in the shared dialog-button group.
+- [x] S3 — global button order OK, Cancel, [Apply] (Sonnet 5) — done
+      2026-07-18; CustomMessageBox accept-first, color picker rebuilt as
+      plain-button row, shortcutcreatordialog's QDialogButtonBox converted to
+      a plain OK/Cancel row (follow-up); resize/scripteditor/print/filereplace
+      were already compliant.
+- [x] S4 — theme all settings dropdowns (Sonnet 5) — done 2026-07-18; merged
+      into the ResizeDialog/ShortcutCreator combobox group + settings-only
+      min-height; popup lists themed. Note: comboboxes are arrow-less by
+      design app-wide (`::drop-down` border 0); the qrc's dropDownArrow.png
+      is a magenta placeholder meant for runtime recoloring, unusable raw in
+      QSS — adding arrows would be a separate design follow-up.
+- [x] S5 — About screen text color on dark themes (Haiku 4.5) — done
+      2026-07-18; `SettingsDialog QTextBrowser { color: %text%; }`; verified
+      readable on Dark and Dark Blue presets (sandboxed HOME so the user's
+      live theme config stayed untouched); step 3 (link recolor) not needed —
+      #007af4 links are legible on both dark presets.
