@@ -11,26 +11,39 @@
 # AUR once I trust it" step - run via `./run.sh` or directly.
 #
 # What it does:
-#   1. Looks up the chosen release's exact asset (name + sha256) on GitHub.
-#   2. Updates packaging/arch-bin/PKGBUILD + regenerates .SRCINFO.
-#   3. Commits that change locally in this repo (not pushed - review/push it
+#   1. Looks up the chosen release on GitHub (aborting - or, in --dry-run,
+#      just warning - on drafts/prereleases unless confirmed).
+#   2. Clones thumbgrid-bin from AUR anonymously over HTTPS (no SSH key
+#      needed) to read the currently-published pkgver/pkgrel: pkgrel is
+#      always derived from what's actually on AUR, never from this repo's
+#      working tree, since the two can be out of sync (publish from another
+#      machine, a --dry-run edit, a lost commit).
+#   3. Picks the newest matching x86_64 asset (name + sha256) on that
+#      release - a release can carry more than one srcrel.
+#   4. Updates packaging/arch-bin/PKGBUILD + regenerates .SRCINFO.
+#   5. Commits that change locally in this repo (not pushed - review/push it
 #      yourself with your normal git workflow).
-#   4. Clones thumbgrid-bin from AUR, copies the two files in, commits, and
-#      pushes - retrying, since aur.archlinux.org's git/SSH service is known
-#      to reset connections intermittently (confirmed: has taken up to ~8
-#      attempts in practice).
+#   6. Copies the two files into the AUR clone, commits, switches that
+#      clone's remote to SSH, and pushes - retrying, since aur.archlinux.org's
+#      git/SSH service is known to reset connections intermittently
+#      (confirmed: has taken up to ~8 attempts in practice).
 #
 # Usage: publish-aur.sh [version] [--dry-run]
 #   version    e.g. 2026.7.12 or v2026.7.12; defaults to the latest git tag.
-#   --dry-run  Do everything up through regenerating .SRCINFO, print what
-#              would be committed/pushed, then stop.
+#   --dry-run  Do everything up through regenerating .SRCINFO (including the
+#              anonymous AUR clone), print a diff against both this repo's
+#              last commit and the current AUR package, then stop before any
+#              commit or push.
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PKG_DIR="$ROOT_DIR/packaging/arch-bin"
 REPO="do-i/thumbgrid"
-AUR_REMOTE="ssh://aur@aur.archlinux.org/thumbgrid-bin.git"
+# Clone anonymously (no auth needed, works in --dry-run without an SSH key);
+# only the final push switches to the SSH remote.
+AUR_HTTPS_REMOTE="https://aur.archlinux.org/thumbgrid-bin.git"
+AUR_SSH_REMOTE="ssh://aur@aur.archlinux.org/thumbgrid-bin.git"
 RETRY_ATTEMPTS=10
 RETRY_DELAY=5
 
@@ -77,24 +90,139 @@ retry() {
     done
 }
 
+# Status-aware curl: a 4xx (bad tag, missing asset, ...) is a permanent
+# answer from the server and retrying it 10x just wastes ~50s, so it fails
+# immediately. Only transport errors (curl itself failing, reported as
+# status "000") and 5xx responses are treated as transient and retried,
+# same bound/delay as retry() above. $5 (hint) is optional extra text
+# printed only on the permanent-failure path.
+curl_fetch() {
+    local desc="$1" url="$2" outfile="$3" max_time="$4" hint="${5:-}"
+    local attempt=1 status
+    while true; do
+        status="$(curl -sSL --max-time "$max_time" -w '%{http_code}' -o "$outfile" "$url")" || status="000"
+        case "$status" in
+            2??) return 0 ;;
+            4??)
+                printf '%s failed: HTTP %s (permanent, not retrying).\n' "$desc" "$status" >&2
+                [[ -n "$hint" ]] && printf '%s\n' "$hint" >&2
+                return 1
+                ;;
+        esac
+        if (( attempt >= RETRY_ATTEMPTS )); then
+            printf '%s failed after %d attempts (last: HTTP %s).\n' "$desc" "$RETRY_ATTEMPTS" "$status" >&2
+            return 1
+        fi
+        printf '%s failed (HTTP %s, attempt %d/%d), retrying in %ds...\n' "$desc" "$status" "$attempt" "$RETRY_ATTEMPTS" "$RETRY_DELAY" >&2
+        sleep "$RETRY_DELAY"
+        attempt=$((attempt + 1))
+    done
+}
+
+# Escapes ERE metacharacters so a literal pkgver (which contains dots, e.g.
+# "2026.7.12") can't be mis-parsed as part of the jq test() pattern below.
+escape_regex() {
+    printf '%s' "$1" | sed 's/[.[\*^$+?{}()|]/\\&/g'
+}
+
+# TAG is the raw git tag, used verbatim for the GitHub API lookup. PKGVER is
+# CI's normalized form of it (see .github workflows: s/^v//; s/-/_/g -
+# dashes aren't legal in pacman versions), used for asset names, PKGBUILD
+# fields, and the AUR pkgver comparison. The two diverge for pre-release-style
+# tags (e.g. tag v2026.7.12-rc1 -> pkgver 2026.7.12_rc1), so deriving TAG from
+# PKGVER (as the old `TAG="v$PKGVER"` did) breaks; TAG must come from the raw
+# input instead.
 if [[ -n "$VERSION_ARG" ]]; then
-    PKGVER="${VERSION_ARG#v}"
+    case "$VERSION_ARG" in
+        v*) TAG="$VERSION_ARG" ;;
+        *)  TAG="v$VERSION_ARG" ;;
+    esac
 else
-    PKGVER="$(git -C "$ROOT_DIR" describe --tags --abbrev=0)"
-    PKGVER="${PKGVER#v}"
+    TAG="$(git -C "$ROOT_DIR" describe --tags --abbrev=0)"
 fi
-TAG="v$PKGVER"
+PKGVER="$(printf '%s' "$TAG" | sed -e 's/^v//' -e 's/-/_/g')"
 
 printf 'Publishing thumbgrid %s to AUR (thumbgrid-bin)...\n' "$TAG"
 
 RELEASE_JSON="$(mktemp)"
 trap 'rm -f "$RELEASE_JSON"' EXIT
-retry "GitHub release lookup" curl -sSfL --max-time 20 \
-    "https://api.github.com/repos/$REPO/releases/tags/$TAG" -o "$RELEASE_JSON"
+curl_fetch "GitHub release lookup" "https://api.github.com/repos/$REPO/releases/tags/$TAG" "$RELEASE_JSON" 20 \
+    'Has the "Arch package" workflow finished for this tag?' || exit 1
 
-ASSET_NAME="$(jq -r --arg pkgver "$PKGVER" \
+# Guard against promoting something not meant for general use yet.
+IS_DRAFT="$(jq -r '.draft' "$RELEASE_JSON")"
+IS_PRERELEASE="$(jq -r '.prerelease' "$RELEASE_JSON")"
+RELEASE_FLAGS=""
+if [[ "$IS_DRAFT" == "true" ]]; then
+    RELEASE_FLAGS="draft"
+fi
+if [[ "$IS_PRERELEASE" == "true" ]]; then
+    if [[ -n "$RELEASE_FLAGS" ]]; then
+        RELEASE_FLAGS="$RELEASE_FLAGS, prerelease"
+    else
+        RELEASE_FLAGS="prerelease"
+    fi
+fi
+if [[ -n "$RELEASE_FLAGS" ]]; then
+    printf 'Warning: release %s is marked %s on GitHub.\n' "$TAG" "$RELEASE_FLAGS" >&2
+    if (( DRY_RUN )); then
+        printf 'Dry run: a real run would prompt for confirmation before publishing a %s release.\n' "$RELEASE_FLAGS" >&2
+    else
+        read -r -p "Publish this $RELEASE_FLAGS release to AUR anyway? [y/N] " answer
+        case "$answer" in
+            [yY]|[yY][eE][sS]) ;;
+            *) printf 'Aborted.\n' >&2; exit 1 ;;
+        esac
+    fi
+fi
+
+WORK_DIR="$(mktemp -d)"
+trap 'rm -f "$RELEASE_JSON"; rm -rf "$WORK_DIR"' EXIT
+
+# rm -rf the destination first so a retry after a partial clone failure
+# doesn't fail merely because the directory already exists / is non-empty.
+clone_aur() {
+    rm -rf "$WORK_DIR/thumbgrid-bin"
+    git clone -q "$AUR_HTTPS_REMOTE" "$WORK_DIR/thumbgrid-bin"
+}
+retry "AUR clone" clone_aur
+
+AUR_PKGBUILD="$WORK_DIR/thumbgrid-bin/PKGBUILD"
+if [[ -f "$AUR_PKGBUILD" ]]; then
+    AUR_PKGVER="$(grep -E '^pkgver=' "$AUR_PKGBUILD" | cut -d= -f2)"
+    AUR_PKGREL="$(grep -E '^pkgrel=' "$AUR_PKGBUILD" | cut -d= -f2)"
+else
+    # Fresh AUR package: empty clone, no PKGBUILD yet.
+    AUR_PKGVER=""
+    AUR_PKGREL=0
+fi
+
+if [[ "$AUR_PKGVER" == "$PKGVER" ]]; then
+    NEW_PKGREL=$((AUR_PKGREL + 1))
+    printf 'thumbgrid-bin on AUR is already at pkgver %s; bumping pkgrel to %s.\n' "$PKGVER" "$NEW_PKGREL"
+else
+    NEW_PKGREL=1
+fi
+
+PKGVER_RE="$(escape_regex "$PKGVER")"
+mapfile -t ASSET_NAMES < <(jq -r --arg pkgver "$PKGVER_RE" \
     '.assets[] | select(.name | test("^thumbgrid-" + $pkgver + "-[0-9]+-x86_64\\.pkg\\.tar\\.zst$")) | .name' \
-    "$RELEASE_JSON" | head -1)"
+    "$RELEASE_JSON")
+
+# A release can carry more than one srcrel (e.g. a re-run of the "Arch
+# package" workflow); GitHub lists assets in upload order, not version
+# order, so pick the highest srcrel rather than the first one.
+ASSET_NAME=""
+BEST_SRCREL=-1
+for name in "${ASSET_NAMES[@]}"; do
+    srcrel="${name#thumbgrid-"$PKGVER"-}"
+    srcrel="${srcrel%-x86_64.pkg.tar.zst}"
+    srcrel=$((10#$srcrel))
+    if (( srcrel > BEST_SRCREL )); then
+        BEST_SRCREL="$srcrel"
+        ASSET_NAME="$name"
+    fi
+done
 ASSET_URL="$(jq -r --arg name "$ASSET_NAME" '.assets[] | select(.name == $name) | .browser_download_url' "$RELEASE_JSON")"
 
 if [[ -z "$ASSET_NAME" || -z "$ASSET_URL" ]]; then
@@ -102,26 +230,15 @@ if [[ -z "$ASSET_NAME" || -z "$ASSET_URL" ]]; then
     printf 'Has the "Arch package" workflow finished for this tag?\n' >&2
     exit 1
 fi
-
-# thumbgrid-<pkgver>-<srcrel>-x86_64.pkg.tar.zst -> srcrel
-SRCREL="$(printf '%s' "$ASSET_NAME" | sed -E "s/^thumbgrid-${PKGVER}-([0-9]+)-x86_64\.pkg\.tar\.zst\$/\1/")"
+SRCREL="$BEST_SRCREL"
 
 printf 'Found asset: %s (srcrel=%s)\n' "$ASSET_NAME" "$SRCREL"
 
 ASSET_FILE="$(mktemp)"
-trap 'rm -f "$RELEASE_JSON" "$ASSET_FILE"' EXIT
-retry "Asset download" curl -sSfL --max-time 60 "$ASSET_URL" -o "$ASSET_FILE"
+trap 'rm -f "$RELEASE_JSON" "$ASSET_FILE"; rm -rf "$WORK_DIR"' EXIT
+curl_fetch "Asset download" "$ASSET_URL" "$ASSET_FILE" 60 || exit 1
 SHA256="$(sha256sum "$ASSET_FILE" | cut -d' ' -f1)"
 printf 'sha256: %s\n' "$SHA256"
-
-CURRENT_PKGVER="$(grep -E '^pkgver=' "$PKG_DIR/PKGBUILD" | cut -d= -f2)"
-if [[ "$CURRENT_PKGVER" == "$PKGVER" ]]; then
-    CURRENT_PKGREL="$(grep -E '^pkgrel=' "$PKG_DIR/PKGBUILD" | cut -d= -f2)"
-    NEW_PKGREL=$((CURRENT_PKGREL + 1))
-    printf 'Republishing the same pkgver; bumping pkgrel to %s.\n' "$NEW_PKGREL"
-else
-    NEW_PKGREL=1
-fi
 
 sed -i \
     -e "s/^pkgver=.*/pkgver=$PKGVER/" \
@@ -132,27 +249,33 @@ sed -i \
 
 (cd "$PKG_DIR" && makepkg --printsrcinfo > .SRCINFO)
 
-printf '\n--- packaging/arch-bin/PKGBUILD diff ---\n'
+printf "\n--- packaging/arch-bin/PKGBUILD diff (against this repo's last commit) ---\n"
 git -C "$ROOT_DIR" --no-pager diff -- packaging/arch-bin/ || true
 printf -- '---\n\n'
 
 if (( DRY_RUN )); then
+    printf '\n--- PKGBUILD/.SRCINFO diff (against the current AUR package) ---\n'
+    if [[ -f "$WORK_DIR/thumbgrid-bin/PKGBUILD" ]]; then
+        diff -u "$WORK_DIR/thumbgrid-bin/PKGBUILD" "$PKG_DIR/PKGBUILD" || true
+        diff -u "$WORK_DIR/thumbgrid-bin/.SRCINFO" "$PKG_DIR/.SRCINFO" || true
+    else
+        printf '(no PKGBUILD on AUR yet - this would be a new package)\n'
+    fi
+    printf -- '---\n\n'
     printf 'Dry run: stopping before commit/push.\n'
     exit 0
 fi
 
 if ! git -C "$ROOT_DIR" diff --quiet -- packaging/arch-bin/; then
     git -C "$ROOT_DIR" add packaging/arch-bin/PKGBUILD packaging/arch-bin/.SRCINFO
-    git -C "$ROOT_DIR" commit -m "Publish thumbgrid-bin $PKGVER-$NEW_PKGREL to AUR" -q
+    # Pathspec-scoped so this only ever commits packaging/arch-bin/, even if
+    # the user has unrelated changes staged elsewhere in the index.
+    git -C "$ROOT_DIR" commit -q -m "Publish thumbgrid-bin $PKGVER-$NEW_PKGREL to AUR" -- packaging/arch-bin/
     printf 'Committed locally in %s. Push it yourself when ready.\n' "$ROOT_DIR"
 else
     printf 'PKGBUILD already up to date; nothing to commit.\n'
 fi
 
-WORK_DIR="$(mktemp -d)"
-trap 'rm -f "$RELEASE_JSON" "$ASSET_FILE"; rm -rf "$WORK_DIR"' EXIT
-
-retry "AUR clone" git clone -q "$AUR_REMOTE" "$WORK_DIR/thumbgrid-bin"
 cp "$PKG_DIR/PKGBUILD" "$PKG_DIR/.SRCINFO" "$WORK_DIR/thumbgrid-bin/"
 
 pushd "$WORK_DIR/thumbgrid-bin" >/dev/null
@@ -165,6 +288,9 @@ if git diff --cached --quiet; then
     exit 0
 fi
 git commit -q -m "thumbgrid-bin $PKGVER-$NEW_PKGREL"
+# Switch this clone's remote to SSH only now, for the push - everything
+# before this point (including --dry-run) only ever needed anonymous HTTPS.
+git remote set-url origin "$AUR_SSH_REMOTE"
 retry "AUR push" git push -q origin HEAD:master
 popd >/dev/null
 

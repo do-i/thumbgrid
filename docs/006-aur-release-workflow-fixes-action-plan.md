@@ -38,7 +38,9 @@ diff against real AUR state instead of stopping before the clone.
 the comparison source; clear spec, moderate care around the retry/trap
 structure.
 
-- [ ] B1 open
+- [x] B1 done — AUR cloned anonymously over HTTPS before any pkgrel math;
+  pkgrel derived from the AUR-side PKGBUILD; push switches the clone's
+  remote to SSH; dry-run now diffs against real AUR state
 
 ### B2. ABI-only rebuild must build the tag, not the dispatched branch HEAD
 
@@ -86,7 +88,8 @@ take the max.
 *Model:* **Haiku 4.5** — mechanical jq/sort change with an obvious test
 (two fake asset names).
 
-- [ ] B4 open
+- [x] B4 done — all matching assets collected, numeric max srcrel wins
+  (base-10 forced against future zero-padding)
 
 ## Robustness
 
@@ -101,7 +104,7 @@ dirty).
 
 *Model:* **Haiku 4.5** — one-line change, well-understood git behavior.
 
-- [ ] B5 open
+- [x] B5 done — pathspec-scoped commit (`-- packaging/arch-bin/`)
 
 ### B6. Make the AUR clone retryable after a partial failure
 
@@ -114,7 +117,8 @@ small function that `rm -rf`s first).
 
 *Model:* **Haiku 4.5** — mechanical; the retry() helper already exists.
 
-- [ ] B6 open
+- [x] B6 done — clone wrapped in a function that clears the destination
+  first; the function (not bare `git clone`) is what gets retried
 
 ### B7. Do not retry permanent HTTP errors
 
@@ -130,7 +134,9 @@ with the existing hint on 4xx.
 *Model:* **Sonnet 5** — needs care to keep retry() generic while adding
 status-aware behavior for the curl call sites only.
 
-- [ ] B7 open
+- [x] B7 done — `curl_fetch()` helper: 2xx succeeds, 4xx fails fast with
+  hint, 5xx/transport retried with the existing bound; retry() stays
+  generic for git operations
 
 ### B8. Normalize versions the same way CI does
 
@@ -146,7 +152,9 @@ stay plain-numeric.
 *Model:* **Sonnet 5** — small, but regex-escaping in jq via shell has
 enough foot-guns to be above mechanical.
 
-- [ ] B8 open
+- [x] B8 done — raw TAG for the API lookup, CI-normalized PKGVER
+  (`s/^v//; s/-/_/g`) for asset/PKGBUILD/AUR use, regex-escaped before jq
+  interpolation
 
 ## Polish
 
@@ -222,7 +230,8 @@ confirmation prompt would prevent slips.
 *Model:* **Haiku 4.5** — one jq field check + prompt, mirroring existing
 script style.
 
-- [ ] B12 open
+- [x] B12 done — draft/prerelease flags checked after the release lookup;
+  dry-run warns, real run prompts [y/N] and aborts unless confirmed
 
 ### B13. Un-stale doc 005 vs. reality
 
