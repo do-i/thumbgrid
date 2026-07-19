@@ -31,7 +31,7 @@ QSettings *PlatformDesktop::createSettingsConfig() {
     return new QSettings(configDir + "/" + QCoreApplication::applicationName() + ".ini", QSettings::IniFormat);
 }
 
-QSettings *PlatformDesktop::createStateConfig() {
+QSettings *PlatformDesktop::createLegacyStateConfig() {
     return new QSettings(settingsConfigDirectory(nullptr) + "/savedState.ini", QSettings::IniFormat);
 }
 

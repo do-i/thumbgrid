@@ -115,6 +115,14 @@ QString settingGroupFor(const QString &key) {
         {"memoryAllocationLimit", "Advanced"}, {"cacheDir", "Advanced"},
         // Shortcuts (preset pointer + dirty flag; the mapping lives in shortcuts.json)
         {"preset", "Shortcuts"}, {"modified", "Shortcuts"},
+        // State (runtime state persisted between sessions; not part of the settings dialog)
+        {"volume", "State"}, {"maximizedWindow", "State"}, {"lastDisplay", "State"},
+        {"windowGeometry", "State"}, {"savedPaths", "State"}, {"bookmarks", "State"},
+        {"placesPanel", "State"}, {"placesPanelBookmarksExpanded", "State"},
+        {"placesPanelTreeExpanded", "State"}, {"placesPanelWidth", "State"},
+        {"duplicateFinder", "State"}, {"printLandscape", "State"}, {"printPdfDefault", "State"},
+        {"printColor", "State"}, {"printFitToPage", "State"}, {"lastPrinter", "State"},
+        {"shortcutsSortColumn", "State"}, {"shortcutsSortOrder", "State"},
     };
     return groups.value(key);
 }
@@ -538,12 +546,10 @@ void migrateLegacyShortcuts(QSettings *settingsConf, const QString &jsonPath) {
 Settings::Settings(QObject *parent)
     : QObject(parent),
       settingsConf(nullptr),
-      stateConf(nullptr),
       themeConf(nullptr),
       mTmpDir(nullptr),
       mThumbCacheDir(nullptr) {
     settingsConf = PlatformDesktop::createSettingsConfig();
-    stateConf = PlatformDesktop::createStateConfig();
     const QString confDir = PlatformDesktop::settingsConfigDirectory(settingsConf);
     themeConf = PlatformDesktop::createThemeConfig(confDir);
     mShortcutsJsonPath = PlatformDesktop::shortcutsJsonPath(confDir);
@@ -564,7 +570,6 @@ Settings::~Settings() {
     delete mThumbCacheDir;
     delete mTmpDir;
     delete settingsConf;
-    delete stateConf;
     delete themeConf;
 }
 //------------------------------------------------------------------------------
@@ -598,7 +603,6 @@ void Settings::setupCache() {
 //------------------------------------------------------------------------------
 void Settings::sync() {
     settings->settingsConf->sync();
-    settings->stateConf->sync();
 }
 //------------------------------------------------------------------------------
 QVariant Settings::readSetting(const QString &key, const QVariant &defaultValue) const {
@@ -628,6 +632,22 @@ void Settings::runConfigRecoveryMigrations(const QString &confDir) {
     const QString presetKey = groupedKey(QStringLiteral("preset"));
     if(!settingsConf->contains(presetKey))
         settingsConf->setValue(presetKey, QStringLiteral("qimgv"));
+
+    // Runtime state used to live in its own savedState file; import it into
+    // [State] and delete the old file. Keys already present win, so a stale
+    // legacy file reappearing (restored backup) cannot clobber newer state.
+    QSettings *legacyState = PlatformDesktop::createLegacyStateConfig();
+    const QString legacyStatePath = legacyState->fileName();
+    if(QFile::exists(legacyStatePath)) {
+        const QStringList stateKeys = legacyState->allKeys();
+        for(const QString &key : stateKeys) {
+            const QString target = QLatin1String("State/") + key;
+            if(!settingsConf->contains(target))
+                settingsConf->setValue(target, legacyState->value(key));
+        }
+    }
+    delete legacyState;
+    QFile::remove(legacyStatePath);
 }
 //------------------------------------------------------------------------------
 int Settings::selectedThemeTid() {
@@ -1139,11 +1159,11 @@ void Settings::setShowVideoControls(bool mode) {
 }
 //------------------------------------------------------------------------------
 void Settings::setVolume(int vol) {
-    settings->stateConf->setValue("volume", vol);
+    settings->writeSetting("volume", vol);
 }
 
 int Settings::volume() {
-    return settings->stateConf->value("volume", 100).toInt();
+    return settings->readSetting("volume", 100).toInt();
 }
 //------------------------------------------------------------------------------
 FolderViewMode Settings::folderViewMode() {
@@ -1228,11 +1248,11 @@ void Settings::setFullscreenMode(bool mode) {
 }
 //------------------------------------------------------------------------------
 bool Settings::maximizedWindow() {
-    return settings->stateConf->value("maximizedWindow", false).toBool();
+    return settings->readSetting("maximizedWindow", false).toBool();
 }
 
 void Settings::setMaximizedWindow(bool mode) {
-    settings->stateConf->setValue("maximizedWindow", mode);
+    settings->writeSetting("maximizedWindow", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::panelEnabled() {
@@ -1252,11 +1272,11 @@ void Settings::setPanelFullscreenOnly(bool mode) {
 }
 //------------------------------------------------------------------------------
 int Settings::lastDisplay() {
-    return settings->stateConf->value("lastDisplay", 0).toInt();
+    return settings->readSetting("lastDisplay", 0).toInt();
 }
 
 void Settings::setLastDisplay(int display) {
-    settings->stateConf->setValue("lastDisplay", display);
+    settings->writeSetting("lastDisplay", display);
 }
 //------------------------------------------------------------------------------
 PanelPosition Settings::panelPosition() {
@@ -1324,14 +1344,14 @@ void Settings::setImageFitMode(ImageFitMode mode) {
 }
 //------------------------------------------------------------------------------
 QRect Settings::windowGeometry() {
-    QRect savedRect = settings->stateConf->value("windowGeometry").toRect();
+    QRect savedRect = settings->readSetting("windowGeometry").toRect();
     if(savedRect.size().isEmpty())
         savedRect.setRect(100, 100, 900, 600);
     return savedRect;
 }
 
 void Settings::setWindowGeometry(QRect geometry) {
-    settings->stateConf->setValue("windowGeometry", geometry);
+    settings->writeSetting("windowGeometry", geometry);
 }
 //------------------------------------------------------------------------------
 bool Settings::loopSlideshow() {
@@ -1471,27 +1491,27 @@ void Settings::setThumbnailerMemCacheLimit(int limitMB) {
 }
 //------------------------------------------------------------------------------
 QStringList Settings::savedPaths() {
-    return settings->stateConf->value("savedPaths", QDir::homePath()).toStringList();
+    return settings->readSetting("savedPaths", QDir::homePath()).toStringList();
 }
 
 void Settings::setSavedPaths(const QStringList& paths) {
-    settings->stateConf->setValue("savedPaths", paths);
+    settings->writeSetting("savedPaths", paths);
 }
 //------------------------------------------------------------------------------
 QStringList Settings::bookmarks() {
-    return settings->stateConf->value("bookmarks").toStringList();
+    return settings->readSetting("bookmarks").toStringList();
 }
 
 void Settings::setBookmarks(const QStringList& paths) {
-    settings->stateConf->setValue("bookmarks", paths);
+    settings->writeSetting("bookmarks", paths);
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanel() {
-    return settings->stateConf->value("placesPanel", true).toBool();
+    return settings->readSetting("placesPanel", true).toBool();
 }
 
 void Settings::setPlacesPanel(bool mode) {
-    settings->stateConf->setValue("placesPanel", mode);
+    settings->writeSetting("placesPanel", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::folderViewTopBar() {
@@ -1503,27 +1523,27 @@ void Settings::setFolderViewTopBar(bool mode) {
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanelBookmarksExpanded() {
-    return settings->stateConf->value("placesPanelBookmarksExpanded", true).toBool();
+    return settings->readSetting("placesPanelBookmarksExpanded", true).toBool();
 }
 
 void Settings::setPlacesPanelBookmarksExpanded(bool mode) {
-    settings->stateConf->setValue("placesPanelBookmarksExpanded", mode);
+    settings->writeSetting("placesPanelBookmarksExpanded", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanelTreeExpanded() {
-    return settings->stateConf->value("placesPanelTreeExpanded", true).toBool();
+    return settings->readSetting("placesPanelTreeExpanded", true).toBool();
 }
 
 void Settings::setPlacesPanelTreeExpanded(bool mode) {
-    settings->stateConf->setValue("placesPanelTreeExpanded", mode);
+    settings->writeSetting("placesPanelTreeExpanded", mode);
 }
 //------------------------------------------------------------------------------
 int Settings::placesPanelWidth() {
-    return settings->stateConf->value("placesPanelWidth", 260).toInt();
+    return settings->readSetting("placesPanelWidth", 260).toInt();
 }
 
 void Settings::setPlacesPanelWidth(int width) {
-    settings->stateConf->setValue("placesPanelWidth", width);
+    settings->writeSetting("placesPanelWidth", width);
 }
 //------------------------------------------------------------------------------
 void Settings::setSlideshowInterval(int ms) {
@@ -1573,11 +1593,11 @@ void Settings::setDuplicateSearchThreadCount(int count) {
 // duplicate finder window state (geometry, last options/folders) lives in
 // the state file, not the settings file, like windowGeometry above
 QVariantMap Settings::duplicateFinderState() {
-    return settings->stateConf->value("duplicateFinder").toMap();
+    return settings->readSetting("duplicateFinder").toMap();
 }
 
 void Settings::setDuplicateFinderState(const QVariantMap &state) {
-    settings->stateConf->setValue("duplicateFinder", state);
+    settings->writeSetting("duplicateFinder", state);
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothUpscaling() {
@@ -1881,59 +1901,59 @@ void Settings::setFolderEndAction(FolderEndAction mode) {
 }
 //------------------------------------------------------------------------------
 bool Settings::printLandscape() {
-    return stateConf->value("printLandscape", false).toBool();
+    return readSetting("printLandscape", false).toBool();
 }
 
 void Settings::setPrintLandscape(bool mode) {
-    stateConf->setValue("printLandscape", mode);
+    writeSetting("printLandscape", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::printPdfDefault() {
-    return stateConf->value("printPdfDefault", false).toBool();
+    return readSetting("printPdfDefault", false).toBool();
 }
 
 void Settings::setPrintPdfDefault(bool mode) {
-    stateConf->setValue("printPdfDefault", mode);
+    writeSetting("printPdfDefault", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::printColor() {
-    return stateConf->value("printColor", false).toBool();
+    return readSetting("printColor", false).toBool();
 }
 
 void Settings::setPrintColor(bool mode) {
-    stateConf->setValue("printColor", mode);
+    writeSetting("printColor", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::printFitToPage() {
-    return stateConf->value("printFitToPage", true).toBool();
+    return readSetting("printFitToPage", true).toBool();
 }
 
 void Settings::setPrintFitToPage(bool mode) {
-    stateConf->setValue("printFitToPage", mode);
+    writeSetting("printFitToPage", mode);
 }
 //------------------------------------------------------------------------------
 QString Settings::lastPrinter() {
-    return stateConf->value("lastPrinter", "").toString();
+    return readSetting("lastPrinter", "").toString();
 }
 
 void Settings::setLastPrinter(const QString& name) {
-    stateConf->setValue("lastPrinter", name);
+    writeSetting("lastPrinter", name);
 }
 //------------------------------------------------------------------------------
 int Settings::shortcutsSortColumn() {
-    return stateConf->value("shortcutsSortColumn", 0).toInt();
+    return readSetting("shortcutsSortColumn", 0).toInt();
 }
 
 void Settings::setShortcutsSortColumn(int column) {
-    stateConf->setValue("shortcutsSortColumn", column);
+    writeSetting("shortcutsSortColumn", column);
 }
 //------------------------------------------------------------------------------
 Qt::SortOrder Settings::shortcutsSortOrder() {
-    return static_cast<Qt::SortOrder>(stateConf->value("shortcutsSortOrder", Qt::AscendingOrder).toInt());
+    return static_cast<Qt::SortOrder>(readSetting("shortcutsSortOrder", Qt::AscendingOrder).toInt());
 }
 
 void Settings::setShortcutsSortOrder(Qt::SortOrder order) {
-    stateConf->setValue("shortcutsSortOrder", static_cast<int>(order));
+    writeSetting("shortcutsSortOrder", static_cast<int>(order));
 }
 //------------------------------------------------------------------------------
 bool Settings::jxlAnimation() {

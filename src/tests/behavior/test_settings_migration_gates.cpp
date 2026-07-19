@@ -141,6 +141,35 @@ bool shortcutRecoveryStaysLazyAndImportsOnRead() {
                    "Legacy eq shortcut should decode to '='.");
 }
 
+bool stateRecoveryImportsLegacySavedState() {
+    QSettings conf;
+    seedExistingConfig(conf, appVersion);
+    conf.setValue("State/volume", 55);
+    conf.sync();
+
+    QString legacyPath;
+    {
+        QSettings legacy(QCoreApplication::organizationName(), "savedState");
+        legacy.setValue("volume", 42);
+        legacy.setValue("placesPanelWidth", 300);
+        legacy.sync();
+        legacyPath = legacy.fileName();
+    }
+
+    Settings::getInstance();
+
+    QSettings after;
+    return require(!QFile::exists(legacyPath), "State recovery should delete the legacy savedState file.") &&
+           require(after.value("State/placesPanelWidth").toInt() == 300,
+                   "Legacy placesPanelWidth should be imported into [State].") &&
+           require(after.value("State/volume").toInt() == 55,
+                   "Existing [State] keys should win over the legacy savedState file.") &&
+           require(settings->placesPanelWidth() == 300,
+                   "The accessor should read the imported [State] value.") &&
+           require(settings->volume() == 55,
+                   "The accessor should read the pre-existing [State] value.");
+}
+
 bool shortcutPresetPointerIsRecovered() {
     QSettings conf;
     seedExistingConfig(conf, appVersion);
@@ -202,6 +231,8 @@ bool runScenario(const QString &scenario) {
         return themeRecoveryPreservesSelectionPointer();
     if(scenario == QLatin1String("shortcut-recovery"))
         return shortcutRecoveryStaysLazyAndImportsOnRead();
+    if(scenario == QLatin1String("state-recovery"))
+        return stateRecoveryImportsLegacySavedState();
     if(scenario == QLatin1String("shortcut-preset-recovery"))
         return shortcutPresetPointerIsRecovered();
     if(scenario == QLatin1String("shortcut-new-action-backfill"))

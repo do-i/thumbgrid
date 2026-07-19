@@ -13,7 +13,9 @@ void applyHighDpiPolicy();
 bool cacheDirectoryIsConfigurable();
 QString contextMenuBorderRadius();
 QSettings *createSettingsConfig();
-QSettings *createStateConfig();
+// Opens the pre-consolidation savedState file; used only to import it into
+// thumbgrid.conf [State] and delete it.
+QSettings *createLegacyStateConfig();
 QSettings *createThemeConfig(const QString &configDir);
 QString defaultCacheDirectory();
 QString defaultMpvBinary();

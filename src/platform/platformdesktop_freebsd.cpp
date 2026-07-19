@@ -32,7 +32,7 @@ QSettings *PlatformDesktop::createSettingsConfig() {
     return new QSettings();
 }
 
-QSettings *PlatformDesktop::createStateConfig() {
+QSettings *PlatformDesktop::createLegacyStateConfig() {
     return new QSettings(QCoreApplication::organizationName(), "savedState");
 }
 

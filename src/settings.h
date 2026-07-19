@@ -373,7 +373,7 @@ public:
 
 private:
     explicit Settings(QObject *parent = nullptr);
-    QSettings *settingsConf, *stateConf, *themeConf;
+    QSettings *settingsConf, *themeConf;
     QString mShortcutsJsonPath;
     QDir *mTmpDir, *mThumbCacheDir;
     ColorScheme mColorScheme;
@@ -386,7 +386,8 @@ private:
 
     // Group-aware access to thumbgrid.conf: keys are stored under the UI
     // category they belong to (General/Grid/Document/Advanced), so the on-disk
-    // config mirrors the settings dialog.
+    // config mirrors the settings dialog. Runtime state (window geometry,
+    // bookmarks, print prefs, ...) lives under [State] in the same file.
     QVariant readSetting(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void writeSetting(const QString &key, const QVariant &value);
     void runVersionedSettingsMigrations(const QVersionNumber &lastVer);
