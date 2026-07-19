@@ -179,7 +179,9 @@ committed `.SRCINFO`.
 *Model:* **Sonnet 5** — new CI step with a couple of design micro-choices
 (where it runs, how to parse depends robustly).
 
-- [ ] B10 open
+- [x] B10 done — `scripts/check-packaging.sh` (runnable locally) + thin
+  `.github/workflows/packaging-checks.yml` caller; both checks go through
+  `makepkg --printsrcinfo`, never sourcing PKGBUILDs
 
 ### B11. Consider GPG-signing packages and the pacman repo db
 

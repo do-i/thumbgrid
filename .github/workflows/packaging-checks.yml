@@ -1,0 +1,51 @@
+name: Packaging checks
+
+# Guard against Arch packaging metadata drift that nothing else catches:
+#   - packaging/arch/PKGBUILD and packaging/arch-bin/PKGBUILD must declare
+#     the same runtime depends=() (thumbgrid-bin repackages the exact binary
+#     built by thumbgrid, so their dependencies must match).
+#   - packaging/arch-bin/.SRCINFO must exactly match what
+#     `makepkg --printsrcinfo` generates from its PKGBUILD (that's what AUR
+#     consumes, and manual PKGBUILD edits are how it goes stale).
+#
+# See scripts/check-packaging.sh, which does the actual checking and can
+# also be run locally; this workflow is a thin caller.
+on:
+  push:
+    branches:
+      - main
+      - develop   # day-to-day commits land here directly, not only via PRs
+    paths:
+      - 'packaging/**'
+      - 'scripts/check-packaging.sh'
+      - '.github/workflows/packaging-checks.yml'
+  pull_request:
+    paths:
+      - 'packaging/**'
+      - 'scripts/check-packaging.sh'
+      - '.github/workflows/packaging-checks.yml'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+    steps:
+      # makepkg is part of base-devel; --printsrcinfo never runs build(), so
+      # unlike the full package build we don't need the Qt/exiv2/opencv/mpv
+      # toolchain here.
+      - name: Install check tooling
+        run: pacman -Syu --noconfirm git pacman-contrib
+
+      - uses: actions/checkout@v7
+
+      - name: Mark workspace as a safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Create unprivileged build user (makepkg refuses to run as root)
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
+      - name: Run packaging consistency checks
+        run: sudo -u builder bash scripts/check-packaging.sh
