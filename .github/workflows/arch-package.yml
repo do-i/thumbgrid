@@ -55,12 +55,27 @@ jobs:
             ref="$(git describe --tags --abbrev=0)"
             pkgrel="${{ github.event.inputs.pkgrel }}"
             pkgrel="${pkgrel:-1}"
+
+            # actions/checkout left the dispatched branch's HEAD checked out,
+            # not this tag -- if the branch moved on since the tag, building
+            # HEAD would silently ship newer code labeled with the old
+            # version. Pin the worktree to the tag before the build step runs.
+            git checkout "$ref"
+            # LFS smudging only covers the ref actions/checkout originally
+            # fetched; without this, image assets under the tag stay LFS
+            # pointer stubs and crash the app at runtime (see checkout step).
+            git lfs pull
           fi
           # Strip leading 'v' and map '-' to '_' (pacman versions can't contain '-').
           pkgver="$(printf '%s' "$ref" | sed 's/^v//; s/-/_/g')"
           echo "pkgver=$pkgver" >> "$GITHUB_OUTPUT"
           echo "pkgrel=$pkgrel" >> "$GITHUB_OUTPUT"
+          echo "tag=$ref" >> "$GITHUB_OUTPUT"
           echo "Building pkgver=$pkgver pkgrel=$pkgrel from ref=$ref"
+
+      - name: Re-chown workspace for builder (dispatch checkout above ran as root)
+        if: github.event_name == 'workflow_dispatch'
+        run: chown -R builder:builder "$GITHUB_WORKSPACE"
 
       - name: Build package
         working-directory: packaging/arch
@@ -74,10 +89,19 @@ jobs:
 
       - name: Upload package to the release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+        # Also run on workflow_dispatch: an ABI-only rebuild needs its
+        # package attached to the existing tag's release too, since the
+        # AUR-publish script consumes release assets (multi-srcrel aware).
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
         with:
+          # Explicit tag_name so dispatch runs (whose github.ref is the
+          # triggering branch, not the tag) still target the tag's release;
+          # this is a no-op on tag-push runs, where it already matches.
+          tag_name: ${{ steps.ver.outputs.tag }}
           files: packaging/arch/*.pkg.tar.zst
           fail_on_unmatched_files: true
+          # Safe for dispatch too: softprops/action-gh-release does not
+          # regenerate notes for a release that already exists.
           generate_release_notes: true
 
       - name: Publish/refresh pacman repo (gh-pages)
