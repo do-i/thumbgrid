@@ -41,7 +41,7 @@ QStringList dedupePaths(const QStringList &paths) {
 
 DuplicateFinder::DuplicateFinder(QObject *parent) : QObject(parent) {
     qRegisterMetaType<DuplicateMatch>();
-    mCache = std::make_unique<HashCache>(settings->tmpDir() + "duplicatehashes.dat");
+    mCache = std::make_unique<HashCache>(settings->duplicateHashCachePath());
 }
 
 DuplicateFinder::~DuplicateFinder() {

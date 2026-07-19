@@ -127,6 +127,7 @@ QString settingGroupFor(const QString &key) {
         {"printLandscape", "State"}, {"printPdfDefault", "State"},
         {"printColor", "State"}, {"printFitToPage", "State"}, {"lastPrinter", "State"},
         {"shortcutsSortColumn", "State"}, {"shortcutsSortOrder", "State"},
+        {"clearOnExit", "State"},
     };
     return groups.value(key);
 }
@@ -1523,6 +1524,16 @@ QStringList Settings::savedPaths() {
 void Settings::setSavedPaths(const QStringList& paths) {
     settings->writeSetting("savedPaths", paths);
 }
+
+// savedPaths() falls back to the home dir, so the "Stored data" page needs a
+// separate way to tell "nothing stored" from "home dir stored".
+bool Settings::savedPathsStored() {
+    return settings->settingsConf->contains(groupedKey("savedPaths"));
+}
+
+void Settings::clearSavedPaths() {
+    settings->settingsConf->remove(groupedKey("savedPaths"));
+}
 //------------------------------------------------------------------------------
 QStringList Settings::bookmarks() {
     return settings->readSetting("bookmarks").toStringList();
@@ -1530,6 +1541,21 @@ QStringList Settings::bookmarks() {
 
 void Settings::setBookmarks(const QStringList& paths) {
     settings->writeSetting("bookmarks", paths);
+}
+
+void Settings::clearBookmarks() {
+    settings->settingsConf->remove(groupedKey("bookmarks"));
+}
+//------------------------------------------------------------------------------
+QStringList Settings::clearOnExitStores() {
+    return settings->readSetting("clearOnExit").toStringList();
+}
+
+void Settings::setClearOnExitStores(const QStringList &ids) {
+    if(ids.isEmpty())
+        settings->settingsConf->remove(groupedKey("clearOnExit"));
+    else
+        settings->writeSetting("clearOnExit", ids);
 }
 //------------------------------------------------------------------------------
 bool Settings::placesPanel() {
@@ -1672,6 +1698,14 @@ QStringList Settings::duplicateFinderTargets() {
 
 void Settings::setDuplicateFinderTargets(const QStringList &targets) {
     settings->writeSetting("duplicateFinderTargets", targets);
+}
+
+void Settings::clearDuplicateFinderTargets() {
+    settings->settingsConf->remove(groupedKey("duplicateFinderTargets"));
+}
+
+QString Settings::duplicateHashCachePath() {
+    return tmpDir() + "duplicatehashes.dat";
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothUpscaling() {

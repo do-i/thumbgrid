@@ -167,6 +167,13 @@ public:
     void setThumbnailerMemCacheLimit(int limitMB);
     QStringList savedPaths();
     void setSavedPaths(const QStringList& paths);
+    bool savedPathsStored();
+    void clearSavedPaths();
+    void clearBookmarks();
+    void clearDuplicateFinderTargets();
+    QString duplicateHashCachePath();
+    QStringList clearOnExitStores();
+    void setClearOnExitStores(const QStringList &ids);
     QString tmpDir();
     int thumbnailerThreadCount();
     void setThumbnailerThreadCount(int count);
