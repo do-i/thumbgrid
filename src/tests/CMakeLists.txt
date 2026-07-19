@@ -202,6 +202,14 @@ add_test(
     COMMAND thumbgrid_convert_folder_selection_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_duplicate_image_hashing_test
+    behavior/test_duplicate_image_hashing.cpp
+)
+add_test(
+    NAME "Perceptual hashing matches visual copies and separates distinct images"
+    COMMAND thumbgrid_duplicate_image_hashing_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )

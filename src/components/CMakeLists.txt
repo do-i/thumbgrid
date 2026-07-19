@@ -23,6 +23,8 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
 
     directorymanager/directorymanager.cpp
 
+    duplicatefinder/imagehasher.cpp
+
     directorymanager/watchers/directorywatcher.cpp
     directorymanager/watchers/dummywatcher.cpp
     directorymanager/watchers/portablewatcher.cpp
