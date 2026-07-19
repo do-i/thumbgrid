@@ -48,6 +48,7 @@ private slots:
     void threadSettingsShareCoreBudget();
     void hashCachePersistsAndInvalidatesByMtime();
     void cachedRerunFindsTheSameMatches();
+    void aspectGateRejectsShapeMismatches();
 };
 
 QList<DuplicateMatch> DuplicateFinderEngineTest::runSearch(const DuplicateSearchRequest &request,
@@ -204,6 +205,31 @@ void DuplicateFinderEngineTest::cachedRerunFindsTheSameMatches() {
     // second run resolves hashes from the persistent cache; results identical
     QVERIFY(QFile::exists(settings->tmpDir() + "duplicatehashes.dat"));
     QCOMPARE(runSearch(req).count(), 3);
+}
+
+void DuplicateFinderEngineTest::aspectGateRejectsShapeMismatches() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    QImage sceneA = makeScene(0); // 512x384 (4:3)
+    QVERIFY(sceneA.save(dir.filePath("A.png")));
+    // same content squashed to 4:1 - pHash alone would call this identical,
+    // the aspect gate must reject it (the user-reported false-match shape)
+    QVERIFY(sceneA.scaled(512, 128, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+                .save(dir.filePath("stretched.png")));
+    // 90-degree rotation (3:4) only matches when rotation matching is on
+    QVERIFY(sceneA.transformed(QTransform().rotate(90)).save(dir.filePath("rotated.png")));
+
+    DuplicateSearchRequest req;
+    req.mode = DuplicateSearchRequest::SINGLE_IMAGE;
+    req.sourceImage = dir.filePath("A.png");
+    req.targetFolders = QStringList{dir.path()};
+    auto matches = runSearch(req);
+    QCOMPARE(matches.count(), 0);
+
+    req.matchRotated = true;
+    matches = runSearch(req);
+    QCOMPARE(matches.count(), 1);
+    QVERIFY(matches.first().matchPath.endsWith("rotated.png"));
 }
 
 TG_BEHAVIOR_TEST_MAIN(DuplicateFinderEngineTest)

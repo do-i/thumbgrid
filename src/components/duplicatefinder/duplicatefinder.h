@@ -45,7 +45,8 @@ private:
     void hashFiles(const QStringList &paths, bool sourceSet, const DuplicateSearchRequest &request,
                    QHash<QString, HashEntry> &entries, int totalCount, std::atomic<int> &hashedCount);
     bool comparePair(const HashEntry &source, const HashEntry &target, int maxDistance,
-                     QHash<QString, QByteArray> &contentHashes, DuplicateMatch &out) const;
+                     bool allowRotated, QHash<QString, QByteArray> &contentHashes,
+                     DuplicateMatch &out) const;
     void joinThread();
 
     QThreadPool mPool;

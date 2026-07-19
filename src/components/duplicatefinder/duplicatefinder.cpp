@@ -137,7 +137,8 @@ void DuplicateFinder::run(DuplicateSearchRequest request) {
         QHash<QString, QByteArray> contentHashes;
         DuplicateMatch match;
         auto reportMatch = [&](const QString &src, const QString &tgt) {
-            if(!comparePair(entries[src], entries[tgt], maxDistance, contentHashes, match))
+            if(!comparePair(entries[src], entries[tgt], maxDistance, request.matchRotated,
+                            contentHashes, match))
                 return;
             match.sourcePath = src;
             match.matchPath = tgt;
@@ -233,11 +234,32 @@ void DuplicateFinder::hashFiles(const QStringList &paths, bool sourceSet,
 }
 
 bool DuplicateFinder::comparePair(const HashEntry &source, const HashEntry &target, int maxDistance,
-                                  QHash<QString, QByteArray> &contentHashes, DuplicateMatch &out) const {
+                                  bool allowRotated, QHash<QString, QByteArray> &contentHashes,
+                                  DuplicateMatch &out) const {
     if(!source.valid || !target.valid)
         return false;
     if(source.canonicalPath == target.canonicalPath)
         return false;
+    // Aspect gate: pHash squashes everything to a square, so images with very
+    // different shapes can collide at loose thresholds (seen in user testing:
+    // a 2.1:1 graphic "matching" a 2.9:1 sprite sheet at 65%). Require the
+    // shapes to be within 35% of each other; with rotation matching the
+    // 90-degree-swapped shape also qualifies.
+    if(!source.dimensions.isEmpty() && !target.dimensions.isEmpty()) {
+        qreal sourceRatio = qreal(source.dimensions.width()) / source.dimensions.height();
+        qreal targetRatio = qreal(target.dimensions.width()) / target.dimensions.height();
+        auto compatible = [](qreal a, qreal b) {
+            qreal q = a / b;
+            if(q < 1)
+                q = 1 / q;
+            return q <= 1.35;
+        };
+        bool aspectOk = compatible(sourceRatio, targetRatio);
+        if(!aspectOk && allowRotated)
+            aspectOk = compatible(sourceRatio, 1.0 / targetRatio);
+        if(!aspectOk)
+            return false;
+    }
     int best = ImageHasher::HASH_BITS + 1;
     quint64 targetHash = target.hashes.first();
     for(quint64 sourceHash : source.hashes)
