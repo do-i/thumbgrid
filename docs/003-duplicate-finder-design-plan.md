@@ -1,6 +1,15 @@
 # 003 — Image Duplicate Finder: Design Plan (Algorithm + UI)
 
-Status: **approved with decisions** — open questions answered 2026-07-19; resolutions folded in below and logged in §6.
+Status: **implemented** (v1, 2026-07-19) — phases 1–5 landed with tests; §7 remains v2.
+Implementation deviations from this plan:
+- Deletion uses the static `FileOperations` helpers (trash) with a dialog-local
+  count+bytes confirmation instead of `FileOperationsController` — the
+  controller is bound to the currently open directory, while finder results
+  live anywhere. Same trash backend, same safety.
+- The per-row hover ✕ became a row context menu (Open / Move to trash);
+  checkbox + Delete-selected covers batch flow. Hover ✕ left as polish.
+- The finder dialog is hand-built layout code rather than a .ui file (the
+  mode-switching setup zone is dynamic); other dialogs' conventions kept.
 
 ## 1. Goals and use cases
 

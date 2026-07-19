@@ -75,6 +75,15 @@ void DuplicateFinderDialogTest::dialogRunsSearchAndShowsGroupedResults() {
     QModelIndex firstMatch = view->model()->index(0, DuplicateResultsModel::COL_CHECK, group);
     QVERIFY(view->model()->setData(firstMatch, Qt::Checked, Qt::CheckStateRole));
     QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 1);
+
+    // optional offscreen render for visual verification
+    QString shot = qEnvironmentVariable("TG_DUPLICATE_DIALOG_SHOT");
+    if(!shot.isEmpty()) {
+        view->setCurrentIndex(view->model()->index(0, 0, group));
+        dialog.resize(900, 720);
+        QTest::qWait(200);
+        dialog.grab().save(shot);
+    }
 }
 
 void DuplicateFinderDialogTest::smartSelectKeepsTheBestCopy() {
