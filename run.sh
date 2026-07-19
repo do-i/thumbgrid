@@ -296,6 +296,14 @@ migrate_theme() {
     fi
 }
 
+publish_aur() {
+    if ((${#APP_ARGS[@]})); then
+        "$ROOT_DIR/scripts/publish-aur.sh" "${APP_ARGS[@]}"
+    else
+        "$ROOT_DIR/scripts/publish-aur.sh"
+    fi
+}
+
 clean_build_dir() {
     if [[ ! -d "$BUILD_DIR" ]]; then
         printf 'Build directory does not exist: %s\n' "$BUILD_DIR"
@@ -321,11 +329,12 @@ printf '  f) Full build - build and run tests\n'
 printf '  r) Run\n'
 printf '  c) Clean      - delete build directory\n'
 printf '  m) Migrate    - migrate custom theme and colors\n'
+printf '  a) AUR publish - promote a GitHub release to the thumbgrid-bin AUR package\n'
 printf '  q) Quit\n\n'
 
 # Single keypress, no Enter needed. Each choice runs once and then exits
-# (run_menu_action exits for i/b/f/r/c), so the menu does not loop.
-read -rsn1 -p "Choose [i/b/f/c/r/m/q]: " choice
+# (run_menu_action exits for i/b/f/r/c/a), so the menu does not loop.
+read -rsn1 -p "Choose [i/b/f/c/r/m/a/q]: " choice
 printf '%s\n\n' "$choice"
 case "$choice" in
     i|I) run_menu_action install_full_deps ;;
@@ -334,6 +343,7 @@ case "$choice" in
     r|R) run_menu_action run_executable ;;
     c|C) run_menu_action clean_build_dir ;;
     m|M) run_menu_action migrate_theme ;;
+    a|A) run_menu_action publish_aur ;;
     q|Q) exit 0 ;;
     *) printf 'Invalid option: %s\n' "$choice"; exit 1 ;;
 esac
