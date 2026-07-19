@@ -1707,6 +1707,10 @@ void Settings::clearDuplicateFinderTargets() {
 QString Settings::duplicateHashCachePath() {
     return tmpDir() + "duplicatehashes.dat";
 }
+
+QString Settings::settingsFilePath() {
+    return settingsConf->fileName();
+}
 //------------------------------------------------------------------------------
 bool Settings::smoothUpscaling() {
     return settings->readSetting("smoothUpscaling", true).toBool();

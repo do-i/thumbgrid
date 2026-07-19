@@ -10,6 +10,7 @@ struct StoredDataStore {
     QString id;                      // stable id, persisted in State/clearOnExit
     QString title;                   // translated display name
     QString description;             // translated tooltip text
+    QString path;                    // the file itself, or its parent dir when the store spans many files
     std::function<QString()> detail; // human summary ("3 items", "48 MB"), computed on demand
     std::function<void()> clear;     // deletes the store's data
 };

@@ -5,6 +5,7 @@
 #include "themestore.h"
 
 #include <QCheckBox>
+#include <QDir>
 #include <QPushButton>
 #include <QTreeWidget>
 
@@ -18,6 +19,7 @@ private slots:
     void registryClearsEachStoreExactly();
     void exitClearRespectsSelection();
     void pageChecksPersistTheExitList();
+    void pathColumnShowsFileOrParentDir();
 
 private:
     StoredDataStore storeById(const QString &id);
@@ -72,6 +74,28 @@ void StoredDataCleanupTest::registryClearsEachStoreExactly() {
     QVERIFY(!QFile::exists(thumbDir() + "thumb2.png"));
     QVERIFY2(QFile::exists(thumbDir() + "not-ours.txt"),
              "Clearing thumbnails must only touch the cache's own PNGs.");
+}
+
+// Stores that live as keys inside thumbgrid.conf (single file) report that
+// file's path; the thumbnail cache (many PNGs) reports its parent directory.
+void StoredDataCleanupTest::pathColumnShowsFileOrParentDir() {
+    const QString confPath = QDir::cleanPath(settings->settingsFilePath());
+    QCOMPARE(QDir::cleanPath(storeById("savedPaths").path), confPath);
+    QCOMPARE(QDir::cleanPath(storeById("bookmarks").path), confPath);
+    QCOMPARE(QDir::cleanPath(storeById("dupeHistory").path), confPath);
+    QCOMPARE(QDir::cleanPath(storeById("dupeIndex").path),
+             QDir::cleanPath(settings->duplicateHashCachePath()));
+    QCOMPARE(QDir::cleanPath(storeById("thumbnails").path),
+             QDir::cleanPath(settings->thumbnailCacheDir()));
+
+    SettingsDialog dialog;
+    auto *table = dialog.findChild<QTreeWidget *>("storedDataTable");
+    QVERIFY(table);
+    QCOMPARE(table->columnCount(), 4);
+    QCOMPARE(table->headerItem()->text(1), QStringLiteral("Path"));
+    QCOMPARE(QDir::cleanPath(table->topLevelItem(0)->text(1)), confPath);
+    QCOMPARE(QDir::cleanPath(table->topLevelItem(4)->text(1)),
+             QDir::cleanPath(settings->thumbnailCacheDir()));
 }
 
 void StoredDataCleanupTest::exitClearRespectsSelection() {

@@ -172,6 +172,7 @@ public:
     void clearBookmarks();
     void clearDuplicateFinderTargets();
     QString duplicateHashCachePath();
+    QString settingsFilePath();
     QStringList clearOnExitStores();
     void setClearOnExitStores(const QStringList &ids);
     QString tmpDir();

@@ -3,6 +3,7 @@
 #include "appversion.h"
 #include <QSignalBlocker>
 #include <QToolButton>
+#include <QDir>
 #include "gui/dialogs/custommessagebox.h"
 #include "gui/customwidgets/iconbutton.h"
 #include "gui/customwidgets/scriptrowwidget.h"
@@ -408,15 +409,16 @@ QWidget* SettingsDialog::setupStoredDataPage() {
 
     mStoredDataTable = new QTreeWidget(group);
     mStoredDataTable->setObjectName("storedDataTable");
-    mStoredDataTable->setColumnCount(3);
-    mStoredDataTable->setHeaderLabels({tr("Store"), tr("Size"), QString()});
+    mStoredDataTable->setColumnCount(4);
+    mStoredDataTable->setHeaderLabels({tr("Store"), tr("Path"), tr("Size"), QString()});
     mStoredDataTable->setRootIsDecorated(false);
     mStoredDataTable->setUniformRowHeights(true);
     mStoredDataTable->setAllColumnsShowFocus(true);
     mStoredDataTable->setSelectionMode(QAbstractItemView::NoSelection);
-    mStoredDataTable->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    mStoredDataTable->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    mStoredDataTable->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    mStoredDataTable->header()->setSectionResizeMode(1, QHeaderView::Stretch);
     mStoredDataTable->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    mStoredDataTable->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
     mStoredDataTable->header()->setStretchLastSection(false);
 
     mStores = StoredData::stores();
@@ -425,6 +427,9 @@ QWidget* SettingsDialog::setupStoredDataPage() {
         auto *item = new QTreeWidgetItem(mStoredDataTable);
         item->setText(0, store.title);
         item->setToolTip(0, store.description);
+        const QString path = QDir::toNativeSeparators(QDir::cleanPath(store.path));
+        item->setText(1, path);
+        item->setToolTip(1, path);
         item->setCheckState(0, Qt::Unchecked);
         auto *removeButton = new QToolButton(mStoredDataTable);
         removeButton->setText(QStringLiteral("✕"));
@@ -432,7 +437,7 @@ QWidget* SettingsDialog::setupStoredDataPage() {
         removeButton->setCursor(Qt::PointingHandCursor);
         removeButton->setToolTip(tr("Delete %1 now").arg(store.title));
         connect(removeButton, &QToolButton::clicked, this, [this, i] { deleteStoredData({i}); });
-        mStoredDataTable->setItemWidget(item, 2, removeButton);
+        mStoredDataTable->setItemWidget(item, 3, removeButton);
     }
     // 5 fixed rows - size the view to them instead of scrolling inside the page
     mStoredDataTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -493,7 +498,7 @@ QWidget* SettingsDialog::setupStoredDataPage() {
 
 void SettingsDialog::refreshStoredDataDetails() {
     for(int i = 0; i < mStores.count(); i++)
-        mStoredDataTable->topLevelItem(i)->setText(1, mStores.at(i).detail());
+        mStoredDataTable->topLevelItem(i)->setText(2, mStores.at(i).detail());
 }
 
 QList<int> SettingsDialog::checkedStoredDataRows() const {
