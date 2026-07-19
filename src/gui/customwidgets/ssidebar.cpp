@@ -15,6 +15,7 @@ SSideBar::SSideBar(QWidget *parent) : QWidget{parent} {
     addEntry(":res/icons/common/settings/document32.png",   tr("Document"));
     addEntry(":res/icons/common/settings/terminal32.png",   tr("Scripts"));
     addEntry(":res/icons/common/settings/advanced32.png",   tr("Advanced"));
+    addEntry(":res/icons/common/settings/storeddata32.png", tr("Stored data"));
     addEntry(":res/icons/common/settings/about32.png",      tr("About"));
 }
 

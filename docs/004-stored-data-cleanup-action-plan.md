@@ -1,6 +1,6 @@
 # 004 — Stored Data: Readable State + "Stored data" Cleanup Page
 
-Two goals (2026-07-19):
+Two goals (2026-07-19; implemented same day, all items below checked off):
 
 1. Make the `[State]` section of `thumbgrid.conf` human-readable — today
    `State/duplicateFinder` is a single `@Variant(...)` hex blob because the
@@ -61,7 +61,7 @@ it (same existing-key-wins rule as the savedState import). Update the
 *Model:* **Sonnet 5** — well-bounded refactor with a mechanical migration;
 the pattern (recovery migration + test scenario) already exists to copy.
 
-- [ ] S1 done
+- [x] S1 done (2026-07-19)
 
 ## S2. `StoredDataStore` registry (backend, no UI)
 
@@ -98,7 +98,7 @@ capped walk, never on app start.
 *Model:* **Sonnet 5** — plain backend code with clear specs; the only
 judgment call (safe deletion rules) is spelled out above.
 
-- [ ] S2 done
+- [x] S2 done (2026-07-19)
 
 ## S3. "Stored data" settings page (UI)
 
@@ -124,7 +124,7 @@ assembled around line 370; sidebar is `ui->sideBar2`). Layout:
 dialog wiring, theming across presets, and the S2 backend; highest-risk
 item of the plan. (Opus 4.8 acceptable fallback.)
 
-- [ ] S3 done
+- [x] S3 done (2026-07-19)
 
 ## S4. Delete-on-exit
 
@@ -143,7 +143,7 @@ item of the plan. (Opus 4.8 acceptable fallback.)
 *Model:* **Opus 4.8** — small amount of code but the correctness is all
 shutdown-ordering judgment.
 
-- [ ] S4 done
+- [x] S4 done (2026-07-19)
 
 ## S5. Behavior tests
 
@@ -156,7 +156,7 @@ shutdown-ordering judgment.
 *Model:* **Sonnet 5**, mirroring `test_settings_migration_gates.cpp`
 structure. Remember `-DBUILD_TESTING=ON` is not sticky in the cache.
 
-- [ ] S5 done
+- [x] S5 done (2026-07-19)
 
 ---
 

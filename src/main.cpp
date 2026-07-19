@@ -11,6 +11,7 @@
 #include "utils/actions.h"
 #include "utils/cmdoptionsrunner.h"
 #include "sharedresources.h"
+#include "components/storeddata/storeddataregistry.h"
 #include "core.h"
 
 #ifdef __APPLE__
@@ -19,6 +20,10 @@
 
 //------------------------------------------------------------------------------
 void saveSettings() {
+    // Runs at exit, after Core has written its final session state (saved
+    // paths, geometry) - so an on-exit clear cannot be re-written by shutdown
+    // code. Must precede the Settings teardown that flushes the config.
+    StoredData::clearStoresMarkedForExit();
     delete settings;
 }
 //------------------------------------------------------------------------------

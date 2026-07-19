@@ -5,6 +5,8 @@
 #include <QColorDialog>
 #include <QThreadPool>
 #include <QTableWidget>
+#include <QTreeWidget>
+#include <QCheckBox>
 #include <QTextBrowser>
 #include <QListWidget>
 #include <QStackedWidget>
@@ -22,6 +24,7 @@
 #include "gui/dialogs/scripteditordialog.h"
 #include "settings.h"
 #include "components/actionmanager/actionmanager.h"
+#include "components/storeddata/storeddataregistry.h"
 
 namespace Ui {
 class SettingsDialog;
@@ -92,6 +95,21 @@ private:
     QWidget* makeSettingsPage(const QString &title, QVBoxLayout **contentLayout);
     QWidget* makeSettingsGroup(const QString &title = QString());
     void setupShortcutsPage();
+    // "Stored data" page: per-store rows with a delete button, a shared
+    // checked-set feeding "Delete selected now" and the on-exit clear list.
+    QWidget* setupStoredDataPage();
+    void refreshStoredDataDetails();
+    void deleteStoredData(const QList<int> &rows);
+    void persistClearOnExit();
+    void updateStoredDataControls();
+    QList<int> checkedStoredDataRows() const;
+    QList<StoredDataStore> mStores;
+    QWidget *mStoredDataPage = nullptr;
+    QTreeWidget *mStoredDataTable = nullptr;
+    QCheckBox *mStoredDataSelectAll = nullptr;
+    QCheckBox *mClearOnExitBox = nullptr;
+    QPushButton *mDeleteSelectedButton = nullptr;
+    bool mStoredDataUpdating = false;
     void setupAboutPage();
     void setupThemePage();
     void setupFeatureToggles();

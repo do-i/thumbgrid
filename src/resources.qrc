@@ -166,6 +166,8 @@
         <file>res/icons/common/settings/shortcuts32_i.png</file>
         <file>res/icons/common/settings/shortcuts32.png</file>
         <file>res/icons/common/settings/shortcuts32@2x.png</file>
+        <file>res/icons/common/settings/storeddata32.png</file>
+        <file>res/icons/common/settings/storeddata32@2x.png</file>
         <file>res/icons/common/settings/terminal32.png</file>
         <file>res/icons/common/settings/terminal32@2x.png</file>
         <file>res/icons/common/settings/view32.png</file>

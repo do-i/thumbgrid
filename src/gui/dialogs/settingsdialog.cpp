@@ -379,7 +379,163 @@ void SettingsDialog::setupPreferencePages() {
     stack->addWidget(documentPage);
     stack->addWidget(ui->Scripts);
     stack->addWidget(ui->Advanced);
+    stack->addWidget(setupStoredDataPage());
     stack->addWidget(ui->About);
+
+    // Store sizes can be expensive to compute (thumbnail dir walk), so they
+    // refresh when the page is opened rather than when the dialog is built.
+    connect(stack, &QStackedWidget::currentChanged, this, [this](int) {
+        if(ui->stackedWidget->currentWidget() == mStoredDataPage)
+            refreshStoredDataDetails();
+    });
+}
+//------------------------------------------------------------------------------
+QWidget* SettingsDialog::setupStoredDataPage() {
+    QVBoxLayout *layout = nullptr;
+    mStoredDataPage = makeSettingsPage(tr("Stored data"), &layout);
+    QWidget *group = makeSettingsGroup(tr("Data stored on this computer"));
+    auto *groupLayout = qobject_cast<QVBoxLayout*>(group->layout());
+
+    QLabel *hint = new QLabel(tr("Everything the app remembers about your files and folders. "
+                                 "Delete a row with its ✕ button, or check rows to delete them "
+                                 "together — right away or on every exit."), group);
+    hint->setWordWrap(true);
+    groupLayout->addWidget(hint);
+
+    mStoredDataSelectAll = new QCheckBox(tr("Select all"), group);
+    mStoredDataSelectAll->setObjectName("storedDataSelectAll");
+    groupLayout->addWidget(mStoredDataSelectAll);
+
+    mStoredDataTable = new QTreeWidget(group);
+    mStoredDataTable->setObjectName("storedDataTable");
+    mStoredDataTable->setColumnCount(3);
+    mStoredDataTable->setHeaderLabels({tr("Store"), tr("Size"), QString()});
+    mStoredDataTable->setRootIsDecorated(false);
+    mStoredDataTable->setUniformRowHeights(true);
+    mStoredDataTable->setAllColumnsShowFocus(true);
+    mStoredDataTable->setSelectionMode(QAbstractItemView::NoSelection);
+    mStoredDataTable->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    mStoredDataTable->header()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
+    mStoredDataTable->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
+    mStoredDataTable->header()->setStretchLastSection(false);
+
+    mStores = StoredData::stores();
+    for(int i = 0; i < mStores.count(); i++) {
+        const StoredDataStore &store = mStores.at(i);
+        auto *item = new QTreeWidgetItem(mStoredDataTable);
+        item->setText(0, store.title);
+        item->setToolTip(0, store.description);
+        item->setCheckState(0, Qt::Unchecked);
+        auto *removeButton = new QToolButton(mStoredDataTable);
+        removeButton->setText(QStringLiteral("✕"));
+        removeButton->setAutoRaise(true);
+        removeButton->setCursor(Qt::PointingHandCursor);
+        removeButton->setToolTip(tr("Delete %1 now").arg(store.title));
+        connect(removeButton, &QToolButton::clicked, this, [this, i] { deleteStoredData({i}); });
+        mStoredDataTable->setItemWidget(item, 2, removeButton);
+    }
+    // 5 fixed rows - size the view to them instead of scrolling inside the page
+    mStoredDataTable->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mStoredDataTable->setMinimumHeight(
+        mStoredDataTable->sizeHintForRow(0) * (mStoredDataTable->topLevelItemCount() + 2));
+    groupLayout->addWidget(mStoredDataTable);
+
+    QHBoxLayout *buttonRow = new QHBoxLayout();
+    buttonRow->setContentsMargins(0, 0, 0, 0);
+    mDeleteSelectedButton = new QPushButton(tr("Delete selected now"), group);
+    mDeleteSelectedButton->setObjectName("storedDataDeleteSelected");
+    buttonRow->addWidget(mDeleteSelectedButton);
+    buttonRow->addStretch();
+    groupLayout->addLayout(buttonRow);
+
+    mClearOnExitBox = new QCheckBox(tr("Delete selected every time the app exits"), group);
+    mClearOnExitBox->setObjectName("storedDataClearOnExit");
+    groupLayout->addWidget(mClearOnExitBox);
+
+    layout->addWidget(group);
+    layout->addStretch();
+
+    connect(mStoredDataTable, &QTreeWidget::itemChanged, this, [this] {
+        if(mStoredDataUpdating)
+            return;
+        updateStoredDataControls();
+        persistClearOnExit();
+    });
+    connect(mStoredDataSelectAll, &QCheckBox::clicked, this, [this](bool checked) {
+        mStoredDataUpdating = true;
+        for(int i = 0; i < mStoredDataTable->topLevelItemCount(); i++)
+            mStoredDataTable->topLevelItem(i)->setCheckState(0, checked ? Qt::Checked : Qt::Unchecked);
+        mStoredDataUpdating = false;
+        updateStoredDataControls();
+        persistClearOnExit();
+    });
+    connect(mDeleteSelectedButton, &QPushButton::clicked, this, [this] {
+        deleteStoredData(checkedStoredDataRows());
+    });
+    connect(mClearOnExitBox, &QCheckBox::toggled, this, [this] {
+        if(!mStoredDataUpdating)
+            persistClearOnExit();
+    });
+
+    // The on-exit clear list doubles as the persisted row selection.
+    const QStringList exitIds = settings->clearOnExitStores();
+    if(!exitIds.isEmpty()) {
+        mStoredDataUpdating = true;
+        mClearOnExitBox->setChecked(true);
+        for(int i = 0; i < mStores.count(); i++)
+            if(exitIds.contains(mStores.at(i).id))
+                mStoredDataTable->topLevelItem(i)->setCheckState(0, Qt::Checked);
+        mStoredDataUpdating = false;
+    }
+    updateStoredDataControls();
+    return mStoredDataPage;
+}
+
+void SettingsDialog::refreshStoredDataDetails() {
+    for(int i = 0; i < mStores.count(); i++)
+        mStoredDataTable->topLevelItem(i)->setText(1, mStores.at(i).detail());
+}
+
+QList<int> SettingsDialog::checkedStoredDataRows() const {
+    QList<int> rows;
+    for(int i = 0; i < mStoredDataTable->topLevelItemCount(); i++)
+        if(mStoredDataTable->topLevelItem(i)->checkState(0) == Qt::Checked)
+            rows.append(i);
+    return rows;
+}
+
+void SettingsDialog::deleteStoredData(const QList<int> &rows) {
+    if(rows.isEmpty())
+        return;
+    const QString text = rows.count() == 1
+        ? tr("Delete %1? This cannot be undone.").arg(mStores.at(rows.first()).title.toLower())
+        : tr("Delete %n selected data store(s)? This cannot be undone.", nullptr, rows.count());
+    if(!CustomMessageBox::confirm(this, tr("Delete stored data"), text))
+        return;
+    for(int row : rows)
+        mStores.at(row).clear();
+    refreshStoredDataDetails();
+}
+
+void SettingsDialog::persistClearOnExit() {
+    QStringList ids;
+    if(mClearOnExitBox->isChecked())
+        for(int row : checkedStoredDataRows())
+            ids.append(mStores.at(row).id);
+    settings->setClearOnExitStores(ids);
+}
+
+void SettingsDialog::updateStoredDataControls() {
+    const int checked = checkedStoredDataRows().count();
+    mDeleteSelectedButton->setEnabled(checked > 0);
+    mStoredDataSelectAll->blockSignals(true);
+    if(!checked)
+        mStoredDataSelectAll->setCheckState(Qt::Unchecked);
+    else if(checked == mStoredDataTable->topLevelItemCount())
+        mStoredDataSelectAll->setCheckState(Qt::Checked);
+    else
+        mStoredDataSelectAll->setCheckState(Qt::PartiallyChecked);
+    mStoredDataSelectAll->blockSignals(false);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::setupShortcutsPage() {

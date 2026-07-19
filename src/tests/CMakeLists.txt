@@ -74,6 +74,14 @@ add_test(
     COMMAND thumbgrid_shortcut_context_dispatch_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_stored_data_cleanup_test
+    behavior/test_stored_data_cleanup.cpp
+)
+add_test(
+    NAME "Stored data can be cleared per store, in bulk, and on exit"
+    COMMAND thumbgrid_stored_data_cleanup_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_script_shortcut_binding_test
     behavior/test_a_script_can_be_bound_to_a_shortcut.cpp
 )

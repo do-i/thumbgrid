@@ -1177,7 +1177,8 @@ SettingsDialog QComboBox QAbstractItemView::item:selected {
 /* Shortcuts table (Shortcuts tab). Without these rules it renders native white
    on every theme; colors come from the per-preset table_* keys (derived from
    the widget surface when a preset omits them). */
-SettingsDialog QTableWidget {
+SettingsDialog QTableWidget,
+SettingsDialog QTreeWidget {
     background-color: %table_bg%;
     alternate-background-color: %table_bg_alt%;
     color: %table_text%;
@@ -1186,11 +1187,13 @@ SettingsDialog QTableWidget {
     border-radius: 3px;
 }
 
-SettingsDialog QTableWidget::item {
+SettingsDialog QTableWidget::item,
+SettingsDialog QTreeWidget::item {
     padding: 3px 5px;
 }
 
-SettingsDialog QTableWidget::item:selected {
+SettingsDialog QTableWidget::item:selected,
+SettingsDialog QTreeWidget::item:selected {
     background-color: %accent_hover_rgba%;
     color: %table_text%;
 }
