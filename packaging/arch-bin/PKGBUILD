@@ -32,12 +32,12 @@ depends=(
 provides=('thumbgrid')
 conflicts=('thumbgrid')
 options=('!strip' '!debug')
-source=("thumbgrid-$pkgver-x86_64.pkg.tar.zst::https://github.com/do-i/thumbgrid/releases/download/v$pkgver/thumbgrid-$pkgver-$_srcrel-x86_64.pkg.tar.zst")
+source=("thumbgrid-$pkgver-$_srcrel-x86_64.pkg.tar.zst::https://github.com/do-i/thumbgrid/releases/download/v$pkgver/thumbgrid-$pkgver-$_srcrel-x86_64.pkg.tar.zst")
 sha256sums=('972d187abea7df9109d4c98916896ad73e2718759216d622dadd455f4dafc977')
 
 package() {
   # The download is itself a complete pacman package; unpack it as-is and
   # drop the upstream package's own metadata so makepkg can generate ours.
-  bsdtar -xf "$srcdir/thumbgrid-$pkgver-x86_64.pkg.tar.zst" -C "$pkgdir" \
+  bsdtar -xf "$srcdir/thumbgrid-$pkgver-$_srcrel-x86_64.pkg.tar.zst" -C "$pkgdir" \
     --exclude .PKGINFO --exclude .BUILDINFO --exclude .MTREE
 }

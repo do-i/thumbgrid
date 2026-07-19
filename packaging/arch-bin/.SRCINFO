@@ -15,7 +15,7 @@ pkgbase = thumbgrid-bin
 	conflicts = thumbgrid
 	options = !strip
 	options = !debug
-	source = thumbgrid-2026.7.12-x86_64.pkg.tar.zst::https://github.com/do-i/thumbgrid/releases/download/v2026.7.12/thumbgrid-2026.7.12-1-x86_64.pkg.tar.zst
+	source = thumbgrid-2026.7.12-1-x86_64.pkg.tar.zst::https://github.com/do-i/thumbgrid/releases/download/v2026.7.12/thumbgrid-2026.7.12-1-x86_64.pkg.tar.zst
 	sha256sums = 972d187abea7df9109d4c98916896ad73e2718759216d622dadd455f4dafc977
 
 pkgname = thumbgrid-bin
