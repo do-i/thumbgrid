@@ -47,6 +47,11 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     trashItem->setAction("moveToTrash");
     mainLayout->addWidget(trashItem);
 
+    findDuplicatesItem = makeItem(tr("Find duplicates..."), ":/res/icons/common/menuitem/folderview16.png");
+    findDuplicatesItem->setObjectName("menuFindDuplicates");
+    findDuplicatesItem->setAction("findDuplicates");
+    mainLayout->addWidget(findDuplicatesItem);
+
     addSeparator(mainPage, mainLayout);
 
     // destructive and not undoable; relies on the confirmation dialog downstream
@@ -139,6 +144,7 @@ void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
     moveItem->setEnabled(info.total() > 0);
     trashItem->setEnabled(info.total() > 0);
     deleteItem->setEnabled(info.total() > 0);
+    findDuplicatesItem->setEnabled(info.total() > 0);
 }
 
 // The stack holds pages of very different heights (11-row main page vs.

@@ -8,6 +8,7 @@
 #include "core.h"
 #include "components/actionmanager/actionmanager.h"
 #include "gui/dialogs/duplicatefinderdialog.h"
+#include "themestore.h"
 
 static QImage makeScene(int id, int w = 512, int h = 384) {
     QImage img(w, h, QImage::Format_RGB32);
@@ -39,6 +40,9 @@ private:
 private slots:
     void initTestCase();
     void dialogRunsSearchAndShowsGroupedResults();
+    void startButtonTracksRequiredFields();
+    void clearButtonResetsResults();
+    void folderSelectionSeedsCompareOrWithinMode();
     void smartSelectKeepsTheBestCopy();
     void movingCheckedFilesCreatesAuditableSession();
     void findDuplicatesActionOpensSeededDialog();
@@ -76,14 +80,65 @@ void DuplicateFinderDialogTest::dialogRunsSearchAndShowsGroupedResults() {
     QVERIFY(view->model()->setData(firstMatch, Qt::Checked, Qt::CheckStateRole));
     QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 1);
 
-    // optional offscreen render for visual verification
+    // optional offscreen render for visual verification (dark theme so
+    // missing QSS coverage is obvious)
     QString shot = qEnvironmentVariable("TG_DUPLICATE_DIALOG_SHOT");
     if(!shot.isEmpty()) {
+        settings->setColorScheme(ThemeStore::colorScheme(ColorSchemes::COLORS_DARK));
         view->setCurrentIndex(view->model()->index(0, 0, group));
         dialog.resize(900, 720);
         QTest::qWait(200);
         dialog.grab().save(shot);
     }
+}
+
+void DuplicateFinderDialogTest::startButtonTracksRequiredFields() {
+    DuplicateFinderDialog dialog;
+    auto *start = dialog.findChild<QPushButton *>("duplicateFinderStartButton");
+    QVERIFY(start);
+    // fresh dialog: single-image mode with no image and no folders -> disabled
+    QVERIFY(!start->isEnabled());
+    dialog.presetFor(tmp.filePath("src/A.png"), tmp.filePath("tgt"));
+    QVERIFY(start->isEnabled());
+    // switching to compare mode invalidates: no source folders yet
+    dialog.findChild<QRadioButton *>("modeCompare")->setChecked(true);
+    QVERIFY(!start->isEnabled());
+    dialog.findChild<QListWidget *>("sourceFoldersList")->addItem(tmp.filePath("src"));
+    QVERIFY(start->isEnabled());
+}
+
+void DuplicateFinderDialogTest::clearButtonResetsResults() {
+    DuplicateFinderDialog dialog;
+    auto *clear = dialog.findChild<QPushButton *>("duplicateFinderClearButton");
+    QVERIFY(clear);
+    QVERIFY(!clear->isEnabled());
+    dialog.presetFor(tmp.filePath("src/A.png"), tmp.filePath("tgt"));
+    dialog.findChild<QPushButton *>("duplicateFinderStartButton")->click();
+    QTRY_VERIFY_WITH_TIMEOUT(dialog.resultsModel()->matchCount() > 0, 15000);
+    QTRY_VERIFY(!dialog.finder()->isRunning());
+    QTRY_VERIFY(clear->isEnabled());
+    clear->click();
+    QCOMPARE(dialog.resultsModel()->matchCount(), 0);
+    QVERIFY(!clear->isEnabled());
+}
+
+void DuplicateFinderDialogTest::folderSelectionSeedsCompareOrWithinMode() {
+    DuplicateFinderDialog dialog;
+    auto *targets = dialog.findChild<QListWidget *>("targetFoldersList");
+    // one folder -> within-folders, populated with it
+    dialog.presetForSelection({tmp.filePath("tgt")}, "");
+    QVERIFY(dialog.findChild<QRadioButton *>("modeWithin")->isChecked());
+    QCOMPARE(targets->count(), 1);
+    QCOMPARE(targets->item(0)->text(), tmp.filePath("tgt"));
+    // several folders -> compare mode, first is source, rest are targets
+    dialog.presetForSelection({tmp.filePath("src"), tmp.filePath("tgt")}, "");
+    QVERIFY(dialog.findChild<QRadioButton *>("modeCompare")->isChecked());
+    auto *sources = dialog.findChild<QListWidget *>("sourceFoldersList");
+    QCOMPARE(sources->count(), 1);
+    QCOMPARE(sources->item(0)->text(), tmp.filePath("src"));
+    QCOMPARE(targets->count(), 1);
+    QCOMPARE(targets->item(0)->text(), tmp.filePath("tgt"));
+    QVERIFY(dialog.findChild<QPushButton *>("duplicateFinderStartButton")->isEnabled());
 }
 
 void DuplicateFinderDialogTest::smartSelectKeepsTheBestCopy() {

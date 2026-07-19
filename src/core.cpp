@@ -1085,7 +1085,12 @@ void Core::showDuplicateFinder() {
         connect(duplicateFinderDialog.get(), &DuplicateFinderDialog::openFileRequested,
                 this, [this](const QString &path) { loadPath(path); });
     }
-    duplicateFinderDialog->presetFor(selectedPath(), model ? model->directoryPath() : "");
+    QStringList selection;
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        selection = folderViewPresenter.selectedPaths();
+    else if(!selectedPath().isEmpty())
+        selection << selectedPath();
+    duplicateFinderDialog->presetForSelection(selection, model ? model->directoryPath() : "");
     duplicateFinderDialog->show();
     duplicateFinderDialog->raise();
     duplicateFinderDialog->activateWindow();

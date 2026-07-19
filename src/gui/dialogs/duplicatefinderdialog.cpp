@@ -119,14 +119,36 @@ DuplicateFinderDialog::DuplicateFinderDialog(QWidget *parent) : QDialog(parent) 
             if(mTargetFolders->findItems(folder, Qt::MatchExactly).isEmpty())
                 mTargetFolders->addItem(folder);
     }
+
+    // Start stays disabled until the current mode's required fields are valid
+    connect(mSourceEdit, &QLineEdit::textChanged, this, &DuplicateFinderDialog::updateStartEnabled);
+    for(auto *list : {mSourceFolders, mTargetFolders}) {
+        connect(list->model(), &QAbstractItemModel::rowsInserted,
+                this, &DuplicateFinderDialog::updateStartEnabled);
+        connect(list->model(), &QAbstractItemModel::rowsRemoved,
+                this, &DuplicateFinderDialog::updateStartEnabled);
+    }
+    updateStartEnabled();
+}
+
+void DuplicateFinderDialog::updateStartEnabled() {
+    if(mFinder.isRunning()) {
+        mStartButton->setEnabled(true); // acts as Cancel
+        return;
+    }
+    QString error;
+    mStartButton->setEnabled(validateRequest(buildRequest(), error));
 }
 
 void DuplicateFinderDialog::setupModeRow() {
     auto *modeRow = new QHBoxLayout();
     modeRow->addWidget(new QLabel(tr("Mode:"), this));
     mModeSingle = new QRadioButton(tr("One image"), this);
+    mModeSingle->setObjectName("modeSingle");
     mModeCompare = new QRadioButton(tr("Compare folders"), this);
+    mModeCompare->setObjectName("modeCompare");
     mModeWithin = new QRadioButton(tr("Within folders"), this);
+    mModeWithin->setObjectName("modeWithin");
     mModeSingle->setChecked(true);
     auto *group = new QButtonGroup(this);
     for(auto *radio : {mModeSingle, mModeCompare, mModeWithin}) {
@@ -174,6 +196,8 @@ void DuplicateFinderDialog::setupSetupZone() {
     mTargetsLabel = new QLabel(tr("Search in:"), this);
     mainLayout->addWidget(mTargetsLabel);
     mainLayout->addWidget(makeFolderListBox(mTargetFolders, this));
+    mTargetFolders->setObjectName("targetFoldersList");
+    mSourceFolders->setObjectName("sourceFoldersList");
 
     auto *optionsRow = new QHBoxLayout();
     mRecursiveBox = new QCheckBox(tr("Include subfolders"), this);
@@ -182,12 +206,13 @@ void DuplicateFinderDialog::setupSetupZone() {
     optionsRow->addSpacing(12);
     optionsRow->addWidget(new QLabel(tr("Similarity:"), this));
     mSimilaritySlider = new QSlider(Qt::Horizontal, this);
-    mSimilaritySlider->setRange(50, 100);
+    // below ~70% a 64-bit pHash distance is mostly noise, don't offer it
+    mSimilaritySlider->setRange(70, 100);
     mSimilaritySlider->setValue(87);
     mSimilaritySlider->setMinimumWidth(120);
     optionsRow->addWidget(mSimilaritySlider);
     mSimilaritySpin = new QSpinBox(this);
-    mSimilaritySpin->setRange(50, 100);
+    mSimilaritySpin->setRange(70, 100);
     mSimilaritySpin->setValue(87);
     mSimilaritySpin->setSuffix("%");
     optionsRow->addWidget(mSimilaritySpin);
@@ -210,6 +235,10 @@ void DuplicateFinderDialog::setupRunRow() {
     mStartButton->setObjectName("duplicateFinderStartButton");
     mStartButton->setDefault(true);
     runRow->addWidget(mStartButton);
+    mClearButton = new QPushButton(tr("Clear"), this);
+    mClearButton->setObjectName("duplicateFinderClearButton");
+    mClearButton->setEnabled(false);
+    runRow->addWidget(mClearButton);
     mProgressBar = new QProgressBar(this);
     mProgressBar->setTextVisible(false);
     runRow->addWidget(mProgressBar, 1);
@@ -217,6 +246,17 @@ void DuplicateFinderDialog::setupRunRow() {
     runRow->addWidget(mStatsLabel);
     static_cast<QVBoxLayout *>(layout())->addLayout(runRow);
     connect(mStartButton, &QPushButton::clicked, this, &DuplicateFinderDialog::onStartClicked);
+    connect(mClearButton, &QPushButton::clicked, this, [this] {
+        if(mFinder.isRunning())
+            return;
+        mModel->clear();
+        mThumbsRequested.clear();
+        mProgressBar->setRange(0, 1);
+        mProgressBar->setValue(0);
+        mStatsLabel->setText(tr("Idle"));
+        mClearButton->setEnabled(false);
+        updatePreview(QModelIndex());
+    });
 }
 
 void DuplicateFinderDialog::setupResultsZone() {
@@ -341,19 +381,40 @@ void DuplicateFinderDialog::updateModeUi() {
         mSourceStack->setVisible(false);
         mTargetsLabel->setText(tr("Folders to dedupe:"));
     }
+    if(mStartButton) // rows are built after the mode row on first setup
+        updateStartEnabled();
 }
 
 void DuplicateFinderDialog::presetFor(const QString &path, const QString &currentDirectory) {
-    QFileInfo info(path);
-    if(info.isFile()) {
+    presetForSelection(path.isEmpty() ? QStringList() : QStringList{path}, currentDirectory);
+}
+
+void DuplicateFinderDialog::presetForSelection(const QStringList &paths,
+                                               const QString &currentDirectory) {
+    QStringList dirs, files;
+    for(const QString &path : paths) {
+        QFileInfo info(path);
+        if(info.isDir())
+            dirs << path;
+        else if(info.isFile())
+            files << path;
+    }
+    if(dirs.count() >= 2) {
+        // explicit folder selection replaces whatever was in the lists
+        mModeCompare->setChecked(true);
+        mSourceFolders->clear();
+        mSourceFolders->addItem(dirs.first());
+        mTargetFolders->clear();
+        mTargetFolders->addItems(dirs.mid(1));
+    } else if(dirs.count() == 1) {
+        mModeWithin->setChecked(true);
+        mTargetFolders->clear();
+        mTargetFolders->addItem(dirs.first());
+    } else if(!files.isEmpty()) {
         mModeSingle->setChecked(true);
-        mSourceEdit->setText(path);
+        mSourceEdit->setText(files.first());
         if(mTargetFolders->count() == 0 && !currentDirectory.isEmpty())
             mTargetFolders->addItem(currentDirectory);
-    } else if(info.isDir()) {
-        mModeWithin->setChecked(true);
-        if(mTargetFolders->findItems(path, Qt::MatchExactly).isEmpty())
-            mTargetFolders->addItem(path);
     } else if(mTargetFolders->count() == 0 && !currentDirectory.isEmpty()) {
         mModeWithin->setChecked(true);
         mTargetFolders->addItem(currentDirectory);
@@ -413,6 +474,7 @@ void DuplicateFinderDialog::onStartClicked() {
     mProgressBar->setRange(0, 0);
     mStatsLabel->setText(tr("Scanning..."));
     mStartButton->setText(tr("Cancel"));
+    mClearButton->setEnabled(false);
     mFinder.start(request);
 }
 
@@ -445,7 +507,8 @@ void DuplicateFinderDialog::onThumbnailReady(const std::shared_ptr<Thumbnail> &t
 
 void DuplicateFinderDialog::onSearchFinished(bool cancelled) {
     mStartButton->setText(tr("Start"));
-    mStartButton->setEnabled(true);
+    updateStartEnabled();
+    mClearButton->setEnabled(true);
     mProgressBar->setRange(0, 1);
     mProgressBar->setValue(cancelled ? 0 : 1);
     if(cancelled)

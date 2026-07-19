@@ -30,6 +30,9 @@ public:
     // Seed from the context the dialog was opened in: a file path selects
     // single-image mode, a directory selects within-folders mode.
     void presetFor(const QString &path, const QString &currentDirectory);
+    // Grid-view seeding: one folder -> within-folders; several folders ->
+    // compare-folders (first = source, rest = targets); files -> single image.
+    void presetForSelection(const QStringList &paths, const QString &currentDirectory);
 
     // Moves the checked matches into a timestamped session subfolder of
     // dest, preserving search-relative paths, and writes a manifest.
@@ -64,6 +67,7 @@ private:
     void setupResultsZone();
     void setupPreviewAndActions();
     void updateModeUi();
+    void updateStartEnabled();
     void deletePaths(const QStringList &paths);
     QString searchRootFor(const QString &path) const;
     static QString previewInfoHtml(const QString &path, const QSize &otherDims, qint64 otherSize);
@@ -78,23 +82,25 @@ private:
     DuplicateResultsProxy *mProxy;
     QSet<QString> mThumbsRequested;
 
-    QRadioButton *mModeSingle, *mModeCompare, *mModeWithin;
-    QStackedWidget *mSourceStack;
-    QLineEdit *mSourceEdit;
-    QListWidget *mSourceFolders;
-    QListWidget *mTargetFolders;
-    QLabel *mTargetsLabel;
-    QCheckBox *mRecursiveBox, *mRotatedBox, *mMirroredBox;
-    QSlider *mSimilaritySlider;
-    QSpinBox *mSimilaritySpin;
-    QPushButton *mStartButton;
-    QProgressBar *mProgressBar;
-    QLabel *mStatsLabel;
-    QLineEdit *mFilterEdit;
-    QSpinBox *mMinSimilaritySpin;
-    QTreeView *mTreeView;
-    QLabel *mSelectionLabel;
-    QPushButton *mMoveButton, *mDeleteButton;
-    QLabel *mSourcePreview, *mMatchPreview, *mSourceInfo, *mMatchInfo;
+    QRadioButton *mModeSingle = nullptr, *mModeCompare = nullptr, *mModeWithin = nullptr;
+    QStackedWidget *mSourceStack = nullptr;
+    QLineEdit *mSourceEdit = nullptr;
+    QListWidget *mSourceFolders = nullptr;
+    QListWidget *mTargetFolders = nullptr;
+    QLabel *mTargetsLabel = nullptr;
+    QCheckBox *mRecursiveBox = nullptr, *mRotatedBox = nullptr, *mMirroredBox = nullptr;
+    QSlider *mSimilaritySlider = nullptr;
+    QSpinBox *mSimilaritySpin = nullptr;
+    QPushButton *mStartButton = nullptr;
+    QPushButton *mClearButton = nullptr;
+    QProgressBar *mProgressBar = nullptr;
+    QLabel *mStatsLabel = nullptr;
+    QLineEdit *mFilterEdit = nullptr;
+    QSpinBox *mMinSimilaritySpin = nullptr;
+    QTreeView *mTreeView = nullptr;
+    QLabel *mSelectionLabel = nullptr;
+    QPushButton *mMoveButton = nullptr, *mDeleteButton = nullptr;
+    QLabel *mSourcePreview = nullptr, *mMatchPreview = nullptr,
+           *mSourceInfo = nullptr, *mMatchInfo = nullptr;
     QStringList mSearchRoots;
 };
