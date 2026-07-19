@@ -194,7 +194,21 @@ decision.
 trust model) is judgment-heavy; the implementation afterward is Sonnet 5
 territory.
 
-- [ ] B11 open
+**Decision (2026-07-19): deferred.** Rationale: signing in CI requires
+storing the private key as a GitHub Actions secret, and for a
+single-maintainer personal repo that key is exfiltratable by anything
+that can run in CI — the added trust is marginal over what already
+exists (assets served over HTTPS from GitHub; the AUR path pins an exact
+sha256 in the PKGBUILD; README already discloses `SigLevel Optional
+TrustAll` as personal/low-stakes). Revisit if the user base grows or a
+second maintainer joins; the implementation sketch then is: offline
+master key + CI signing subkey as a secret, `gpg --detach-sign` each
+package, `repo-add --sign`, publish the pubkey in the README, drop
+`SigLevel` to `Optional TrustedOnly`. Provisioning the key/secret is a
+human step regardless.
+
+- [x] B11 decided — defer signing; decision + revisit criteria recorded
+  above
 
 ### B12. Guard against promoting prereleases/drafts
 
@@ -220,4 +234,6 @@ exists).
 *Model:* **Haiku 4.5** — doc-only edit once the human confirms the actual
 AUR account status.
 
-- [ ] B13 open
+- [x] B13 done — doc 005 updated: A1–A4 marked done (AUR account/publishes
+  confirmed by publish-aur.sh in practice), A5 kept open for the README
+  edit, stale registration blocker demoted to historical note
