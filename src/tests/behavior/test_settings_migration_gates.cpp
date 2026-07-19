@@ -170,6 +170,30 @@ bool stateRecoveryImportsLegacySavedState() {
                    "The accessor should read the pre-existing [State] value.");
 }
 
+bool duplicateFinderBlobExplodesIntoFlatKeys() {
+    QSettings conf;
+    seedExistingConfig(conf, appVersion);
+    QVariantMap blob;
+    blob["similarity"] = 92;
+    blob["recursive"] = false;
+    blob["targets"] = QStringList{"/photos/a", "/photos/b"};
+    conf.setValue("State/duplicateFinder", blob);
+    conf.setValue("State/duplicateFinderSimilarity", 78);
+    conf.sync();
+
+    Settings::getInstance();
+
+    QSettings after;
+    return require(!after.contains("State/duplicateFinder"),
+                   "The opaque duplicateFinder blob should be removed.") &&
+           require(after.value("State/duplicateFinderSimilarity").toInt() == 78,
+                   "Existing flat keys should win over the legacy blob.") &&
+           require(after.value("State/duplicateFinderRecursive").toBool() == false,
+                   "Blob values should be exploded into flat keys.") &&
+           require(settings->duplicateFinderTargets() == QStringList({"/photos/a", "/photos/b"}),
+                   "The targets list should survive the explode readably.");
+}
+
 bool shortcutPresetPointerIsRecovered() {
     QSettings conf;
     seedExistingConfig(conf, appVersion);
@@ -233,6 +257,8 @@ bool runScenario(const QString &scenario) {
         return shortcutRecoveryStaysLazyAndImportsOnRead();
     if(scenario == QLatin1String("state-recovery"))
         return stateRecoveryImportsLegacySavedState();
+    if(scenario == QLatin1String("duplicate-finder-state-recovery"))
+        return duplicateFinderBlobExplodesIntoFlatKeys();
     if(scenario == QLatin1String("shortcut-preset-recovery"))
         return shortcutPresetPointerIsRecovered();
     if(scenario == QLatin1String("shortcut-new-action-backfill"))

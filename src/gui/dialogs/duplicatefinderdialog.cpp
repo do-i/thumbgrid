@@ -107,18 +107,19 @@ DuplicateFinderDialog::DuplicateFinderDialog(QWidget *parent) : QDialog(parent) 
     connect(&mThumbnailer, &Thumbnailer::thumbnailReady, this, &DuplicateFinderDialog::onThumbnailReady);
     Q_UNUSED(layout)
 
-    QVariantMap state = settings->duplicateFinderState();
-    if(!state.isEmpty()) {
-        restoreGeometry(state.value("geometry").toByteArray());
-        mTreeView->header()->restoreState(state.value("header").toByteArray());
-        mSimilaritySpin->setValue(state.value("similarity", 87).toInt());
-        mRecursiveBox->setChecked(state.value("recursive", true).toBool());
-        mRotatedBox->setChecked(state.value("rotated", false).toBool());
-        mMirroredBox->setChecked(state.value("mirrored", false).toBool());
-        for(const QString &folder : state.value("targets").toStringList())
-            if(mTargetFolders->findItems(folder, Qt::MatchExactly).isEmpty())
-                mTargetFolders->addItem(folder);
-    }
+    const QByteArray geometry = settings->duplicateFinderGeometry();
+    if(!geometry.isEmpty())
+        restoreGeometry(geometry);
+    const QByteArray header = settings->duplicateFinderHeader();
+    if(!header.isEmpty())
+        mTreeView->header()->restoreState(header);
+    mSimilaritySpin->setValue(settings->duplicateFinderSimilarity());
+    mRecursiveBox->setChecked(settings->duplicateFinderRecursive());
+    mRotatedBox->setChecked(settings->duplicateFinderRotated());
+    mMirroredBox->setChecked(settings->duplicateFinderMirrored());
+    for(const QString &folder : settings->duplicateFinderTargets())
+        if(mTargetFolders->findItems(folder, Qt::MatchExactly).isEmpty())
+            mTargetFolders->addItem(folder);
 
     // Start stays disabled until the current mode's required fields are valid
     connect(mSourceEdit, &QLineEdit::textChanged, this, &DuplicateFinderDialog::updateStartEnabled);
@@ -519,15 +520,13 @@ void DuplicateFinderDialog::onSearchFinished(bool cancelled) {
 
 void DuplicateFinderDialog::closeEvent(QCloseEvent *event) {
     mFinder.cancel();
-    QVariantMap state;
-    state["geometry"] = saveGeometry();
-    state["header"] = mTreeView->header()->saveState();
-    state["similarity"] = mSimilaritySpin->value();
-    state["recursive"] = mRecursiveBox->isChecked();
-    state["rotated"] = mRotatedBox->isChecked();
-    state["mirrored"] = mMirroredBox->isChecked();
-    state["targets"] = foldersIn(mTargetFolders);
-    settings->setDuplicateFinderState(state);
+    settings->setDuplicateFinderGeometry(saveGeometry());
+    settings->setDuplicateFinderHeader(mTreeView->header()->saveState());
+    settings->setDuplicateFinderSimilarity(mSimilaritySpin->value());
+    settings->setDuplicateFinderRecursive(mRecursiveBox->isChecked());
+    settings->setDuplicateFinderRotated(mRotatedBox->isChecked());
+    settings->setDuplicateFinderMirrored(mMirroredBox->isChecked());
+    settings->setDuplicateFinderTargets(foldersIn(mTargetFolders));
     QDialog::closeEvent(event);
 }
 

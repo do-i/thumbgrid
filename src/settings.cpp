@@ -120,7 +120,11 @@ QString settingGroupFor(const QString &key) {
         {"windowGeometry", "State"}, {"savedPaths", "State"}, {"bookmarks", "State"},
         {"placesPanel", "State"}, {"placesPanelBookmarksExpanded", "State"},
         {"placesPanelTreeExpanded", "State"}, {"placesPanelWidth", "State"},
-        {"duplicateFinder", "State"}, {"printLandscape", "State"}, {"printPdfDefault", "State"},
+        {"duplicateFinderGeometry", "State"}, {"duplicateFinderHeader", "State"},
+        {"duplicateFinderSimilarity", "State"}, {"duplicateFinderRecursive", "State"},
+        {"duplicateFinderRotated", "State"}, {"duplicateFinderMirrored", "State"},
+        {"duplicateFinderTargets", "State"},
+        {"printLandscape", "State"}, {"printPdfDefault", "State"},
         {"printColor", "State"}, {"printFitToPage", "State"}, {"lastPrinter", "State"},
         {"shortcutsSortColumn", "State"}, {"shortcutsSortOrder", "State"},
     };
@@ -648,6 +652,28 @@ void Settings::runConfigRecoveryMigrations(const QString &confDir) {
     }
     delete legacyState;
     QFile::remove(legacyStatePath);
+
+    // The duplicate finder state used to be one opaque QVariantMap blob under
+    // State/duplicateFinder; explode it into per-value keys. Existing keys win.
+    const QString dupeBlobKey = QStringLiteral("State/duplicateFinder");
+    if(settingsConf->contains(dupeBlobKey)) {
+        static const QHash<QString, QString> blobKeyMap = {
+            {QStringLiteral("geometry"),   QStringLiteral("State/duplicateFinderGeometry")},
+            {QStringLiteral("header"),     QStringLiteral("State/duplicateFinderHeader")},
+            {QStringLiteral("similarity"), QStringLiteral("State/duplicateFinderSimilarity")},
+            {QStringLiteral("recursive"),  QStringLiteral("State/duplicateFinderRecursive")},
+            {QStringLiteral("rotated"),    QStringLiteral("State/duplicateFinderRotated")},
+            {QStringLiteral("mirrored"),   QStringLiteral("State/duplicateFinderMirrored")},
+            {QStringLiteral("targets"),    QStringLiteral("State/duplicateFinderTargets")},
+        };
+        const QVariantMap blob = settingsConf->value(dupeBlobKey).toMap();
+        for(auto it = blob.constBegin(); it != blob.constEnd(); ++it) {
+            const QString target = blobKeyMap.value(it.key());
+            if(!target.isEmpty() && !settingsConf->contains(target))
+                settingsConf->setValue(target, it.value());
+        }
+        settingsConf->remove(dupeBlobKey);
+    }
 }
 //------------------------------------------------------------------------------
 int Settings::selectedThemeTid() {
@@ -1590,14 +1616,62 @@ void Settings::setDuplicateSearchThreadCount(int count) {
     settings->writeSetting("duplicateSearchThreads", qBound(1, count, maxAllowed));
 }
 
-// duplicate finder window state (geometry, last options/folders) lives in
-// the state file, not the settings file, like windowGeometry above
-QVariantMap Settings::duplicateFinderState() {
-    return settings->readSetting("duplicateFinder").toMap();
+// Duplicate finder window state, one [State] key per value so the config
+// stays readable; only the two Qt widget-state blobs are binary.
+QByteArray Settings::duplicateFinderGeometry() {
+    return settings->readSetting("duplicateFinderGeometry").toByteArray();
 }
 
-void Settings::setDuplicateFinderState(const QVariantMap &state) {
-    settings->writeSetting("duplicateFinder", state);
+void Settings::setDuplicateFinderGeometry(const QByteArray &geometry) {
+    settings->writeSetting("duplicateFinderGeometry", geometry);
+}
+
+QByteArray Settings::duplicateFinderHeader() {
+    return settings->readSetting("duplicateFinderHeader").toByteArray();
+}
+
+void Settings::setDuplicateFinderHeader(const QByteArray &header) {
+    settings->writeSetting("duplicateFinderHeader", header);
+}
+
+int Settings::duplicateFinderSimilarity() {
+    return settings->readSetting("duplicateFinderSimilarity", 87).toInt();
+}
+
+void Settings::setDuplicateFinderSimilarity(int value) {
+    settings->writeSetting("duplicateFinderSimilarity", value);
+}
+
+bool Settings::duplicateFinderRecursive() {
+    return settings->readSetting("duplicateFinderRecursive", true).toBool();
+}
+
+void Settings::setDuplicateFinderRecursive(bool mode) {
+    settings->writeSetting("duplicateFinderRecursive", mode);
+}
+
+bool Settings::duplicateFinderRotated() {
+    return settings->readSetting("duplicateFinderRotated", false).toBool();
+}
+
+void Settings::setDuplicateFinderRotated(bool mode) {
+    settings->writeSetting("duplicateFinderRotated", mode);
+}
+
+bool Settings::duplicateFinderMirrored() {
+    return settings->readSetting("duplicateFinderMirrored", false).toBool();
+}
+
+void Settings::setDuplicateFinderMirrored(bool mode) {
+    settings->writeSetting("duplicateFinderMirrored", mode);
+}
+
+QStringList Settings::duplicateFinderTargets() {
+    return settings->readSetting("duplicateFinderTargets").toStringList();
+}
+
+void Settings::setDuplicateFinderTargets(const QStringList &targets) {
+    settings->writeSetting("duplicateFinderTargets", targets);
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothUpscaling() {

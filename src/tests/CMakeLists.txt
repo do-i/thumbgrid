@@ -233,7 +233,7 @@ target_include_directories(thumbgrid_settings_migration_gates_test PRIVATE ${CMA
 target_link_libraries(thumbgrid_settings_migration_gates_test PRIVATE thumbgrid_app_objects Qt6::Test)
 add_dependencies(thumbgrid_behavior_tests_all thumbgrid_settings_migration_gates_test)
 
-foreach(scenario fresh upgrade current downgrade theme-recovery state-recovery shortcut-recovery shortcut-preset-recovery shortcut-new-action-backfill)
+foreach(scenario fresh upgrade current downgrade theme-recovery state-recovery duplicate-finder-state-recovery shortcut-recovery shortcut-preset-recovery shortcut-new-action-backfill)
     add_test(
         NAME "Settings migration gates: ${scenario}"
         COMMAND thumbgrid_settings_migration_gates_test ${scenario}
