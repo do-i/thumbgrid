@@ -1,7 +1,9 @@
 #include "duplicateresultsmodel.h"
 
+#include <QDateTime>
 #include <QFileInfo>
 #include <QLocale>
+#include <QSet>
 
 DuplicateResultsModel::DuplicateResultsModel(QObject *parent) : QAbstractItemModel(parent) {
 }
@@ -69,6 +71,85 @@ QStringList DuplicateResultsModel::allMatchPaths() const {
         for(const MatchRow &row : group.rows)
             paths << row.match.matchPath;
     return paths;
+}
+
+void DuplicateResultsModel::smartSelect(SmartSelectMode mode) {
+    for(int g = 0; g < mGroups.count(); g++) {
+        Group &group = mGroups[g];
+        if(mode == SELECT_ALL || mode == CLEAR_SELECTION) {
+            for(MatchRow &row : group.rows)
+                row.checked = (mode == SELECT_ALL) ? Qt::Checked : Qt::Unchecked;
+        } else {
+            // metric per candidate; index -1 is the group's source image
+            auto metric = [&](int i) -> qint64 {
+                QString path = (i < 0) ? group.sourcePath : group.rows[i].match.matchPath;
+                switch(mode) {
+                case KEEP_LARGEST_RESOLUTION: {
+                    QSize d = (i < 0) ? group.dimensions : group.rows[i].match.matchDimensions;
+                    return qint64(d.width()) * d.height();
+                }
+                case KEEP_LARGEST_FILE:
+                    return (i < 0) ? group.fileSize : group.rows[i].match.matchFileSize;
+                case KEEP_NEWEST:
+                    return QFileInfo(path).lastModified().toSecsSinceEpoch();
+                case KEEP_OLDEST:
+                    return -QFileInfo(path).lastModified().toSecsSinceEpoch();
+                default:
+                    return 0;
+                }
+            };
+            int best = -1;
+            qint64 bestValue = metric(-1);
+            for(int i = 0; i < group.rows.count(); i++) {
+                if(metric(i) > bestValue) {
+                    bestValue = metric(i);
+                    best = i;
+                }
+            }
+            for(int i = 0; i < group.rows.count(); i++)
+                group.rows[i].checked = (i == best) ? Qt::Unchecked : Qt::Checked;
+        }
+        QModelIndex groupIdx = index(g, COL_CHECK);
+        emit dataChanged(groupIdx, groupIdx, {Qt::CheckStateRole});
+        if(!group.rows.isEmpty())
+            emit dataChanged(index(0, COL_CHECK, index(g, 0)),
+                             index(group.rows.count() - 1, COL_CHECK, index(g, 0)),
+                             {Qt::CheckStateRole});
+    }
+    emitCheckedCount();
+}
+
+void DuplicateResultsModel::removeMatchesForPaths(const QStringList &paths) {
+    QSet<QString> removed(paths.begin(), paths.end());
+    beginResetModel();
+    QVector<Group> kept;
+    for(Group &group : mGroups) {
+        if(removed.contains(group.sourcePath))
+            continue;
+        QVector<MatchRow> rows;
+        for(MatchRow &row : group.rows)
+            if(!removed.contains(row.match.matchPath))
+                rows.append(row);
+        if(rows.isEmpty())
+            continue;
+        group.rows = rows;
+        kept.append(group);
+    }
+    mGroups = kept;
+    mGroupIndexByPath.clear();
+    for(int g = 0; g < mGroups.count(); g++)
+        mGroupIndexByPath.insert(mGroups[g].sourcePath, g);
+    endResetModel();
+    emitCheckedCount();
+}
+
+qint64 DuplicateResultsModel::checkedBytes() const {
+    qint64 total = 0;
+    for(const Group &group : mGroups)
+        for(const MatchRow &row : group.rows)
+            if(row.checked == Qt::Checked)
+                total += row.match.matchFileSize;
+    return total;
 }
 
 QModelIndex DuplicateResultsModel::groupIndex(const QString &sourcePath) const {

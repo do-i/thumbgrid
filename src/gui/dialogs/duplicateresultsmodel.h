@@ -26,9 +26,19 @@ public:
 
     explicit DuplicateResultsModel(QObject *parent = nullptr);
 
+    enum SmartSelectMode {
+        SELECT_ALL, KEEP_LARGEST_RESOLUTION, KEEP_LARGEST_FILE,
+        KEEP_NEWEST, KEEP_OLDEST, CLEAR_SELECTION
+    };
+
     void clear();
     void addMatch(const DuplicateMatch &match);
     void setThumbnail(const QString &path, const QPixmap &pixmap);
+    // check all matches per group except the "best" one by the given
+    // criterion; the group's source image also competes for "best"
+    void smartSelect(SmartSelectMode mode);
+    void removeMatchesForPaths(const QStringList &paths);
+    qint64 checkedBytes() const;
     QStringList checkedPaths() const;
     QStringList allMatchPaths() const;
     int matchCount() const;

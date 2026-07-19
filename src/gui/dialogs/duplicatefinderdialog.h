@@ -31,6 +31,10 @@ public:
     // single-image mode, a directory selects within-folders mode.
     void presetFor(const QString &path, const QString &currentDirectory);
 
+    // Moves the checked matches into a timestamped session subfolder of
+    // dest, preserving search-relative paths, and writes a manifest.
+    void moveCheckedTo(const QString &dest);
+
     // test access
     DuplicateResultsModel *resultsModel() { return mModel; }
     DuplicateFinder *finder() { return &mFinder; }
@@ -48,13 +52,21 @@ private slots:
     void onMatchFound(const DuplicateMatch &match);
     void onSearchFinished(bool cancelled);
     void onThumbnailReady(const std::shared_ptr<Thumbnail> &thumbnail, const QString &filePath);
+    void deleteChecked();
+    void moveChecked();
+    void onResultsContextMenu(const QPoint &pos);
+    void updatePreview(const QModelIndex &current);
 
 private:
     void setupModeRow();
     void setupSetupZone();
     void setupRunRow();
     void setupResultsZone();
+    void setupPreviewAndActions();
     void updateModeUi();
+    void deletePaths(const QStringList &paths);
+    QString searchRootFor(const QString &path) const;
+    static QString previewInfoHtml(const QString &path, const QSize &otherDims, qint64 otherSize);
     void requestThumbnail(const QString &path);
     DuplicateSearchRequest buildRequest() const;
     bool validateRequest(const DuplicateSearchRequest &request, QString &error) const;
@@ -82,4 +94,7 @@ private:
     QSpinBox *mMinSimilaritySpin;
     QTreeView *mTreeView;
     QLabel *mSelectionLabel;
+    QPushButton *mMoveButton, *mDeleteButton;
+    QLabel *mSourcePreview, *mMatchPreview, *mSourceInfo, *mMatchInfo;
+    QStringList mSearchRoots;
 };

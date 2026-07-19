@@ -13,8 +13,12 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QDateTime>
+#include <QDir>
+#include <QMenu>
 #include <QMessageBox>
 #include <QMimeData>
+#include <QTextStream>
 #include <QProgressBar>
 #include <QPushButton>
 #include <QRadioButton>
@@ -24,6 +28,7 @@
 #include <QTreeView>
 #include <QVBoxLayout>
 #include "settings.h"
+#include "utils/fileoperations.h"
 
 namespace {
 
@@ -241,13 +246,72 @@ void DuplicateFinderDialog::setupResultsZone() {
             emit openFileRequested(path);
     });
 
+    mTreeView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(mTreeView, &QTreeView::customContextMenuRequested,
+            this, &DuplicateFinderDialog::onResultsContextMenu);
+    connect(mTreeView->selectionModel(), &QItemSelectionModel::currentRowChanged,
+            this, [this](const QModelIndex &current, const QModelIndex &) { updatePreview(current); });
+
+    setupPreviewAndActions();
+}
+
+void DuplicateFinderDialog::setupPreviewAndActions() {
+    auto *mainLayout = static_cast<QVBoxLayout *>(layout());
+
+    auto *previewBox = new QGroupBox(tr("Preview"), this);
+    auto *previewLayout = new QHBoxLayout(previewBox);
+    auto makePane = [&](QLabel *&image, QLabel *&info, const QString &title) {
+        auto *pane = new QVBoxLayout();
+        pane->addWidget(new QLabel(title, previewBox));
+        image = new QLabel(previewBox);
+        image->setFixedHeight(150);
+        image->setAlignment(Qt::AlignCenter);
+        pane->addWidget(image);
+        info = new QLabel(previewBox);
+        info->setTextFormat(Qt::RichText);
+        pane->addWidget(info);
+        previewLayout->addLayout(pane, 1);
+    };
+    makePane(mSourcePreview, mSourceInfo, tr("Reference"));
+    makePane(mMatchPreview, mMatchInfo, tr("Match"));
+    previewBox->setVisible(false);
+    previewBox->setObjectName("duplicatePreviewBox");
+    mainLayout->addWidget(previewBox);
+
     auto *bottomRow = new QHBoxLayout();
+    auto *smartSelect = new QPushButton(tr("Smart select"), this);
+    auto *smartMenu = new QMenu(smartSelect);
+    auto addSmart = [&](const QString &text, DuplicateResultsModel::SmartSelectMode mode) {
+        smartMenu->addAction(text, this, [this, mode] { mModel->smartSelect(mode); });
+    };
+    addSmart(tr("Select all matches"), DuplicateResultsModel::SELECT_ALL);
+    addSmart(tr("Keep largest resolution"), DuplicateResultsModel::KEEP_LARGEST_RESOLUTION);
+    addSmart(tr("Keep largest file"), DuplicateResultsModel::KEEP_LARGEST_FILE);
+    addSmart(tr("Keep newest"), DuplicateResultsModel::KEEP_NEWEST);
+    addSmart(tr("Keep oldest"), DuplicateResultsModel::KEEP_OLDEST);
+    smartMenu->addSeparator();
+    addSmart(tr("Clear selection"), DuplicateResultsModel::CLEAR_SELECTION);
+    smartSelect->setMenu(smartMenu);
+    bottomRow->addWidget(smartSelect);
+
     mSelectionLabel = new QLabel(tr("0 selected"), this);
     bottomRow->addWidget(mSelectionLabel);
     bottomRow->addStretch();
+    mMoveButton = new QPushButton(tr("Move selected..."), this);
+    mMoveButton->setEnabled(false);
+    bottomRow->addWidget(mMoveButton);
+    mDeleteButton = new QPushButton(tr("Delete selected..."), this);
+    mDeleteButton->setObjectName("duplicateFinderDeleteButton");
+    mDeleteButton->setEnabled(false);
+    bottomRow->addWidget(mDeleteButton);
     mainLayout->addLayout(bottomRow);
+
+    connect(mMoveButton, &QPushButton::clicked, this, &DuplicateFinderDialog::moveChecked);
+    connect(mDeleteButton, &QPushButton::clicked, this, &DuplicateFinderDialog::deleteChecked);
     connect(mModel, &DuplicateResultsModel::checkedCountChanged, this, [this](int count) {
         mSelectionLabel->setText(tr("%n selected", nullptr, count));
+        mMoveButton->setEnabled(count > 0);
+        mDeleteButton->setEnabled(count > 0);
     });
 }
 
@@ -332,6 +396,7 @@ void DuplicateFinderDialog::onStartClicked() {
     }
     mModel->clear();
     mThumbsRequested.clear();
+    mSearchRoots = request.targetFolders + request.sourceFolders;
     mProgressBar->setRange(0, 0);
     mStatsLabel->setText(tr("Scanning..."));
     mStartButton->setText(tr("Cancel"));
@@ -379,4 +444,160 @@ void DuplicateFinderDialog::onSearchFinished(bool cancelled) {
 void DuplicateFinderDialog::closeEvent(QCloseEvent *event) {
     mFinder.cancel();
     QDialog::closeEvent(event);
+}
+
+//------------------------------------------------------------------------------
+
+void DuplicateFinderDialog::deleteChecked() {
+    deletePaths(mModel->checkedPaths());
+}
+
+void DuplicateFinderDialog::deletePaths(const QStringList &paths) {
+    if(paths.isEmpty())
+        return;
+    qint64 bytes = 0;
+    for(const QString &path : paths)
+        bytes += QFileInfo(path).size();
+    QString msg = tr("Move %n file(s) to trash?", nullptr, paths.count())
+                  + QString(" (%1)").arg(QLocale().formattedDataSize(bytes, 1));
+    if(QMessageBox::question(this, tr("Move to trash"), msg) != QMessageBox::Yes)
+        return;
+    QStringList removed, failed;
+    for(const QString &path : paths) {
+        FileOpResult result;
+        FileOperations::moveToTrash(path, result);
+        (result == FileOpResult::SUCCESS ? removed : failed) << path;
+    }
+    mModel->removeMatchesForPaths(removed);
+    mTreeView->expandAll();
+    mStatsLabel->setText(tr("Moved %n file(s) to trash", nullptr, removed.count()));
+    if(!failed.isEmpty())
+        QMessageBox::warning(this, tr("Move to trash"),
+                             tr("Could not trash %n file(s):", nullptr, failed.count())
+                             + "\n" + failed.join("\n"));
+}
+
+QString DuplicateFinderDialog::searchRootFor(const QString &path) const {
+    for(const QString &root : mSearchRoots)
+        if(path.startsWith(QDir(root).absolutePath() + "/"))
+            return root;
+    return QString();
+}
+
+void DuplicateFinderDialog::moveChecked() {
+    if(mModel->checkedPaths().isEmpty())
+        return;
+    QString dest = QFileDialog::getExistingDirectory(this, tr("Move duplicates to..."));
+    if(!dest.isEmpty())
+        moveCheckedTo(dest);
+}
+
+void DuplicateFinderDialog::moveCheckedTo(const QString &dest) {
+    QStringList paths = mModel->checkedPaths();
+    if(paths.isEmpty() || dest.isEmpty())
+        return;
+    // timestamped session folder, original relative paths preserved,
+    // manifest for auditability (docs/003 §3.3)
+    QString session = "dedupe-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss");
+    QDir destDir(dest);
+    if(!destDir.mkpath(session)) {
+        QMessageBox::warning(this, tr("Move duplicates"), tr("Could not create %1").arg(session));
+        return;
+    }
+    QString sessionPath = destDir.filePath(session);
+    QFile manifest(sessionPath + "/manifest.txt");
+    manifest.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+    QTextStream manifestOut(&manifest);
+    QStringList moved, failed;
+    for(const QString &path : paths) {
+        QString root = searchRootFor(path);
+        QString rel = root.isEmpty() ? QFileInfo(path).fileName()
+                                     : QDir(root).relativeFilePath(path);
+        QString target = sessionPath + "/" + rel;
+        QDir().mkpath(QFileInfo(target).absolutePath());
+        for(int n = 1; QFile::exists(target); n++) {
+            QFileInfo ti(sessionPath + "/" + rel);
+            target = ti.path() + "/" + ti.completeBaseName() + QString("-%1").arg(n)
+                     + (ti.suffix().isEmpty() ? "" : "." + ti.suffix());
+        }
+        bool ok = QFile::rename(path, target);
+        if(!ok)
+            ok = QFile::copy(path, target) && QFile::remove(path);
+        if(ok) {
+            manifestOut << path << " -> " << target << "\n";
+            moved << path;
+        } else {
+            failed << path;
+        }
+    }
+    manifest.close();
+    mModel->removeMatchesForPaths(moved);
+    mTreeView->expandAll();
+    mStatsLabel->setText(tr("Moved %n file(s) to %1", nullptr, moved.count()).arg(session));
+    if(!failed.isEmpty())
+        QMessageBox::warning(this, tr("Move duplicates"),
+                             tr("Could not move %n file(s):", nullptr, failed.count())
+                             + "\n" + failed.join("\n"));
+}
+
+void DuplicateFinderDialog::onResultsContextMenu(const QPoint &pos) {
+    QModelIndex idx = mTreeView->indexAt(pos);
+    if(!idx.isValid())
+        return;
+    QString path = idx.data(DuplicateResultsModel::FilePathRole).toString();
+    QMenu menu(this);
+    menu.addAction(tr("Open"), this, [this, path] { emit openFileRequested(path); });
+    if(idx.parent().isValid())
+        menu.addAction(tr("Move to trash"), this, [this, path] { deletePaths({path}); });
+    menu.exec(mTreeView->viewport()->mapToGlobal(pos));
+}
+
+QString DuplicateFinderDialog::previewInfoHtml(const QString &path, const QSize &otherDims,
+                                               qint64 otherSize) {
+    QFileInfo info(path);
+    QImageReader reader(path);
+    reader.setAutoTransform(true);
+    QSize dims = reader.size();
+    auto colored = [](const QString &text, qint64 self, qint64 other) {
+        if(self > other)
+            return QString("<span style='color:#3c9a46;'>%1</span>").arg(text);
+        if(self < other)
+            return QString("<span style='color:#c05050;'>%1</span>").arg(text);
+        return text;
+    };
+    QString dimsText = colored(QString("%1 x %2").arg(dims.width()).arg(dims.height()),
+                               qint64(dims.width()) * dims.height(),
+                               qint64(otherDims.width()) * otherDims.height());
+    QString sizeText = colored(QLocale().formattedDataSize(info.size(), 1), info.size(), otherSize);
+    return QString("<b>%1</b><br>%2 &middot; %3<br>%4")
+        .arg(info.fileName().toHtmlEscaped(), dimsText, sizeText,
+             QLocale().toString(info.lastModified(), QLocale::ShortFormat));
+}
+
+void DuplicateFinderDialog::updatePreview(const QModelIndex &current) {
+    QWidget *box = mSourcePreview->parentWidget();
+    if(!current.isValid() || !current.parent().isValid()) {
+        box->setVisible(false);
+        return;
+    }
+    QString matchPath = current.data(DuplicateResultsModel::FilePathRole).toString();
+    QString sourcePath = current.parent().data(DuplicateResultsModel::FilePathRole).toString();
+    auto loadInto = [](QLabel *label, const QString &path) {
+        QImageReader reader(path);
+        reader.setAutoTransform(true);
+        QSize size = reader.size();
+        if(size.isValid()) {
+            size.scale(280, 150, Qt::KeepAspectRatio);
+            reader.setScaledSize(size);
+        }
+        QImage img = reader.read();
+        label->setPixmap(img.isNull() ? QPixmap() : QPixmap::fromImage(img));
+    };
+    loadInto(mSourcePreview, sourcePath);
+    loadInto(mMatchPreview, matchPath);
+    QFileInfo sourceInfo(sourcePath), matchInfo(matchPath);
+    QImageReader sr(sourcePath), mr(matchPath);
+    mSourceInfo->setText(previewInfoHtml(sourcePath, mr.size(), matchInfo.size()));
+    mMatchInfo->setText(previewInfoHtml(matchPath, sr.size(), sourceInfo.size()));
+    box->setVisible(true);
 }

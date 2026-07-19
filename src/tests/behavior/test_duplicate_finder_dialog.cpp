@@ -39,6 +39,8 @@ private:
 private slots:
     void initTestCase();
     void dialogRunsSearchAndShowsGroupedResults();
+    void smartSelectKeepsTheBestCopy();
+    void movingCheckedFilesCreatesAuditableSession();
     void findDuplicatesActionOpensSeededDialog();
 };
 
@@ -73,6 +75,58 @@ void DuplicateFinderDialogTest::dialogRunsSearchAndShowsGroupedResults() {
     QModelIndex firstMatch = view->model()->index(0, DuplicateResultsModel::COL_CHECK, group);
     QVERIFY(view->model()->setData(firstMatch, Qt::Checked, Qt::CheckStateRole));
     QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 1);
+}
+
+void DuplicateFinderDialogTest::smartSelectKeepsTheBestCopy() {
+    DuplicateFinderDialog dialog;
+    dialog.presetFor(tmp.filePath("src/A.png"), tmp.filePath("tgt"));
+    dialog.findChild<QPushButton *>("duplicateFinderStartButton")->click();
+    QTRY_COMPARE_WITH_TIMEOUT(dialog.resultsModel()->matchCount(), 2, 15000);
+    QTRY_VERIFY(!dialog.finder()->isRunning());
+    // the source (a PNG) is at least as large as both matches, so
+    // "keep largest file" selects every match for removal
+    dialog.resultsModel()->smartSelect(DuplicateResultsModel::KEEP_LARGEST_FILE);
+    QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 2);
+    dialog.resultsModel()->smartSelect(DuplicateResultsModel::CLEAR_SELECTION);
+    QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 0);
+    dialog.resultsModel()->smartSelect(DuplicateResultsModel::SELECT_ALL);
+    QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 2);
+}
+
+void DuplicateFinderDialogTest::movingCheckedFilesCreatesAuditableSession() {
+    // separate fixture so the shared one stays intact for other tests
+    QTemporaryDir work, moveDest;
+    QVERIFY(work.isValid() && moveDest.isValid());
+    QVERIFY(QDir(work.path()).mkpath("scope/sub"));
+    QImage sceneA = makeScene(0);
+    QVERIFY(sceneA.save(work.filePath("A.png")));
+    QVERIFY(QFile::copy(work.filePath("A.png"), work.filePath("scope/copy1.png")));
+    QVERIFY(QFile::copy(work.filePath("A.png"), work.filePath("scope/sub/copy2.png")));
+
+    DuplicateFinderDialog dialog;
+    dialog.presetFor(work.filePath("A.png"), work.filePath("scope"));
+    dialog.findChild<QPushButton *>("duplicateFinderStartButton")->click();
+    QTRY_COMPARE_WITH_TIMEOUT(dialog.resultsModel()->matchCount(), 2, 15000);
+    QTRY_VERIFY(!dialog.finder()->isRunning());
+    dialog.resultsModel()->smartSelect(DuplicateResultsModel::SELECT_ALL);
+    dialog.moveCheckedTo(moveDest.path());
+
+    // originals gone, model emptied
+    QVERIFY(!QFile::exists(work.filePath("scope/copy1.png")));
+    QVERIFY(!QFile::exists(work.filePath("scope/sub/copy2.png")));
+    QCOMPARE(dialog.resultsModel()->matchCount(), 0);
+    // one dedupe-* session folder with relative structure + manifest
+    QStringList sessions = QDir(moveDest.path()).entryList({"dedupe-*"}, QDir::Dirs);
+    QCOMPARE(sessions.count(), 1);
+    QDir session(QDir(moveDest.path()).filePath(sessions.first()));
+    QVERIFY(session.exists("copy1.png"));
+    QVERIFY(session.exists("sub/copy2.png"));
+    QFile manifest(session.filePath("manifest.txt"));
+    QVERIFY(manifest.open(QIODevice::ReadOnly | QIODevice::Text));
+    QString manifestText = manifest.readAll();
+    QVERIFY(manifestText.contains("copy1.png"));
+    QVERIFY(manifestText.contains("sub/copy2.png"));
+    QCOMPARE(manifestText.trimmed().split('\n').count(), 2);
 }
 
 void DuplicateFinderDialogTest::findDuplicatesActionOpensSeededDialog() {
