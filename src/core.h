@@ -17,6 +17,7 @@
 #include "gui/mainwindow.h"
 #include "utils/randomizer.h"
 #include "gui/dialogs/printdialog.h"
+#include "gui/dialogs/duplicatefinderdialog.h"
 
 #ifdef __GLIBC__
 #include <malloc.h>
@@ -69,6 +70,7 @@ private:
 
     DirectoryPresenter thumbPanelPresenter, folderViewPresenter;
     FileOperationsController *fileOps = nullptr;
+    std::unique_ptr<DuplicateFinderDialog> duplicateFinderDialog;
 
     void rotateByDegrees(int degrees);
     void reset();
@@ -157,6 +159,7 @@ private slots:
     void sortByTime();
     void sortBySize();
     void showRenameDialog();
+    void showDuplicateFinder();
     void createDirectory();
     void onDraggedOut();
     void onDraggedOut(QStringList paths);

@@ -101,6 +101,10 @@ ContextMenu::ContextMenu(QWidget *parent) :
     ui->stripMetadata->setAction("stripMetadata");
     ui->stripMetadata->setText(tr("Strip metadata"));
     ui->stripMetadata->setIconPath(":/res/icons/common/menuitem/trash16.png");
+
+    ui->findDuplicates->setAction("findDuplicates");
+    ui->findDuplicates->setText(tr("Find duplicates..."));
+    ui->findDuplicates->setIconPath(":/res/icons/common/menuitem/folderview16.png");
     // -------------------------------------------------------------------------
     // force resize to fit new menuitem width
     this->adjustSize();
@@ -158,6 +162,7 @@ void ContextMenu::setImageEntriesEnabled(bool mode) {
     ui->showLocation->setEnabled(mode);
     ui->imageInfo->setEnabled(mode);
     ui->stripMetadata->setEnabled(mode);
+    ui->findDuplicates->setEnabled(mode);
 }
 
 void ContextMenu::showAt(QPoint pos) {

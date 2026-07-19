@@ -4772,6 +4772,80 @@
                    </layout>
                   </item>
                   <item>
+                   <layout class="QHBoxLayout" name="duplicateThreadsRow">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="duplicateThreadsTitleLabel">
+                      <property name="text">
+                       <string>Duplicate search thread count:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSlider" name="duplicateThreadsSlider">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>180</width>
+                        <height>25</height>
+                       </size>
+                      </property>
+                      <property name="minimum">
+                       <number>1</number>
+                      </property>
+                      <property name="maximum">
+                       <number>8</number>
+                      </property>
+                      <property name="pageStep">
+                       <number>1</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="tickPosition">
+                       <enum>QSlider::TicksBelow</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="duplicateThreadsLabel">
+                      <property name="text">
+                       <string>2</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="duplicateThreadsSpacer">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
                    <widget class="QCheckBox" name="useThumbnailCacheCheckBox">
                     <property name="sizePolicy">
                      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Minimum">
@@ -5649,6 +5723,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </hints>
   </connection>
   <connection>
+   <sender>duplicateThreadsSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>SettingsDialog</receiver>
+   <slot>onDuplicateThreadsSliderChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>369</x>
+     <y>124</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>591</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
    <sender>pushButton_2</sender>
    <signal>clicked()</signal>
    <receiver>SettingsDialog</receiver>
@@ -5823,6 +5913,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <slot>editScript()</slot>
   <slot>editScript(QListWidgetItem*)</slot>
   <slot>onThumbnailerThreadsSliderChanged(int)</slot>
+  <slot>onDuplicateThreadsSliderChanged(int)</slot>
   <slot>fullscreenColorDialog()</slot>
   <slot>windowColorDialog()</slot>
   <slot>highlightColorDialog()</slot>

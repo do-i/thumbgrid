@@ -97,4 +97,5 @@ void Actions::init() {
     mActions.insert("cutFile", QVersionNumber(1,0,4));
     mActions.insert("stripMetadata", QVersionNumber(1,0,5));
     mActions.insert("togglePlacesPanel", QVersionNumber(1,0,6));
+    mActions.insert("findDuplicates", QVersionNumber(2026,7,10));
 }

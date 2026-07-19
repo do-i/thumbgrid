@@ -661,8 +661,15 @@ void SettingsDialog::readSettings() {
     onExpandLimitSliderChanged(ui->expandLimitSlider->value());
 
     // thumbnailer threads
+    // thumbnailer + duplicate-search pools share a core budget: each
+    // slider's max is total cores minus the other's current allocation
+    int cores = qMax(1, QThread::idealThreadCount());
+    ui->thumbnailerThreadsSlider->setMaximum(qMax(1, cores - settings->duplicateSearchThreadCount()));
+    ui->duplicateThreadsSlider->setMaximum(qMax(1, cores - settings->thumbnailerThreadCount()));
     ui->thumbnailerThreadsSlider->setValue(settings->thumbnailerThreadCount());
     onThumbnailerThreadsSliderChanged(ui->thumbnailerThreadsSlider->value());
+    ui->duplicateThreadsSlider->setValue(settings->duplicateSearchThreadCount());
+    onDuplicateThreadsSliderChanged(ui->duplicateThreadsSlider->value());
 
     ui->memoryLimitSpinBox->setValue(settings->memoryAllocationLimit());
 
@@ -808,7 +815,12 @@ void SettingsDialog::saveSettings() {
     settings->setMouseScrollingSpeed(static_cast<qreal>(0.5f + (ui->mouseScrollingSpeedSlider->value() * 0.25f)));
     settings->setAutoResizeLimit(ui->autoResizeLimitSlider->value() * 5);
     settings->setExpandLimit(ui->expandLimitSlider->value());
+    // write finder count on both sides of the thumbnailer write: the setters
+    // clamp against the other pool's stored value, so this order guarantees
+    // both UI values land intact whichever direction the user rebalanced
+    settings->setDuplicateSearchThreadCount(ui->duplicateThreadsSlider->value());
     settings->setThumbnailerThreadCount(ui->thumbnailerThreadsSlider->value());
+    settings->setDuplicateSearchThreadCount(ui->duplicateThreadsSlider->value());
     settings->setMemoryAllocationLimit(ui->memoryLimitSpinBox->value());
     settings->setThumbnailerMemCacheLimit(ui->thumbMemCacheSpinBox->value());
 
@@ -1677,6 +1689,15 @@ void SettingsDialog::onMouseScrollingSpeedSliderChanged(int value) {
 //------------------------------------------------------------------------------
 void SettingsDialog::onThumbnailerThreadsSliderChanged(int value) {
     ui->thumbnailerThreadsLabel->setText(QString::number(value));
+    // live-rebalance: the finder slider may only use what the thumbnailer leaves
+    int cores = qMax(1, QThread::idealThreadCount());
+    ui->duplicateThreadsSlider->setMaximum(qMax(1, cores - value));
+}
+
+void SettingsDialog::onDuplicateThreadsSliderChanged(int value) {
+    ui->duplicateThreadsLabel->setText(QString::number(value));
+    int cores = qMax(1, QThread::idealThreadCount());
+    ui->thumbnailerThreadsSlider->setMaximum(qMax(1, cores - value));
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::onBgOpacitySliderChanged(int value) {

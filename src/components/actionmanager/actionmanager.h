@@ -155,6 +155,7 @@ signals:
     void toggleFolderViewTopBar();
     void toggleStatusFooter();
     void togglePlacesPanel();
+    void findDuplicates();
 };
 
 extern ActionManager *actionManager;

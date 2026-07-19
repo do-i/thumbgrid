@@ -220,6 +220,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::sortBySize, this, &Core::sortBySize);
     connect(actionManager, &ActionManager::toggleImageInfo, mw, &MW::toggleImageInfoOverlay);
     connect(actionManager, &ActionManager::stripMetadata, this, &Core::stripMetadata);
+    connect(actionManager, &ActionManager::findDuplicates, this, &Core::showDuplicateFinder);
     connect(actionManager, &ActionManager::toggleShuffle, this, &Core::toggleShuffle);
     connect(actionManager, &ActionManager::toggleScalingFilter, mw, &MW::toggleScalingFilter);
     connect(actionManager, &ActionManager::showInDirectory, this, &Core::showInDirectory);
@@ -1076,6 +1077,18 @@ void Core::showRenameDialog() {
         return;
     QFileInfo fi(selectedPath());
     mw->toggleRenameOverlay(fi.fileName());
+}
+
+void Core::showDuplicateFinder() {
+    if(!duplicateFinderDialog) {
+        duplicateFinderDialog.reset(new DuplicateFinderDialog(mw));
+        connect(duplicateFinderDialog.get(), &DuplicateFinderDialog::openFileRequested,
+                this, [this](const QString &path) { loadPath(path); });
+    }
+    duplicateFinderDialog->presetFor(selectedPath(), model ? model->directoryPath() : "");
+    duplicateFinderDialog->show();
+    duplicateFinderDialog->raise();
+    duplicateFinderDialog->activateWindow();
 }
 
 void Core::createDirectory() {

@@ -218,6 +218,14 @@ add_test(
     COMMAND thumbgrid_duplicate_finder_engine_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_duplicate_finder_dialog_test
+    behavior/test_duplicate_finder_dialog.cpp
+)
+add_test(
+    NAME "Duplicate finder dialog searches and lists grouped results"
+    COMMAND thumbgrid_duplicate_finder_dialog_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )
