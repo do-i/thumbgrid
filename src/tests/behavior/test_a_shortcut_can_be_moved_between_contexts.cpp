@@ -22,6 +22,7 @@ private slots:
     void copyingABindingKeepsTheOriginalAndRevivesTheDestination();
     void aTakenKeyInTheDestinationIsReportedBeforeTheTransfer();
     void theShortcutsTableOffersARowContextMenu();
+    void theRowMenuResolvesTheClickedRow();
 };
 
 // Move: the key leaves the source context entirely, and so do the source's
@@ -134,6 +135,31 @@ void AShortcutCanBeMovedBetweenContextsTest::theShortcutsTableOffersARowContextM
     // Move to.../Copy to... are row commands; without a custom policy there is
     // no affordance to reach them at all.
     QCOMPARE(table->contextMenuPolicy(), Qt::CustomContextMenu);
+}
+
+// The table's customContextMenuRequested delivers viewport coordinates
+// (QAbstractScrollArea exception), and the menu must resolve them as-is.
+// Remapping them table->viewport a second time shifts the hit point up by the
+// header height: the menu then targets the row above the clicked one, and the
+// top of the first row gets no menu at all.
+void AShortcutCanBeMovedBetweenContextsTest::theRowMenuResolvesTheClickedRow() {
+    actionManager->removeAllShortcuts();
+
+    SettingsDialog dialog;
+    QTableWidget *table = dialog.findChild<QTableWidget *>("shortcutsTableWidget");
+    QVERIFY2(table, "The shortcuts page should have its table.");
+    QVERIFY2(table->rowCount() >= 2, "Needs at least two rows to tell them apart.");
+
+    for(int row : {0, 1}) {
+        const QPoint middle(5, table->rowViewportPosition(row) + table->rowHeight(row) / 2);
+        QCOMPARE(dialog.shortcutActionAtMenuPos(middle),
+                 table->item(row, 0)->data(Qt::UserRole).toString());
+    }
+    // The very top of the first row is still the first row - under the
+    // historical double-mapping this point resolved to no row at all.
+    const QPoint top(5, table->rowViewportPosition(0) + 1);
+    QCOMPARE(dialog.shortcutActionAtMenuPos(top),
+             table->item(0, 0)->data(Qt::UserRole).toString());
 }
 
 TG_BEHAVIOR_TEST_MAIN(AShortcutCanBeMovedBetweenContextsTest)

@@ -19,7 +19,7 @@ jobs:
       - name: Install build tooling
         run: brew install cmake ninja qt opencv exiv2 mpv pkg-config create-dmg
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0   # tags needed for git describe / appversion
           lfs: true        # fetch real image bytes; LFS pointer stubs in qrc crash at runtime

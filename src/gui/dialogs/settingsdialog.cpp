@@ -1118,13 +1118,11 @@ void SettingsDialog::updateShortcutsTable() {
         const int row = ui->shortcutsTableWidget->rowCount();
         ui->shortcutsTableWidget->setRowCount(row + 1);
 
-        // Script actions are stored as "s:<name>"; show the bare name with a
-        // "(script)" tag so the row does not read as a misspelled action.
+        // Script rows show shortcutActionLabel()'s "(script)"-tagged name;
         // Qt::UserRole always keeps the real action id - every lookup uses it.
         const bool isScript = action.startsWith(QStringLiteral("s:"));
-        const QString label = isScript ? tr("%1  (script)").arg(action.mid(2)) : action;
 
-        QTableWidgetItem *actionItem = new QTableWidgetItem(label);
+        QTableWidgetItem *actionItem = new QTableWidgetItem(shortcutActionLabel(action));
         actionItem->setData(Qt::UserRole, action);
         if(isScript)
             actionItem->setToolTip(tr("User script \"%1\"").arg(action.mid(2)));
@@ -1186,9 +1184,7 @@ void SettingsDialog::openShortcutDetails(int row) {
 //------------------------------------------------------------------------------
 void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context) {
     QDialog dialog(this);
-    dialog.setWindowTitle(action.startsWith(QStringLiteral("s:"))
-                              ? tr("%1  (script)").arg(action.mid(2))
-                              : action);
+    dialog.setWindowTitle(shortcutActionLabel(action));
     QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
     QLabel *hint = new QLabel(
@@ -1421,15 +1417,21 @@ void SettingsDialog::transferShortcut(const QString &action, ViewMode src, ViewM
     applyShortcutTransfer(action, src, dst, move);
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
-    QWidget *viewport = ui->shortcutsTableWidget->viewport();
-    const QPoint local = viewport->mapFrom(ui->shortcutsTableWidget, pos);
-    const int row = ui->shortcutsTableWidget->rowAt(local.y());
+// The position from the table's customContextMenuRequested is already in
+// viewport coordinates - QAbstractScrollArea subclasses hand the viewport's
+// context-menu event up untranslated. Remapping it again would shift the hit
+// point by the header height and target the wrong row.
+QString SettingsDialog::shortcutActionAtMenuPos(const QPoint &viewportPos) const {
+    const int row = ui->shortcutsTableWidget->rowAt(viewportPos.y());
     QTableWidgetItem *item = (row < 0) ? nullptr : ui->shortcutsTableWidget->item(row, 0);
-    if(!item)
-        return;
     // Column 0 carries the real action id in UserRole (script rows show a label).
-    const QString action = item->data(Qt::UserRole).toString();
+    return item ? item->data(Qt::UserRole).toString() : QString();
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
+    const QString action = shortcutActionAtMenuPos(pos);
+    if(action.isEmpty())
+        return;
     const ViewMode src = selectedShortcutContext();
 
     QMenu menu(this);
@@ -1463,7 +1465,7 @@ void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
             });
         }
     }
-    menu.exec(viewport->mapToGlobal(local));
+    menu.exec(ui->shortcutsTableWidget->viewport()->mapToGlobal(pos));
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::readScripts() {
@@ -1568,8 +1570,21 @@ void SettingsDialog::editScript(const QString& name) {
 void SettingsDialog::removeScript(const QString& name) {
     if(name.isEmpty() || !scriptManager->scriptExists(name))
         return;
+    // Purge the action from every per-context draft structure before saving.
+    // A left-behind disabled entry is not inert: it persists in the config and
+    // the disabled-row seeding in updateShortcutsTable() would resurrect the
+    // deleted script as a ghost row.
+    const QString action = QStringLiteral("s:") + name;
+    const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT};
+    for(ViewMode context : contexts) {
+        setActionShortcuts(mShortcutDraft[context], action, QStringList());
+        mShortcutPrimary[context].remove(action);
+        QStringList disabled = mShortcutDisabled.value(context);
+        if(disabled.removeAll(action) > 0)
+            mShortcutDisabled[context] = disabled;
+    }
+    rebuildShortcutDraftLookup();
     saveShortcuts();
-    actionManager->removeAllShortcuts("s:" + name);
     readShortcuts();
     scriptManager->removeScript(name);
     readScripts();

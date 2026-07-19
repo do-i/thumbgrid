@@ -117,6 +117,28 @@ All three live in `settingsdialog.cpp` — serialize, one session can take all.
 
 ## Status
 
-- [ ] R1 — row menu coordinate fix + testable row resolution (Sonnet 5)
-- [ ] R2 — purge disabled/primary/draft entries on script delete (Sonnet 5)
-- [ ] R3 — deduplicate script label formatting (Haiku 4.5)
+All items done 2026-07-18. Full build warning-clean, 31/31 behavior tests
+green, both new test cases mutation-verified (each fails when its fix is
+reverted).
+
+- [x] R1 — done 2026-07-18. Row resolution factored into public
+      `shortcutActionAtMenuPos(viewportPos)`; the slot and the menu-exec
+      position now use the signal's pos as-is. Covered by
+      `theRowMenuResolvesTheClickedRow()` in the transfer test (middle of
+      rows 0/1 + top edge of row 0); reintroducing the `mapFrom` fails it.
+- [x] R2 — done 2026-07-18. `removeScript()` now purges `s:<name>` from
+      `mShortcutDraft` / `mShortcutPrimary` / `mShortcutDisabled` in all
+      three contexts before saving (the explicit
+      `actionManager->removeAllShortcuts` call became redundant — the saved
+      draft no longer contains the action). Repro confirmed the bug was
+      real: with the purge mutated out, `deletingAScriptLeavesNoGhostRow()`
+      shows the ghost row.
+- [x] R3 — done 2026-07-18. Both inline `"%1  (script)"` copies replaced
+      with `shortcutActionLabel()`.
+
+**Build-tree gotcha found on the way:** the build cache had
+`BUILD_TESTING=OFF` while the generated makefiles still contained the test
+targets from an earlier configure — test binaries silently stopped
+rebuilding (ctest ran stale executables that passed). Re-configured with
+`-DBUILD_TESTING=ON`; if tests ever seem to ignore source edits, check this
+cache flag first.

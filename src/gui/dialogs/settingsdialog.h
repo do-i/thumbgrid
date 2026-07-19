@@ -56,6 +56,10 @@ public:
     // a move clears all three in the source. Does not prompt - transferShortcut()
     // is the confirm-gated wrapper the menu uses.
     void applyShortcutTransfer(const QString &action, ViewMode src, ViewMode dst, bool move);
+    // Resolves the action id of the shortcuts-table row at a position from the
+    // table's customContextMenuRequested signal - viewport coordinates, used
+    // as-is (see the definition). Empty when no row is there.
+    QString shortcutActionAtMenuPos(const QPoint &viewportPos) const;
 
 public slots:
     int exec() override;

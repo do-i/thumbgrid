@@ -21,6 +21,8 @@ private slots:
     void unboundScriptsAreListedOnTheShortcutsPage();
     void theShortcutsPageOffersAnEntryPointForNewBindings();
     void theShortcutCreatorCanProduceAScriptAction();
+    // Deletes the shared script - must stay the last test in this binary.
+    void deletingAScriptLeavesNoGhostRow();
 };
 
 void AScriptCanBeBoundToAShortcutTest::initTestCase() {
@@ -103,6 +105,33 @@ void AScriptCanBeBoundToAShortcutTest::theShortcutCreatorCanProduceAScriptAction
     QVERIFY2(scriptCombo, "The shortcut creator should list scripts.");
     QVERIFY2(scriptCombo->findText(QStringLiteral("open externally")) != -1,
              "A registered script should be offered by the shortcut creator.");
+}
+
+// Deleting a script must leave nothing behind in the persisted shortcut state.
+// The dangerous leftover is the per-context disabled flag: the shortcuts table
+// seeds rows from it, so a stale entry resurrects the deleted script as a
+// ghost "(script)" row that can never run.
+void AScriptCanBeBoundToAShortcutTest::deletingAScriptLeavesNoGhostRow() {
+    const QString action = QStringLiteral("s:open externally");
+    actionManager->removeAllShortcuts();
+    {
+        SettingsDialog dialog;
+        // The worst-case leftover: the script's row is switched off, which
+        // clears its draft keys and records it in the disabled list.
+        dialog.setShortcutEnabled(MODE_GLOBAL, action, false);
+        QVERIFY(QMetaObject::invokeMethod(&dialog, "removeScript",
+                                          Q_ARG(QString, QStringLiteral("open externally"))));
+    }
+    QVERIFY(!scriptManager->scriptExists(QStringLiteral("open externally")));
+
+    // A fresh dialog re-reads the persisted state; the deleted script must not
+    // resurface from the disabled list (or anywhere else).
+    SettingsDialog dialog;
+    QTableWidget *table = dialog.findChild<QTableWidget *>("shortcutsTableWidget");
+    QVERIFY2(table, "The shortcuts page should have its table.");
+    for(int row = 0; row < table->rowCount(); row++)
+        QVERIFY2(table->item(row, 0)->data(Qt::UserRole).toString() != action,
+                 "A deleted script must not keep a row on the shortcuts page.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(AScriptCanBeBoundToAShortcutTest)
