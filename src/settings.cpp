@@ -1569,6 +1569,16 @@ void Settings::setDuplicateSearchThreadCount(int count) {
     int maxAllowed = qMax(1, totalCoreBudget() - thumbnailerThreadCount());
     settings->writeSetting("duplicateSearchThreads", qBound(1, count, maxAllowed));
 }
+
+// duplicate finder window state (geometry, last options/folders) lives in
+// the state file, not the settings file, like windowGeometry above
+QVariantMap Settings::duplicateFinderState() {
+    return settings->stateConf->value("duplicateFinder").toMap();
+}
+
+void Settings::setDuplicateFinderState(const QVariantMap &state) {
+    settings->stateConf->setValue("duplicateFinder", state);
+}
 //------------------------------------------------------------------------------
 bool Settings::smoothUpscaling() {
     return settings->readSetting("smoothUpscaling", true).toBool();

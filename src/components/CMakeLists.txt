@@ -25,6 +25,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
 
     duplicatefinder/imagehasher.cpp
     duplicatefinder/duplicatefinder.cpp
+    duplicatefinder/hashcache.cpp
 
     directorymanager/watchers/directorywatcher.cpp
     directorymanager/watchers/dummywatcher.cpp

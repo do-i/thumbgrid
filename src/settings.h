@@ -172,6 +172,8 @@ public:
     void setThumbnailerThreadCount(int count);
     int duplicateSearchThreadCount();
     void setDuplicateSearchThreadCount(int count);
+    QVariantMap duplicateFinderState();
+    void setDuplicateFinderState(const QVariantMap &state);
     bool smoothUpscaling();
     void setSmoothUpscaling(bool mode);
     void setExpandImage(bool mode);

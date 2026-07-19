@@ -1,5 +1,6 @@
 #include "duplicatefinder.h"
 
+#include <QDateTime>
 #include <QDirIterator>
 #include <QFileInfo>
 #include <QImageReader>
@@ -40,6 +41,7 @@ QStringList dedupePaths(const QStringList &paths) {
 
 DuplicateFinder::DuplicateFinder(QObject *parent) : QObject(parent) {
     qRegisterMetaType<DuplicateMatch>();
+    mCache = std::make_unique<HashCache>(settings->tmpDir() + "duplicatehashes.dat");
 }
 
 DuplicateFinder::~DuplicateFinder() {
@@ -86,6 +88,10 @@ void DuplicateFinder::joinThread() {
 }
 
 void DuplicateFinder::run(DuplicateSearchRequest request) {
+    if(!mCacheLoaded) {
+        mCache->load();
+        mCacheLoaded = true;
+    }
     QStringList sources, targets;
     bool within = (request.mode == DuplicateSearchRequest::WITHIN_FOLDERS);
     switch(request.mode) {
@@ -124,6 +130,7 @@ void DuplicateFinder::run(DuplicateSearchRequest request) {
     std::atomic<int> hashed{0};
     hashFiles(sources, true, request, entries, total, hashed);
     hashFiles(targets, false, request, entries, total, hashed);
+    mCache->save();
 
     if(!mCancel) {
         int maxDistance = ImageHasher::maxDistanceForSimilarity(request.similarityPercent);
@@ -177,25 +184,40 @@ void DuplicateFinder::hashFiles(const QStringList &paths, bool sourceSet,
                                        totalCount, &hashedCount] {
             HashEntry entry;
             if(!mCancel) {
-                QImageReader reader(path);
-                reader.setAutoTransform(true);
-                QSize size = reader.size();
-                if(size.isValid() && (size.width() > DECODE_SIZE || size.height() > DECODE_SIZE))
-                    reader.setScaledSize(QSize(DECODE_SIZE, DECODE_SIZE));
-                QImage image = reader.read();
-                if(!image.isNull()) {
-                    if(!size.isValid())
-                        size = image.size();
-                    if(variants)
-                        entry.hashes = ImageHasher::phashVariants(image, request.matchRotated,
-                                                                  request.matchMirrored);
-                    else
-                        entry.hashes = QList<quint64>{ImageHasher::phash(image)};
-                    QFileInfo info(path);
-                    entry.dimensions = size;
+                QFileInfo info(path);
+                qint64 mtime = info.lastModified().toSecsSinceEpoch();
+                quint64 cachedHash = 0;
+                QSize cachedDims;
+                // variant hashing needs the decoded image, so only the
+                // plain-hash path (all targets, most sources) hits the cache
+                if(!variants && mCache->lookup(path, mtime, info.size(), cachedHash, cachedDims)) {
+                    entry.hashes = QList<quint64>{cachedHash};
+                    entry.dimensions = cachedDims;
                     entry.fileSize = info.size();
                     entry.canonicalPath = info.canonicalFilePath();
-                    entry.valid = !entry.hashes.isEmpty();
+                    entry.valid = true;
+                } else {
+                    QImageReader reader(path);
+                    reader.setAutoTransform(true);
+                    QSize size = reader.size();
+                    if(size.isValid() && (size.width() > DECODE_SIZE || size.height() > DECODE_SIZE))
+                        reader.setScaledSize(QSize(DECODE_SIZE, DECODE_SIZE));
+                    QImage image = reader.read();
+                    if(!image.isNull()) {
+                        if(!size.isValid())
+                            size = image.size();
+                        if(variants)
+                            entry.hashes = ImageHasher::phashVariants(image, request.matchRotated,
+                                                                      request.matchMirrored);
+                        else
+                            entry.hashes = QList<quint64>{ImageHasher::phash(image)};
+                        entry.dimensions = size;
+                        entry.fileSize = info.size();
+                        entry.canonicalPath = info.canonicalFilePath();
+                        entry.valid = !entry.hashes.isEmpty();
+                        if(!variants && entry.valid)
+                            mCache->insert(path, mtime, info.size(), entry.hashes.first(), size);
+                    }
                 }
             }
             {

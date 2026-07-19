@@ -4,8 +4,10 @@
 #include <QObject>
 #include <QThreadPool>
 #include <atomic>
+#include <memory>
 #include <thread>
 #include "duplicatematch.h"
+#include "hashcache.h"
 
 // Duplicate search engine (docs/003 §2). Runs the whole search on a
 // coordinator thread with a private QThreadPool for hashing; all signals
@@ -51,4 +53,6 @@ private:
     std::atomic<bool> mCancel{false};
     std::atomic<bool> mRunning{false};
     std::atomic<int> mMatchCount{0};
+    std::unique_ptr<HashCache> mCache;
+    bool mCacheLoaded = false;
 };

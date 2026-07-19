@@ -6,6 +6,7 @@
 #include <QTemporaryDir>
 #include <QThread>
 #include "components/duplicatefinder/duplicatefinder.h"
+#include "components/duplicatefinder/hashcache.h"
 #include "settings.h"
 
 static QImage makeScene(int id, int w = 512, int h = 384) {
@@ -45,6 +46,8 @@ private slots:
     void compareFoldersFindsSourceCopiesInTargets();
     void withinFoldersFindsInternalDuplicates();
     void threadSettingsShareCoreBudget();
+    void hashCachePersistsAndInvalidatesByMtime();
+    void cachedRerunFindsTheSameMatches();
 };
 
 QList<DuplicateMatch> DuplicateFinderEngineTest::runSearch(const DuplicateSearchRequest &request,
@@ -167,6 +170,40 @@ void DuplicateFinderEngineTest::threadSettingsShareCoreBudget() {
     // back to defaults for any later tests
     settings->setDuplicateSearchThreadCount(2);
     settings->setThumbnailerThreadCount(2);
+}
+
+void DuplicateFinderEngineTest::hashCachePersistsAndInvalidatesByMtime() {
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    QString cacheFile = dir.filePath("cache.dat");
+    {
+        HashCache cache(cacheFile);
+        cache.insert("/x/a.png", 1000, 5000, 0xDEADBEEFULL, QSize(800, 600));
+        cache.save();
+    }
+    HashCache cache(cacheFile);
+    cache.load();
+    QCOMPARE(cache.count(), 1);
+    quint64 hash = 0;
+    QSize dims;
+    QVERIFY(cache.lookup("/x/a.png", 1000, 5000, hash, dims));
+    QCOMPARE(hash, 0xDEADBEEFULL);
+    QCOMPARE(dims, QSize(800, 600));
+    // stale entries (changed mtime or size) must miss
+    QVERIFY(!cache.lookup("/x/a.png", 1001, 5000, hash, dims));
+    QVERIFY(!cache.lookup("/x/a.png", 1000, 5001, hash, dims));
+    QVERIFY(!cache.lookup("/x/other.png", 1000, 5000, hash, dims));
+}
+
+void DuplicateFinderEngineTest::cachedRerunFindsTheSameMatches() {
+    DuplicateSearchRequest req;
+    req.mode = DuplicateSearchRequest::SINGLE_IMAGE;
+    req.sourceImage = tmp.filePath("src/A.png");
+    req.targetFolders = QStringList{tgtDir};
+    QCOMPARE(runSearch(req).count(), 3);
+    // second run resolves hashes from the persistent cache; results identical
+    QVERIFY(QFile::exists(settings->tmpDir() + "duplicatehashes.dat"));
+    QCOMPARE(runSearch(req).count(), 3);
 }
 
 TG_BEHAVIOR_TEST_MAIN(DuplicateFinderEngineTest)
