@@ -170,6 +170,8 @@ public:
     QString tmpDir();
     int thumbnailerThreadCount();
     void setThumbnailerThreadCount(int count);
+    int duplicateSearchThreadCount();
+    void setDuplicateSearchThreadCount(int count);
     bool smoothUpscaling();
     void setSmoothUpscaling(bool mode);
     void setExpandImage(bool mode);

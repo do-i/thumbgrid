@@ -111,6 +111,7 @@ QString settingGroupFor(const QString &key) {
         {"confirmDelete", "Advanced"}, {"confirmTrash", "Advanced"}, {"showSaveOverlay", "Advanced"},
         {"jxlAnimation", "Advanced"}, {"mpvBinary", "Advanced"}, {"JPEGSaveQuality", "Advanced"},
         {"thumbnailerThreads", "Advanced"}, {"thumbnailerMemCacheLimit", "Advanced"},
+        {"duplicateSearchThreads", "Advanced"},
         {"memoryAllocationLimit", "Advanced"}, {"cacheDir", "Advanced"},
         // Shortcuts (preset pointer + dirty flag; the mapping lives in shortcuts.json)
         {"preset", "Shortcuts"}, {"modified", "Shortcuts"},
@@ -1536,15 +1537,37 @@ int Settings::slideshowInterval() {
     return interval;
 }
 //------------------------------------------------------------------------------
+// The thumbnailer and duplicate-search pools share one budget of
+// idealThreadCount() cores (docs/003 §2.4): each setting's ceiling is the
+// budget minus the other's allocation. Enforced here, not only in the UI,
+// so config-file values can't oversubscribe. The thumbnailer wins ties and
+// only has to leave one core for the finder; minimum is always 1 each.
+static int totalCoreBudget() {
+    return qMax(1, QThread::idealThreadCount());
+}
+
+static int defaultThreadsPerPool() {
+    return qMax(1, qMin(2, totalCoreBudget() / 2));
+}
+
 int Settings::thumbnailerThreadCount() {
-    int count = settings->readSetting("thumbnailerThreads", 4).toInt();
-    if(count < 1)
-        count = 4;
-    return count;
+    int count = settings->readSetting("thumbnailerThreads", defaultThreadsPerPool()).toInt();
+    return qBound(1, count, qMax(1, totalCoreBudget() - 1));
 }
 
 void Settings::setThumbnailerThreadCount(int count) {
-    settings->writeSetting("thumbnailerThreads", count);
+    int maxAllowed = qMax(1, totalCoreBudget() - duplicateSearchThreadCount());
+    settings->writeSetting("thumbnailerThreads", qBound(1, count, maxAllowed));
+}
+
+int Settings::duplicateSearchThreadCount() {
+    int count = settings->readSetting("duplicateSearchThreads", defaultThreadsPerPool()).toInt();
+    return qBound(1, count, qMax(1, totalCoreBudget() - thumbnailerThreadCount()));
+}
+
+void Settings::setDuplicateSearchThreadCount(int count) {
+    int maxAllowed = qMax(1, totalCoreBudget() - thumbnailerThreadCount());
+    settings->writeSetting("duplicateSearchThreads", qBound(1, count, maxAllowed));
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothUpscaling() {
