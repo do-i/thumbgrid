@@ -102,9 +102,9 @@ jobs:
 
           mkdir -p "$work/arch/x86_64"
           cp packaging/arch/*.pkg.tar.zst "$work/arch/x86_64/"
-          # repo-add merges with whatever is already in thumbgrid.db.tar.zst,
-          # so previously published packages are kept, not deleted.
-          (cd "$work/arch/x86_64" && repo-add thumbgrid.db.tar.zst *.pkg.tar.zst)
+          # Keep old package files available, but never let their filename order
+          # replace the newest database entry (for example, .7.9 sorts after .7.10).
+          (cd "$work/arch/x86_64" && repo-add --prevent-downgrade thumbgrid.db.tar.zst *.pkg.tar.zst)
 
           cd "$work"
           git add -A
