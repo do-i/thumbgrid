@@ -7,6 +7,21 @@ Image viewer. Fast, easy to use. Optional video support.
 > under the GNU GPL v3. The original copyright and attribution are retained — see
 > [`NOTICE`](NOTICE) and [`LICENSE`](LICENSE).
 
+## Development process
+
+thumbgrid is maintained with extensive use of coding agents. Most fork-specific
+code, tests, documentation, and maintenance changes have been drafted or
+implemented by agents under maintainer direction.
+
+The maintainer sets project priorities, evaluates user-facing behavior, and
+runs available builds and tests, but does not claim C++ expertise. Agent-produced
+changes should therefore be treated as AI-assisted work and are accepted based
+on available validation rather than asserted manual code review.
+
+Agents are development tools, not project authors or copyright holders.
+Upstream qimgv attribution and copyright notices remain intact; see `NOTICE`
+and `LICENSE`.
+
 **Versioning:** thumbgrid uses calendar versioning (`YYYY.M.N`), independent of
 upstream. The **git tag is the single source of truth**: CMake derives the
 version from the latest `vYYYY.M.N` tag (`src/appversion.cpp` is generated from
