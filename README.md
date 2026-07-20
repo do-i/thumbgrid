@@ -172,9 +172,11 @@ thumbgrid can open some extra formats via third-party image plugins.
 
 # Installation
 
-This fork does not yet ship to the upstream distribution channels (AUR
-`qimgv-git`, apt/dnf/zypper/pkg, Chocolatey, WinGet). Build from source, or grab
-a CI-built package from the fork's releases.
+On Arch Linux, install from the fork's own pacman repo or from the AUR
+(`thumbgrid-bin`) — see [Arch Linux package](#arch-linux-package) below. This
+fork does not ship to the upstream distribution channels it inherited from
+qimgv (AUR `qimgv-git`, apt/dnf/zypper/pkg, Chocolatey, WinGet); elsewhere,
+build from source or grab a CI-built package from the fork's releases.
 
 ## Build from source (GNU+Linux)
 
@@ -236,6 +238,18 @@ Arch-side ABI change with no thumbgrid code change.
 
 `SigLevel = Optional TrustAll` means packages are unsigned; treat this as a
 personal/low-stakes distribution method until package signing is added.
+
+**AUR:** [`thumbgrid-bin`](https://aur.archlinux.org/packages/thumbgrid-bin)
+repackages the same prebuilt release binary, for those who prefer an AUR
+helper:
+
+```
+paru -S thumbgrid-bin   # or: yay -S thumbgrid-bin
+```
+
+The AUR package is updated manually and only for versions promoted as stable,
+so it can lag the pacman repo above — which is the path that tracks every
+release and ABI rebuild.
 
 **Manual fallback:** download `*.pkg.tar.zst` from a
 [GitHub Release](https://github.com/do-i/thumbgrid/releases) and install with

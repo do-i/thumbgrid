@@ -9,9 +9,12 @@ Status update (2026-07-19): the registration blocker below is resolved —
 `thumbgrid-bin` is published on AUR and maintained via
 `scripts/publish-aur.sh` (its header notes pushes "confirmed in practice",
 and `packaging/arch-bin/PKGBUILD` records the last published version), so
-an AUR account evidently exists. A1–A4 are marked done accordingly; only
-A5's README edit remains open. Workflow-hardening follow-ups live in
-`docs/006-aur-release-workflow-fixes-action-plan.md`.
+an AUR account evidently exists. A1–A4 are marked done accordingly.
+
+Status update (2026-07-20): A5 is done — README corrected and the AUR
+publishing workflow documented in `CONTRIBUTING.md#releasing`. All items in
+this plan are now complete; it can be deleted once the workflow-hardening
+follow-ups in `docs/006-aur-release-workflow-fixes-action-plan.md` land.
 
 Original blocker (checked 2026-07-19, since resolved): AUR disabled new
 account registration on 2026-06-15 during cleanup of a large
@@ -105,9 +108,12 @@ judgment once A3 is validated.
 *Model:* **Haiku 4.5** for the README edit (mechanical) · manual process
 (no AI model) for the ongoing per-release maintenance loop itself.
 
-- [ ] A5 open — README still says the fork "does not yet ship to ... AUR"
-  (`README.md` Installation intro) and has no AUR install snippet; the
-  maintenance loop half is covered by `scripts/publish-aur.sh`
+- [x] A5 done (2026-07-20) — corrected the Installation intro (it claimed the
+  fork "does not yet ship to ... AUR") and added a `thumbgrid-bin` install
+  snippet to README's "Arch Linux package" section, noting it can lag the
+  pacman repo. The maintenance loop is covered by `scripts/publish-aur.sh`,
+  now documented under "Publishing to AUR" in `CONTRIBUTING.md#releasing`
+  along with the tag-push fan-out, ABI-only rebuilds, and packaging checks
 
 ---
 

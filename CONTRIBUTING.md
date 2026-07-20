@@ -131,6 +131,79 @@ A few notes:
 - To shape the auto-generated notes (categorise by label, exclude bots, …), add
   a [`.github/release.yml`](https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes).
 
+### What a tag push builds
+
+Pushing `v*` fans out to two workflows, both attaching their artifact to the
+same GitHub Release:
+
+- [`arch-package.yml`](.github/workflows/arch-package.yml) — builds the
+  full-featured Arch package (Exiv2 / OpenCV / mpv) and, beyond uploading the
+  `.pkg.tar.zst`, publishes the **pacman repo** on the `gh-pages` branch
+  (`arch/x86_64/`, via `repo-add --prevent-downgrade`). That repo is what
+  users' `pacman -Syu` reads, so this step — not AUR — is what ships an update
+  to existing installs.
+- [`mac-package.yml`](.github/workflows/mac-package.yml) — builds the macOS
+  app bundle and packages it as a DMG.
+
+### ABI-only rebuilds
+
+When Arch updates Qt, mpv, Exiv2, or OpenCV, the shipped package can break
+against the new libraries with no thumbgrid code change. Republish the latest
+tag instead of cutting a version: run `arch-package.yml` via
+**`workflow_dispatch`** with `pkgrel` bumped (2, 3, …). It rebuilds the
+existing tag — pinning the worktree to it, so a moved `develop` can't leak
+newer code under an old version — attaches the new package to that tag's
+existing release alongside the old one, and refreshes the pacman repo.
+
+### Publishing to AUR
+
+The AUR package (`thumbgrid-bin`) is **deliberately not** updated by CI.
+Releases reach GitHub and the pacman repo far more often, including for
+testing, than they should reach AUR; promotion is a manual "I trust this
+version now" step:
+
+```
+./scripts/publish-aur.sh --dry-run     # latest tag, stop before any commit/push
+./scripts/publish-aur.sh 2026.7.12     # publish a specific version
+```
+
+It is also item `a` in `./run.sh`'s menu. What it does:
+
+1. Looks up the release on GitHub, prompting for confirmation if it is marked
+   draft or prerelease.
+2. Clones `thumbgrid-bin` from AUR anonymously over HTTPS and reads the
+   currently published `pkgver`/`pkgrel`. **`pkgrel` is always derived from
+   what is live on AUR, never from this repo's working tree** — the two drift
+   (publishing from another machine, an abandoned `--dry-run` edit, a lost
+   commit), and AUR is the only authority on what was actually shipped.
+3. Picks the **highest** `_srcrel` x86_64 asset on the release — an ABI-only
+   rebuild leaves several, and GitHub lists assets in upload order, not
+   version order — and hashes it.
+4. Rewrites [`packaging/arch-bin/PKGBUILD`](packaging/arch-bin/) and
+   regenerates `.SRCINFO`, then commits that **locally only**. Review and
+   push it yourself with your normal git workflow; the script never pushes to
+   this repo.
+5. Pushes the same two files to AUR over SSH. `aur.archlinux.org` resets
+   git/SSH connections intermittently under normal load, so the push retries
+   up to 10 times — in practice it has taken ~8 attempts. Repeated failures
+   are normal; only exhausting the retries is a real error.
+
+`--dry-run` runs everything through `.SRCINFO` regeneration (including the
+anonymous clone) and diffs against both this repo's last commit and the live
+AUR package, then stops. Use it before every publish.
+
+Note that a tag with a dash (`v2026.7.12-rc1`) normalises to a different
+pacman version (`2026.7.12_rc1`) — dashes are not legal in pacman versions.
+The script tracks both forms; pass it the git tag.
+
+### Packaging consistency
+
+[`scripts/check-packaging.sh`](scripts/check-packaging.sh), run in CI by
+[`packaging-checks.yml`](.github/workflows/packaging-checks.yml), catches
+`depends` drift between `packaging/arch/PKGBUILD` and
+`packaging/arch-bin/PKGBUILD`, and a `packaging/arch-bin/.SRCINFO` left stale
+against its PKGBUILD. Run it locally after touching either PKGBUILD.
+
 ## Attribution
 
 Please retain credit to easymodo and the qimgv contributors in any
