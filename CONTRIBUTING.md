@@ -179,18 +179,18 @@ It is also item `a` in `./run.sh`'s menu. What it does:
 3. Picks the **highest** `_srcrel` x86_64 asset on the release — an ABI-only
    rebuild leaves several, and GitHub lists assets in upload order, not
    version order — and hashes it.
-4. Rewrites [`packaging/arch-bin/PKGBUILD`](packaging/arch-bin/) and
-   regenerates `.SRCINFO`, then commits that **locally only**. Review and
-   push it yourself with your normal git workflow; the script never pushes to
-   this repo.
-5. Pushes the same two files to AUR over SSH. `aur.archlinux.org` resets
+4. Renders the version-neutral
+   [`packaging/arch-bin/PKGBUILD.template`](packaging/arch-bin/PKGBUILD.template)
+   directly into the temporary AUR clone and generates `.SRCINFO` there. The
+   thumbgrid worktree is never modified and contains no stale release version.
+5. Shows the exact staged AUR diff, then commits and pushes those two concrete
+   files to AUR over SSH. `aur.archlinux.org` resets
    git/SSH connections intermittently under normal load, so the push retries
    up to 10 times — in practice it has taken ~8 attempts. Repeated failures
    are normal; only exhausting the retries is a real error.
 
-`--dry-run` runs everything through `.SRCINFO` regeneration (including the
-anonymous clone) and diffs against both this repo's last commit and the live
-AUR package, then stops. Use it before every publish.
+`--dry-run` runs everything through `.SRCINFO` regeneration and shows the exact
+diff against the live AUR package, then stops. Use it before every publish.
 
 Note that a tag with a dash (`v2026.7.12-rc1`) normalises to a different
 pacman version (`2026.7.12_rc1`) — dashes are not legal in pacman versions.
@@ -200,9 +200,10 @@ The script tracks both forms; pass it the git tag.
 
 [`scripts/check-packaging.sh`](scripts/check-packaging.sh), run in CI by
 [`packaging-checks.yml`](.github/workflows/packaging-checks.yml), catches
-`depends` drift between `packaging/arch/PKGBUILD` and
-`packaging/arch-bin/PKGBUILD`, and a `packaging/arch-bin/.SRCINFO` left stale
-against its PKGBUILD. Run it locally after touching either PKGBUILD.
+`depends` drift between `packaging/arch/PKGBUILD` and the rendered
+`packaging/arch-bin/PKGBUILD.template`, and verifies that the template renders
+valid package metadata without stale release values. Run it locally after
+touching either packaging recipe.
 
 ## Attribution
 

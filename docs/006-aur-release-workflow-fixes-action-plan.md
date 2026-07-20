@@ -160,7 +160,7 @@ enough foot-guns to be above mechanical.
 
 ### B9. Include `_srcrel` in the local source filename
 
-`packaging/arch-bin/PKGBUILD:35` renames the download to
+The concrete AUR `PKGBUILD` previously renamed the download to
 `thumbgrid-$pkgver-x86_64.pkg.tar.zst`, so two srcrels of the same pkgver
 collide in makepkg's download cache and produce a checksum mismatch until
 the cached file is deleted.
@@ -174,11 +174,10 @@ Fix: include `$_srcrel` in the local (left-of-`::`) filename.
 
 ### B10. CI guard against depends drift and stale .SRCINFO
 
-No check keeps `packaging/arch/PKGBUILD` and
-`packaging/arch-bin/PKGBUILD` `depends=` arrays in sync (a risk
-`docs/005-aur-package-action-plan.md` A3 already flags), nor that
-`.SRCINFO` matches its PKGBUILD — manual edits (like the maintainer-email
-fix, cee8783d) are exactly how drift sneaks in.
+No check keeps `packaging/arch/PKGBUILD` and the rendered
+`packaging/arch-bin/PKGBUILD.template` `depends=` arrays in sync (a risk
+`docs/005-aur-package-action-plan.md` A3 already flags), nor verifies that
+the template renders valid `.SRCINFO` metadata.
 
 Fix: small CI job (or step in an existing workflow) that diffs the two
 depends arrays and asserts `makepkg --printsrcinfo` output equals the

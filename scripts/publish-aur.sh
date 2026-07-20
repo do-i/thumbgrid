@@ -20,11 +20,10 @@
 #      machine, a --dry-run edit, a lost commit).
 #   3. Picks the newest matching x86_64 asset (name + sha256) on that
 #      release - a release can carry more than one srcrel.
-#   4. Updates packaging/arch-bin/PKGBUILD + regenerates .SRCINFO.
-#   5. Commits that change locally in this repo (not pushed - review/push it
-#      yourself with your normal git workflow).
-#   6. Copies the two files into the AUR clone, commits, switches that
-#      clone's remote to SSH, and pushes - retrying, since aur.archlinux.org's
+#   4. Renders packaging/arch-bin/PKGBUILD.template into the AUR clone and
+#      regenerates .SRCINFO there. This repo's worktree is never modified.
+#   5. Shows the exact AUR diff, commits it, switches that clone's remote to
+#      SSH, and pushes - retrying, since aur.archlinux.org's
 #      git/SSH service is known to reset connections intermittently
 #      (confirmed: has taken up to ~8 attempts in practice).
 #
@@ -38,7 +37,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PKG_DIR="$ROOT_DIR/packaging/arch-bin"
+PKG_TEMPLATE="$ROOT_DIR/packaging/arch-bin/PKGBUILD.template"
 REPO="do-i/thumbgrid"
 # Clone anonymously (no auth needed, works in --dry-run without an SSH key);
 # only the final push switches to the SSH remote.
@@ -240,48 +239,30 @@ curl_fetch "Asset download" "$ASSET_URL" "$ASSET_FILE" 60 || exit 1
 SHA256="$(sha256sum "$ASSET_FILE" | cut -d' ' -f1)"
 printf 'sha256: %s\n' "$SHA256"
 
+cp "$PKG_TEMPLATE" "$WORK_DIR/thumbgrid-bin/PKGBUILD"
 sed -i \
-    -e "s/^pkgver=.*/pkgver=$PKGVER/" \
-    -e "s/^pkgrel=.*/pkgrel=$NEW_PKGREL/" \
-    -e "s/^_srcrel=.*/_srcrel=$SRCREL/" \
-    -e "s/^sha256sums=.*/sha256sums=('$SHA256')/" \
-    "$PKG_DIR/PKGBUILD"
+    -e "s/@PKGVER@/$PKGVER/g" \
+    -e "s/@PKGREL@/$NEW_PKGREL/g" \
+    -e "s/@SRCREL@/$SRCREL/g" \
+    -e "s/@SHA256@/$SHA256/g" \
+    "$WORK_DIR/thumbgrid-bin/PKGBUILD"
 
-(cd "$PKG_DIR" && makepkg --printsrcinfo > .SRCINFO)
+(cd "$WORK_DIR/thumbgrid-bin" && makepkg --printsrcinfo > .SRCINFO)
 
-printf "\n--- packaging/arch-bin/PKGBUILD diff (against this repo's last commit) ---\n"
-git -C "$ROOT_DIR" --no-pager diff -- packaging/arch-bin/ || true
+pushd "$WORK_DIR/thumbgrid-bin" >/dev/null
+# Stage in the temporary clone so the same review output also works for a
+# brand-new AUR package whose PKGBUILD and .SRCINFO are not tracked yet.
+git add PKGBUILD .SRCINFO
+printf '\n--- PKGBUILD/.SRCINFO diff (against the current AUR package) ---\n'
+git --no-pager diff --cached -- PKGBUILD .SRCINFO || true
 printf -- '---\n\n'
 
 if (( DRY_RUN )); then
-    printf '\n--- PKGBUILD/.SRCINFO diff (against the current AUR package) ---\n'
-    if [[ -f "$WORK_DIR/thumbgrid-bin/PKGBUILD" ]]; then
-        diff -u "$WORK_DIR/thumbgrid-bin/PKGBUILD" "$PKG_DIR/PKGBUILD" || true
-        diff -u "$WORK_DIR/thumbgrid-bin/.SRCINFO" "$PKG_DIR/.SRCINFO" || true
-    else
-        printf '(no PKGBUILD on AUR yet - this would be a new package)\n'
-    fi
-    printf -- '---\n\n'
     printf 'Dry run: stopping before commit/push.\n'
+    popd >/dev/null
     exit 0
 fi
 
-if ! git -C "$ROOT_DIR" diff --quiet -- packaging/arch-bin/; then
-    git -C "$ROOT_DIR" add packaging/arch-bin/PKGBUILD packaging/arch-bin/.SRCINFO
-    # Pathspec-scoped so this only ever commits packaging/arch-bin/, even if
-    # the user has unrelated changes staged elsewhere in the index.
-    git -C "$ROOT_DIR" commit -q -m "Publish thumbgrid-bin $PKGVER-$NEW_PKGREL to AUR" -- packaging/arch-bin/
-    printf 'Committed locally in %s. Push it yourself when ready.\n' "$ROOT_DIR"
-else
-    printf 'PKGBUILD already up to date; nothing to commit.\n'
-fi
-
-cp "$PKG_DIR/PKGBUILD" "$PKG_DIR/.SRCINFO" "$WORK_DIR/thumbgrid-bin/"
-
-pushd "$WORK_DIR/thumbgrid-bin" >/dev/null
-# --cached (not plain diff) so this also sees copied-but-untracked files
-# correctly on a from-scratch clone, not just changes to already-tracked ones.
-git add PKGBUILD .SRCINFO
 if git diff --cached --quiet; then
     printf 'thumbgrid-bin on AUR is already at %s-%s; nothing to push.\n' "$PKGVER" "$NEW_PKGREL"
     popd >/dev/null

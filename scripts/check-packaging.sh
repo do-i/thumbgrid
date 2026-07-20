@@ -5,18 +5,15 @@
 #
 # Guard against two Arch packaging drift risks that nothing else checks:
 #
-#   1. depends=() drift between packaging/arch/PKGBUILD and
-#      packaging/arch-bin/PKGBUILD. thumbgrid-bin repackages the exact
-#      binary built by thumbgrid (see packaging/arch-bin/PKGBUILD's header),
+#   1. depends=() drift between packaging/arch/PKGBUILD and the rendered
+#      packaging/arch-bin/PKGBUILD.template. thumbgrid-bin repackages the exact
+#      binary built by thumbgrid,
 #      so their runtime dependencies must stay identical - nothing here
 #      rebuilds against different library versions, so any divergence is a
 #      bug, not an intentional choice.
 #
-#   2. A stale packaging/arch-bin/.SRCINFO. That file is what AUR actually
-#      consumes, generated from PKGBUILD via `makepkg --printsrcinfo`.
-#      scripts/publish-aur.sh regenerates it automatically, but a manual
-#      PKGBUILD edit can easily forget to, silently shipping stale metadata
-#      to AUR.
+#   2. An invalid template or an unreplaced release placeholder. The concrete
+#      PKGBUILD and .SRCINFO exist only in the AUR clone during publication.
 #
 # Deliberately does NOT source either PKGBUILD directly:
 # packaging/arch/PKGBUILD runs `cd "$startdir/../.."` at parse time and
@@ -43,6 +40,19 @@ done
 
 fail=0
 
+# Render deterministic dummy release metadata exactly as publish-aur.sh does.
+# This makes the version-neutral template parseable by makepkg without putting
+# a stale real release version or checksum in the source tree.
+RENDER_DIR="$(mktemp -d)"
+trap 'rm -rf "$RENDER_DIR"' EXIT
+cp "$ARCH_BIN_DIR/PKGBUILD.template" "$RENDER_DIR/PKGBUILD"
+sed -i \
+    -e 's/@PKGVER@/0.0.0/g' \
+    -e 's/@PKGREL@/1/g' \
+    -e 's/@SRCREL@/1/g' \
+    -e 's/@SHA256@/0000000000000000000000000000000000000000000000000000000000000000/g' \
+    "$RENDER_DIR/PKGBUILD"
+
 # --- Check 1: depends=() drift between the two PKGBUILDs -------------------
 #
 # packaging/arch/PKGBUILD's pkgver() falls back to `git describe` when
@@ -51,7 +61,7 @@ fail=0
 # tree's tags (e.g. a shallow CI checkout) instead of relying on the
 # fallback behaving the same way everywhere.
 arch_srcinfo="$(cd "$ARCH_DIR" && THUMBGRID_PKGVER=0 makepkg --printsrcinfo)"
-arch_bin_srcinfo="$(cd "$ARCH_BIN_DIR" && makepkg --printsrcinfo)"
+arch_bin_srcinfo="$(cd "$RENDER_DIR" && makepkg --printsrcinfo)"
 
 # Normalized to just the `depends = ...` lines, in file order, so the
 # comparison ignores everything else .SRCINFO carries (pkgver, source,
@@ -70,16 +80,12 @@ else
     printf 'OK: depends=() matches between packaging/arch and packaging/arch-bin.\n'
 fi
 
-# --- Check 2: stale packaging/arch-bin/.SRCINFO -----------------------------
-if diff_output="$(diff -u "$ARCH_BIN_DIR/.SRCINFO" <(printf '%s\n' "$arch_bin_srcinfo"))"; then
-    printf 'OK: packaging/arch-bin/.SRCINFO matches `makepkg --printsrcinfo`.\n'
-else
-    printf 'packaging/arch-bin/.SRCINFO is stale: it does not match what\n' >&2
-    printf '`makepkg --printsrcinfo` generates from packaging/arch-bin/PKGBUILD.\n' >&2
-    printf 'Regenerate it:\n' >&2
-    printf '  (cd packaging/arch-bin && makepkg --printsrcinfo > .SRCINFO)\n\n' >&2
-    printf '%s\n' "$diff_output" >&2
+# --- Check 2: template rendered cleanly ------------------------------------
+if grep -q '@[A-Z][A-Z0-9_]*@' "$RENDER_DIR/PKGBUILD"; then
+    printf 'packaging/arch-bin/PKGBUILD.template has an unreplaced placeholder.\n' >&2
     fail=1
+else
+    printf 'OK: PKGBUILD.template renders valid release metadata.\n'
 fi
 
 if (( fail )); then

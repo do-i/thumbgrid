@@ -1,12 +1,10 @@
 name: Packaging checks
 
 # Guard against Arch packaging metadata drift that nothing else catches:
-#   - packaging/arch/PKGBUILD and packaging/arch-bin/PKGBUILD must declare
-#     the same runtime depends=() (thumbgrid-bin repackages the exact binary
-#     built by thumbgrid, so their dependencies must match).
-#   - packaging/arch-bin/.SRCINFO must exactly match what
-#     `makepkg --printsrcinfo` generates from its PKGBUILD (that's what AUR
-#     consumes, and manual PKGBUILD edits are how it goes stale).
+#   - packaging/arch/PKGBUILD and the rendered arch-bin PKGBUILD template must
+#     declare the same runtime depends=().
+#   - packaging/arch-bin/PKGBUILD.template must render into valid metadata
+#     without leaving release placeholders behind.
 #
 # See scripts/check-packaging.sh, which does the actual checking and can
 # also be run locally; this workflow is a thin caller.
