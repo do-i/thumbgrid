@@ -240,10 +240,14 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
     if(!model || paths.isEmpty())
         return;
 
-    // normalize the target extension
-    QString ext = format.toLower();
-    if(ext == "jpeg")
-        ext = "jpg";
+    // normalize alternate spellings so "jpeg" and "jpg" (or "tiff"/"tif")
+    // count as the same format for both the target and the skip check below
+    auto normalizeExt = [](const QString &e) {
+        if(e == "jpeg") return QStringLiteral("jpg");
+        if(e == "tiff") return QStringLiteral("tif");
+        return e;
+    };
+    QString ext = normalizeExt(format.toLower());
 
     struct ConvertJob {
         QString src;
@@ -273,9 +277,9 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
 
     for(const QString &path : expandedPaths) {
         QFileInfo fi(path);
-        QString srcExt = fi.suffix().toLower();
+        QString srcExt = normalizeExt(fi.suffix().toLower());
         // already in the target format
-        if(srcExt == ext || (ext == "jpg" && srcExt == "jpeg")) {
+        if(srcExt == ext) {
             skipped++;
             continue;
         }

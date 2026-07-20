@@ -2,6 +2,7 @@
 
 #include <QScreen>
 #include <QPainter>
+#include <QImageWriter>
 #include <QStyleOption>
 #include <QMouseEvent>
 #include <QKeyEvent>
@@ -99,6 +100,19 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     addConvertFormat(convertLayout, "JPEG", "jpg");
     addConvertFormat(convertLayout, "PNG",  "png");
     addConvertFormat(convertLayout, "WebP", "webp");
+    addConvertFormat(convertLayout, "TIFF", "tif");
+    addConvertFormat(convertLayout, "BMP",  "bmp");
+    addConvertFormat(convertLayout, "ICO",  "ico");
+    addConvertFormat(convertLayout, "JPEG 2000", "jp2");
+    addSeparator(convertPage, convertLayout);
+    addConvertFormat(convertLayout, "ICNS", "icns");
+    addConvertFormat(convertLayout, "PPM",  "ppm");
+    addConvertFormat(convertLayout, "PGM",  "pgm");
+    addConvertFormat(convertLayout, "PBM",  "pbm");
+    addConvertFormat(convertLayout, "XBM",  "xbm");
+    addConvertFormat(convertLayout, "XPM",  "xpm");
+    addConvertFormat(convertLayout, "WBMP", "wbmp");
+    addConvertFormat(convertLayout, "CUR",  "cur");
 
     // Safety net: if the page still ends up taller than its items (e.g. a
     // future item count change), the surplus goes below the items instead
@@ -120,6 +134,10 @@ ContextMenuItem *GridContextMenu::makeItem(const QString &text, const QString &i
 }
 
 void GridContextMenu::addConvertFormat(QVBoxLayout *layout, const QString &label, const QString &format) {
+    // Formats depend on which Qt imageformats plugins are installed, so gate
+    // each entry on actual encoder availability instead of trusting the list.
+    if(!QImageWriter::supportedImageFormats().contains(format.toUtf8()))
+        return;
     auto *item = makeItem(label, ":/res/icons/common/menuitem/convert16.png");
     connect(item, &ContextMenuItem::pressed, this, [this, format]() {
         emit convertFormatRequested(format);
