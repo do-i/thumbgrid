@@ -11,8 +11,9 @@ ActionManager *actionManager = nullptr;
 
 namespace {
 
-// Resolve the selected preset to a file path (system PRESETS_PATH dir, else the
-// embedded qrc copy), falling back to qimgv (always embedded) if the selected
+// Resolve the selected preset to a file path (XDG config dirs, then
+// PRESETS_PATH, else the embedded qrc copy), falling back to qimgv (always
+// embedded) if the selected
 // preset resolves nowhere — e.g. a config naming a preset not compiled into this
 // build. The active mapping in shortcuts.json is never touched by this.
 QString resolveSelectedPresetPath() {
@@ -95,8 +96,9 @@ ActionManager *ActionManager::getInstance() {
 }
 //------------------------------------------------------------------------------
 void ActionManager::initDefaults() {
-    // Defaults are loaded from the selected preset (system PRESETS_PATH dir or
-    // embedded qrc, resolved by ShortcutPresetStore). Shared bindings live in
+    // Defaults are loaded from the selected preset (XDG config dirs,
+    // PRESETS_PATH or embedded qrc, resolved by ShortcutPresetStore). Shared
+    // bindings live in
     // MODE_GLOBAL; document/grid entries are only context-specific differences.
     const QString path = resolveSelectedPresetPath();
     QFile file(path);

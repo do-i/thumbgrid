@@ -2,6 +2,7 @@
 
 target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     actions.cpp
+    apppaths.cpp
     cmdoptionsrunner.cpp
     imagefactory.cpp
     imagelib.cpp

@@ -1,5 +1,7 @@
 #include "shortcutpresetstore.h"
 
+#include "utils/apppaths.h"
+
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -12,12 +14,15 @@
 namespace {
 constexpr const char *kQrcDir = ":/res/presets";
 
-// Directories searched for presets, highest priority first. The system dir
-// (admin/packager-editable) overlays the embedded qrc copies by id.
+// Directories searched for presets, highest priority first: the XDG config
+// dirs (user's ~/.config/thumbgrid/presets first, then the system ones), the
+// compiled-in PRESETS_PATH, and finally the embedded qrc copies. Anything found
+// earlier overlays a later copy with the same id.
 QStringList presetDirs() {
-    QStringList dirs;
 #ifdef PRESETS_PATH
-    dirs << QStringLiteral(PRESETS_PATH);
+    QStringList dirs = AppPaths::configDirs(QStringLiteral("presets"), QStringLiteral(PRESETS_PATH));
+#else
+    QStringList dirs = AppPaths::configDirs(QStringLiteral("presets"));
 #endif
     dirs << QLatin1String(kQrcDir);
     return dirs;

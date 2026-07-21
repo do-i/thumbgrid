@@ -25,16 +25,17 @@ public:
     // "windows" | "macos" | "linux" (FreeBSD normalizes to "linux").
     static QString currentOsToken();
 
-    // Enumerate presets (system PRESETS_PATH dir overlaid on embedded qrc),
-    // sorted by _meta.order then id. When currentOsOnly, keep only presets whose
-    // _meta.os contains currentOsToken().
+    // Enumerate presets (XDG config dirs and PRESETS_PATH overlaid on embedded
+    // qrc), sorted by _meta.order then id. When currentOsOnly, keep only presets
+    // whose _meta.os contains currentOsToken().
     static QList<PresetInfo> available(bool currentOsOnly = true);
 
     // Metadata for one preset id (invalid PresetInfo if it resolves nowhere).
     static PresetInfo meta(const QString &id);
 
-    // Resolve a preset id to a file path: system PRESETS_PATH/<id>.json if
-    // present, else the embedded :/res/presets/<id>.json. Empty if neither.
+    // Resolve a preset id to a file path, searching <id>.json across the XDG
+    // config dirs (~/.config/thumbgrid/presets first), then PRESETS_PATH, then
+    // the embedded :/res/presets/<id>.json. Empty if it resolves nowhere.
     static QString resolvePath(const QString &id);
 
     // Parsed root object of a preset file (empty object if it resolves nowhere).

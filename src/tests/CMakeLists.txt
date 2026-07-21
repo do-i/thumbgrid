@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_preset_themes_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_xdg_search_path_test
+    behavior/test_xdg_search_path_overrides.cpp
+)
+add_test(
+    NAME "User themes and presets in the XDG config dirs override the packaged copies"
+    COMMAND thumbgrid_xdg_search_path_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_custom_theme_persistence_test
     behavior/test_custom_theme_persistence.cpp
 )

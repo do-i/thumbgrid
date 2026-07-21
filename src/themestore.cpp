@@ -1,5 +1,7 @@
 #include "themestore.h"
 
+#include "utils/apppaths.h"
+
 #include <QSettings>
 #include <QFile>
 #include <QTemporaryFile>
@@ -19,14 +21,18 @@ QString themeFileName(ColorSchemes name) {
     }
 }
 
-// Prefer the installed system config copy (admin-editable), fall back to the
-// copy embedded in the binary via resources.qrc so dev/non-Linux builds work.
+// Search the XDG config dirs (user's ~/.config/thumbgrid/themes first, then the
+// system ones), then the compiled-in THEMES_PATH, and fall back to the copy
+// embedded in the binary via resources.qrc so dev/non-XDG builds still work.
 QString resolveThemePath(const QString &fileName) {
 #ifdef THEMES_PATH
-    const QString systemPath = QStringLiteral(THEMES_PATH) + "/" + fileName;
-    if(QFile::exists(systemPath))
-        return systemPath;
+    const QStringList dirs = AppPaths::configDirs(QStringLiteral("themes"), QStringLiteral(THEMES_PATH));
+#else
+    const QStringList dirs = AppPaths::configDirs(QStringLiteral("themes"));
 #endif
+    const QString found = AppPaths::findFirst(dirs, fileName);
+    if(!found.isEmpty())
+        return found;
     return QStringLiteral(":/res/themes/") + fileName;
 }
 

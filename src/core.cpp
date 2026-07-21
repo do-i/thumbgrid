@@ -10,6 +10,7 @@
 #include "platform/platformdesktop.h"
 #include "utils/safesave.h"
 #include "utils/logging.h"
+#include "utils/apppaths.h"
 #include "gui/dialogs/custommessagebox.h"
 
 #include <QFileDialog>
@@ -242,12 +243,6 @@ void Core::initActions() {
 void Core::loadTranslation() {
     if(!translator)
         translator = new QTranslator;
-    QString trPathFallback = QCoreApplication::applicationDirPath() + "/translations";
-#ifdef TRANSLATIONS_PATH
-    QString trPath = QString(TRANSLATIONS_PATH);
-#else
-    QString trPath = trPathFallback;
-#endif
     QString localeName = settings->language();
     if(localeName == "system")
         localeName = QLocale::system().name();
@@ -255,16 +250,22 @@ void Core::loadTranslation() {
         QApplication::removeTranslator(translator);
         return;
     }
-    QString trFile = trPath + "/" + localeName;
-    QString trFileFallback = trPathFallback + "/" + localeName;
-    if(!translator->load(trFile)) {
-        qCWarning(logCore) << "Could not load translation file: " << trFile;
-        if(!translator->load(trFileFallback)) {
-            qCWarning(logCore) << "Could not load translation file: " << trFileFallback;
+    // XDG data dirs (~/.local/share/thumbgrid/translations first, then the
+    // system ones), then the compiled-in TRANSLATIONS_PATH, then the build-tree
+    // copy next to the binary so an uninstalled run still finds its .qm files.
+#ifdef TRANSLATIONS_PATH
+    QStringList trDirs = AppPaths::dataDirs(QStringLiteral("translations"), QStringLiteral(TRANSLATIONS_PATH));
+#else
+    QStringList trDirs = AppPaths::dataDirs(QStringLiteral("translations"));
+#endif
+    trDirs << QCoreApplication::applicationDirPath() + QStringLiteral("/translations");
+    for(const QString &dir : std::as_const(trDirs)) {
+        if(translator->load(dir + QLatin1Char('/') + localeName)) {
+            QApplication::installTranslator(translator);
             return;
         }
     }
-    QApplication::installTranslator(translator);
+    qCWarning(logCore) << "Could not load translation" << localeName << "from any of" << trDirs;
 }
 
 void Core::onUpdate() {
