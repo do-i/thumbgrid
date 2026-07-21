@@ -133,7 +133,6 @@ private slots:
     void flipH();
     void flipV();
     void crop(QRect rect);
-    void cropAndSave(QRect rect);
     void discardEdits();
     void toggleCropPanel();
     void toggleFullscreenInfoBar();

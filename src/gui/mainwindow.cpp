@@ -80,7 +80,8 @@ void MW::setupUi() {
     controlsOverlay = new ControlsOverlay(docWidget.get());
     infoBarFullscreen = new FullscreenInfoOverlayProxy(viewerWidget.get());
     sidePanel = new SidePanel(this);
-    layout.addWidget(sidePanel);
+    sidePanel->setWindowTitle(tr("Crop"));
+    connect(sidePanel, &SidePanel::closed, this, &MW::hideCropPanel);
     imageInfoOverlay = new ImageInfoOverlayProxy(viewerWidget.get());
     floatingMessage = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
     connect(viewerWidget.get(), &ViewerWidget::scalingRequested, this, &MW::scalingRequested);
@@ -125,8 +126,6 @@ void MW::setupCropPanel() {
     connect(cropPanel, &CropPanel::cancel, this, &MW::hideCropPanel);
     connect(cropPanel, &CropPanel::crop,   this, &MW::hideCropPanel);
     connect(cropPanel, &CropPanel::crop,   this, &MW::cropRequested);
-    connect(cropPanel, &CropPanel::cropAndSave, this, &MW::hideCropPanel);
-    connect(cropPanel, &CropPanel::cropAndSave, this, &MW::cropAndSaveRequested);
 }
 
 void MW::setupCopyOverlay() {

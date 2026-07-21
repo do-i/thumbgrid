@@ -5,6 +5,7 @@
 #include <QStyleOption>
 #include <QPainter>
 #include <QVBoxLayout>
+#include <QCloseEvent>
 #include "gui/customwidgets/sidepanelwidget.h"
 
 namespace Ui {
@@ -26,8 +27,12 @@ public slots:
     void show();
     void hide();
 
+signals:
+    void closed();
+
 protected:
     void paintEvent(QPaintEvent *) override;
+    void closeEvent(QCloseEvent *event) override;
 private:
     Ui::SidePanel *ui;
     SidePanelWidget *mWidget;

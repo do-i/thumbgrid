@@ -15,8 +15,6 @@ CropOverlay::CropOverlay(FloatingWidgetContainer *parent) : FloatingWidget(paren
     dpr = devicePixelRatioF();
     handleSize = static_cast<int>(8 * dpr);
     prepareDrawElements();
-    brushInactiveTint.setColor(QColor(0, 0, 0, 160));
-    brushInactiveTint.setStyle(Qt::SolidPattern);
     brushDarkGray.setColor(QColor(120, 120, 120, 160));
     brushDarkGray.setStyle(Qt::SolidPattern);
     brushGray.setColor(QColor(150, 150, 150, 160));
@@ -122,25 +120,16 @@ void CropOverlay::hide() {
 //------------------------------------------------------------------------------
 void CropOverlay::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event)
+    if(!hasSelection())
+        return;
     QPainter p(this);
-    if(!hasSelection()) {
-        p.setPen(Qt::NoPen);
-        p.setBrush(brushInactiveTint);
-        p.drawRect(imageDrawRectDpi);
-    } else {
-        // draw tint over non-selected area of the image
-        QRegion tintRegion(imageDrawRectDpi);
-        p.setClipRegion(tintRegion.subtracted(selectionDrawRectDpi));
-        p.fillRect(imageDrawRectDpi, brushInactiveTint);
-        p.setClipRegion(rect());
-        // selection outline & handles
-        if(selectionDrawRect.width() > 0 && selectionDrawRect.height() > 0) {
-            drawSelection(&p);
-            // draw handles if there is no interaction going on
-            // and selection is large enough
-            if(cursorAction == NO_DRAG && selectionDrawRect.width() >= 90 && selectionDrawRect.height() >= 90)
-                drawHandles(brushGray, &p);
-        }
+    // selection outline & handles only - no dimming of the rest of the image
+    if(selectionDrawRect.width() > 0 && selectionDrawRect.height() > 0) {
+        drawSelection(&p);
+        // draw handles if there is no interaction going on
+        // and selection is large enough
+        if(cursorAction == NO_DRAG && selectionDrawRect.width() >= 90 && selectionDrawRect.height() >= 90)
+            drawHandles(brushGray, &p);
     }
 }
 
@@ -593,10 +582,7 @@ void CropOverlay::onSelectionOutsideChange(QRect selection) {
 //------------------------------------------------------------------------------
 void CropOverlay::keyPressEvent(QKeyEvent *event) {
     if((event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) && hasSelection()) {
-        if(event->modifiers() == Qt::ShiftModifier)
-            emit cropSave();
-        else
-            emit cropDefault();
+        emit cropRequested();
     } else if(event->key() == Qt::Key_Escape) {
         clearSelection();
         emit escPressed();

@@ -105,7 +105,7 @@ QString settingGroupFor(const QString &key) {
         {"imageScrolling", "Document"}, {"mouseScrollingSpeed", "Document"}, {"trackpadDetection", "Document"},
         {"clickableEdges", "Document"}, {"clickableEdgesVisible", "Document"}, {"thumbPanelStyle", "Document"},
         {"panelPosition", "Document"}, {"panelPinned", "Document"}, {"panelPreviewsSize", "Document"},
-        {"panelCenterSelection", "Document"}, {"defaultCropAction", "Document"},
+        {"panelCenterSelection", "Document"},
         // Advanced
         {"usePreloader", "Advanced"}, {"thumbnailCache", "Advanced"}, {"unloadThumbs", "Advanced"},
         {"confirmDelete", "Advanced"}, {"confirmTrash", "Advanced"}, {"showSaveOverlay", "Advanced"},
@@ -1966,17 +1966,6 @@ ImageFocusPoint Settings::focusPointIn1to1Mode() {
     if(mode < 0 || mode > 2)
         mode = 1;
     return static_cast<ImageFocusPoint>(mode);
-}
-
-void Settings::setDefaultCropAction(DefaultCropAction mode) {
-    settings->writeSetting("defaultCropAction", mode);
-}
-
-DefaultCropAction Settings::defaultCropAction() {
-    int mode = settings->readSetting("defaultCropAction", 0).toInt();
-    if(mode < 0 || mode > 1)
-        mode = 0;
-    return static_cast<DefaultCropAction>(mode);
 }
 
 ImageScrolling Settings::imageScrolling() {

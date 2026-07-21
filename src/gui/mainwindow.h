@@ -168,7 +168,6 @@ signals:
     void resizeRequested(QSize);
     void renameRequested(QString);
     void cropRequested(QRect);
-    void cropAndSaveRequested(QRect);
     void discardEditsRequested();
     void saveAsClicked();
     void saveRequested();

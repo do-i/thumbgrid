@@ -62,11 +62,6 @@ enum ZoomIndicatorMode {
     INDICATOR_AUTO
 };
 
-enum DefaultCropAction {
-    ACTION_CROP,
-    ACTION_CROP_SAVE
-};
-
 enum ImageFocusPoint {
     FOCUS_TOP,
     FOCUS_CENTER,
@@ -263,8 +258,6 @@ public:
     ZoomIndicatorMode zoomIndicatorMode();
     void setFocusPointIn1to1Mode(ImageFocusPoint mode);
     ImageFocusPoint focusPointIn1to1Mode();
-    void setDefaultCropAction(DefaultCropAction mode);
-    DefaultCropAction defaultCropAction();
     bool placesPanel();
     void setPlacesPanel(bool mode);
     bool folderViewTopBar();

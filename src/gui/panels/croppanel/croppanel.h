@@ -33,7 +33,6 @@ public slots:
 
 signals:
     void crop(QRect);
-    void cropAndSave(QRect);
     void cancel();
     void cropClicked();
     void selectionChanged(QRect);
@@ -47,14 +46,9 @@ protected:
 
 private slots:
     void doCrop();
-    void doCropSave();
     void onSelectionChange();
     void onAspectRatioChange(); // via manual input
     void onAspectRatioSelected(); // via ComboBox
-    void setFocusCropBtn();
-    void setFocusCropSaveBtn();
-
-    void doCropDefaultAction();
 private:
     Ui::CropPanel *ui;
     QRect cropRect;

@@ -488,7 +488,7 @@
       <number>0</number>
      </property>
      <item>
-      <widget class="PushButtonFocusInd" name="cropButton">
+      <widget class="QPushButton" name="cropButton">
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
@@ -497,19 +497,6 @@
        </property>
        <property name="text">
         <string>Crop</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="PushButtonFocusInd" name="cropSaveButton">
-       <property name="focusPolicy">
-        <enum>Qt::NoFocus</enum>
-       </property>
-       <property name="accessibleName">
-        <string notr="true">Button</string>
-       </property>
-       <property name="text">
-        <string>Crop &amp;&amp; Save</string>
        </property>
       </widget>
      </item>
@@ -565,11 +552,6 @@
    <extends>QWidget</extends>
    <header>gui/customwidgets/iconwidget.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>PushButtonFocusInd</class>
-   <extends>QPushButton</extends>
-   <header>gui/customwidgets/pushbuttonfocusind.h</header>
   </customwidget>
   <customwidget>
    <class>StyledComboBox</class>

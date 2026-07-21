@@ -2,7 +2,7 @@
 #include "ui_sidepanel.h"
 
 SidePanel::SidePanel(QWidget *parent) :
-    QWidget(parent),
+    QWidget(parent, Qt::Dialog),
     ui(new Ui::SidePanel),
     mWidget(nullptr)
 {
@@ -47,4 +47,9 @@ void SidePanel::paintEvent(QPaintEvent *) {
     opt.initFrom(this);
     QPainter p(this);
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+}
+
+void SidePanel::closeEvent(QCloseEvent *event) {
+    emit closed();
+    QWidget::closeEvent(event);
 }

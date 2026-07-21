@@ -36,8 +36,7 @@ signals:
     void positionChanged(float x, float y);
     void selectionChanged(QRect);
     void escPressed();
-    void cropDefault();
-    void cropSave();
+    void cropRequested();
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -52,7 +51,7 @@ private:
     QRect imageRect, imageDrawRect, imageDrawRectDpi, selectionRect, selectionDrawRect, selectionDrawRectDpi, handles[8];
     bool lockAspectRatio;
     float scale;
-    QBrush brushInactiveTint, brushDarkGray, brushGray, brushLightGray;
+    QBrush brushDarkGray, brushGray, brushLightGray;
     QRectF handlesDpi[8];
     int handleSize;
     CursorAction cursorAction;

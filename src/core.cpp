@@ -131,7 +131,6 @@ void Core::connectComponents() {
     connect(mw, &MW::moveUrlsRequested,     fileOps, &FileOperationsController::movePathsTo);
     connect(mw, &MW::convertFormatRequested, this, &Core::convertSelectionToFormat);
     connect(mw, &MW::cropRequested,         this, &Core::crop);
-    connect(mw, &MW::cropAndSaveRequested,  this, &Core::cropAndSave);
     connect(mw, &MW::saveAsClicked,         this, &Core::requestSavePath);
     connect(mw, &MW::saveRequested,         this, &Core::saveCurrentFile);
     connect(mw, &MW::saveAsRequested,       this, &Core::saveCurrentFileAs);
@@ -970,14 +969,6 @@ void Core::crop(QRect rect) {
     if(mw->currentViewMode() == MODE_FOLDERVIEW)
         return;
     edit_template(false, tr("Crop"), { ImageLib::cropped }, rect);
-}
-
-void Core::cropAndSave(QRect rect) {
-    if(mw->currentViewMode() == MODE_FOLDERVIEW)
-        return;
-    edit_template(false, tr("Crop"), { ImageLib::cropped }, rect);
-    saveFile(selectedPath());
-    updateInfoString();
 }
 
 // ---------------------------------------------------------------- image operations ^
