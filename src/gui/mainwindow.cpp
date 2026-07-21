@@ -686,6 +686,12 @@ void MW::updateCropPanelData() {
         cropOverlay->setImageDrawRect(viewerWidget->imageRect());
         cropOverlay->setImageScale(viewerWidget->currentScale());
         cropOverlay->setImageRealSize(viewerWidget->sourceSize());
+        // Start framing the whole image: setImageRealSize() just cleared the
+        // selection, and an empty one leaves no visible handle to grab now that
+        // crop mode no longer dims anything. A full-image rect is also inert -
+        // doCrop() routes size == realSize to cancel, so accepting the default
+        // does nothing rather than silently trimming the image.
+        cropOverlay->selectAll();
     }
 }
 
