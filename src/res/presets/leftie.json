@@ -2,14 +2,14 @@
     "_meta": {
         "id": "leftie",
         "name": "Leftie",
-        "description": "User-defined preset cloned from local shortcuts.json",
+        "description": "Southpaw-friendly key selection - turns out keys pick their own friends, and this bunch all huddled on the right hand",
         "os": [
             "linux",
             "windows",
             "macos"
         ],
         "order": 50,
-        "source": "Snapshot of a user-customized thumbgrid shortcuts.json"
+        "source": "House blend - not modeled on any app, just how the maintainer's hands happen to land"
     },
     "global": {
         "closeFullScreenOrExit": [
@@ -20,7 +20,7 @@
             "RMB"
         ],
         "copyFile": [
-            "C"
+            "$Alt+C"
         ],
         "copyFileClipboard": [
             "$Ctrl+C"
@@ -77,7 +77,7 @@
     },
     "document": {
         "crop": [
-            "$Shift+X"
+            "N"
         ],
         "discardEdits": [
             "$Ctrl+Z"
