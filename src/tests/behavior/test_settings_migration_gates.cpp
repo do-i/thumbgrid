@@ -94,6 +94,24 @@ bool downgradeSkipsVersionedGroupingMigration() {
            require(!after.contains("Document/videoPlayback"), "Downgrade must not run versioned grouping migration.");
 }
 
+bool upgradePrunesRetiredKeys() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 7, 5));
+    // Both spellings a config could carry: grouped, and flat from before the
+    // grouping migration.
+    conf.setValue("Document/defaultCropAction", 1);
+    conf.setValue("defaultCropAction", 1);
+    conf.setValue("Document/panelCenterSelection", true);
+    conf.sync();
+
+    Settings::getInstance();
+
+    QSettings after;
+    return require(!after.contains("Document/defaultCropAction"), "Grouped defaultCropAction should be pruned on upgrade.") &&
+           require(!after.contains("defaultCropAction"), "Flat defaultCropAction should be pruned on upgrade.") &&
+           require(after.contains("Document/panelCenterSelection"), "Pruning must not touch live keys.");
+}
+
 bool themeRecoveryPreservesSelectionPointer() {
     QSettings conf;
     seedExistingConfig(conf, appVersion);
@@ -251,6 +269,8 @@ bool runScenario(const QString &scenario) {
         return currentVersionSkipsVersionedGroupingMigration();
     if(scenario == QLatin1String("downgrade"))
         return downgradeSkipsVersionedGroupingMigration();
+    if(scenario == QLatin1String("retired-key-prune"))
+        return upgradePrunesRetiredKeys();
     if(scenario == QLatin1String("theme-recovery"))
         return themeRecoveryPreservesSelectionPointer();
     if(scenario == QLatin1String("shortcut-recovery"))

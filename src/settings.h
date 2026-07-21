@@ -408,6 +408,8 @@ private:
     // One-time move of flat top-level keys into their category groups, and of
     // the old useSystemColorScheme boolean / theme.ini tid into [General]/theme.
     void migrateConfigGroups();
+    // Removes keys left behind by features that no longer exist.
+    void pruneRetiredSettings();
 
 signals:
     void settingsChanged();

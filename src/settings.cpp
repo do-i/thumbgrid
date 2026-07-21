@@ -621,6 +621,31 @@ void Settings::writeSetting(const QString &key, const QVariant &value) {
 void Settings::runVersionedSettingsMigrations(const QVersionNumber &lastVer) {
     if(lastVer < QVersionNumber(2026, 7, 7))
         migrateConfigGroups();
+    if(lastVer < QVersionNumber(2026, 7, 14))
+        pruneRetiredSettings();
+}
+
+// Drops keys whose feature no longer exists, so a retired setting does not sit
+// in thumbgrid.conf forever. Both spellings are swept: the grouped key written
+// by migrateConfigGroups() and the flat one older configs still use (a retired
+// key is absent from settingGroupFor(), so the grouping pass leaves it flat).
+void Settings::pruneRetiredSettings() {
+    static const QHash<QString, QString> retiredKeys = {
+        // The crop panel lost its "Crop & Save" button, so there is no longer a
+        // default action to pick between.
+        {QStringLiteral("defaultCropAction"), QStringLiteral("Document")},
+    };
+    bool removed = false;
+    for(auto it = retiredKeys.constBegin(); it != retiredKeys.constEnd(); ++it) {
+        for(const QString &key : {it.value() + QLatin1Char('/') + it.key(), it.key()}) {
+            if(!settingsConf->contains(key))
+                continue;
+            settingsConf->remove(key);
+            removed = true;
+        }
+    }
+    if(removed)
+        settingsConf->sync();
 }
 
 void Settings::runConfigRecoveryMigrations(const QString &confDir) {
