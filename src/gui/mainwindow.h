@@ -125,6 +125,7 @@ private:
     void mouseDoubleClickEvent(QMouseEvent *event) override;
 
     void setupCropPanel();
+    void positionCropPanel();
     void setupCopyOverlay();
     void setupSaveOverlay();
     void setupRenameOverlay();

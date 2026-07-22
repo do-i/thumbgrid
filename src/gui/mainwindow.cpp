@@ -734,6 +734,9 @@ void MW::showCropPanel() {
         docWidget->hideFloatingPanel();
         sidePanel->setWidget(cropPanel);
         sidePanel->show();
+        positionCropPanel();
+        // frame margins are only known once the window is mapped
+        QTimer::singleShot(0, this, &MW::positionCropPanel);
         cropOverlay->show();
         activeSidePanel = SIDEPANEL_CROP;
         // reset & lock zoom so CropOverlay won't go crazy
@@ -742,6 +745,35 @@ void MW::showCropPanel() {
         // feed the panel current image info
         updateCropPanelData();
     }
+}
+
+// Park the floating crop panel just outside the right edge of the main window,
+// bottom-aligned with its frame. If the screen has no room to the right, the
+// panel is pushed flush against the screen edge and may overlap us.
+void MW::positionCropPanel() {
+    if(!sidePanel || sidePanel->isHidden())
+        return;
+    QScreen *scr = screen();
+    if(!scr)
+        return;
+
+    const QRect avail      = scr->availableGeometry();
+    const QRect mainFrame  = frameGeometry();
+    const QRect panelFrame = sidePanel->frameGeometry();
+    const QSize panelSize  = panelFrame.size();
+    // move() places the client area; compensate for window decorations
+    const QPoint frameOffset = sidePanel->pos() - panelFrame.topLeft();
+
+    int x = mainFrame.right() + 1;
+    if(x + panelSize.width() > avail.right() + 1)
+        x = avail.right() + 1 - panelSize.width();
+    x = qMax(x, avail.left());
+
+    int y = mainFrame.bottom() + 1 - panelSize.height();
+    y = qMin(y, avail.bottom() + 1 - panelSize.height());
+    y = qMax(y, avail.top());
+
+    sidePanel->move(QPoint(x, y) + frameOffset);
 }
 
 void MW::setInteractionEnabled(bool mode) {
