@@ -873,6 +873,31 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
                                                   + QString::number(sys_text.green()) + ","
                                                   + QString::number(sys_text.blue())  + ",50%)");
 
+    // Destructive-action red. Fixed hue/saturation so it reads as "danger"
+    // in every theme, but the value is picked per theme lightness: a bright
+    // red glares against a dark background, while a dim one has too little
+    // contrast against a light one.
+    QColor danger, danger_hover, danger_pressed, danger_text;
+    if(colors.background.valueF() <= 0.45f) {
+        danger.setHsv(357, 148, 132);
+        danger_hover.setHsv(357, 152, 158);
+        danger_pressed.setHsv(357, 158, 112);
+        danger_text = QColor(240, 232, 232);
+    } else {
+        danger.setHsv(357, 172, 196);
+        danger_hover.setHsv(357, 176, 216);
+        danger_pressed.setHsv(357, 180, 170);
+        danger_text = QColor(255, 255, 255);
+    }
+    styleSheet.replace("%danger%",               danger.name());
+    styleSheet.replace("%danger_hover%",         danger_hover.name());
+    styleSheet.replace("%danger_pressed%",       danger_pressed.name());
+    styleSheet.replace("%danger_text%",          danger_text.name());
+    // disabled state: keep the shape, drop the alarm
+    styleSheet.replace("%danger_disabled_rgba%", "rgba(" + QString::number(danger.red())   + ","
+                                                         + QString::number(danger.green()) + ","
+                                                         + QString::number(danger.blue())  + ",30%)");
+
     styleSheet.replace("%button%",               colors.button.name());
     styleSheet.replace("%button_hover%",         colors.button_hover.name());
     styleSheet.replace("%button_pressed%",       colors.button_pressed.name());

@@ -1314,6 +1314,33 @@ SettingsDialog QPushButton#OK:default {
    accent from their own explicit per-dialog selectors instead. */
 
 /*----------------------------------------------------------------------------*/
+/* Stored data tab - destructive "Delete selected now" button */
+/*----------------------------------------------------------------------------*/
+
+SettingsDialog QPushButton#storedDataDeleteSelected {
+    color: %danger_text%;
+    background-color: %danger%;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 14px 2px 14px;
+    min-width: 70px;
+    min-height: %button_height%;
+}
+
+SettingsDialog QPushButton#storedDataDeleteSelected:hover {
+    background-color: %danger_hover%;
+}
+
+SettingsDialog QPushButton#storedDataDeleteSelected:pressed {
+    background-color: %danger_pressed%;
+}
+
+SettingsDialog QPushButton#storedDataDeleteSelected:disabled {
+    background-color: %danger_disabled_rgba%;
+    color: %text_secondary_rgba%;
+}
+
+/*----------------------------------------------------------------------------*/
 /* Scripts tab - list + per-row edit / delete icon buttons */
 /*----------------------------------------------------------------------------*/
 
