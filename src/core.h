@@ -18,6 +18,7 @@
 #include "utils/randomizer.h"
 #include "gui/dialogs/printdialog.h"
 #include "gui/dialogs/duplicatefinderdialog.h"
+#include "gui/dialogs/fileinfodialog.h"
 
 #ifdef __GLIBC__
 #include <malloc.h>
@@ -71,6 +72,10 @@ private:
     DirectoryPresenter thumbPanelPresenter, folderViewPresenter;
     FileOperationsController *fileOps = nullptr;
     std::unique_ptr<DuplicateFinderDialog> duplicateFinderDialog;
+    std::unique_ptr<FileInfoDialog> fileInfoDialog;
+    // Retargets the live-follow File info popup, but only while it exists and
+    // is visible, so a closed popup costs nothing.
+    void retargetFileInfoDialog();
 
     void rotateByDegrees(int degrees);
     void reset();
@@ -159,6 +164,7 @@ private slots:
     void sortBySize();
     void showRenameDialog();
     void showDuplicateFinder();
+    void showFileInfoDialog();
     void createDirectory();
     void onDraggedOut();
     void onDraggedOut(QStringList paths);

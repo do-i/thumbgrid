@@ -121,6 +121,11 @@ void Core::connectComponents() {
             fileOps, &FileOperationsController::movePathsTo);
     connect(&folderViewPresenter, &DirectoryPresenter::statusTextChanged,
             mw, &MW::setFolderStatusText);
+    // Grid-view live-follow: statusTextChanged is the one signal Core already
+    // receives on every grid selection change (and on file add/remove/rename),
+    // so it doubles as the retarget trigger for the File info popup.
+    connect(&folderViewPresenter, &DirectoryPresenter::statusTextChanged,
+            this, &Core::retargetFileInfoDialog);
 
     connect(scriptManager, &ScriptManager::error, mw, &MW::showError);
 
@@ -1088,6 +1093,23 @@ void Core::showDuplicateFinder() {
     duplicateFinderDialog->activateWindow();
 }
 
+void Core::showFileInfoDialog() {
+    if(!fileInfoDialog)
+        fileInfoDialog.reset(new FileInfoDialog(mw));
+    const QStringList selection = currentSelection();
+    fileInfoDialog->setTarget(selection.isEmpty() ? QString() : selection.first());
+    fileInfoDialog->show();
+    fileInfoDialog->raise();
+    fileInfoDialog->activateWindow();
+}
+
+void Core::retargetFileInfoDialog() {
+    if(!fileInfoDialog || !fileInfoDialog->isVisible())
+        return;
+    const QStringList selection = currentSelection();
+    fileInfoDialog->setTarget(selection.isEmpty() ? QString() : selection.first());
+}
+
 void Core::createDirectory() {
     if(!model)
         return;
@@ -1603,4 +1625,8 @@ void Core::updateInfoString() {
                        slideshow,
                        shuffle,
                        edited);
+    // Document-view live-follow: updateInfoString() is the chokepoint for
+    // every current-image change (and for the current file being removed),
+    // so retargeting here keeps the popup in sync in document mode.
+    retargetFileInfoDialog();
 }
