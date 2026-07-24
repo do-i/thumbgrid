@@ -172,11 +172,58 @@ thumbgrid can open some extra formats via third-party image plugins.
 
 # Installation
 
-On Arch Linux, install from the fork's own pacman repo or from the AUR
-(`thumbgrid-bin`) — see [Arch Linux package](#arch-linux-package) below. This
+On Arch Linux, install from the AUR (`thumbgrid-bin`), from the fork's own
+pacman repo, or from a manually downloaded release package — see below. This
 fork does not ship to the upstream distribution channels it inherited from
 qimgv (AUR `qimgv-git`, apt/dnf/zypper/pkg, Chocolatey, WinGet); elsewhere,
 build from source or grab a CI-built package from the fork's releases.
+
+## AUR
+
+[`thumbgrid-bin`](https://aur.archlinux.org/packages/thumbgrid-bin)
+repackages the same prebuilt release binary, for those who prefer an AUR
+helper:
+
+```
+paru -S thumbgrid-bin   # or: yay -S thumbgrid-bin
+```
+
+The AUR package is updated manually and only for versions promoted as stable,
+so it can lag — see the custom pacman repo section below for a path that
+tracks every release and ABI rebuild.
+
+## Custom pacman repo
+
+**Recommended:** Add to `/etc/pacman.conf`:
+
+```ini
+[thumbgrid]
+SigLevel = Optional TrustAll
+Server = https://do-i.github.io/thumbgrid/arch/$arch
+```
+
+Then:
+
+```
+sudo pacman -Sy thumbgrid
+```
+
+Subsequent `sudo pacman -Syu` runs will pick up rebuilt thumbgrid packages
+automatically, including rebuilds triggered by Arch ABI updates to Qt,
+Exiv2, OpenCV, or mpv. The repo is published by
+[`arch-package.yml`](.github/workflows/arch-package.yml) to the `gh-pages`
+branch on every version tag, and can also be re-triggered manually
+(`workflow_dispatch` with a bumped `pkgrel`) to republish after an
+Arch-side ABI change with no thumbgrid code change.
+
+`SigLevel = Optional TrustAll` means packages are unsigned; treat this as a
+personal/low-stakes distribution method until package signing is added.
+
+## Manual fallback
+
+Download `*.pkg.tar.zst` from a
+[GitHub Release](https://github.com/do-i/thumbgrid/releases) and install with
+`sudo pacman -U thumbgrid-*.pkg.tar.zst` (no auto-updates via this path).
 
 ## Build from source (GNU+Linux)
 
@@ -212,51 +259,9 @@ Install with:
 sudo cmake --install build
 ```
 
-## Arch Linux package
+### Building on Arch from source
 
-**Recommended: pacman repo.** Add to `/etc/pacman.conf`:
-
-```ini
-[thumbgrid]
-SigLevel = Optional TrustAll
-Server = https://do-i.github.io/thumbgrid/arch/$arch
-```
-
-Then:
-
-```
-sudo pacman -Sy thumbgrid
-```
-
-Subsequent `sudo pacman -Syu` runs will pick up rebuilt thumbgrid packages
-automatically, including rebuilds triggered by Arch ABI updates to Qt,
-Exiv2, OpenCV, or mpv. The repo is published by
-[`arch-package.yml`](.github/workflows/arch-package.yml) to the `gh-pages`
-branch on every version tag, and can also be re-triggered manually
-(`workflow_dispatch` with a bumped `pkgrel`) to republish after an
-Arch-side ABI change with no thumbgrid code change.
-
-`SigLevel = Optional TrustAll` means packages are unsigned; treat this as a
-personal/low-stakes distribution method until package signing is added.
-
-**AUR:** [`thumbgrid-bin`](https://aur.archlinux.org/packages/thumbgrid-bin)
-repackages the same prebuilt release binary, for those who prefer an AUR
-helper:
-
-```
-paru -S thumbgrid-bin   # or: yay -S thumbgrid-bin
-```
-
-The AUR package is updated manually and only for versions promoted as stable,
-so it can lag the pacman repo above — which is the path that tracks every
-release and ABI rebuild.
-
-**Manual fallback:** download `*.pkg.tar.zst` from a
-[GitHub Release](https://github.com/do-i/thumbgrid/releases) and install with
-`sudo pacman -U thumbgrid-*.pkg.tar.zst` (no auto-updates via this path).
-
-**Building from source:** a minimal Qt6 PKGBUILD lives in
-[`packaging/arch/`](packaging/arch/). From that directory:
+A minimal Qt6 PKGBUILD lives in [`packaging/arch/`](packaging/arch/). From that directory:
 
 ```
 makepkg -si
