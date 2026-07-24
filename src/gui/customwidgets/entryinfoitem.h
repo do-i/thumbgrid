@@ -17,8 +17,12 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
+    void updateElidedText();
+
     QString name;
     QString value;
     QHBoxLayout layout;

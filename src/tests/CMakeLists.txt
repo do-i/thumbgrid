@@ -266,6 +266,14 @@ add_test(
     COMMAND thumbgrid_file_info_folder_and_exif_states_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_file_info_long_path_elides_test
+    behavior/test_file_info_long_path_elides.cpp
+)
+add_test(
+    NAME "File info popup elides long paths with a full-path tooltip and copy action"
+    COMMAND thumbgrid_file_info_long_path_elides_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )
