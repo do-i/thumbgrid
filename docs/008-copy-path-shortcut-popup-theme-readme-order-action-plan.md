@@ -63,7 +63,7 @@ neighbouring menu items, but it spans `.ui` + two menus + a gating fix +
 tests. No design judgment needed, so Opus is overkill; too many coordinated
 touch points for Haiku.
 
-- [ ] A1 done
+- [x] A1 done
 
 ## A2. Shortcut key-edit popup is unthemed
 
@@ -104,7 +104,7 @@ bookkeeping plus offscreen verification. Escalate to Opus 4.8 only if the
 popup turns out to need structural rework (e.g. converting it into a real
 dialog class).
 
-- [ ] A2 done
+- [x] A2 done
 
 ## A3. README installation order: AUR → custom repo → compile from source
 
@@ -133,4 +133,4 @@ Steps:
 *Model:* **Haiku 4.5** — mechanical documentation restructure with no code
 impact; all content already exists and is only being reordered/re-worded.
 
-- [ ] A3 done
+- [x] A3 done
