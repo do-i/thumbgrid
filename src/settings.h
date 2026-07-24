@@ -177,6 +177,8 @@ public:
     void setDuplicateSearchThreadCount(int count);
     QByteArray duplicateFinderGeometry();
     void setDuplicateFinderGeometry(const QByteArray &geometry);
+    QByteArray fileInfoDialogGeometry();
+    void setFileInfoDialogGeometry(const QByteArray &geometry);
     QByteArray duplicateFinderHeader();
     void setDuplicateFinderHeader(const QByteArray &header);
     int duplicateFinderSimilarity();

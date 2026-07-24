@@ -121,6 +121,7 @@ QString settingGroupFor(const QString &key) {
         {"placesPanel", "State"}, {"placesPanelBookmarksExpanded", "State"},
         {"placesPanelTreeExpanded", "State"}, {"placesPanelWidth", "State"},
         {"duplicateFinderGeometry", "State"}, {"duplicateFinderHeader", "State"},
+        {"fileInfoDialogGeometry", "State"},
         {"duplicateFinderSimilarity", "State"}, {"duplicateFinderRecursive", "State"},
         {"duplicateFinderRotated", "State"}, {"duplicateFinderMirrored", "State"},
         {"duplicateFinderTargets", "State"},
@@ -1700,6 +1701,14 @@ QByteArray Settings::duplicateFinderGeometry() {
 
 void Settings::setDuplicateFinderGeometry(const QByteArray &geometry) {
     settings->writeSetting("duplicateFinderGeometry", geometry);
+}
+
+QByteArray Settings::fileInfoDialogGeometry() {
+    return settings->readSetting("fileInfoDialogGeometry").toByteArray();
+}
+
+void Settings::setFileInfoDialogGeometry(const QByteArray &geometry) {
+    settings->writeSetting("fileInfoDialogGeometry", geometry);
 }
 
 QByteArray Settings::duplicateFinderHeader() {

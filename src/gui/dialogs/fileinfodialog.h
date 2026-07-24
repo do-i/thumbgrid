@@ -7,6 +7,7 @@ class QTabWidget;
 class QVBoxLayout;
 class QWidget;
 class QLabel;
+class QHideEvent;
 class EntryInfoItem;
 
 // Non-modal inspector window showing metadata for the current selection.
@@ -27,6 +28,9 @@ public:
 
     // test access
     QTabWidget *tabs() { return mTabs; }
+
+protected:
+    void hideEvent(QHideEvent *event) override;
 
 private:
     void populateGeneralTab(const QString &path);

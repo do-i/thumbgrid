@@ -4,6 +4,7 @@
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QHideEvent>
 #include <QLabel>
 #include <QLocale>
 #include <QTabWidget>
@@ -26,7 +27,7 @@ QString formatDateTime(const QDateTime &dt) {
 FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     setWindowTitle(tr("File info"));
     setModal(false);
-    resize(360, 440);
+    resize(440, 440);
 
     auto *layout = new QVBoxLayout(this);
     mTabs = new QTabWidget(this);
@@ -61,7 +62,19 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mTabs->addTab(mExifTab, tr("EXIF"));
     mTabs->setTabEnabled(mTabs->indexOf(mExifTab), false);
 
+    const QByteArray geometry = settings->fileInfoDialogGeometry();
+    if(!geometry.isEmpty())
+        restoreGeometry(geometry);
+
     clearTarget();
+}
+
+void FileInfoDialog::hideEvent(QHideEvent *event) {
+    // Dismissed via Core::toggleFileInfoDialog()'s hide() far more often than
+    // via the window's close button, so geometry is saved here rather than
+    // in closeEvent (which a plain hide() never triggers).
+    settings->setFileInfoDialogGeometry(saveGeometry());
+    QDialog::hideEvent(event);
 }
 
 void FileInfoDialog::setTarget(const QString &path) {
