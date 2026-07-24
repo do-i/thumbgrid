@@ -10,6 +10,8 @@
 #include <QVBoxLayout>
 
 #include "gui/customwidgets/entryinfoitem.h"
+#include "settings.h"
+#include "sourcecontainers/documentinfo.h"
 
 namespace {
 
@@ -43,10 +45,19 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mRowsLayout->setSpacing(0);
     generalLayout->addWidget(mRowsContainer);
     generalLayout->addStretch(1);
+    mGeneralTab = generalTab;
     mTabs->addTab(generalTab, tr("General"));
 
-    // EXIF tab is an empty placeholder disabled until B2 populates it.
+    // EXIF tab: rows are (re)built by populateExifTab(); the tab itself is
+    // enabled only when there is at least one row to show.
     mExifTab = new QWidget(mTabs);
+    auto *exifLayout = new QVBoxLayout(mExifTab);
+    mExifRowsContainer = new QWidget(mExifTab);
+    mExifRowsLayout = new QVBoxLayout(mExifRowsContainer);
+    mExifRowsLayout->setContentsMargins(0, 0, 0, 0);
+    mExifRowsLayout->setSpacing(0);
+    exifLayout->addWidget(mExifRowsContainer);
+    exifLayout->addStretch(1);
     mTabs->addTab(mExifTab, tr("EXIF"));
     mTabs->setTabEnabled(mTabs->indexOf(mExifTab), false);
 
@@ -119,10 +130,50 @@ void FileInfoDialog::populateGeneralTab(const QString &path) {
 }
 
 void FileInfoDialog::populateExifTab(const QString &path) {
-    // B2 seam: read EXIF from the image at path and enable the tab when the
-    // map is non-empty. B1 keeps it permanently disabled.
-    Q_UNUSED(path)
-    mTabs->setTabEnabled(mTabs->indexOf(mExifTab), false);
+    clearExifRows();
+    const int exifIndex = mTabs->indexOf(mExifTab);
+    const bool wasCurrent = (mTabs->currentIndex() == exifIndex);
+
+    // Constructed locally rather than routed in from Core: DocumentInfo is
+    // designed for cheap ad hoc queries on a path (Core itself does this,
+    // e.g. Core::isSupportedImage in core.cpp), so there is no heavyweight
+    // shared state to reuse here.
+    QMap<QString, QString> tags;
+    QFileInfo fi(path);
+    if(!path.isEmpty() && fi.isFile()) {
+        DocumentInfo docInfo(path);
+        if(docInfo.type() == DocumentType::STATIC || docInfo.type() == DocumentType::ANIMATED) {
+            // Honor the global metadata verbosity toggle the same way the
+            // document view does (Core::showDocument).
+            tags = settings->showFullMetadata() ? docInfo.getAllTags()
+                                                : docInfo.getExifTags();
+        }
+    }
+
+    if(tags.isEmpty()) {
+        mTabs->setTabEnabled(exifIndex, false);
+        if(wasCurrent)
+            mTabs->setCurrentIndex(mTabs->indexOf(mGeneralTab));
+        return;
+    }
+
+    QMap<QString, QString>::const_iterator it = tags.constBegin();
+    for(; it != tags.constEnd(); ++it)
+        addExifRow(it.key(), it.value());
+    mTabs->setTabEnabled(exifIndex, true);
+}
+
+void FileInfoDialog::clearExifRows() {
+    for(EntryInfoItem *row : mExifRows)
+        delete row;
+    mExifRows.clear();
+}
+
+void FileInfoDialog::addExifRow(const QString &name, const QString &value) {
+    auto *row = new EntryInfoItem(mExifRowsContainer);
+    row->setInfo(name, value);
+    mExifRowsLayout->addWidget(row);
+    mExifRows.append(row);
 }
 
 QString FileInfoDialog::permissionsString(const QString &path) {
