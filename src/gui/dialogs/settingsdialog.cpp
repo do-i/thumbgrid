@@ -1357,6 +1357,7 @@ void SettingsDialog::openShortcutDetails(int row) {
 //------------------------------------------------------------------------------
 void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context) {
     QDialog dialog(this);
+    dialog.setObjectName("ShortcutDetailsDialog");
     dialog.setWindowTitle(shortcutActionLabel(action));
     QVBoxLayout *mainLayout = new QVBoxLayout(&dialog);
 
