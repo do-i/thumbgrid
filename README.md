@@ -242,8 +242,12 @@ Or build directly with CMake:
 
 ```
 cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-cmake --build build --parallel
+cmake --build build --parallel $(nproc)
 ```
+
+_Note: pass an explicit job count to `--parallel`; with the Makefiles
+generator a bare `--parallel` runs unlimited compile jobs and can exhaust
+memory on smaller machines._
 
 Exiv2 (metadata), the mpv plugin (video playback) and OpenCV (high quality
 scaling) are always built in and require those libraries at build time. The
