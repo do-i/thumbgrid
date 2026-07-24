@@ -134,3 +134,96 @@ Steps:
 impact; all content already exists and is only being reordered/re-worded.
 
 - [x] A3 done
+
+---
+
+# Popup consistency audit follow-ups (2026-07-24)
+
+A full sweep of every dialog/popup graded three axes: themed QSS coverage,
+accept-left button order (spacer → OK → Cancel, per
+`shortcutcreatordialog.ui`), and `%danger%` styling on destructive confirm
+buttons (reference: `SettingsDialog QPushButton#storedDataDeleteSelected`).
+
+**Clean on all axes** (no action): SettingsDialog, ResizeDialog,
+ScriptEditorDialog, ShortcutCreatorDialog, PrintDialog, ColorPickerDialog
+(`colorselectorbutton.cpp:31`), the informational `QMessageBox::warning`
+calls in DuplicateFinderDialog, the deliberately-native QFileDialog pickers,
+and the shortcut-details popup (button order + danger Remove fixed
+2026-07-24). `QInputDialog` is fully retired in favor of
+`CustomMessageBox::getText`. Menu-style `Qt::Popup` widgets (ContextMenu,
+GridContextMenu, FVOptionsPopup) and overlays are out of scope — they have
+no accept/reject semantics.
+
+The failures, ranked by blast radius:
+
+## A4. CustomMessageBox has no danger role
+
+`src/gui/dialogs/custommessagebox.cpp` is the app's confirmation primitive
+(call sites in core.cpp, fileoperationscontroller.cpp, settingsdialog.cpp,
+mainwindow.cpp), and `addButton(text, acceptRole, makeDefault)`
+(`custommessagebox.h:28`) has no severity parameter — so every destructive
+confirmation in the app ("Move to trash"/"Delete permanently" at
+`fileoperationscontroller.cpp:212`, "Overwrite file?" at `core.cpp:748`,
+"Delete stored data" at `settingsdialog.cpp:517`, …) renders identically
+to a benign prompt. Theming and button order are already correct.
+
+Steps:
+
+- [ ] Add a danger variant to `addButton` (e.g. a `ButtonRole`/severity
+      enum or a `danger` bool defaulting to false) that sets a shared
+      objectName on the button.
+- [ ] Add the matching `CustomMessageBox QPushButton#<name>` QSS block
+      with `%danger_text%`/`%danger%`/`%danger_hover%`/`%danger_pressed%`,
+      and mind the `:default` accent group at style-template.qss ~1312 —
+      a danger button that is also the default must stay red, not accent.
+- [ ] Flip the accept button to the danger variant at the destructive call
+      sites only (trash/delete/overwrite/discard); leave benign confirms
+      unchanged. Audit each `CustomMessageBox` call site when doing so.
+- [ ] Offscreen light+dark render of one danger confirm as evidence.
+
+*Model:* **Sonnet 5** — small API addition with an established QSS pattern,
+but it fans out across every confirmation call site and needs per-site
+destructive-vs-benign judgment.
+
+- [ ] A4 done
+
+## A5. DuplicateFinderDialog destructive actions unstyled
+
+Two hits in `src/gui/dialogs/duplicatefinderdialog.cpp`:
+the "Delete selected..." button (`duplicateFinderDeleteButton`,
+~line 357) triggers trash-deletion but only the generic
+`DuplicateFinderDialog QPushButton` rule applies; and the confirm at
+line ~547 is a raw `QMessageBox::question` — platform-ordered buttons
+(native QDialogButtonBox) and no danger styling, failing both axes.
+
+Steps:
+
+- [ ] Add a `#duplicateFinderDeleteButton` danger QSS block (pattern:
+      `storedDataDeleteSelected`).
+- [ ] Replace the `QMessageBox::question` trash confirm with
+      `CustomMessageBox` using the A4 danger variant (blocked on A4).
+
+*Model:* **Haiku 4.5** for the QSS block; **Sonnet 5** for the confirm
+swap once A4 lands.
+
+- [ ] A5 done
+
+## A6. FileReplaceDialog overwrite confirm not danger-colored
+
+`yesButton` (`src/gui/dialogs/filereplacedialog.cpp:20`) confirms
+"Replace destination file?" / "Merge directories?" — an overwrite — but is
+styled by the generic `FileReplaceDialog QPushButton` rule. Theming and
+order are already correct.
+
+Steps:
+
+- [ ] Danger-style `yesButton` via an objectName-scoped QSS block; check
+      the `:default` accent group interaction (FileReplaceDialog *is* in
+      the accent group, so the danger rule must win for this button).
+- [ ] Offscreen light+dark render as evidence.
+
+*Model:* **Haiku 4.5** — single-button QSS change with a reference
+pattern; escalate to Sonnet 5 only if the accent/default interaction
+misbehaves.
+
+- [ ] A6 done
