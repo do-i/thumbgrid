@@ -250,6 +250,22 @@ add_test(
     COMMAND thumbgrid_duplicate_finder_dialog_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_file_info_popup_both_views_test
+    behavior/test_file_info_popup_opens_in_both_views.cpp
+)
+add_test(
+    NAME "File info popup opens from the action in grid view and document view"
+    COMMAND thumbgrid_file_info_popup_both_views_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_file_info_folder_and_exif_states_test
+    behavior/test_file_info_folder_and_exif_states.cpp
+)
+add_test(
+    NAME "File info popup shows folder counts, tracks EXIF availability, and live-follows selection"
+    COMMAND thumbgrid_file_info_folder_and_exif_states_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )
