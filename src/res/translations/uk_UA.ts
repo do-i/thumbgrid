@@ -91,8 +91,12 @@
     </message>
     <message>
         <location filename="../../gui/contextmenu.cpp" line="102"/>
+        <source>File info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Image info</source>
-        <translation>Інформація про зображення</translation>
+        <translation type="vanished">Інформація про зображення</translation>
     </message>
     <message>
         <location filename="../../gui/contextmenu.cpp" line="106"/>
@@ -132,42 +136,42 @@
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="288"/>
+        <location filename="../../core.cpp" line="293"/>
         <source>Updated: </source>
         <translation>Оновлено: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="293"/>
+        <location filename="../../core.cpp" line="298"/>
         <source>Welcome to </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="293"/>
+        <location filename="../../core.cpp" line="298"/>
         <source> version </source>
         <translation> версія </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="300"/>
+        <location filename="../../core.cpp" line="305"/>
         <source>Shuffle mode: OFF</source>
         <translation>Режим перемішування: Вимкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="303"/>
+        <location filename="../../core.cpp" line="308"/>
         <source>Shuffle mode: ON</source>
         <translation>Режим перемішування: Увімкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="312"/>
+        <location filename="../../core.cpp" line="317"/>
         <source>Slideshow: OFF</source>
         <translation>Слайд-шоу: Вимкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="316"/>
+        <location filename="../../core.cpp" line="321"/>
         <source>Slideshow: ON</source>
         <translation>Слайд-шоу: Увімкнено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="369"/>
+        <location filename="../../core.cpp" line="374"/>
         <source>Cannot display this file type</source>
         <translation>Не вдається відобразити цей тип файлу</translation>
     </message>
@@ -232,47 +236,47 @@
         <translation type="vanished">Не вдається видалити</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="416"/>
+        <location filename="../../core.cpp" line="421"/>
         <source>Cannot strip metadata from this file type</source>
         <translation>Не вдається видалити метадані з цього типу файлу</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="421"/>
+        <location filename="../../core.cpp" line="426"/>
         <source>Metadata removed</source>
         <translation>Метадані видалено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="423"/>
+        <location filename="../../core.cpp" line="428"/>
         <source>Could not remove metadata</source>
         <translation>Не вдалося видалити метадані</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="487"/>
+        <location filename="../../core.cpp" line="492"/>
         <source>File copied</source>
         <translation>Файл скопійовано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="518"/>
+        <location filename="../../core.cpp" line="523"/>
         <source>%1 items cut</source>
         <translation>%1 елементів вирізано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="518"/>
+        <location filename="../../core.cpp" line="523"/>
         <source>Item cut</source>
         <translation>Елемент вирізано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="520"/>
+        <location filename="../../core.cpp" line="525"/>
         <source>%1 items copied</source>
         <translation>%1 елементів скопійовано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="520"/>
+        <location filename="../../core.cpp" line="525"/>
         <source>Item copied</source>
         <translation>Елемент скопійовано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="576"/>
+        <location filename="../../core.cpp" line="581"/>
         <source>Nothing to paste</source>
         <translation>Немає що вставити</translation>
     </message>
@@ -281,42 +285,42 @@
         <translation type="vanished">Перемістити</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="586"/>
+        <location filename="../../core.cpp" line="591"/>
         <source>%1 items moved</source>
         <translation>%1 елементів переміщено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="586"/>
+        <location filename="../../core.cpp" line="591"/>
         <source>Item moved</source>
         <translation>Елемент переміщено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="589"/>
+        <location filename="../../core.cpp" line="594"/>
         <source>%1 items pasted</source>
         <translation>%1 елементів вставлено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="589"/>
+        <location filename="../../core.cpp" line="594"/>
         <source>Item pasted</source>
         <translation>Елемент вставлено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="605"/>
+        <location filename="../../core.cpp" line="610"/>
         <source>Path copied</source>
         <translation>Шлях скопійовано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="605"/>
+        <location filename="../../core.cpp" line="610"/>
         <source>%1 paths copied</source>
         <translation>%1 шляхів скопійовано</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="748"/>
+        <location filename="../../core.cpp" line="753"/>
         <source>File exists</source>
         <translation>Файл існує</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="748"/>
+        <location filename="../../core.cpp" line="753"/>
         <source>Overwrite file?</source>
         <translation>Перезаписати файл?</translation>
     </message>
@@ -377,113 +381,113 @@ Continue?</source>
         <translation type="vanished">Файл скопійовано.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="870"/>
+        <location filename="../../core.cpp" line="875"/>
         <source>Move to...</source>
         <translation type="unfinished">Перемістити до...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="875"/>
+        <location filename="../../core.cpp" line="880"/>
         <source>Cannot move a folder into itself</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="936"/>
+        <location filename="../../core.cpp" line="941"/>
         <source>Perform action &quot;</source>
         <translation>Виконати дію &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="936"/>
+        <location filename="../../core.cpp" line="941"/>
         <source>Changes will be saved immediately.</source>
         <translation>Зміни будуть збережені негайно.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="954"/>
+        <location filename="../../core.cpp" line="959"/>
         <source>Flip horizontal</source>
         <translation>Перевернути горизонтально</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="958"/>
+        <location filename="../../core.cpp" line="963"/>
         <source>Flip vertical</source>
         <translation>Перевернути вертикально</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="962"/>
+        <location filename="../../core.cpp" line="967"/>
         <source>Rotate</source>
         <translation>Повернути</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="966"/>
+        <location filename="../../core.cpp" line="971"/>
         <source>Resize</source>
         <translation>Змінити розмір</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="972"/>
+        <location filename="../../core.cpp" line="977"/>
         <source>Crop</source>
         <translation>Обрізати</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1002"/>
+        <location filename="../../core.cpp" line="1007"/>
         <source>File saved</source>
         <translation>Файл збережено</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1005"/>
+        <location filename="../../core.cpp" line="1010"/>
         <source>Could not save file</source>
         <translation>Не вдалос зберегти файл</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1098"/>
-        <location filename="../../core.cpp" line="1099"/>
+        <location filename="../../core.cpp" line="1127"/>
+        <location filename="../../core.cpp" line="1128"/>
         <source>New Folder</source>
         <translation>Нова папка</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1098"/>
+        <location filename="../../core.cpp" line="1127"/>
         <source>Folder name:</source>
         <translation>Назва папки:</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1106"/>
+        <location filename="../../core.cpp" line="1135"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>Назва папки не може містити роздільники шляху.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1140"/>
+        <location filename="../../core.cpp" line="1169"/>
         <source>Could not open image</source>
         <translation>Не вдалося відкрити зображення</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1144"/>
+        <location filename="../../core.cpp" line="1173"/>
         <source>Can only print static images</source>
         <translation>Можливий друк лише статичних зображень</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1192"/>
+        <location filename="../../core.cpp" line="1221"/>
         <source>Cannot view root folder.</source>
         <translation>Не вдається переглянути кореневу папку.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1200"/>
+        <location filename="../../core.cpp" line="1229"/>
         <source>Could not open path: </source>
         <translation>Не вдалося відкрити шлях: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1240"/>
+        <location filename="../../core.cpp" line="1269"/>
         <source>Could not load folder: </source>
         <translation>Не вдалося завантажити теку: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1298"/>
+        <location filename="../../core.cpp" line="1327"/>
         <source>Already at root folder.</source>
         <translation>Вже в кореневій папці.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1465"/>
+        <location filename="../../core.cpp" line="1494"/>
         <source>End of directory.</source>
         <translation>Кінець директорії.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1515"/>
+        <location filename="../../core.cpp" line="1544"/>
         <source>Cannot display file: </source>
         <translation>Не вдається відобразити файл: </translation>
     </message>
@@ -492,7 +496,7 @@ Continue?</source>
         <translation type="vanished">Завантаження не вдалося: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1558"/>
+        <location filename="../../core.cpp" line="1587"/>
         <source>Error: could not load image.</source>
         <translation>Помилка: не вдалося завантажити зображення.</translation>
     </message>
@@ -951,6 +955,86 @@ Continue?</source>
     </message>
 </context>
 <context>
+    <name>FileInfoDialog</name>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="27"/>
+        <source>File info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="39"/>
+        <source>No selection</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="49"/>
+        <source>General</source>
+        <translation type="unfinished">Загальні</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="61"/>
+        <source>EXIF</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="103"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="123"/>
+        <source>Path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="104"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="125"/>
+        <source>Permissions</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="106"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="127"/>
+        <source>Owner</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="114"/>
+        <source>Contains</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="115"/>
+        <source>%n file(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="116"/>
+        <source>%n folder(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="117"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="129"/>
+        <source>Modified</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="124"/>
+        <source>Size</source>
+        <translation type="unfinished">Розмір</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="128"/>
+        <source>Created</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>FileOperationsController</name>
     <message>
         <location filename="../../components/fileoperationscontroller.cpp" line="31"/>
@@ -1276,46 +1360,51 @@ Continue?</source>
     </message>
     <message>
         <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
+        <source>File info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
         <source>Move to...</source>
         <translation type="unfinished">Перемістити до...</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="56"/>
         <source>Move to trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="56"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="61"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="64"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="69"/>
         <source>Delete permanently</source>
         <translation type="unfinished">Видалити остаточно</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="73"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="78"/>
         <source>Header title bar</source>
         <translation>Панель заголовка</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="77"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="82"/>
         <source>Left side panel</source>
         <translation>Ліва бічна панель</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="81"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="86"/>
         <source>Bottom status bar</source>
         <translation>Нижня панель стану</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="88"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="93"/>
         <source>Settings</source>
         <translation type="unfinished">Налаштування</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="100"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="105"/>
         <source>Back</source>
         <translation>Назад</translation>
     </message>
@@ -1323,14 +1412,12 @@ Continue?</source>
 <context>
     <name>ImageInfoOverlay</name>
     <message>
-        <location filename="../../gui/overlays/imageinfooverlay.ui" line="65"/>
         <source>OverlayHeaderWidget</source>
-        <translation>OverlayHeaderWidget</translation>
+        <translation type="vanished">OverlayHeaderWidget</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/imageinfooverlay.ui" line="99"/>
         <source>EXIF Tags</source>
-        <translation>Теги EXIF</translation>
+        <translation type="vanished">Теги EXIF</translation>
     </message>
 </context>
 <context>
@@ -1344,40 +1431,40 @@ Continue?</source>
 <context>
     <name>MW</name>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="594"/>
+        <location filename="../../gui/mainwindow.cpp" line="581"/>
         <source>Save File as...</source>
         <translation>Зберегти файл як...</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="930"/>
+        <location filename="../../gui/mainwindow.cpp" line="917"/>
         <source>Folder view</source>
         <translation>Галерея</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="870"/>
-        <location filename="../../gui/mainwindow.cpp" line="931"/>
-        <location filename="../../gui/mainwindow.cpp" line="935"/>
-        <location filename="../../gui/mainwindow.cpp" line="936"/>
+        <location filename="../../gui/mainwindow.cpp" line="857"/>
+        <location filename="../../gui/mainwindow.cpp" line="918"/>
+        <location filename="../../gui/mainwindow.cpp" line="922"/>
+        <location filename="../../gui/mainwindow.cpp" line="923"/>
         <source>No file opened.</source>
         <translation>Файл не відкрито.</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="83"/>
+        <location filename="../../gui/mainwindow.cpp" line="82"/>
         <source>Crop</source>
         <translation type="unfinished">Обрізати</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="1000"/>
+        <location filename="../../gui/mainwindow.cpp" line="981"/>
         <source>Fit Window</source>
         <translation>Вписати у вікно</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="1004"/>
+        <location filename="../../gui/mainwindow.cpp" line="985"/>
         <source>Fit Width</source>
         <translation>Розтягнути по ширині</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="1008"/>
+        <location filename="../../gui/mainwindow.cpp" line="989"/>
         <source>Fit 1:1</source>
         <translation>Режим 1:1</translation>
     </message>

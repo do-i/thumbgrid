@@ -37,6 +37,7 @@ private:
     ContextMenuItem *convertItem;
     ContextMenuItem *renameItem;
     ContextMenuItem *copyPathItem;
+    ContextMenuItem *fileInfoItem;
     ContextMenuItem *moveItem;
     ContextMenuItem *trashItem;
     ContextMenuItem *deleteItem;

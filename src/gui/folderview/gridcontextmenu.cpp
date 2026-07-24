@@ -43,6 +43,11 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     copyPathItem->setAction("copyPathClipboard");
     mainLayout->addWidget(copyPathItem);
 
+    fileInfoItem = makeItem(tr("File info"), ":/res/icons/common/overlay/info16.png");
+    fileInfoItem->setObjectName("menuFileInfo");
+    fileInfoItem->setAction("toggleImageInfo");
+    mainLayout->addWidget(fileInfoItem);
+
     moveItem = makeItem(tr("Move to..."), ":/res/icons/common/menuitem/move16.png");
     moveItem->setObjectName("menuMove");
     moveItem->setAction("moveFile");
@@ -165,6 +170,7 @@ void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
     convertItem->setEnabled(info.total() > 0 && info.allConvertible);
     renameItem->setEnabled(info.total() == 1);
     copyPathItem->setEnabled(info.total() > 0);
+    fileInfoItem->setEnabled(info.total() == 1);
     moveItem->setEnabled(info.total() > 0);
     trashItem->setEnabled(info.total() > 0);
     deleteItem->setEnabled(info.total() > 0);

@@ -223,7 +223,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::sortByName, this, &Core::sortByName);
     connect(actionManager, &ActionManager::sortByTime, this, &Core::sortByTime);
     connect(actionManager, &ActionManager::sortBySize, this, &Core::sortBySize);
-    connect(actionManager, &ActionManager::toggleImageInfo, mw, &MW::toggleImageInfoOverlay);
+    connect(actionManager, &ActionManager::toggleImageInfo, this, &Core::toggleFileInfoDialog);
     connect(actionManager, &ActionManager::stripMetadata, this, &Core::stripMetadata);
     connect(actionManager, &ActionManager::findDuplicates, this, &Core::showDuplicateFinder);
     connect(actionManager, &ActionManager::toggleShuffle, this, &Core::toggleShuffle);
@@ -1103,6 +1103,13 @@ void Core::showFileInfoDialog() {
     fileInfoDialog->activateWindow();
 }
 
+void Core::toggleFileInfoDialog() {
+    if(fileInfoDialog && fileInfoDialog->isVisible())
+        fileInfoDialog->hide();
+    else
+        showFileInfoDialog();
+}
+
 void Core::retargetFileInfoDialog() {
     if(!fileInfoDialog || !fileInfoDialog->isVisible())
         return;
@@ -1596,7 +1603,6 @@ void Core::guiSetImage(const std::shared_ptr<Image>& img) {
         mw->showText(img->filePath());
     }
     img->isEdited() ? mw->showSaveOverlay() : mw->hideSaveOverlay();
-    mw->setExifInfo(settings->showFullMetadata() ? img->getAllTags() : img->getExifTags());
 }
 
 void Core::updateInfoString() {

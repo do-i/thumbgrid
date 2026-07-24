@@ -99,7 +99,7 @@ ContextMenu::ContextMenu(QWidget *parent) :
     ui->copyPath->setIconPath(":/res/icons/common/menuitem/copy16.png");
     // -------------------------------------------------------------------------
     ui->imageInfo->setAction("toggleImageInfo");
-    ui->imageInfo->setText(tr("Image info"));
+    ui->imageInfo->setText(tr("File info"));
     ui->imageInfo->setIconPath(":/res/icons/common/overlay/info16.png");
 
     ui->stripMetadata->setAction("stripMetadata");

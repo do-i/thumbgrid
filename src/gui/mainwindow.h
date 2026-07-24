@@ -21,7 +21,6 @@
 #include "gui/overlays/cropoverlay.h"
 #include "gui/overlays/copyoverlay.h"
 #include "gui/overlays/changelogwindow.h"
-#include "gui/overlays/imageinfooverlayproxy.h"
 #include "gui/overlays/renameoverlay.h"
 #include "gui/dialogs/resizedialog.h"
 #include "gui/centralwidget.h"
@@ -70,7 +69,6 @@ public:
     void showText(QString file);
 
     void setCurrentInfo(int fileIndex, int fileCount, QString filePath, QString fileName, QSize imageSize, int imageDepth, qint64 fileSize, bool slideshow, bool shuffle, bool edited);
-    void setExifInfo(QMap<QString, QString>);
     void setFolderStatusText(QString text);
     std::shared_ptr<FolderViewProxy> getFolderView();
     std::shared_ptr<ThumbnailStripProxy> getThumbnailPanel();
@@ -101,8 +99,6 @@ private:
     CopyOverlay *copyOverlay;
 
     RenameOverlay *renameOverlay;
-
-    ImageInfoOverlayProxy *imageInfoOverlay;
 
     ControlsOverlay *controlsOverlay;
     FullscreenInfoOverlayProxy *infoBarFullscreen;
@@ -246,7 +242,6 @@ public slots:
     void prepareForLoad(bool nextIsVideo);
     void showContextMenu();
     void onSortingChanged(SortingMode);
-    void toggleImageInfoOverlay();
     void toggleRenameOverlay(QString currentName);
     void setFilterNearest();
     void setFilterBilinear();

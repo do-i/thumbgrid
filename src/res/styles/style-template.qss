@@ -996,10 +996,6 @@ BookmarksItem[highlighted="true"] {
     font: bold;
 }
 /*----------------------------------------------------------------------------*/
-ImageInfoOverlay QLabel {
-    color: %text%;
-}
-
 EntryInfoItem {
     background-color: %widget%;
     color: %text_hc2%;

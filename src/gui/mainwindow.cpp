@@ -16,7 +16,6 @@ MW::MW(QWidget *parent)
       saveOverlay(nullptr),
       renameOverlay(nullptr),
       infoBarFullscreen(nullptr),
-      imageInfoOverlay(nullptr),
       floatingMessage(nullptr),
       cropPanel(nullptr),
       cropOverlay(nullptr)
@@ -82,7 +81,6 @@ void MW::setupUi() {
     sidePanel = new SidePanel(this);
     sidePanel->setWindowTitle(tr("Crop"));
     connect(sidePanel, &SidePanel::closed, this, &MW::hideCropPanel);
-    imageInfoOverlay = new ImageInfoOverlayProxy(viewerWidget.get());
     floatingMessage = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
     connect(viewerWidget.get(), &ViewerWidget::scalingRequested, this, &MW::scalingRequested);
     connect(viewerWidget.get(), &ViewerWidget::draggedOut, this, qOverload<>(&MW::draggedOut));
@@ -154,7 +152,6 @@ void MW::toggleFolderView() {
     if(renameOverlay)
         renameOverlay->hide();
     docWidget->hideFloatingPanel();
-    imageInfoOverlay->hide();
     centralWidget->toggleViewMode();
     onInfoUpdated();
 }
@@ -166,7 +163,6 @@ void MW::enableFolderView() {
     if(renameOverlay)
         renameOverlay->hide();
     docWidget->hideFloatingPanel();
-    imageInfoOverlay->hide();
     centralWidget->showFolderView();
     onInfoUpdated();
 }
@@ -336,15 +332,6 @@ void MW::toggleFullscreenInfoBar() {
         infoBarFullscreen->showWhenReady();
     else
         infoBarFullscreen->hide();
-}
-
-void MW::toggleImageInfoOverlay() {
-    if(centralWidget->currentViewMode() == MODE_FOLDERVIEW)
-        return;
-    if(imageInfoOverlay->isHidden())
-        imageInfoOverlay->show();
-    else
-        imageInfoOverlay->hide();
 }
 
 void MW::toggleRenameOverlay(QString currentName) {
@@ -965,12 +952,6 @@ void MW::onInfoUpdated() {
     }
     updateStatusFooters();
     setWindowTitle(windowTitle);
-}
-
-// TODO!!! buffer this in mw
-void MW::setExifInfo(QMap<QString, QString> info) {
-    if(imageInfoOverlay)
-        imageInfoOverlay->setExifInfo(std::move(info));
 }
 
 std::shared_ptr<FolderViewProxy> MW::getFolderView() {

@@ -51,8 +51,6 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     overlays/floatingmessageproxy.cpp
     overlays/fullscreeninfooverlay.cpp
     overlays/fullscreeninfooverlayproxy.cpp
-    overlays/imageinfooverlay.cpp
-    overlays/imageinfooverlayproxy.cpp
     overlays/renameoverlay.cpp
     overlays/saveconfirmoverlay.cpp
     overlays/videocontrols.cpp
@@ -104,7 +102,6 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     overlays/copyoverlay.ui
     overlays/floatingmessage.ui
     overlays/fullscreeninfooverlay.ui
-    overlays/imageinfooverlay.ui
     overlays/renameoverlay.ui
     overlays/saveconfirmoverlay.ui
     overlays/videocontrols.ui

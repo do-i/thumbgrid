@@ -165,6 +165,7 @@ private slots:
     void showRenameDialog();
     void showDuplicateFinder();
     void showFileInfoDialog();
+    void toggleFileInfoDialog();
     void createDirectory();
     void onDraggedOut();
     void onDraggedOut(QStringList paths);
