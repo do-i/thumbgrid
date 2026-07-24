@@ -1,10 +1,12 @@
-# 002 — Open Items Backlog
+# 007 — Open Items Backlog
 
 Every non-completed item gathered from the retired action plan files
-(2026-07-18 consolidation). Provenance is noted per item; the source files
-are deleted — this file is now the single home for open work. Newly found
-bugs from the commit audit live separately in
-`001-shortcuts-page-audit-fixes-action-plan.md`.
+(2026-07-18 consolidation, refreshed 2026-07-23). Provenance is noted per
+item; the source files are deleted — this file is the single home for open
+work. Plans 001 and 003–006 have since been completed in full (shortcuts
+page audit fixes, duplicate finder v1, stored-data cleanup, AUR packaging,
+AUR workflow hardening) and were removed as part of the 2026-07-23 doc
+cleanup; their history lives in git.
 
 Model tiers: Haiku 4.5 (`claude-haiku-4-5-20251001`) mechanical edits ·
 Sonnet 5 (`claude-sonnet-5`) standard coding · Opus 4.8 (`claude-opus-4-8`)
@@ -110,3 +112,9 @@ features again. *Model:* **Opus 4.8** (API design across both menus).
 `settings-ui-consistency-action-plan.md`,
 `settings-theming-shortcut-binding-action-plan.md` — all completed items are
 in git history (this file's creation commit removes them).
+
+Also retired 2026-07-23 (fully completed, no open items carried forward):
+`001-shortcuts-page-audit-fixes-action-plan.md`,
+`003-duplicate-finder-design-plan.md`,
+`004-stored-data-cleanup-action-plan.md`, `005-aur-package-action-plan.md`,
+`006-aur-release-workflow-fixes-action-plan.md`.
