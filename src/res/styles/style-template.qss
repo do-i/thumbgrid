@@ -1173,7 +1173,7 @@ PrintDialog QGroupBox {
     background-color: %widget%;
     border: 1px solid %button%;
     border-radius: 3px;
-    padding: 6px 10px 8px 10px;
+    padding: 14px 10px 8px 10px;
 }
 
 ResizeDialog QCheckBox,

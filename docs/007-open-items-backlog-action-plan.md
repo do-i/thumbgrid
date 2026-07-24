@@ -28,7 +28,8 @@ caused by the theming batch. Likely cause: a stale `<minimumSize>` in
 verify with an offscreen render of ResizeDialog on light + dark presets.
 Escalate to Sonnet 5 if the minimumSize turns out not to be the cause.
 
-- [ ] B1 done
+- [x] B1 done (2026-07-24 — cause was QSS `padding-top`, not the suspected
+      `.ui` minimumSize; `ResizeDialog QGroupBox` top padding 6px → 14px)
 
 ## Opportunistic — do when already in the file, never in bulk
 
