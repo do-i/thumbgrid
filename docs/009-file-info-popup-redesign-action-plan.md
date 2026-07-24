@@ -76,7 +76,7 @@ changes vs. deletions, across Core/MW/presenter boundaries) is the
 judgment-heavy core of the feature; wrong wiring here shows up as stale
 or flickering data.
 
-- [ ] B1 done
+- [x] B1 done
 
 ## B2. EXIF tab
 
@@ -90,7 +90,7 @@ if present, a "show all metadata" checkbox in the tab keeps parity).
 *Model:* **Sonnet 5** — data plumbing with an existing source and a clear
 disabled-state rule.
 
-- [ ] B2 done
+- [x] B2 done
 
 ## B3. Menu entries, action rewiring, overlay removal
 
@@ -112,7 +112,7 @@ disabled-state rule.
 *Model:* **Sonnet 5** — coordinated but mechanical once B1 exists;
 removal has clear grep-able edges.
 
-- [ ] B3 done
+- [x] B3 done
 
 **Follow-up recorded, not done (opt-in):** presets bind `toggleImageInfo`
 to `I` in the `document` context only, so in grid view the popup opens
@@ -141,7 +141,7 @@ state.
 *Model:* **Sonnet 5** — new QTabBar rules need real QSS care (tab
 overlap, selected elevation, disabled contrast), more than mechanical.
 
-- [ ] B4 done
+- [x] B4 done
 
 ## B5. Behavior tests
 
@@ -163,7 +163,7 @@ memory):
 *Model:* **Sonnet 5** — follows established test patterns; the fixtures
 are the only fiddly part.
 
-- [ ] B5 done
+- [x] B5 done
 
 ## Suggested order
 
