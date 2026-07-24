@@ -1329,21 +1329,24 @@ SettingsDialog QPushButton#OK:default {
 
 /* "Remove" buttons on each key row in the shortcut details popup. QToolButton
    isn't a QPushButton subclass so it doesn't pick up the shared button rules
-   above - style it to match separately. */
-QDialog#ShortcutDetailsDialog QToolButton {
-    color: %text%;
-    background-color: %button%;
+   above - style it to match separately. They are destructive, so use the
+   same danger tokens as SettingsDialog QPushButton#storedDataDeleteSelected
+   rather than the neutral button palette. */
+QDialog#ShortcutDetailsDialog QToolButton#shortcutKeyRemove {
+    color: %danger_text%;
+    background-color: %danger%;
+    border: none;
     border-radius: 3px;
     padding: 2px 10px 2px 10px;
     min-height: %button_height%;
 }
 
-QDialog#ShortcutDetailsDialog QToolButton:hover {
-    background-color: %button_hover%;
+QDialog#ShortcutDetailsDialog QToolButton#shortcutKeyRemove:hover {
+    background-color: %danger_hover%;
 }
 
-QDialog#ShortcutDetailsDialog QToolButton:pressed {
-    background-color: %button_pressed%;
+QDialog#ShortcutDetailsDialog QToolButton#shortcutKeyRemove:pressed {
+    background-color: %danger_pressed%;
 }
 
 /*----------------------------------------------------------------------------*/

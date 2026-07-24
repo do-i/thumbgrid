@@ -9,7 +9,6 @@
 #include "gui/customwidgets/scriptrowwidget.h"
 #include <QHBoxLayout>
 #include <QStyle>
-#include <QDialogButtonBox>
 #include <QFrame>
 #include <QHeaderView>
 #include <QKeyEvent>
@@ -1423,6 +1422,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
             }
             row->addStretch();
             QToolButton *del = new QToolButton(rowsWidget);
+            del->setObjectName("shortcutKeyRemove");
             del->setText(tr("Remove"));
             connect(del, &QToolButton::clicked, &dialog, [&, key]() {
                 keys.removeAll(key);
@@ -1465,10 +1465,23 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
         rebuild();
     });
 
-    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
-    mainLayout->addWidget(buttons);
-    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    // Plain buttons instead of QDialogButtonBox: the box's visual order is
+    // style-driven and can't be forced via QSS, so wire OK/Cancel ourselves
+    // (accept-first order, matching ShortcutCreatorDialog).
+    QHBoxLayout *buttonsLayout = new QHBoxLayout();
+    buttonsLayout->addStretch();
+    QPushButton *okButton = new QPushButton(tr("OK"), &dialog);
+    QPushButton *cancelButton = new QPushButton(tr("Cancel"), &dialog);
+    okButton->setDefault(true);
+    for(QPushButton *b : {okButton, cancelButton}) {
+        b->setCursor(Qt::PointingHandCursor);
+        b->setIcon(QIcon());
+    }
+    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+    buttonsLayout->addWidget(okButton);
+    buttonsLayout->addWidget(cancelButton);
+    mainLayout->addLayout(buttonsLayout);
 
     if(dialog.exec() != QDialog::Accepted)
         return;

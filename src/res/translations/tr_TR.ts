@@ -1604,22 +1604,22 @@ Devam edilsin mi?</translation>
         <translation>Bilinmeyen biçim</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1128"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1127"/>
         <source>Global</source>
         <translation type="unfinished">Genel</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1129"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1128"/>
         <source>Grid</source>
         <translation type="unfinished">Izgara</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1129"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1128"/>
         <source>Document</source>
         <translation type="unfinished">Belge</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1134"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1133"/>
         <source>%1  (script)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1637,6 +1637,21 @@ Devam edilsin mi?</translation>
         <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="77"/>
         <source>Select folder</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/custommessagebox.h" line="32"/>
+        <source>Yes</source>
+        <translation type="unfinished">Evet</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/custommessagebox.h" line="33"/>
+        <source>No</source>
+        <translation type="unfinished">Hayır</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/custommessagebox.h" line="36"/>
+        <source>OK</source>
+        <translation type="unfinished">Tamam</translation>
     </message>
 </context>
 <context>
@@ -2220,7 +2235,7 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="1572"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="413"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="412"/>
         <source>Size</source>
         <translation>Boyut</translation>
     </message>
@@ -2482,7 +2497,7 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3020"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="687"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="686"/>
         <source>Custom</source>
         <translation>Özel</translation>
     </message>
@@ -2493,7 +2508,7 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4071"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="553"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="552"/>
         <source>+ New shortcut</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2567,7 +2582,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3184"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="179"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="178"/>
         <source>Accent</source>
         <translation>Vurgu rengi</translation>
     </message>
@@ -2581,86 +2596,86 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3225"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="180"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="179"/>
         <source>Text</source>
         <translation>Metin rengi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3273"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="181"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="180"/>
         <source>Icons</source>
         <translation>İkonlar</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3308"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="182"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="181"/>
         <source>Window background</source>
         <translation>Pencere arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3343"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="183"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="182"/>
         <source>Control background</source>
         <translation>Kontrol arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3378"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="184"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="183"/>
         <source>Control border</source>
         <translation>Kontrol kenarlığı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3413"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="185"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="184"/>
         <source>Scrollbar</source>
         <translation>Kaydırma çubuğu</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3438"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="333"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="597"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="332"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="596"/>
         <source>Grid</source>
         <translation>Izgara</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3473"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="187"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="186"/>
         <source>Grid background</source>
         <translation>Izgara arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3508"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="188"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="187"/>
         <source>Grid top bar</source>
         <translation>Izgara üst çubuğu</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3543"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="189"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="188"/>
         <source>Thumbnail cell</source>
         <translation>Küçük resim hücresi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3578"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="190"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="189"/>
         <source>Filename label</source>
         <translation>Dosya adı etiketi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3613"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="191"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="190"/>
         <source>Selected filename label</source>
         <translation>Seçili dosya adı etiketi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3648"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="192"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="191"/>
         <source>Selection highlight</source>
         <translation>Seçim vurgusu</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3683"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="193"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="192"/>
         <source>Folder-icon tint</source>
         <translation>Klasör simgesi tonu</translation>
     </message>
@@ -2671,13 +2686,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3743"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="195"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="194"/>
         <source>Fullscreen background</source>
         <translation>Tam ekran arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3778"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="196"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="195"/>
         <source>Overlay background</source>
         <translation>Yer paylaşımlı arka plan</translation>
     </message>
@@ -2695,7 +2710,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3813"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="197"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="196"/>
         <source>Overlay text</source>
         <translation>Yer paylaşımlı metin</translation>
     </message>
@@ -2739,13 +2754,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4100"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1695"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1709"/>
         <source>Edit</source>
         <translation>Düzenle</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4113"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1425"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1426"/>
         <source>Remove</source>
         <translation>Kaldır</translation>
     </message>
@@ -2755,7 +2770,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4163"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="610"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
         <source>Action</source>
         <translation>İşlem</translation>
     </message>
@@ -2973,6 +2988,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="5448"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1473"/>
         <source>OK</source>
         <translation>Tamam</translation>
     </message>
@@ -2983,31 +2999,32 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="5455"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1474"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="98"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="97"/>
         <source>Preferences — </source>
         <translation>Tercihler — </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="127"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="126"/>
         <source>Show full version</source>
         <translation>Tam sürümü göster</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="133"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="132"/>
         <source>Version</source>
         <translation>Sürüm</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="134"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="133"/>
         <source>&lt;b&gt;thumbgrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Build: %2</source>
         <translation>&lt;b&gt;thumbgrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Yapı: %2</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="325"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="324"/>
         <source>Shortcuts</source>
         <translation>Kısayollar</translation>
     </message>
@@ -3016,33 +3033,33 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">Ayrıca, Kısayollar bölümünde betiklere kısayol atayabilirsiniz.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="327"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="326"/>
         <source>Start in grid view by default</source>
         <translation>Varsayılan olarak ızgara görünümünde başlat</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="328"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="327"/>
         <source>Show grid top bar</source>
         <translation>Izgara üst çubuğunu göster</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="329"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="328"/>
         <source>Grid filename font size:</source>
         <translation>Izgara dosya adı yazı tipi boyutu:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="330"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="329"/>
         <source>Grid navigation</source>
         <translation>Izgara gezinme</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="334"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="333"/>
         <source>Grid display</source>
         <translation>Izgara görünümü</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="349"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="598"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="348"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="597"/>
         <source>Document</source>
         <translation>Belge</translation>
     </message>
@@ -3051,119 +3068,119 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">Geçerli bağlamı sıfırla</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="326"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="325"/>
         <source>Every script is also listed on the Shortcuts page, where you can assign it a key.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="396"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="395"/>
         <source>Stored data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="397"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="396"/>
         <source>Data stored on this computer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="400"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="399"/>
         <source>Everything the app remembers about your files and folders. Delete a row with its ✕ button, or check rows to delete them together — right away or on every exit.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="406"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="405"/>
         <source>Select all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="413"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="412"/>
         <source>Store</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="413"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="412"/>
         <source>Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="438"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="437"/>
         <source>Delete %1 now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="450"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="449"/>
         <source>Delete selected now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="456"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="455"/>
         <source>Delete selected every time the app exits</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="516"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="515"/>
         <source>Delete %1? This cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="517"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="516"/>
         <source>Delete %n selected data store(s)? This cannot be undone.</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="518"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="517"/>
         <source>Delete stored data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="560"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="559"/>
         <source>Shortcut preset:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="582"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="581"/>
         <source>Switch shortcut preset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="583"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="582"/>
         <source>Switching to &quot;%1&quot; replaces all current keyboard/mouse shortcuts with that preset&apos;s bindings. This cannot be undone from this dialog. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="596"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="595"/>
         <source>Global</source>
         <translation>Genel</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="602"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="601"/>
         <source>Search</source>
         <translation>Ara</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="610"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
         <source>Key</source>
         <translation>Tuş</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="610"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
         <source>Count</source>
         <translation>Sayı</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="610"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
         <source>Enabled</source>
         <translation>Etkin</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="675"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="674"/>
         <source>%1 (unavailable)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1301"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1300"/>
         <source>User script &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3183,98 +3200,98 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation>varsayılan</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1440"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1441"/>
         <source>Add key:</source>
         <translation>Tuş ekle:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1454"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1455"/>
         <source>&quot;%1&quot; is already assigned to this action.</source>
         <translation>&quot;%1&quot; zaten bu eyleme atanmış.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1460"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1582"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1461"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1596"/>
         <source>&quot;%1&quot; is also used by: %2</source>
         <translation>&quot;%1&quot; ayrıca şurada da kullanılıyor: %2</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1558"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1572"/>
         <source>Move &quot;%1&quot; from %2 to %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1558"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1572"/>
         <source>Copy &quot;%1&quot; from %2 to %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1565"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1579"/>
         <source>This widens its reach: it will run in every screen, not only in the %1 view (a view-specific binding for the same key still overrides it).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1569"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1583"/>
         <source>This narrows its reach: it runs in every screen today, and afterwards it will run only in the %1 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1572"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1586"/>
         <source>The global binding stays as it is; the %1 copy simply overrides it while that view is active.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1575"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1589"/>
         <source>It will run only in the %1 view instead of the %2 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1577"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1591"/>
         <source>It will run in the %1 view as well as the %2 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1584"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1598"/>
         <source>Continuing takes those keys over in the %1 context.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1586"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1600"/>
         <source>Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1587"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1601"/>
         <source>Move shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1587"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1601"/>
         <source>Copy shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1611"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1625"/>
         <source>Edit keys...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1616"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1630"/>
         <source>Move to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1617"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1631"/>
         <source>Copy to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1621"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1635"/>
         <source>No keys bound in %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1704"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1718"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3311,7 +3328,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">Kısayolu düzenle</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1826"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1840"/>
         <source>Navigate to mpv binary</source>
         <translation>mpv program dosyasına git</translation>
     </message>
@@ -3448,28 +3465,34 @@ li.checked::marker { content: &quot;\2612&quot;; }
 <context>
     <name>main</name>
     <message>
+        <location filename="../../main.cpp" line="114"/>
         <source>File or directory path.</source>
-        <translation type="vanished">Dosya veya dizin yolu.</translation>
+        <translation>Dosya veya dizin yolu.</translation>
     </message>
     <message>
+        <location filename="../../main.cpp" line="117"/>
         <source>Generate all thumbnails for directory.</source>
-        <translation type="vanished">Dizindeki tüm küçük resimleri oluştur.</translation>
+        <translation>Dizindeki tüm küçük resimleri oluştur.</translation>
     </message>
     <message>
+        <location filename="../../main.cpp" line="118"/>
         <source>directory-path</source>
-        <translation type="vanished">dizin-yolu</translation>
+        <translation>dizin-yolu</translation>
     </message>
     <message>
+        <location filename="../../main.cpp" line="120"/>
         <source>Thumbnail size. Current size is used if not specified.</source>
-        <translation type="vanished">Küçük resim boyutu. Belirtilmediği takdirde şu anki boyut kullanılır.</translation>
+        <translation>Küçük resim boyutu. Belirtilmediği takdirde şu anki boyut kullanılır.</translation>
     </message>
     <message>
+        <location filename="../../main.cpp" line="121"/>
         <source>thumbnail-size</source>
-        <translation type="vanished">küçük resim-boyutu</translation>
+        <translation>küçük resim-boyutu</translation>
     </message>
     <message>
+        <location filename="../../main.cpp" line="123"/>
         <source>Show build options.</source>
-        <translation type="vanished">Derleme seçeneklerini göster.</translation>
+        <translation>Derleme seçeneklerini göster.</translation>
     </message>
 </context>
 </TS>
