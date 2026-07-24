@@ -114,6 +114,15 @@ removal has clear grep-able edges.
 
 - [ ] B3 done
 
+**Follow-up recorded, not done (opt-in):** presets bind `toggleImageInfo`
+to `I` in the `document` context only, so in grid view the popup opens
+from the menu but not the keyboard. `I` is free in the grid context of the
+qimgv preset, but the `adjustFromVersion()` backfill only seeds bindings
+for *new* actions — extending an existing action into a new context needs
+either a version bump (risk: resurrects deliberately-removed bindings) or
+a bespoke migration. Decide deliberately before touching it.
+*Model if picked up:* **Opus 4.8** (migration semantics).
+
 ## B4. Theming
 
 New `FileInfoDialog` QSS in `style-template.qss` following the
