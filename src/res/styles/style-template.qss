@@ -1004,6 +1004,17 @@ EntryInfoItem {
 EntryInfoItem:hover {
     background-color: %accent_hover_rgba%;
 }
+
+/* EntryInfoItem's name/value QLabel children have no rule of their own, so
+   they inherit %text_hc2% from the EntryInfoItem rule above. FileInfoDialog
+   (docs/009 B4) adds a dialog-wide "FileInfoDialog QLabel" rule below for its
+   own plain labels (the "No selection" placeholder); without this override
+   that broader rule would win for these labels too (same-specificity rules
+   inherit nothing - an explicit match always beats inheritance) and mute rows
+   that already theme correctly against the dialog background. */
+FileInfoDialog EntryInfoItem QLabel {
+    color: %text_hc2%;
+}
 /*----------------------------------------------------------------------------*/
 PrintDialog QRadioButton,
 PrintDialog QCheckBox {
@@ -1023,6 +1034,7 @@ ResizeDialog,
 ScriptEditorDialog,
 ShortcutCreatorDialog,
 QDialog#ShortcutDetailsDialog,
+FileInfoDialog,
 PrintDialog,
 QMessageBox {
     background-color: %background%;
@@ -1090,6 +1102,7 @@ FileReplaceDialog QLabel,
 ScriptEditorDialog QLabel,
 ShortcutCreatorDialog QLabel,
 QDialog#ShortcutDetailsDialog QLabel,
+FileInfoDialog QLabel,
 PrintDialog QLabel,
 QMessageBox QLabel {
     color: %text%;
@@ -1100,6 +1113,58 @@ QMessageBox QLabel {
    other disabled labels (see [accessibleName="MenuItem"] QLabel:disabled)
    instead of falling back to unreadable native gray. */
 QDialog#ShortcutDetailsDialog QLabel:disabled {
+    color: %text_secondary_rgba%;
+}
+
+/* First QTabWidget/QTabBar rules in this theme (docs/009 B4) - scoped
+   strictly to FileInfoDialog so a future tabbed dialog does not silently pick
+   these up. The pane matches the EntryInfoItem row surface (%widget%) so the
+   selected tab visually merges into it; unselected tabs sit on %button% like
+   any other secondary-dialog control so they read as separate, clickable
+   chips. An accent underline marks the selected tab (in addition to the
+   background merge) since the two tones alone are close in some presets. */
+FileInfoDialog QTabWidget::pane {
+    background-color: %widget%;
+    border: 1px solid %widget_border%;
+    border-radius: 3px;
+    top: -1px;
+}
+
+FileInfoDialog QTabWidget::tab-bar {
+    left: 6px;
+}
+
+FileInfoDialog QTabBar::tab {
+    background-color: %button%;
+    color: %text%;
+    border: 1px solid %widget_border%;
+    border-bottom: none;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    padding: 5px 16px;
+    margin-right: 2px;
+}
+
+FileInfoDialog QTabBar::tab:!selected {
+    margin-top: 2px;
+}
+
+FileInfoDialog QTabBar::tab:hover:!selected {
+    background-color: %button_hover%;
+    color: %text_hc%;
+}
+
+FileInfoDialog QTabBar::tab:selected {
+    background-color: %widget%;
+    color: %text_hc%;
+    border-color: %widget_border%;
+    border-bottom: 2px solid %accent%;
+}
+
+/* Disabled EXIF tab (no metadata / non-image target, docs/009 B2): same
+   muted token as other disabled labels in this file, so it reads as
+   unavailable rather than native gray. */
+FileInfoDialog QTabBar::tab:disabled {
     color: %text_secondary_rgba%;
 }
 
