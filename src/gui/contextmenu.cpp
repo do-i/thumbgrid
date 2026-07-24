@@ -93,6 +93,10 @@ ContextMenu::ContextMenu(QWidget *parent) :
     ui->showLocation->setAction("showInDirectory");
     ui->showLocation->setText(tr("Show in folder"));
     ui->showLocation->setIconPath(":/res/icons/common/menuitem/folder16.png");
+
+    ui->copyPath->setAction("copyPathClipboard");
+    ui->copyPath->setText(tr("Copy path"));
+    ui->copyPath->setIconPath(":/res/icons/common/menuitem/copy16.png");
     // -------------------------------------------------------------------------
     ui->imageInfo->setAction("toggleImageInfo");
     ui->imageInfo->setText(tr("Image info"));
@@ -160,6 +164,7 @@ void ContextMenu::setImageEntriesEnabled(bool mode) {
     ui->trash->setEnabled(mode);
     ui->openWith->setEnabled(mode);
     ui->showLocation->setEnabled(mode);
+    ui->copyPath->setEnabled(mode);
     ui->imageInfo->setEnabled(mode);
     ui->stripMetadata->setEnabled(mode);
     ui->findDuplicates->setEnabled(mode);

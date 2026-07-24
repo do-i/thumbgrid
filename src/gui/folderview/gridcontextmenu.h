@@ -36,6 +36,7 @@ private:
     QStackedWidget *stack;
     ContextMenuItem *convertItem;
     ContextMenuItem *renameItem;
+    ContextMenuItem *copyPathItem;
     ContextMenuItem *moveItem;
     ContextMenuItem *trashItem;
     ContextMenuItem *deleteItem;

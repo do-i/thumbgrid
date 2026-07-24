@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QTemporaryDir>
 
+#include "components/actionmanager/actionmanager.h"
 #include "core.h"
 #include "gui/customwidgets/contextmenuitem.h"
 #include "gui/folderview/foldergridview.h"
@@ -16,6 +17,7 @@ class GridContextMenuGatingTest : public QObject {
 
 private slots:
     void gridContextMenuGatesFileOpsOnSelection();
+    void copyPathActionCopiesFolderPathToClipboard();
 };
 
 namespace {
@@ -88,6 +90,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     QVERIFY2(menu != nullptr, "The grid context menu should exist.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert enabled for single png.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single png.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for single png.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuMove")->isEnabled(), "Move enabled for single png.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuTrash")->isEnabled(), "Trash enabled for single png.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuDelete")->isEnabled(), "Delete enabled for single png.");
@@ -98,6 +101,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for gif.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single gif.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for single gif.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuMove")->isEnabled(), "Move enabled for single gif.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuTrash")->isEnabled(), "Trash enabled for single gif.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuDelete")->isEnabled(), "Delete enabled for single gif.");
@@ -108,6 +112,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     menu = openContextMenuFor(grid);
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert enabled for two pngs.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename disabled for multi-selection.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for two pngs.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuMove")->isEnabled(), "Move enabled for two pngs.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuTrash")->isEnabled(), "Trash enabled for two pngs.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuDelete")->isEnabled(), "Delete enabled for two pngs.");
@@ -118,6 +123,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for png+gif.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename disabled for png+gif (multi).");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for png+gif.");
     menu->hide();
 
     // Case: folder containing an image -> Convert enabled, Rename enabled (single).
@@ -125,6 +131,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     menu = openContextMenuFor(grid);
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert enabled for folder with image.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single folder.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for folder with image.");
     menu->hide();
 
     // Case: folder without a convertible image -> Convert disabled, Rename enabled.
@@ -132,6 +139,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for folder without image.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single folder.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for folder without image.");
     menu->hide();
 
     // Case: only the ".." parent tile selected -> counts as an empty selection
@@ -140,10 +148,54 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for empty selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename disabled for empty selection.");
+    QVERIFY2(!menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path disabled for empty selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuMove")->isEnabled(), "Move disabled for empty selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuTrash")->isEnabled(), "Trash disabled for empty selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuDelete")->isEnabled(), "Delete disabled for empty selection.");
     menu->hide();
+
+    if(qEnvironmentVariableIsSet("THUMBGRID_TEST_VISUAL"))
+        QTest::qWait(1500);
+}
+
+void GridContextMenuGatingTest::copyPathActionCopiesFolderPathToClipboard() {
+    QTemporaryDir fixture;
+    QVERIFY2(fixture.isValid(), "Test fixture directory should be created.");
+
+    QDir root(fixture.path());
+    QVERIFY2(root.mkpath("gallery/noimg"), "noimg subfolder should be created.");
+    const QString galleryPath = root.filePath("gallery");
+    const QString noimgPath = root.filePath("gallery/noimg");
+
+    {
+        // A folder with no images: this used to be silently blocked by
+        // Core::copyPathClipboard's now-removed model->isEmpty() check.
+        QFile notes(root.filePath("gallery/noimg/notes.txt"));
+        QVERIFY(notes.open(QIODevice::WriteOnly));
+        notes.write("just some notes");
+    }
+
+    Core core;
+    QVERIFY2(core.loadPath(galleryPath), "Opening the gallery folder should succeed.");
+    core.showGui();
+
+    QTRY_VERIFY2(tgtest::mainWindow() != nullptr, "The thumbgrid window should exist.");
+    MW *window = tgtest::mainWindow();
+    QTRY_VERIFY2(window->isVisible(), "The thumbgrid window should be visible.");
+
+    auto grid = window->findChild<FolderGridView *>("thumbnailGrid");
+    QVERIFY2(grid != nullptr, "The folder thumbnail grid should exist.");
+
+    // Parent ".." (0), then noimg (1).
+    QTRY_COMPARE(grid->itemCount(), 2);
+    const int noimgDir = 1;
+
+    grid->select(noimgDir);
+    QCOMPARE(grid->selection(), QList<int>{noimgDir});
+
+    QApplication::clipboard()->clear();
+    QVERIFY2(actionManager->invokeAction("copyPathClipboard"), "copyPathClipboard action should be invocable.");
+    QCOMPARE(QApplication::clipboard()->text(), QDir(noimgPath).absolutePath());
 
     if(qEnvironmentVariableIsSet("THUMBGRID_TEST_VISUAL"))
         QTest::qWait(1500);

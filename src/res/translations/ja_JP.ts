@@ -86,26 +86,31 @@
     </message>
     <message>
         <location filename="../../gui/contextmenu.cpp" line="98"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="102"/>
         <source>Image info</source>
         <translation>画像情報</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="102"/>
+        <location filename="../../gui/contextmenu.cpp" line="106"/>
         <source>Strip metadata</source>
         <translation>メタデータを削除</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="106"/>
+        <location filename="../../gui/contextmenu.cpp" line="110"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="114"/>
+        <location filename="../../gui/contextmenu.cpp" line="118"/>
         <source>Back</source>
         <translation>戻る</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="117"/>
+        <location filename="../../gui/contextmenu.cpp" line="121"/>
         <source>Configure menu</source>
         <translation>メニューを設定</translation>
     </message>
@@ -127,42 +132,42 @@
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="287"/>
+        <location filename="../../core.cpp" line="288"/>
         <source>Updated: </source>
         <translation>更新: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="292"/>
+        <location filename="../../core.cpp" line="293"/>
         <source>Welcome to </source>
         <translation>ようこそ </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="292"/>
+        <location filename="../../core.cpp" line="293"/>
         <source> version </source>
         <translation> バージョン </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="299"/>
+        <location filename="../../core.cpp" line="300"/>
         <source>Shuffle mode: OFF</source>
         <translation>シャッフルモード: OFF</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="302"/>
+        <location filename="../../core.cpp" line="303"/>
         <source>Shuffle mode: ON</source>
         <translation>シャッフルモード: ON</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="311"/>
+        <location filename="../../core.cpp" line="312"/>
         <source>Slideshow: OFF</source>
         <translation>スライドショー: OFF</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="315"/>
+        <location filename="../../core.cpp" line="316"/>
         <source>Slideshow: ON</source>
         <translation>スライドショー: ON</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="368"/>
+        <location filename="../../core.cpp" line="369"/>
         <source>Cannot display this file type</source>
         <translation>このファイル形式は表示できません</translation>
     </message>
@@ -227,47 +232,47 @@
         <translation type="vanished">削除できません</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="415"/>
+        <location filename="../../core.cpp" line="416"/>
         <source>Cannot strip metadata from this file type</source>
         <translation>このファイル形式からメタデータを削除できません</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="420"/>
+        <location filename="../../core.cpp" line="421"/>
         <source>Metadata removed</source>
         <translation>メタデータを削除しました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="422"/>
+        <location filename="../../core.cpp" line="423"/>
         <source>Could not remove metadata</source>
         <translation>メタデータを削除できませんでした</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="486"/>
+        <location filename="../../core.cpp" line="487"/>
         <source>File copied</source>
         <translation>ファイルがコピーされました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="517"/>
+        <location filename="../../core.cpp" line="518"/>
         <source>%1 items cut</source>
         <translation>%1 個のアイテムを切り取りました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="517"/>
+        <location filename="../../core.cpp" line="518"/>
         <source>Item cut</source>
         <translation>アイテムを切り取りました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="519"/>
+        <location filename="../../core.cpp" line="520"/>
         <source>%1 items copied</source>
         <translation>%1 個のアイテムをコピーしました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="519"/>
+        <location filename="../../core.cpp" line="520"/>
         <source>Item copied</source>
         <translation>アイテムをコピーしました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="575"/>
+        <location filename="../../core.cpp" line="576"/>
         <source>Nothing to paste</source>
         <translation>貼り付けるものがありません</translation>
     </message>
@@ -276,42 +281,42 @@
         <translation type="vanished">移動</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="585"/>
+        <location filename="../../core.cpp" line="586"/>
         <source>%1 items moved</source>
         <translation>%1 個のアイテムを移動しました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="585"/>
+        <location filename="../../core.cpp" line="586"/>
         <source>Item moved</source>
         <translation>アイテムを移動しました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="588"/>
+        <location filename="../../core.cpp" line="589"/>
         <source>%1 items pasted</source>
         <translation>%1 個のアイテムを貼り付けました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="588"/>
+        <location filename="../../core.cpp" line="589"/>
         <source>Item pasted</source>
         <translation>アイテムを貼り付けました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="604"/>
+        <location filename="../../core.cpp" line="605"/>
         <source>Path copied</source>
         <translation>パスがコピーされました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="604"/>
+        <location filename="../../core.cpp" line="605"/>
         <source>%1 paths copied</source>
         <translation>%1 個のパスをコピーしました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="747"/>
+        <location filename="../../core.cpp" line="748"/>
         <source>File exists</source>
         <translation>ファイルは存在します</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="747"/>
+        <location filename="../../core.cpp" line="748"/>
         <source>Overwrite file?</source>
         <translation>ファイルを上書きしますか？</translation>
     </message>
@@ -372,113 +377,113 @@ Continue?</source>
         <translation type="vanished">ファイルがコピーされました。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="869"/>
+        <location filename="../../core.cpp" line="870"/>
         <source>Move to...</source>
         <translation type="unfinished">移動先...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="874"/>
+        <location filename="../../core.cpp" line="875"/>
         <source>Cannot move a folder into itself</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="935"/>
+        <location filename="../../core.cpp" line="936"/>
         <source>Perform action &quot;</source>
         <translation>アクションを実行 &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="935"/>
+        <location filename="../../core.cpp" line="936"/>
         <source>Changes will be saved immediately.</source>
         <translation>変更はすぐに保存されます。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="953"/>
+        <location filename="../../core.cpp" line="954"/>
         <source>Flip horizontal</source>
         <translation>水平方向に反転</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="957"/>
+        <location filename="../../core.cpp" line="958"/>
         <source>Flip vertical</source>
         <translation>垂直方向に反転</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="961"/>
+        <location filename="../../core.cpp" line="962"/>
         <source>Rotate</source>
         <translation>回転</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="965"/>
+        <location filename="../../core.cpp" line="966"/>
         <source>Resize</source>
         <translation>リサイズ</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="971"/>
+        <location filename="../../core.cpp" line="972"/>
         <source>Crop</source>
         <translation>切り抜き</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1001"/>
+        <location filename="../../core.cpp" line="1002"/>
         <source>File saved</source>
         <translation>ファイルが保存されました</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1004"/>
+        <location filename="../../core.cpp" line="1005"/>
         <source>Could not save file</source>
         <translation>ファイルを保存できませんでした</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1097"/>
         <location filename="../../core.cpp" line="1098"/>
+        <location filename="../../core.cpp" line="1099"/>
         <source>New Folder</source>
         <translation>新しいフォルダー</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1097"/>
+        <location filename="../../core.cpp" line="1098"/>
         <source>Folder name:</source>
         <translation>フォルダー名:</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1105"/>
+        <location filename="../../core.cpp" line="1106"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>フォルダー名にパス区切り文字を含めることはできません。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1139"/>
+        <location filename="../../core.cpp" line="1140"/>
         <source>Could not open image</source>
         <translation>画像を開けませんでした</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1143"/>
+        <location filename="../../core.cpp" line="1144"/>
         <source>Can only print static images</source>
         <translation>静止画像のみ印刷できます</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1191"/>
+        <location filename="../../core.cpp" line="1192"/>
         <source>Cannot view root folder.</source>
         <translation>ルートフォルダーを表示できません。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1199"/>
+        <location filename="../../core.cpp" line="1200"/>
         <source>Could not open path: </source>
         <translation>パスを開けませんでした: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1239"/>
+        <location filename="../../core.cpp" line="1240"/>
         <source>Could not load folder: </source>
         <translation>フォルダを読み込めませんでした: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1297"/>
+        <location filename="../../core.cpp" line="1298"/>
         <source>Already at root folder.</source>
         <translation>既にルートフォルダーにいます。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1464"/>
+        <location filename="../../core.cpp" line="1465"/>
         <source>End of directory.</source>
         <translation>ディレクトリの終わり。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1514"/>
+        <location filename="../../core.cpp" line="1515"/>
         <source>Cannot display file: </source>
         <translation>ファイルを表示できません: </translation>
     </message>
@@ -487,7 +492,7 @@ Continue?</source>
         <translation type="vanished">読み込みに失敗しました: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1557"/>
+        <location filename="../../core.cpp" line="1558"/>
         <source>Error: could not load image.</source>
         <translation>エラー: 画像を読み込めませんでした。</translation>
     </message>
@@ -1250,46 +1255,51 @@ Continue?</source>
     </message>
     <message>
         <location filename="../../gui/folderview/gridcontextmenu.cpp" line="41"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
         <source>Move to...</source>
         <translation type="unfinished">移動先...</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
         <source>Move to trash</source>
         <translation type="unfinished">ゴミ箱へ移動</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="56"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="59"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="64"/>
         <source>Delete permanently</source>
         <translation type="unfinished">完全に削除</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="68"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="73"/>
         <source>Header title bar</source>
         <translation>ヘッダータイトルバー</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="72"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="77"/>
         <source>Left side panel</source>
         <translation>左サイドパネル</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="76"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="81"/>
         <source>Bottom status bar</source>
         <translation>下部ステータスバー</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="83"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="88"/>
         <source>Settings</source>
         <translation type="unfinished">設定</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="95"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="100"/>
         <source>Back</source>
         <translation>戻る</translation>
     </message>
@@ -1323,15 +1333,15 @@ Continue?</source>
         <translation>名前を付けてファイルを保存</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="892"/>
+        <location filename="../../gui/mainwindow.cpp" line="930"/>
         <source>Folder view</source>
         <translation>フォルダービュー</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="832"/>
-        <location filename="../../gui/mainwindow.cpp" line="893"/>
-        <location filename="../../gui/mainwindow.cpp" line="897"/>
-        <location filename="../../gui/mainwindow.cpp" line="898"/>
+        <location filename="../../gui/mainwindow.cpp" line="870"/>
+        <location filename="../../gui/mainwindow.cpp" line="931"/>
+        <location filename="../../gui/mainwindow.cpp" line="935"/>
+        <location filename="../../gui/mainwindow.cpp" line="936"/>
         <source>No file opened.</source>
         <translation>ファイルが開かれていません。</translation>
     </message>
@@ -1341,17 +1351,17 @@ Continue?</source>
         <translation type="unfinished">切り抜き</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="962"/>
+        <location filename="../../gui/mainwindow.cpp" line="1000"/>
         <source>Fit Window</source>
         <translation>ウィンドウに合わせる</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="966"/>
+        <location filename="../../gui/mainwindow.cpp" line="1004"/>
         <source>Fit Width</source>
         <translation>幅に合わせる</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="970"/>
+        <location filename="../../gui/mainwindow.cpp" line="1008"/>
         <source>Fit 1:1</source>
         <translation>1:1表示</translation>
     </message>

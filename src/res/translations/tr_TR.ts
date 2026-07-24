@@ -86,26 +86,31 @@
     </message>
     <message>
         <location filename="../../gui/contextmenu.cpp" line="98"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="102"/>
         <source>Image info</source>
         <translation>Görsel bilgisi</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="102"/>
+        <location filename="../../gui/contextmenu.cpp" line="106"/>
         <source>Strip metadata</source>
         <translation>Meta verileri kaldır</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="106"/>
+        <location filename="../../gui/contextmenu.cpp" line="110"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="114"/>
+        <location filename="../../gui/contextmenu.cpp" line="118"/>
         <source>Back</source>
         <translation>Geri</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="117"/>
+        <location filename="../../gui/contextmenu.cpp" line="121"/>
         <source>Configure menu</source>
         <translation>Menüyü düzenle</translation>
     </message>
@@ -127,42 +132,42 @@
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="287"/>
+        <location filename="../../core.cpp" line="288"/>
         <source>Updated: </source>
         <translation>Güncellendi: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="292"/>
+        <location filename="../../core.cpp" line="293"/>
         <source>Welcome to </source>
         <translation>Hoş geldiniz</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="292"/>
+        <location filename="../../core.cpp" line="293"/>
         <source> version </source>
         <translation> sürüm </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="299"/>
+        <location filename="../../core.cpp" line="300"/>
         <source>Shuffle mode: OFF</source>
         <translation>Karıştırma modu: KAPALI</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="302"/>
+        <location filename="../../core.cpp" line="303"/>
         <source>Shuffle mode: ON</source>
         <translation>Karıştırma modu: AÇIK</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="311"/>
+        <location filename="../../core.cpp" line="312"/>
         <source>Slideshow: OFF</source>
         <translation>Slayt gösterisi: KAPALI</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="315"/>
+        <location filename="../../core.cpp" line="316"/>
         <source>Slideshow: ON</source>
         <translation>Slayt gösterisi: AÇIK</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="368"/>
+        <location filename="../../core.cpp" line="369"/>
         <source>Cannot display this file type</source>
         <translation>Bu dosya türü görüntülenemiyor</translation>
     </message>
@@ -227,47 +232,47 @@
         <translation type="vanished">Silinemiyor</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="415"/>
+        <location filename="../../core.cpp" line="416"/>
         <source>Cannot strip metadata from this file type</source>
         <translation>Bu dosya türünden meta veriler kaldırılamıyor</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="420"/>
+        <location filename="../../core.cpp" line="421"/>
         <source>Metadata removed</source>
         <translation>Meta veriler kaldırıldı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="422"/>
+        <location filename="../../core.cpp" line="423"/>
         <source>Could not remove metadata</source>
         <translation>Meta veriler kaldırılamadı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="486"/>
+        <location filename="../../core.cpp" line="487"/>
         <source>File copied</source>
         <translation>Dosya kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="517"/>
+        <location filename="../../core.cpp" line="518"/>
         <source>%1 items cut</source>
         <translation>%1 öğe kesildi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="517"/>
+        <location filename="../../core.cpp" line="518"/>
         <source>Item cut</source>
         <translation>Öğe kesildi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="519"/>
+        <location filename="../../core.cpp" line="520"/>
         <source>%1 items copied</source>
         <translation>%1 öğe kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="519"/>
+        <location filename="../../core.cpp" line="520"/>
         <source>Item copied</source>
         <translation>Öğe kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="575"/>
+        <location filename="../../core.cpp" line="576"/>
         <source>Nothing to paste</source>
         <translation>Yapıştırılacak bir şey yok</translation>
     </message>
@@ -276,42 +281,42 @@
         <translation type="vanished">Taşı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="585"/>
+        <location filename="../../core.cpp" line="586"/>
         <source>%1 items moved</source>
         <translation>%1 öğe taşındı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="585"/>
+        <location filename="../../core.cpp" line="586"/>
         <source>Item moved</source>
         <translation>Öğe taşındı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="588"/>
+        <location filename="../../core.cpp" line="589"/>
         <source>%1 items pasted</source>
         <translation>%1 öğe yapıştırıldı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="588"/>
+        <location filename="../../core.cpp" line="589"/>
         <source>Item pasted</source>
         <translation>Öğe yapıştırıldı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="604"/>
+        <location filename="../../core.cpp" line="605"/>
         <source>Path copied</source>
         <translation>Dosya yolu kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="604"/>
+        <location filename="../../core.cpp" line="605"/>
         <source>%1 paths copied</source>
         <translation>%1 yol kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="747"/>
+        <location filename="../../core.cpp" line="748"/>
         <source>File exists</source>
         <translation>Dosya zaten var</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="747"/>
+        <location filename="../../core.cpp" line="748"/>
         <source>Overwrite file?</source>
         <translation>Dosyanın üzerine yazılsın mı?</translation>
     </message>
@@ -372,113 +377,113 @@ Devam edilsin mi?</translation>
         <translation type="vanished">Dosya kopyalandı.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="869"/>
+        <location filename="../../core.cpp" line="870"/>
         <source>Move to...</source>
         <translation type="unfinished">Şuraya taşı...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="874"/>
+        <location filename="../../core.cpp" line="875"/>
         <source>Cannot move a folder into itself</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="935"/>
+        <location filename="../../core.cpp" line="936"/>
         <source>Perform action &quot;</source>
         <translation>Eylemi gerçekleştir: &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="935"/>
+        <location filename="../../core.cpp" line="936"/>
         <source>Changes will be saved immediately.</source>
         <translation>Değişiklikler hemen kaydedilecektir.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="953"/>
+        <location filename="../../core.cpp" line="954"/>
         <source>Flip horizontal</source>
         <translation>Yatay çevir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="957"/>
+        <location filename="../../core.cpp" line="958"/>
         <source>Flip vertical</source>
         <translation>Dikey çevir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="961"/>
+        <location filename="../../core.cpp" line="962"/>
         <source>Rotate</source>
         <translation>Döndür</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="965"/>
+        <location filename="../../core.cpp" line="966"/>
         <source>Resize</source>
         <translation>Yeniden boyutlandır</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="971"/>
+        <location filename="../../core.cpp" line="972"/>
         <source>Crop</source>
         <translation>Kırp</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1001"/>
+        <location filename="../../core.cpp" line="1002"/>
         <source>File saved</source>
         <translation>Dosya kaydedildi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1004"/>
+        <location filename="../../core.cpp" line="1005"/>
         <source>Could not save file</source>
         <translation>Dosya kaydedilemedi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1097"/>
         <location filename="../../core.cpp" line="1098"/>
+        <location filename="../../core.cpp" line="1099"/>
         <source>New Folder</source>
         <translation>Yeni Klasör</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1097"/>
+        <location filename="../../core.cpp" line="1098"/>
         <source>Folder name:</source>
         <translation>Klasör adı:</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1105"/>
+        <location filename="../../core.cpp" line="1106"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>Klasör adı yol ayırıcıları içeremez.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1139"/>
+        <location filename="../../core.cpp" line="1140"/>
         <source>Could not open image</source>
         <translation>Görüntü açılamadı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1143"/>
+        <location filename="../../core.cpp" line="1144"/>
         <source>Can only print static images</source>
         <translation>Sadece hareketsiz görüntüler yazdırılabilir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1191"/>
+        <location filename="../../core.cpp" line="1192"/>
         <source>Cannot view root folder.</source>
         <translation>Kök klasör görüntülenemiyor.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1199"/>
+        <location filename="../../core.cpp" line="1200"/>
         <source>Could not open path: </source>
         <translation>Dosya yolu açılamadı: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1239"/>
+        <location filename="../../core.cpp" line="1240"/>
         <source>Could not load folder: </source>
         <translation>Klasör yüklenemedi: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1297"/>
+        <location filename="../../core.cpp" line="1298"/>
         <source>Already at root folder.</source>
         <translation>Zaten kök klasördesiniz.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1464"/>
+        <location filename="../../core.cpp" line="1465"/>
         <source>End of directory.</source>
         <translation>Dizin sonu.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1514"/>
+        <location filename="../../core.cpp" line="1515"/>
         <source>Cannot display file: </source>
         <translation>Dosya görüntülenemiyor: </translation>
     </message>
@@ -487,7 +492,7 @@ Devam edilsin mi?</translation>
         <translation type="vanished">Yükleme başarısız: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1557"/>
+        <location filename="../../core.cpp" line="1558"/>
         <source>Error: could not load image.</source>
         <translation>Hata: Görüntü yüklenemedi.</translation>
     </message>
@@ -1250,46 +1255,51 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/folderview/gridcontextmenu.cpp" line="41"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
         <source>Move to...</source>
         <translation type="unfinished">Şuraya taşı...</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
         <source>Move to trash</source>
         <translation type="unfinished">Çöp kutusuna taşı</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="56"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="59"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="64"/>
         <source>Delete permanently</source>
         <translation type="unfinished">Kalıcı olarak sil</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="68"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="73"/>
         <source>Header title bar</source>
         <translation>Başlık çubuğu</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="72"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="77"/>
         <source>Left side panel</source>
         <translation>Sol yan panel</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="76"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="81"/>
         <source>Bottom status bar</source>
         <translation>Alt durum çubuğu</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="83"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="88"/>
         <source>Settings</source>
         <translation type="unfinished">Ayarlar</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="95"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="100"/>
         <source>Back</source>
         <translation>Geri</translation>
     </message>
@@ -1323,15 +1333,15 @@ Devam edilsin mi?</translation>
         <translation>Dosyayı farklı kaydet...</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="892"/>
+        <location filename="../../gui/mainwindow.cpp" line="930"/>
         <source>Folder view</source>
         <translation>Klasör görünümü</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="832"/>
-        <location filename="../../gui/mainwindow.cpp" line="893"/>
-        <location filename="../../gui/mainwindow.cpp" line="897"/>
-        <location filename="../../gui/mainwindow.cpp" line="898"/>
+        <location filename="../../gui/mainwindow.cpp" line="870"/>
+        <location filename="../../gui/mainwindow.cpp" line="931"/>
+        <location filename="../../gui/mainwindow.cpp" line="935"/>
+        <location filename="../../gui/mainwindow.cpp" line="936"/>
         <source>No file opened.</source>
         <translation>Açık dosya yok.</translation>
     </message>
@@ -1341,17 +1351,17 @@ Devam edilsin mi?</translation>
         <translation type="unfinished">Kırp</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="962"/>
+        <location filename="../../gui/mainwindow.cpp" line="1000"/>
         <source>Fit Window</source>
         <translation>Pencereye sığdır</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="966"/>
+        <location filename="../../gui/mainwindow.cpp" line="1004"/>
         <source>Fit Width</source>
         <translation>Genişliğe sığdır</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="970"/>
+        <location filename="../../gui/mainwindow.cpp" line="1008"/>
         <source>Fit 1:1</source>
         <translation>Gerçek boyutta göster 1:1</translation>
     </message>

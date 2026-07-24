@@ -543,6 +543,9 @@
           <widget class="ContextMenuItem" name="showLocation" native="true"/>
          </item>
          <item>
+          <widget class="ContextMenuItem" name="copyPath" native="true"/>
+         </item>
+         <item>
           <spacer name="verticalSpacer_6">
            <property name="orientation">
             <enum>Qt::Vertical</enum>

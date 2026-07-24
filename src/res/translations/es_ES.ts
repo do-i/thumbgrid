@@ -86,26 +86,31 @@
     </message>
     <message>
         <location filename="../../gui/contextmenu.cpp" line="98"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="102"/>
         <source>Image info</source>
         <translation>Información de la imagen</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="102"/>
+        <location filename="../../gui/contextmenu.cpp" line="106"/>
         <source>Strip metadata</source>
         <translation>Eliminar metadatos</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="106"/>
+        <location filename="../../gui/contextmenu.cpp" line="110"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="114"/>
+        <location filename="../../gui/contextmenu.cpp" line="118"/>
         <source>Back</source>
         <translation>Atras</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="117"/>
+        <location filename="../../gui/contextmenu.cpp" line="121"/>
         <source>Configure menu</source>
         <translation>Menu de configuracion</translation>
     </message>
@@ -127,42 +132,42 @@
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="287"/>
+        <location filename="../../core.cpp" line="288"/>
         <source>Updated: </source>
         <translation>Actualizado: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="292"/>
+        <location filename="../../core.cpp" line="293"/>
         <source>Welcome to </source>
         <translation>Bienvenido a </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="292"/>
+        <location filename="../../core.cpp" line="293"/>
         <source> version </source>
         <translation> versión </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="299"/>
+        <location filename="../../core.cpp" line="300"/>
         <source>Shuffle mode: OFF</source>
         <translation>Modo aleatorio: Apagado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="302"/>
+        <location filename="../../core.cpp" line="303"/>
         <source>Shuffle mode: ON</source>
         <translation>Modo aleatorio: Encendido</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="311"/>
+        <location filename="../../core.cpp" line="312"/>
         <source>Slideshow: OFF</source>
         <translation>Diapositivas: Apagado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="315"/>
+        <location filename="../../core.cpp" line="316"/>
         <source>Slideshow: ON</source>
         <translation>Diapositivas: Encendido</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="368"/>
+        <location filename="../../core.cpp" line="369"/>
         <source>Cannot display this file type</source>
         <translation>No se puede mostrar este tipo de archivo</translation>
     </message>
@@ -227,47 +232,47 @@
         <translation type="vanished">No se puede eliminar</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="415"/>
+        <location filename="../../core.cpp" line="416"/>
         <source>Cannot strip metadata from this file type</source>
         <translation>No se pueden eliminar los metadatos de este tipo de archivo</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="420"/>
+        <location filename="../../core.cpp" line="421"/>
         <source>Metadata removed</source>
         <translation>Metadatos eliminados</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="422"/>
+        <location filename="../../core.cpp" line="423"/>
         <source>Could not remove metadata</source>
         <translation>No se pudieron eliminar los metadatos</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="486"/>
+        <location filename="../../core.cpp" line="487"/>
         <source>File copied</source>
         <translation>Archivo copiado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="517"/>
+        <location filename="../../core.cpp" line="518"/>
         <source>%1 items cut</source>
         <translation>%1 elementos cortados</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="517"/>
+        <location filename="../../core.cpp" line="518"/>
         <source>Item cut</source>
         <translation>Elemento cortado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="519"/>
+        <location filename="../../core.cpp" line="520"/>
         <source>%1 items copied</source>
         <translation>%1 elementos copiados</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="519"/>
+        <location filename="../../core.cpp" line="520"/>
         <source>Item copied</source>
         <translation>Elemento copiado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="575"/>
+        <location filename="../../core.cpp" line="576"/>
         <source>Nothing to paste</source>
         <translation>Nada que pegar</translation>
     </message>
@@ -276,42 +281,42 @@
         <translation type="vanished">Mover</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="585"/>
+        <location filename="../../core.cpp" line="586"/>
         <source>%1 items moved</source>
         <translation>%1 elementos movidos</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="585"/>
+        <location filename="../../core.cpp" line="586"/>
         <source>Item moved</source>
         <translation>Elemento movido</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="588"/>
+        <location filename="../../core.cpp" line="589"/>
         <source>%1 items pasted</source>
         <translation>%1 elementos pegados</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="588"/>
+        <location filename="../../core.cpp" line="589"/>
         <source>Item pasted</source>
         <translation>Elemento pegado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="604"/>
+        <location filename="../../core.cpp" line="605"/>
         <source>Path copied</source>
         <translation>Ruta copiada</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="604"/>
+        <location filename="../../core.cpp" line="605"/>
         <source>%1 paths copied</source>
         <translation>%1 rutas copiadas</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="747"/>
+        <location filename="../../core.cpp" line="748"/>
         <source>File exists</source>
         <translation>Archivo existente</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="747"/>
+        <location filename="../../core.cpp" line="748"/>
         <source>Overwrite file?</source>
         <translation>Sobre escribir archivo?</translation>
     </message>
@@ -372,113 +377,113 @@ Continue?</source>
         <translation type="vanished">Archivo copiado.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="869"/>
+        <location filename="../../core.cpp" line="870"/>
         <source>Move to...</source>
         <translation type="unfinished">Mover a...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="874"/>
+        <location filename="../../core.cpp" line="875"/>
         <source>Cannot move a folder into itself</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="935"/>
+        <location filename="../../core.cpp" line="936"/>
         <source>Perform action &quot;</source>
         <translation>Ejecutar acción &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="935"/>
+        <location filename="../../core.cpp" line="936"/>
         <source>Changes will be saved immediately.</source>
         <translation>Los cambios serán guardados inmediatamente.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="953"/>
+        <location filename="../../core.cpp" line="954"/>
         <source>Flip horizontal</source>
         <translation>Voltear horizontalmente</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="957"/>
+        <location filename="../../core.cpp" line="958"/>
         <source>Flip vertical</source>
         <translation>Voltear verticalmente</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="961"/>
+        <location filename="../../core.cpp" line="962"/>
         <source>Rotate</source>
         <translation>Rotar</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="965"/>
+        <location filename="../../core.cpp" line="966"/>
         <source>Resize</source>
         <translation>Cambiar tamaño</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="971"/>
+        <location filename="../../core.cpp" line="972"/>
         <source>Crop</source>
         <translation>Recortar</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1001"/>
+        <location filename="../../core.cpp" line="1002"/>
         <source>File saved</source>
         <translation>Archivo grabado</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1004"/>
+        <location filename="../../core.cpp" line="1005"/>
         <source>Could not save file</source>
         <translation>No se pudo grabar el archivo</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1097"/>
         <location filename="../../core.cpp" line="1098"/>
+        <location filename="../../core.cpp" line="1099"/>
         <source>New Folder</source>
         <translation>Nueva carpeta</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1097"/>
+        <location filename="../../core.cpp" line="1098"/>
         <source>Folder name:</source>
         <translation>Nombre de la carpeta:</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1105"/>
+        <location filename="../../core.cpp" line="1106"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>El nombre de la carpeta no puede contener separadores de ruta.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1139"/>
+        <location filename="../../core.cpp" line="1140"/>
         <source>Could not open image</source>
         <translation>No se pudo abrir la imágen</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1143"/>
+        <location filename="../../core.cpp" line="1144"/>
         <source>Can only print static images</source>
         <translation>Solo se pueden imprimir imágenes estáticas</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1191"/>
+        <location filename="../../core.cpp" line="1192"/>
         <source>Cannot view root folder.</source>
         <translation>No se puede ver la carpeta raíz.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1199"/>
+        <location filename="../../core.cpp" line="1200"/>
         <source>Could not open path: </source>
         <translation>No se pudo abrir la ruta: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1239"/>
+        <location filename="../../core.cpp" line="1240"/>
         <source>Could not load folder: </source>
         <translation>No se pudo cargar la carpeta: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1297"/>
+        <location filename="../../core.cpp" line="1298"/>
         <source>Already at root folder.</source>
         <translation>Ya está en la carpeta raíz.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1464"/>
+        <location filename="../../core.cpp" line="1465"/>
         <source>End of directory.</source>
         <translation>Fin de la carpeta.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1514"/>
+        <location filename="../../core.cpp" line="1515"/>
         <source>Cannot display file: </source>
         <translation>No se puede mostrar el archivo: </translation>
     </message>
@@ -487,7 +492,7 @@ Continue?</source>
         <translation type="vanished">Carga fallida: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1557"/>
+        <location filename="../../core.cpp" line="1558"/>
         <source>Error: could not load image.</source>
         <translation>Error: no se pudo cargar la imagen.</translation>
     </message>
@@ -1258,46 +1263,51 @@ Continue?</source>
     </message>
     <message>
         <location filename="../../gui/folderview/gridcontextmenu.cpp" line="41"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
         <source>Move to...</source>
         <translation type="unfinished">Mover a...</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
         <source>Move to trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="56"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="59"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="64"/>
         <source>Delete permanently</source>
         <translation type="unfinished">Eliminar permanentemente</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="68"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="73"/>
         <source>Header title bar</source>
         <translation>Barra de título superior</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="72"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="77"/>
         <source>Left side panel</source>
         <translation>Panel lateral izquierdo</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="76"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="81"/>
         <source>Bottom status bar</source>
         <translation>Barra de estado inferior</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="83"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="88"/>
         <source>Settings</source>
         <translation type="unfinished">Preferencias</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="95"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="100"/>
         <source>Back</source>
         <translation>Atrás</translation>
     </message>
@@ -1331,15 +1341,15 @@ Continue?</source>
         <translation>Guardar como...</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="892"/>
+        <location filename="../../gui/mainwindow.cpp" line="930"/>
         <source>Folder view</source>
         <translation>Vista de carpetas</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="832"/>
-        <location filename="../../gui/mainwindow.cpp" line="893"/>
-        <location filename="../../gui/mainwindow.cpp" line="897"/>
-        <location filename="../../gui/mainwindow.cpp" line="898"/>
+        <location filename="../../gui/mainwindow.cpp" line="870"/>
+        <location filename="../../gui/mainwindow.cpp" line="931"/>
+        <location filename="../../gui/mainwindow.cpp" line="935"/>
+        <location filename="../../gui/mainwindow.cpp" line="936"/>
         <source>No file opened.</source>
         <translation>No se abrió el archivo.</translation>
     </message>
@@ -1349,17 +1359,17 @@ Continue?</source>
         <translation type="unfinished">Recortar</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="962"/>
+        <location filename="../../gui/mainwindow.cpp" line="1000"/>
         <source>Fit Window</source>
         <translation>Encajar en la ventana</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="966"/>
+        <location filename="../../gui/mainwindow.cpp" line="1004"/>
         <source>Fit Width</source>
         <translation>Encajar ancho</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="970"/>
+        <location filename="../../gui/mainwindow.cpp" line="1008"/>
         <source>Fit 1:1</source>
         <translation>Proporción 1:1</translation>
     </message>

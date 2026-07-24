@@ -595,8 +595,8 @@ void Core::pasteFile() {
 }
 
 void Core::copyPathClipboard() {
-    if(model->isEmpty())
-        return;
+    // isEmpty() only counts image files, so it wrongly blocks copying a folder's
+    // path when the open directory has no images (see Core::showRenameDialog).
     // copy every selected path (one per line) so it covers a multi-selection in folder view
     QStringList paths = currentSelection();
     if(paths.isEmpty())

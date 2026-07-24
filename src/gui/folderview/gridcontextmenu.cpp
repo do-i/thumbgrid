@@ -38,6 +38,11 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     renameItem->setAction("renameFile");
     mainLayout->addWidget(renameItem);
 
+    copyPathItem = makeItem(tr("Copy path"), ":/res/icons/common/menuitem/copy16.png");
+    copyPathItem->setObjectName("menuCopyPath");
+    copyPathItem->setAction("copyPathClipboard");
+    mainLayout->addWidget(copyPathItem);
+
     moveItem = makeItem(tr("Move to..."), ":/res/icons/common/menuitem/move16.png");
     moveItem->setObjectName("menuMove");
     moveItem->setAction("moveFile");
@@ -159,6 +164,7 @@ void GridContextMenu::addSeparator(QWidget *page, QVBoxLayout *layout) {
 void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
     convertItem->setEnabled(info.total() > 0 && info.allConvertible);
     renameItem->setEnabled(info.total() == 1);
+    copyPathItem->setEnabled(info.total() > 0);
     moveItem->setEnabled(info.total() > 0);
     trashItem->setEnabled(info.total() > 0);
     deleteItem->setEnabled(info.total() > 0);
