@@ -186,6 +186,14 @@ add_test(
     COMMAND thumbgrid_grid_context_menu_gating_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_copy_path_clipboard_test
+    behavior/test_copy_path_to_clipboard.cpp
+)
+add_test(
+    NAME "Copy path puts the selected folder's absolute path on the clipboard"
+    COMMAND thumbgrid_copy_path_clipboard_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_grid_delete_selection_test
     behavior/test_grid_delete_selection.cpp
 )
