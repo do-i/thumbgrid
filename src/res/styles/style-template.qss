@@ -1380,6 +1380,33 @@ SettingsDialog QPushButton#OK:default {
     color: %text_hc%;
 }
 
+/* FileReplaceDialog "Yes" confirms an overwrite (replace destination file /
+   merge directory) - destructive, so use the same danger tokens as
+   CustomMessageBox #dangerButton instead of the accent color. yesButton is
+   set as the dialog's default button, and FileReplaceDialog QPushButton is
+   in the :default accent group above, so the :default/:focus overrides
+   below are required too - without them that rule would repaint this
+   button with %accent%, since it is always the dialog's default/focused
+   button. */
+FileReplaceDialog QPushButton#yesButton {
+    color: %danger_text%;
+    background-color: %danger%;
+}
+
+FileReplaceDialog QPushButton#yesButton:hover {
+    background-color: %danger_hover%;
+}
+
+FileReplaceDialog QPushButton#yesButton:pressed {
+    background-color: %danger_pressed%;
+}
+
+FileReplaceDialog QPushButton#yesButton:default,
+FileReplaceDialog QPushButton#yesButton:focus {
+    background-color: %danger%;
+    color: %danger_text%;
+}
+
 /* Deliberately NOT accented: the SDialogButton marker tags generic in-page
    buttons ("+ New", "Load defaults", "..."), which are never a dialog's accept
    action. It is kept out of the :default group above because Qt's stylesheet
@@ -1539,6 +1566,31 @@ DuplicateFinderDialog QPushButton:disabled {
 DuplicateFinderDialog QPushButton#duplicateFinderStartButton:enabled {
     background-color: %accent%;
     color: %text_hc%;
+}
+
+/* "Delete selected..." moves the checked matches to trash - destructive, so
+   use the danger palette (same tokens as SettingsDialog
+   QPushButton#storedDataDeleteSelected / CustomMessageBox #dangerButton)
+   instead of the neutral button color. DuplicateFinderDialog QPushButton
+   above already supplies the shared geometry (padding/border-radius/etc)
+   and isn't in the accent :default/:focus group, so only the color states
+   need overriding here. */
+DuplicateFinderDialog QPushButton#duplicateFinderDeleteButton {
+    color: %danger_text%;
+    background-color: %danger%;
+}
+
+DuplicateFinderDialog QPushButton#duplicateFinderDeleteButton:hover {
+    background-color: %danger_hover%;
+}
+
+DuplicateFinderDialog QPushButton#duplicateFinderDeleteButton:pressed {
+    background-color: %danger_pressed%;
+}
+
+DuplicateFinderDialog QPushButton#duplicateFinderDeleteButton:disabled {
+    background-color: %danger_disabled_rgba%;
+    color: %text_secondary_rgba%;
 }
 
 DuplicateFinderDialog QLineEdit {

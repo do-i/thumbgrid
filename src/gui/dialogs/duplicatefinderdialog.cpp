@@ -27,6 +27,7 @@
 #include <QStackedWidget>
 #include <QTreeView>
 #include <QVBoxLayout>
+#include "gui/dialogs/custommessagebox.h"
 #include "settings.h"
 #include "utils/fileoperations.h"
 
@@ -544,7 +545,7 @@ void DuplicateFinderDialog::deletePaths(const QStringList &paths) {
         bytes += QFileInfo(path).size();
     QString msg = tr("Move %n file(s) to trash?", nullptr, paths.count())
                   + QString(" (%1)").arg(QLocale().formattedDataSize(bytes, 1));
-    if(QMessageBox::question(this, tr("Move to trash"), msg) != QMessageBox::Yes)
+    if(!CustomMessageBox::confirm(this, tr("Move to trash"), msg, true))
         return;
     QStringList removed, failed;
     for(const QString &path : paths) {

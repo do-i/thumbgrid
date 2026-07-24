@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QTemporaryDir>
+#include <QTimer>
 #include <QTreeView>
 #include "core.h"
 #include "components/actionmanager/actionmanager.h"
@@ -45,6 +46,7 @@ private slots:
     void folderSelectionSeedsCompareOrWithinMode();
     void smartSelectKeepsTheBestCopy();
     void movingCheckedFilesCreatesAuditableSession();
+    void deletingCheckedFilesGoesThroughDangerConfirm();
     void findDuplicatesActionOpensSeededDialog();
 };
 
@@ -191,6 +193,53 @@ void DuplicateFinderDialogTest::movingCheckedFilesCreatesAuditableSession() {
     QVERIFY(manifestText.contains("copy1.png"));
     QVERIFY(manifestText.contains("sub/copy2.png"));
     QCOMPARE(manifestText.trimmed().split('\n').count(), 2);
+}
+
+void DuplicateFinderDialogTest::deletingCheckedFilesGoesThroughDangerConfirm() {
+    // separate fixture so the shared one stays intact for other tests
+    QTemporaryDir work;
+    QVERIFY(work.isValid());
+    QVERIFY(QDir(work.path()).mkpath("scope"));
+    QImage sceneA = makeScene(0);
+    QVERIFY(sceneA.save(work.filePath("A.png")));
+    QVERIFY(QFile::copy(work.filePath("A.png"), work.filePath("scope/copy.png")));
+
+    DuplicateFinderDialog dialog;
+    dialog.presetFor(work.filePath("A.png"), work.filePath("scope"));
+    dialog.findChild<QPushButton *>("duplicateFinderStartButton")->click();
+    QTRY_COMPARE_WITH_TIMEOUT(dialog.resultsModel()->matchCount(), 1, 15000);
+    QTRY_VERIFY(!dialog.finder()->isRunning());
+    dialog.resultsModel()->smartSelect(DuplicateResultsModel::SELECT_ALL);
+
+    auto *deleteButton = dialog.findChild<QPushButton *>("duplicateFinderDeleteButton");
+    QVERIFY(deleteButton);
+    QVERIFY(deleteButton->isEnabled());
+
+    // deletePaths() now confirms via the themed CustomMessageBox (danger
+    // accept button) instead of a native QMessageBox::question. Accepting
+    // cannot be exercised end-to-end here: QFile::moveToTrash refuses files
+    // under QDir::tempPath(), where every test fixture lives (which is also
+    // why the other behavior tests never trash). Cover the gating instead:
+    // the box runs a nested exec() loop, so poll from a timer until it is
+    // the active modal, record whether it carries the danger accept button,
+    // and reject it - the checked file must survive untouched.
+    bool sawDangerConfirm = false;
+    QTimer poll;
+    poll.setInterval(50);
+    QObject::connect(&poll, &QTimer::timeout, [&] {
+        auto *box = qobject_cast<QDialog *>(QApplication::activeModalWidget());
+        if(!box)
+            return;
+        sawDangerConfirm = box->findChild<QPushButton *>("dangerButton") != nullptr;
+        poll.stop();
+        box->reject();
+    });
+    poll.start();
+    deleteButton->click();
+
+    QVERIFY(sawDangerConfirm);
+    QCOMPARE(dialog.resultsModel()->matchCount(), 1);
+    QVERIFY(QFile::exists(work.filePath("scope/copy.png")));
 }
 
 void DuplicateFinderDialogTest::findDuplicatesActionOpensSeededDialog() {

@@ -208,7 +208,10 @@ Steps:
 *Model:* **Haiku 4.5** for the QSS block; **Sonnet 5** for the confirm
 swap once A4 lands.
 
-- [ ] A5 done
+- [x] A5 done (2026-07-24 — danger QSS for the delete button incl. :disabled;
+      trash confirm now CustomMessageBox danger; behavior test covers the
+      confirm gating — accept can't be e2e-tested since QFile::moveToTrash
+      refuses files under QDir::tempPath())
 
 ## A6. FileReplaceDialog overwrite confirm not danger-colored
 
@@ -228,4 +231,6 @@ Steps:
 pattern; escalate to Sonnet 5 only if the accent/default interaction
 misbehaves.
 
-- [ ] A6 done
+- [x] A6 done (2026-07-24 — `#yesButton` danger QSS with explicit
+      :default/:focus overrides beating the FileReplaceDialog accent group;
+      no code change needed, the objectName comes from the .ui)
