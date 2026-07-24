@@ -185,7 +185,9 @@ Steps:
 but it fans out across every confirmation call site and needs per-site
 destructive-vs-benign judgment.
 
-- [ ] A4 done
+- [x] A4 done (2026-07-24 — `danger` flag on addButton/confirm/showConfirmation;
+      danger sites: overwrite ×3, trash/delete, edit-save, stored-data delete,
+      preset switch; benign kept: copy/move confirm, single-shortcut move/copy)
 
 ## A5. DuplicateFinderDialog destructive actions unstyled
 

@@ -1009,8 +1009,8 @@ void MW::showError(QString text) {
     floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_ERROR, 2800);
 }
 
-bool MW::showConfirmation(const QString& title, const QString& msg) {
-    return CustomMessageBox::confirm(this, title, msg);
+bool MW::showConfirmation(const QString& title, const QString& msg, bool danger) {
+    return CustomMessageBox::confirm(this, title, msg, danger);
 }
 
 void MW::showErrorDialog(const QString& title, const QString& msg) {

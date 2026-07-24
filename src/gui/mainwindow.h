@@ -75,7 +75,9 @@ public:
 
     ViewMode currentViewMode();
 
-    bool showConfirmation(const QString& title, const QString& msg);
+    // danger marks a destructive confirmation (trash/delete/overwrite) so the
+    // accept button renders with the red danger palette.
+    bool showConfirmation(const QString& title, const QString& msg, bool danger = false);
     void showErrorDialog(const QString& title, const QString& msg);
     DialogResult fileReplaceDialog(QString source, QString target, FileReplaceMode mode, bool multiple);
 

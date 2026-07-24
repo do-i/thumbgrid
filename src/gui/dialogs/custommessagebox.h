@@ -25,10 +25,16 @@ public:
     QLineEdit* addInput(const QString& initialValue = QString());
     // role == true accepts the dialog, false rejects it. The first button
     // added with makeDefault triggers on Enter and receives initial focus.
-    QPushButton* addButton(const QString& text, bool acceptRole, bool makeDefault = false);
+    // danger marks a destructive action (trash/delete/overwrite) so the
+    // button renders with the red danger palette instead of the normal one.
+    QPushButton* addButton(const QString& text, bool acceptRole, bool makeDefault = false, bool danger = false);
 
     // Yes / No confirmation. Returns true when the accept button was chosen.
+    // danger marks the accept button as a destructive action (trash/delete/
+    // overwrite): it renders in the red danger palette, including while it
+    // is the default/focused button.
     static bool confirm(QWidget *parent, const QString& title, const QString& text,
+                        bool danger = false,
                         const QString& acceptText = QObject::tr("Yes"),
                         const QString& rejectText = QObject::tr("No"));
     // Single-button notice (info / error). Blocks until dismissed.

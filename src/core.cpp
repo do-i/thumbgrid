@@ -750,7 +750,7 @@ void Core::renameCurrentSelection(const QString& newName) {
     if(result == FileOpResult::DESTINATION_DIR_EXISTS) {
         mw->toggleRenameOverlay(newName);
     } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(mw->showConfirmation(tr("File exists"), tr("Overwrite file?"))) {
+        if(mw->showConfirmation(tr("File exists"), tr("Overwrite file?"), true)) {
             model->renameEntry(selectedPath(), newName, true, result);
         } else {
             // show rename dialog again
@@ -938,7 +938,7 @@ template<typename... Args>
 void Core::edit_template(bool save, QString action, const std::function<std::unique_ptr<QImage>(std::shared_ptr<const QImage>, Args...)>& editFunc, Args&&... as) {
     if(model->isEmpty())
         return;
-    if(save && !mw->showConfirmation(action, tr("Perform action \"") + action + "\"? \n\n" + tr("Changes will be saved immediately.")))
+    if(save && !mw->showConfirmation(action, tr("Perform action \"") + action + "\"? \n\n" + tr("Changes will be saved immediately."), true))
         return;
     for(const auto& path : currentSelection()) {
         auto img = getEditableImage(path);

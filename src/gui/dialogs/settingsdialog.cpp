@@ -514,7 +514,7 @@ void SettingsDialog::deleteStoredData(const QList<int> &rows) {
     const QString text = rows.count() == 1
         ? tr("Delete %1? This cannot be undone.").arg(mStores.at(rows.first()).title.toLower())
         : tr("Delete %n selected data store(s)? This cannot be undone.", nullptr, rows.count());
-    if(!CustomMessageBox::confirm(this, tr("Delete stored data"), text))
+    if(!CustomMessageBox::confirm(this, tr("Delete stored data"), text, true))
         return;
     for(int row : rows)
         mStores.at(row).clear();
@@ -581,7 +581,7 @@ void SettingsDialog::setupShortcutsPage() {
             tr("Switch shortcut preset"),
             tr("Switching to \"%1\" replaces all current keyboard/mouse shortcuts "
                "with that preset's bindings. This cannot be undone from this dialog. Continue?")
-                .arg(mShortcutPresetComboBox->itemText(index)));
+                .arg(mShortcutPresetComboBox->itemText(index)), true);
         if(!proceed) {
             refreshShortcutPresetCombo(); // revert the displayed selection
             return;

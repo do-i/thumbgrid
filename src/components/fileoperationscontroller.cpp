@@ -174,7 +174,7 @@ FileOpResult FileOperationsController::copyOrMoveFile(const QString &path, const
     if(result == FileOpResult::SUCCESS) {
         mw->showMessageSuccess(move ? tr("File moved.") : tr("File copied."));
     } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
-        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?")))
+        if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?"), true))
             op(true);
     }
     return result;
@@ -209,7 +209,7 @@ void FileOperationsController::removePaths(const QStringList& paths, bool trash)
         else
             msg = (paths.count() > 1) ? tr("Delete ") + QString::number(paths.count()) + tr(" items permanently?")
                                       : tr("Delete item permanently?");
-        if(!mw->showConfirmation(trash ? tr("Move to trash") : tr("Delete permanently"), msg))
+        if(!mw->showConfirmation(trash ? tr("Move to trash") : tr("Delete permanently"), msg, true))
             return;
     }
     FileOpResult result;
@@ -299,7 +299,7 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
         return;
     }
     if(overwrites && !mw->showConfirmation(tr("Convert"),
-            tr("Some files already exist and will be overwritten.\n\nContinue?")))
+            tr("Some files already exist and will be overwritten.\n\nContinue?"), true))
         return;
 
     int converted = 0, failed = 0;

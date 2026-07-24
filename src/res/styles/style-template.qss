@@ -1388,6 +1388,32 @@ SettingsDialog QPushButton#OK:default {
    paint every tagged button with the accent color. Accept buttons get the
    accent from their own explicit per-dialog selectors instead. */
 
+/* CustomMessageBox danger accept button (trash/delete/overwrite confirms:
+   see CustomMessageBox::addButton's danger flag). Uses the same danger
+   tokens as SettingsDialog QPushButton#storedDataDeleteSelected. The
+   :default/:focus rules are required even though they repeat the base
+   colors - without them the CustomMessageBox QPushButton:default/:focus
+   rule above would repaint this button with %accent%, since it is always
+   the dialog's default/focused button. */
+CustomMessageBox QPushButton#dangerButton {
+    color: %danger_text%;
+    background-color: %danger%;
+}
+
+CustomMessageBox QPushButton#dangerButton:hover {
+    background-color: %danger_hover%;
+}
+
+CustomMessageBox QPushButton#dangerButton:pressed {
+    background-color: %danger_pressed%;
+}
+
+CustomMessageBox QPushButton#dangerButton:default,
+CustomMessageBox QPushButton#dangerButton:focus {
+    background-color: %danger%;
+    color: %danger_text%;
+}
+
 /* "Remove" buttons on each key row in the shortcut details popup. QToolButton
    isn't a QPushButton subclass so it doesn't pick up the shared button rules
    above - style it to match separately. They are destructive, so use the

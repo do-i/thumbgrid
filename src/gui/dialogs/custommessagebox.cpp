@@ -67,9 +67,11 @@ QLineEdit* CustomMessageBox::addInput(const QString& initialValue) {
     return inputField;
 }
 
-QPushButton* CustomMessageBox::addButton(const QString& text, bool acceptRole, bool makeDefault) {
+QPushButton* CustomMessageBox::addButton(const QString& text, bool acceptRole, bool makeDefault, bool danger) {
     auto *button = new QPushButton(text, this);
     button->setCursor(Qt::PointingHandCursor);
+    if(danger)
+        button->setObjectName(QStringLiteral("dangerButton"));
     if(acceptRole)
         connect(button, &QPushButton::clicked, this, &QDialog::accept);
     else
@@ -83,11 +85,11 @@ QPushButton* CustomMessageBox::addButton(const QString& text, bool acceptRole, b
 }
 
 bool CustomMessageBox::confirm(QWidget *parent, const QString& title, const QString& text,
-                               const QString& acceptText, const QString& rejectText) {
+                               bool danger, const QString& acceptText, const QString& rejectText) {
     CustomMessageBox box(parent);
     box.setTitle(title);
     box.setText(text);
-    box.addButton(acceptText, true, true);
+    box.addButton(acceptText, true, true, danger);
     box.addButton(rejectText, false);
     return box.exec() == QDialog::Accepted;
 }
