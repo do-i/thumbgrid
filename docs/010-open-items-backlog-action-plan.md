@@ -79,7 +79,27 @@ real window.
 
 *Model:* **Opus 4.8** — behavioral risk, event-ordering reasoning.
 
-### C2. `performance-enum-size` warnings (41 sites, surveyed 2026-07-24)
+### C2. `performance-enum-size` warnings — DONE (2026-07-24)
+
+All 41 done in one sweep: 40 `std::uint8_t`, 1 `std::uint16_t`
+(`DuplicateResultsModel::Roles`, whose `SortRole = Qt::UserRole` is 256).
+clang-tidy `performance-enum-size` under `src/` went **41 → 0**; the only
+remaining hits are the vendored 3rdparty header and a CMake AUTOMOC placeholder,
+neither project-owned. Diff was 26 files, +67/-41 — exactly 41 rewritten
+declarations plus 26 `#include <cstdint>`, nothing else touched.
+
+The original "never in bulk" caution was dropped deliberately, because the
+survey below established there were no width-shrinking hazards to trip over.
+
+> **Trap worth remembering.** Changing an enum's underlying type changes the
+> *layout of every class holding one as a member*. Testing a partially-applied
+> tree, or building incrementally over stale objects, produces SEGFAULTs and
+> bogus failures that look exactly like a broken sweep. Seen during this work:
+> an incremental run reported 5 failures including two segfaults, while a
+> from-scratch `clean` + rebuild of the identical source passed 47/47. Always
+> full-rebuild before judging a change like this. See also [[background-build-race]].
+
+#### Original survey (kept for reference)
 
 From `code-analysis-action-plan.md` §4 / `touch-ups-action-plan.md` T7,
 carried via 007 B3. Originally "address only when a flagged header is being
