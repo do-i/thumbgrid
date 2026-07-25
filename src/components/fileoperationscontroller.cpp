@@ -64,9 +64,17 @@ static QString canonicalizeAsFarAsPossible(const QString &path) {
 
 // A destination that is one of the sources, or lives beneath one, makes a
 // recursive copy/move consume its own output and reproduce the tree until the
-// filesystem stops it. Checked here rather than per route, so drag-and-drop,
-// bookmarks and paste cannot bypass it. Paths are canonicalized first so a
-// symlinked route to the same directory is caught too.
+// filesystem stops it - in practice the app freezes first.
+//
+// Enforced in interactiveCopy()/interactiveMove() rather than only here.
+// Checking it in copyPathsTo()/movePathsTo() alone was not enough: those are the
+// confirm-then-execute wrappers, and Core::pasteFile() deliberately skips them
+// for a plain paste, so the paste route ran unguarded. Keeping the check in the
+// wrappers as well means a doomed operation is refused before the user is asked
+// to confirm it, rather than after.
+//
+// Paths are canonicalized first so a symlinked route to the same directory is
+// caught too, including a destination that does not exist yet.
 bool FileOperationsController::destinationIsInsideSource(const QStringList& paths, const QString& destDirectory) {
     QString dest = canonicalizeAsFarAsPossible(destDirectory);
     for(const auto& path : paths) {
@@ -125,22 +133,40 @@ bool FileOperationsController::confirmFileOperation(const QString& action, QStri
     return mw->showConfirmation(action, msg);
 }
 
-void FileOperationsController::interactiveCopy(const QStringList& paths, const QString& destDirectory) {
+// The containment check is repeated here, in the executors, and not left to
+// copyPathsTo()/movePathsTo() alone. Those two are not the only way in:
+// Core::pasteFile() calls interactiveCopy() directly, on purpose, so that a
+// plain paste does not raise a confirmation prompt the way a cut+paste does. A
+// guard living only in copyPathsTo() therefore missed the paste route
+// completely, and pasting a folder into one of its own subfolders recursed
+// until the app froze. Guarding the executor makes the rule unbypassable: every
+// route to a recursive copy or move now passes through one of these two.
+bool FileOperationsController::interactiveCopy(const QStringList& paths, const QString& destDirectory) {
+    if(destinationIsInsideSource(paths, destDirectory)) {
+        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
+        return false;
+    }
     DialogResult overwriteFiles;
     for(const auto& path : paths) {
         doInteractiveCopyMove(path, destDirectory, false, overwriteFiles);
         if(overwriteFiles.cancel)
-            return;
+            return true;
     }
+    return true;
 }
 
-void FileOperationsController::interactiveMove(const QStringList& paths, const QString& destDirectory) {
+bool FileOperationsController::interactiveMove(const QStringList& paths, const QString& destDirectory) {
+    if(destinationIsInsideSource(paths, destDirectory)) {
+        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
+        return false;
+    }
     DialogResult overwriteFiles;
     for(const auto& path : paths) {
         doInteractiveCopyMove(path, destDirectory, true, overwriteFiles);
         if(overwriteFiles.cancel)
-            return;
+            return true;
     }
+    return true;
 }
 
 // Single copy/move attempt; on DESTINATION_FILE_EXISTS asks via the replace

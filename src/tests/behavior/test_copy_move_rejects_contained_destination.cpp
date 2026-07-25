@@ -72,6 +72,9 @@ private slots:
     void oneOffendingSourceAmongManyIsEnough();
     void aNonExistentDestinationUnderASymlinkedRouteToTheSourceIsContained();
     void aNonExistentDestinationOutsideEverySourceIsNotContained();
+    void theCopyExecutorRefusesTheSourcesOwnSubfolder();
+    void theMoveExecutorRefusesTheSourcesOwnSubfolder();
+    void theCopyExecutorStillCopiesToAnUnrelatedFolder();
 };
 
 void CopyMoveRejectsContainedDestinationTest::theSourceDirectoryItselfIsAContainedDestination() {
@@ -217,6 +220,60 @@ void CopyMoveRejectsContainedDestinationTest::aNonExistentDestinationOutsideEver
     QVERIFY2(!QFileInfo(destination).exists(), "the destination must not exist yet for this case to be meaningful");
     QVERIFY2(!FileOperationsController::destinationIsInsideSource({fx.source()}, destination),
              "a non-existent destination that is genuinely outside every source must be accepted");
+}
+
+// Reported freeze: copy a folder, open one of its own subfolders, paste ->
+// infinite recursion, app hangs. Core::pasteFile() calls interactiveCopy()
+// directly (on purpose, so a plain paste raises no confirmation prompt), which
+// skipped copyPathsTo()'s containment guard entirely. Testing only the static
+// destinationIsInsideSource() above is what let this through, so these two
+// drive the executors that every route actually ends up in.
+//
+// Deliberately assert the refusal happens *before* any copying: the whole
+// failure mode is that work starts and never finishes.
+void CopyMoveRejectsContainedDestinationTest::theCopyExecutorRefusesTheSourcesOwnSubfolder() {
+    Fixture fx;
+    QVERIFY(fx.build());
+
+    MW *window = new MW();
+    FileOperationsController ops(window);
+
+    const QString child = fx.path(QStringLiteral("source/child"));
+    QVERIFY(QFileInfo(child).isDir());
+
+    QVERIFY2(!ops.interactiveCopy({fx.source()}, child),
+             "pasting a folder into its own subfolder must be refused by the executor");
+    QVERIFY2(!QFileInfo(child + QStringLiteral("/source")).exists(),
+             "the refusal must land before any copying starts");
+}
+
+void CopyMoveRejectsContainedDestinationTest::theMoveExecutorRefusesTheSourcesOwnSubfolder() {
+    Fixture fx;
+    QVERIFY(fx.build());
+
+    MW *window = new MW();
+    FileOperationsController ops(window);
+
+    const QString child = fx.path(QStringLiteral("source/child"));
+    QVERIFY2(!ops.interactiveMove({fx.source()}, child),
+             "moving a folder into its own subfolder must be refused by the executor");
+    QVERIFY2(QFileInfo(fx.source()).isDir(), "the source must survive a refused move");
+}
+
+// Positive control: the executor must still do ordinary work, or the guard
+// above could pass by refusing everything.
+void CopyMoveRejectsContainedDestinationTest::theCopyExecutorStillCopiesToAnUnrelatedFolder() {
+    Fixture fx;
+    QVERIFY(fx.build());
+
+    MW *window = new MW();
+    FileOperationsController ops(window);
+
+    const QString dest = fx.path(QStringLiteral("unrelated"));
+    QVERIFY2(ops.interactiveCopy({fx.path(QStringLiteral("loose.txt"))}, dest),
+             "an ordinary copy to an unrelated folder must still be accepted");
+    QVERIFY2(QFileInfo(dest + QStringLiteral("/loose.txt")).isFile(),
+             "the file must actually arrive");
 }
 
 TG_BEHAVIOR_TEST_MAIN(CopyMoveRejectsContainedDestinationTest)

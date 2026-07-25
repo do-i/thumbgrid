@@ -26,8 +26,10 @@ public:
 public slots:
     bool copyPathsTo(const QStringList& paths, const QString& destDirectory);
     bool movePathsTo(const QStringList& paths, const QString& destDirectory);
-    void interactiveCopy(const QStringList& paths, const QString& destDirectory);
-    void interactiveMove(const QStringList& paths, const QString& destDirectory);
+    // false if the containment rule refused the operation and nothing was done;
+    // callers must not report success without checking.
+    bool interactiveCopy(const QStringList& paths, const QString& destDirectory);
+    bool interactiveMove(const QStringList& paths, const QString& destDirectory);
     FileOpResult copyOrMoveFile(const QString &path, const QString &destDirectory, bool move);
     void removePaths(const QStringList& paths, bool trash);
     void convertToFormat(const QStringList& paths, const QString& format);

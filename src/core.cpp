@@ -591,7 +591,12 @@ void Core::pasteFile() {
             return;
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
     } else {
-        fileOps->interactiveCopy(toPaste, destDirectory);
+        // interactiveCopy() rather than copyPathsTo() so a plain paste does not
+        // raise a confirmation prompt. It still enforces the containment rule,
+        // and returns false when it refuses - do not claim success then, and
+        // leave the clipboard alone so the paste can be retried elsewhere.
+        if(!fileOps->interactiveCopy(toPaste, destDirectory))
+            return;
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items pasted").arg(toPaste.count()) : tr("Item pasted"));
     }
     // Clear the clipboard once the paste is done. For a move this stops a second
