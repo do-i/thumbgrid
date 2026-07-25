@@ -46,12 +46,34 @@ Highest value first:
 
 *Model:* **Opus 4.8** — behavioral risk, event-ordering reasoning.
 
-### C2. `performance-enum-size` warnings (~30 sites)
+### C2. `performance-enum-size` warnings (41 sites, surveyed 2026-07-24)
 
 From `code-analysis-action-plan.md` §4 / `touch-ups-action-plan.md` T7,
-carried via 007 B3. Deliberately skipped as low-value; address only when a
-flagged header is being edited anyway. *Model:* **Haiku 4.5**, folded into
-whatever session touches the header.
+carried via 007 B3. Originally "address only when a flagged header is being
+edited anyway". A full survey has since been done, and it removes most of the
+reason for that caution — the sweep is mechanically safe:
+
+- **41 project enums**, all currently implicit `unsigned int`. 40 want
+  `std::uint8_t`; exactly one, `DuplicateResultsModel::Roles`, wants
+  `std::uint16_t` (its `SortRole = Qt::UserRole` is 256 — do not reflexively
+  write `uint8_t` there).
+- The codebase has **no `Q_ENUM`/`Q_ENUMS`/`Q_FLAG`/`Q_DECLARE_FLAGS`, no
+  `QFlags`, no enum bitfields, no enum streamed through `QDataStream`, and no
+  enum crossing a queued signal/slot boundary** — so none of the usual
+  width-shrinking hazards applies.
+- Settings persistence is safe by construction: enums reach disk via
+  `QVariant(int)` integral promotion and return through `toInt()` plus a range
+  clamp, so a fixed underlying type leaves the on-disk bytes identical.
+  `PanelPosition` is stored as a *string*; `ViewMode` keys shortcut JSON by
+  string token, never by number.
+- `scriptmanager.cpp` has an unnamed function-local enum needing
+  `enum : std::uint8_t { … }` rather than a header edit.
+- No header currently includes `<cstdint>`, so the sweep must add it wherever
+  it introduces `std::uint8_t`.
+- **Skip** `src/3rdparty/QtOpenCV/cvmatandqimage.h` (vendored — merge friction,
+  no benefit).
+
+*Model:* **Haiku 4.5** — mechanical, now that the risk analysis is done.
 
 ## Parked — blocked on an external precondition
 
