@@ -330,6 +330,14 @@ add_test(
     COMMAND thumbgrid_startup_auto_resize_chrome_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_stale_cache_dirs_swept_test
+    behavior/test_stale_cache_dirs_are_swept_but_live_ones_survive.cpp
+)
+add_test(
+    NAME "Stale cache dirs are swept but live ones survive"
+    COMMAND thumbgrid_stale_cache_dirs_swept_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )
