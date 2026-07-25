@@ -219,6 +219,9 @@
         ],
         "toggleFolderViewTopBar": [
             "$Ctrl+T"
+        ],
+        "toggleImageInfo": [
+            "I"
         ]
     },
     "platform": {

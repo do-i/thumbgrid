@@ -43,6 +43,7 @@
         "createDirectory": ["F7"],
         "documentView": ["Enter"],
         "goUp": ["Backspace"],
-        "moveFile": ["M"]
+        "moveFile": ["M"],
+        "toggleImageInfo": ["I"]
     }
 }
