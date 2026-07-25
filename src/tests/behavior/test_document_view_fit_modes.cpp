@@ -9,9 +9,9 @@
 #include "gui/mainwindow.h"
 #include "gui/viewers/imageviewerv2.h"
 
-// Two fit-mode behaviours that were wrong in ways only visible on screen.
+// Fit-mode behaviours that were wrong in ways only visible on screen.
 //
-// Both use one square image in a deliberately landscape viewport - the shape
+// Most use one square image in a deliberately landscape viewport - the shape
 // that exposes them. A square image is wider-relative-to-the-window than the
 // window itself, so:
 //   - at 1:1 it overflows *both* axes, the case where nothing centered it;
@@ -26,6 +26,13 @@ constexpr int kViewportH = 500;
 // comfortably smaller than the viewport on both axes
 constexpr int kSmallW = 400;
 constexpr int kSmallH = 300;
+// Small enough that fit-window wants to scale them past the 2x expand limit
+// below, so a clamped fit and an unclamped one are different sizes on screen.
+constexpr int kExpandLimit = 2;
+constexpr int kTinyW = 200;
+constexpr int kTinyH = 150;
+constexpr int kNextTinyW = 240;
+constexpr int kNextTinyH = 180;
 
 } // namespace
 
@@ -38,6 +45,9 @@ private:
     ImageViewerV2 *openSquareImage(QTemporaryDir &fixture, std::unique_ptr<Core> &core);
     // Same flow, but with an image comfortably smaller than the viewport.
     ImageViewerV2 *openSmallImage(QTemporaryDir &fixture, std::unique_ptr<Core> &core);
+    // Two tiny images in one gallery, opened on the first, so a test can step to
+    // the second the way the "next image" shortcut does.
+    ImageViewerV2 *openTinyImagePair(QTemporaryDir &fixture, std::unique_ptr<Core> &core);
 
 private slots:
     void oversizedImageAtOneToOneOpensCentered();
@@ -46,23 +56,33 @@ private slots:
     void stretchIsReachableAsTheDefaultFitMode();
     void explicitFitExpandsASmallImageEvenWithExpandImageOff();
     void openingAnImageStillHonoursExpandImageOff();
+    void explicitFitDoesNotOutliveTheImageEvenWithKeepFitModeOn();
 };
 
 namespace {
 
-// Shared open flow: build a one-image gallery, show the window at a fixed
-// landscape size, then enter document view on that image.
+bool writeGalleryImage(const QDir &root, const QString &fileName, const QSize &size) {
+    QImage image(size, QImage::Format_RGB32);
+    image.fill(Qt::darkCyan);
+    return image.save(root.filePath("gallery/" + fileName), "PNG");
+}
+
+// Shared open flow: build a gallery, show the window at a fixed landscape size,
+// then enter document view on its first image. A second image is written too
+// when secondSize is valid, so a test can navigate to it.
 ImageViewerV2 *openGalleryImage(QTemporaryDir &fixture, std::unique_ptr<Core> &core,
-                                const QSize &imageSize, const QString &fileName) {
+                                const QSize &imageSize, const QString &fileName,
+                                const QSize &secondSize = QSize(),
+                                const QString &secondName = QString()) {
     if(!fixture.isValid())
         return nullptr;
     QDir root(fixture.path());
     if(!root.mkpath("gallery"))
         return nullptr;
     const QString galleryPath = root.filePath("gallery");
-    QImage image(imageSize, QImage::Format_RGB32);
-    image.fill(Qt::darkCyan);
-    if(!image.save(root.filePath("gallery/" + fileName), "PNG"))
+    if(!writeGalleryImage(root, fileName, imageSize))
+        return nullptr;
+    if(secondSize.isValid() && !writeGalleryImage(root, secondName, secondSize))
         return nullptr;
 
     // Earlier slots' windows can still be alive (they are deleted via
@@ -97,7 +117,9 @@ ImageViewerV2 *openGalleryImage(QTemporaryDir &fixture, std::unique_ptr<Core> &c
     auto grid = window->findChild<FolderGridView *>("thumbnailGrid");
     if(!grid)
         return nullptr;
-    for(int i = 0; i < 200 && grid->itemCount() < 2; ++i)
+    // One item per file, plus the entry that sits ahead of them.
+    const int expectedItems = secondSize.isValid() ? 3 : 2;
+    for(int i = 0; i < 200 && grid->itemCount() < expectedItems; ++i)
         QCoreApplication::processEvents();
 
     // Settle the window into a landscape shape *before* opening the image, so it
@@ -129,6 +151,14 @@ ImageViewerV2 *DocumentViewFitModesTest::openSmallImage(QTemporaryDir &fixture,
                                                         std::unique_ptr<Core> &core) {
     return openGalleryImage(fixture, core, QSize(kSmallW, kSmallH),
                             QStringLiteral("small.png"));
+}
+
+ImageViewerV2 *DocumentViewFitModesTest::openTinyImagePair(QTemporaryDir &fixture,
+                                                           std::unique_ptr<Core> &core) {
+    return openGalleryImage(fixture, core, QSize(kTinyW, kTinyH),
+                            QStringLiteral("a-tiny.png"),
+                            QSize(kNextTinyW, kNextTinyH),
+                            QStringLiteral("b-tiny.png"));
 }
 
 // reset() parks the scene on the pixmap's top-left. At 1:1 nothing moved it
@@ -319,6 +349,76 @@ void DocumentViewFitModesTest::openingAnImageStillHonoursExpandImageOff() {
              qPrintable(QStringLiteral("opening should leave the image at 1:1, got %1x%2")
                             .arg(shown.width())
                             .arg(shown.height())));
+}
+
+// "Keep fit mode" is meant to carry the fit *mode* to the next image. It used to
+// carry the explicit-fit exemption along with it, because the flag was cleared
+// only inside the branch keepFitMode skips: one click on any fit button and
+// every later image ignored "Expand images, up to: Nx" for the rest of the
+// session. An explicit fit belongs to the image the user clicked on, so the next
+// image is laid out under the expand policy again - in the mode that was kept.
+void DocumentViewFitModesTest::explicitFitDoesNotOutliveTheImageEvenWithKeepFitModeOn() {
+    settings->setImageFitMode(FIT_WINDOW);
+    settings->setExpandImage(true);
+    settings->setExpandLimit(kExpandLimit);
+    settings->setKeepFitMode(true);
+    settings->sendChangeNotification();
+
+    QTemporaryDir fixture;
+    std::unique_ptr<Core> core;
+    ImageViewerV2 *viewer = openTinyImagePair(fixture, core);
+    QVERIFY2(viewer != nullptr, "The document image viewer should exist.");
+    QTRY_VERIFY2(viewer->isDisplaying(), "The first tiny image should be displayed.");
+    QCOMPARE(viewer->sourceSize(), QSize(kTinyW, kTinyH));
+
+    const QRect vport = viewer->viewport()->rect();
+    QVERIFY2(kTinyW * kExpandLimit < vport.width() && kNextTinyW * kExpandLimit < vport.width(),
+             "This check is only meaningful while the expand limit stops short of the viewport width.");
+    QVERIFY2(kNextTinyH * kExpandLimit < vport.height(),
+             "This check is only meaningful while the expand limit stops short of the viewport height.");
+
+    // The click. An explicit fit is a direct instruction, so it ignores the
+    // expand limit and spans the viewport.
+    viewer->setFitWidth();
+    QTest::qWait(200);
+    QCOMPARE(viewer->fitMode(), FIT_WIDTH);
+    QVERIFY2(viewer->scaledRectR().width() >= vport.width(),
+             qPrintable(QStringLiteral("the explicit fit should span the viewport, got %1 of %2")
+                            .arg(viewer->scaledRectR().width())
+                            .arg(vport.width())));
+
+    // Step to the next image, the way the "next image" shortcut does. Retried
+    // because the second file may still be arriving from the directory loader.
+    for(int i = 0; i < 100 && viewer->sourceSize() != QSize(kNextTinyW, kNextTinyH); ++i) {
+        QVERIFY2(actionManager->invokeAction("nextImage"),
+                 "nextImage should be a known, invocable action.");
+        QTest::qWait(50);
+    }
+    QCOMPARE(viewer->sourceSize(), QSize(kNextTinyW, kNextTinyH));
+
+    // The mode carried over - that is what keepFitMode is for - but the expand
+    // limit applies again, so the new image stops at 2x instead of filling 900.
+    QCOMPARE(viewer->fitMode(), FIT_WIDTH);
+    const QRect shown = viewer->scaledRectR();
+    QVERIFY2(shown.width() <= kNextTinyW * kExpandLimit + 2,
+             qPrintable(QStringLiteral("the new image should stop at the %1x expand limit, got %2 wide")
+                            .arg(kExpandLimit)
+                            .arg(shown.width())));
+
+    // The fit-window scale is computed once during that load, so it has to be
+    // computed with the flag already cleared. Switching to fit-window without a
+    // click reads exactly that cached value - it stays unclamped if the clear
+    // happens after updateMinScale() instead of before it.
+    viewer->setFitMode(FIT_WINDOW);
+    QTest::qWait(200);
+    QVERIFY2(viewer->scaledRectR().height() <= kNextTinyH * kExpandLimit + 2,
+             qPrintable(QStringLiteral("fit-window should honour the %1x expand limit too, got %2 high")
+                            .arg(kExpandLimit)
+                            .arg(viewer->scaledRectR().height())));
+
+    // Leave the shared settings as the other slots expect to find them.
+    settings->setKeepFitMode(false);
+    settings->sendChangeNotification();
 }
 
 TG_BEHAVIOR_TEST_MAIN(DocumentViewFitModesTest)

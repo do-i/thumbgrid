@@ -156,9 +156,11 @@ void ImageViewerV2::readSettings() {
     // set bg color
     onFullscreenModeChanged(mIsFullscreen);
     scene->update();
+    // Before updateMinScale(), which caches fitWindowScale/fitWindowStretchScale
+    // through the flag - see showImage().
+    explicitFit = false; // re-applying the configured default is not an explicit fit
     updateMinScale();
     setScalingFilter(settings->scalingFilter());
-    explicitFit = false; // re-applying the configured default is not an explicit fit
     setFitMode(imageFitModeDefault);
 }
 
@@ -298,11 +300,15 @@ void ImageViewerV2::showAnimation(std::shared_ptr<QMovie> _movie) {
         emit durationChanged(movie->frameCount());
         emit frameChanged(0);
 
+        // An explicit fit applies to the image the user acted on, so it does not
+        // survive a load - "keep fit mode" keeps the *mode*, not the exemption
+        // from the "Expand images" policy. Cleared before updateMinScale()
+        // because updateFitWindowScale()/updateFitWindowStretchScale() read the
+        // flag and cache the scales that applyFitMode() zooms to below.
+        explicitFit = false; // back to the automatic policy for a new image
         updateMinScale();
-        if(!keepFitMode || imageFitMode == FIT_FREE) {
+        if(!keepFitMode || imageFitMode == FIT_FREE)
             imageFitMode = imageFitModeDefault;
-            explicitFit = false; // back to the automatic policy for a new image
-        }
 
         if(mViewLock == LOCK_NONE) {
             applyFitMode();
@@ -329,12 +335,16 @@ void ImageViewerV2::showImage(std::unique_ptr<QPixmap> _pixmap) {
             mode = Qt::FastTransformation;
         pixmapItem.setTransformationMode(mode);
         pixmapItem.show();
+        // An explicit fit applies to the image the user acted on, so it does not
+        // survive a load - "keep fit mode" keeps the *mode*, not the exemption
+        // from the "Expand images" policy. Cleared before updateMinScale()
+        // because updateFitWindowScale()/updateFitWindowStretchScale() read the
+        // flag and cache the scales that applyFitMode() zooms to below.
+        explicitFit = false; // back to the automatic policy for a new image
         updateMinScale();
 
-        if(!keepFitMode || imageFitMode == FIT_FREE) {
+        if(!keepFitMode || imageFitMode == FIT_FREE)
             imageFitMode = imageFitModeDefault;
-            explicitFit = false; // back to the automatic policy for a new image
-        }
 
         if(mViewLock == LOCK_NONE) {
             applyFitMode();
@@ -945,8 +955,11 @@ void ImageViewerV2::setFitMode(ImageFitMode newMode) {
 
 // The four slots below are what a fit button / shortcut reaches. They are a
 // direct instruction, so they opt out of the "Expand images" policy - see
-// applyExpandPolicy(). The flag is sticky so a later resize does not undo the
-// choice; loading an image or re-reading settings clears it.
+// applyExpandPolicy(). The flag is sticky within one image, so a later resize
+// does not undo the choice, but it is scoped to that image: every load
+// (showImage()/showAnimation()) clears it, as does re-reading settings. It is
+// cleared on load even with "keep fit mode" on - that setting carries the fit
+// *mode* to the next image, not this exemption.
 
 // public, sends scale request
 void ImageViewerV2::setFitOriginal() {
