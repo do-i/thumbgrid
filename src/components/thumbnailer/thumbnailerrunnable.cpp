@@ -1,10 +1,12 @@
 #include "thumbnailerrunnable.h"
+#include "utils/logging.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QImageReader>
 #include <QPainter>
 #include <QPainterPath>
 #include <QSet>
+#include <QTemporaryDir>
 #include <utility>
 
 namespace {
@@ -503,9 +505,19 @@ QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewa
 }
 
 std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbnail(const QString& path, int size, bool squared) {
-    QFileInfo fi(path);
     QImageReader reader;
-    QString tmpFilePath = settings->tmpDir() + fi.fileName() + ".png";
+    // Private per-task directory. The output path used to be
+    // "<tmpDir>/<source basename>.png", so two videos sharing a basename - or
+    // two workers on the same file - raced for one predictable path, each able
+    // to read or delete the other's frame. It also made the output name
+    // guessable inside a cache root the user can point anywhere.
+    QTemporaryDir tmpDir(settings->tmpDir() + QStringLiteral("videothumb-"));
+    if(!tmpDir.isValid())
+        return std::make_pair(std::make_unique<QImage>(), QSize());
+    // owner-only, so nothing else can reach the frame while it is on disk
+    QFile::setPermissions(tmpDir.path(), QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+
+    QString tmpFilePath = tmpDir.filePath(QStringLiteral("frame.png"));
     QString tmpFilePathEsc = tmpFilePath;
     tmpFilePathEsc.replace("%", "%%");
     QProcess process;
@@ -521,8 +533,24 @@ std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbn
                                 << "--o=" + tmpFilePathEsc
                                 << path
                   );
-    process.waitForFinished(8000);
+    // Check start, timeout and exit status explicitly; on any of them the
+    // QTemporaryDir below still takes the partial output with it.
+    if(!process.waitForStarted(3000)) {
+        qCWarning(logThumbnailer) << "could not start" << settings->mpvBinary() << "for" << path;
+        return std::make_pair(std::make_unique<QImage>(), QSize());
+    }
+    if(!process.waitForFinished(8000)) {
+        qCWarning(logThumbnailer) << "video thumbnail timed out for" << path;
+        process.kill();
+        process.waitForFinished(1000);
+        return std::make_pair(std::make_unique<QImage>(), QSize());
+    }
+    bool ok = (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0);
     process.close();
+    if(!ok || !QFileInfo::exists(tmpFilePath)) {
+        qCWarning(logThumbnailer) << "no video frame produced for" << path;
+        return std::make_pair(std::make_unique<QImage>(), QSize());
+    }
 
     reader.setFileName(tmpFilePath);
     reader.setFormat("png");
@@ -541,12 +569,9 @@ std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbn
     QSize originalSize = reader.size();
     auto result = std::make_unique<QImage>(reader.read());
 
-    // force reader to close file so it can be deleted later
+    // force reader to close file so it can be deleted
     reader.setFileName("");
 
-    // remove temporary file
-    QFile tmpFile(tmpFilePath);
-    tmpFile.remove();
-
+    // tmpDir removes itself (and the frame inside it) as it goes out of scope
     return std::make_pair(std::move(result), originalSize);
 }
