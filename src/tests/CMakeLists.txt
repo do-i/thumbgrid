@@ -306,6 +306,14 @@ add_test(
     COMMAND thumbgrid_copy_move_contained_destination_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_document_view_fit_modes_test
+    behavior/test_document_view_fit_modes.cpp
+)
+add_test(
+    NAME "Document view centers a 1:1 image and stretch fills the window"
+    COMMAND thumbgrid_document_view_fit_modes_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )

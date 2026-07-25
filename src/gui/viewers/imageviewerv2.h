@@ -142,7 +142,10 @@ private:
     bool transparencyGrid, expandImage,    smoothAnimatedImages,
          smoothUpscaling,  forceFastScale, keepFitMode,
          loopPlayback,     mIsFullscreen,  scrollBarWorkaround,
-         useFixedZoomLevels, trackpadDetection;
+         useFixedZoomLevels, trackpadDetection,
+         // true while the current fit came from an explicit action rather than
+         // the automatic on-open/on-resize fit; opts out of "Expand images"
+         explicitFit;
     QList<float> zoomLevels;
     MouseInteractionState mouseInteraction;
     const int SCROLL_UPDATE_RATE = 7;
@@ -197,9 +200,12 @@ private:
     void updatePixmap(std::unique_ptr<QPixmap> newPixmap);
     Qt::TransformationMode selectTransformationMode();
     void centerIfNecessary();
+    // centerOnPixmap(), deferred past the eventloop on the first call
+    void centerOnPixmapDeferred();
     void snapToEdges();
     void scrollSmooth(int dx, int dy);
     void scrollPrecise(int dx, int dy);
+    float applyExpandPolicy(float scale) const;
     void updateFitWindowScale();
     void updateFitWindowStretchScale();
     void updateMinScale();

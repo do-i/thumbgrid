@@ -357,6 +357,8 @@ void ViewerWidget::setFitMode(ImageFitMode mode) {
         emit fitWidth();
     else if(mode == FIT_ORIGINAL)
         emit fitOriginal();
+    else if(mode == FIT_WINDOW_STRETCH)
+        emit fitWindowStretch();
 }
 
 ImageFitMode ViewerWidget::fitMode() {

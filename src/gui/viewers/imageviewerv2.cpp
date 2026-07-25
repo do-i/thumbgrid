@@ -20,6 +20,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
     scrollBarWorkaround(true),
     useFixedZoomLevels(false),
     trackpadDetection(true),
+    explicitFit(false),
     mouseInteraction(MouseInteractionState::MOUSE_NONE),
     minScale(0.01f),
     maxScale(500.0f),
@@ -157,6 +158,7 @@ void ImageViewerV2::readSettings() {
     scene->update();
     updateMinScale();
     setScalingFilter(settings->scalingFilter());
+    explicitFit = false; // re-applying the configured default is not an explicit fit
     setFitMode(imageFitModeDefault);
 }
 
@@ -297,8 +299,10 @@ void ImageViewerV2::showAnimation(std::shared_ptr<QMovie> _movie) {
         emit frameChanged(0);
 
         updateMinScale();
-        if(!keepFitMode || imageFitMode == FIT_FREE)
+        if(!keepFitMode || imageFitMode == FIT_FREE) {
             imageFitMode = imageFitModeDefault;
+            explicitFit = false; // back to the automatic policy for a new image
+        }
 
         if(mViewLock == LOCK_NONE) {
             applyFitMode();
@@ -327,8 +331,10 @@ void ImageViewerV2::showImage(std::unique_ptr<QPixmap> _pixmap) {
         pixmapItem.show();
         updateMinScale();
 
-        if(!keepFitMode || imageFitMode == FIT_FREE)
+        if(!keepFitMode || imageFitMode == FIT_FREE) {
             imageFitMode = imageFitModeDefault;
+            explicitFit = false; // back to the automatic policy for a new image
+        }
 
         if(mViewLock == LOCK_NONE) {
             applyFitMode();
@@ -362,6 +368,20 @@ void ImageViewerV2::reset() {
 
 void ImageViewerV2::closeImage() {
     reset();
+}
+
+// centerOnPixmap(), held back one event-loop turn on the very first call.
+// There's either a qt bug or we are misusing something: the first
+// scrollbar->setValue() lands on the wrong value unless it comes from the
+// eventloop. fitWindow() has always carried this workaround; it is shared here
+// so every centering path gets it exactly once.
+void ImageViewerV2::centerOnPixmapDeferred() {
+    if(scrollBarWorkaround) {
+        scrollBarWorkaround = false;
+        QTimer::singleShot(0, this, &ImageViewerV2::centerOnPixmap);
+    } else {
+        centerOnPixmap();
+    }
 }
 
 void ImageViewerV2::setScaledPixmap(std::unique_ptr<QPixmap> newFrame) {
@@ -748,6 +768,21 @@ void ImageViewerV2::mouseMoveZoom(QMouseEvent *event) {
         imageFitMode = FIT_WINDOW_STRETCH;
 }
 
+// "Expand images, up to: Nx" governs the *automatic* fit - the one applied when
+// an image opens or the window is resized. An explicit fit action is a direct
+// instruction from the user, so it scales to the window whatever the setting
+// says: otherwise the fit buttons silently do nothing for any image already
+// smaller than the view, which is indistinguishable from them being broken.
+float ImageViewerV2::applyExpandPolicy(float scale) const {
+    if(explicitFit)
+        return scale;
+    if(!expandImage && scale > 1.0f)
+        return 1.0f;
+    if(scale > expandLimit)
+        return expandLimit;
+    return scale;
+}
+
 // scale at which current image fills the window
 void ImageViewerV2::updateFitWindowScale() {
     float scaleFitX = (float) viewport()->width()  * dpr / pixmap->width();
@@ -757,7 +792,7 @@ void ImageViewerV2::updateFitWindowScale() {
     } else {
         fitWindowScale = scaleFitY;
     }
-    if(expandImage && fitWindowScale > expandLimit)
+    if(!explicitFit && expandImage && fitWindowScale > expandLimit)
         fitWindowScale = expandLimit;
 }
 
@@ -765,14 +800,15 @@ void ImageViewerV2::updateFitWindowStretchScale() {
     if(!pixmap)
         return;
 
+    float scaleFitX = (float) viewport()->width()  * dpr / pixmap->width();
     float scaleFitY = (float) viewport()->height() * dpr / pixmap->height();
 
-    // For "Fit in window (stretch)", we always use height-based scaling
-    // This ensures the full image is always visible while stretching to fill the window height
-    fitWindowStretchScale = scaleFitY;
-
-    if(expandImage && fitWindowStretchScale > expandLimit)
-        fitWindowStretchScale = expandLimit;
+    // "Fit in window (stretch)" fills the window: take the *larger* of the two
+    // ratios so neither axis is left letterboxed, and let the other axis overflow
+    // (it stays scrollable). Height-only scaling used to be equal to
+    // fitWindowScale - which is min(x, y) - for every image narrower than the
+    // window, so the mode visibly did nothing in the common landscape-window case.
+    fitWindowStretchScale = applyExpandPolicy(qMax(scaleFitX, scaleFitY));
 }
 
 void ImageViewerV2::updateMinScale() {
@@ -798,11 +834,7 @@ void ImageViewerV2::updateMinScale() {
 void ImageViewerV2::fitWidth() {
     if(!pixmap)
         return;
-    float scaleX = (float)viewport()->width() * dpr / pixmap->width();
-    if(!expandImage && scaleX > 1.0f)
-        scaleX = 1.0f;
-    if(scaleX > expandLimit)
-        scaleX = expandLimit;
+    float scaleX = applyExpandPolicy((float)viewport()->width() * dpr / pixmap->width());
     if(currentScale() != scaleX) {
         swapToOriginalPixmap();
         doZoom(scaleX);
@@ -820,22 +852,14 @@ void ImageViewerV2::fitWidth() {
 void ImageViewerV2::fitWindow() {
     if(!pixmap)
         return;
-    if(imageFits() && !expandImage) {
+    if(imageFits() && !expandImage && !explicitFit) {
         fitNormal();
     } else {
         if(currentScale() != fitWindowScale) {
             swapToOriginalPixmap();
             doZoom(fitWindowScale);
         }
-        // There's either a qt bug or I am misusing something.
-        // First call to scrollbar->setValue() produces wrong results
-        // - unless when called from eventloop
-        if(scrollBarWorkaround) {
-            scrollBarWorkaround = false;
-            QTimer::singleShot(0, this, &ImageViewerV2::centerOnPixmap);
-        } else {
-            centerOnPixmap();
-        }
+        centerOnPixmapDeferred();
     }
 }
 
@@ -855,13 +879,7 @@ void ImageViewerV2::fitWindowStretch() {
         doZoom(fitWindowStretchScale);
     }
 
-    // Handle scrollbar workaround similar to fitWindow()
-    if(scrollBarWorkaround) {
-        scrollBarWorkaround = false;
-        QTimer::singleShot(0, this, &ImageViewerV2::centerOnPixmap);
-    } else {
-        centerOnPixmap();
-    }
+    centerOnPixmapDeferred();
 }
 
 void ImageViewerV2::fitFree(float scale) {
@@ -881,7 +899,16 @@ void ImageViewerV2::fitFree(float scale) {
             setZoomAnchor(viewport()->rect().center());
         else
             setZoomAnchor(mapFromGlobal(cursor().pos()));
+        // zoomAnchored() is a no-op when the scale already matches - which is
+        // exactly the case for a freshly loaded image at 1:1, since reset()
+        // leaves the scale at 1.0 parked on the pixmap's top-left corner. With
+        // nothing to anchor, centerIfNecessary() only handles axes the image
+        // fits inside and snapToEdges() leaves a full-bleed image alone, so an
+        // image larger than the viewport on both axes stayed in its corner.
+        const bool rescaled = currentScale() != scale;
         zoomAnchored(scale);
+        if(!rescaled && focusIn1to1 == FOCUS_CENTER)
+            centerOnPixmapDeferred();
         centerIfNecessary();
         snapToEdges();
     }
@@ -916,25 +943,34 @@ void ImageViewerV2::setFitMode(ImageFitMode newMode) {
     requestScaling();
 }
 
+// The four slots below are what a fit button / shortcut reaches. They are a
+// direct instruction, so they opt out of the "Expand images" policy - see
+// applyExpandPolicy(). The flag is sticky so a later resize does not undo the
+// choice; loading an image or re-reading settings clears it.
+
 // public, sends scale request
 void ImageViewerV2::setFitOriginal() {
+    explicitFit = true;
     setFitMode(FIT_ORIGINAL);
 }
 
 // public, sends scale request
 void ImageViewerV2::setFitWidth() {
+    explicitFit = true;
     setFitMode(FIT_WIDTH);
     requestScaling();
 }
 
 // public, sends scale request
 void ImageViewerV2::setFitWindow() {
+    explicitFit = true;
     setFitMode(FIT_WINDOW);
     requestScaling();
 }
 
 // public, sends scale request
 void ImageViewerV2::setFitWindowStretch() {
+    explicitFit = true;
     setFitMode(FIT_WINDOW_STRETCH);
     requestScaling();
 }
