@@ -30,6 +30,8 @@ public slots:
 
 private:
     bool confirmFileOperation(const QString& action, QStringList paths, const QString& destDirectory);
+    // true if destDirectory is a source directory or lives beneath one
+    static bool destinationIsInsideSource(const QStringList& paths, const QString& destDirectory);
     bool confirmRemovePossible(const QStringList& paths, bool trash);
     void doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles);
     void doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,

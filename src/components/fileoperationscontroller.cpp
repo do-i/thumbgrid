@@ -27,7 +27,35 @@ void FileOperationsController::outputError(const FileOpResult &error) const {
     qCWarning(logCore) << FileOperations::decodeResult(error);
 }
 
+// A destination that is one of the sources, or lives beneath one, makes a
+// recursive copy/move consume its own output and reproduce the tree until the
+// filesystem stops it. Checked here rather than per route, so drag-and-drop,
+// bookmarks and paste cannot bypass it. Paths are canonicalized first so a
+// symlinked route to the same directory is caught too.
+bool FileOperationsController::destinationIsInsideSource(const QStringList& paths, const QString& destDirectory) {
+    QString dest = QFileInfo(destDirectory).canonicalFilePath();
+    if(dest.isEmpty())
+        dest = QDir::cleanPath(destDirectory);
+    for(const auto& path : paths) {
+        QFileInfo fi(path);
+        // Only a real directory can contain the destination. A link is
+        // recreated as a link, so it never recurses.
+        if(fi.isSymLink() || !fi.isDir())
+            continue;
+        QString src = fi.canonicalFilePath();
+        if(src.isEmpty())
+            continue;
+        if(dest == src || dest.startsWith(src + QLatin1Char('/')))
+            return true;
+    }
+    return false;
+}
+
 bool FileOperationsController::copyPathsTo(const QStringList& paths, const QString& destDirectory) {
+    if(destinationIsInsideSource(paths, destDirectory)) {
+        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
+        return false;
+    }
     if(!confirmFileOperation(tr("Copy"), paths, destDirectory))
         return false;
     interactiveCopy(paths, destDirectory);
@@ -35,6 +63,10 @@ bool FileOperationsController::copyPathsTo(const QStringList& paths, const QStri
 }
 
 bool FileOperationsController::movePathsTo(const QStringList& paths, const QString& destDirectory) {
+    if(destinationIsInsideSource(paths, destDirectory)) {
+        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
+        return false;
+    }
     if(!confirmFileOperation(tr("Move"), paths, destDirectory))
         return false;
     interactiveMove(paths, destDirectory);
