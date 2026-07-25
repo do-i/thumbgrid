@@ -23,11 +23,26 @@ via 007 B2. All carry the greppable marker `// FIXME: re-entrancy hazard
 per-site restructure plus interactive verification. One site at a time.
 Highest value first:
 
-- [ ] `src/components/directorymodel.cpp` ×3 (watcher-ordering guards →
-      explicit event sequencing in DirectoryManager)
-- [ ] `src/gui/customwidgets/thumbnailview.cpp` ×3 (layout waits →
-      `QTimer::singleShot(0)` or polish-time geometry passes)
-- [ ] The rest per the FIXME grep.
+- [x] `src/components/directorymodel.cpp` ×3 — done 2026-07-24. Removed
+      outright. The racing watcher event for `moveFileTo`/`moveSymLinkTo` sits
+      behind a 150 ms inotify debounce (`linuxwatcher.cpp` `EVENT_MOVE_TIMEOUT`),
+      so `processEvents()` provably never flushed it — it was pure re-entrancy
+      hazard with no ordering benefit. `renameEntry` now mutates eagerly and
+      lets the later watcher event be absorbed by DirectoryManager's idempotent
+      guards; `updateFileEntry()` only emits `fileModified` when the entry
+      actually changed, so that absorption no longer causes a spurious reload.
+- [x] `src/gui/customwidgets/thumbnailview.cpp` ×3 — done 2026-07-24. Replaced
+      by a re-armable 0-ms `layoutSettleTimer` (`onLayoutSettled()`), which also
+      made `populate()` atomic with respect to the event loop — previously a
+      queued handler could run against half-destroyed thumbnail widgets.
+      Guarded by "The grid re-enables painting after every populate so it never
+      stays blank"; verified by mutation, and confirmed that the three closest
+      pre-existing tests do *not* catch the regression.
+- [ ] The rest per the FIXME grep. Note: the `folderviewproxy.cpp` and
+      `thumbnailstripproxy.cpp` pairs are coupled to the change above — they do
+      `populate()` → `processEvents()` → `focusOnSelection()`, and that pump is
+      currently what drives the settle timer. Removing them requires moving
+      `focusOnSelection()` into the settle path, not just deleting the call.
 
 *Model:* **Opus 4.8** — behavioral risk, event-ordering reasoning.
 
@@ -88,16 +103,27 @@ declined (they differ in 262 of 372 lines); revisit only if the two menus
 start growing parallel features again. *Model:* **Opus 4.8** (API design
 across both menus).
 
-### C8. Grid-context `I` keybinding for File info
+### C8. Grid-context `I` keybinding for File info — DONE (2026-07-24)
 
-From plan 009's opt-in follow-up (recorded 2026-07-24). Presets bind
-`toggleImageInfo` to `I` in the `document` context only, so in grid view
-the File info popup opens from the menu but not the keyboard. `I` is free
-in the grid context of the qimgv preset, but the `adjustFromVersion()`
-backfill only seeds bindings for *new* actions — extending an existing
-action into a new context needs either a version bump (risk: resurrects
-deliberately-removed bindings) or a bespoke migration. Decide deliberately
-before touching it. *Model:* **Opus 4.8** (migration semantics).
+Decided: implemented, via the bespoke-migration route.
+
+The feared risk (a version bump resurrecting deliberately-removed bindings)
+does not apply to a *targeted* migration, and the premise checked out: `I` is
+free in the grid context of **all five** presets and none of them binds
+`toggleImageInfo` there, so no user can have deliberately removed a binding
+that never existed.
+
+- `grid.toggleImageInfo = ["I"]` added to `qimgv.json` and `xnviewmp.json`
+  only — the other three presets (`gwenview`, `irfanview`, `leftie`) do not
+  bind File info in any context, so forcing it on them would override preset
+  intent.
+- A state-conditional block in `adjustFromVersion()`, following the existing
+  `MiddleButton=exit` idiom, fires only when `I` is still free in grid **and**
+  the user's document context actually maps `I` to `toggleImageInfo`. Users who
+  rebound `I`, and users on a preset that never binds File info, are untouched.
+- The generic backfill could not do this: it only seeds actions whose
+  introduction version is newer than the user's last version, and
+  `toggleImageInfo` dates to 0.7.84.
 
 ---
 
