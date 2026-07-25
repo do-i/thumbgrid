@@ -81,7 +81,10 @@ void MW::setupUi() {
     sidePanel = new SidePanel(this);
     sidePanel->setWindowTitle(tr("Crop"));
     connect(sidePanel, &SidePanel::closed, this, &MW::hideCropPanel);
-    floatingMessage = new FloatingMessageProxy(viewerWidget.get()); // todo: use additional one for folderview?
+    // Parented to the window, not to viewerWidget: viewerWidget is hidden in
+    // folder view, so anything shown there - including copy/move errors raised
+    // from the grid - went to an invisible widget and was never seen.
+    floatingMessage = new FloatingMessageProxy(this);
     connect(viewerWidget.get(), &ViewerWidget::scalingRequested, this, &MW::scalingRequested);
     connect(viewerWidget.get(), &ViewerWidget::draggedOut, this, qOverload<>(&MW::draggedOut));
     connect(viewerWidget.get(), &ViewerWidget::playbackFinished, this, &MW::playbackFinished);
