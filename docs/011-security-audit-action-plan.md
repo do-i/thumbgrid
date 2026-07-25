@@ -19,7 +19,7 @@ The work below is intentionally not implemented by this document.
 | Item | Status |
 |---|---|
 | XL1 symlink deletion | **Done** — fixed and regression-tested |
-| XL2 macOS AppleScript injection | **Open** — code fix is small, but unbuildable/untestable on this Linux host |
+| XL2 macOS AppleScript injection | **Done (needs macOS verification)** — fix landed, syntax-checked only |
 | XL3 pacman repository signing | **Blocked on maintainer** — needs a signing key, secrets, and published fingerprint |
 | L1 Windows dependency pinning | **Open** — large, and unverifiable without a Windows runner |
 | L2 action SHA pinning / permissions | **Blocked on maintainer** — changes release workflow permissions |
@@ -128,16 +128,26 @@ insert additional AppleScript statements.
 Using “Open containing directory” on an attacker-named file can execute
 AppleScript, including shell commands, with the thumbgrid user’s privileges.
 
-**Action**
+**Action** — DONE (2026-07-24), but see the verification caveat below
 
-- [ ] Remove the AppleScript construction entirely.
-- [ ] Reveal the file with `QProcess::startDetached("/usr/bin/open",
+- [x] Remove the AppleScript construction entirely.
+- [x] Reveal the file with `QProcess::startDetached("/usr/bin/open",
       {"-R", selectedPath})`, keeping the executable and every argument
-      separate.
-- [ ] Do not add a shell fallback or rebuild AppleScript source by escaping
-      user-controlled text.
-- [ ] Report launch failure to the user and retain the existing directory-open
-      fallback where appropriate.
+      separate. Absolute path, so `PATH` cannot redirect which binary runs.
+- [x] Do not add a shell fallback or rebuild AppleScript source by escaping
+      user-controlled text — no escaping helper was introduced.
+- [x] Retain the directory-open fallback: if `startDetached()` returns false,
+      it falls back to opening `fallbackDir`, the same path the
+      empty-selection case takes.
+
+> **Verification caveat.** This was implemented on a Linux host. The file
+> compiles under `g++ -fsyntax-only` against Qt 6 headers, which confirms the
+> API usage, but the change has **not** been built into a macOS binary or
+> exercised in Finder. Before release, confirm on macOS that a normal file is
+> selected in Finder, and that names containing quotes, newlines, spaces,
+> Unicode, backslashes and leading dashes are treated as one inert argument.
+> (`-R` is positional after the flag, so a leading-dash filename is passed as
+> the operand rather than parsed as an option — worth confirming in practice.)
 
 **Acceptance**
 
