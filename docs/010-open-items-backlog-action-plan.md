@@ -48,7 +48,20 @@ Highest value first:
       Now `QTimer::singleShot(0, this, &ImageViewerV2::applyFitMode)`, matching
       the deferral this class already uses for `centerOnPixmap()`.
 
-**10 of 17 done. 7 remain**, all needing more care than a deletion:
+**10 of 17 done. 7 remain**, all needing more care than a deletion — and all
+sharing one blocker: their observable effect is *visual* (repaint latency,
+animation smoothness, focus position, window-manager geometry timing), so the
+"interactive verification" this item has always called for is genuinely
+required. They were deliberately left rather than changed blind. Each entry
+below records the fix shape so the next session does not have to re-derive it.
+
+Note on `showFullScreen`/`showWindowed` specifically: `QWidget::isFullScreen()`
+is set synchronously by `showFullScreen()`, so `adaptToWindowState()` reads the
+correct state without the pump — the emit ordering is *not* the risk. The risk
+is that the pump also lets the window manager's resize arrive before
+`adaptToWindowState()` lays out, so removing it may cause a transient
+mislayout that only corrects on the next resize event. That needs eyes on a
+real window.
 
 - [ ] `src/gui/mainwindow.cpp` ×2 (`showFullScreen`/`showWindowed`) — the pump
       applies the new geometry *before* `fullscreenStateChanged` is emitted, so
