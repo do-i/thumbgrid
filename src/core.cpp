@@ -65,10 +65,10 @@ void Core::readSettings() {
 void Core::showGui() {
     if(mw && !mw->isVisible())
         mw->showDefault();
-    // TODO: this is unreliable.
-    // how to make it wait until a window is shown?
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
+    // The show is queued; the timer below already defers setupFullUi() past it,
+    // so pumping the event loop here bought nothing. It also ran before
+    // QApplication::exec() had started, where draining the queue by hand is
+    // exactly the re-entrancy the FIXME warned about.
     QTimer::singleShot(50, mw, &MW::setupFullUi);
 }
 

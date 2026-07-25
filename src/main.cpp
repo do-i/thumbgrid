@@ -152,11 +152,9 @@ int main(int argc, char *argv[]) {
     else if(settings->defaultViewMode() == MODE_FOLDERVIEW)
         core.loadPath(QDir::homePath());
 
-    // wait for event queue to catch up before showing window
-    // this avoids white background flicker on windows (or not?)
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
-
+    // No event pumping before the window is shown: this ran before exec(), so
+    // the queue it drained was startup work that exec() processes anyway. The
+    // flicker it claimed to avoid was already in doubt ("or not?").
     core.showGui();
     return a.exec();
 }

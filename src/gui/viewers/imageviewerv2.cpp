@@ -701,12 +701,11 @@ void ImageViewerV2::wheelScroll(QWheelEvent *event) {
 
 void ImageViewerV2::showEvent(QShowEvent *event) {
     QGraphicsView::showEvent(event);
-    // ensure we are properly resized
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
-    // reapply fitmode to fix viewport position
+    // Our final size only lands with the queued resize that follows the show,
+    // so reapply the fit mode after it rather than pumping the event loop
+    // here - the same deferral this class already uses for centerOnPixmap().
     if(imageFitMode == FIT_ORIGINAL)
-        applyFitMode();
+        QTimer::singleShot(0, this, &ImageViewerV2::applyFitMode);
 }
 
 void ImageViewerV2::drawBackground(QPainter *painter, const QRectF &rect) {
