@@ -9,8 +9,9 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 #include <QDebug>
+#include <cstdint>
 
-enum FloatingWidgetPosition {
+enum FloatingWidgetPosition : std::uint8_t {
     LEFT,
     RIGHT,
     BOTTOM,

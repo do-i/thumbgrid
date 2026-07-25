@@ -6,12 +6,13 @@
 #include <QPushButton>
 #include <QSlider>
 #include <QWidget>
+#include <cstdint>
 
 namespace Ui {
 class VideoControls;
 }
 
-enum PlaybackMode {
+enum PlaybackMode : std::uint8_t {
     PLAYBACK_ANIMATION,
     PLAYBACK_VIDEO
 };
@@ -45,7 +46,7 @@ signals:
     void toggleMuteRequested();
 
 private:
-    enum LoopABState {
+    enum LoopABState : std::uint8_t {
         LOOP_AB_CLEAR,
         LOOP_AB_START_SET,
         LOOP_AB_ACTIVE

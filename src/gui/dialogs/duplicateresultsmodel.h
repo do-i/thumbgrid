@@ -5,6 +5,7 @@
 #include <QPixmap>
 #include <QSortFilterProxyModel>
 #include <QVector>
+#include <cstdint>
 #include "components/duplicatefinder/duplicatematch.h"
 
 // Two-level tree of duplicate search results: parent rows are reference
@@ -13,11 +14,11 @@
 class DuplicateResultsModel : public QAbstractItemModel {
     Q_OBJECT
 public:
-    enum Columns {
+    enum Columns : std::uint8_t {
         COL_CHECK, COL_THUMB, COL_SIMILARITY, COL_DIMENSIONS,
         COL_SIZE, COL_NAME, COL_PATH, COLUMN_COUNT
     };
-    enum Roles {
+    enum Roles : std::uint16_t {
         SortRole = Qt::UserRole,
         FilePathRole,
         IsGroupRole,
@@ -26,7 +27,7 @@ public:
 
     explicit DuplicateResultsModel(QObject *parent = nullptr);
 
-    enum SmartSelectMode {
+    enum SmartSelectMode : std::uint8_t {
         SELECT_ALL, KEEP_LARGEST_RESOLUTION, KEEP_LARGEST_FILE,
         KEEP_NEWEST, KEEP_OLDEST, CLEAR_SELECTION
     };

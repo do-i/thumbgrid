@@ -8,6 +8,7 @@
 #include <QFileSystemModel>
 #include <QDesktopServices>
 #include <QTranslator>
+#include <cstdint>
 #include "appversion.h"
 #include "settings.h"
 #include "components/directorymodel.h"
@@ -32,7 +33,7 @@ struct State {
     std::shared_ptr<Image> currentImg;
 };
 
-enum MimeDataTarget {
+enum MimeDataTarget : std::uint8_t {
     TARGET_CLIPBOARD,
     TARGET_DROP
 };

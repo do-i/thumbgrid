@@ -13,9 +13,10 @@
 #include <QDebug>
 #include <memory>
 #include <cmath>
+#include <cstdint>
 #include "settings.h"
 
-enum MouseInteractionState {
+enum MouseInteractionState : std::uint8_t {
     MOUSE_NONE,
     MOUSE_DRAG_BEGIN,
     MOUSE_DRAG,
@@ -24,7 +25,7 @@ enum MouseInteractionState {
     MOUSE_WHEEL_ZOOM
 };
 
-enum ViewLockMode {
+enum ViewLockMode : std::uint8_t {
     LOCK_NONE,
     LOCK_ZOOM,
     LOCK_ALL

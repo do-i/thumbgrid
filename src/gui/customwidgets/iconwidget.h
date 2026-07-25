@@ -5,10 +5,11 @@
 #include <QPainter>
 #include <QDebug>
 #include <QMouseEvent>
+#include <cstdint>
 #include "settings.h"
 #include "utils/imagelib.h"
 
-enum IconColorMode {
+enum IconColorMode : std::uint8_t {
     ICON_COLOR_CUSTOM,
     ICON_COLOR_THEME,
     ICON_COLOR_SOURCE

@@ -4,10 +4,11 @@
 #include <QGraphicsOpacityEffect>
 #include <QPropertyAnimation>
 #include <QDebug>
+#include <cstdint>
 #include "gui/customwidgets/floatingwidget.h"
 #include "utils/imagelib.h"
 
-enum ActiveHighlightZone {
+enum ActiveHighlightZone : std::uint8_t {
     HIGHLIGHT_NONE,
     HIGHLIGHT_LEFT,
     HIGHLIGHT_RIGHT

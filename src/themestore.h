@@ -3,10 +3,11 @@
 #include <QDebug>
 #include <QColor>
 #include <QPalette>
+#include <cstdint>
 
 class QSettings;
 
-enum ColorSchemes {
+enum ColorSchemes : std::uint8_t {
     COLORS_SYSTEM,
     COLORS_LIGHT,
     COLORS_BLACK,

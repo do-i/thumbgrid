@@ -15,6 +15,7 @@
 #include <filesystem>
 #include <algorithm>
 #include <functional>
+#include <cstdint>
 
 #include "settings.h"
 #include "watchers/directorywatcher.h"
@@ -24,7 +25,7 @@
 #include "windows.h"
 #endif
 
-enum FileListSource { // rename? wip
+enum FileListSource : std::uint8_t { // rename? wip
     SOURCE_DIRECTORY,
     SOURCE_DIRECTORY_RECURSIVE,
     SOURCE_LIST

@@ -8,12 +8,13 @@
 #include <QGraphicsSceneHoverEvent>
 #include <QPaintEngine>
 #include <cmath>
+#include <cstdint>
 #include "sourcecontainers/thumbnail.h"
 #include "utils/imagelib.h"
 #include "settings.h"
 #include "sharedresources.h"
 
-enum ThumbnailStyle {
+enum ThumbnailStyle : std::uint8_t {
     THUMB_SIMPLE,
     THUMB_NORMAL,
     THUMB_NORMAL_CENTERED

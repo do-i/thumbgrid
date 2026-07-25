@@ -8,6 +8,7 @@
 #include <QMimeData>
 #include <QImageWriter>
 #include <QWindow>
+#include <cstdint>
 
 #include "gui/customwidgets/floatingwidgetcontainer.h"
 #include "gui/viewers/viewerwidget.h"
@@ -51,7 +52,7 @@ struct CurrentInfo {
     bool edited;
 };
 
-enum ActiveSidePanel {
+enum ActiveSidePanel : std::uint8_t {
     SIDEPANEL_CROP,
     SIDEPANEL_NONE
 };

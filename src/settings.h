@@ -21,10 +21,11 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QSaveFile>
+#include <cstdint>
 #include "utils/script.h"
 #include "themestore.h"
 
-enum SortingMode {
+enum SortingMode : std::uint8_t {
     SORT_NAME,
     SORT_NAME_DESC,
     SORT_SIZE,
@@ -33,7 +34,7 @@ enum SortingMode {
     SORT_TIME_DESC
 };
 
-enum ImageFitMode {
+enum ImageFitMode : std::uint8_t {
     FIT_WINDOW,
     FIT_WIDTH,
     FIT_ORIGINAL,
@@ -41,14 +42,14 @@ enum ImageFitMode {
     FIT_FREE
 };
 
-enum PanelPosition {
+enum PanelPosition : std::uint8_t {
     PANEL_TOP,
     PANEL_BOTTOM,
     PANEL_LEFT,
     PANEL_RIGHT
 };
 
-enum ScalingFilter {
+enum ScalingFilter : std::uint8_t {
     QI_FILTER_NEAREST,
     QI_FILTER_BILINEAR,
     QI_FILTER_CV_BILINEAR_SHARPEN,
@@ -56,43 +57,43 @@ enum ScalingFilter {
     QI_FILTER_CV_CUBIC_SHARPEN
 };
 
-enum ZoomIndicatorMode {
+enum ZoomIndicatorMode : std::uint8_t {
     INDICATOR_DISABLED,
     INDICATOR_ENABLED,
     INDICATOR_AUTO
 };
 
-enum ImageFocusPoint {
+enum ImageFocusPoint : std::uint8_t {
     FOCUS_TOP,
     FOCUS_CENTER,
     FOCUS_CURSOR
 };
 
-enum ImageScrolling {
+enum ImageScrolling : std::uint8_t {
     SCROLL_NONE,
     SCROLL_BY_TRACKPAD,
     SCROLL_BY_TRACKPAD_AND_WHEEL
 };
 
-enum ViewMode {
+enum ViewMode : std::uint8_t {
     MODE_DOCUMENT,
     MODE_FOLDERVIEW,
     MODE_GLOBAL
 };
 
-enum FolderEndAction {
+enum FolderEndAction : std::uint8_t {
     FOLDER_END_NO_ACTION,
     FOLDER_END_LOOP,
     FOLDER_END_GOTO_ADJACENT
 };
 
-enum FolderViewMode {
+enum FolderViewMode : std::uint8_t {
     FV_SIMPLE,
     FV_EXTENDED,
     FV_EXT_FOLDERS
 };
 
-enum ThumbPanelStyle {
+enum ThumbPanelStyle : std::uint8_t {
     TH_PANEL_SIMPLE,
     TH_PANEL_EXTENDED
 };

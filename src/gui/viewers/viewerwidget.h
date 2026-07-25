@@ -2,6 +2,7 @@
 
 #include "gui/customwidgets/floatingwidgetcontainer.h"
 #include <QVBoxLayout>
+#include <cstdint>
 #include "gui/viewers/imageviewerv2.h"
 #include "gui/viewers/textviewer.h"
 #include "gui/viewers/videoplayerinitproxy.h"
@@ -10,7 +11,7 @@
 #include "gui/overlays/clickzoneoverlay.h"
 #include "gui/contextmenu.h"
 
-enum CurrentWidget {
+enum CurrentWidget : std::uint8_t {
     IMAGEVIEWER,
     VIDEOPLAYER,
     TEXTVIEWER,

@@ -8,13 +8,14 @@
 #include <QHash>
 #include <QDebug>
 #include <QStringList>
+#include <cstdint>
 #include "utils/actions.h"
 #include "shortcutbuilder.h"
 #include "components/scriptmanager/scriptmanager.h"
 #include "settings.h"
 #include "shortcutpresetstore.h"
 
-enum ActionType {
+enum ActionType : std::uint8_t {
     ACTION_INVALID,
     ACTION_NORMAL,
     ACTION_SCRIPT

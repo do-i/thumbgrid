@@ -1,10 +1,11 @@
 #pragma once
 
 #include <QString>
+#include <cstdint>
 
 class WatcherEvent {
 public:
-    enum Type {
+    enum Type : std::uint8_t {
         None,
         MovedFrom,
         MovedTo,

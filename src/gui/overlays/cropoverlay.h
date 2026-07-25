@@ -5,8 +5,9 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include <QColor>
+#include <cstdint>
 
-enum CursorAction {
+enum CursorAction : std::uint8_t {
     NO_DRAG,          // 0
     SELECTION_START,  // 1
     DRAG_SELECT,      // 2

@@ -2,6 +2,7 @@
 
 #include <QTimer>
 #include <QLabel>
+#include <cstdint>
 #include "gui/customwidgets/overlaywidget.h"
 #include "settings.h"
 
@@ -9,7 +10,7 @@ namespace Ui {
 class FloatingMessage;
 }
 
-enum FloatingMessageIcon {
+enum FloatingMessageIcon : std::uint8_t {
     NO_ICON,
     ICON_DIRECTORY,
     ICON_LEFT_EDGE,

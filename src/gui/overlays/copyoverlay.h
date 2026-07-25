@@ -4,12 +4,13 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QKeyEvent>
+#include <cstdint>
 #include "gui/customwidgets/overlaywidget.h"
 #include "gui/customwidgets/pathselectormenuitem.h"
 #include "settings.h"
 #include "components/actionmanager/actionmanager.h"
 
-enum CopyOverlayMode {
+enum CopyOverlayMode : std::uint8_t {
     OVERLAY_COPY,
     OVERLAY_MOVE
 };

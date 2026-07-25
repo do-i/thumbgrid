@@ -4,9 +4,10 @@
 #include <QSize>
 #include <QString>
 #include <QStringList>
+#include <cstdint>
 
 struct DuplicateSearchRequest {
-    enum Mode { SINGLE_IMAGE, COMPARE_FOLDERS, WITHIN_FOLDERS };
+    enum Mode : std::uint8_t { SINGLE_IMAGE, COMPARE_FOLDERS, WITHIN_FOLDERS };
     Mode mode = SINGLE_IMAGE;
     QString sourceImage;        // SINGLE_IMAGE only
     QStringList sourceFolders;  // COMPARE_FOLDERS only

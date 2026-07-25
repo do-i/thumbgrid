@@ -2,8 +2,9 @@
 
 #include <QPixmap>
 #include <QDebug>
+#include <cstdint>
 
-enum ShrIcon {
+enum ShrIcon : std::uint8_t {
     SHR_ICON_ERROR,
     SHR_ICON_LOADING
 };

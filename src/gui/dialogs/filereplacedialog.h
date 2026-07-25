@@ -1,5 +1,6 @@
 #pragma once
 #include <QDialog>
+#include <cstdint>
 
 struct DialogResult {
     bool yes = false;
@@ -18,7 +19,7 @@ struct DialogResult {
     }
 };
 
-enum FileReplaceMode {
+enum FileReplaceMode : std::uint8_t {
     FILE_TO_FILE,
     DIR_TO_DIR,
     FILE_TO_DIR,

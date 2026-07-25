@@ -7,8 +7,9 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QtGlobal>
+#include <cstdint>
 
-enum FileOpResult {
+enum FileOpResult : std::uint8_t {
     SUCCESS,
     DESTINATION_FILE_EXISTS,
     DESTINATION_DIR_EXISTS,

@@ -9,6 +9,7 @@
 #include <QDateTime>
 #include <cmath>
 #include <cstring>
+#include <cstdint>
 #include "settings.h"
 
 #ifdef USE_EXIV2
@@ -22,7 +23,7 @@
 
 #include <QImageReader>
 
-enum DocumentType { NONE, STATIC, ANIMATED, VIDEO, TEXT };
+enum DocumentType : std::uint8_t { NONE, STATIC, ANIMATED, VIDEO, TEXT };
 
 class DocumentInfo {
 public:

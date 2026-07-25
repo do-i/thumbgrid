@@ -1,5 +1,6 @@
 #include "scriptmanager.h"
 
+#include <cstdint>
 #include <utility>
 #include "utils/logging.h"
 
@@ -88,7 +89,7 @@ QStringList ScriptManager::splitCommandLine(const QString &cmdLine) {
     QStringList list;
     QString arg;
     bool escape = false;
-    enum { Idle, Arg, QuotedArg } state = Idle;
+    enum : std::uint8_t { Idle, Arg, QuotedArg } state = Idle;
     for (const auto &c : cmdLine) {
         //if(!escape && c == '\\') {
         //    escape = true;

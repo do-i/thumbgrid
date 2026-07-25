@@ -17,17 +17,18 @@
 #include <QTimer>
 #include <QElapsedTimer>
 #include <QScreen>
+#include <cstdint>
 
 #include "gui/customwidgets/thumbnailwidget.h"
 #include "gui/idirectoryview.h"
 #include "shortcutbuilder.h"
 
-enum ThumbnailSelectMode {
+enum ThumbnailSelectMode : std::uint8_t {
     ACTIVATE_BY_PRESS,
     ACTIVATE_BY_DOUBLECLICK
 };
 
-enum ScrollDirection {
+enum ScrollDirection : std::uint8_t {
     SCROLL_FORWARDS,
     SCROLL_BACKWARDS
 };

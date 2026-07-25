@@ -1,9 +1,10 @@
 #pragma once
 
+#include <cstdint>
 #include "gui/customwidgets/iconbutton.h"
 #include "components/actionmanager/actionmanager.h"
 
-enum TriggerMode {
+enum TriggerMode : std::uint8_t {
     PressTrigger,
     ClickTrigger
 };
