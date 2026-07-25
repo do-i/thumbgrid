@@ -139,9 +139,10 @@ void DirectoryModel::removeFile(const QString &filePath, bool trash, FileOpResul
 void DirectoryModel::renameEntry(const QString &oldPath, const QString &newName, bool force, FileOpResult &result) {
     bool isDir = dirManager.isDir(oldPath);
     FileOperations::rename(oldPath, newName, force, result);
-    // chew through watcher events so they wont be processed out of order
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
+    // Apply the change eagerly. The fs watcher will report the same rename a
+    // moment later; DirectoryManager's mutators are idempotent, so the second
+    // application is absorbed. (Pumping the event loop here to "order" the two
+    // was a re-entrancy hazard and could not flush timer-delayed events anyway.)
     if(result != FileOpResult::SUCCESS)
         return;
     if(isDir)
@@ -177,9 +178,8 @@ void DirectoryModel::copyFileTo(const QString &srcFile, const QString &destDirPa
 
 void DirectoryModel::moveFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result) {
     FileOperations::moveFileTo(srcFile, destDirPath, force, result);
-    // chew through watcher events so they wont be processed out of order
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
+    // See renameEntry(): the watcher's removal event is idempotent with the
+    // explicit removeFileEntry() below, so no event-loop pumping is needed.
     if(result == FileOpResult::SUCCESS) {
         if(destDirPath != this->directoryPath())
             dirManager.removeFileEntry(srcFile);
@@ -192,9 +192,8 @@ void DirectoryModel::copySymLinkTo(const QString &srcLink, const QString &destDi
 
 void DirectoryModel::moveSymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result) {
     FileOperations::moveSymLinkTo(srcLink, destDirPath, force, result);
-    // chew through watcher events so they wont be processed out of order
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
+    // See renameEntry(): the watcher's removal event is idempotent with the
+    // explicit removeFileEntry() below, so no event-loop pumping is needed.
     if(result == FileOpResult::SUCCESS) {
         if(destDirPath != this->directoryPath())
             dirManager.removeFileEntry(srcLink);

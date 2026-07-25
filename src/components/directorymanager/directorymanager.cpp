@@ -509,8 +509,12 @@ void DirectoryManager::updateFileEntry(const QString &filePath) {
     if(index < 0)
         return;
     FSEntry newEntry(filePath);
-    if(fileEntryVec.at(index).modifyTime != newEntry.modifyTime)
-        fileEntryVec.at(index) = newEntry;
+    // Only announce an actual change. Callers re-stat speculatively (the fs
+    // watcher, and renameFileEntry() when the rename was already applied
+    // eagerly), and an unconditional signal there means a spurious reload.
+    if(fileEntryVec.at(index).modifyTime == newEntry.modifyTime)
+        return;
+    fileEntryVec.at(index) = newEntry;
     qCDebug(logDirManager) << "fileMod" << filePath;
     emit fileModified(filePath);
 }
