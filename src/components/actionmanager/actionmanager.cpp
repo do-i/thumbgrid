@@ -296,19 +296,22 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             }
         }
     }
-    // Extend the existing File info binding into the grid context. The generic
-    // backfill below cannot do this: it only seeds actions *newer* than lastVer,
-    // and toggleImageInfo is ancient. Deliberately narrow instead of bumping the
-    // action's version, which would resurrect defaults users had removed on
-    // purpose. Only fires when I is still free in grid and the user's document
-    // context actually uses it for this action, so presets that never bind File
-    // info (gwenview, irfanview, leftie) and users who rebound I keep their setup.
-    if(lastVer < QVersionNumber(2026,7,24)) {
-        if(shortcuts[MODE_DOCUMENT].value("I") == "toggleImageInfo" &&
-           !shortcuts[MODE_FOLDERVIEW].contains("I"))
-        {
-            shortcuts[MODE_FOLDERVIEW].insert("I", "toggleImageInfo");
-            qCDebug(logSettings) << "[actionManager]: bound I=toggleImageInfo in" << contextToString(MODE_FOLDERVIEW);
+    // Backfill File info from the active preset. The generic pass below cannot do
+    // this: it only seeds actions *newer* than lastVer, and toggleImageInfo is
+    // ancient. Take the key from `defaults` rather than naming one here — the
+    // right key is preset-specific (qimgv/xnviewmp use I; leftie needs Alt+I
+    // because I is its zoomIn). Skips any context where the user already bound
+    // the action, or where the preset's key is spoken for, so customised setups
+    // and presets that deliberately omit File info are left alone.
+    if(lastVer < QVersionNumber(2026,7,25)) {
+        for(ViewMode ctx : shortcutContexts()) {
+            if(!shortcuts[ctx].key("toggleImageInfo").isEmpty())
+                continue; // user already has a binding in this context
+            const QString key = defaults[ctx].key("toggleImageInfo");
+            if(key.isEmpty() || shortcuts[ctx].contains(key))
+                continue;
+            shortcuts[ctx].insert(key, "toggleImageInfo");
+            qCDebug(logSettings) << "[actionManager]: bound" << key << "=toggleImageInfo in" << contextToString(ctx);
         }
     }
     // add new default actions, per context

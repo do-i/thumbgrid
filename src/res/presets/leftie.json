@@ -152,6 +152,9 @@
         "toggleFullscreenInfoBar": [
             "$Shift+F"
         ],
+        "toggleImageInfo": [
+            "$Alt+I"
+        ],
         "toggleSlideshow": [
             "`"
         ],
@@ -186,6 +189,9 @@
         ],
         "toggleFolderViewTopBar": [
             "$Ctrl+T"
+        ],
+        "toggleImageInfo": [
+            "$Alt+I"
         ]
     }
 }

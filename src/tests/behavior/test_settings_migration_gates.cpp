@@ -260,6 +260,82 @@ bool shortcutNewActionsBackfillWithoutMergeMissing() {
                    "togglePlacesPanel should be backfilled from the qimgv preset without mergeMissing.");
 }
 
+// Writes a shortcuts.json fixture shaped like the leftie preset: I and O are
+// spent on zoom, and File info is not bound at all.
+bool seedLeftieShortcuts() {
+    QJsonObject document;
+    document.insert("zoomIn", QJsonArray{QStringLiteral("$Ctrl++"), QStringLiteral("$Ctrl+="), QStringLiteral("I")});
+    document.insert("zoomOut", QJsonArray{QStringLiteral("$Ctrl+-"), QStringLiteral("O")});
+    QJsonObject grid;
+    grid.insert("folderView", QJsonArray{QStringLiteral("U")});
+    QJsonObject root;
+    root.insert("document", document);
+    root.insert("grid", grid);
+    QFile shortcutsFile(configDir() + "/shortcuts.json");
+    if(!require(shortcutsFile.open(QIODevice::WriteOnly | QIODevice::Truncate),
+                "Failed to write the leftie shortcuts.json fixture."))
+        return false;
+    shortcutsFile.write(QJsonDocument(root).toJson());
+    shortcutsFile.close();
+    return true;
+}
+
+// File info reaches an upgrading user from whichever key their *preset* assigns,
+// never a key named in the migration. On leftie that has to be Alt+I, because I
+// is already that preset's zoomIn - the previous migration hardcoded I and so
+// silently did nothing for these users.
+bool fileInfoBackfillsFromThePresetKey() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 7, 14));
+    conf.setValue("Shortcuts/preset", "leftie");
+    conf.sync();
+
+    if(!seedLeftieShortcuts())
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 7, 14));
+
+    return require(actionManager->actionForShortcut(MODE_DOCUMENT, "Alt+I") == QLatin1String("toggleImageInfo"),
+                   "leftie's document context should pick up File info on Alt+I.") &&
+           require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Alt+I") == QLatin1String("toggleImageInfo"),
+                   "leftie's grid context should pick up File info on Alt+I.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "I") == QLatin1String("zoomIn"),
+                   "the backfill must not take I away from zoomIn.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "O") == QLatin1String("zoomOut"),
+                   "the backfill must leave the rest of the preset alone.");
+}
+
+// A user who already chose a key for File info keeps it: the backfill must not
+// hand the action a second binding behind their back.
+bool fileInfoBackfillSkipsAnExistingBinding() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 7, 14));
+    conf.setValue("Shortcuts/preset", "leftie");
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("toggleImageInfo", QJsonArray{QStringLiteral("F4")});
+    QJsonObject root;
+    root.insert("document", document);
+    QFile shortcutsFile(configDir() + "/shortcuts.json");
+    if(!require(shortcutsFile.open(QIODevice::WriteOnly | QIODevice::Truncate),
+                "Failed to write the customised shortcuts.json fixture."))
+        return false;
+    shortcutsFile.write(QJsonDocument(root).toJson());
+    shortcutsFile.close();
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 7, 14));
+
+    return require(actionManager->actionForShortcut(MODE_DOCUMENT, "F4") == QLatin1String("toggleImageInfo"),
+                   "a user's own File info key must survive the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "Alt+I").isEmpty(),
+                   "File info already had a document binding, so Alt+I must not be added there too.");
+}
+
 bool runScenario(const QString &scenario) {
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
@@ -283,6 +359,10 @@ bool runScenario(const QString &scenario) {
         return shortcutPresetPointerIsRecovered();
     if(scenario == QLatin1String("shortcut-new-action-backfill"))
         return shortcutNewActionsBackfillWithoutMergeMissing();
+    if(scenario == QLatin1String("file-info-preset-backfill"))
+        return fileInfoBackfillsFromThePresetKey();
+    if(scenario == QLatin1String("file-info-backfill-skips-existing"))
+        return fileInfoBackfillSkipsAnExistingBinding();
     return fail("Unknown scenario: " + scenario);
 }
 
