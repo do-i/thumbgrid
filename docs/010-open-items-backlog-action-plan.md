@@ -38,11 +38,31 @@ Highest value first:
       Guarded by "The grid re-enables painting after every populate so it never
       stays blank"; verified by mutation, and confirmed that the three closest
       pre-existing tests do *not* catch the regression.
-- [ ] The rest per the FIXME grep. Note: the `folderviewproxy.cpp` and
-      `thumbnailstripproxy.cpp` pairs are coupled to the change above — they do
-      `populate()` → `processEvents()` → `focusOnSelection()`, and that pump is
-      currently what drives the settle timer. Removing them requires moving
-      `focusOnSelection()` into the settle path, not just deleting the call.
+- [x] `src/main.cpp` ×1, `src/core.cpp` ×1 — done 2026-07-24. Both ran *before*
+      `QApplication::exec()`, so they hand-drained a queue that `exec()`
+      processes anyway; `showGui()` already defers `setupFullUi()` behind a
+      50 ms timer, so the pump bought nothing.
+- [x] `src/gui/mainwindow.cpp` ×1 (`preShowResize`) — done 2026-07-24. Removed;
+      its own comment already read "not needed anymore with patched qt?".
+- [x] `src/gui/viewers/imageviewerv2.cpp` ×1 (`showEvent`) — done 2026-07-24.
+      Now `QTimer::singleShot(0, this, &ImageViewerV2::applyFitMode)`, matching
+      the deferral this class already uses for `centerOnPixmap()`.
+
+**10 of 17 done. 7 remain**, all needing more care than a deletion:
+
+- [ ] `src/gui/mainwindow.cpp` ×2 (`showFullScreen`/`showWindowed`) — the pump
+      applies the new geometry *before* `fullscreenStateChanged` is emitted, so
+      subscribers may rely on it. Deferring the emit is the likely fix.
+- [ ] `src/gui/folderview/folderviewproxy.cpp` ×2 and
+      `src/gui/panels/mainpanel/thumbnailstripproxy.cpp` ×2 — coupled to the
+      ThumbnailView change above. Both do `populate()` → `processEvents()` →
+      `focusOnSelection()`, and that pump is currently what drives the new
+      settle timer. Removing it requires moving `focusOnSelection()` into the
+      settle path, not just deleting the call. The `init()` pumps additionally
+      guard `stateBuf` against queued mutations before the mutex is taken.
+- [ ] `src/gui/customwidgets/slidepanel.cpp` ×1 — inside an animation frame
+      handler; pumping there re-enters the animation. Needs the frame driver
+      examined, not a blind removal.
 
 *Model:* **Opus 4.8** — behavioral risk, event-ordering reasoning.
 
