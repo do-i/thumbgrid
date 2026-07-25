@@ -4,6 +4,9 @@
 #include "appversion.h"
 #include "utils/logging.h"
 
+#include <QDateTime>
+#include <QLockFile>
+
 Settings *settings = nullptr;
 
 namespace {
@@ -605,6 +608,41 @@ void Settings::setupCache() {
     }
     mThumbCacheDir = new QDir(PlatformDesktop::thumbnailCacheDirectory(mTmpDir->absolutePath()));
     mThumbCacheDir->mkpath(mThumbCacheDir->absolutePath());
+
+    // Sweep leftover "videothumb-*" (video frame export, thumbnailerrunnable.cpp)
+    // and "export-*" (edited-image drag/clipboard export, core.cpp) directories.
+    // Both are QTemporaryDir instances that normally remove themselves on
+    // destruction, but a crash or SIGKILL strands them permanently since
+    // nothing else ever revisits the cache root. Runs after the writability
+    // fallback above, so it sweeps whichever root ended up in use.
+    //
+    // Nothing in this app enforces a single instance - a file manager happily
+    // spawns one process per opened image - so a starting instance must not
+    // delete scratch dirs another one is still using. Two cheap filters keep
+    // it off live data:
+    //   * an age floor, because a videothumb dir exists only for the few
+    //     seconds one frame grab takes and carries no lock of its own;
+    //   * a lock probe, because an export dir lives as long as its owning
+    //     session and is held open by a QLockFile (see Core::mExportTmpLock).
+    //     QLockFile reclaims a lock whose owning pid is gone, so a genuine
+    //     crash leftover is still swept.
+    // Anything skipped here is simply swept by a later launch.
+    QDir cacheRootDir(mTmpDir->absolutePath());
+    const QStringList scratchDirs = cacheRootDir.entryList(
+        {QStringLiteral("videothumb-*"), QStringLiteral("export-*")},
+        QDir::Dirs | QDir::NoDotAndDotDot);
+    const QDateTime staleBefore = QDateTime::currentDateTime().addSecs(-300);
+    for(const QString& name : scratchDirs) {
+        const QString dirPath = cacheRootDir.filePath(name);
+        if(QFileInfo(dirPath).lastModified() > staleBefore)
+            continue; // may still be in flight
+        QLockFile lock(dirPath + QStringLiteral("/.tg-lock"));
+        lock.setStaleLockTime(0);
+        if(!lock.tryLock(0))
+            continue; // a live session owns this one
+        lock.unlock();
+        QDir(dirPath).removeRecursively();
+    }
 }
 //------------------------------------------------------------------------------
 void Settings::sync() {

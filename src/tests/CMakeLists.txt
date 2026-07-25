@@ -314,6 +314,14 @@ add_test(
     COMMAND thumbgrid_document_view_fit_modes_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_edited_image_export_unique_temp_files_test
+    behavior/test_edited_image_export_uses_unique_temp_files.cpp
+)
+add_test(
+    NAME "Exporting an edited image for drag/clipboard uses unique, owner-only temp files"
+    COMMAND thumbgrid_edited_image_export_unique_temp_files_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )

@@ -7,8 +7,11 @@
 #include <QDrag>
 #include <QFileSystemModel>
 #include <QDesktopServices>
+#include <QLockFile>
+#include <QTemporaryDir>
 #include <QTranslator>
 #include <cstdint>
+#include <memory>
 #include "appversion.h"
 #include "settings.h"
 #include "components/directorymodel.h"
@@ -84,6 +87,16 @@ private:
 
     QDrag *mDrag;
     QMimeData *getMimeDataForImage(const std::shared_ptr<Image>& img, MimeDataTarget target);
+    // Lazily-created, session-lifetime directory for edited-image drag/clipboard
+    // exports. Owned by Core (not scope-bound) because the receiving app reads
+    // the file's URL asynchronously after getMimeDataForImage() returns.
+    std::unique_ptr<QTemporaryDir> mExportTmpDir;
+    // Marks mExportTmpDir as belonging to a live session, so the startup sweep
+    // in Settings::setupCache() leaves it alone while another instance is
+    // running. Declared after the dir it guards: members are destroyed in
+    // reverse order, so the lock is released before the directory goes away.
+    std::unique_ptr<QLockFile> mExportTmpLock;
+    int mExportFileCounter = 0;
     void copySelectionToClipboard(bool cut);
     QTranslator *translator = nullptr;
 

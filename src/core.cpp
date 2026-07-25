@@ -13,6 +13,7 @@
 #include "utils/apppaths.h"
 #include "gui/dialogs/custommessagebox.h"
 
+#include <QFile>
 #include <QFileDialog>
 #include <utility>
 
@@ -714,12 +715,48 @@ QMimeData *Core::getMimeDataForImage(const std::shared_ptr<Image>& img, MimeData
     QString path = img->filePath();
     if(img->type() == STATIC) {
         if(img->isEdited()) {
-            // TODO: cleanup temp files
-            // meanwhile use generic name
-            path = settings->tmpDir() + "image.png";
-            // use faster compression for drag'n'drop
-            int pngQuality = (target == TARGET_DROP) ? 80 : 30;
-            img->getImage()->save(path, nullptr, pngQuality);
+            // Private, session-lifetime directory for exported edited-image
+            // payloads. Created lazily on first use. Not scope-bound and never
+            // deleted here: the receiving app (drop target or paste consumer)
+            // reads the file's URL asynchronously, after this function has
+            // already returned, so the file must outlive the call. It is
+            // cleaned up when mExportTmpDir is destroyed (end of the Core's
+            // lifetime), and Settings::setupCache() sweeps any leftovers from
+            // a previous abnormal exit at startup.
+            if(!mExportTmpDir) {
+                mExportTmpDir = std::make_unique<QTemporaryDir>(settings->tmpDir() + QStringLiteral("export-"));
+                if(mExportTmpDir->isValid()) {
+                    // owner-only, so nothing else can reach the exported image while it is on disk
+                    QFile::setPermissions(mExportTmpDir->path(),
+                                           QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
+                    // Claim the dir for this session. Held until Core dies, so
+                    // another instance starting up sweeps every other leftover
+                    // but skips this one while we may still export into it.
+                    mExportTmpLock = std::make_unique<QLockFile>(mExportTmpDir->filePath(QStringLiteral(".tg-lock")));
+                    mExportTmpLock->setStaleLockTime(0);
+                    if(!mExportTmpLock->tryLock(0)) {
+                        qCWarning(logCore) << "Could not lock edited-image export dir" << mExportTmpDir->path();
+                        mExportTmpLock.reset();
+                    }
+                } else {
+                    qCWarning(logCore) << "Could not create temp dir for edited-image export; using original file path";
+                    mExportTmpDir.reset();
+                }
+            }
+            if(mExportTmpDir) {
+                // Unique name per export: two overlapping exports (drag then
+                // copy, or two selections) must never collide on one path.
+                QString exportPath = mExportTmpDir->filePath(QStringLiteral("export-%1.png").arg(mExportFileCounter++));
+                // use faster compression for drag'n'drop
+                int pngQuality = (target == TARGET_DROP) ? 80 : 30;
+                if(img->getImage()->save(exportPath, nullptr, pngQuality))
+                    path = exportPath;
+                else
+                    // Never silently: falling through here hands the consumer the
+                    // original file, i.e. the image without the user's edits.
+                    qCWarning(logCore) << "Could not write edited-image export to" << exportPath
+                                       << "- handing over the unedited original instead";
+            }
         }
     }
     // !!! using setImageData() while doing drag'n'drop hangs Xorg !!!
