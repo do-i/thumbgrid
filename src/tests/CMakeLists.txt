@@ -290,6 +290,22 @@ add_test(
     COMMAND thumbgrid_delete_does_not_follow_symlinks_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_rename_rejects_path_traversal_test
+    behavior/test_rename_rejects_path_traversal.cpp
+)
+add_test(
+    NAME "Renaming rejects path traversal and never leaves the browsed folder"
+    COMMAND thumbgrid_rename_rejects_path_traversal_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_copy_move_contained_destination_test
+    behavior/test_copy_move_rejects_contained_destination.cpp
+)
+add_test(
+    NAME "Copy and move refuse a destination inside their own source"
+    COMMAND thumbgrid_copy_move_contained_destination_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )

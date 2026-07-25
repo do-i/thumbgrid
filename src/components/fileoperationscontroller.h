@@ -19,6 +19,10 @@ public:
     void setModel(std::shared_ptr<DirectoryModel> newModel);
     void setRemoveFileHandler(std::function<FileOpResult(QString, bool)> handler);
 
+    // true if destDirectory is a source directory or lives beneath one; static
+    // and public so the containment rule can be tested without a live window
+    static bool destinationIsInsideSource(const QStringList& paths, const QString& destDirectory);
+
 public slots:
     bool copyPathsTo(const QStringList& paths, const QString& destDirectory);
     bool movePathsTo(const QStringList& paths, const QString& destDirectory);
@@ -30,8 +34,6 @@ public slots:
 
 private:
     bool confirmFileOperation(const QString& action, QStringList paths, const QString& destDirectory);
-    // true if destDirectory is a source directory or lives beneath one
-    static bool destinationIsInsideSource(const QStringList& paths, const QString& destDirectory);
     bool confirmRemovePossible(const QStringList& paths, bool trash);
     void doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles);
     void doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
