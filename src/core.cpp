@@ -747,7 +747,8 @@ void Core::renameCurrentSelection(const QString& newName) {
         return;
     FileOpResult result;
     model->renameEntry(selectedPath(), newName, false, result);
-    if(result == FileOpResult::DESTINATION_DIR_EXISTS) {
+    if(result == FileOpResult::DESTINATION_DIR_EXISTS || result == FileOpResult::INVALID_NAME) {
+        // keep the editor open with the rejected text so it can be corrected
         mw->toggleRenameOverlay(newName);
     } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
         if(mw->showConfirmation(tr("File exists"), tr("Overwrite file?"), true)) {
@@ -875,12 +876,8 @@ void Core::moveSelection() {
         QString destDir = QFileDialog::getExistingDirectory(mw, tr("Move to..."), model->directoryPath());
         if(destDir.isEmpty())
             return;
-        for(const auto& path : selection) {
-            if(destDir == path || destDir.startsWith(path + "/")) {
-                mw->showError(tr("Cannot move a folder into itself"));
-                return;
-            }
-        }
+        // containment is enforced centrally in FileOperationsController, which
+        // also canonicalizes paths, so every route gets the same guard
         fileOps->movePathsTo(selection, destDir);
     } else {
         mw->triggerMoveOverlay();

@@ -19,6 +19,8 @@ enum FileOpResult {
     DIRECTORY_NOT_EMPTY,
     PARENT_DIRECTORY_NOT_WRITABLE,
     NOTHING_TO_DO, // todo: maybe just return SUCCESS?
+    INVALID_NAME,
+    DESTINATION_INSIDE_SOURCE,
     OTHER_ERROR
 };
 
@@ -30,6 +32,8 @@ public:
     static void copySymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
     static void moveSymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
     static void rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result);
+    // true only for a single leaf filename component (no separators, no traversal)
+    static bool isValidFileName(const QString &name);
     static void checkCanRemove(const QString &filePath, FileOpResult &result);
     static void removeFile(const QString &filePath, FileOpResult &result);
     // unlinks the link itself; never dereferences or touches its target

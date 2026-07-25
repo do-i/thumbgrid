@@ -104,6 +104,10 @@ QString FileOperations::decodeResult(const FileOpResult &result) {
         return QObject::tr("Containing directory is not writable.");
     case FileOpResult::NOTHING_TO_DO:
         return QObject::tr("Nothing to do.");
+    case FileOpResult::INVALID_NAME:
+        return QObject::tr("Invalid name. Enter a file name without slashes, and not \".\" or \"..\".");
+    case FileOpResult::DESTINATION_INSIDE_SOURCE:
+        return QObject::tr("Cannot copy or move a folder into itself.");
     case FileOpResult::OTHER_ERROR:
         return QObject::tr("Other error.");
     }
@@ -324,6 +328,20 @@ void FileOperations::moveSymLinkTo(const QString &srcLinkPath, const QString &de
     }
 }
 
+bool FileOperations::isValidFileName(const QString &name) {
+    if(name.isEmpty() || name == QStringLiteral(".") || name == QStringLiteral(".."))
+        return false;
+    // Both separators are rejected on every platform, so a name accepted here
+    // behaves the same everywhere rather than only being caught on Windows.
+    if(name.contains(QLatin1Char('/')) || name.contains(QLatin1Char('\\')))
+        return false;
+    if(QDir::isAbsolutePath(name))
+        return false;
+    // Belt and braces: whatever the platform considers the leaf must be the
+    // whole string, so nothing can smuggle in a directory component.
+    return QFileInfo(name).fileName() == name;
+}
+
 void FileOperations::rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result) {
     QFileInfo srcFile(srcFilePath);
     QString tmpPath;
@@ -338,6 +356,15 @@ void FileOperations::rename(const QString &srcFilePath, const QString &newName, 
     }
     if(newName.isEmpty() || newName == srcFile.fileName()) {
         result = FileOpResult::NOTHING_TO_DO;
+        return;
+    }
+    // A rename must stay inside the folder the user is looking at. newName is
+    // free-form text from the rename editors, and the destination below is
+    // built by concatenation, so "../elsewhere" would turn a rename into an
+    // out-of-folder move (and could reach the overwrite path). Enforced here,
+    // in the file-operation layer, so no UI route can skip the check.
+    if(!isValidFileName(newName)) {
+        result = FileOpResult::INVALID_NAME;
         return;
     }
     QString newFilePath = srcFile.absolutePath() + "/" + newName;
