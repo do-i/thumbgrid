@@ -319,18 +319,43 @@ void Core::toggleSlideshow() {
 
     } else {
         startSlideshow();
-        mw->showMessage(tr("Slideshow: ON"));
+        // startSlideshow() can refuse (empty folder) and posts its own message
+        if(slideshow)
+            mw->showMessage(tr("Slideshow: ON"));
     }
 }
 
+// Reachable from the grid's context menu now, not just from a key binding, so
+// it has to survive being invoked with an empty folder or with no document
+// open at all - startSlideshowTimer() dereferences the model unconditionally.
+//
+// Starting from the grid begins at the highlighted file. enableDocumentView()
+// only picks a path when nothing is open *at all*, so without this the
+// slideshow would resume at whatever was last viewed rather than at the file
+// the user just right-clicked. The path is read before the view switch, while
+// the grid selection is still the meaningful one.
 void Core::startSlideshow() {
-    if(!slideshow) {
-        slideshow = true;
-        mw->setLoopPlayback(false);
-        enableDocumentView();
-        startSlideshowTimer();
-        updateInfoString();
+    if(slideshow)
+        return;
+    if(!model || model->isEmpty()) {
+        mw->showMessage(tr("Directory is empty."));
+        return;
     }
+    QString startAt;
+    if(mw->currentViewMode() == MODE_FOLDERVIEW) {
+        auto selection = folderViewPresenter.selectedPaths();
+        if(!selection.isEmpty() && model->containsFile(selection.first()))
+            startAt = selection.first();
+    }
+    slideshow = true;
+    mw->setLoopPlayback(false);
+    enableDocumentView();
+    // skipped when enableDocumentView() already landed on it, which is the
+    // common case of opening the grid selection with nothing loaded yet
+    if(!startAt.isEmpty() && startAt != state.currentFilePath)
+        loadPath(startAt);
+    startSlideshowTimer();
+    updateInfoString();
 }
 
 void Core::stopSlideshow() {

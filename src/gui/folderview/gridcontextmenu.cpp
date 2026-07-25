@@ -74,6 +74,15 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     // thin divider between the file actions and the view toggles
     addSeparator(mainPage, mainLayout);
 
+    // Slideshow had no default shortcut and no menu entry anywhere, so there was
+    // no way to reach it from a stock install. It is a toggle, but entering the
+    // grid always stops it (Core::enableFolderView), so from here it can only
+    // ever start one - hence the unconditional "Start slideshow" label.
+    slideshowItem = makeItem(tr("Start slideshow"), ":/res/icons/common/menuitem/document-view16.png");
+    slideshowItem->setObjectName("menuSlideshow");
+    slideshowItem->setAction("toggleSlideshow");
+    mainLayout->addWidget(slideshowItem);
+
     // view toggles - each drives an action so the shortcut text fills in itself
     auto *topBar = makeItem(tr("Header title bar"), ":/res/icons/common/menuitem/titlebar16.png");
     topBar->setAction("toggleFolderViewTopBar");

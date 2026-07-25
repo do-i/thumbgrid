@@ -194,6 +194,14 @@ add_test(
     COMMAND thumbgrid_grid_context_menu_gating_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_slideshow_from_grid_test
+    behavior/test_slideshow_starts_from_the_grid.cpp
+)
+add_test(
+    NAME "The grid context menu starts a slideshow at the selected file"
+    COMMAND thumbgrid_slideshow_from_grid_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_copy_path_clipboard_test
     behavior/test_copy_path_to_clipboard.cpp
 )
