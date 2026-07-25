@@ -512,6 +512,15 @@ void DirectoryManager::updateFileEntry(const QString &filePath) {
     // Only announce an actual change. Callers re-stat speculatively (the fs
     // watcher, and renameFileEntry() when the rename was already applied
     // eagerly), and an unconditional signal there means a spurious reload.
+    //
+    // Known limitation, accepted deliberately: a content change that leaves
+    // modifyTime untouched is not announced, so the view keeps showing the old
+    // image and the old size until something else triggers a refresh. That
+    // covers `cp --preserve=timestamps`, a restore-from-backup, and two writes
+    // landing inside Qt's millisecond timestamp resolution. If it ever bites,
+    // compare `size` here as well - it is already stat'ed, so it is free, and
+    // it closes those cases without reintroducing the rename-reload (a rename
+    // changes neither field).
     if(fileEntryVec.at(index).modifyTime == newEntry.modifyTime)
         return;
     fileEntryVec.at(index) = newEntry;
