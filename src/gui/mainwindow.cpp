@@ -241,9 +241,26 @@ void MW::preShowResize(QSize sz) {
     QRect availableGeom = screens.at(currentDisplay)->availableGeometry();
     QSize maxSz = availableGeom.size() * maxSzMulti;
     maxSz.setHeight(maxSz.height() - decorationSize);
+
+    // The window is more than the image: the status footer sits below the viewer
+    // and a pinned panel sits beside it. Sizing the *window* to the image left
+    // the viewport smaller than the image, so the fit mode scaled it down and the
+    // slack showed up as empty bars either side. Size the viewport to the image
+    // and add the chrome back on top.
+    QSize chrome(0, 0);
+    if(isVisible() && viewerWidget->size().isValid()) {
+        chrome = size() - viewerWidget->size();
+        chrome.setWidth(qMax(0, chrome.width()));
+        chrome.setHeight(qMax(0, chrome.height()));
+    }
+    QSize maxContentSz = maxSz - chrome;
+    maxContentSz.setWidth(qMax(1, maxContentSz.width()));
+    maxContentSz.setHeight(qMax(1, maxContentSz.height()));
+
     if(!sz.isEmpty()) {
-        if(sz.width() > maxSz.width() || sz.height() > maxSz.height())
-            sz.scale(maxSz, Qt::KeepAspectRatio);
+        if(sz.width() > maxContentSz.width() || sz.height() > maxContentSz.height())
+            sz.scale(maxContentSz, Qt::KeepAspectRatio);
+        sz += chrome;
     } else {
         sz = maxSz;
     }
