@@ -128,6 +128,9 @@ private:
     void setupCopyOverlay();
     void setupSaveOverlay();
     void setupRenameOverlay();
+    // Window size minus viewer size (status footer, pinned panel). Measured when
+    // the window is up, estimated from widget hints while it is still hidden.
+    QSize windowChromeSize() const;
     void preShowResize(QSize sz);
     void setInteractionEnabled(bool mode);
 

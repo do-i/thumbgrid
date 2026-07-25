@@ -322,6 +322,14 @@ add_test(
     COMMAND thumbgrid_edited_image_export_unique_temp_files_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_startup_auto_resize_chrome_test
+    behavior/test_startup_auto_resize_accounts_for_chrome.cpp
+)
+add_test(
+    NAME "Auto-resize at startup leaves room for the status footer"
+    COMMAND thumbgrid_startup_auto_resize_chrome_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )

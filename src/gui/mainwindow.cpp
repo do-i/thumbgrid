@@ -230,6 +230,72 @@ void MW::prepareForLoad(bool nextIsVideo) {
     viewerWidget->prepareForLoad(nextIsVideo);
 }
 
+// The extent a layout would hand this widget along one axis, resolved the way
+// QLayout resolves it: size hints first, then the widget's own explicit
+// minimum/maximum clamps. Unlike geometry() this is answerable for a widget that
+// sits in a layout but has never been shown, which is what windowChromeSize()
+// needs. QWIDGETSIZE_MAX is Qt's "no constraint" marker rather than a real
+// extent, so a clamp set to it is ignored instead of taken literally - MainPanel
+// pins the axis it does not manage to exactly that value.
+static int resolvedExtent(const QWidget *w, Qt::Orientation axis) {
+    const bool horizontal = (axis == Qt::Horizontal);
+    const int hint    = horizontal ? w->sizeHint().width()        : w->sizeHint().height();
+    const int minHint = horizontal ? w->minimumSizeHint().width() : w->minimumSizeHint().height();
+    const int minimum = horizontal ? w->minimumWidth()            : w->minimumHeight();
+    const int maximum = horizontal ? w->maximumWidth()            : w->maximumHeight();
+    int extent = qMax(hint, minHint);
+    if(minimum < QWIDGETSIZE_MAX)
+        extent = qMax(extent, minimum);
+    if(maximum < QWIDGETSIZE_MAX)
+        extent = qMin(extent, maximum);
+    return qMax(0, extent);
+}
+
+// How much of the window is *not* the viewer: the status footer below it, a
+// pinned thumbnail panel beside it.
+//
+// Once the window is up this is a plain measurement. Before the first show it
+// cannot be measured at all - the layout has not run, so every child still
+// carries a placeholder geometry - and that case is not academic: main.cpp calls
+// loadPath() for a command line argument *before* showGui(), so `thumbgrid
+// img.jpg` always resizes while hidden, and preShowResize() then writes the
+// result through setWindowGeometry(), which is both what the first show restores
+// and what the next launch starts from. Answering zero there would put the
+// chrome-less geometry on screen and in the config file, so fall back to what
+// the widgets themselves can still tell us.
+QSize MW::windowChromeSize() const {
+    if(isVisible() && viewerWidget->size().isValid()) {
+        QSize measured = size() - viewerWidget->size();
+        return QSize(qMax(0, measured.width()), qMax(0, measured.height()));
+    }
+    QSize estimate(0, 0);
+    // Footer: same rule updateStatusFooters() applies. InfoBarProxy constrains
+    // its own height (minimum == maximum) in its constructor, so this is exact
+    // even before init() puts the real InfoBar inside it.
+    if(showInfoBarWindowed && !isFullScreen())
+        estimate.rheight() += resolvedExtent(infoBarWindowed.get(), Qt::Vertical);
+    // Panel: pinned means it is in DocumentWidget's layout, on the axis given by
+    // panelPosition(). Only the axis it occupies is queried - the other one is
+    // deliberately unconstrained there.
+    //
+    // Honest limitation, not a silent zero: MainPanel::sizeHint() stays (0,0)
+    // until its thumbnail strip is initialized, and that happens in
+    // setupFullUi(), 50ms *after* the window is shown. So on the startup path
+    // this contributes only the panel's own minimum, which is smaller than the
+    // strip it will end up holding. Nothing reachable from here knows the real
+    // number yet; every later auto-resize measures it for real.
+    if(settings->panelEnabled() && settings->panelPinned()) {
+        if(auto panel = docWidget->findChild<MainPanel *>()) {
+            const auto pos = settings->panelPosition();
+            if(pos == PANEL_TOP || pos == PANEL_BOTTOM)
+                estimate.rheight() += resolvedExtent(panel, Qt::Vertical);
+            else
+                estimate.rwidth() += resolvedExtent(panel, Qt::Horizontal);
+        }
+    }
+    return estimate;
+}
+
 // todo: fix flicker somehow
 // ideally it should change img & resize in one go
 void MW::preShowResize(QSize sz) {
@@ -246,13 +312,9 @@ void MW::preShowResize(QSize sz) {
     // and a pinned panel sits beside it. Sizing the *window* to the image left
     // the viewport smaller than the image, so the fit mode scaled it down and the
     // slack showed up as empty bars either side. Size the viewport to the image
-    // and add the chrome back on top.
-    QSize chrome(0, 0);
-    if(isVisible() && viewerWidget->size().isValid()) {
-        chrome = size() - viewerWidget->size();
-        chrome.setWidth(qMax(0, chrome.width()));
-        chrome.setHeight(qMax(0, chrome.height()));
-    }
+    // and add the chrome back on top. Estimated rather than measured while the
+    // window is still hidden - see windowChromeSize().
+    const QSize chrome = windowChromeSize();
     QSize maxContentSz = maxSz - chrome;
     maxContentSz.setWidth(qMax(1, maxContentSz.width()));
     maxContentSz.setHeight(qMax(1, maxContentSz.height()));
