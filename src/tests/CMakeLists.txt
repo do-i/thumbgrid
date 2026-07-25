@@ -338,6 +338,14 @@ add_test(
     COMMAND thumbgrid_stale_cache_dirs_swept_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_external_content_change_test
+    behavior/test_external_content_change_refreshes_other_instances.cpp
+)
+add_test(
+    NAME "An external content change refreshes other instances even if the timestamp is unchanged"
+    COMMAND thumbgrid_external_content_change_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )

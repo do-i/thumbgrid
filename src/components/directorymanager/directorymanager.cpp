@@ -513,15 +513,18 @@ void DirectoryManager::updateFileEntry(const QString &filePath) {
     // watcher, and renameFileEntry() when the rename was already applied
     // eagerly), and an unconditional signal there means a spurious reload.
     //
-    // Known limitation, accepted deliberately: a content change that leaves
-    // modifyTime untouched is not announced, so the view keeps showing the old
-    // image and the old size until something else triggers a refresh. That
-    // covers `cp --preserve=timestamps`, a restore-from-backup, and two writes
-    // landing inside Qt's millisecond timestamp resolution. If it ever bites,
-    // compare `size` here as well - it is already stat'ed, so it is free, and
-    // it closes those cases without reintroducing the rename-reload (a rename
-    // changes neither field).
-    if(fileEntryVec.at(index).modifyTime == newEntry.modifyTime)
+    // Size is compared as well as mtime, not instead of it. Running several
+    // instances at once is supported, and a mutation made in one must reach
+    // the others immediately - onFileModifiedExternal() lands here, so this
+    // is that path. mtime alone misses any content change that preserves the
+    // timestamp (`cp --preserve=timestamps`, a restore-from-backup, two writes
+    // inside Qt's millisecond resolution), which would leave the other
+    // instance showing a stale image and a stale size. FSEntry has already
+    // stat'ed size, so this costs nothing, and it does not bring back the
+    // spurious rename-reload the early return exists for: a rename changes
+    // neither field.
+    if(fileEntryVec.at(index).modifyTime == newEntry.modifyTime &&
+       fileEntryVec.at(index).size == newEntry.size)
         return;
     fileEntryVec.at(index) = newEntry;
     qCDebug(logDirManager) << "fileMod" << filePath;
