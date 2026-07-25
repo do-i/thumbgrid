@@ -42,6 +42,14 @@ add_test(
     COMMAND thumbgrid_folder_thumbnails_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_grid_repaint_after_populate_test
+    behavior/test_grid_repaints_after_populate.cpp
+)
+add_test(
+    NAME "The grid re-enables painting after every populate so it never stays blank"
+    COMMAND thumbgrid_grid_repaint_after_populate_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_open_picture_test
     behavior/test_opening_a_picture_shows_the_picture_view.cpp
 )

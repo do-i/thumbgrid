@@ -32,6 +32,10 @@ ThumbnailView::ThumbnailView(Qt::Orientation _orientation, QWidget *parent)
     loadTimer.setInterval(static_cast<const int>(LOAD_DELAY));
     loadTimer.setSingleShot(true);
 
+    connect(&layoutSettleTimer, &QTimer::timeout, this, &ThumbnailView::onLayoutSettled);
+    layoutSettleTimer.setInterval(0);
+    layoutSettleTimer.setSingleShot(true);
+
     qreal screenMaxRefreshRate = 60;
     for(auto screen : qApp->screens())
         if(screen->refreshRate() > screenMaxRefreshRate)
@@ -216,18 +220,16 @@ void ThumbnailView::show() {
 
 void ThumbnailView::showEvent(QShowEvent *event) {
     QGraphicsView::showEvent(event);
-    // ensure we are properly resized
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
-    updateScrollbarIndicator();
-    loadVisibleThumbnails();
+    // Our final geometry is only known after the queued resize/layout events
+    // that follow the show, so defer instead of pumping the event loop here.
+    layoutSettleTimer.start();
 }
 
 void ThumbnailView::populate(int newCount) {
-    // wait for possible queued layout events before removing items
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
-
+    // No event pumping here on purpose: rebuilding the item list must stay
+    // atomic with respect to the event loop, or a queued handler could run
+    // against half-destroyed widgets. Queued events now observe the finished
+    // list instead of the old one, which is what they want anyway.
     clearSelection();
     // reset
     lastScrollDirection = SCROLL_FORWARDS;
@@ -283,10 +285,15 @@ void ThumbnailView::populate(int newCount) {
     updateLayout();
     fitSceneToContents();
     resetViewport();
-    // wait for layout before updating
-    // FIXME: re-entrancy hazard (processEvents)
-    qApp->processEvents();
-    this->setUpdatesEnabled(true);
+    // Painting stays off until the queued layout settles, otherwise the scene
+    // is seen shifting as the scrollbar appears. Re-armed rather than stacked,
+    // so repeated populate() calls collapse into one re-enable.
+    layoutSettleTimer.start();
+}
+
+void ThumbnailView::onLayoutSettled() {
+    setUpdatesEnabled(true);
+    updateScrollbarIndicator();
     loadVisibleThumbnails();
 }
 

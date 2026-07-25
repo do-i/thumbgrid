@@ -78,6 +78,10 @@ signals:
 
 private:
     QTimer loadTimer;
+    // Fires on the next event-loop turn, once queued layout/scrollbar geometry
+    // has been applied, to re-enable painting after populate().
+    QTimer layoutSettleTimer;
+    void onLayoutSettled();
     bool blockThumbnailLoading;
 
     int mDrawScrollbarIndicator, lastScrollFrameTime;
