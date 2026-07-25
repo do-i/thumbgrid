@@ -82,16 +82,21 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
         return;
     }
 
-    QStringList args;
-    args << "-e";
-    args << "tell application \"Finder\"";
-    args << "-e";
-    args << "activate";
-    args << "-e";
-    args << "select POSIX file \"" + selectedPath + "\"";
-    args << "-e";
-    args << "end tell";
-    QProcess::startDetached("osascript", args);
+    // Reveal via `open -R`, passing the path as one inert argument.
+    //
+    // This previously built AppleScript source by concatenating the path into
+    // `select POSIX file "<path>"` and handing it to osascript. macOS allows
+    // quotes and newlines in filenames, so a crafted name could close the
+    // string and append its own AppleScript statements - arbitrary execution
+    // with the user's privileges, just from using "Open containing directory"
+    // on an attacker-named file. There is deliberately no escaping helper and
+    // no shell fallback here: the fix is to never build script source at all.
+    // Absolute path so PATH cannot redirect which binary runs.
+    if(!QProcess::startDetached("/usr/bin/open", QStringList() << "-R" << selectedPath)) {
+        // Reveal failed (missing binary, or the path went away). Fall back to
+        // opening the containing directory, same as the empty-selection case.
+        QDesktopServices::openUrl(QUrl::fromLocalFile(fallbackDir));
+    }
 }
 
 QString PlatformDesktop::shortcutsJsonPath(const QString &configDir) {
