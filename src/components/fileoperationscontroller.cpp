@@ -27,15 +27,48 @@ void FileOperationsController::outputError(const FileOpResult &error) const {
     qCWarning(logCore) << FileOperations::decodeResult(error);
 }
 
+// QFileInfo::canonicalFilePath() returns an empty string for a path that
+// does not exist (or has a non-existent tail), so a straight
+// QDir::cleanPath() fallback would leave any symlink in the existing part of
+// that path un-resolved. Walk up to the deepest existing ancestor,
+// canonicalize just that ancestor, and re-append the non-existent tail
+// verbatim - a route to a source that goes through a symlinked existing
+// ancestor is still caught, and once the whole path exists this reduces to
+// plain canonicalFilePath(), unchanged from before.
+static QString canonicalizeAsFarAsPossible(const QString &path) {
+    QFileInfo direct(path);
+    QString canonical = direct.canonicalFilePath();
+    if(!canonical.isEmpty())
+        return canonical;
+
+    QString clean = QDir::cleanPath(direct.absoluteFilePath());
+    QStringList parts = clean.split(QLatin1Char('/'), Qt::SkipEmptyParts);
+    QStringList tail;
+    while(!parts.isEmpty()) {
+        tail.prepend(parts.takeLast());
+        QString ancestor = QLatin1Char('/') + parts.join(QLatin1Char('/'));
+        canonical = QFileInfo(ancestor).canonicalFilePath();
+        if(!canonical.isEmpty()) {
+            // Root canonicalizes to "/", so join without doubling the
+            // separator rather than relying on cleanPath() to collapse it
+            // (a leading "//" is meaningful on Windows and is preserved).
+            if(!canonical.endsWith(QLatin1Char('/')))
+                canonical += QLatin1Char('/');
+            return QDir::cleanPath(canonical + tail.join(QLatin1Char('/')));
+        }
+    }
+    // Root itself (or nothing at all) could not be canonicalized - give up
+    // and fall back to the cleaned, non-canonical path.
+    return clean;
+}
+
 // A destination that is one of the sources, or lives beneath one, makes a
 // recursive copy/move consume its own output and reproduce the tree until the
 // filesystem stops it. Checked here rather than per route, so drag-and-drop,
 // bookmarks and paste cannot bypass it. Paths are canonicalized first so a
 // symlinked route to the same directory is caught too.
 bool FileOperationsController::destinationIsInsideSource(const QStringList& paths, const QString& destDirectory) {
-    QString dest = QFileInfo(destDirectory).canonicalFilePath();
-    if(dest.isEmpty())
-        dest = QDir::cleanPath(destDirectory);
+    QString dest = canonicalizeAsFarAsPossible(destDirectory);
     for(const auto& path : paths) {
         QFileInfo fi(path);
         // Only a real directory can contain the destination. A link is

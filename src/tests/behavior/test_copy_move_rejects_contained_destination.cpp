@@ -70,6 +70,8 @@ private slots:
     void aPlainFileSourceNeverContainsTheDestination();
     void aSymlinkSourceDoesNotContainItsOwnTarget();
     void oneOffendingSourceAmongManyIsEnough();
+    void aNonExistentDestinationUnderASymlinkedRouteToTheSourceIsContained();
+    void aNonExistentDestinationOutsideEverySourceIsNotContained();
 };
 
 void CopyMoveRejectsContainedDestinationTest::theSourceDirectoryItselfIsAContainedDestination() {
@@ -183,6 +185,38 @@ void CopyMoveRejectsContainedDestinationTest::oneOffendingSourceAmongManyIsEnoug
     // The same set with a destination outside every source goes through.
     QVERIFY(!FileOperationsController::destinationIsInsideSource(
         paths, fx.path(QStringLiteral("linkTarget/inner"))));
+}
+
+// Regression case for S4: canonicalFilePath() returns an empty string for a
+// destination that does not exist, so the containment guard must not fall
+// back to a raw, non-canonical path for the whole destination - it has to
+// canonicalize the existing ancestor chain and only leave the missing tail
+// untouched. Route: source/ is real, links/sourceLink -> source/, and the
+// destination is a not-yet-created subdirectory reached through the link.
+void CopyMoveRejectsContainedDestinationTest::aNonExistentDestinationUnderASymlinkedRouteToTheSourceIsContained() {
+    Fixture fx;
+    QVERIFY(fx.build());
+
+    QString link = fx.path(QStringLiteral("links/sourceLink"));
+    if(!QFile::link(fx.source(), link) || !QFileInfo(link).isSymLink())
+        QSKIP("filesystem/platform does not support symlinks");
+
+    QString destination = link + QStringLiteral("/newsub");
+    QVERIFY2(!QFileInfo(destination).exists(), "the destination must not exist yet for this case to be meaningful");
+    QVERIFY2(FileOperationsController::destinationIsInsideSource({fx.source()}, destination),
+             "a non-existent destination reached through a symlinked route to the source must still be refused");
+}
+
+// Same shape, but nothing links back to a source: a non-existent destination
+// must not be flagged just because it fails to canonicalize.
+void CopyMoveRejectsContainedDestinationTest::aNonExistentDestinationOutsideEverySourceIsNotContained() {
+    Fixture fx;
+    QVERIFY(fx.build());
+
+    QString destination = fx.path(QStringLiteral("sibling/newsub"));
+    QVERIFY2(!QFileInfo(destination).exists(), "the destination must not exist yet for this case to be meaningful");
+    QVERIFY2(!FileOperationsController::destinationIsInsideSource({fx.source()}, destination),
+             "a non-existent destination that is genuinely outside every source must be accepted");
 }
 
 TG_BEHAVIOR_TEST_MAIN(CopyMoveRejectsContainedDestinationTest)
