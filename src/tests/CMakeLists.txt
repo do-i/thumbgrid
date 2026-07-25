@@ -282,6 +282,14 @@ add_test(
     COMMAND thumbgrid_file_info_long_path_elides_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_delete_does_not_follow_symlinks_test
+    behavior/test_delete_does_not_follow_symlinks.cpp
+)
+add_test(
+    NAME "Deleting a symlink unlinks the link and never touches its target"
+    COMMAND thumbgrid_delete_does_not_follow_symlinks_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )
