@@ -216,7 +216,10 @@ void FileOperationsController::removePaths(const QStringList& paths, bool trash)
     int successCount = 0;
     for(const auto& path : paths) {
         QFileInfo fi(path);
-        if(fi.isDir())
+        // isDir() resolves links, so a link pointing at a directory would be
+        // sent down the recursive-directory route and take its target's
+        // contents with it. Classify the link first and remove just the link.
+        if(!fi.isSymLink() && fi.isDir())
             model->removeDir(path, trash, true, result);
         else
             result = removeFileHandler(path, trash);

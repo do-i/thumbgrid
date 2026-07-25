@@ -32,6 +32,8 @@ public:
     static void rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result);
     static void checkCanRemove(const QString &filePath, FileOpResult &result);
     static void removeFile(const QString &filePath, FileOpResult &result);
+    // unlinks the link itself; never dereferences or touches its target
+    static void removeSymLink(const QString &linkPath, FileOpResult &result);
     static void removeDir(const QString &dirPath, bool recursive, FileOpResult &result);
     static void createDirectory(const QString &dirPath, FileOpResult &result);
     static void moveToTrash(const QString &filePath, FileOpResult &result);

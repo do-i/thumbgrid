@@ -132,7 +132,11 @@ void DirectoryModel::removeFile(const QString &filePath, bool trash, FileOpResul
         FileOperations::removeFile(filePath, result);
     if(result != FileOpResult::SUCCESS)
         return;
+    // A link resolving to a directory is listed as a dir entry but removed
+    // through here, so drop whichever entry it occupies. Both calls are
+    // guarded no-ops, same as the watcher's own removal handler.
     dirManager.removeFileEntry(filePath);
+    dirManager.removeDirEntry(filePath);
     return;
 }
 

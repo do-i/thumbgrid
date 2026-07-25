@@ -19,7 +19,10 @@ void FileOperations::removeFile(const QString &filePath, FileOpResult &result) {
 
 void FileOperations::checkCanRemove(const QString &filePath, FileOpResult &result) {
     QFileInfo file(filePath);
-    if(!file.exists()) {
+    // exists() resolves the link, so a dangling symlink reads as absent even
+    // though the link itself is right there and removable. Removing a broken
+    // link must stay possible.
+    if(!file.exists() && !file.isSymLink()) {
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
         return;
     }
@@ -38,7 +41,29 @@ void FileOperations::checkCanRemove(const QString &filePath, FileOpResult &resul
 }
 
 // non-recursive
+void FileOperations::removeSymLink(const QString &linkPath, FileOpResult &result) {
+    checkCanRemove(linkPath, result);
+    if(result != FileOpResult::SUCCESS)
+        return;
+
+    // QFile::remove() unlinks the link itself and never touches its target.
+    if(QFile::remove(linkPath))
+        result = FileOpResult::SUCCESS;
+    else
+        result = FileOpResult::OTHER_ERROR;
+}
+
 void FileOperations::removeDir(const QString &dirPath, bool recursive, FileOpResult &result) {
+    // A link that resolves to a directory must never be recursed into.
+    // QDir::removeRecursively() would walk through it and delete the contents
+    // of the *target* - data living outside the folder the user is looking at -
+    // while leaving the link itself in place. Unlink the link instead. This is
+    // the single chokepoint for that rule: every delete route reaches it, so a
+    // caller cannot reintroduce target-following by classifying a path wrong.
+    if(QFileInfo(dirPath).isSymLink()) {
+        removeSymLink(dirPath, result);
+        return;
+    }
     checkCanRemove(dirPath, result);
     if(result != FileOpResult::SUCCESS)
         return;
