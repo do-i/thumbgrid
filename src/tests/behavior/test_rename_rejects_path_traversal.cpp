@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QStringList>
 #include <QTemporaryDir>
+#include <QtGlobal>
 #include "utils/fileoperations.h"
 
 // Regression guard for a path-traversal bug: FileOperations::rename() built its
@@ -19,6 +20,12 @@
 //
 // Every rejection case is run with force=false and force=true: the traversal
 // must be rejected *before* the overwrite path is reachable.
+//
+// '\' is only a path separator on Windows (S5): isValidFileName() rejects it
+// only under Q_OS_WIN, since on Linux/macOS it is an ordinary filename
+// character and cannot itself produce traversal. The "backslash subpath" rows
+// below are gated the same way the production check is, and a Q_OS_WIN-only
+// mirror row is added where the platform check flips the expected outcome.
 
 namespace {
 
@@ -91,7 +98,11 @@ void RenameRejectsPathTraversalTest::traversalNamesAreRejectedAndNothingEscapesT
         {"parent escape", QStringLiteral("../escaped.txt")},
         {"grandparent escape", QStringLiteral("../../escaped.txt")},
         {"forward-slash subpath", QStringLiteral("sub/child.txt")},
+#ifdef Q_OS_WIN
+        // Only rejected on Windows, where '\' is a path separator; see
+        // isValidFileName() and the file-level comment above.
         {"backslash subpath", QStringLiteral("sub\\child.txt")},
+#endif
         {"current dir", QStringLiteral(".")},
         {"parent dir", QStringLiteral("..")},
         {"absolute path", QStringLiteral("/tmp/evil.txt")},
@@ -140,6 +151,12 @@ void RenameRejectsPathTraversalTest::ordinaryNamesAreStillRenamed_data() {
     QTest::newRow("unicode") << QStringLiteral("日本語 café.txt");
     QTest::newRow("multiple dots") << QStringLiteral("multiple.dots.tar.gz");
     QTest::newRow("leading dot") << QStringLiteral(".hidden");
+#ifndef Q_OS_WIN
+    // S5: '\' is an ordinary filename character outside Windows, so a rename
+    // onto a name containing one must work end to end - landing on a single
+    // leaf file with a literal backslash in its name, not a subdirectory.
+    QTest::newRow("literal backslash (non-Windows only)") << QStringLiteral("sub\\child.txt");
+#endif
 }
 
 void RenameRejectsPathTraversalTest::ordinaryNamesAreStillRenamed() {
@@ -207,7 +224,9 @@ void RenameRejectsPathTraversalTest::isValidFileNameRejects_data() {
     QTest::newRow("parent escape") << QStringLiteral("../escaped.txt");
     QTest::newRow("grandparent escape") << QStringLiteral("../../escaped.txt");
     QTest::newRow("forward-slash subpath") << QStringLiteral("sub/child.txt");
+#ifdef Q_OS_WIN
     QTest::newRow("backslash subpath") << QStringLiteral("sub\\child.txt");
+#endif
     QTest::newRow("trailing slash") << QStringLiteral("name/");
     QTest::newRow("current dir") << QStringLiteral(".");
     QTest::newRow("parent dir") << QStringLiteral("..");
@@ -231,6 +250,11 @@ void RenameRejectsPathTraversalTest::isValidFileNameAccepts_data() {
     QTest::newRow("leading dot") << QStringLiteral(".hidden");
     QTest::newRow("dots inside") << QStringLiteral("a..b.txt");
     QTest::newRow("no extension") << QStringLiteral("README");
+#ifndef Q_OS_WIN
+    // S5: '\' is legal in a POSIX filename and does not affect where the leaf
+    // component starts or ends, so isValidFileName() must accept it here.
+    QTest::newRow("literal backslash (non-Windows only)") << QStringLiteral("sub\\child.txt");
+#endif
 }
 
 void RenameRejectsPathTraversalTest::isValidFileNameAccepts() {

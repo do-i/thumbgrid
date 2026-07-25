@@ -58,8 +58,10 @@ void FileOperations::removeDir(const QString &dirPath, bool recursive, FileOpRes
     // QDir::removeRecursively() would walk through it and delete the contents
     // of the *target* - data living outside the folder the user is looking at -
     // while leaving the link itself in place. Unlink the link instead. This is
-    // the single chokepoint for that rule: every delete route reaches it, so a
-    // caller cannot reintroduce target-following by classifying a path wrong.
+    // one of two guards for that rule, not the single chokepoint: it covers
+    // this function's own (non-trash) callers, but DirectoryModel::removeDir()
+    // branches to FileOperations::moveToTrash() before ever reaching here, so
+    // it carries the same isSymLink() check up front to cover the trash route.
     if(QFileInfo(dirPath).isSymLink()) {
         removeSymLink(dirPath, result);
         return;
@@ -331,10 +333,18 @@ void FileOperations::moveSymLinkTo(const QString &srcLinkPath, const QString &de
 bool FileOperations::isValidFileName(const QString &name) {
     if(name.isEmpty() || name == QStringLiteral(".") || name == QStringLiteral(".."))
         return false;
-    // Both separators are rejected on every platform, so a name accepted here
-    // behaves the same everywhere rather than only being caught on Windows.
-    if(name.contains(QLatin1Char('/')) || name.contains(QLatin1Char('\\')))
+    // '/' is a path separator everywhere this runs, so it always disqualifies
+    // a leaf name. '\' is only a path separator on Windows - on Linux/macOS it
+    // is an ordinary filename character, and rejecting it there breaks a
+    // legitimate rename for no traversal benefit: '/', ".", "..",
+    // isAbsolutePath() and the leaf-equality check below are what actually
+    // stop traversal, and none of them depend on '\'.
+    if(name.contains(QLatin1Char('/')))
         return false;
+#ifdef Q_OS_WIN
+    if(name.contains(QLatin1Char('\\')))
+        return false;
+#endif
     if(QDir::isAbsolutePath(name))
         return false;
     // Belt and braces: whatever the platform considers the leaf must be the

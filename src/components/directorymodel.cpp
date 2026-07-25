@@ -156,7 +156,14 @@ void DirectoryModel::renameEntry(const QString &oldPath, const QString &newName,
 }
 
 void DirectoryModel::removeDir(const QString &dirPath, bool trash, bool recursive, FileOpResult &result) {
-    if(trash) {
+    // A link that resolves to a directory must never be recursed into or
+    // handed to the trash route as if it were the real directory - see
+    // FileOperations::removeDir()'s comment for why. That guard lives inside
+    // removeDir() itself, so it only covers the non-trash branch below; this
+    // check is the other guard, applied before the branch so it covers both.
+    if(QFileInfo(dirPath).isSymLink()) {
+        FileOperations::removeSymLink(dirPath, result);
+    } else if(trash) {
         FileOperations::moveToTrash(dirPath, result);
     } else {
         FileOperations::removeDir(dirPath, recursive, result);
