@@ -8,6 +8,7 @@ class QVBoxLayout;
 class QWidget;
 class QLabel;
 class QHideEvent;
+class QPushButton;
 class EntryInfoItem;
 
 // Non-modal inspector window showing metadata for the current selection.
@@ -28,6 +29,14 @@ public:
 
     // test access
     QTabWidget *tabs() { return mTabs; }
+    QPushButton *stripMetadataButton() { return mStripButton; }
+
+signals:
+    // Carries the path rather than letting Core re-derive it: this window shows
+    // exactly one file, while Core::selectedPath() takes the *last* of a
+    // multi-selection, so re-deriving could strip a different file than the one
+    // whose EXIF rows the user is looking at.
+    void stripMetadataRequested(const QString &path);
 
 protected:
     void hideEvent(QHideEvent *event) override;
@@ -39,6 +48,9 @@ private:
     void addGeneralRow(const QString &name, const QString &value);
     void clearExifRows();
     void addExifRow(const QString &name, const QString &value);
+    // Enabled only for a still or animated image that exists on disk - the only
+    // thing DocumentInfo::stripMetadata() can actually write.
+    void updateStripButton(const QString &path);
     static QString permissionsString(const QString &path);
 
     QTabWidget *mTabs = nullptr;
@@ -51,5 +63,6 @@ private:
     QWidget *mExifRowsContainer = nullptr;
     QVBoxLayout *mExifRowsLayout = nullptr;
     QList<EntryInfoItem *> mExifRows;
+    QPushButton *mStripButton = nullptr;
     QString mTargetPath;
 };

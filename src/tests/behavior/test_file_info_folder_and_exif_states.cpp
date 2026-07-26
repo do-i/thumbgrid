@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QLabel>
+#include <QPushButton>
 #include <QTabWidget>
 #include <QTemporaryDir>
 
@@ -130,12 +131,23 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     QVERIFY2(exifIndex >= 0 && generalIndex >= 0, "Both tabs should exist.");
     QVERIFY2(!dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be disabled for a folder target.");
 
+    // Strip metadata lives here rather than in the context menu. It must be
+    // present but refuse a folder - disabled, not hidden, so its absence can
+    // never be misread as "this file carries no metadata".
+    QPushButton *stripButton = dialog->stripMetadataButton();
+    QVERIFY2(stripButton != nullptr, "The File info window should offer a strip metadata button.");
+    QVERIFY2(stripButton->isVisibleTo(dialog), "The strip button should be visible in the dialog.");
+    QVERIFY2(!stripButton->isEnabled(), "Strip metadata should be disabled for a folder target.");
+    QVERIFY2(!stripButton->isDefault() && !stripButton->autoDefault(),
+             "a destructive button must never be the dialog's default (Enter) button");
+
     // --- Live-follow: selecting a tagged jpeg (no re-invoking the action)
     // updates the path and enables the EXIF tab. ---
     grid->select(taggedJpg);
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(taggedPath).absoluteFilePath());
     QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be enabled for a tagged jpeg.");
     QTRY_COMPARE(rowValueByName(dialog, "Make"), QStringLiteral("TestCam"));
+    QTRY_VERIFY2(stripButton->isEnabled(), "Strip metadata should be enabled for a writable jpeg.");
 
     // Switch to the EXIF tab so the next case can prove it snaps back.
     dialog->tabs()->setCurrentIndex(exifIndex);
@@ -147,6 +159,9 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(untaggedPath).absoluteFilePath());
     QTRY_VERIFY2(!dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be disabled for a tagless png.");
     QTRY_COMPARE(dialog->tabs()->currentIndex(), generalIndex);
+    // Still enabled: a png with no *Exif* tags can carry XMP or text chunks, so
+    // the button gates on the file being a strippable image, not on the EXIF tab.
+    QTRY_VERIFY2(stripButton->isEnabled(), "Strip metadata should stay enabled for a tagless png.");
 
     if(qEnvironmentVariableIsSet("THUMBGRID_TEST_VISUAL"))
         QTest::qWait(1500);

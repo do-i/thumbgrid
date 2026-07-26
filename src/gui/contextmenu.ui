@@ -565,9 +565,6 @@
           <widget class="ContextMenuItem" name="imageInfo" native="true"/>
          </item>
          <item>
-          <widget class="ContextMenuItem" name="stripMetadata" native="true"/>
-         </item>
-         <item>
           <widget class="ContextMenuItem" name="findDuplicates" native="true"/>
          </item>
         </layout>

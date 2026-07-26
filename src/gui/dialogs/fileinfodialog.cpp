@@ -5,8 +5,10 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QHideEvent>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLocale>
+#include <QPushButton>
 #include <QTabWidget>
 #include <QVBoxLayout>
 
@@ -62,6 +64,31 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mTabs->addTab(mExifTab, tr("EXIF"));
     mTabs->setTabEnabled(mTabs->indexOf(mExifTab), false);
 
+    // Sits below the tabs, not inside them: it acts on the file as a whole, and
+    // keeping it out of the tab stack means it stays visible while the user is
+    // reading the very EXIF rows it will delete. Red (#stripMetadataButton,
+    // styled with the same danger tokens as the delete confirmations) because it
+    // rewrites the file on disk and cannot be undone. Core raises the
+    // confirmation - see Core::stripMetadataAt().
+    mStripButton = new QPushButton(tr("Strip metadata"), this);
+    mStripButton->setObjectName(QStringLiteral("stripMetadataButton"));
+    mStripButton->setToolTip(tr("Permanently remove all Exif, IPTC and XMP metadata from this file"));
+    mStripButton->setCursor(Qt::PointingHandCursor);
+    // Never the dialog's default button: Enter is for dismissing an inspector
+    // window, not for destroying data.
+    mStripButton->setAutoDefault(false);
+    mStripButton->setDefault(false);
+    connect(mStripButton, &QPushButton::clicked, this, [this]() {
+        if(!mTargetPath.isEmpty())
+            emit stripMetadataRequested(mTargetPath);
+    });
+
+    auto *buttonRow = new QHBoxLayout();
+    buttonRow->setContentsMargins(0, 0, 0, 0);
+    buttonRow->addStretch(1);
+    buttonRow->addWidget(mStripButton);
+    layout->addLayout(buttonRow);
+
     const QByteArray geometry = settings->fileInfoDialogGeometry();
     if(!geometry.isEmpty())
         restoreGeometry(geometry);
@@ -81,6 +108,22 @@ void FileInfoDialog::setTarget(const QString &path) {
     mTargetPath = path;
     populateGeneralTab(path);
     populateExifTab(path);
+    updateStripButton(path);
+}
+
+// Same type test populateExifTab() uses, and the same reason: DocumentInfo is
+// cheap enough for an ad hoc query on a path. A folder, a video, or a missing
+// file leaves the button disabled rather than hidden, so its absence never
+// reads as "this file has no metadata".
+void FileInfoDialog::updateStripButton(const QString &path) {
+    bool strippable = false;
+    QFileInfo fi(path);
+    if(!path.isEmpty() && fi.isFile() && fi.isWritable()) {
+        DocumentInfo docInfo(path);
+        strippable = (docInfo.type() == DocumentType::STATIC ||
+                      docInfo.type() == DocumentType::ANIMATED);
+    }
+    mStripButton->setEnabled(strippable);
 }
 
 void FileInfoDialog::clearTarget() {

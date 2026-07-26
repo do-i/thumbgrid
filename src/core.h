@@ -166,6 +166,7 @@ private slots:
     void reloadImage();
     void reloadImage(QString fileName);
     void stripMetadata();
+    void stripMetadataAt(const QString &path);
     void copyFileClipboard();
     void cutFileClipboard();
     void pasteFile();

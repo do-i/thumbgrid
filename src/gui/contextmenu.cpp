@@ -102,10 +102,9 @@ ContextMenu::ContextMenu(QWidget *parent) :
     ui->imageInfo->setText(tr("File info"));
     ui->imageInfo->setIconPath(":/res/icons/common/overlay/info16.png");
 
-    ui->stripMetadata->setAction("stripMetadata");
-    ui->stripMetadata->setText(tr("Strip metadata"));
-    ui->stripMetadata->setIconPath(":/res/icons/common/menuitem/trash16.png");
-
+    // Strip metadata deliberately lives in the File info window instead: it is
+    // destructive and irreversible, and it belongs next to the EXIF rows it
+    // deletes rather than one slip away from "File info" in a menu.
     ui->findDuplicates->setAction("findDuplicates");
     ui->findDuplicates->setText(tr("Find duplicates..."));
     ui->findDuplicates->setIconPath(":/res/icons/common/menuitem/folderview16.png");
@@ -166,7 +165,6 @@ void ContextMenu::setImageEntriesEnabled(bool mode) {
     ui->showLocation->setEnabled(mode);
     ui->copyPath->setEnabled(mode);
     ui->imageInfo->setEnabled(mode);
-    ui->stripMetadata->setEnabled(mode);
     ui->findDuplicates->setEnabled(mode);
 }
 

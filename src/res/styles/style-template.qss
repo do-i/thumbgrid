@@ -1123,6 +1123,33 @@ QDialog#ShortcutDetailsDialog QLabel:disabled {
    any other secondary-dialog control so they read as separate, clickable
    chips. An accent underline marks the selected tab (in addition to the
    background merge) since the two tones alone are close in some presets. */
+/* "Strip metadata" in the File info window. Destructive and irreversible - it
+   rewrites the file on disk - so it uses the same danger tokens as
+   CustomMessageBox #dangerButton rather than the neutral button palette. The
+   disabled rule matters more here than elsewhere: the button is disabled for
+   folders, videos and read-only files, and a full-strength red would still read
+   as "press me". */
+FileInfoDialog QPushButton#stripMetadataButton {
+    color: %danger_text%;
+    background-color: %danger%;
+    border: none;
+    border-radius: 3px;
+    padding: 5px 16px;
+}
+
+FileInfoDialog QPushButton#stripMetadataButton:hover {
+    background-color: %danger_hover%;
+}
+
+FileInfoDialog QPushButton#stripMetadataButton:pressed {
+    background-color: %danger_pressed%;
+}
+
+FileInfoDialog QPushButton#stripMetadataButton:disabled {
+    background-color: %button%;
+    color: %text_secondary_rgba%;
+}
+
 FileInfoDialog QTabWidget::pane {
     background-color: %widget%;
     border: 1px solid %widget_border%;

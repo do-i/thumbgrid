@@ -437,9 +437,16 @@ void Core::reloadImage(QString filePath) {
 
 // Removes all Exif/Iptc/Xmp metadata from the current file on disk (privacy).
 void Core::stripMetadata() {
-    if(model->isEmpty())
+    stripMetadataAt(selectedPath());
+}
+
+// Rewrites the file in place and cannot be undone, so every route confirms -
+// the File info window's red button and any shortcut bound to the action alike.
+// The path is a parameter rather than re-derived from the selection because the
+// File info window targets one specific file.
+void Core::stripMetadataAt(const QString &path) {
+    if(!model || model->isEmpty() || path.isEmpty())
         return;
-    QString path = selectedPath();
     auto img = model->getImage(path);
     if(!img)
         return;
@@ -447,6 +454,12 @@ void Core::stripMetadata() {
         mw->showMessage(tr("Cannot strip metadata from this file type"));
         return;
     }
+    if(!mw->showConfirmation(tr("Strip metadata"),
+                             tr("Permanently remove all metadata from \"%1\"?\n"
+                                "This rewrites the file and cannot be undone.")
+                                 .arg(QFileInfo(path).fileName()),
+                             true))
+        return;
     if(img->stripMetadata()) {
         reloadImage(path);
         mw->showMessageSuccess(tr("Metadata removed"));
@@ -1158,8 +1171,11 @@ void Core::showDuplicateFinder() {
 }
 
 void Core::showFileInfoDialog() {
-    if(!fileInfoDialog)
+    if(!fileInfoDialog) {
         fileInfoDialog.reset(new FileInfoDialog(mw));
+        connect(fileInfoDialog.get(), &FileInfoDialog::stripMetadataRequested,
+                this, &Core::stripMetadataAt);
+    }
     const QStringList selection = currentSelection();
     fileInfoDialog->setTarget(selection.isEmpty() ? QString() : selection.first());
     fileInfoDialog->show();
