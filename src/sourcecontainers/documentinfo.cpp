@@ -2,6 +2,7 @@
 #include "utils/logging.h"
 #include "utils/pathstring.h"
 #include <QDirIterator>
+#include <algorithm>
 
 DocumentInfo::DocumentInfo(const QString& path)
     : mDocumentType(DocumentType::NONE),
@@ -415,6 +416,155 @@ bool DocumentInfo::stripMetadata() {
         return false;
     }
 #else
+    return false;
+#endif
+}
+
+// --- editable metadata -------------------------------------------------------
+
+QStringList DocumentInfo::editableTagKeys() {
+    return {QStringLiteral("Exif.Image.Make"),
+            QStringLiteral("Exif.Image.Model"),
+            QStringLiteral("Exif.Image.DateTime"),
+            QStringLiteral("Exif.Photo.UserComment")};
+}
+
+QString DocumentInfo::editableTagLabel(const QString &key) {
+    if(key == QLatin1String("Exif.Image.Make"))
+        return QObject::tr("Make");
+    if(key == QLatin1String("Exif.Image.Model"))
+        return QObject::tr("Model");
+    if(key == QLatin1String("Exif.Image.DateTime"))
+        return QObject::tr("Date/Time");
+    if(key == QLatin1String("Exif.Photo.UserComment"))
+        return QObject::tr("Comment");
+    return key;
+}
+
+// Deliberately a allow-list of two rather than "anything exiv2 might open".
+// exiv2 can read metadata from far more formats than it can safely rewrite, and
+// offering an editor that fails on save is worse than not offering one.
+bool DocumentInfo::supportsMetadataEditing(const QString &filePath) {
+#ifdef USE_EXIV2
+    const QString suffix = QFileInfo(filePath).suffix().toLower();
+    return suffix == QLatin1String("jpg") || suffix == QLatin1String("jpeg") ||
+           suffix == QLatin1String("webp");
+#else
+    Q_UNUSED(filePath)
+    return false;
+#endif
+}
+
+bool DocumentInfo::isValidExifDateTime(const QString &value) {
+    // Exif 2.3 §4.6.4: exactly "YYYY:MM:DD HH:MM:SS", zero-padded.
+    return QDateTime::fromString(value, QStringLiteral("yyyy:MM:dd HH:mm:ss")).isValid();
+}
+
+#ifdef USE_EXIV2
+namespace {
+
+// UserComment is an Undefined-typed value carrying an 8-byte charset header.
+// exiv2's string form keeps that header ("charset=Ascii hello"), which is an
+// encoding detail rather than something to show in an edit box.
+QString stripCharsetPrefix(const QString &raw) {
+    if(!raw.startsWith(QLatin1String("charset=")))
+        return raw;
+    const int space = raw.indexOf(QLatin1Char(' '));
+    return space < 0 ? QString() : raw.mid(space + 1);
+}
+
+// ...and put it back on the way in. Non-ASCII text must be labelled Unicode:
+// exiv2 will happily store UTF-8 bytes under charset=Ascii, but other readers
+// then mangle them.
+std::string withCharsetPrefix(const QString &text) {
+    const bool ascii = std::all_of(text.cbegin(), text.cend(),
+                                   [](QChar c) { return c.unicode() < 128; });
+    const QString prefix = ascii ? QStringLiteral("charset=Ascii ")
+                                 : QStringLiteral("charset=Unicode ");
+    return (prefix + text).toStdString();
+}
+
+} // namespace
+#endif
+
+QMap<QString, QString> DocumentInfo::getEditableTags() {
+    QMap<QString, QString> values;
+#ifdef USE_EXIV2
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return values;
+        image->readMetadata();
+        const Exiv2::ExifData &exifData = image->exifData();
+        for(const QString &key : editableTagKeys()) {
+            auto it = exifData.findKey(Exiv2::ExifKey(key.toStdString()));
+            if(it == exifData.end())
+                continue;
+            // value().toString(), not the stream operator: the stream form is
+            // the interpreted one, which is exactly what must not round-trip.
+            QString raw = QString::fromStdString(it->value().toString());
+            if(key == QLatin1String("Exif.Photo.UserComment"))
+                raw = stripCharsetPrefix(raw);
+            values.insert(key, raw);
+        }
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::getEditableTags() - exiv2 failed to read"
+                             << fileInfo.filePath();
+    }
+#endif
+    return values;
+}
+
+bool DocumentInfo::setEditableTags(const QMap<QString, QString> &values) {
+#ifdef USE_EXIV2
+    // Validate everything before opening the file: a half-applied edit is worse
+    // than a rejected one.
+    const QStringList allowed = editableTagKeys();
+    for(auto it = values.cbegin(); it != values.cend(); ++it) {
+        if(!allowed.contains(it.key()))
+            continue;
+        if(it.key() == QLatin1String("Exif.Image.DateTime") && !it.value().isEmpty() &&
+           !isValidExifDateTime(it.value()))
+            return false;
+    }
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        Exiv2::ExifData &exifData = image->exifData();
+        for(auto it = values.cbegin(); it != values.cend(); ++it) {
+            if(!allowed.contains(it.key()))
+                continue;
+            const std::string key = it.key().toStdString();
+            // Empty means "remove": leaving an empty Ascii tag behind would show
+            // up as a present-but-blank row everywhere else.
+            if(it.value().isEmpty()) {
+                auto existing = exifData.findKey(Exiv2::ExifKey(key));
+                if(existing != exifData.end())
+                    exifData.erase(existing);
+                continue;
+            }
+            if(it.key() == QLatin1String("Exif.Photo.UserComment"))
+                exifData[key] = withCharsetPrefix(it.value());
+            else
+                exifData[key] = it.value().toStdString();
+        }
+        image->writeMetadata();
+        // Same cache invalidation stripMetadata() does - both tag maps are lazy
+        // and would otherwise keep serving pre-edit values.
+        exifLoaded = false;
+        allTagsLoaded = false;
+        exifTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::setEditableTags() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+#else
+    Q_UNUSED(values)
     return false;
 #endif
 }

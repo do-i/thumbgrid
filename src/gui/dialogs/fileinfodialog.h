@@ -30,8 +30,12 @@ public:
     // test access
     QTabWidget *tabs() { return mTabs; }
     QPushButton *stripMetadataButton() { return mStripButton; }
+    QPushButton *editMetadataButton() { return mEditButton; }
 
 signals:
+    // Same reason as stripMetadataRequested: this window targets one file, so
+    // it names it rather than letting Core re-derive it from the selection.
+    void editMetadataRequested(const QString &path);
     // Carries the path rather than letting Core re-derive it: this window shows
     // exactly one file, while Core::selectedPath() takes the *last* of a
     // multi-selection, so re-deriving could strip a different file than the one
@@ -64,5 +68,6 @@ private:
     QVBoxLayout *mExifRowsLayout = nullptr;
     QList<EntryInfoItem *> mExifRows;
     QPushButton *mStripButton = nullptr;
+    QPushButton *mEditButton = nullptr;
     QString mTargetPath;
 };

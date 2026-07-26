@@ -83,9 +83,22 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
             emit stripMetadataRequested(mTargetPath);
     });
 
+    // Edit sits left of Strip: ordinary action before the destructive one, and
+    // it is enabled on a different rule - editing needs a format exiv2 can
+    // rewrite (jpeg/webp), while stripping works on any strippable image.
+    mEditButton = new QPushButton(tr("Edit metadata..."), this);
+    mEditButton->setObjectName(QStringLiteral("editMetadataButton"));
+    mEditButton->setAutoDefault(false);
+    mEditButton->setDefault(false);
+    connect(mEditButton, &QPushButton::clicked, this, [this]() {
+        if(!mTargetPath.isEmpty())
+            emit editMetadataRequested(mTargetPath);
+    });
+
     auto *buttonRow = new QHBoxLayout();
     buttonRow->setContentsMargins(0, 0, 0, 0);
     buttonRow->addStretch(1);
+    buttonRow->addWidget(mEditButton);
     buttonRow->addWidget(mStripButton);
     layout->addLayout(buttonRow);
 
@@ -124,6 +137,9 @@ void FileInfoDialog::updateStripButton(const QString &path) {
                       docInfo.type() == DocumentType::ANIMATED);
     }
     mStripButton->setEnabled(strippable);
+    // Narrower than strippable: writing tags back needs a format exiv2 can
+    // rewrite, which is jpeg and webp only.
+    mEditButton->setEnabled(strippable && DocumentInfo::supportsMetadataEditing(path));
 }
 
 void FileInfoDialog::clearTarget() {

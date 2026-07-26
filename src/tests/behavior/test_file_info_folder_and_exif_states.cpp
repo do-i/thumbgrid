@@ -141,6 +141,12 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     QVERIFY2(!stripButton->isDefault() && !stripButton->autoDefault(),
              "a destructive button must never be the dialog's default (Enter) button");
 
+    // Edit is gated more narrowly than Strip: it needs a format exiv2 can
+    // rewrite, so a folder disables both.
+    QPushButton *editButton = dialog->editMetadataButton();
+    QVERIFY2(editButton != nullptr, "The File info window should offer an edit metadata button.");
+    QVERIFY2(!editButton->isEnabled(), "Edit metadata should be disabled for a folder target.");
+
     // --- Live-follow: selecting a tagged jpeg (no re-invoking the action)
     // updates the path and enables the EXIF tab. ---
     grid->select(taggedJpg);
@@ -148,6 +154,7 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be enabled for a tagged jpeg.");
     QTRY_COMPARE(rowValueByName(dialog, "Make"), QStringLiteral("TestCam"));
     QTRY_VERIFY2(stripButton->isEnabled(), "Strip metadata should be enabled for a writable jpeg.");
+    QTRY_VERIFY2(editButton->isEnabled(), "Edit metadata should be enabled for a jpeg.");
 
     // Switch to the EXIF tab so the next case can prove it snaps back.
     dialog->tabs()->setCurrentIndex(exifIndex);
@@ -162,6 +169,9 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     // Still enabled: a png with no *Exif* tags can carry XMP or text chunks, so
     // the button gates on the file being a strippable image, not on the EXIF tab.
     QTRY_VERIFY2(stripButton->isEnabled(), "Strip metadata should stay enabled for a tagless png.");
+    // ...but a png is not rewritable by tier 1, so editing stays off even
+    // though stripping is available. The two buttons gate on different rules.
+    QTRY_VERIFY2(!editButton->isEnabled(), "Edit metadata should be disabled for a png.");
 
     if(qEnvironmentVariableIsSet("THUMBGRID_TEST_VISUAL"))
         QTest::qWait(1500);

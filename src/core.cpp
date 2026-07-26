@@ -468,6 +468,34 @@ void Core::stripMetadataAt(const QString &path) {
     }
 }
 
+// Opens the tier-1 metadata form for one file and writes back whatever changed.
+// No confirmation prompt, unlike stripMetadata(): the form itself is the
+// confirmation (it shows current values, and Cancel is right there), and every
+// field it can touch is individually recoverable by retyping it.
+void Core::editMetadataAt(const QString &path) {
+    if(path.isEmpty() || !DocumentInfo::supportsMetadataEditing(path))
+        return;
+    DocumentInfo docInfo(path);
+    MetadataEditDialog dialog(QFileInfo(path).fileName(), docInfo.getEditableTags(), mw);
+    if(dialog.exec() != QDialog::Accepted)
+        return;
+    const QMap<QString, QString> changed = dialog.editedValues();
+    if(changed.isEmpty()) {
+        mw->showMessage(tr("No changes"));
+        return;
+    }
+    if(!docInfo.setEditableTags(changed)) {
+        mw->showMessage(tr("Could not save metadata"));
+        return;
+    }
+    // Same refresh stripMetadata() does: the image and its cached tag maps both
+    // have to be re-read before the File info window is retargeted, or it shows
+    // the pre-edit values back at the user.
+    reloadImage(path);
+    retargetFileInfoDialog();
+    mw->showMessageSuccess(tr("Metadata saved"));
+}
+
 void Core::enableFolderView() {
     if(mw->currentViewMode() == MODE_FOLDERVIEW) {
         loadParentDir();
@@ -1175,6 +1203,8 @@ void Core::showFileInfoDialog() {
         fileInfoDialog.reset(new FileInfoDialog(mw));
         connect(fileInfoDialog.get(), &FileInfoDialog::stripMetadataRequested,
                 this, &Core::stripMetadataAt);
+        connect(fileInfoDialog.get(), &FileInfoDialog::editMetadataRequested,
+                this, &Core::editMetadataAt);
     }
     const QStringList selection = currentSelection();
     fileInfoDialog->setTarget(selection.isEmpty() ? QString() : selection.first());

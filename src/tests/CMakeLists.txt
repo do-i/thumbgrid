@@ -194,6 +194,14 @@ add_test(
     COMMAND thumbgrid_grid_context_menu_gating_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_exif_editing_test
+    behavior/test_exif_editing_round_trips.cpp
+)
+add_test(
+    NAME "Editable Exif tags round-trip on jpeg and webp"
+    COMMAND thumbgrid_exif_editing_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_grid_window_size_test
     behavior/test_grid_window_size_survives_a_document_visit.cpp
 )

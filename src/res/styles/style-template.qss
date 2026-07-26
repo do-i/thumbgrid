@@ -1035,6 +1035,7 @@ ScriptEditorDialog,
 ShortcutCreatorDialog,
 QDialog#ShortcutDetailsDialog,
 FileInfoDialog,
+MetadataEditDialog,
 PrintDialog,
 QMessageBox {
     background-color: %background%;
@@ -1123,6 +1124,34 @@ QDialog#ShortcutDetailsDialog QLabel:disabled {
    any other secondary-dialog control so they read as separate, clickable
    chips. An accent underline marks the selected tab (in addition to the
    background merge) since the two tones alone are close in some presets. */
+/* Tier-1 metadata editor (MetadataEditDialog), launched from the File info
+   window. Mirrors QDialog#ColorPickerDialog: a native frame, themed body. The
+   hint and error labels are dimmed/red respectively so the form reads without
+   an icon. */
+MetadataEditDialog QLabel {
+    color: %text%;
+}
+
+MetadataEditDialog QLabel#metadataEditHint {
+    color: %text_secondary_rgba%;
+}
+
+MetadataEditDialog QLabel#metadataEditError {
+    color: %danger%;
+}
+
+MetadataEditDialog QLineEdit {
+    color: %text%;
+    background-color: %button%;
+    border: 1px solid %widget_border%;
+    border-radius: 3px;
+    padding: 2px 4px 2px 4px;
+}
+
+MetadataEditDialog QLineEdit:focus {
+    border: 1px solid %accent%;
+}
+
 /* "Strip metadata" in the File info window. Destructive and irreversible - it
    rewrites the file on disk - so it uses the same danger tokens as
    CustomMessageBox #dangerButton rather than the neutral button palette. The
@@ -1349,6 +1378,7 @@ FileReplaceDialog QPushButton,
 ScriptEditorDialog QPushButton,
 ShortcutCreatorDialog QPushButton,
 QDialog#ShortcutDetailsDialog QPushButton,
+MetadataEditDialog QPushButton,
 PrintDialog QPushButton,
 QMessageBox QPushButton,
 CustomMessageBox QPushButton,
@@ -1370,6 +1400,7 @@ FileReplaceDialog QPushButton:hover,
 ScriptEditorDialog QPushButton:hover,
 ShortcutCreatorDialog QPushButton:hover,
 QDialog#ShortcutDetailsDialog QPushButton:hover,
+MetadataEditDialog QPushButton:hover,
 PrintDialog QPushButton:hover,
 QMessageBox QPushButton:hover,
 CustomMessageBox QPushButton:hover,
@@ -1386,6 +1417,7 @@ FileReplaceDialog QPushButton:pressed,
 ScriptEditorDialog QPushButton:pressed,
 ShortcutCreatorDialog QPushButton:pressed,
 QDialog#ShortcutDetailsDialog QPushButton:pressed,
+MetadataEditDialog QPushButton:pressed,
 PrintDialog QPushButton:pressed,
 QMessageBox QPushButton:pressed,
 CustomMessageBox QPushButton:pressed,
@@ -1402,6 +1434,7 @@ CustomMessageBox QPushButton:focus,
 FileReplaceDialog QPushButton:default,
 ScriptEditorDialog QPushButton:default,
 QDialog#ColorPickerDialog QPushButton:default,
+MetadataEditDialog QPushButton:default,
 SettingsDialog QPushButton#OK:default {
     background-color: %accent%;
     color: %text_hc%;

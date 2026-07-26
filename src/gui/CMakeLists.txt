@@ -39,6 +39,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     dialogs/duplicatefinderdialog.cpp
     dialogs/duplicateresultsmodel.cpp
     dialogs/fileinfodialog.cpp
+    dialogs/metadataeditdialog.cpp
     dialogs/shortcutcreatordialog.cpp
     dialogs/printdialog.cpp
 
