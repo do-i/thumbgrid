@@ -133,6 +133,12 @@ private:
     QSize windowChromeSize() const;
     void preShowResize(QSize sz);
     void setInteractionEnabled(bool mode);
+    // Window geometry the grid was using before auto-resize shrank the window to
+    // fit a document. Session-only and deliberately *not* settings->windowGeometry():
+    // that slot is shared with fullscreen and startup, and by the time we switch
+    // views the 30 ms geometry timer has already persisted the shrunken size into
+    // it. Invalid until the first grid -> document switch.
+    QRect folderViewGeometry;
 
 private slots:
     void updateCurrentDisplay();

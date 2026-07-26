@@ -194,6 +194,14 @@ add_test(
     COMMAND thumbgrid_grid_context_menu_gating_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_grid_window_size_test
+    behavior/test_grid_window_size_survives_a_document_visit.cpp
+)
+add_test(
+    NAME "Returning to the grid restores the window size the grid had"
+    COMMAND thumbgrid_grid_window_size_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_slideshow_from_grid_test
     behavior/test_slideshow_starts_from_the_grid.cpp
 )

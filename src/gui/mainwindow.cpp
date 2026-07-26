@@ -167,6 +167,13 @@ void MW::enableFolderView() {
         renameOverlay->hide();
     docWidget->hideFloatingPanel();
     centralWidget->showFolderView();
+    // Put the grid back in the window it had, rather than in whatever size the
+    // last document was auto-resized to. Opening a small image shrinks the window
+    // to that image, and nothing else ever grew it back, so returning to the grid
+    // left it stuck at thumbnail size for the rest of the session.
+    if(settings->autoResizeWindow() && folderViewGeometry.isValid() &&
+       windowState() == Qt::WindowNoState)
+        setGeometry(folderViewGeometry);
     onInfoUpdated();
 }
 
@@ -302,6 +309,14 @@ void MW::preShowResize(QSize sz) {
     auto screens = qApp->screens();
     if(this->windowState() != Qt::WindowNoState || !screens.count() || screens.count() <= currentDisplay)
         return;
+    // The grid's size only exists until the line below overwrites it, so grab it
+    // here rather than in enableDocumentView(): Core::loadPath() loads the image
+    // *before* switching views (deliberately - that ordering is what stops a stale
+    // video frame flashing), so by the time the view switch runs the window has
+    // already been shrunk. Being still in folder view is exactly what marks this
+    // call as the grid -> document transition.
+    if(isVisible() && currentViewMode() == MODE_FOLDERVIEW)
+        folderViewGeometry = geometry();
     int decorationSize = frameGeometry().height() - height();
     float maxSzMulti = settings->autoResizeLimit() / 100.f;
     QRect availableGeom = screens.at(currentDisplay)->availableGeometry();
