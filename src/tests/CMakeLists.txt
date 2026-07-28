@@ -370,6 +370,14 @@ add_test(
     COMMAND thumbgrid_external_content_change_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_grid_symlink_badge_test
+    behavior/test_grid_symlink_badge.cpp
+)
+add_test(
+    NAME "Symlinked entries are badged in the grid"
+    COMMAND thumbgrid_grid_symlink_badge_test
+)
+
 add_executable(thumbgrid_settings_migration_gates_test
     behavior/test_settings_migration_gates.cpp
 )

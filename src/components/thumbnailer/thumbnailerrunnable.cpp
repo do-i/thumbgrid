@@ -138,6 +138,8 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
     }
     std::shared_ptr<QPixmap> pixmapPtr(tmpPixmap);
     std::shared_ptr<Thumbnail> thumbnail(new Thumbnail(imgInfo.fileName(), label, size, pixmapPtr));
+    // link-ness comes from the entry itself, never from the (path-keyed) cached image
+    thumbnail->setSymlink(QFileInfo(path).isSymLink());
     return thumbnail;
 }
 
@@ -248,7 +250,9 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateDir(ThumbnailCache *cach
 
     auto pixmap = new QPixmap(QPixmap::fromImage(*composite));
     pixmap->setDevicePixelRatio(qApp->devicePixelRatio());
-    return std::shared_ptr<Thumbnail>(new Thumbnail(name, "Folder", size, std::shared_ptr<QPixmap>(pixmap), false));
+    auto thumbnail = std::shared_ptr<Thumbnail>(new Thumbnail(name, "Folder", size, std::shared_ptr<QPixmap>(pixmap), false));
+    thumbnail->setSymlink(QFileInfo(path).isSymLink());
+    return thumbnail;
 }
 
 // Cache key includes the preview-fit mode, scheme icon color, and folder icon
@@ -389,8 +393,10 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateFileTypeIcon(const Docum
         label = suffix.isEmpty() ? QObject::tr("Text file") : suffix.toUpper() + QObject::tr(" file");
     else
         label = QObject::tr("Unknown format");
-    return std::shared_ptr<Thumbnail>(
+    auto thumbnail = std::shared_ptr<Thumbnail>(
         new Thumbnail(imgInfo.fileName(), label, size, std::shared_ptr<QPixmap>(pixmap), false));
+    thumbnail->setSymlink(QFileInfo(imgInfo.filePath()).isSymLink());
+    return thumbnail;
 }
 
 // Generic "document page" icon with a folded corner. Text files get faux text

@@ -120,6 +120,13 @@ void ThumbnailWidget::setTransparencyGridVisible(bool mode) {
     }
 }
 
+void ThumbnailWidget::setSymlinkBadgeVisible(bool mode) {
+    if(mSymlinkBadgeVisible != mode) {
+        mSymlinkBadgeVisible = mode;
+        update();
+    }
+}
+
 void ThumbnailWidget::setThumbnailTopMargin(int margin) {
     margin = qMax(0, margin);
     if(mThumbnailTopMargin != margin) {
@@ -368,6 +375,8 @@ void ThumbnailWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
         }
         if(thumbStyle != THUMB_SIMPLE)
             drawLabel(painter);
+        if(mSymlinkBadgeVisible && thumbnail->isSymlink())
+            drawSymlinkBadge(painter);
     }
     if(mCellBorderVisible)
         drawCellBorder(painter);
@@ -528,6 +537,54 @@ void ThumbnailWidget::drawDropHover(QPainter *painter) {
     QPen pen(clr, 2);
     painter->setPen(pen);
     painter->drawRect(bgRect.adjusted(1,1,-1,-1));
+    painter->setRenderHints(hints);
+}
+
+// The badge belongs to the cell, not to the picture inside it: it sits in the
+// cell's bottom-right corner, so it stays put whatever the thumbnail's size or
+// aspect ratio is (and shows up on the error icon of a dangling link too).
+QRect ThumbnailWidget::symlinkBadgeAnchorRect() const {
+    return bgRect.adjusted(1, 1, -1, -1).toRect();
+}
+
+// Shortcut-style corner badge: a rounded accent chip with an up-right arrow,
+// marking the entry as a symbolic link rather than a regular file/folder.
+void ThumbnailWidget::drawSymlinkBadge(QPainter *painter) {
+    QRect anchor = symlinkBadgeAnchorRect();
+    if(anchor.isEmpty())
+        return;
+
+    auto hints = painter->renderHints();
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    qreal side = qBound(6.0, qMin(anchor.width(), anchor.height()) * 0.09, 13.0);
+    QRectF badge(anchor.right() - side, anchor.bottom() - side, side, side);
+
+    QColor chip = settings->colorScheme().accent;
+    painter->setPen(QPen(QColor(0, 0, 0, 90), qMax(1.0, side * 0.07)));
+    painter->setBrush(chip);
+    painter->drawRoundedRect(badge, side * 0.28, side * 0.28);
+
+    // arrow color follows the chip's luminance, same rule as the file-type badge
+    qreal lum = 0.299 * chip.redF() + 0.587 * chip.greenF() + 0.114 * chip.blueF();
+    QColor glyph = (lum > 0.55) ? QColor(25, 25, 25) : QColor(245, 245, 245);
+
+    QRectF inner = badge.adjusted(side * 0.28, side * 0.28, -side * 0.26, -side * 0.26);
+    QPen shaft(glyph, qMax(1.0, side * 0.13));
+    shaft.setCapStyle(Qt::RoundCap);
+    painter->setPen(shaft);
+    painter->drawLine(inner.bottomLeft(), inner.topRight());
+
+    QPainterPath head;
+    head.moveTo(inner.topRight());
+    head.lineTo(inner.right() - inner.width() * 0.62, inner.top());
+    head.lineTo(inner.right(), inner.top() + inner.height() * 0.62);
+    head.closeSubpath();
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(glyph);
+    painter->drawPath(head);
+
+    painter->setBrush(Qt::NoBrush);
     painter->setRenderHints(hints);
 }
 

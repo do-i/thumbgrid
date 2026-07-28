@@ -34,6 +34,14 @@ bool Thumbnail::transparencyGridEligible() {
     return mTransparencyGridEligible;
 }
 
+bool Thumbnail::isSymlink() const {
+    return mIsSymlink;
+}
+
+void Thumbnail::setSymlink(bool mode) {
+    mIsSymlink = mode;
+}
+
 std::shared_ptr<QPixmap> Thumbnail::pixmap() {
     return mPixmap;
 }

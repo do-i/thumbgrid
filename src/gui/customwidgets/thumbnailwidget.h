@@ -5,6 +5,7 @@
 #include <QGraphicsLayoutItem>
 #include <QMouseEvent>
 #include <QPainter>
+#include <QPainterPath>
 #include <QGraphicsSceneHoverEvent>
 #include <QPaintEngine>
 #include <cmath>
@@ -57,6 +58,7 @@ public:
     void setFixedBackgroundRect(bool mode);
     void setCellBorderVisible(bool mode);
     void setTransparencyGridVisible(bool mode);
+    void setSymlinkBadgeVisible(bool mode);
     void setThumbnailTopMargin(int margin);
     void setCellHeightRatio(qreal heightOverWidth);
     void setLabelFontPointSize(int size);
@@ -78,6 +80,8 @@ protected:
     void drawHoverHighlight(QPainter *painter);
     void drawCellBorder(QPainter *painter);
     void drawTransparencyGrid(QPainter *painter);
+    void drawSymlinkBadge(QPainter *painter);
+    QRect symlinkBadgeAnchorRect() const;
     void drawLabel(QPainter *painter);
     QRectF labelBackgroundRect() const;
     int labelBlockHeight() const;
@@ -98,6 +102,7 @@ protected:
 
     std::shared_ptr<Thumbnail> thumbnail;
     bool highlighted, hovered, dropHovered, mShowInfo, mFixedBackgroundRect, mCellBorderVisible, mTransparencyGridVisible;
+    bool mSymlinkBadgeVisible = false;
     int mThumbnailSize, mThumbnailWidth, mThumbnailHeight, mThumbnailTopMargin, padding, marginX, marginY, labelSpacing, textHeight;
     qreal mCellHeightRatio = 0.0;
     QRectF bgRect, mBoundingRect;

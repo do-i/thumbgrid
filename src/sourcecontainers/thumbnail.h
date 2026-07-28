@@ -12,10 +12,14 @@ public:
     int size();
     bool hasAlphaChannel();
     bool transparencyGridEligible();
+    // whether the source entry is a symbolic link; drawn as a corner badge in the grid
+    bool isSymlink() const;
+    void setSymlink(bool mode);
     std::shared_ptr<QPixmap> pixmap();
 private:
     QString mName, mInfo;
     std::shared_ptr<QPixmap> mPixmap;
     int mSize;
     bool mHasAlphaChannel, mTransparencyGridEligible;
+    bool mIsSymlink = false;
 };
