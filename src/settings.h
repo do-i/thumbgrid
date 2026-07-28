@@ -135,6 +135,13 @@ public:
     // context as action -> sorted keys, with optional per-action primacy.
     void readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     void saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts);
+    // Storage normalization applied by readShortcuts(): a binding present with the
+    // same action in both document and grid is hoisted into global, and anything a
+    // context repeats from global is dropped. Exposed so the preset defaults can be
+    // put through the identical pass - otherwise `defaults` keeps the per-context
+    // copies the preset file spells out while the mapping read back from disk has
+    // them in global, and the two compare unequal forever after a restart.
+    static bool collapseShortcutContexts(QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     void readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary);
     void saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> &primary);
     void readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled);

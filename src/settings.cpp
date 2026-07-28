@@ -1494,6 +1494,10 @@ void Settings::readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) 
 void Settings::saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     writeShortcutsJson(settings->mShortcutsJsonPath, shortcuts);
 }
+
+bool Settings::collapseShortcutContexts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
+    return collapseGlobalShortcutDuplicates(shortcuts);
+}
 //------------------------------------------------------------------------------
 QString Settings::selectedPreset() {
     return settings->readSetting("preset", QStringLiteral("qimgv")).toString();

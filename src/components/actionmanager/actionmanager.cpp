@@ -131,9 +131,19 @@ void ActionManager::initDefaults() {
         platformSpecific = platform.value("default").toObject();
     insertPlatformShortcutObject(platformSpecific, global, document, grid);
 
-    actionManager->defaults.insert(MODE_GLOBAL, global);
-    actionManager->defaults.insert(MODE_DOCUMENT, document);
-    actionManager->defaults.insert(MODE_FOLDERVIEW, grid);
+    ShortcutMap loaded;
+    loaded.insert(MODE_GLOBAL, global);
+    loaded.insert(MODE_DOCUMENT, document);
+    loaded.insert(MODE_FOLDERVIEW, grid);
+    // Presets spell a binding out in every context it applies to (leftie, for one,
+    // repeats folderView/nextDirectory/prevDirectory/toggleImageInfo verbatim under
+    // both document and grid). shortcuts.json does not store that shape: reading it
+    // back hoists any document+grid duplicate into global. Run the defaults through
+    // the same pass so both sides speak one canonical form - otherwise every restart
+    // sees shortcuts != defaults, the preset combo falls back to "Custom", and the
+    // settings table lists those actions as unbound in the contexts the preset named.
+    Settings::collapseShortcutContexts(loaded);
+    actionManager->defaults = loaded;
 }
 
 //------------------------------------------------------------------------------
@@ -304,9 +314,17 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
     // the action, or where the preset's key is spoken for, so customised setups
     // and presets that deliberately omit File info are left alone.
     if(lastVer < QVersionNumber(2026,7,25)) {
+        // Bail out on any existing binding, in any context, rather than per
+        // context: `defaults` is canonicalized, so a preset that names the action
+        // in both document and grid carries it in global instead. Seeding global
+        // reaches every context, which would hand a second key to a context the
+        // user had already bound (their choice, silently doubled).
+        bool alreadyBound = false;
+        for(ViewMode ctx : shortcutContexts())
+            alreadyBound = alreadyBound || !shortcuts[ctx].key("toggleImageInfo").isEmpty();
         for(ViewMode ctx : shortcutContexts()) {
-            if(!shortcuts[ctx].key("toggleImageInfo").isEmpty())
-                continue; // user already has a binding in this context
+            if(alreadyBound)
+                break;
             const QString key = defaults[ctx].key("toggleImageInfo");
             if(key.isEmpty() || shortcuts[ctx].contains(key))
                 continue;
