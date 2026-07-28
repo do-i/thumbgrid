@@ -71,6 +71,24 @@ private:
     QString mActionLabel;
 };
 
+// QStyleSheetStyle ignores Qt::TextAlignmentRole set on the item once the
+// theme QSS styles ::item (padding/background), so alignment has to be forced
+// through the option the delegate hands to the style instead. Left-eliding
+// here too: a right-aligned path is only useful if the filename at its end
+// survives truncation rather than the drive/share prefix.
+class RightAlignedPathDelegate : public QStyledItemDelegate
+{
+public:
+    explicit RightAlignedPathDelegate(QObject *parent = nullptr) : QStyledItemDelegate(parent) {}
+
+protected:
+    void initStyleOption(QStyleOptionViewItem *option, const QModelIndex &index) const override {
+        QStyledItemDelegate::initStyleOption(option, index);
+        option->displayAlignment = Qt::AlignRight | Qt::AlignVCenter;
+        option->textElideMode = Qt::ElideLeft;
+    }
+};
+
 class CenteredCheckBoxDelegate : public QStyledItemDelegate
 {
 public:
@@ -461,6 +479,7 @@ QWidget* SettingsDialog::setupStoredDataPage() {
     mStoredDataTable->header()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
     mStoredDataTable->header()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
     mStoredDataTable->header()->setStretchLastSection(false);
+    mStoredDataTable->setItemDelegateForColumn(1, new RightAlignedPathDelegate(mStoredDataTable));
 
     mStores = StoredData::stores();
     for(int i = 0; i < mStores.count(); i++) {
