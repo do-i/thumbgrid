@@ -16,6 +16,7 @@
 #include <QMenu>
 #include <QComboBox>
 #include <QHash>
+#include <QIcon>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
@@ -63,6 +64,14 @@ public:
     // table's customContextMenuRequested signal - viewport coordinates, used
     // as-is (see the definition). Empty when no row is there.
     QString shortcutActionAtMenuPos(const QPoint &viewportPos) const;
+    // The context that same row belongs to. The table lists all three contexts
+    // at once, so the row - not a filter above it - says which map a command
+    // acts on. Falls back to Global when no row is there.
+    ViewMode shortcutContextAtMenuPos(const QPoint &viewportPos) const;
+    // Per-row identity in the shortcuts table: every cell of a row carries both,
+    // so any column can answer "which binding is this?".
+    QString shortcutActionAtRow(int row) const;
+    ViewMode shortcutContextAtRow(int row) const;
 
 public slots:
     int exec() override;
@@ -125,7 +134,9 @@ private:
     QStringList defaultShortcuts(ViewMode context, const QString &action) const;
     void rebuildShortcutDraftLookup();
     QString draftActionForShortcut(ViewMode context, const QString &shortcut) const;
-    ViewMode selectedShortcutContext() const;
+    // Theme-recolored context icon for the table's leading column, built once
+    // per theme (see mShortcutContextIcons).
+    QIcon shortcutContextIcon(ViewMode context) const;
     void openShortcutDetails(int row);
     void openShortcutDetails(const QString &action, ViewMode context);
     // Right-click on a shortcuts-table row: edit keys, plus Move to.../Copy to...
@@ -141,9 +152,10 @@ private:
     QMap<ViewMode, QHash<QString, QString>> mShortcutDraftLookup;
     QMap<ViewMode, QMap<QString, QString>> mShortcutPrimary;
     QMap<ViewMode, QStringList> mShortcutDisabled;
-    QComboBox *mShortcutContextComboBox = nullptr;
     QLineEdit *mShortcutSearchEdit = nullptr;
     QComboBox *mShortcutPresetComboBox = nullptr;
+    // Cleared on a theme change so the icons pick up the new icon colour.
+    mutable QMap<ViewMode, QIcon> mShortcutContextIcons;
     bool mUpdatingShortcutsTable = false;
 
 private slots:

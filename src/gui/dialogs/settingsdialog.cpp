@@ -23,11 +23,53 @@
 #include <QRadioButton>
 #include <functional>
 #include "gui/customwidgets/keysequenceedit.h"
+#include "utils/imagelib.h"
 
 namespace {
 // Marks the "Custom" entry in the shortcut-preset combobox so it can be told
 // apart from a real preset row that happens to carry the same preset id.
 constexpr int kCustomPresetEntryRole = Qt::UserRole + 1;
+
+// Shortcuts table. The rows of all three contexts share one list, so each cell
+// carries its own context (as ViewMode) next to the action id in Qt::UserRole -
+// there is no filter above the table to ask any more.
+constexpr int kShortcutContextRole = Qt::UserRole + 1;
+// The context label, kept on the icon cell so the search box can match it even
+// though the cell shows no text.
+constexpr int kShortcutContextLabelRole = Qt::UserRole + 2;
+
+enum ShortcutColumn {
+    ShortcutColumnContext = 0,
+    ShortcutColumnAction,
+    ShortcutColumnKey,
+    ShortcutColumnCount,
+    ShortcutColumnEnabled,
+    ShortcutColumnTotal
+};
+
+// The context cell is icon-only, so QTableWidgetItem's text comparison would
+// call every row equal and sorting by context would shuffle rows arbitrarily.
+// Sort by context first, then by the row's action so each group stays in the
+// same order the Action column would give it.
+class ShortcutContextItem : public QTableWidgetItem
+{
+public:
+    ShortcutContextItem(int order, QString actionLabel)
+        : QTableWidgetItem(), mOrder(order), mActionLabel(std::move(actionLabel)) {}
+
+    bool operator<(const QTableWidgetItem &other) const override {
+        const auto *o = dynamic_cast<const ShortcutContextItem *>(&other);
+        if(!o)
+            return QTableWidgetItem::operator<(other);
+        if(mOrder != o->mOrder)
+            return mOrder < o->mOrder;
+        return mActionLabel.compare(o->mActionLabel, Qt::CaseInsensitive) < 0;
+    }
+
+private:
+    int mOrder;
+    QString mActionLabel;
+};
 
 class CenteredCheckBoxDelegate : public QStyledItemDelegate
 {
@@ -591,24 +633,24 @@ void SettingsDialog::setupShortcutsPage() {
     });
     refreshShortcutPresetCombo();
 
-    mShortcutContextComboBox = new QComboBox(ui->Controls);
-    mShortcutContextComboBox->addItem(tr("Global"), ActionManager::contextToString(MODE_GLOBAL));
-    mShortcutContextComboBox->addItem(tr("Grid"), ActionManager::contextToString(MODE_FOLDERVIEW));
-    mShortcutContextComboBox->addItem(tr("Document"), ActionManager::contextToString(MODE_DOCUMENT));
-    mShortcutContextComboBox->setCurrentIndex(0);
-
+    // No context filter above the table: every binding of every context is
+    // listed at once and the Context column's icon says which one a row is in.
+    // The search box therefore also matches the context label, so typing "grid"
+    // still narrows the list down to one context.
     mShortcutSearchEdit = new QLineEdit(ui->Controls);
-    mShortcutSearchEdit->setPlaceholderText(tr("Search"));
+    mShortcutSearchEdit->setPlaceholderText(tr("Search actions, keys and contexts"));
     mShortcutSearchEdit->setClearButtonEnabled(true);
 
-    ui->horizontalLayout_2->insertWidget(0, mShortcutContextComboBox);
-    ui->horizontalLayout_2->insertWidget(1, mShortcutSearchEdit, 1);
+    ui->horizontalLayout_2->insertWidget(0, mShortcutSearchEdit, 1);
 
     disconnect(ui->shortcutsTableWidget, nullptr, this, nullptr);
-    ui->shortcutsTableWidget->setColumnCount(4);
-    ui->shortcutsTableWidget->setHorizontalHeaderLabels({tr("Action"), tr("Key"), tr("Count"), tr("Enabled")});
+    ui->shortcutsTableWidget->setColumnCount(ShortcutColumnTotal);
+    ui->shortcutsTableWidget->setHorizontalHeaderLabels(
+        {tr("Context"), tr("Action"), tr("Key"), tr("Count"), tr("Enabled")});
+    ui->shortcutsTableWidget->setIconSize(QSize(16, 16));
     ui->shortcutsTableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->shortcutsTableWidget->setItemDelegateForColumn(3, new CenteredCheckBoxDelegate(ui->shortcutsTableWidget));
+    ui->shortcutsTableWidget->setItemDelegateForColumn(ShortcutColumnEnabled,
+                                                       new CenteredCheckBoxDelegate(ui->shortcutsTableWidget));
     ui->shortcutsTableWidget->setSortingEnabled(true);
     ui->shortcutsTableWidget->horizontalHeader()->setSectionsClickable(true);
     ui->shortcutsTableWidget->horizontalHeader()->setSortIndicatorShown(true);
@@ -619,37 +661,50 @@ void SettingsDialog::setupShortcutsPage() {
         settings->setShortcutsSortColumn(column);
         settings->setShortcutsSortOrder(order);
     });
-    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(2, QHeaderView::ResizeToContents);
-    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(3, QHeaderView::ResizeToContents);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(ShortcutColumnContext, QHeaderView::ResizeToContents);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(ShortcutColumnAction, QHeaderView::Stretch);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(ShortcutColumnKey, QHeaderView::Stretch);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(ShortcutColumnCount, QHeaderView::ResizeToContents);
+    ui->shortcutsTableWidget->horizontalHeader()->setSectionResizeMode(ShortcutColumnEnabled, QHeaderView::ResizeToContents);
 
-    connect(mShortcutContextComboBox, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, [this]() { updateShortcutsTable(); });
     connect(mShortcutSearchEdit, &QLineEdit::textChanged,
             this, [this]() { updateShortcutsFilter(); });
     connect(ui->shortcutsTableWidget, &QTableWidget::itemChanged, this, [this](QTableWidgetItem *item) {
-        if(mUpdatingShortcutsTable || !item || item->column() != 3)
+        if(mUpdatingShortcutsTable || !item || item->column() != ShortcutColumnEnabled)
             return;
         const QString action = item->data(Qt::UserRole).toString();
-        setShortcutEnabled(selectedShortcutContext(), action, item->checkState() == Qt::Checked);
+        const ViewMode context = static_cast<ViewMode>(item->data(kShortcutContextRole).toInt());
+        setShortcutEnabled(context, action, item->checkState() == Qt::Checked);
         updateShortcutsTable();
     });
     connect(ui->shortcutsTableWidget, &QTableWidget::cellDoubleClicked,
             this, [this](int row, int column) {
-        if(column == 1)
+        if(column == ShortcutColumnKey)
             openShortcutDetails(row);
     });
     connect(ui->shortcutsTableWidget, &QTableWidget::cellClicked,
             this, [this](int row, int column) {
-        if(column == 1)
+        if(column == ShortcutColumnKey)
             openShortcutDetails(row);
     });
-    // The context combo above the table is only a filter over separate
-    // per-context maps, so retargeting a binding needs a row-level command.
+    // A binding lives in exactly one context's map, so retargeting one is a
+    // row-level command rather than something the (now gone) filter could do.
     ui->shortcutsTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->shortcutsTableWidget, &QWidget::customContextMenuRequested,
             this, &SettingsDialog::showShortcutRowMenu);
+
+    // The context icons are recolored to the theme's icon colour, and the theme
+    // page next door can change that while this table is already populated.
+    // Repainting the cells in place keeps sorting and selection untouched.
+    connect(settings, &Settings::settingsChanged, this, [this]() {
+        mShortcutContextIcons.clear();
+        QSignalBlocker blocker(ui->shortcutsTableWidget);
+        for(int row = 0; row < ui->shortcutsTableWidget->rowCount(); row++) {
+            QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, ShortcutColumnContext);
+            if(item)
+                item->setIcon(shortcutContextIcon(shortcutContextAtRow(row)));
+        }
+    });
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::refreshShortcutPresetCombo() {
@@ -1135,10 +1190,49 @@ QString shortcutActionLabel(const QString &action) {
 }
 }    // namespace
 //------------------------------------------------------------------------------
-ViewMode SettingsDialog::selectedShortcutContext() const {
-    if(!mShortcutContextComboBox)
-        return MODE_FOLDERVIEW;
-    return ActionManager::contextFromString(mShortcutContextComboBox->currentData().toString());
+QString SettingsDialog::shortcutActionAtRow(int row) const {
+    // Every cell of the row carries the action id; read it off the context cell,
+    // which is the one column that is always there.
+    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, ShortcutColumnContext);
+    return item ? item->data(Qt::UserRole).toString() : QString();
+}
+//------------------------------------------------------------------------------
+ViewMode SettingsDialog::shortcutContextAtRow(int row) const {
+    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, ShortcutColumnContext);
+    if(!item)
+        return MODE_GLOBAL;
+    return static_cast<ViewMode>(item->data(kShortcutContextRole).toInt());
+}
+//------------------------------------------------------------------------------
+// Monochrome source art recolored to the theme, the same way every other
+// 16px icon in the app is drawn. Grid and Document reuse the icons their view
+// already has in the menus; Global gets the globe.
+QIcon SettingsDialog::shortcutContextIcon(ViewMode context) const {
+    auto cached = mShortcutContextIcons.constFind(context);
+    if(cached != mShortcutContextIcons.constEnd())
+        return cached.value();
+
+    QString name;
+    if(context == MODE_FOLDERVIEW)
+        name = QStringLiteral("folderview16");
+    else if(context == MODE_DOCUMENT)
+        name = QStringLiteral("document-view16");
+    else
+        name = QStringLiteral("global16");
+
+    const QColor color = settings->colorScheme().icons;
+    QIcon icon;
+    // Both scales go into the icon so a HiDPI screen gets the @2x art; Qt picks
+    // whichever matches the device pixels it is asked to paint.
+    for(const QString &suffix : {QStringLiteral(""), QStringLiteral("@2x")}) {
+        QPixmap pixmap(QStringLiteral(":/res/icons/common/menuitem/%1%2.png").arg(name, suffix));
+        if(pixmap.isNull())
+            continue;
+        ImageLib::recolor(pixmap, color);
+        icon.addPixmap(pixmap);
+    }
+    mShortcutContextIcons.insert(context, icon);
+    return icon;
 }
 //------------------------------------------------------------------------------
 QStringList SettingsDialog::actionShortcuts(const ActionManager::ContextMap &map, const QString &action) const {
@@ -1246,7 +1340,7 @@ void SettingsDialog::setShortcutEnabled(ViewMode context, const QString &action,
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::updateShortcutsTable() {
-    if(!mShortcutContextComboBox)
+    if(!mShortcutSearchEdit)
         return;
 
     mUpdatingShortcutsTable = true;
@@ -1254,81 +1348,102 @@ void SettingsDialog::updateShortcutsTable() {
     ui->shortcutsTableWidget->clearContents();
     ui->shortcutsTableWidget->setRowCount(0);
 
-    const ViewMode context = selectedShortcutContext();
-    const ActionManager::ContextMap defaults = actionManager->allDefaultShortcuts().value(context);
-    const ActionManager::ContextMap active = mShortcutDraft.value(context);
-
-    QSet<QString> actions;
-    for(auto it = defaults.cbegin(); it != defaults.cend(); ++it)
-        actions.insert(it.value());
-    for(auto it = active.cbegin(); it != active.cend(); ++it)
-        actions.insert(it.value());
-    // A disabled action has no keys in the draft, so nothing above would list
-    // it. Without this the Enabled checkbox would be a one-way door for any
-    // action that has no defaults here - notably a script moved into this
-    // context and then switched off.
-    const QStringList disabledHere = mShortcutDisabled.value(context);
-    for(const QString &action : disabledHere)
-        actions.insert(action);
-    // Scripts are Global-only actions and are usually unbound, so they would
-    // otherwise never get a row to click. Seed them so they are discoverable
-    // (and bindable) here rather than needing the creator dialog.
-    if(context == MODE_GLOBAL && scriptManager) {
-        const QStringList names = scriptManager->scriptNames();
-        for(const QString &name : names)
-            actions.insert(QStringLiteral("s:") + name);
-    }
-
-    QStringList actionNames = actions.values();
-    actionNames.sort(Qt::CaseInsensitive);
-
     const QBrush disabledBrush = palette().brush(QPalette::Disabled, QPalette::Text);
-    for(const QString &action : actionNames) {
-        const bool enabled = shortcutEnabled(context, action);
-        const QString primary = primaryShortcut(context, action);
+    // Contexts are listed in scope order - widest first - so the default sort by
+    // the Context column reads Global, Grid, Document.
+    const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT};
+    for(int order = 0; order < contexts.size(); order++) {
+        const ViewMode context = contexts.at(order);
+        const ActionManager::ContextMap defaults = actionManager->allDefaultShortcuts().value(context);
+        const ActionManager::ContextMap active = mShortcutDraft.value(context);
 
-        const int row = ui->shortcutsTableWidget->rowCount();
-        ui->shortcutsTableWidget->setRowCount(row + 1);
+        QSet<QString> actions;
+        for(auto it = defaults.cbegin(); it != defaults.cend(); ++it)
+            actions.insert(it.value());
+        for(auto it = active.cbegin(); it != active.cend(); ++it)
+            actions.insert(it.value());
+        // A disabled action has no keys in the draft, so nothing above would list
+        // it. Without this the Enabled checkbox would be a one-way door for any
+        // action that has no defaults here - notably a script moved into this
+        // context and then switched off.
+        const QStringList disabledHere = mShortcutDisabled.value(context);
+        for(const QString &action : disabledHere)
+            actions.insert(action);
+        // Scripts are Global-only actions and are usually unbound, so they would
+        // otherwise never get a row to click. Seed them so they are discoverable
+        // (and bindable) here rather than needing the creator dialog.
+        if(context == MODE_GLOBAL && scriptManager) {
+            const QStringList names = scriptManager->scriptNames();
+            for(const QString &name : names)
+                actions.insert(QStringLiteral("s:") + name);
+        }
 
-        // Script rows show shortcutActionLabel()'s "(script)"-tagged name;
-        // Qt::UserRole always keeps the real action id - every lookup uses it.
-        const bool isScript = action.startsWith(QStringLiteral("s:"));
+        QStringList actionNames = actions.values();
+        actionNames.sort(Qt::CaseInsensitive);
 
-        QTableWidgetItem *actionItem = new QTableWidgetItem(shortcutActionLabel(action));
-        actionItem->setData(Qt::UserRole, action);
-        if(isScript)
-            actionItem->setToolTip(tr("User script \"%1\"").arg(action.mid(2)));
-        actionItem->setFlags(actionItem->flags() & ~Qt::ItemIsEditable);
-        ui->shortcutsTableWidget->setItem(row, 0, actionItem);
+        for(const QString &action : actionNames) {
+            const bool enabled = shortcutEnabled(context, action);
+            const QString primary = primaryShortcut(context, action);
+            const QString label = shortcutActionLabel(action);
 
-        QTableWidgetItem *keyItem = new QTableWidgetItem(primary);
-        keyItem->setData(Qt::UserRole, action);
-        keyItem->setFlags(keyItem->flags() & ~Qt::ItemIsEditable);
-        if(!enabled)
-            keyItem->setForeground(disabledBrush);
-        ui->shortcutsTableWidget->setItem(row, 1, keyItem);
+            const int row = ui->shortcutsTableWidget->rowCount();
+            ui->shortcutsTableWidget->setRowCount(row + 1);
 
-        QTableWidgetItem *countItem = new QTableWidgetItem();
-        countItem->setData(Qt::UserRole, action);
-        // Store as int so the column sorts numerically rather than lexically.
-        countItem->setData(Qt::DisplayRole, candidateShortcuts(context, action).size());
-        countItem->setFlags(countItem->flags() & ~Qt::ItemIsEditable);
-        countItem->setTextAlignment(Qt::AlignCenter);
-        if(!enabled)
-            countItem->setForeground(disabledBrush);
-        ui->shortcutsTableWidget->setItem(row, 2, countItem);
+            // Icon only: the label would repeat on every row of a group and eat
+            // the width the Action and Key columns need. The name is still
+            // reachable - as a tooltip, and to the search box below.
+            QTableWidgetItem *contextItem = new ShortcutContextItem(order, label);
+            contextItem->setIcon(shortcutContextIcon(context));
+            contextItem->setToolTip(contextLabel(context));
+            contextItem->setData(kShortcutContextLabelRole, contextLabel(context));
+            contextItem->setTextAlignment(Qt::AlignCenter);
+            ui->shortcutsTableWidget->setItem(row, ShortcutColumnContext, contextItem);
 
-        QTableWidgetItem *enabledItem = new QTableWidgetItem();
-        enabledItem->setData(Qt::UserRole, action);
-        enabledItem->setFlags((enabledItem->flags() & ~Qt::ItemIsEditable) | Qt::ItemIsUserCheckable);
-        enabledItem->setCheckState(enabled ? Qt::Checked : Qt::Unchecked);
-        enabledItem->setTextAlignment(Qt::AlignCenter);
-        ui->shortcutsTableWidget->setItem(row, 3, enabledItem);
+            // Script rows show shortcutActionLabel()'s "(script)"-tagged name;
+            // Qt::UserRole always keeps the real action id - every lookup uses it.
+            const bool isScript = action.startsWith(QStringLiteral("s:"));
+
+            QTableWidgetItem *actionItem = new QTableWidgetItem(label);
+            if(isScript)
+                actionItem->setToolTip(tr("User script \"%1\"").arg(action.mid(2)));
+            ui->shortcutsTableWidget->setItem(row, ShortcutColumnAction, actionItem);
+
+            QTableWidgetItem *keyItem = new QTableWidgetItem(primary);
+            if(!enabled)
+                keyItem->setForeground(disabledBrush);
+            ui->shortcutsTableWidget->setItem(row, ShortcutColumnKey, keyItem);
+
+            QTableWidgetItem *countItem = new QTableWidgetItem();
+            // Store as int so the column sorts numerically rather than lexically.
+            countItem->setData(Qt::DisplayRole, candidateShortcuts(context, action).size());
+            countItem->setTextAlignment(Qt::AlignCenter);
+            if(!enabled)
+                countItem->setForeground(disabledBrush);
+            ui->shortcutsTableWidget->setItem(row, ShortcutColumnCount, countItem);
+
+            QTableWidgetItem *enabledItem = new QTableWidgetItem();
+            enabledItem->setFlags(enabledItem->flags() | Qt::ItemIsUserCheckable);
+            enabledItem->setCheckState(enabled ? Qt::Checked : Qt::Unchecked);
+            enabledItem->setTextAlignment(Qt::AlignCenter);
+            ui->shortcutsTableWidget->setItem(row, ShortcutColumnEnabled, enabledItem);
+
+            // Sorting reorders the rows, so the row's identity has to live in
+            // the cells themselves - in every one of them, since a click can
+            // land on any column.
+            for(int column = 0; column < ShortcutColumnTotal; column++) {
+                QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, column);
+                item->setData(Qt::UserRole, action);
+                item->setData(kShortcutContextRole, static_cast<int>(context));
+                item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            }
+        }
     }
 
     ui->shortcutsTableWidget->setSortingEnabled(true);
-    ui->shortcutsTableWidget->sortByColumn(settings->shortcutsSortColumn(),
-                                           settings->shortcutsSortOrder());
+    // A column index from an older layout would otherwise sort by a column that
+    // no longer exists.
+    const int sortColumn = qBound(0, settings->shortcutsSortColumn(), ShortcutColumnTotal - 1);
+    ui->shortcutsTableWidget->sortByColumn(sortColumn, settings->shortcutsSortOrder());
     mUpdatingShortcutsTable = false;
     updateShortcutsFilter();
 }
@@ -1340,18 +1455,25 @@ void SettingsDialog::updateShortcutsFilter() {
     const QString needle = mShortcutSearchEdit->text().trimmed();
     for(int row = 0; row < ui->shortcutsTableWidget->rowCount(); row++) {
         bool match = needle.isEmpty();
-        for(int col = 0; col < 2 && !match; col++) {
+        for(int col = ShortcutColumnAction; col <= ShortcutColumnKey && !match; col++) {
             QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, col);
             match = item && item->text().contains(needle, Qt::CaseInsensitive);
+        }
+        // The context is an icon, so its name is only in the item data - but it
+        // is the one filter the removed context dropdown used to provide, and
+        // searching for "grid" has to keep working.
+        if(!match) {
+            QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, ShortcutColumnContext);
+            match = item && item->data(kShortcutContextLabelRole).toString().contains(needle, Qt::CaseInsensitive);
         }
         ui->shortcutsTableWidget->setRowHidden(row, !match);
     }
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::openShortcutDetails(int row) {
-    QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, 0);
-    if(item)
-        openShortcutDetails(item->data(Qt::UserRole).toString(), selectedShortcutContext());
+    const QString action = shortcutActionAtRow(row);
+    if(!action.isEmpty())
+        openShortcutDetails(action, shortcutContextAtRow(row));
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context) {
@@ -1610,16 +1732,20 @@ void SettingsDialog::transferShortcut(const QString &action, ViewMode src, ViewM
 // point by the header height and target the wrong row.
 QString SettingsDialog::shortcutActionAtMenuPos(const QPoint &viewportPos) const {
     const int row = ui->shortcutsTableWidget->rowAt(viewportPos.y());
-    QTableWidgetItem *item = (row < 0) ? nullptr : ui->shortcutsTableWidget->item(row, 0);
-    // Column 0 carries the real action id in UserRole (script rows show a label).
-    return item ? item->data(Qt::UserRole).toString() : QString();
+    // Cells carry the real action id in UserRole (script rows show a label).
+    return (row < 0) ? QString() : shortcutActionAtRow(row);
+}
+//------------------------------------------------------------------------------
+ViewMode SettingsDialog::shortcutContextAtMenuPos(const QPoint &viewportPos) const {
+    const int row = ui->shortcutsTableWidget->rowAt(viewportPos.y());
+    return (row < 0) ? MODE_GLOBAL : shortcutContextAtRow(row);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
     const QString action = shortcutActionAtMenuPos(pos);
     if(action.isEmpty())
         return;
-    const ViewMode src = selectedShortcutContext();
+    const ViewMode src = shortcutContextAtMenuPos(pos);
 
     QMenu menu(this);
     menu.addAction(tr("Edit keys..."), this, [this, action, src]() {
@@ -1793,10 +1919,22 @@ void SettingsDialog::addShortcut() {
     rebuildShortcutDraftLookup();
     setPrimaryShortcut(context, action, key);
     setShortcutEnabled(context, action, true);
-    const int index = mShortcutContextComboBox->findData(ActionManager::contextToString(context));
-    if(index != -1)
-        mShortcutContextComboBox->setCurrentIndex(index);
+    // A leftover search term could hide the row that was just created, which
+    // reads as "nothing happened".
+    if(mShortcutSearchEdit)
+        mShortcutSearchEdit->clear();
     updateShortcutsTable();
+
+    // Bring the new binding into view: sorting decides where its row landed,
+    // and with every context listed the list is long enough to lose it in.
+    for(int row = 0; row < ui->shortcutsTableWidget->rowCount(); row++) {
+        if(shortcutActionAtRow(row) != action || shortcutContextAtRow(row) != context)
+            continue;
+        ui->shortcutsTableWidget->setCurrentCell(row, ShortcutColumnAction);
+        ui->shortcutsTableWidget->scrollToItem(ui->shortcutsTableWidget->item(row, ShortcutColumnAction),
+                                               QAbstractItemView::PositionAtCenter);
+        break;
+    }
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::editShortcut(int row) {
@@ -1808,11 +1946,11 @@ void SettingsDialog::editShortcut() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::removeShortcut() {
-    QTableWidgetItem *item = ui->shortcutsTableWidget->item(ui->shortcutsTableWidget->currentRow(), 0);
-    if(!item)
+    const int row = ui->shortcutsTableWidget->currentRow();
+    const QString action = (row < 0) ? QString() : shortcutActionAtRow(row);
+    if(action.isEmpty())
         return;
-    const ViewMode context = selectedShortcutContext();
-    const QString action = item->data(Qt::UserRole).toString();
+    const ViewMode context = shortcutContextAtRow(row);
     setActionShortcuts(mShortcutDraft[context], action, QStringList());
     rebuildShortcutDraftLookup();
     mShortcutPrimary[context].remove(action);
