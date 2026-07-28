@@ -163,7 +163,11 @@ void FileInfoDialog::populateGeneralTab(const QString &path) {
     clearGeneralRows();
 
     QFileInfo fi(path);
-    if(path.isEmpty() || !fi.exists()) {
+    const bool isLink = fi.isSymLink();
+    // exists() resolves the link, so a dangling symlink reads as absent - but it
+    // is still a real entry the user selected and asked about, so it gets its own
+    // rows instead of the "No selection" placeholder.
+    if(path.isEmpty() || (!fi.exists() && !isLink)) {
         mRowsContainer->hide();
         mPlaceholder->show();
         return;
@@ -171,8 +175,20 @@ void FileInfoDialog::populateGeneralTab(const QString &path) {
     mPlaceholder->hide();
     mRowsContainer->show();
 
+    // Path first for both files and folders, and it is deliberately *not*
+    // canonicalized: the entry the user picked is the link itself. Everything
+    // below is read through it, which is what the Symlink to row announces.
+    addGeneralRow(tr("Path"), fi.absoluteFilePath());
+    if(isLink)
+        addGeneralRow(tr("Symlink to"), symlinkTargetString(fi));
+
+    // A broken link has no target to read size, permissions or timestamps from;
+    // QFileInfo would answer 0 bytes, "---------" and "—" for all of them, which
+    // reads as "an empty file" rather than "there is nothing at the other end".
+    if(isLink && !fi.exists())
+        return;
+
     if(fi.isDir()) {
-        addGeneralRow(tr("Path"), fi.absoluteFilePath());
         addGeneralRow(tr("Permissions"), permissionsString(path));
         if(!fi.owner().isEmpty())
             addGeneralRow(tr("Owner"), fi.owner());
@@ -192,7 +208,6 @@ void FileInfoDialog::populateGeneralTab(const QString &path) {
 
     // Folder entry sizes are meaningless to users, so the size row is a file-
     // only row; folders show "Contains" instead.
-    addGeneralRow(tr("Path"), fi.absoluteFilePath());
     addGeneralRow(tr("Size"), QLocale().formattedDataSize(fi.size()));
     addGeneralRow(tr("Permissions"), permissionsString(path));
     if(!fi.owner().isEmpty())
@@ -246,6 +261,20 @@ void FileInfoDialog::addExifRow(const QString &name, const QString &value) {
     row->setInfo(name, value);
     mExifRowsLayout->addWidget(row);
     mExifRows.append(row);
+}
+
+// symLinkTarget() is a string, not a promise: it is filled in for a dangling
+// link too, which is exactly the case worth naming - a link whose target was
+// moved or deleted is indistinguishable from a working one until the target is
+// spelled out. fi.exists() (which resolves the whole chain) decides broken,
+// rather than testing the immediate target, so a link to a link to nothing is
+// still reported broken.
+QString FileInfoDialog::symlinkTargetString(const QFileInfo &fi) {
+    const QString target = fi.symLinkTarget();
+    // Unreadable link (permissions on the containing directory); the entry is
+    // known to be a link, we just cannot say to what.
+    const QString value = target.isEmpty() ? tr("(unknown)") : target;
+    return fi.exists() ? value : tr("%1 (broken link)").arg(value);
 }
 
 QString FileInfoDialog::permissionsString(const QString &path) {

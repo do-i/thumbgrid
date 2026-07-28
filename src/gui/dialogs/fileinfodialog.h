@@ -7,6 +7,7 @@ class QTabWidget;
 class QVBoxLayout;
 class QWidget;
 class QLabel;
+class QFileInfo;
 class QHideEvent;
 class QPushButton;
 class EntryInfoItem;
@@ -55,6 +56,9 @@ private:
     // Enabled only for a still or animated image that exists on disk - the only
     // thing DocumentInfo::stripMetadata() can actually write.
     void updateStripButton(const QString &path);
+    // The "Symlink to" row's value: the target path, tagged as broken when the
+    // link resolves to nothing.
+    static QString symlinkTargetString(const QFileInfo &fi);
     static QString permissionsString(const QString &path);
 
     QTabWidget *mTabs = nullptr;
