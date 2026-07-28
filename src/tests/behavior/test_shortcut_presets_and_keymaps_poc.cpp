@@ -18,6 +18,7 @@ private slots:
     void applyingPresetSwitchesMappingAndTracksModified();
     void xnviewmpPresetLoadsRepresentativeBindings();
     void presetWithEmptyContextSurvivesDialogRoundTrip();
+    void presetBindingsSurviveRestart();
 };
 
 // (1) The scan-code map is now data, loaded from keymap_<os>.json.
@@ -121,6 +122,49 @@ void ShortcutPresetsAndKeymapsPocTest::presetWithEmptyContextSurvivesDialogRound
 
     QVERIFY2(!settings->shortcutsModified(),
              "A no-op dialog round-trip must not spuriously mark the mapping as Custom.");
+}
+
+// (7) Apply a preset, quit, come back. Leftie repeats folderView, nextDirectory,
+// prevDirectory and toggleImageInfo verbatim under both "document" and "grid";
+// shortcuts.json stores that shape canonically by hoisting the duplicate into
+// global. If `defaults` keeps the preset file's per-context copies while the
+// mapping read back from disk has them in global, the two compare unequal on
+// every launch: the preset combo shows "Custom" and the settings table lists
+// those actions as unbound rows under the contexts the preset named.
+void ShortcutPresetsAndKeymapsPocTest::presetBindingsSurviveRestart() {
+    actionManager->applyPreset("leftie");
+
+    // Next launch: ActionManager::initShortcuts() reads shortcuts.json into a
+    // fresh mapping and compares it against the defaults loaded from the preset.
+    ActionManager::ShortcutMap reloaded;
+    settings->readShortcuts(reloaded);
+
+    // Same context resolution the running app uses: a context falls back to global.
+    auto actionFor = [&reloaded](ViewMode context, const QString &keys) {
+        const QString action = reloaded.value(context).value(keys);
+        if(!action.isEmpty() || context == MODE_GLOBAL)
+            return action;
+        return reloaded.value(MODE_GLOBAL).value(keys);
+    };
+
+    const QMap<QString, QString> leftieKeys{
+        {QStringLiteral("U"),           QStringLiteral("folderView")},
+        {QStringLiteral("Shift+Right"), QStringLiteral("nextDirectory")},
+        {QStringLiteral("Shift+Left"),  QStringLiteral("prevDirectory")},
+        {QStringLiteral("Alt+I"),       QStringLiteral("toggleImageInfo")},
+    };
+    for(auto it = leftieKeys.cbegin(); it != leftieKeys.cend(); ++it) {
+        for(ViewMode ctx : {MODE_DOCUMENT, MODE_FOLDERVIEW}) {
+            QVERIFY2(actionFor(ctx, it.key()) == it.value(),
+                     qPrintable(QStringLiteral("%1 should still run %2 after a restart")
+                                    .arg(it.key(), it.value())));
+        }
+    }
+
+    QVERIFY2(reloaded == actionManager->allDefaultShortcuts(),
+             "The mapping read back from disk must equal the preset defaults, "
+             "otherwise the preset reads as \"Custom\" and its per-context "
+             "bindings show up unbound in the shortcuts table.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(ShortcutPresetsAndKeymapsPocTest)

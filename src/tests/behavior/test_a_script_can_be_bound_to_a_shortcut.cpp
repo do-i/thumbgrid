@@ -83,11 +83,11 @@ void AScriptCanBeBoundToAShortcutTest::unboundScriptsAreListedOnTheShortcutsPage
 
     // Presentation: the raw "s:" id is never shown, but it stays in UserRole
     // because every downstream lookup keys off it.
-    const QString label = table->item(scriptRow, 0)->text();
+    const QString label = table->item(scriptRow, 1)->text();    // Action column
     QVERIFY2(!label.startsWith(QStringLiteral("s:")), "The 's:' prefix should not be displayed.");
     QVERIFY2(label.contains(QStringLiteral("open externally")), "The script name should be shown.");
     QVERIFY2(label.contains(QStringLiteral("script")), "Script rows should be marked as scripts.");
-    QVERIFY2(table->item(scriptRow, 1)->text().isEmpty(), "An unbound script has no key yet.");
+    QVERIFY2(table->item(scriptRow, 2)->text().isEmpty(), "An unbound script has no key yet.");
 }
 
 void AScriptCanBeBoundToAShortcutTest::theShortcutsPageOffersAnEntryPointForNewBindings() {

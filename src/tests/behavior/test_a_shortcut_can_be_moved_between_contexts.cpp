@@ -63,15 +63,20 @@ void AShortcutCanBeMovedBetweenContextsTest::movingABindingRetargetsItAndLeavesN
     QVERIFY2(!dialog.candidateShortcuts(MODE_FOLDERVIEW, kAction).contains(QString(kChosen)),
              "Re-enabling the action in the source must not bring the moved key back.");
 
-    // And the table now shows the binding under Global, not Grid.
+    // And the table - which lists every context at once - now shows the key on
+    // the action's Global row, with the Grid row left empty.
     QTableWidget *table = dialog.findChild<QTableWidget *>("shortcutsTableWidget");
     QVERIFY2(table, "The shortcuts page should have its table.");
     bool found = false;
     for(int row = 0; row < table->rowCount(); row++) {
-        QTableWidgetItem *item = table->item(row, 0);
-        if(item && item->data(Qt::UserRole).toString() == QString(kAction)) {
+        if(dialog.shortcutActionAtRow(row) != QString(kAction))
+            continue;
+        if(dialog.shortcutContextAtRow(row) == MODE_GLOBAL) {
             found = true;
-            QCOMPARE(table->item(row, 1)->text(), QString(kChosen));    // Global is the shown context
+            QCOMPARE(table->item(row, 2)->text(), QString(kChosen));    // Key column
+        } else if(dialog.shortcutContextAtRow(row) == MODE_FOLDERVIEW) {
+            QVERIFY2(table->item(row, 2)->text().isEmpty(),
+                     "The source row must not still advertise the moved key.");
         }
     }
     QVERIFY2(found, "The moved action should still have a row in the Global context.");

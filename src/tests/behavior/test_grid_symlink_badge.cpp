@@ -14,11 +14,12 @@
 
 // A symlinked entry looks exactly like the file it points at: same picture, same
 // size, same label. The only thing telling the two apart in the grid is the
-// badge in the cell's bottom-right corner. Nothing else in the cell changes, so a
-// regression here (flag lost between the thumbnailer and the widget, badge not
-// enabled on the grid's tiles, badge drawn outside the visible cell) is
-// invisible to model-state assertions - it has to be read off the painted
-// pixels, which is what this test does.
+// badge at the bottom-right of the picture area, just above the file name.
+// Nothing else in the cell changes, so a regression here (flag lost between the
+// thumbnailer and the widget, badge not enabled on the grid's tiles, badge drawn
+// outside the visible cell or down on top of the label) is invisible to
+// model-state assertions - it has to be read off the painted pixels, which is
+// what this test does.
 class GridSymlinkBadgeTest : public QObject {
     Q_OBJECT
 
@@ -49,10 +50,11 @@ static int loadedTileCount(FolderGridView *grid) {
     return loaded;
 }
 
-// Paints the grid and returns the bottom-right corner of one cell, which is
-// where the badge is drawn. The corner box is kept small enough to stay clear
-// of the centered filename label - the baseline assertion below checks that.
-static QImage cellCornerOf(FolderGridView *grid, ThumbnailWidget *tile) {
+// Paints the grid and returns the box the badge is drawn in: the right-hand end
+// of the strip directly above the file name. Anchoring it to the label's top
+// edge - rather than to the cell's bottom - is what makes this test notice a
+// badge that slides down onto the name.
+static QImage badgeAreaOf(FolderGridView *grid, ThumbnailWidget *tile) {
     QImage canvas(grid->viewport()->size(), QImage::Format_ARGB32);
     canvas.fill(Qt::transparent);
     QPainter painter(&canvas);
@@ -60,9 +62,10 @@ static QImage cellCornerOf(FolderGridView *grid, ThumbnailWidget *tile) {
     painter.end();
 
     QRect cell = grid->mapFromScene(tile->sceneBoundingRect()).boundingRect();
-    QRect corner(0, 0, qRound(cell.width() * 0.25), qRound(cell.height() * 0.22));
-    corner.moveBottomRight(cell.bottomRight());
-    return canvas.copy(corner.intersected(canvas.rect()));
+    QRect label = grid->mapFromScene(tile->mapToScene(tile->labelGeometry())).boundingRect();
+    QRect box(0, 0, qRound(cell.width() * 0.25), qRound(cell.height() * 0.22));
+    box.moveBottomRight(QPoint(cell.right(), label.top()));
+    return canvas.copy(box.intersected(canvas.rect()));
 }
 
 void GridSymlinkBadgeTest::symlinkedEntriesAreBadgedInTheGrid() {
@@ -99,29 +102,29 @@ void GridSymlinkBadgeTest::symlinkedEntriesAreBadgedInTheGrid() {
     QList<ThumbnailWidget *> tiles = tilesInOrder(grid);
     QCOMPARE(tiles.count(), 4);
     // index 0 is the ".." parent tile; the pictures follow in name order
-    QImage plain = cellCornerOf(grid, tiles.at(1));
-    QImage twin = cellCornerOf(grid, tiles.at(2));
-    QImage link = cellCornerOf(grid, tiles.at(3));
+    QImage plain = badgeAreaOf(grid, tiles.at(1));
+    QImage twin = badgeAreaOf(grid, tiles.at(2));
+    QImage link = badgeAreaOf(grid, tiles.at(3));
 
-    QVERIFY2(!plain.isNull() && !link.isNull(), "Cell corners should have been painted.");
+    QVERIFY2(!plain.isNull() && !link.isNull(), "The badge area should have been painted.");
     QCOMPARE(plain.size(), twin.size());
     QCOMPARE(plain.size(), link.size());
-    // Two regular files with different names but the same picture: their corner
+    // Two regular files with different names but the same picture: their badge
     // boxes must match, which both gives the baseline and proves the box holds
     // nothing but the badge (no label text bleeding into it).
     QVERIFY2(plain == twin,
-             "Two regular pictures must paint the same cell corner - otherwise the badge check below proves nothing.");
-    QVERIFY2(plain != link, "A symlinked picture must be badged in its cell corner.");
+             "Two regular pictures must paint the same badge area - otherwise the badge check below proves nothing.");
+    QVERIFY2(plain != link, "A symlinked picture must be badged above its file name.");
 
     int changed = 0;
     for(int y = 0; y < plain.height(); y++)
         for(int x = 0; x < plain.width(); x++)
             if(plain.pixel(x, y) != link.pixel(x, y))
                 changed++;
-    // A badge, not a repainted corner: it covers a small part of the box.
+    // A badge, not a repainted strip: it covers a small part of the box.
     QVERIFY2(changed > 8, "The badge should cover more than a few stray pixels.");
     QVERIFY2(changed < plain.width() * plain.height() / 2,
-             "The badge should stay a small corner mark, not take over the cell corner.");
+             "The badge should stay a small mark, not take over the strip above the name.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(GridSymlinkBadgeTest)

@@ -16,7 +16,7 @@ class TheSameKeyRunsDifferentActionsPerContextTest : public QObject {
 private slots:
     void theSameKeyRunsDifferentActionsPerContext();
     void contextSpecificShortcutOverridesGlobalShortcut();
-    void shortcutContextDropdownsDefaultToGlobal();
+    void theShortcutCreatorDefaultsToGlobal();
     void resettingDefaultsCanTargetOneContext();
 };
 
@@ -92,18 +92,11 @@ void TheSameKeyRunsDifferentActionsPerContextTest::contextSpecificShortcutOverri
     QCOMPARE(sortByNameSpy.count(), 1);
 }
 
-void TheSameKeyRunsDifferentActionsPerContextTest::shortcutContextDropdownsDefaultToGlobal() {
-    SettingsDialog settingsDialog;
-    QComboBox *settingsContext = nullptr;
-    for(QComboBox *combo : settingsDialog.findChildren<QComboBox *>()) {
-        if(combo->count() >= 3 && combo->itemData(0).toString() == ActionManager::contextToString(MODE_GLOBAL)) {
-            settingsContext = combo;
-            break;
-        }
-    }
-    QVERIFY2(settingsContext, "The shortcuts page should expose a context dropdown with Global.");
-    QCOMPARE(settingsContext->currentData().toString(), ActionManager::contextToString(MODE_GLOBAL));
-
+// Creating a binding is the one place a context still has to be *picked*: the
+// shortcuts page itself lists every context at once (see "The shortcuts list
+// shows every context at once"), so only the creator carries the dropdown, and
+// the widest scope is the safe default there.
+void TheSameKeyRunsDifferentActionsPerContextTest::theShortcutCreatorDefaultsToGlobal() {
     ShortcutCreatorDialog creatorDialog;
     QComboBox *creatorContext = creatorDialog.findChild<QComboBox *>("contextComboBox");
     QVERIFY2(creatorContext, "The shortcut creator should expose its context dropdown.");

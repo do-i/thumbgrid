@@ -540,11 +540,22 @@ void ThumbnailWidget::drawDropHover(QPainter *painter) {
     painter->setRenderHints(hints);
 }
 
-// The badge belongs to the cell, not to the picture inside it: it sits in the
-// cell's bottom-right corner, so it stays put whatever the thumbnail's size or
-// aspect ratio is (and shows up on the error icon of a dangling link too).
+// The badge belongs to the cell, not to the picture inside it: it sits at the
+// bottom-right of the picture area, above the file name, so it stays put
+// whatever the thumbnail's size or aspect ratio is (and shows up on the error
+// icon of a dangling link too) without ever sitting on the label. The inset
+// keeps it off the cell border and off the name below it.
 QRect ThumbnailWidget::symlinkBadgeAnchorRect() const {
-    return bgRect.adjusted(1, 1, -1, -1).toRect();
+    constexpr int badgeMargin = 4;
+    QRectF anchor = bgRect;
+    // Labelled styles: stop above the name block. THUMB_SIMPLE has no label, so
+    // the cell's own bottom is the floor.
+    if(thumbStyle != THUMB_SIMPLE) {
+        const qreal labelTop = labelBackgroundRect().top();
+        if(labelTop > anchor.top())
+            anchor.setBottom(qMin(anchor.bottom(), labelTop));
+    }
+    return anchor.adjusted(badgeMargin, badgeMargin, -badgeMargin, -badgeMargin).toRect();
 }
 
 // Shortcut-style corner badge: a rounded accent chip with an up-right arrow,
