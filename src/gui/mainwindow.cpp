@@ -951,31 +951,14 @@ QString MW::documentStatusText() const {
     if(info.fileName.isEmpty())
         return tr("No file opened.");
 
-    QString text = QString::number(info.fileCount) + " object(s) / 1 object(s) selected";
+    // Only the current image: name, file size, dimensions, zoom (1.00x == 100%).
+    QString text = info.fileName;
     if(info.fileSize)
-        text += " [" + statusDataSize(info.fileSize) + "]";
-
-    text += "  " + info.fileName;
-    if(info.imageSize.width()) {
-        text += " " + QString::number(info.imageSize.width()) + "x" + QString::number(info.imageSize.height());
-        if(info.imageDepth)
-            text += "x" + QString::number(info.imageDepth);
-        text += " (" + QString::number(viewerWidget->currentScale(), 'f', 2) + ")";
-    }
-    if(info.fileSize)
-        text += " " + statusDataSize(info.fileSize);
-
-    QString states;
-    if(info.slideshow)
-        states.append(" [slideshow]");
-    if(info.shuffle)
-        states.append(" [shuffle]");
-    if(viewerWidget->lockZoomEnabled())
-        states.append(" [zoom lock]");
-    if(viewerWidget->lockViewEnabled())
-        states.append(" [view lock]");
-    if(!states.isEmpty())
-        text += " " + states;
+        text += "  " + statusDataSize(info.fileSize);
+    if(info.imageSize.width())
+        text += "  " + QString::number(info.imageSize.width()) + "x" + QString::number(info.imageSize.height());
+    if(info.imageSize.width())
+        text += "  " + QString::number(viewerWidget->currentScale(), 'f', 2) + "x";
 
     return text;
 }

@@ -106,6 +106,14 @@ add_test(
     COMMAND thumbgrid_shortcut_context_transfer_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_shortcut_context_column_test
+    behavior/test_the_shortcuts_list_shows_every_context_at_once.cpp
+)
+add_test(
+    NAME "The shortcuts list shows every context at once"
+    COMMAND thumbgrid_shortcut_context_column_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_shortcut_context_persistence_test
     behavior/test_shortcut_contexts_persist_and_legacy_configs_migrate.cpp
 )
