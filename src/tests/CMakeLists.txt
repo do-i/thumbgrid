@@ -314,6 +314,14 @@ add_test(
     COMMAND thumbgrid_file_info_long_path_elides_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_file_info_symlink_target_test
+    behavior/test_file_info_shows_symlink_target.cpp
+)
+add_test(
+    NAME "File info popup names a symlink's target and flags a broken link"
+    COMMAND thumbgrid_file_info_symlink_target_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_delete_does_not_follow_symlinks_test
     behavior/test_delete_does_not_follow_symlinks.cpp
 )
@@ -384,6 +392,14 @@ thumbgrid_add_behavior_test(thumbgrid_grid_symlink_badge_test
 add_test(
     NAME "Symlinked entries are badged in the grid"
     COMMAND thumbgrid_grid_symlink_badge_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_document_status_bar_test
+    behavior/test_document_status_bar_shows_only_the_current_image.cpp
+)
+add_test(
+    NAME "The document status bar shows only the current image"
+    COMMAND thumbgrid_document_status_bar_test
 )
 
 add_executable(thumbgrid_settings_migration_gates_test
