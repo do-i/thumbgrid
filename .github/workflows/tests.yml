@@ -27,11 +27,24 @@ jobs:
       - name: Mark workspace as a safe git directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+      # Steps in a container run as root, and root bypasses file permission
+      # bits: a mode 0400 file still reports as writable. Behavior tests that
+      # assert the UI greys out editing for a read-only file therefore fail as
+      # root while passing everywhere else. Build and test as an unprivileged
+      # user so permissions mean what they mean for a real user. The same
+      # trick, for the same reason, is in packaging-checks.yml.
+      - name: Create unprivileged build user
+        run: |
+          useradd -m builder
+          chown -R builder:builder "$GITHUB_WORKSPACE"
+
       - name: Configure
-        run: cmake -S . -B build -DBUILD_TESTING=ON
+        run: sudo -u builder -H cmake -S . -B build -DBUILD_TESTING=ON
 
       - name: Build tests
-        run: cmake --build build --target thumbgrid_behavior_tests_all -j"$(nproc)"
+        run: sudo -u builder -H cmake --build build --target thumbgrid_behavior_tests_all -j"$(nproc)"
 
+      # sudo scrubs the environment, so the job-level QT_QPA_PLATFORM does not
+      # survive into the test run; pass it through explicitly.
       - name: Run tests
-        run: ctest --test-dir build --output-on-failure
+        run: sudo -u builder -H env QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure
