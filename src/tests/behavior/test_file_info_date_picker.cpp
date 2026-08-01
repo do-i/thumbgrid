@@ -98,8 +98,8 @@ void FileInfoDatePickerTest::theCalendarFillsTheDateFieldAndTypingStillWorks() {
     QVERIFY(exifIndex >= 0);
     // A jpeg with no Exif at all still opens the tab: it has empty fields to
     // fill in, and this is the case the picker exists for.
-    QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex),
-                 "EXIF tab should be enabled for a writable jpeg.");
+    QTRY_VERIFY2(dialog->tabs()->isTabVisible(exifIndex),
+                 "EXIF tab should be shown for a writable jpeg.");
     dialog->tabs()->setCurrentIndex(exifIndex);
     QTRY_VERIFY(dialog->editableRow(kDate) != nullptr);
     QVERIFY2(dialog->editableRow(kDate)->valueEditor()->text().isEmpty(),

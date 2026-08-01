@@ -92,9 +92,10 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mGeneralTab = generalTab;
     mTabs->addTab(generalTab, tr("General"));
 
-    // EXIF tab: rows are (re)built by populateExifTab(); the tab is enabled for
-    // any file that can carry Exif, with a placeholder for the ones that
-    // currently carry none.
+    // EXIF tab: rows are (re)built by populateExifTab(); the tab is shown for
+    // a format Exiv2 can write Exif into (jpeg/webp), with a placeholder for
+    // the ones that currently carry none, and hidden entirely for kinds that
+    // can't store Exif at all (png, gif, video, text, folders).
     mExifTab = new QWidget(mTabs);
     auto *exifLayout = new QVBoxLayout(mExifTab);
     mExifRowsContainer = new QWidget(mExifTab);
@@ -115,7 +116,7 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     exifLayout->addWidget(mExifError);
     exifLayout->addStretch(1);
     mTabs->addTab(mExifTab, tr("EXIF"));
-    mTabs->setTabEnabled(mTabs->indexOf(mExifTab), false);
+    mTabs->setTabVisible(mTabs->indexOf(mExifTab), false);
 
     // Shown only while the EXIF tab is current (updateActionButtons): General is
     // a read-only view, so it offers no action at all. Red (#stripMetadataButton,
@@ -327,25 +328,28 @@ void FileInfoDialog::populateExifTab(const QString &path) {
     QMap<QString, QString> tags;
     QFileInfo fi(path);
     bool editable = false;
-    // Whether the file is a kind that carries Exif at all, which is what decides
-    // the tab - not whether this particular file happens to have any. A photo
-    // with its metadata already stripped is exactly the case where someone opens
-    // this tab to put a date or a comment back.
+    // Whether the format is one exiv2 can write Exif into at all (jpeg/webp),
+    // which is what decides the tab - not whether this particular file is
+    // currently writable, nor whether it happens to carry any tags today. A
+    // photo with its metadata already stripped is exactly the case where
+    // someone opens this tab to put a date or a comment back; a png has
+    // nowhere for that write to go, so it gets no tab to open.
     bool canCarryExif = false;
     if(!path.isEmpty() && fi.isFile()) {
         DocumentInfo docInfo(path);
-        if(docInfo.type() == DocumentType::STATIC || docInfo.type() == DocumentType::ANIMATED) {
+        if((docInfo.type() == DocumentType::STATIC || docInfo.type() == DocumentType::ANIMATED) &&
+           DocumentInfo::supportsMetadataEditing(path)) {
             canCarryExif = true;
             // Honor the global metadata verbosity toggle the same way the
             // document view does (Core::showDocument).
             tags = settings->showFullMetadata() ? docInfo.getAllTags()
                                                 : docInfo.getExifTags();
-            // Editing needs a format exiv2 can rewrite (jpeg/webp) *and* a file
-            // we are allowed to rewrite; a read-only jpeg still lists its tags,
-            // just as text. The fields come first: they are the only rows here
-            // the user can act on, and the read-only dump below them can run to
-            // dozens of entries.
-            editable = fi.isWritable() && DocumentInfo::supportsMetadataEditing(path);
+            // The format supports writing; whether we are allowed to write to
+            // *this* file also needs it to be writable. A read-only jpeg still
+            // lists its tags, just as text. The fields come first: they are
+            // the only rows here the user can act on, and the read-only dump
+            // below them can run to dozens of entries.
+            editable = fi.isWritable();
             if(editable) {
                 mEditableOriginals = docInfo.getEditableTags();
                 for(const QString &key : DocumentInfo::editableTagKeys())
@@ -369,11 +373,12 @@ void FileInfoDialog::populateExifTab(const QString &path) {
         addExifRow(it.key(), it.value());
     }
 
-    mTabs->setTabEnabled(exifIndex, canCarryExif);
+    mTabs->setTabVisible(exifIndex, canCarryExif);
     // An image with nothing to list says so, rather than showing a blank pane:
     // "no metadata" and "the tab failed to fill in" look identical otherwise.
-    // Folders, videos and text files have no such tab to land on at all, so
-    // whatever tab they arrive with has to fall back to General.
+    // Folders, videos and text files have no such tab to land on at all, so it
+    // is hidden rather than merely disabled, and whatever tab they arrive with
+    // has to fall back to General.
     mExifPlaceholder->setVisible(canCarryExif && mExifRows.isEmpty());
     if(!canCarryExif && wasCurrent)
         mTabs->setCurrentIndex(mTabs->indexOf(mGeneralTab));

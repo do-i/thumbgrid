@@ -88,7 +88,7 @@ void FileInfoClickAwaySavesTest::clickingOutsideAFieldSavesItAndDropsFocus() {
 
     const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
     QVERIFY(exifIndex >= 0);
-    QTRY_VERIFY(dialog->tabs()->isTabEnabled(exifIndex));
+    QTRY_VERIFY(dialog->tabs()->isTabVisible(exifIndex));
     dialog->tabs()->setCurrentIndex(exifIndex);
     QTRY_VERIFY(dialog->editableRow(kMake) != nullptr);
 

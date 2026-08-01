@@ -19,8 +19,10 @@ class DateTimePickerPopup;
 
 // Non-modal inspector window showing metadata for the current selection.
 // Core owns a single instance and retargets it live as the document-view
-// image or the grid selection changes (docs/009 §B1). The EXIF tab is
-// enabled for anything that can carry Exif, tags or no tags (docs/009 §B2).
+// image or the grid selection changes (docs/009 §B1). The EXIF tab is shown
+// only for a format exiv2 can write Exif into (jpeg/webp), tags or no tags,
+// and hidden entirely for anything else - a png has nowhere to store an edit,
+// so it gets no tab to open (docs/009 §B2).
 //
 // The two tabs differ in kind, not just in content: General is read-only, so it
 // carries no buttons at all, while EXIF is where the file is written - the
@@ -33,10 +35,11 @@ public:
     explicit FileInfoDialog(QWidget *parent = nullptr);
 
     // Repopulates the General and EXIF tabs for path. An empty or missing
-    // path drops to a "No selection" placeholder and disables the EXIF tab, as
-    // does a folder or a non-image. An image keeps the tab open whether or not
-    // it carries any tags - having none is a state worth seeing (and, on a
-    // writable jpeg or webp, worth typing into).
+    // path drops to a "No selection" placeholder and hides the EXIF tab, as
+    // does a folder, a non-image, or an image format Exiv2 cannot write to
+    // (e.g. png). A jpeg or webp keeps the tab open whether or not it carries
+    // any tags - having none is a state worth seeing (and, when the file is
+    // also writable, worth typing into).
     void setTarget(const QString &path);
     void clearTarget();
 

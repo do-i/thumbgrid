@@ -119,7 +119,7 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     const int taggedJpg = 2;
     const int untaggedPng = 3;
 
-    // --- Folder target: counts shown, EXIF tab disabled. ---
+    // --- Folder target: counts shown, EXIF tab hidden. ---
     grid->select(subDir);
     QVERIFY2(actionManager->invokeAction("toggleImageInfo"),
              "toggleImageInfo action should be invocable.");
@@ -133,7 +133,7 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
     const int generalIndex = tabIndexByText(dialog->tabs(), "General");
     QVERIFY2(exifIndex >= 0 && generalIndex >= 0, "Both tabs should exist.");
-    QVERIFY2(!dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be disabled for a folder target.");
+    QVERIFY2(!dialog->tabs()->isTabVisible(exifIndex), "EXIF tab should be hidden for a folder target.");
 
     // Clear metadata lives here rather than in the context menu, and it belongs
     // to the EXIF tab: General is a read-only view and must offer no action at
@@ -148,10 +148,10 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
              "a destructive button must never be the dialog's default (Enter) button");
 
     // --- Live-follow: selecting a tagged jpeg (no re-invoking the action)
-    // updates the path and enables the EXIF tab. ---
+    // updates the path and shows the EXIF tab. ---
     grid->select(taggedJpg);
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(taggedPath).absoluteFilePath());
-    QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be enabled for a tagged jpeg.");
+    QTRY_VERIFY2(dialog->tabs()->isTabVisible(exifIndex), "EXIF tab should be shown for a tagged jpeg.");
     QTRY_COMPARE(rowValueByName(dialog, "Make"), QStringLiteral("TestCam"));
     QTRY_VERIFY2(clearButton->isEnabled(), "Clear metadata should be enabled for a writable jpeg.");
 
@@ -178,25 +178,16 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     }
     QCOMPARE(makeRows, 1);
 
-    // --- Live-follow: a tagless png keeps the tab open. Having no metadata is
-    // a state worth seeing (and the Clear metadata button reaching), so the tab
-    // gates on the file being able to carry Exif, not on it having any. ---
+    // --- Live-follow: a png has nowhere for Exiv2 to write Exif, so the tab
+    // closes for it just as it does for a folder - the gate is the format's
+    // capability to store Exif, not merely the file being an image. ---
     grid->select(untaggedPng);
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(untaggedPath).absoluteFilePath());
-    QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex),
-                 "EXIF tab should stay open for an image with no tags.");
-    QCOMPARE(dialog->tabs()->currentIndex(), exifIndex);
-    QVERIFY2(rowValueByName(dialog, "Make").isEmpty(), "the png has no tags to list");
-    // Empty is said out loud rather than shown as a blank pane.
-    auto *emptyNote = dialog->tabs()->widget(exifIndex)->findChild<QLabel *>();
-    QVERIFY(emptyNote != nullptr);
-    QTRY_VERIFY2(emptyNote->isVisibleTo(dialog), "an empty EXIF tab should say it is empty");
-    // A png with no *Exif* tags can still carry XMP or text chunks, so the
-    // button stays available - and now it is reachable, which is the point.
-    QTRY_VERIFY2(clearButton->isEnabled(), "Clear metadata should stay enabled for a tagless png.");
-    QVERIFY2(clearButton->isVisibleTo(dialog), "the button rides with the EXIF tab");
-    // A png is not rewritable by tier 1, so it gets no input fields even when it
-    // does carry Exif - editing and clearing gate on different rules.
+    QTRY_VERIFY2(!dialog->tabs()->isTabVisible(exifIndex),
+                 "EXIF tab should be hidden for a png, which Exiv2 cannot write Exif into.");
+    QCOMPARE(dialog->tabs()->currentIndex(), generalIndex);
+    QVERIFY2(!clearButton->isVisibleTo(dialog),
+             "with the EXIF tab hidden, its button stays off General too");
     QVERIFY2(dialog->editableRow(QStringLiteral("Exif.Image.Make")) == nullptr,
              "a png should offer no editable metadata fields");
 
@@ -204,7 +195,7 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     // takes the current tab back to General with it. ---
     grid->select(subDir);
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(subPath).absoluteFilePath());
-    QTRY_VERIFY2(!dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be disabled for a folder.");
+    QTRY_VERIFY2(!dialog->tabs()->isTabVisible(exifIndex), "EXIF tab should be hidden for a folder.");
     QTRY_COMPARE(dialog->tabs()->currentIndex(), generalIndex);
     QVERIFY2(!clearButton->isVisibleTo(dialog),
              "back on General, the button row should be gone again");

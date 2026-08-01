@@ -112,7 +112,7 @@ void FileInfoClearMetadataRefreshesTest::clearingMetadataUpdatesTheOpenExifTab()
 
     const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
     QVERIFY(exifIndex >= 0);
-    QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be enabled for a tagged jpeg.");
+    QTRY_VERIFY2(dialog->tabs()->isTabVisible(exifIndex), "EXIF tab should be shown for a tagged jpeg.");
     dialog->tabs()->setCurrentIndex(exifIndex);
     QTRY_COMPARE(rowValueByName(dialog, "Make"), QStringLiteral("TestCam"));
     QCOMPARE(rowValueByName(dialog, "F Number"), QStringLiteral("f/2.8"));
@@ -150,7 +150,7 @@ void FileInfoClearMetadataRefreshesTest::clearingMetadataUpdatesTheOpenExifTab()
     // into, which is why the tab does not go away with the tags.
     QVERIFY2(dialog->editableRow(QStringLiteral("Exif.Image.Make")) != nullptr,
              "a writable jpeg keeps its input fields after a clear");
-    QVERIFY(dialog->tabs()->isTabEnabled(exifIndex));
+    QVERIFY(dialog->tabs()->isTabVisible(exifIndex));
 
     if(qEnvironmentVariableIsSet("THUMBGRID_TEST_VISUAL"))
         QTest::qWait(1500);

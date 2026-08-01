@@ -108,7 +108,7 @@ void FileInfoInlineMetadataEditingTest::exifFieldsWriteOnCommitAndRefuseAMalform
 
     const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
     QVERIFY(exifIndex >= 0);
-    QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be enabled for a jpeg.");
+    QTRY_VERIFY2(dialog->tabs()->isTabVisible(exifIndex), "EXIF tab should be shown for a jpeg.");
     dialog->tabs()->setCurrentIndex(exifIndex);
 
     // --- Committing a field writes the tag to the file. ---
