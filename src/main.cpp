@@ -3,6 +3,10 @@
 #include <QEvent>
 #include <QIcon>
 
+#ifdef USE_EXIV2
+#include <exiv2/exiv2.hpp>
+#endif
+
 #include "appversion.h"
 #include "platform/platformdesktop.h"
 #include "settings.h"
@@ -25,6 +29,13 @@ void saveSettings() {
     // code. Must precede the Settings teardown that flushes the config.
     StoredData::clearStoresMarkedForExit();
     delete settings;
+
+#ifdef USE_EXIV2
+    // Pairs with Exiv2::XmpParser::initialize() in main(). By this point all
+    // worker threads that could touch XMP metadata are gone, so it's safe to
+    // tear the toolkit down here on the main thread.
+    Exiv2::XmpParser::terminate();
+#endif
 }
 //------------------------------------------------------------------------------
 QDataStream& operator<<(QDataStream& out, const Script& v) {
@@ -100,6 +111,15 @@ int main(int argc, char *argv[]) {
     scriptManager = ScriptManager::getInstance();
     actionManager = ActionManager::getInstance();
     shrRes = SharedResources::getInstance();
+
+#ifdef USE_EXIV2
+    // Exiv2::XmpParser::initialize() is documented as not thread-safe, but the
+    // toolkit self-initializes lazily on first use otherwise - and metadata
+    // (including XMP) is read from worker threads (thumbnail loader, file info
+    // panel). Do the one-time init here, on the main thread, before any of
+    // those threads can start, so the lazy path is never taken.
+    Exiv2::XmpParser::initialize();
+#endif
 
     atexit(saveSettings);
 
