@@ -181,8 +181,13 @@ void FileInfoXmpAndIccTabsTest::xmpAndIccTabsFollowWhatTheFormatCanCarry() {
              "the ICC placeholder should stay hidden once real rows are showing");
     QCOMPARE(dialog->iccRows().size(), 4);
     QCOMPARE(rowValueByName(dialog->iccTab(), "Profile"), QStringLiteral("sRGB"));
-    QVERIFY2(rowValueByName(dialog->xmpTab(), "Xmp.dc.title").contains("Sunrise over the bay"),
-             "the XMP title row should carry the value written into the file");
+    // dc:title is a curated key now, so it appears as the editable "Title"
+    // field rather than as a row in the read-only property dump - showing it in
+    // both places would be the same property twice.
+    EntryInfoItem *titleRow = dialog->editableXmpRow(QStringLiteral("Xmp.dc.title"));
+    QVERIFY2(titleRow != nullptr, "a writable png should offer the curated XMP Title field");
+    QVERIFY2(titleRow->currentValue().contains("Sunrise over the bay"),
+             "the XMP Title field should carry the value written into the file");
 
     // --- Live-follow to the jpeg carrying all three kinds of metadata: EXIF,
     // XMP and ICC should all be visible together. ---
@@ -193,8 +198,10 @@ void FileInfoXmpAndIccTabsTest::xmpAndIccTabsFollowWhatTheFormatCanCarry() {
     QVERIFY2(dialog->tabs()->isTabVisible(iccIndex), "ICC tab should be shown for a jpeg carrying an ICC profile.");
     QTRY_COMPARE(rowValueByName(dialog, "Make"), QStringLiteral("TestCam"));
     QCOMPARE(rowValueByName(dialog->iccTab(), "Profile"), QStringLiteral("sRGB"));
-    QVERIFY2(rowValueByName(dialog->xmpTab(), "Xmp.dc.title").contains("Evening market"),
-             "the XMP title row should update to the newly selected file's value");
+    EntryInfoItem *jpegTitleRow = dialog->editableXmpRow(QStringLiteral("Xmp.dc.title"));
+    QVERIFY2(jpegTitleRow != nullptr, "a writable jpeg should offer the curated XMP Title field");
+    QVERIFY2(jpegTitleRow->currentValue().contains("Evening market"),
+             "the XMP Title field should update to the newly selected file's value");
 
     // --- Live-follow to a png with an ICC profile but no XMP: the XMP tab
     // stays open (gated on what the format can carry, not on what this file
@@ -206,8 +213,16 @@ void FileInfoXmpAndIccTabsTest::xmpAndIccTabsFollowWhatTheFormatCanCarry() {
              "XMP tab should stay shown for a png even when it carries no XMP today.");
     QVERIFY2(dialog->tabs()->isTabVisible(iccIndex), "ICC tab should be shown for a png carrying an ICC profile.");
     QCOMPARE(dialog->xmpRows().size(), 0);
-    QVERIFY2(dialog->xmpPlaceholder()->isVisibleTo(dialog->xmpTab()),
-             "the XMP placeholder should appear when the format can carry XMP but this file has none.");
+    // The placeholder existed to avoid a blank pane. A writable png now offers
+    // the curated fields instead, which is a better answer to "this file has no
+    // XMP" than a label saying so - it is also where the first property gets
+    // typed in.
+    QVERIFY2(!dialog->xmpPlaceholder()->isVisibleTo(dialog->xmpTab()),
+             "a writable png offers XMP fields to type into rather than an empty-state label.");
+    QVERIFY2(dialog->editableXmpRow(QStringLiteral("Xmp.dc.title")) != nullptr,
+             "the curated XMP fields should be offered for a writable png carrying no XMP yet.");
+    QVERIFY2(dialog->editableXmpRow(QStringLiteral("Xmp.dc.title"))->currentValue().isEmpty(),
+             "and they should be empty, since the file carries no XMP.");
     QCOMPARE(rowValueByName(dialog->iccTab(), "Profile"), QStringLiteral("sRGB"));
 
     // --- Switch to the ICC tab, then retarget to a text file: EXIF, XMP and

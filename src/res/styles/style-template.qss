@@ -1038,6 +1038,57 @@ FileInfoDialog EntryInfoItem QLineEdit:focus {
     background-color: %button%;
     border: 1px solid %accent%;
 }
+
+/* The one-item-per-line editor an XMP array needs (dc:subject, dc:creator).
+   Same three states as the line editors above, because it is the same kind of
+   in-place field - only taller. Without this it would keep QPlainTextEdit's own
+   base colour and read as a white box punched into a dark tab. */
+FileInfoDialog EntryInfoItem QPlainTextEdit {
+    color: %text_hc2%;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0px 3px 0px 3px;
+    selection-background-color: %accent%;
+}
+
+FileInfoDialog EntryInfoItem QPlainTextEdit:hover {
+    background-color: %button%;
+    border: 1px solid %widget_border%;
+}
+
+FileInfoDialog EntryInfoItem QPlainTextEdit:focus {
+    background-color: %button%;
+    border: 1px solid %accent%;
+}
+
+/* Section titles splitting the XMP property list into standard and custom
+   groups. Quieter than a row: they label the list rather than belonging to it. */
+FileInfoDialog QLabel#xmpSectionHeader {
+    color: %text_hc4%;
+    font: bold;
+    padding: 6px 0px 2px 9px;
+}
+
+/* Says why a tab is read-only, or that a long list was capped. Informational,
+   not an error - it is styled quieter than #metadataEditError deliberately. */
+FileInfoDialog QLabel#xmpNotice {
+    color: %text_hc4%;
+    padding: 4px 9px 4px 9px;
+}
+
+/* The per-row remove button, revealed by the Remove properties toggle. */
+FileInfoDialog EntryInfoItem QPushButton#removePropertyButton {
+    color: %text_hc2%;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+FileInfoDialog EntryInfoItem QPushButton#removePropertyButton:hover {
+    background-color: #BB0000;
+    color: #FFFFFF;
+}
 /*----------------------------------------------------------------------------*/
 PrintDialog QRadioButton,
 PrintDialog QCheckBox {

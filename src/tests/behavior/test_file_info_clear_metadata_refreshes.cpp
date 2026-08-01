@@ -117,9 +117,11 @@ void FileInfoClearMetadataRefreshesTest::clearingMetadataUpdatesTheOpenExifTab()
     QTRY_COMPARE(rowValueByName(dialog, "Make"), QStringLiteral("TestCam"));
     QCOMPARE(rowValueByName(dialog, "F Number"), QStringLiteral("f/2.8"));
 
-    QPushButton *clearButton = dialog->stripMetadataButton();
+    QPushButton *clearButton = dialog->removeExifButton();
     QVERIFY(clearButton != nullptr);
-    QVERIFY2(clearButton->isEnabled(), "Clear metadata should be enabled for a writable jpeg.");
+    QVERIFY2(clearButton->isEnabled(), "Remove all Exif should be enabled for a writable jpeg.");
+    QVERIFY2(clearButton->isVisibleTo(dialog),
+             "a tagged jpeg has Exif to remove, so the button is shown rather than hidden");
 
     // The confirmation runs a nested exec() loop, so it can only be answered
     // from a timer: poll for the active modal and press its danger button.
@@ -136,7 +138,7 @@ void FileInfoClearMetadataRefreshesTest::clearingMetadataUpdatesTheOpenExifTab()
     });
     poll.start();
     clearButton->click();
-    QVERIFY2(confirmed, "Clearing metadata must confirm first, with a danger-styled accept.");
+    QVERIFY2(confirmed, "Removing all Exif must confirm first, with a danger-styled accept.");
 
     // On disk...
     QTRY_VERIFY2(DocumentInfo(photoPath).getEditableTags().isEmpty(),

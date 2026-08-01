@@ -32,6 +32,21 @@ const QLatin1String kDateTimeKey("Exif.Image.DateTime");
 // the user types are the same string.
 const QLatin1String kExifDateTimeFormat("yyyy:MM:dd HH:mm:ss");
 
+// Defensive display caps (docs/2026-08-01-001 §8). What cannot be capped is
+// exiv2 parsing the packet; what can is widget construction, which is where the
+// cost is. Two numbers rather than one because the kinds differ in how many
+// entries legitimately occur: XMP properties are authored a handful at a time,
+// while an Exif dump is machine-generated and a verbose MakerNote runs to
+// hundreds, so a shared 512 would truncate real camera files.
+constexpr int kMaxXmpRowsDisplayed = 512;
+constexpr int kMaxMetadataRowsDisplayed = 4096;
+
+// The XMP tab lists full exiv2 keys ("Xmp.photoshop.Headline"), which do not fit
+// the column width the short labels on the other tabs use. Applied to every row
+// on the tab, curated fields included, so the columns still line up with each
+// other - the consistency that matters here is within the tab.
+constexpr int kXmpKeyColumnWidth = 190;
+
 QString formatDateTime(const QDateTime &dt) {
     if(!dt.isValid())
         return QStringLiteral("—"); // em dash: unavailable on this filesystem
@@ -134,6 +149,13 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mXmpPlaceholder->setAlignment(Qt::AlignCenter);
     mXmpPlaceholder->hide();
     xmpLayout->addWidget(mXmpPlaceholder);
+    // Says why the fields are read-only, or that the list was capped - so a
+    // format this app will not write into never reads as a bug.
+    mXmpNotice = new QLabel(mXmpTab);
+    mXmpNotice->setObjectName(QStringLiteral("xmpNotice"));
+    mXmpNotice->setWordWrap(true);
+    mXmpNotice->hide();
+    xmpLayout->addWidget(mXmpNotice);
     xmpLayout->addStretch(1);
     mTabs->addTab(mXmpTab, tr("XMP"));
     mTabs->setTabVisible(mTabs->indexOf(mXmpTab), false);
@@ -155,29 +177,67 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mTabs->addTab(mIccTab, tr("ICC"));
     mTabs->setTabVisible(mTabs->indexOf(mIccTab), false);
 
-    // Shown only while the EXIF tab is current (updateActionButtons): General,
-    // XMP and ICC are read-only views, so they offer no action at all. Red
-    // (#stripMetadataButton, styled with the same danger tokens as the delete
-    // confirmations) because it
-    // rewrites the file on disk and cannot be undone. Core raises the
-    // confirmation - see Core::stripMetadataAt().
-    mStripButton = new QPushButton(tr("Clear metadata"), this);
-    mStripButton->setObjectName(QStringLiteral("stripMetadataButton"));
-    mStripButton->setToolTip(tr("Permanently remove all Exif, IPTC and XMP metadata from this file"));
-    mStripButton->setCursor(Qt::PointingHandCursor);
-    // Never the dialog's default button: Enter is for dismissing an inspector
-    // window, not for destroying data.
-    mStripButton->setAutoDefault(false);
-    mStripButton->setDefault(false);
-    connect(mStripButton, &QPushButton::clicked, this, [this]() {
+    // One removal per metadata tab, each scoped to that tab's own kind and each
+    // shown only while its tab is current. Red (styled with the same danger
+    // tokens as the delete confirmations) because they rewrite the file on disk
+    // and cannot be undone; Core raises the confirmation for all three.
+    auto makeRemoveButton = [this](const QString &text, const QString &objectName,
+                                   const QString &tip) {
+        auto *button = new QPushButton(text, this);
+        button->setObjectName(objectName);
+        button->setToolTip(tip);
+        button->setCursor(Qt::PointingHandCursor);
+        // Never the dialog's default button: Enter is for dismissing an
+        // inspector window, not for destroying data.
+        button->setAutoDefault(false);
+        button->setDefault(false);
+        return button;
+    };
+    mRemoveExifButton = makeRemoveButton(
+        tr("Remove all Exif"), QStringLiteral("stripMetadataButton"),
+        tr("Permanently remove every Exif tag from this file. XMP and the colour profile are not affected."));
+    mRemoveXmpButton = makeRemoveButton(
+        tr("Remove all XMP"), QStringLiteral("removeXmpButton"),
+        tr("Permanently remove every XMP property from this file. Exif and the colour profile are not affected."));
+    mRemoveIccButton = makeRemoveButton(
+        tr("Remove colour profile"), QStringLiteral("removeIccButton"),
+        tr("Permanently remove the embedded ICC colour profile. Exif and XMP are not affected."));
+    connect(mRemoveExifButton, &QPushButton::clicked, this, [this]() {
         if(!mTargetPath.isEmpty())
-            emit stripMetadataRequested(mTargetPath);
+            emit removeAllExifRequested(mTargetPath);
+    });
+    connect(mRemoveXmpButton, &QPushButton::clicked, this, [this]() {
+        if(!mTargetPath.isEmpty())
+            emit removeAllXmpRequested(mTargetPath);
+    });
+    connect(mRemoveIccButton, &QPushButton::clicked, this, [this]() {
+        if(!mTargetPath.isEmpty())
+            emit removeIccProfileRequested(mTargetPath);
+    });
+
+    // Reveals the per-row "x" on the custom grid instead of spending a column on
+    // it always. Checkable rather than a mode label: entering the mode is the
+    // deliberate act that stands in for a per-row confirmation.
+    mRemoveToggle = new QPushButton(tr("Remove properties"), this);
+    mRemoveToggle->setObjectName(QStringLiteral("removePropertiesToggle"));
+    mRemoveToggle->setCheckable(true);
+    mRemoveToggle->setCursor(Qt::PointingHandCursor);
+    mRemoveToggle->setAutoDefault(false);
+    mRemoveToggle->setDefault(false);
+    connect(mRemoveToggle, &QPushButton::toggled, this, [this](bool on) {
+        for(EntryInfoItem *row : std::as_const(mCustomXmpRows)) {
+            // The trailing blank row has nothing to remove.
+            row->setRemovable(on && !mCustomXmpOriginalKeys.value(row).isEmpty());
+        }
     });
 
     auto *buttonRow = new QHBoxLayout();
     buttonRow->setContentsMargins(0, 0, 0, 0);
+    buttonRow->addWidget(mRemoveToggle);
     buttonRow->addStretch(1);
-    buttonRow->addWidget(mStripButton);
+    buttonRow->addWidget(mRemoveExifButton);
+    buttonRow->addWidget(mRemoveXmpButton);
+    buttonRow->addWidget(mRemoveIccButton);
     layout->addLayout(buttonRow);
 
     connect(mTabs, &QTabWidget::currentChanged, this, [this]() { updateActionButtons(); });
@@ -233,15 +293,41 @@ void FileInfoDialog::commitFocusedEditor(QWidget *clicked) {
     // A click inside the field being edited is a cursor move, not a commit.
     if(clicked && (clicked == focused || focused->isAncestorOf(clicked)))
         return;
+    // Any row whose editor holds the focus, across all three editable kinds.
+    // A grid row is matched on any of its cells: it commits as a whole, so
+    // tabbing from its key cell to its value cell must not count as leaving it.
+    auto owns = [focused](EntryInfoItem *row) {
+        return row && row->isAncestorOf(focused);
+    };
     EntryInfoItem *editing = nullptr;
     for(EntryInfoItem *row : std::as_const(mEditableRows)) {
-        if(row->valueEditor() == focused) {
+        if(owns(row)) {
             editing = row;
             break;
         }
     }
-    // Focus sitting anywhere else in this window (the Clear metadata button, a
-    // tab) is not an edit in progress and is left alone.
+    if(!editing) {
+        for(EntryInfoItem *row : std::as_const(mXmpEditableRows)) {
+            if(owns(row)) {
+                editing = row;
+                break;
+            }
+        }
+    }
+    if(!editing) {
+        for(EntryInfoItem *row : std::as_const(mCustomXmpRows)) {
+            if(owns(row)) {
+                // Clicking from one cell of this row into another is not a
+                // commit - the row is still being filled in.
+                if(clicked && row->isAncestorOf(clicked))
+                    return;
+                editing = row;
+                break;
+            }
+        }
+    }
+    // Focus sitting anywhere else in this window (a removal button, a tab) is
+    // not an edit in progress and is left alone.
     if(!editing)
         return;
     editing->commitEdit();
@@ -250,37 +336,43 @@ void FileInfoDialog::commitFocusedEditor(QWidget *clicked) {
 
 void FileInfoDialog::setTarget(const QString &path) {
     mTargetPath = path;
+    // A delete mode must never follow the user onto the next file: this window
+    // is retargeted live as the selection changes, so leaving the toggle on
+    // would put an x next to rows nobody has read yet.
+    if(mRemoveToggle->isChecked())
+        mRemoveToggle->setChecked(false);
+    mHasExif = mHasXmp = mHasIcc = false;
+    mExifWritable = mXmpWritable = mIccWritable = false;
     populateGeneralTab(path);
     populateExifTab(path);
     populateXmpTab(path);
     populateIccTab(path);
-    updateStripButton(path);
     updateActionButtons();
 }
 
-// General, XMP and ICC show nothing that can be changed from here, so they carry
-// no buttons; everything that writes the file belongs with the EXIF fields it
-// writes. Keyed on the EXIF tab specifically rather than on "not General", so
-// adding read-only tabs never leaks a write action onto one. Visibility, not
-// enablement: on a read-only tab there is nothing to explain by showing a
-// greyed-out button.
+// One rule for all three removals (docs/2026-08-01-001 §7): hidden when the button
+// does not belong on the current tab *or* when there is nothing for it to
+// remove; disabled only when there is something to remove but the file cannot be
+// written. Greying therefore says exactly one thing - "there is something here,
+// but I cannot write to this file" - instead of conflating that with "nothing to
+// do". Each button is keyed to its own tab, so no action can leak onto another.
 void FileInfoDialog::updateActionButtons() {
-    mStripButton->setVisible(mTabs->currentIndex() == mTabs->indexOf(mExifTab));
-}
+    const int current = mTabs->currentIndex();
+    const bool onExif = current == mTabs->indexOf(mExifTab);
+    const bool onXmp = current == mTabs->indexOf(mXmpTab);
+    const bool onIcc = current == mTabs->indexOf(mIccTab);
 
-// Same type test populateExifTab() uses, and the same reason: DocumentInfo is
-// cheap enough for an ad hoc query on a path. A folder, a video, or a missing
-// file leaves the button disabled rather than hidden, so its absence never
-// reads as "this file has no metadata".
-void FileInfoDialog::updateStripButton(const QString &path) {
-    bool strippable = false;
-    QFileInfo fi(path);
-    if(!path.isEmpty() && fi.isFile() && fi.isWritable()) {
-        DocumentInfo docInfo(path);
-        strippable = (docInfo.type() == DocumentType::STATIC ||
-                      docInfo.type() == DocumentType::ANIMATED);
-    }
-    mStripButton->setEnabled(strippable);
+    mRemoveExifButton->setVisible(onExif && mHasExif);
+    mRemoveExifButton->setEnabled(mExifWritable);
+    mRemoveXmpButton->setVisible(onXmp && mHasXmp);
+    mRemoveXmpButton->setEnabled(mXmpWritable);
+    mRemoveIccButton->setVisible(onIcc && mHasIcc);
+    mRemoveIccButton->setEnabled(mIccWritable);
+
+    // The toggle belongs to the custom grid, which only the XMP tab has, and
+    // only when there is a row it could remove.
+    mRemoveToggle->setVisible(onXmp && mXmpWritable && !mCustomXmpRows.isEmpty() &&
+                              mCustomXmpRows.size() > 1);
 }
 
 void FileInfoDialog::clearTarget() {
@@ -408,12 +500,24 @@ void FileInfoDialog::populateExifTab(const QString &path) {
     // DocumentInfo::loadExifTags() translated them in.
     const QStringList compactLabels = {QObject::tr("Make"), QObject::tr("Model"),
                                        QObject::tr("Date/Time"), QObject::tr("UserComment")};
+    int shown = 0;
     for(auto it = tags.constBegin(); it != tags.constEnd(); ++it) {
         if(editable && (DocumentInfo::editableTagKeys().contains(it.key()) ||
                         compactLabels.contains(it.key())))
             continue;
+        // Capped while building rows: a file crafted with a very large number of
+        // tags would otherwise build one widget each and hang the dialog. The
+        // cap is applied in both verbosity modes so it is a property of this
+        // loop rather than of a setting.
+        if(shown >= kMaxMetadataRowsDisplayed) {
+            addExifRow(tr("Showing %1 of %2 tags").arg(shown).arg(tags.size()), QString());
+            break;
+        }
         addExifRow(it.key(), it.value());
+        ++shown;
     }
+    mHasExif = canCarryExif && !tags.isEmpty();
+    mExifWritable = editable;
 
     mTabs->setTabVisible(exifIndex, canCarryExif);
     // An image with nothing to list says so, rather than showing a blank pane:
@@ -526,33 +630,257 @@ void FileInfoDialog::showExifError(const QString &message) {
 // there, which is why it shows this tab and no EXIF one.
 void FileInfoDialog::populateXmpTab(const QString &path) {
     clearXmpRows();
+    mXmpNotice->hide();
     const int xmpIndex = mTabs->indexOf(mXmpTab);
     const bool wasCurrent = (mTabs->currentIndex() == xmpIndex);
 
     QMap<QString, QString> tags;
+    QMap<QString, QStringList> curated;
     QFileInfo fi(path);
     bool canCarryXmp = false;
+    bool editable = false;
     if(!path.isEmpty() && fi.isFile()) {
         DocumentInfo docInfo(path);
         if((docInfo.type() == DocumentType::STATIC || docInfo.type() == DocumentType::ANIMATED) &&
            DocumentInfo::supportsXmp(path)) {
             canCarryXmp = true;
             tags = docInfo.getXmpTags();
+            // The format gate and the file gate are separate questions: a tiff
+            // can hold XMP that this app will not write, and a read-only jpeg is
+            // writable in principle but not right now.
+            editable = DocumentInfo::supportsXmpEditing(path) && fi.isWritable();
+            if(editable)
+                curated = docInfo.getEditableXmpTags();
+        }
+    }
+    mHasXmp = canCarryXmp && !tags.isEmpty();
+    mXmpWritable = editable;
+
+    if(editable) {
+        // The curated set first: these are the rows a person came here to type
+        // into, and the property dump below them can run long.
+        for(const QString &key : DocumentInfo::editableXmpKeys())
+            addEditableXmpRow(key, curated.value(key));
+    }
+
+    // Split into standard and custom, each sorted by key. exiv2's own iteration
+    // order is neither grouped nor lexicographic, so the sort is a requirement
+    // rather than a tidy-up. Sorted once over the key list rather than by
+    // inserting rows into a sorted container.
+    QStringList standardKeys, customKeys;
+    for(auto it = tags.constBegin(); it != tags.constEnd(); ++it) {
+        // A curated key is already shown as its own field above; showing it
+        // again in the dump would be the same property twice.
+        if(editable && DocumentInfo::editableXmpKeys().contains(it.key()))
+            continue;
+        (DocumentInfo::isRegisteredXmpKey(it.key()) ? standardKeys : customKeys).append(it.key());
+    }
+    standardKeys.sort();
+    customKeys.sort();
+
+    int capped = 0;
+    if(!standardKeys.isEmpty()) {
+        addXmpSectionHeader(tr("Standard properties"));
+        for(const QString &key : std::as_const(standardKeys)) {
+            // Capped while building rows, not by trimming the map: the map is
+            // cheap and the widgets are not.
+            if(mXmpRows.size() >= kMaxXmpRowsDisplayed) {
+                capped = standardKeys.size();
+                break;
+            }
+            addXmpRow(key, tags.value(key));
         }
     }
 
-    // Keyed by exiv2 key ("Xmp.dc.title"), listed in the map's own order: XMP
-    // has no display-label form to sort by, and grouping by schema prefix is
-    // what sorting the keys gives anyway.
-    for(auto it = tags.constBegin(); it != tags.constEnd(); ++it)
-        addXmpRow(it.key(), it.value());
+    if(editable || !customKeys.isEmpty()) {
+        addXmpSectionHeader(tr("Custom properties"));
+        for(const QString &key : std::as_const(customKeys)) {
+            if(mCustomXmpRows.size() >= kMaxXmpRowsDisplayed) {
+                capped = customKeys.size();
+                break;
+            }
+            addCustomXmpRow(key, tags.value(key), editable);
+        }
+        // The trailing blank row is how a property gets added, so it is present
+        // even for a file that carries no XMP at all - which is exactly where
+        // someone wants to add the first one.
+        if(editable && customKeys.size() < DocumentInfo::kMaxCustomXmpProperties)
+            ensureTrailingBlankRow();
+        else if(editable)
+            showXmpNotice(tr("This file already holds the maximum of %1 custom properties.")
+                              .arg(DocumentInfo::kMaxCustomXmpProperties));
+    }
+
+    if(capped)
+        showXmpNotice(tr("Showing %1 of %2 properties.").arg(kMaxXmpRowsDisplayed).arg(capped));
+    else if(canCarryXmp && !DocumentInfo::supportsXmpEditing(path))
+        showXmpNotice(tr("%1 metadata is shown read-only; ThumbGrid does not write XMP into %1 files.")
+                          .arg(fi.suffix().toUpper()));
+    else if(canCarryXmp && !fi.isWritable())
+        showXmpNotice(tr("This file is read-only, so its XMP cannot be edited."));
 
     mTabs->setTabVisible(xmpIndex, canCarryXmp);
     // A format that can carry XMP but currently carries none says so rather than
-    // showing a blank pane, exactly as the EXIF tab does.
-    mXmpPlaceholder->setVisible(canCarryXmp && mXmpRows.isEmpty());
+    // showing a blank pane, exactly as the EXIF tab does - unless there are
+    // fields to type into, in which case the fields are the answer.
+    mXmpPlaceholder->setVisible(canCarryXmp && mXmpRows.isEmpty() &&
+                                mCustomXmpRows.isEmpty() && mXmpEditableRows.isEmpty());
     if(!canCarryXmp && wasCurrent)
         mTabs->setCurrentIndex(mTabs->indexOf(mGeneralTab));
+}
+
+void FileInfoDialog::addXmpSectionHeader(const QString &title) {
+    auto *header = new QLabel(title, mXmpRowsContainer);
+    header->setObjectName(QStringLiteral("xmpSectionHeader"));
+    mXmpRowsLayout->addWidget(header);
+    mXmpHeaders.append(header);
+}
+
+void FileInfoDialog::addEditableXmpRow(const QString &key, const QStringList &values) {
+    const auto kind = DocumentInfo::xmpValueKind(key);
+    const bool isArray = (kind == DocumentInfo::XmpValueKind::Seq ||
+                          kind == DocumentInfo::XmpValueKind::Bag);
+    auto *row = new EntryInfoItem(mXmpRowsContainer);
+    row->setNameWidth(kXmpKeyColumnWidth);
+    row->setEditable(true);
+    if(isArray) {
+        // One item per line: the only unambiguous form, since an item may
+        // contain a comma and the displayed joined form cannot be re-split.
+        row->setMultiLine(true);
+        row->setValuePlaceholder(tr("One per line"));
+    }
+    row->setInfo(DocumentInfo::editableXmpLabel(key),
+                 isArray ? values.join(QLatin1Char('\n'))
+                         : (values.isEmpty() ? QString() : values.first()));
+    if(kind == DocumentInfo::XmpValueKind::Text && key.endsWith(QLatin1String("Rating")))
+        row->setValuePlaceholder(QStringLiteral("0 - 5"));
+    connect(row, &EntryInfoItem::valueEdited, this,
+            [this, key](const QString &text) { commitEditableXmpTag(key, text); });
+    mXmpRowsLayout->addWidget(row);
+    // Deliberately not in mXmpRows: that list is the read-only property dump,
+    // and a curated field is the opposite of one. Keeping them apart is what
+    // lets a caller ask "what does this file actually carry" without counting
+    // the empty fields offered for typing into.
+    mXmpEditableRows.insert(key, row);
+}
+
+EntryInfoItem *FileInfoDialog::addCustomXmpRow(const QString &key, const QString &value,
+                                               bool editable) {
+    auto *row = new EntryInfoItem(mXmpRowsContainer);
+    row->setNameWidth(kXmpKeyColumnWidth);
+    row->setNameEditable(editable);
+    row->setEditable(editable);
+    row->setNamePlaceholder(QStringLiteral("Xmp.prefix.Name"));
+    row->setExtraPlaceholder(tr("Namespace URI"));
+    row->setInfo(key, value);
+    // A value too long to show in full must not be committable: the editor would
+    // write back the elided text and silently truncate the file's real data.
+    if(value.length() > DocumentInfo::kMaxXmpValueLengthEdited)
+        row->setValueReadOnly(true);
+    if(editable) {
+        connect(row, &EntryInfoItem::rowEdited, this, [this, row]() { commitCustomXmpRow(row); });
+        connect(row, &EntryInfoItem::removeRequested, this, [this, row]() {
+            const QString original = mCustomXmpOriginalKeys.value(row);
+            if(!original.isEmpty() && !mTargetPath.isEmpty())
+                emit customXmpRemoveRequested(mTargetPath, original);
+        });
+    }
+    mXmpRowsLayout->addWidget(row);
+    mCustomXmpRows.append(row);
+    mCustomXmpOriginalKeys.insert(row, key);
+    return row;
+}
+
+// Exactly one blank row at the end: filling the last one appends a fresh blank
+// beneath it, so there is always somewhere to type without an Add button.
+void FileInfoDialog::ensureTrailingBlankRow() {
+    if(!mCustomXmpRows.isEmpty() && mCustomXmpRows.last()->isBlank())
+        return;
+    if(mCustomXmpRows.size() >= DocumentInfo::kMaxCustomXmpProperties)
+        return;
+    addCustomXmpRow(QString(), QString(), true);
+}
+
+// One grid row, committed as a whole. Row states, per docs/2026-08-01-001 §5:
+// blank is the affordance and is never written; a value with no key is invalid
+// and writes nothing; a key with no value is legal and is written as an
+// empty-valued property; clearing the key of an existing row erases it.
+void FileInfoDialog::commitCustomXmpRow(EntryInfoItem *row) {
+    if(mTargetPath.isEmpty())
+        return;
+    const QString original = mCustomXmpOriginalKeys.value(row);
+    const QString key = row->currentName().trimmed();
+    const QString value = row->currentValue();
+
+    if(key.isEmpty()) {
+        if(original.isEmpty()) {
+            // A value typed with no key: nothing to write it under. The row is
+            // left as the user typed it rather than reset, so the text is not
+            // lost while they go back to fill the key in.
+            if(!value.trimmed().isEmpty())
+                showXmpNotice(tr("A property needs a key, for example Xmp.dc.title."));
+            return;
+        }
+        // The key is the row's identity, so clearing it removes the property.
+        emit customXmpRemoveRequested(mTargetPath, original);
+        return;
+    }
+
+    // A key from a schema exiv2 knows is not a custom property, and the backend
+    // refuses it - its declared type (LangAlt, Seq, Bag, struct) is exactly what
+    // a free-text cell would corrupt. Caught here so the answer names the reason
+    // and points at where the property *can* be edited, rather than surfacing as
+    // a bare "could not save".
+    if(DocumentInfo::isRegisteredXmpKey(key)) {
+        showXmpNotice(DocumentInfo::editableXmpKeys().contains(key)
+                          ? tr("\"%1\" is a standard property - edit it in the field above.").arg(key)
+                          : tr("\"%1\" belongs to a standard schema, so it cannot be edited here.").arg(key));
+        return;
+    }
+
+    // A brand-new prefix has to bring its namespace URI: writing one the file
+    // does not already declare throws rather than corrupting anything, so the
+    // row asks for it instead of failing at the write.
+    const QStringList parts = key.split(QLatin1Char('.'));
+    const QString prefix = (parts.size() == 3 && parts.at(0) == QLatin1String("Xmp"))
+                               ? parts.at(1)
+                               : QString();
+    if(prefix.isEmpty()) {
+        showXmpNotice(tr("A key looks like Xmp.prefix.Name."));
+        return;
+    }
+    const bool needsUri = !DocumentInfo::isKnownXmpPrefix(prefix);
+    row->setExtraVisible(needsUri);
+    if(needsUri && row->currentExtra().trimmed().isEmpty()) {
+        showXmpNotice(tr("\"%1\" is a new namespace prefix, so it needs a namespace URI.").arg(prefix));
+        return;
+    }
+    mXmpNotice->hide();
+    emit customXmpEditRequested(mTargetPath, original, key, value,
+                                needsUri ? row->currentExtra().trimmed() : QString());
+}
+
+void FileInfoDialog::commitEditableXmpTag(const QString &key, const QString &text) {
+    if(mTargetPath.isEmpty())
+        return;
+    const auto kind = DocumentInfo::xmpValueKind(key);
+    QStringList values;
+    if(kind == DocumentInfo::XmpValueKind::Seq || kind == DocumentInfo::XmpValueKind::Bag) {
+        // Blank lines dropped, whitespace trimmed, order preserved.
+        for(const QString &line : text.split(QLatin1Char('\n'))) {
+            const QString item = line.trimmed();
+            if(!item.isEmpty())
+                values.append(item);
+        }
+    } else if(!text.isEmpty()) {
+        values.append(text);
+    }
+    emit xmpEditRequested(mTargetPath, key, values);
+}
+
+void FileInfoDialog::showXmpNotice(const QString &message) {
+    mXmpNotice->setText(message);
+    mXmpNotice->show();
 }
 
 // As populateXmpTab(), for the embedded colour profile.
@@ -573,6 +901,8 @@ void FileInfoDialog::populateIccTab(const QString &path) {
            DocumentInfo::supportsIccProfile(path)) {
             canCarryIcc = true;
             info = docInfo.getIccProfileInfo();
+            mHasIcc = docInfo.hasIccProfile();
+            mIccWritable = DocumentInfo::supportsIccEditing(path) && fi.isWritable();
         }
     }
 
@@ -588,11 +918,24 @@ void FileInfoDialog::populateIccTab(const QString &path) {
 void FileInfoDialog::clearXmpRows() {
     for(EntryInfoItem *row : mXmpRows)
         delete row;
+    for(EntryInfoItem *row : mCustomXmpRows)
+        delete row;
+    for(EntryInfoItem *row : mXmpEditableRows)
+        delete row;
+    for(QLabel *header : mXmpHeaders)
+        delete header;
     mXmpRows.clear();
+    mCustomXmpRows.clear();
+    mXmpHeaders.clear();
+    mXmpEditableRows.clear();
+    mCustomXmpOriginalKeys.clear();
 }
 
 void FileInfoDialog::addXmpRow(const QString &name, const QString &value) {
     auto *row = new EntryInfoItem(mXmpRowsContainer);
+    // Full exiv2 keys, not short labels: they need the wider column or they are
+    // clipped to something unidentifiable.
+    row->setNameWidth(kXmpKeyColumnWidth);
     row->setInfo(name, value);
     mXmpRowsLayout->addWidget(row);
     mXmpRows.append(row);

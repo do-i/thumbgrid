@@ -138,12 +138,12 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     // Clear metadata lives here rather than in the context menu, and it belongs
     // to the EXIF tab: General is a read-only view and must offer no action at
     // all. A folder cannot even reach the EXIF tab, so the button is away.
-    QPushButton *clearButton = dialog->stripMetadataButton();
-    QVERIFY2(clearButton != nullptr, "The File info window should offer a clear metadata button.");
+    QPushButton *clearButton = dialog->removeExifButton();
+    QVERIFY2(clearButton != nullptr, "The EXIF tab should offer a scoped Exif removal button.");
     QCOMPARE(dialog->tabs()->currentIndex(), generalIndex);
     QVERIFY2(!clearButton->isVisibleTo(dialog),
              "the read-only General tab should show no action buttons");
-    QVERIFY2(!clearButton->isEnabled(), "Clear metadata should be disabled for a folder target.");
+    QVERIFY2(!clearButton->isEnabled(), "Exif removal should be disabled for a folder target.");
     QVERIFY2(!clearButton->isDefault() && !clearButton->autoDefault(),
              "a destructive button must never be the dialog's default (Enter) button");
 

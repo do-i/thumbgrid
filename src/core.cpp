@@ -475,6 +475,136 @@ void Core::stripMetadataAt(const QString &path) {
     }
 }
 
+// The three scoped removals. Each is stripMetadataAt() with a narrower verb:
+// same type gate, same confirmation weight (all three rewrite the file and none
+// is individually recoverable), same reload-and-retarget refresh. The scope is
+// named in the prompt rather than left to the button label, because "remove all"
+// on its own reads as "remove everything" whichever tab it was pressed on.
+void Core::removeAllExifAt(const QString &path) {
+    runScopedMetadataRemoval(
+        path, tr("Remove all Exif"),
+        tr("Permanently remove every Exif tag from \"%1\"?\n"
+           "XMP and the colour profile are not affected.\n"
+           "This rewrites the file and cannot be undone."),
+        &DocumentInfo::clearExifMetadata, tr("Exif removed"), tr("Could not remove Exif"));
+}
+
+void Core::removeAllXmpAt(const QString &path) {
+    runScopedMetadataRemoval(
+        path, tr("Remove all XMP"),
+        tr("Permanently remove every XMP property from \"%1\"?\n"
+           "Exif and the colour profile are not affected.\n"
+           "This rewrites the file and cannot be undone."),
+        &DocumentInfo::clearXmpMetadata, tr("XMP removed"), tr("Could not remove XMP"));
+}
+
+void Core::removeIccProfileAt(const QString &path) {
+    runScopedMetadataRemoval(
+        path, tr("Remove colour profile"),
+        tr("Permanently remove the embedded colour profile from \"%1\"?\n"
+           "Exif and XMP are not affected, but the image may be displayed with "
+           "different colours afterwards.\n"
+           "This rewrites the file and cannot be undone."),
+        &DocumentInfo::clearIccProfile, tr("Colour profile removed"),
+        tr("Could not remove the colour profile"));
+}
+
+// The part all three share. A member function pointer rather than three copies:
+// they differ in one call and three strings, and keeping them identical is the
+// point - a removal that skipped the confirmation or the refresh would be a bug
+// nobody would notice until it shipped.
+void Core::runScopedMetadataRemoval(const QString &path, const QString &title,
+                                    const QString &prompt, MetadataRemoval removal,
+                                    const QString &okMessage, const QString &failMessage) {
+    if(!model || model->isEmpty() || path.isEmpty())
+        return;
+    auto img = model->getImage(path);
+    if(!img)
+        return;
+    if(img->type() != STATIC && img->type() != ANIMATED) {
+        mw->showMessage(tr("Cannot remove metadata from this file type"));
+        return;
+    }
+    if(!mw->showConfirmation(title, prompt.arg(QFileInfo(path).fileName()), true))
+        return;
+    DocumentInfo docInfo(path);
+    if((docInfo.*removal)()) {
+        reloadImage(path);
+        // The window that raised this is still open on the rows just deleted,
+        // and nothing else retargets it: the selection did not change.
+        retargetFileInfoDialog();
+        mw->showMessageSuccess(okMessage);
+    } else {
+        mw->showMessage(failMessage);
+    }
+}
+
+// One curated XMP field, committed from the File info window. No confirmation,
+// for the same reason saveMetadataTagAt() has none: the user typed into a field
+// that showed the old value, and retyping it puts it back.
+void Core::saveXmpTagAt(const QString &path, const QString &key, const QStringList &values) {
+    if(path.isEmpty() || !DocumentInfo::supportsXmpEditing(path))
+        return;
+    DocumentInfo docInfo(path);
+    if(!docInfo.setEditableXmpTags({{key, values}})) {
+        mw->showMessage(tr("Could not save XMP"));
+        retargetFileInfoDialog();
+        return;
+    }
+    reloadImage(path);
+    retargetFileInfoDialog();
+    mw->showMessageSuccess(tr("XMP saved"));
+}
+
+// One custom-property grid row. A renamed key is an erase plus an add, because
+// exiv2 has no rename - so the old property goes first, and only then is the new
+// one written.
+void Core::saveCustomXmpAt(const QString &path, const QString &oldKey, const QString &newKey,
+                           const QString &value, const QString &namespaceUri) {
+    if(path.isEmpty() || !DocumentInfo::supportsXmpEditing(path) || newKey.isEmpty())
+        return;
+    DocumentInfo docInfo(path);
+    bool ok = true;
+    if(!oldKey.isEmpty() && oldKey != newKey)
+        ok = docInfo.eraseXmpKey(oldKey);
+    if(ok) {
+        // An existing prefix takes the plain write; a new one has to register
+        // its namespace first, which is what addCustomXmpProperty() is for.
+        const QStringList parts = newKey.split(QLatin1Char('.'));
+        const bool known = parts.size() == 3 && DocumentInfo::isKnownXmpPrefix(parts.at(1));
+        if(known && namespaceUri.isEmpty())
+            ok = docInfo.setCustomXmpTags({{newKey, value}});
+        else if(parts.size() == 3)
+            ok = docInfo.addCustomXmpProperty(parts.at(1), parts.at(2), namespaceUri, value);
+        else
+            ok = false;
+    }
+    if(!ok) {
+        mw->showMessage(tr("Could not save property"));
+        retargetFileInfoDialog();
+        return;
+    }
+    reloadImage(path);
+    retargetFileInfoDialog();
+    mw->showMessageSuccess(tr("Property saved"));
+}
+
+// No confirmation: the remove toggle the user switched on is the deliberate act,
+// and a key and value can be retyped. Same line saveMetadataTagAt() draws.
+void Core::removeCustomXmpAt(const QString &path, const QString &key) {
+    if(path.isEmpty() || !DocumentInfo::supportsXmpEditing(path) || key.isEmpty())
+        return;
+    DocumentInfo docInfo(path);
+    if(!docInfo.eraseXmpKey(key)) {
+        mw->showMessage(tr("Could not remove property"));
+        retargetFileInfoDialog();
+        return;
+    }
+    reloadImage(path);
+    retargetFileInfoDialog();
+    mw->showMessageSuccess(tr("Property removed"));
+}
+
 // Writes one tag committed in the File info window's EXIF tab. No confirmation
 // prompt, unlike stripMetadata(): a single text field is individually
 // recoverable by retyping it, and the user typed it deliberately into a field
@@ -1203,14 +1333,24 @@ void Core::showDuplicateFinder() {
 void Core::showFileInfoDialog() {
     if(!fileInfoDialog) {
         fileInfoDialog.reset(new FileInfoDialog(mw));
-        connect(fileInfoDialog.get(), &FileInfoDialog::stripMetadataRequested,
-                this, &Core::stripMetadataAt);
+        connect(fileInfoDialog.get(), &FileInfoDialog::removeAllExifRequested,
+                this, &Core::removeAllExifAt);
+        connect(fileInfoDialog.get(), &FileInfoDialog::removeAllXmpRequested,
+                this, &Core::removeAllXmpAt);
+        connect(fileInfoDialog.get(), &FileInfoDialog::removeIccProfileRequested,
+                this, &Core::removeIccProfileAt);
         // Queued: the signal originates in a row's line edit, and the write ends
         // in retargetFileInfoDialog(), which deletes and rebuilds that very row.
         // Returning to the event loop first keeps the sender alive for the rest
         // of its own event handler.
         connect(fileInfoDialog.get(), &FileInfoDialog::metadataEditRequested,
                 this, &Core::saveMetadataTagAt, Qt::QueuedConnection);
+        connect(fileInfoDialog.get(), &FileInfoDialog::xmpEditRequested,
+                this, &Core::saveXmpTagAt, Qt::QueuedConnection);
+        connect(fileInfoDialog.get(), &FileInfoDialog::customXmpEditRequested,
+                this, &Core::saveCustomXmpAt, Qt::QueuedConnection);
+        connect(fileInfoDialog.get(), &FileInfoDialog::customXmpRemoveRequested,
+                this, &Core::removeCustomXmpAt, Qt::QueuedConnection);
     }
     const QStringList selection = currentSelection();
     fileInfoDialog->setTarget(selection.isEmpty() ? QString() : selection.first());
