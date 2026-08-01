@@ -354,6 +354,14 @@ add_test(
     COMMAND thumbgrid_file_info_symlink_target_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_file_info_xmp_and_icc_tabs_test
+    behavior/test_file_info_xmp_and_icc_tabs.cpp
+)
+add_test(
+    NAME "File info popup's XMP and ICC tabs follow what the format can carry"
+    COMMAND thumbgrid_file_info_xmp_and_icc_tabs_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_delete_does_not_follow_symlinks_test
     behavior/test_delete_does_not_follow_symlinks.cpp
 )
