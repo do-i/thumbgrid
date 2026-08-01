@@ -19,32 +19,51 @@ class DateTimePickerPopup;
 
 // Non-modal inspector window showing metadata for the current selection.
 // Core owns a single instance and retargets it live as the document-view
-// image or the grid selection changes (docs/009 §B1). The EXIF tab is shown
-// only for a format exiv2 can write Exif into (jpeg/webp), tags or no tags,
-// and hidden entirely for anything else - a png has nowhere to store an edit,
-// so it gets no tab to open (docs/009 §B2).
+// image or the grid selection changes (docs/009 §B1). Each metadata tab is
+// shown for a format that can carry its own kind of metadata, tags or no tags,
+// and hidden entirely for anything else (docs/009 §B2). The gate differs per
+// tab because the tabs differ in purpose: EXIF is shown only where exiv2 can
+// *write* Exif (jpeg/webp), since a png has nowhere to store an edit, while
+// XMP and ICC only read and so are shown wherever the format can *hold* them
+// (jpeg/png/webp/tiff). A png therefore opens with XMP and ICC tabs and no
+// EXIF tab at all.
 //
-// The two tabs differ in kind, not just in content: General is read-only, so it
-// carries no buttons at all, while EXIF is where the file is written - the
-// editable tags are in-place input fields and the Clear metadata button rides
-// along with them. Anything that acts on the file therefore appears only while
-// the EXIF tab is current.
+// The tabs differ in kind, not just in content: General, XMP and ICC are
+// read-only views, so they carry no buttons at all, while EXIF is where the
+// file is written - the editable tags are in-place input fields and the Clear
+// metadata button rides along with them. XMP and ICC stay read-only because
+// there is nothing here to type into: an XMP property is a typed value
+// (LangAlt, Seq, Bag) rather than a line of text, and "editing" an ICC profile
+// means replacing a binary blob. Anything that acts on the file therefore
+// appears only while the EXIF tab is current.
 class FileInfoDialog : public QDialog {
     Q_OBJECT
 public:
     explicit FileInfoDialog(QWidget *parent = nullptr);
 
-    // Repopulates the General and EXIF tabs for path. An empty or missing
-    // path drops to a "No selection" placeholder and hides the EXIF tab, as
-    // does a folder, a non-image, or an image format Exiv2 cannot write to
-    // (e.g. png). A jpeg or webp keeps the tab open whether or not it carries
-    // any tags - having none is a state worth seeing (and, when the file is
+    // Repopulates the General, EXIF, XMP and ICC tabs for path. An empty or
+    // missing path drops to a "No selection" placeholder and hides all three
+    // metadata tabs, as does a folder or a non-image. An image keeps whichever
+    // of them its format can carry open whether or not it holds anything today
+    // - having none is a state worth seeing (and, on EXIF, when the file is
     // also writable, worth typing into).
     void setTarget(const QString &path);
     void clearTarget();
 
     // test access
     QTabWidget *tabs() { return mTabs; }
+    // The read-only metadata tabs, for asserting visibility: they are hidden
+    // rather than removed, so tabs()->indexOf() still finds them.
+    QWidget *xmpTab() const { return mXmpTab; }
+    QWidget *iccTab() const { return mIccTab; }
+    // The rows currently listed on those tabs, in display order (ICC keeps the
+    // order DocumentInfo::getIccProfileInfo() hands back).
+    QList<EntryInfoItem *> xmpRows() const { return mXmpRows; }
+    QList<EntryInfoItem *> iccRows() const { return mIccRows; }
+    // Shown in place of the rows when the format can carry the metadata but
+    // this file holds none; visible only while its tab is.
+    QLabel *xmpPlaceholder() const { return mXmpPlaceholder; }
+    QLabel *iccPlaceholder() const { return mIccPlaceholder; }
     // Named for the objectName/action it drives (stripMetadata); the button
     // itself reads "Clear metadata".
     QPushButton *stripMetadataButton() { return mStripButton; }
@@ -74,10 +93,18 @@ protected:
 private:
     void populateGeneralTab(const QString &path);
     void populateExifTab(const QString &path);
+    // Same rule shape as populateExifTab(), read-only: shown when the format
+    // can carry the metadata, with a placeholder when this file carries none.
+    void populateXmpTab(const QString &path);
+    void populateIccTab(const QString &path);
     void clearGeneralRows();
     void addGeneralRow(const QString &name, const QString &value);
     void clearExifRows();
     void addExifRow(const QString &name, const QString &value);
+    void clearXmpRows();
+    void addXmpRow(const QString &name, const QString &value);
+    void clearIccRows();
+    void addIccRow(const QString &name, const QString &value);
     // An editable tag: same row shape, but the value is an input field wired
     // back to commitEditableTag().
     void addEditableExifRow(const QString &key, const QString &value);
@@ -95,7 +122,7 @@ private:
     // Enabled only for a still or animated image that exists on disk - the only
     // thing DocumentInfo::stripMetadata() can actually write.
     void updateStripButton(const QString &path);
-    // Keeps the button row out of the read-only General tab.
+    // Keeps the button row out of the read-only tabs (General, XMP, ICC).
     void updateActionButtons();
     // The "Symlink to" row's value: the target path, tagged as broken when the
     // link resolves to nothing.
@@ -119,6 +146,19 @@ private:
     // Shown in place of the rows when an image simply has no tags.
     QLabel *mExifPlaceholder = nullptr;
     QLabel *mExifError = nullptr;
+    // The two read-only metadata tabs. Same shape as the EXIF tab minus the
+    // editable rows and the error label - neither writes, so neither can fail
+    // a write.
+    QWidget *mXmpTab = nullptr;
+    QWidget *mXmpRowsContainer = nullptr;
+    QVBoxLayout *mXmpRowsLayout = nullptr;
+    QList<EntryInfoItem *> mXmpRows;
+    QLabel *mXmpPlaceholder = nullptr;
+    QWidget *mIccTab = nullptr;
+    QWidget *mIccRowsContainer = nullptr;
+    QVBoxLayout *mIccRowsLayout = nullptr;
+    QList<EntryInfoItem *> mIccRows;
+    QLabel *mIccPlaceholder = nullptr;
     // Built on first use and kept: it outlives the rows, which are rebuilt on
     // every retarget.
     DateTimePickerPopup *mDateTimePicker = nullptr;

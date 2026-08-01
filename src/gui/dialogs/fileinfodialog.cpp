@@ -118,9 +118,47 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mTabs->addTab(mExifTab, tr("EXIF"));
     mTabs->setTabVisible(mTabs->indexOf(mExifTab), false);
 
-    // Shown only while the EXIF tab is current (updateActionButtons): General is
-    // a read-only view, so it offers no action at all. Red (#stripMetadataButton,
-    // styled with the same danger tokens as the delete confirmations) because it
+    // XMP tab: the EXIF tab's shape without the editable rows or the error
+    // label - it only reads, so it has no write to report on. Shown for any
+    // format that can hold an XMP packet (jpeg/png/webp/tiff), which is wider
+    // than EXIF's "exiv2 can write here", so a png gets this tab and no EXIF
+    // one.
+    mXmpTab = new QWidget(mTabs);
+    auto *xmpLayout = new QVBoxLayout(mXmpTab);
+    mXmpRowsContainer = new QWidget(mXmpTab);
+    mXmpRowsLayout = new QVBoxLayout(mXmpRowsContainer);
+    mXmpRowsLayout->setContentsMargins(0, 0, 0, 0);
+    mXmpRowsLayout->setSpacing(0);
+    xmpLayout->addWidget(mXmpRowsContainer);
+    mXmpPlaceholder = new QLabel(tr("No XMP metadata"), mXmpTab);
+    mXmpPlaceholder->setAlignment(Qt::AlignCenter);
+    mXmpPlaceholder->hide();
+    xmpLayout->addWidget(mXmpPlaceholder);
+    xmpLayout->addStretch(1);
+    mTabs->addTab(mXmpTab, tr("XMP"));
+    mTabs->setTabVisible(mTabs->indexOf(mXmpTab), false);
+
+    // ICC tab: same again, listing a derived summary of the embedded colour
+    // profile rather than the blob itself.
+    mIccTab = new QWidget(mTabs);
+    auto *iccLayout = new QVBoxLayout(mIccTab);
+    mIccRowsContainer = new QWidget(mIccTab);
+    mIccRowsLayout = new QVBoxLayout(mIccRowsContainer);
+    mIccRowsLayout->setContentsMargins(0, 0, 0, 0);
+    mIccRowsLayout->setSpacing(0);
+    iccLayout->addWidget(mIccRowsContainer);
+    mIccPlaceholder = new QLabel(tr("No ICC profile"), mIccTab);
+    mIccPlaceholder->setAlignment(Qt::AlignCenter);
+    mIccPlaceholder->hide();
+    iccLayout->addWidget(mIccPlaceholder);
+    iccLayout->addStretch(1);
+    mTabs->addTab(mIccTab, tr("ICC"));
+    mTabs->setTabVisible(mTabs->indexOf(mIccTab), false);
+
+    // Shown only while the EXIF tab is current (updateActionButtons): General,
+    // XMP and ICC are read-only views, so they offer no action at all. Red
+    // (#stripMetadataButton, styled with the same danger tokens as the delete
+    // confirmations) because it
     // rewrites the file on disk and cannot be undone. Core raises the
     // confirmation - see Core::stripMetadataAt().
     mStripButton = new QPushButton(tr("Clear metadata"), this);
@@ -214,14 +252,18 @@ void FileInfoDialog::setTarget(const QString &path) {
     mTargetPath = path;
     populateGeneralTab(path);
     populateExifTab(path);
+    populateXmpTab(path);
+    populateIccTab(path);
     updateStripButton(path);
     updateActionButtons();
 }
 
-// The General tab shows nothing that can be changed from here, so it carries no
-// buttons; everything that writes the file belongs with the EXIF fields it
-// writes. Visibility, not enablement: on General there is nothing to explain by
-// showing a greyed-out button.
+// General, XMP and ICC show nothing that can be changed from here, so they carry
+// no buttons; everything that writes the file belongs with the EXIF fields it
+// writes. Keyed on the EXIF tab specifically rather than on "not General", so
+// adding read-only tabs never leaks a write action onto one. Visibility, not
+// enablement: on a read-only tab there is nothing to explain by showing a
+// greyed-out button.
 void FileInfoDialog::updateActionButtons() {
     mStripButton->setVisible(mTabs->currentIndex() == mTabs->indexOf(mExifTab));
 }
@@ -475,6 +517,98 @@ void FileInfoDialog::commitEditableTag(const QString &key, const QString &value)
 void FileInfoDialog::showExifError(const QString &message) {
     mExifError->setText(message);
     mExifError->show();
+}
+
+// Same rule shape as populateExifTab() - existing file, still or animated image,
+// format that can carry the metadata - with a wider predicate, because this tab
+// only reads: supportsXmp() asks whether the container can hold an XMP packet,
+// not whether exiv2 would rewrite Exif into it. A png passes here and fails
+// there, which is why it shows this tab and no EXIF one.
+void FileInfoDialog::populateXmpTab(const QString &path) {
+    clearXmpRows();
+    const int xmpIndex = mTabs->indexOf(mXmpTab);
+    const bool wasCurrent = (mTabs->currentIndex() == xmpIndex);
+
+    QMap<QString, QString> tags;
+    QFileInfo fi(path);
+    bool canCarryXmp = false;
+    if(!path.isEmpty() && fi.isFile()) {
+        DocumentInfo docInfo(path);
+        if((docInfo.type() == DocumentType::STATIC || docInfo.type() == DocumentType::ANIMATED) &&
+           DocumentInfo::supportsXmp(path)) {
+            canCarryXmp = true;
+            tags = docInfo.getXmpTags();
+        }
+    }
+
+    // Keyed by exiv2 key ("Xmp.dc.title"), listed in the map's own order: XMP
+    // has no display-label form to sort by, and grouping by schema prefix is
+    // what sorting the keys gives anyway.
+    for(auto it = tags.constBegin(); it != tags.constEnd(); ++it)
+        addXmpRow(it.key(), it.value());
+
+    mTabs->setTabVisible(xmpIndex, canCarryXmp);
+    // A format that can carry XMP but currently carries none says so rather than
+    // showing a blank pane, exactly as the EXIF tab does.
+    mXmpPlaceholder->setVisible(canCarryXmp && mXmpRows.isEmpty());
+    if(!canCarryXmp && wasCurrent)
+        mTabs->setCurrentIndex(mTabs->indexOf(mGeneralTab));
+}
+
+// As populateXmpTab(), for the embedded colour profile.
+void FileInfoDialog::populateIccTab(const QString &path) {
+    clearIccRows();
+    const int iccIndex = mTabs->indexOf(mIccTab);
+    const bool wasCurrent = (mTabs->currentIndex() == iccIndex);
+
+    // A list rather than a map, and iterated in the order DocumentInfo built it:
+    // the four rows read as a description ("what is it" through "how big is
+    // it"), which sorting by key would scramble.
+    QList<QPair<QString, QString>> info;
+    QFileInfo fi(path);
+    bool canCarryIcc = false;
+    if(!path.isEmpty() && fi.isFile()) {
+        DocumentInfo docInfo(path);
+        if((docInfo.type() == DocumentType::STATIC || docInfo.type() == DocumentType::ANIMATED) &&
+           DocumentInfo::supportsIccProfile(path)) {
+            canCarryIcc = true;
+            info = docInfo.getIccProfileInfo();
+        }
+    }
+
+    for(const auto &row : std::as_const(info))
+        addIccRow(row.first, row.second);
+
+    mTabs->setTabVisible(iccIndex, canCarryIcc);
+    mIccPlaceholder->setVisible(canCarryIcc && mIccRows.isEmpty());
+    if(!canCarryIcc && wasCurrent)
+        mTabs->setCurrentIndex(mTabs->indexOf(mGeneralTab));
+}
+
+void FileInfoDialog::clearXmpRows() {
+    for(EntryInfoItem *row : mXmpRows)
+        delete row;
+    mXmpRows.clear();
+}
+
+void FileInfoDialog::addXmpRow(const QString &name, const QString &value) {
+    auto *row = new EntryInfoItem(mXmpRowsContainer);
+    row->setInfo(name, value);
+    mXmpRowsLayout->addWidget(row);
+    mXmpRows.append(row);
+}
+
+void FileInfoDialog::clearIccRows() {
+    for(EntryInfoItem *row : mIccRows)
+        delete row;
+    mIccRows.clear();
+}
+
+void FileInfoDialog::addIccRow(const QString &name, const QString &value) {
+    auto *row = new EntryInfoItem(mIccRowsContainer);
+    row->setInfo(name, value);
+    mIccRowsLayout->addWidget(row);
+    mIccRows.append(row);
 }
 
 // symLinkTarget() is a string, not a promise: it is filled in for a dangling
