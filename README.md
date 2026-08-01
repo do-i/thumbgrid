@@ -237,11 +237,22 @@ Requirements: a C++17 compiler (GCC 9+), CMake 3.13+, and Qt6
 (`Core Widgets Svg PrintSupport OpenGLWidgets`). Optional features pull in
 exiv2 (metadata), OpenCV (HQ scaling) and mpv (video).
 
-The easiest way is the interactive helper, which can install the minimal Qt6
-build dependencies for your distro and then configure / build / run:
+The easiest way is the interactive menu, which can install the minimal Qt6
+build dependencies for your distro and then configure / build / run. It needs
+[lazymenu-cli](https://github.com/do-i/lazymenu-cli) and reads
+[`menu.toml`](menu.toml) from the repository root:
 
 ```
-./run.sh
+lazymenu-cli
+```
+
+Each menu item is a thin wrapper around a script in `scripts/`, so you can skip
+the menu entirely:
+
+```
+./scripts/dev.sh init         # install build dependencies
+./scripts/dev.sh build        # configure and build
+./scripts/dev.sh run          # run the built executable
 ```
 
 Or build directly with CMake:

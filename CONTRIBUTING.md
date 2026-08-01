@@ -7,8 +7,10 @@ It is GPLv3 software; the original qimgv copyright and attribution are retained
 ## Building
 
 See the *Installation → Build from source* section in the [README](README.md).
-The interactive helper `./run.sh` can install the minimal Qt6 build dependencies
-and configure / build / run for you.
+The interactive menu (`lazymenu-cli`, driven by [`menu.toml`](menu.toml)) can
+install the minimal Qt6 build dependencies and configure / build / run for you.
+Its build items are thin wrappers around `./scripts/dev.sh`, which works
+standalone too (`./scripts/dev.sh build`).
 
 ## Relationship to upstream
 
@@ -94,11 +96,12 @@ The git tag is the single source of truth for the version.
 **Cutting a release**, from anywhere with a clean working tree:
 
 ```
-./scripts/release.sh             # interactive menu
-./scripts/release.sh cut         # cut a release non-interactively
+./scripts/release.sh cut           # cut a release
 ./scripts/release.sh cut 2026.7.2  # cut an explicit version instead of auto-CalVer
 ./scripts/release.sh --dry-run cut # preview the steps, change nothing
 ```
+
+It is also item `e` in the `lazymenu-cli` menu.
 
 "Cut release" fetches `origin`, verifies `origin/main` is an ancestor of
 `origin/develop` (aborting with the offending commits listed if not), checks
@@ -110,11 +113,13 @@ Arch package and publishes a GitHub Release with **auto-generated release
 notes** (from merged PRs / commits since the previous tag). The script only
 tags — there is no version constant in the tree to bump.
 
-**Other menu items:**
+**Other release commands:**
 
 ```
 ./scripts/release.sh status  # show develop/main state, make no changes
 ```
+
+That one is item `s` in the `lazymenu-cli` menu.
 
 Flags: `--dry-run` (preview only), `--skip-ci-check` (bypass the `gh` CI-status
 gate), `--yes` (skip the confirmation prompt).
@@ -167,7 +172,7 @@ version now" step:
 ./scripts/publish-aur.sh 2026.7.12     # publish a specific version
 ```
 
-It is also item `a` in `./run.sh`'s menu. What it does:
+It is also item `a` in the `lazymenu-cli` menu. What it does:
 
 1. Looks up the release on GitHub, prompting for confirmation if it is marked
    draft or prerelease.

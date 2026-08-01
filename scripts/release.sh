@@ -3,7 +3,10 @@
 # Copyright (C) 2024-2026 do-i and thumbgrid contributors
 # Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
 #
-# Interactive release manager.
+# Release manager.
+#
+# The interactive front-end lives in the repository's menu.toml (lazymenu-cli);
+# this script only takes explicit subcommands.
 #
 # Versioning:
 #   - The version is derived entirely from the latest git tag (vYYYY.M.N) at
@@ -32,8 +35,7 @@
 #   3. Tags that commit and pushes main + the tag together, atomically.
 #
 # Usage:
-#   scripts/release.sh                     # interactive menu
-#   scripts/release.sh cut                 # cut a release non-interactively
+#   scripts/release.sh cut                 # cut a release
 #   scripts/release.sh cut 2026.7.2        # cut an explicit version
 #   scripts/release.sh status              # show state, make no changes
 #   scripts/release.sh --dry-run ...       # show what would happen, change nothing
@@ -51,12 +53,18 @@ ASSUME_YES=0
 EXPLICIT_VERSION=""
 COMMAND=""
 
+# Prints this file's leading comment block (everything after the shebang, up to
+# the first line that is not a comment), so the help text is just the header.
+print_usage() {
+    awk 'NR > 1 { if (/^#/) { sub(/^# ?/, ""); print } else { exit } }' "$0"
+}
+
 for arg in "$@"; do
     case "$arg" in
         --dry-run) DRY_RUN=1 ;;
         --skip-ci-check) SKIP_CI_CHECK=1 ;;
         --yes|-y) ASSUME_YES=1 ;;
-        -h|--help) sed -n '2,40p' "$0"; exit 0 ;;
+        -h|--help) print_usage; exit 0 ;;
         cut|status) COMMAND="$arg" ;;
         v*) EXPLICIT_VERSION="${arg#v}" ;;
         [0-9]*) EXPLICIT_VERSION="$arg" ;;
@@ -266,25 +274,13 @@ cmd_cut() {
     echo "Done. Released $tag."
 }
 
-menu() {
-    while true; do
-        echo
-        echo "thumbgrid release manager"
-        echo "  1) Cut release   ($DEV_BRANCH -> $DEFAULT_BRANCH, tag, push)"
-        echo "  2) Show status"
-        echo "  3) Quit"
-        read -rp "Select an option [1-3]: " choice
-        case "$choice" in
-            1) cmd_cut ;;
-            2) show_status ;;
-            3) exit 0 ;;
-            *) echo "invalid choice" ;;
-        esac
-    done
-}
-
 case "$COMMAND" in
     cut) cmd_cut ;;
     status) show_status ;;
-    "") menu ;;
+    "")
+        echo "error: no command given; expected 'cut' or 'status'." >&2
+        echo >&2
+        print_usage >&2
+        exit 2
+        ;;
 esac

@@ -1,0 +1,98 @@
+# SPDX-License-Identifier: GPL-3.0-only
+# Copyright (C) 2024-2026 do-i and thumbgrid contributors
+# Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
+#
+# Developer menu for lazymenu-cli. Run `lazymenu-cli` from the repository root.
+# Every item is a thin wrapper around a script in scripts/, so each command
+# stays usable on its own without the menu.
+
+[menu]
+title = "thumbgrid dev menu"
+quit_key = "q"
+loop = true
+key_format = "{key})"
+selected_foreground = "black"
+selected_background = "cyan"
+selected_bold = true
+
+[[items]]
+id = "init"
+label = "Init - install full dependencies"
+key = "i"
+command = ["scripts/dev.sh", "init"]
+group = "Build"
+tags = ["dependencies", "packages", "setup", "install"]
+description = "Install the full build dependencies for your package manager, then pull Git LFS assets"
+
+[[items]]
+id = "build"
+label = "Build - build only, skip tests"
+key = "b"
+command = ["scripts/dev.sh", "build"]
+group = "Build"
+tags = ["cmake", "compile"]
+description = "Configure with BUILD_TESTING=OFF and build the project"
+favorite = true
+
+[[items]]
+id = "full-build"
+label = "Full build - build and run tests"
+key = "f"
+command = ["scripts/dev.sh", "full-build"]
+group = "Build"
+tags = ["cmake", "compile", "tests", "ctest"]
+description = "Configure with BUILD_TESTING=ON, build the project, then run the test target"
+
+[[items]]
+id = "run"
+label = "Run"
+key = "r"
+command = ["scripts/dev.sh", "run"]
+group = "Build"
+tags = ["launch", "start", "app"]
+description = "Run the thumbgrid executable from the build directory"
+
+[[items]]
+id = "clean"
+label = "Clean - delete build directory"
+key = "c"
+command = ["scripts/dev.sh", "clean"]
+group = "Build"
+tags = ["delete", "reset", "build"]
+description = "Delete the build directory after confirmation"
+
+[[items]]
+id = "migrate-theme"
+label = "Migrate - migrate custom theme and colors"
+key = "m"
+command = ["scripts/migrate-theme.sh"]
+group = "Maintenance"
+tags = ["theme", "colors", "config"]
+description = "Migrate a custom theme and its colors to the current format"
+
+[[items]]
+id = "release-status"
+label = "Release status - show develop/main state"
+key = "s"
+command = ["scripts/release.sh", "status"]
+group = "Release"
+tags = ["status", "version", "tag", "develop", "main", "state"]
+description = "Show origin develop/main state, unreleased commits and the next auto version; changes nothing"
+
+[[items]]
+id = "release-cut"
+label = "Cut release - fast-forward main to develop and tag"
+key = "e"
+command = ["scripts/release.sh", "cut"]
+group = "Release"
+tags = ["tag", "version", "cut", "publish", "develop", "main"]
+description = "Fast-forward main to origin/develop, tag the new version and push both atomically"
+
+[[items]]
+id = "aur-publish"
+label = "AUR publish - promote a GitHub release to thumbgrid-bin"
+key = "a"
+command = ["scripts/publish-aur.sh"]
+group = "Release"
+tags = ["aur", "arch", "package", "publish"]
+description = "Promote an existing GitHub release to the thumbgrid-bin AUR package"

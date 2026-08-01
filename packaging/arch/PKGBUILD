@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2024-2026 do-i and thumbgrid contributors
 # PKGBUILD for thumbgrid (a hard fork of easymodo/qimgv).
-# Full build: Qt6 plus Exiv2 / OpenCV / mpv (matches run.sh default build).
+# Full build: Qt6 plus Exiv2 / OpenCV / mpv (matches scripts/dev.sh default build).
 #
 # This PKGBUILD builds from the already checked-out source tree (the repo this
 # file lives in), so CI can package the exact tag without downloading a tarball

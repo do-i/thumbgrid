@@ -8,7 +8,7 @@
 # Deliberately NOT run by CI on every tag push: releases go to GitHub and the
 # custom pacman repo (gh-pages) far more often, for testing, than they should
 # reach AUR. This script is the manual, on-demand "promote this version to
-# AUR once I trust it" step - run via `./run.sh` or directly.
+# AUR once I trust it" step - run via the `lazymenu-cli` menu or directly.
 #
 # What it does:
 #   1. Looks up the chosen release on GitHub (aborting - or, in --dry-run,

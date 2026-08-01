@@ -2,13 +2,29 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2024-2026 do-i and thumbgrid contributors
 # Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
+#
+# Developer build helper. The interactive menu lives in ../menu.toml and is
+# driven by lazymenu-cli; this script holds the actual commands so they stay
+# usable on their own.
+#
+# Usage:
+#   scripts/dev.sh init                 # install full build dependencies
+#   scripts/dev.sh build                # configure and build, skip tests
+#   scripts/dev.sh full-build           # configure and build, then run tests
+#   scripts/dev.sh run [args...]        # run the built executable
+#   scripts/dev.sh clean                # delete the build directory
+#
+# Environment:
+#   BUILD_DIR   build directory (default: <repo>/build)
+#   BUILD_TYPE  CMake build type (default: Debug)
+#   CMAKE_BIN   cmake executable (default: cmake)
+#   JOBS        build parallelism (default: nproc, else 1)
 set -uo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BUILD_DIR="${BUILD_DIR:-"$ROOT_DIR/build"}"
 BUILD_TYPE="${BUILD_TYPE:-Debug}"
 CMAKE_BIN="${CMAKE_BIN:-cmake}"
-APP_ARGS=("$@")
 
 if ! command -v "$CMAKE_BIN" >/dev/null 2>&1 && command -v brew >/dev/null 2>&1; then
     BREW_CMAKE_BIN="$(brew --prefix cmake 2>/dev/null)/bin/cmake"
@@ -23,13 +39,6 @@ else
     DEFAULT_JOBS=1
 fi
 JOBS="${JOBS:-$DEFAULT_JOBS}"
-
-print_header() {
-    printf '\nthumbgrid build menu\n'
-    printf 'Source: %s\n' "$ROOT_DIR"
-    printf 'Build:  %s\n' "$BUILD_DIR"
-    printf 'Type:   %s\n\n' "$BUILD_TYPE"
-}
 
 run_as_root() {
     if [[ "${EUID:-$(id -u)}" -eq 0 ]]; then
@@ -207,17 +216,6 @@ require_cmake() {
     return 127
 }
 
-run_menu_action() {
-    "$@"
-    local status=$?
-
-    if [[ "$status" -ne 0 ]]; then
-        printf '\nCommand failed with exit code %s.\n' "$status" >&2
-    fi
-
-    exit "$status"
-}
-
 configure_project() {
     local build_testing="$1"
     require_cmake || return
@@ -281,26 +279,10 @@ run_executable() {
         return 1
     fi
 
-    if ((${#APP_ARGS[@]})); then
-        "$executable" "${APP_ARGS[@]}"
+    if (($#)); then
+        "$executable" "$@"
     else
         "$executable"
-    fi
-}
-
-migrate_theme() {
-    if ((${#APP_ARGS[@]})); then
-        "$ROOT_DIR/scripts/migrate-theme.sh" "${APP_ARGS[@]}"
-    else
-        "$ROOT_DIR/scripts/migrate-theme.sh"
-    fi
-}
-
-publish_aur() {
-    if ((${#APP_ARGS[@]})); then
-        "$ROOT_DIR/scripts/publish-aur.sh" "${APP_ARGS[@]}"
-    else
-        "$ROOT_DIR/scripts/publish-aur.sh"
     fi
 }
 
@@ -322,28 +304,37 @@ clean_build_dir() {
     esac
 }
 
-print_header
-printf '  i) Init       - install full dependencies\n'
-printf '  b) Build      - build only, skip tests\n'
-printf '  f) Full build - build and run tests\n'
-printf '  r) Run\n'
-printf '  c) Clean      - delete build directory\n'
-printf '  m) Migrate    - migrate custom theme and colors\n'
-printf '  a) AUR publish - promote a GitHub release to the thumbgrid-bin AUR package\n'
-printf '  q) Quit\n\n'
+print_usage() {
+    printf 'Usage: %s <init|build|full-build|run|clean> [args...]\n\n' "${BASH_SOURCE[0]}"
+    printf '  init        install full build dependencies\n'
+    printf '  build       configure and build, skip tests\n'
+    printf '  full-build  configure and build, then run tests\n'
+    printf '  run         run the built executable, forwarding any extra args\n'
+    printf '  clean       delete %s\n' "$BUILD_DIR"
+}
 
-# Single keypress, no Enter needed. Each choice runs once and then exits
-# (run_menu_action exits for i/b/f/r/c/a), so the menu does not loop.
-read -rsn1 -p "Choose [i/b/f/c/r/m/a/q]: " choice
-printf '%s\n\n' "$choice"
-case "$choice" in
-    i|I) run_menu_action install_full_deps ;;
-    b|B) run_menu_action build_project ;;
-    f|F) run_menu_action full_build_project ;;
-    r|R) run_menu_action run_executable ;;
-    c|C) run_menu_action clean_build_dir ;;
-    m|M) run_menu_action migrate_theme ;;
-    a|A) run_menu_action publish_aur ;;
-    q|Q) exit 0 ;;
-    *) printf 'Invalid option: %s\n' "$choice"; exit 1 ;;
-esac
+main() {
+    if (($# == 0)); then
+        print_usage >&2
+        return 1
+    fi
+
+    local command="$1"
+    shift
+
+    case "$command" in
+        init) install_full_deps "$@" ;;
+        build) build_project "$@" ;;
+        full-build) full_build_project "$@" ;;
+        run) run_executable "$@" ;;
+        clean) clean_build_dir "$@" ;;
+        -h|--help|help) print_usage ;;
+        *)
+            printf 'Unknown command: %s\n\n' "$command" >&2
+            print_usage >&2
+            return 1
+            ;;
+    esac
+}
+
+main "$@"
