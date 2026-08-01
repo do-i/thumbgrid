@@ -357,6 +357,22 @@ add_test(
 thumbgrid_add_behavior_test(thumbgrid_file_info_xmp_and_icc_tabs_test
     behavior/test_file_info_xmp_and_icc_tabs.cpp
 )
+
+thumbgrid_add_behavior_test(thumbgrid_xmp_editing_round_trips_test
+    behavior/test_xmp_editing_round_trips.cpp
+)
+add_test(
+    NAME "XMP editing round trips through exiv2's typed values"
+    COMMAND thumbgrid_xmp_editing_round_trips_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_file_info_xmp_grid_test
+    behavior/test_file_info_xmp_grid.cpp
+)
+add_test(
+    NAME "The XMP tab's custom property grid, remove toggle and scoped buttons"
+    COMMAND thumbgrid_file_info_xmp_grid_test
+)
 add_test(
     NAME "File info popup's XMP and ICC tabs follow what the format can carry"
     COMMAND thumbgrid_file_info_xmp_and_icc_tabs_test
