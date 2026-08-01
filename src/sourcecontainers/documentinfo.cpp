@@ -591,6 +591,471 @@ bool DocumentInfo::supportsIccProfile(const QString &filePath) {
 #endif
 }
 
+// --- XMP / ICC writing -------------------------------------------------------
+
+// Wider than supportsMetadataEditing(): probed 2026-08-01 that exiv2 writes XMP
+// into png as cleanly as into jpeg, which it will not do for Exif. tiff is left
+// out on purpose - exiv2 rewrites a tiff's whole structure, and its Exif and ICC
+// scopes overlap, so no removal there could be scoped to one kind.
+bool DocumentInfo::supportsXmpEditing(const QString &filePath) {
+#ifdef USE_EXIV2
+    const QString suffix = QFileInfo(filePath).suffix().toLower();
+    return suffix == QLatin1String("jpg") || suffix == QLatin1String("jpeg") ||
+           suffix == QLatin1String("png") || suffix == QLatin1String("webp");
+#else
+    Q_UNUSED(filePath)
+    return false;
+#endif
+}
+
+// Same set, same reason. In a tiff the profile is stored as an Exif tag, so
+// clearing it there is not a scoped operation at all.
+bool DocumentInfo::supportsIccEditing(const QString &filePath) {
+    return supportsXmpEditing(filePath);
+}
+
+QStringList DocumentInfo::editableXmpKeys() {
+    return {QStringLiteral("Xmp.dc.title"),
+            QStringLiteral("Xmp.dc.description"),
+            QStringLiteral("Xmp.dc.creator"),
+            QStringLiteral("Xmp.dc.rights"),
+            QStringLiteral("Xmp.dc.subject"),
+            QStringLiteral("Xmp.xmp.Rating"),
+            QStringLiteral("Xmp.xmp.Label")};
+}
+
+QString DocumentInfo::editableXmpLabel(const QString &key) {
+    if(key == QLatin1String("Xmp.dc.title"))       return QObject::tr("Title");
+    if(key == QLatin1String("Xmp.dc.description")) return QObject::tr("Description");
+    if(key == QLatin1String("Xmp.dc.creator"))     return QObject::tr("Author");
+    if(key == QLatin1String("Xmp.dc.rights"))      return QObject::tr("Copyright");
+    if(key == QLatin1String("Xmp.dc.subject"))     return QObject::tr("Keywords");
+    if(key == QLatin1String("Xmp.xmp.Rating"))     return QObject::tr("Rating");
+    if(key == QLatin1String("Xmp.xmp.Label"))      return QObject::tr("Label");
+    return key;
+}
+
+DocumentInfo::XmpValueKind DocumentInfo::xmpValueKind(const QString &key) {
+    if(key == QLatin1String("Xmp.dc.title") || key == QLatin1String("Xmp.dc.description") ||
+       key == QLatin1String("Xmp.dc.rights"))
+        return XmpValueKind::LangAlt;
+    if(key == QLatin1String("Xmp.dc.creator"))
+        return XmpValueKind::Seq;
+    if(key == QLatin1String("Xmp.dc.subject"))
+        return XmpValueKind::Bag;
+    return XmpValueKind::Text;
+}
+
+#ifdef USE_EXIV2
+namespace {
+
+const char *kDefaultLang = "x-default";
+
+// A LangAlt value's x-default entry, or empty. Read through LangAltValue rather
+// than the stream form, which prefixes every entry with its lang and joins them
+// with commas - unusable as an edit-box value.
+QString langAltDefault(const Exiv2::Xmpdatum &datum) {
+    const auto *la = dynamic_cast<const Exiv2::LangAltValue *>(&datum.value());
+    if(!la)
+        return QString::fromStdString(datum.value().toString());
+    for(const auto &entry : la->value_) {
+        if(entry.first == kDefaultLang)
+            return QString::fromStdString(entry.second);
+    }
+    return QString();
+}
+
+// Array items, in order. count() is the item count for XmpArrayValue; toString(n)
+// gives one item, which is the whole point of not using the joined stream form.
+QStringList arrayItems(const Exiv2::Xmpdatum &datum) {
+    QStringList items;
+    const long n = static_cast<long>(datum.count());
+    for(long i = 0; i < n; ++i)
+        items.append(QString::fromStdString(datum.value().toString(i)));
+    return items;
+}
+
+// Erases every datum under key - an array can hold more than one, and assignment
+// appends rather than replaces, so a rewrite has to start from nothing.
+void eraseAll(Exiv2::XmpData &xmp, const std::string &key) {
+    for(;;) {
+        auto it = xmp.findKey(Exiv2::XmpKey(key));
+        if(it == xmp.end())
+            return;
+        xmp.erase(it);
+    }
+}
+
+// Xmp.<prefix>.<Name> -> prefix. Empty when the key is not in that shape.
+QString xmpPrefixOf(const QString &key) {
+    const QStringList parts = key.split(QLatin1Char('.'));
+    return parts.size() == 3 && parts.at(0) == QLatin1String("Xmp") ? parts.at(1) : QString();
+}
+
+} // namespace
+#endif
+
+bool DocumentInfo::isRegisteredXmpKey(const QString &key) {
+#ifdef USE_EXIV2
+    try {
+        return Exiv2::XmpProperties::propertyInfo(Exiv2::XmpKey(key.toStdString())) != nullptr;
+    } catch(...) {
+        // An unparseable key is not a schema exiv2 knows, which is the question
+        // being asked.
+        return false;
+    }
+#else
+    Q_UNUSED(key)
+    return false;
+#endif
+}
+
+bool DocumentInfo::isKnownXmpPrefix(const QString &prefix) {
+#ifdef USE_EXIV2
+    try {
+        return !Exiv2::XmpProperties::ns(prefix.toStdString()).empty();
+    } catch(...) {
+        return false;
+    }
+#else
+    Q_UNUSED(prefix)
+    return false;
+#endif
+}
+
+QMap<QString, QStringList> DocumentInfo::getEditableXmpTags() {
+    QMap<QString, QStringList> values;
+#ifdef USE_EXIV2
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return values;
+        image->readMetadata();
+        const Exiv2::XmpData &xmp = image->xmpData();
+        for(const QString &key : editableXmpKeys()) {
+            auto it = xmp.findKey(Exiv2::XmpKey(key.toStdString()));
+            if(it == xmp.end())
+                continue;
+            switch(xmpValueKind(key)) {
+            case XmpValueKind::LangAlt: {
+                const QString text = langAltDefault(*it);
+                values.insert(key, text.isEmpty() ? QStringList() : QStringList{text});
+                break;
+            }
+            case XmpValueKind::Seq:
+            case XmpValueKind::Bag:
+                values.insert(key, arrayItems(*it));
+                break;
+            case XmpValueKind::Text:
+                values.insert(key, QStringList{QString::fromStdString(it->value().toString())});
+                break;
+            }
+        }
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::getEditableXmpTags() - exiv2 failed to read"
+                             << fileInfo.filePath();
+    }
+#endif
+    return values;
+}
+
+bool DocumentInfo::setEditableXmpTags(const QMap<QString, QStringList> &values) {
+#ifdef USE_EXIV2
+    // Validate before opening the file: a half-applied edit is worse than a
+    // rejected one, the same rule setEditableTags() follows.
+    const QStringList allowed = editableXmpKeys();
+    for(auto it = values.cbegin(); it != values.cend(); ++it) {
+        if(!allowed.contains(it.key()))
+            continue;
+        for(const QString &item : it.value()) {
+            if(item.length() > kMaxXmpValueLengthEdited)
+                return false;
+        }
+        if(it.key() == QLatin1String("Xmp.xmp.Rating") && !it.value().isEmpty() &&
+           !it.value().first().isEmpty()) {
+            bool ok = false;
+            const int rating = it.value().first().toInt(&ok);
+            // XMP spec: -1 means rejected, then 0-5.
+            if(!ok || rating < -1 || rating > 5)
+                return false;
+        }
+    }
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        Exiv2::XmpData &xmp = image->xmpData();
+        for(auto it = values.cbegin(); it != values.cend(); ++it) {
+            if(!allowed.contains(it.key()))
+                continue;
+            const std::string key = it.key().toStdString();
+            const QStringList items = it.value();
+            const bool empty = items.isEmpty() || (items.size() == 1 && items.first().isEmpty());
+            switch(xmpValueKind(it.key())) {
+            case XmpValueKind::LangAlt:
+                // Assigning an empty x-default drops exactly that entry and
+                // leaves translations in other languages alone - clearing a
+                // title must not destroy a de-DE one.
+                xmp[key] = empty ? std::string("lang=x-default ")
+                                 : ("lang=x-default " + items.first().toStdString());
+                break;
+            case XmpValueKind::Seq:
+            case XmpValueKind::Bag: {
+                eraseAll(xmp, key);
+                if(empty)
+                    break;
+                auto value = Exiv2::Value::create(xmpValueKind(it.key()) == XmpValueKind::Seq
+                                                      ? Exiv2::xmpSeq
+                                                      : Exiv2::xmpBag);
+                for(const QString &item : items) {
+                    if(!item.isEmpty())
+                        value->read(item.toStdString());
+                }
+                xmp.add(Exiv2::XmpKey(key), value.get());
+                break;
+            }
+            case XmpValueKind::Text:
+                // Assignment would leave a present-but-blank property, which
+                // shows up as an empty row everywhere else; a curated row has
+                // only its value to delete by, so empty means erase.
+                if(empty)
+                    eraseAll(xmp, key);
+                else
+                    xmp[key] = items.first().toStdString();
+                break;
+            }
+        }
+        image->writeMetadata();
+        xmpLoaded = false;
+        allTagsLoaded = false;
+        xmpTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::setEditableXmpTags() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+#else
+    Q_UNUSED(values)
+    return false;
+#endif
+}
+
+QMap<QString, QString> DocumentInfo::getCustomXmpTags() {
+    QMap<QString, QString> values;
+#ifdef USE_EXIV2
+    const QMap<QString, QString> all = getXmpTags();
+    for(auto it = all.cbegin(); it != all.cend(); ++it) {
+        if(!isRegisteredXmpKey(it.key()))
+            values.insert(it.key(), it.value());
+    }
+#endif
+    return values;
+}
+
+bool DocumentInfo::setCustomXmpTags(const QMap<QString, QString> &values) {
+#ifdef USE_EXIV2
+    for(auto it = values.cbegin(); it != values.cend(); ++it) {
+        if(it.key().length() > kMaxXmpKeyLength ||
+           it.value().length() > kMaxXmpValueLengthEdited)
+            return false;
+        if(isRegisteredXmpKey(it.key()))
+            return false;
+        if(!isKnownXmpPrefix(xmpPrefixOf(it.key())))
+            return false;
+    }
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        Exiv2::XmpData &xmp = image->xmpData();
+        // A custom property is always XmpText, so plain assignment replaces it.
+        // An empty value is kept rather than erased: in the grid the key is the
+        // row's identity, so an empty value is a legal state and erasing is what
+        // eraseXmpKey() is for.
+        for(auto it = values.cbegin(); it != values.cend(); ++it)
+            xmp[it.key().toStdString()] = it.value().toStdString();
+        image->writeMetadata();
+        xmpLoaded = false;
+        allTagsLoaded = false;
+        xmpTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::setCustomXmpTags() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+#else
+    Q_UNUSED(values)
+    return false;
+#endif
+}
+
+bool DocumentInfo::eraseXmpKey(const QString &key) {
+#ifdef USE_EXIV2
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        eraseAll(image->xmpData(), key.toStdString());
+        image->writeMetadata();
+        xmpLoaded = false;
+        allTagsLoaded = false;
+        xmpTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::eraseXmpKey() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+#else
+    Q_UNUSED(key)
+    return false;
+#endif
+}
+
+bool DocumentInfo::addCustomXmpProperty(const QString &prefix, const QString &name,
+                                        const QString &namespaceUri, const QString &value) {
+#ifdef USE_EXIV2
+    if(prefix.isEmpty() || name.isEmpty())
+        return false;
+    const QString key = QStringLiteral("Xmp.%1.%2").arg(prefix, name);
+    if(key.length() > kMaxXmpKeyLength || value.length() > kMaxXmpValueLengthEdited)
+        return false;
+    if(getCustomXmpTags().size() >= kMaxCustomXmpProperties)
+        return false;
+    try {
+        // Only for a genuinely new prefix: writing one the file does not already
+        // declare throws "No namespace info available for XMP prefix".
+        if(!isKnownXmpPrefix(prefix)) {
+            if(namespaceUri.isEmpty())
+                return false;
+            Exiv2::XmpProperties::registerNs(namespaceUri.toStdString(), prefix.toStdString());
+        }
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        image->xmpData()[key.toStdString()] = value.toStdString();
+        image->writeMetadata();
+        xmpLoaded = false;
+        allTagsLoaded = false;
+        xmpTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::addCustomXmpProperty() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+#else
+    Q_UNUSED(prefix) Q_UNUSED(name) Q_UNUSED(namespaceUri) Q_UNUSED(value)
+    return false;
+#endif
+}
+
+#ifdef USE_EXIV2
+// The three scoped removals share everything but one line, and each was probed
+// to leave the other two kinds intact - that isolation is what lets the three
+// buttons live in three tabs.
+bool DocumentInfo::clearExifMetadata() {
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        image->exifData().clear();
+        image->writeMetadata();
+        exifLoaded = false;
+        allTagsLoaded = false;
+        exifTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::clearExifMetadata() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+}
+
+bool DocumentInfo::clearXmpMetadata() {
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        image->xmpData().clear();
+        image->writeMetadata();
+        xmpLoaded = false;
+        allTagsLoaded = false;
+        xmpTags.clear();
+        allTags.clear();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::clearXmpMetadata() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+}
+
+bool DocumentInfo::clearIccProfile() {
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        image->clearIccProfile();
+        image->writeMetadata();
+        return true;
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::clearIccProfile() - exiv2 failed to write"
+                             << fileInfo.filePath();
+        return false;
+    }
+}
+
+bool DocumentInfo::hasExifMetadata() {
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        return !image->exifData().empty();
+    } catch(...) {
+        return false;
+    }
+}
+
+bool DocumentInfo::hasXmpMetadata() {
+    return !getXmpTags().isEmpty();
+}
+
+bool DocumentInfo::hasIccProfile() {
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return false;
+        image->readMetadata();
+        return image->iccProfileDefined();
+    } catch(...) {
+        return false;
+    }
+}
+#else
+bool DocumentInfo::clearExifMetadata() { return false; }
+bool DocumentInfo::clearXmpMetadata()  { return false; }
+bool DocumentInfo::clearIccProfile()   { return false; }
+bool DocumentInfo::hasExifMetadata()   { return false; }
+bool DocumentInfo::hasXmpMetadata()    { return false; }
+bool DocumentInfo::hasIccProfile()     { return false; }
+#endif
+
 bool DocumentInfo::isValidExifDateTime(const QString &value) {
     // Exif 2.3 §4.6.4: exactly "YYYY:MM:DD HH:MM:SS", zero-padded.
     return QDateTime::fromString(value, QStringLiteral("yyyy:MM:dd HH:mm:ss")).isValid();

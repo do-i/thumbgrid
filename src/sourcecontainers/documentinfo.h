@@ -78,6 +78,81 @@ public:
     // "Profile" from "Profile size".
     QList<QPair<QString, QString>> getIccProfileInfo();
 
+    // --- XMP / ICC writing (docs/2026-08-01-001) ----------------------------
+    //
+    // Three separate write gates, because the three metadata kinds are not
+    // writable in the same set of containers. tiff is outside all of them: its
+    // ICC profile *is* an Exif tag (Exif.Image.InterColorProfile), and exiv2
+    // must rewrite a tiff's structural Exif tags to emit a valid file at all,
+    // so neither "remove all Exif" nor "remove the profile" can be scoped there.
+    static bool supportsXmpEditing(const QString &filePath);
+    static bool supportsIccEditing(const QString &filePath);
+
+    // An XMP property's declared type. The editor picks a widget from it and
+    // the writer picks assign-vs-erase-then-add: assignment replaces a Text or
+    // LangAlt value in place, but *appends* to an array, so Seq and Bag have to
+    // be erased before they are rewritten.
+    enum class XmpValueKind : std::uint8_t { Text, LangAlt, Seq, Bag };
+
+    // The curated editable set - a fixed list for the same reason
+    // editableTagKeys() is one: each key's type has to be known here, and the
+    // displayed value of an array is lossy (exiv2 joins bag items with ", ",
+    // and an item may itself contain a comma).
+    static QStringList editableXmpKeys();
+    static QString editableXmpLabel(const QString &key);
+    static XmpValueKind xmpValueKind(const QString &key);
+
+    // Uniform shape across kinds: Text and LangAlt come back as a one-element
+    // list (absent keys are absent from the map), Seq and Bag as their items in
+    // order. There is deliberately no joined string to re-split.
+    QMap<QString, QStringList> getEditableXmpTags();
+    // An empty list erases the key. LangAlt is written as x-default only, and
+    // cleared by assigning an empty x-default so other languages survive.
+    bool setEditableXmpTags(const QMap<QString, QStringList> &values);
+
+    // True when exiv2 knows the property's schema (XmpProperties::propertyInfo
+    // returns non-null). Drives the standard/custom split in the UI: a standard
+    // property carries a declared type a text box would corrupt, while a custom
+    // one is always XmpText and so is safe to edit as free text.
+    static bool isRegisteredXmpKey(const QString &key);
+
+    // Properties in namespaces exiv2 does not know. Always XmpText, so a flat
+    // QString is the whole value. Readable even for a namespace this process
+    // never registered - the prefix binding travels in the packet itself.
+    QMap<QString, QString> getCustomXmpTags();
+    // An empty value keeps the key with an empty value (legal, and stable
+    // across later writes); erasing is what removes the property. Keys whose
+    // prefix is unknown are rejected rather than attempted.
+    bool setCustomXmpTags(const QMap<QString, QString> &values);
+    bool eraseXmpKey(const QString &key);
+    // Registers the namespace when prefix is new, then writes. Main thread only:
+    // registerNs() mutates the same global registry XmpParser::initialize() sets
+    // up at startup.
+    bool addCustomXmpProperty(const QString &prefix, const QString &name,
+                              const QString &namespaceUri, const QString &value);
+    // True when the prefix already resolves, i.e. no namespace URI is needed.
+    static bool isKnownXmpPrefix(const QString &prefix);
+
+    // Scoped removals. Each leaves the other two kinds untouched - verified by
+    // probe, and the reason the three buttons can sit in three tabs.
+    bool clearExifMetadata();
+    bool clearXmpMetadata();
+    bool clearIccProfile();
+
+    // Cheap "is there anything here to remove", for deciding whether a
+    // destructive button is shown at all.
+    bool hasExifMetadata();
+    bool hasXmpMetadata();
+    bool hasIccProfile();
+
+    // Defensive limits (docs/2026-08-01-001 §8). Constants rather than
+    // settings: a configurable cap is an invitation to raise it and meet the
+    // pathology it exists to prevent. None is reachable by intentional use -
+    // keywords are items inside one Xmp.dc.subject bag, not one property each.
+    static constexpr int kMaxCustomXmpProperties = 256;
+    static constexpr int kMaxXmpKeyLength = 256;
+    static constexpr int kMaxXmpValueLengthEdited = 4096;
+
     // --- editable metadata (docs: tier 1 - text-valued Exif only) ------------
     //
     // The four keys below are the ones a person realistically retypes, and all
