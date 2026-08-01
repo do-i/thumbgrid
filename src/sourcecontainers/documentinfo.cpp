@@ -1,6 +1,8 @@
 #include "documentinfo.h"
 #include "utils/logging.h"
 #include "utils/pathstring.h"
+#include <QByteArray>
+#include <QColorSpace>
 #include <QDirIterator>
 #include <algorithm>
 
@@ -9,7 +11,8 @@ DocumentInfo::DocumentInfo(const QString& path)
       mOrientation(0),
       mFormat(""),
       exifLoaded(false),
-      allTagsLoaded(false)
+      allTagsLoaded(false),
+      xmpLoaded(false)
 {
     fileInfo.setFile(path);
     if(!fileInfo.isFile()) {
@@ -396,6 +399,108 @@ QMap<QString, QString> DocumentInfo::getAllTags() {
     return allTags;
 }
 
+// The Xmp half of loadAllTags(), on its own: same keys ("Xmp.dc.title"), same
+// interpreted stream values, cached under its own flag so opening the Xmp tab
+// does not pay for a full Exif+Iptc dump it will not show.
+void DocumentInfo::loadXmpTags() {
+    if(xmpLoaded)
+        return;
+    xmpLoaded = true;
+    xmpTags.clear();
+#ifdef USE_EXIV2
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return;
+        image->readMetadata();
+        const Exiv2::XmpData &xmpData = image->xmpData();
+        for(auto it = xmpData.begin(); it != xmpData.end(); ++it) {
+            std::ostringstream os;
+            os << *it;
+            xmpTags.insert(QString::fromStdString(it->key()), QString::fromStdString(os.str()));
+        }
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::loadXmpTags() - exiv2 failed to read" << fileInfo.filePath();
+    }
+#endif
+}
+
+QMap<QString, QString> DocumentInfo::getXmpTags() {
+    if(!xmpLoaded)
+        loadXmpTags();
+    return xmpTags;
+}
+
+#ifdef USE_EXIV2
+namespace {
+
+QString primariesName(QColorSpace::Primaries primaries) {
+    switch(primaries) {
+    case QColorSpace::Primaries::SRgb:       return QStringLiteral("SRgb");
+    case QColorSpace::Primaries::AdobeRgb:   return QStringLiteral("AdobeRgb");
+    case QColorSpace::Primaries::DciP3D65:   return QStringLiteral("DciP3D65");
+    case QColorSpace::Primaries::ProPhotoRgb:return QStringLiteral("ProPhotoRgb");
+    case QColorSpace::Primaries::Custom:     break;
+    default:                                 break;
+    }
+    return QStringLiteral("Custom");
+}
+
+QString transferFunctionName(const QColorSpace &space) {
+    switch(space.transferFunction()) {
+    case QColorSpace::TransferFunction::Linear: return QStringLiteral("Linear");
+    case QColorSpace::TransferFunction::Gamma:
+        // The name alone says nothing useful here - gamma 1.8 and gamma 2.2 are
+        // both "Gamma", and the number is the part someone is looking for.
+        return QStringLiteral("Gamma (%1)").arg(space.gamma(), 0, 'g', 3);
+    case QColorSpace::TransferFunction::SRgb:   return QStringLiteral("SRgb");
+    case QColorSpace::TransferFunction::St2084: return QStringLiteral("St2084");
+    case QColorSpace::TransferFunction::Hlg:    return QStringLiteral("Hlg");
+    case QColorSpace::TransferFunction::Custom: break;
+    default:                                    break;
+    }
+    return QStringLiteral("Custom");
+}
+
+} // namespace
+#endif
+
+// Summarises the embedded profile instead of dumping it: the blob is binary and
+// several hundred bytes even for plain sRGB, so what is worth showing is what Qt
+// managed to make of it.
+QList<QPair<QString, QString>> DocumentInfo::getIccProfileInfo() {
+    QList<QPair<QString, QString>> info;
+#ifdef USE_EXIV2
+    try {
+        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        if(!image.get())
+            return info;
+        image->readMetadata();
+        if(!image->iccProfileDefined())
+            return info;
+        const Exiv2::DataBuf &profile = image->iccProfile();
+        if(profile.size() == 0)
+            return info;
+        const QByteArray raw(reinterpret_cast<const char *>(profile.c_data()),
+                             static_cast<qsizetype>(profile.size()));
+        const QColorSpace space = QColorSpace::fromIccProfile(raw);
+        // A profile Qt cannot parse is reported as "none" rather than as four
+        // empty rows: there is nothing truthful to put in them.
+        if(!space.isValid())
+            return info;
+        info.append({QObject::tr("Profile"), space.description()});
+        info.append({QObject::tr("Primaries"), primariesName(space.primaries())});
+        info.append({QObject::tr("Transfer function"), transferFunctionName(space)});
+        info.append({QObject::tr("Profile size"),
+                     QObject::tr("%1 bytes").arg(raw.size())});
+    } catch(...) {
+        qCWarning(logLoader) << "DocumentInfo::getIccProfileInfo() - exiv2 failed to read"
+                             << fileInfo.filePath();
+    }
+#endif
+    return info;
+}
+
 bool DocumentInfo::stripMetadata() {
 #ifdef USE_EXIV2
     try {
@@ -408,8 +513,10 @@ bool DocumentInfo::stripMetadata() {
         // invalidate caches so a refresh re-reads from disk
         exifLoaded = false;
         allTagsLoaded = false;
+        xmpLoaded = false;
         exifTags.clear();
         allTags.clear();
+        xmpTags.clear();
         return true;
     } catch(...) {
         qCWarning(logLoader) << "DocumentInfo::stripMetadata() - exiv2 failed to write" << fileInfo.filePath();
@@ -449,6 +556,35 @@ bool DocumentInfo::supportsMetadataEditing(const QString &filePath) {
     const QString suffix = QFileInfo(filePath).suffix().toLower();
     return suffix == QLatin1String("jpg") || suffix == QLatin1String("jpeg") ||
            suffix == QLatin1String("webp");
+#else
+    Q_UNUSED(filePath)
+    return false;
+#endif
+}
+
+// Wider than supportsMetadataEditing() on purpose: the Xmp tab only reads, so
+// the gate is "can this container hold an XMP packet at all", which png and tiff
+// can even though exiv2 will not rewrite Exif into them.
+bool DocumentInfo::supportsXmp(const QString &filePath) {
+#ifdef USE_EXIV2
+    const QString suffix = QFileInfo(filePath).suffix().toLower();
+    return suffix == QLatin1String("jpg") || suffix == QLatin1String("jpeg") ||
+           suffix == QLatin1String("png") || suffix == QLatin1String("webp") ||
+           suffix == QLatin1String("tif") || suffix == QLatin1String("tiff");
+#else
+    Q_UNUSED(filePath)
+    return false;
+#endif
+}
+
+// Same set, and for the same reason: these are the formats with a defined place
+// to embed an ICC profile that exiv2 will hand back via iccProfile().
+bool DocumentInfo::supportsIccProfile(const QString &filePath) {
+#ifdef USE_EXIV2
+    const QString suffix = QFileInfo(filePath).suffix().toLower();
+    return suffix == QLatin1String("jpg") || suffix == QLatin1String("jpeg") ||
+           suffix == QLatin1String("png") || suffix == QLatin1String("webp") ||
+           suffix == QLatin1String("tif") || suffix == QLatin1String("tiff");
 #else
     Q_UNUSED(filePath)
     return false;
