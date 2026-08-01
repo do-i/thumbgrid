@@ -306,6 +306,38 @@ add_test(
     COMMAND thumbgrid_file_info_folder_and_exif_states_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_file_info_click_away_test
+    behavior/test_file_info_click_away_saves.cpp
+)
+add_test(
+    NAME "Clicking away from an EXIF field saves it"
+    COMMAND thumbgrid_file_info_click_away_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_file_info_date_picker_test
+    behavior/test_file_info_date_picker.cpp
+)
+add_test(
+    NAME "The EXIF Date/Time field offers a calendar and still takes typed values"
+    COMMAND thumbgrid_file_info_date_picker_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_file_info_clear_metadata_test
+    behavior/test_file_info_clear_metadata_refreshes.cpp
+)
+add_test(
+    NAME "Clearing metadata refreshes the open File info window"
+    COMMAND thumbgrid_file_info_clear_metadata_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_file_info_inline_metadata_test
+    behavior/test_file_info_inline_metadata_editing.cpp
+)
+add_test(
+    NAME "File info EXIF tab edits tags in place and refuses a malformed date"
+    COMMAND thumbgrid_file_info_inline_metadata_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_file_info_long_path_elides_test
     behavior/test_file_info_long_path_elides.cpp
 )

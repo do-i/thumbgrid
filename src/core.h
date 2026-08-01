@@ -23,7 +23,6 @@
 #include "gui/dialogs/printdialog.h"
 #include "gui/dialogs/duplicatefinderdialog.h"
 #include "gui/dialogs/fileinfodialog.h"
-#include "gui/dialogs/metadataeditdialog.h"
 
 #ifdef __GLIBC__
 #include <malloc.h>
@@ -168,7 +167,7 @@ private slots:
     void reloadImage(QString fileName);
     void stripMetadata();
     void stripMetadataAt(const QString &path);
-    void editMetadataAt(const QString &path);
+    void saveMetadataTagAt(const QString &path, const QString &key, const QString &value);
     void copyFileClipboard();
     void cutFileClipboard();
     void pasteFile();

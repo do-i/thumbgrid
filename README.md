@@ -43,7 +43,8 @@ Main window         |  Folder view   |  Thumbnails  |  Settings window
 - Basic image editing: Crop, Rotate and Resize
 
 - EXIF/IPTC/XMP metadata via exiv2: view tags (with an optional full-metadata
-  mode), preserve metadata when saving edits, and strip all metadata for privacy
+  mode), edit the writable ones in place, preserve metadata when saving edits,
+  and clear all metadata for privacy
 
 - Folder view with file management: copy / cut / paste of files and folders
   (symlink-aware), create directory (F7), rename (F2), and an on-disk async
@@ -121,8 +122,13 @@ are cached on disk and generated asynchronously.
 ## Metadata (exiv2)
 
 thumbgrid reads Exif / IPTC / XMP tags via exiv2 (always built in). The image-info panel (`I`) has an optional full-metadata
-mode. Metadata is preserved when saving edits, and a strip-metadata action lets
-you remove all metadata for privacy. Both are available from the context menu.
+mode. Its General tab is read-only; the EXIF tab is where a file gets written -
+on formats exiv2 can rewrite (jpeg/webp), Make, Model, Date/Time and Comment are
+input fields you click and type into, saved when you press Enter or leave the
+field. Date/Time also has a calendar drop-down (the icon in the field) for
+picking a date and time instead of typing one; clearing any field removes that
+tag. The same tab carries the Clear metadata button, which removes every tag
+for privacy. Metadata is preserved when saving edits.
 
 ## Running scripts
 

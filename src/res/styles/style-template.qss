@@ -1015,6 +1015,29 @@ EntryInfoItem:hover {
 FileInfoDialog EntryInfoItem QLabel {
     color: %text_hc2%;
 }
+
+/* In-place editors for the writable Exif tags in the File info window's EXIF
+   tab. They must read as plain rows until pointed at - a tab full of framed
+   input boxes would look like a form, and most rows there are read-only - so
+   the frame and fill only appear on hover and focus. */
+FileInfoDialog EntryInfoItem QLineEdit {
+    color: %text_hc2%;
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0px 3px 0px 3px;
+    selection-background-color: %accent%;
+}
+
+FileInfoDialog EntryInfoItem QLineEdit:hover {
+    background-color: %button%;
+    border: 1px solid %widget_border%;
+}
+
+FileInfoDialog EntryInfoItem QLineEdit:focus {
+    background-color: %button%;
+    border: 1px solid %accent%;
+}
 /*----------------------------------------------------------------------------*/
 PrintDialog QRadioButton,
 PrintDialog QCheckBox {
@@ -1035,7 +1058,6 @@ ScriptEditorDialog,
 ShortcutCreatorDialog,
 QDialog#ShortcutDetailsDialog,
 FileInfoDialog,
-MetadataEditDialog,
 PrintDialog,
 QMessageBox {
     background-color: %background%;
@@ -1124,23 +1146,40 @@ QDialog#ShortcutDetailsDialog QLabel:disabled {
    any other secondary-dialog control so they read as separate, clickable
    chips. An accent underline marks the selected tab (in addition to the
    background merge) since the two tones alone are close in some presets. */
-/* Tier-1 metadata editor (MetadataEditDialog), launched from the File info
-   window. Mirrors QDialog#ColorPickerDialog: a native frame, themed body. The
-   hint and error labels are dimmed/red respectively so the form reads without
-   an icon. */
-MetadataEditDialog QLabel {
+/* Calendar drop-down for the Date/Time field (DateTimePickerPopup). Most of its
+   coloring is done with a palette in applyThemeColors() - QCalendarWidget paints
+   through an internal item view that a stylesheet cannot reach cleanly - so the
+   rules here only cover the popup frame and the plain widgets around the
+   calendar. */
+DateTimePickerPopup {
+    background-color: %widget%;
+    border: 1px solid %widget_border%;
+    border-radius: 3px;
+}
+
+DateTimePickerPopup QPushButton {
     color: %text%;
+    background-color: %button%;
+    border: none;
+    border-radius: 3px;
+    padding: 4px 12px 4px 12px;
+    min-height: %button_height%;
 }
 
-MetadataEditDialog QLabel#metadataEditHint {
-    color: %text_secondary_rgba%;
+DateTimePickerPopup QPushButton:hover {
+    background-color: %button_hover%;
 }
 
-MetadataEditDialog QLabel#metadataEditError {
-    color: %danger%;
+DateTimePickerPopup QPushButton:pressed {
+    background-color: %button_pressed%;
 }
 
-MetadataEditDialog QLineEdit {
+DateTimePickerPopup QPushButton#dateTimePickerSetButton {
+    color: %text_hc%;
+    background-color: %accent%;
+}
+
+DateTimePickerPopup QTimeEdit {
     color: %text%;
     background-color: %button%;
     border: 1px solid %widget_border%;
@@ -1148,11 +1187,61 @@ MetadataEditDialog QLineEdit {
     padding: 2px 4px 2px 4px;
 }
 
-MetadataEditDialog QLineEdit:focus {
+DateTimePickerPopup QTimeEdit:focus {
     border: 1px solid %accent%;
 }
 
-/* "Strip metadata" in the File info window. Destructive and irreversible - it
+/* The month/year buttons and the year spin box in the calendar's navigation
+   bar. Left native they render as raised gray chips against the themed body. */
+DateTimePickerPopup QCalendarWidget QWidget#qt_calendar_navigationbar {
+    background-color: %widget%;
+}
+
+DateTimePickerPopup QCalendarWidget QToolButton {
+    color: %text_hc2%;
+    background-color: transparent;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 8px 2px 8px;
+}
+
+DateTimePickerPopup QCalendarWidget QToolButton:hover {
+    background-color: %button_hover%;
+}
+
+DateTimePickerPopup QCalendarWidget QSpinBox {
+    color: %text%;
+    background-color: %button%;
+    border: 1px solid %widget_border%;
+    border-radius: 3px;
+}
+
+/* The day grid. QCalendarWidget hands its view a palette of its own, so the
+   popup-wide palette in applyThemeColors() does not reach it - these rules do.
+   Days outside the shown month keep the muted text color so the month being
+   edited still reads as the foreground one. */
+DateTimePickerPopup QCalendarWidget QAbstractItemView {
+    color: %text_hc2%;
+    background-color: %widget%;
+    alternate-background-color: %widget%;
+    selection-background-color: %accent%;
+    selection-color: %text_hc%;
+    outline: none;
+}
+
+DateTimePickerPopup QCalendarWidget QAbstractItemView:disabled {
+    color: %text_lc%;
+}
+
+/* Why a rejected inline edit reports itself in red rather than with an icon:
+   the EXIF tab has no Save button to hang a message off, so the reason sits
+   under the rows. The ID selector beats the broader "FileInfoDialog QLabel"
+   rule above. */
+FileInfoDialog QLabel#metadataEditError {
+    color: %danger%;
+}
+
+/* "Clear metadata" in the File info window. Destructive and irreversible - it
    rewrites the file on disk - so it uses the same danger tokens as
    CustomMessageBox #dangerButton rather than the neutral button palette. The
    disabled rule matters more here than elsewhere: the button is disabled for
@@ -1378,7 +1467,6 @@ FileReplaceDialog QPushButton,
 ScriptEditorDialog QPushButton,
 ShortcutCreatorDialog QPushButton,
 QDialog#ShortcutDetailsDialog QPushButton,
-MetadataEditDialog QPushButton,
 PrintDialog QPushButton,
 QMessageBox QPushButton,
 CustomMessageBox QPushButton,
@@ -1400,7 +1488,6 @@ FileReplaceDialog QPushButton:hover,
 ScriptEditorDialog QPushButton:hover,
 ShortcutCreatorDialog QPushButton:hover,
 QDialog#ShortcutDetailsDialog QPushButton:hover,
-MetadataEditDialog QPushButton:hover,
 PrintDialog QPushButton:hover,
 QMessageBox QPushButton:hover,
 CustomMessageBox QPushButton:hover,
@@ -1417,7 +1504,6 @@ FileReplaceDialog QPushButton:pressed,
 ScriptEditorDialog QPushButton:pressed,
 ShortcutCreatorDialog QPushButton:pressed,
 QDialog#ShortcutDetailsDialog QPushButton:pressed,
-MetadataEditDialog QPushButton:pressed,
 PrintDialog QPushButton:pressed,
 QMessageBox QPushButton:pressed,
 CustomMessageBox QPushButton:pressed,
@@ -1434,7 +1520,6 @@ CustomMessageBox QPushButton:focus,
 FileReplaceDialog QPushButton:default,
 ScriptEditorDialog QPushButton:default,
 QDialog#ColorPickerDialog QPushButton:default,
-MetadataEditDialog QPushButton:default,
 SettingsDialog QPushButton#OK:default {
     background-color: %accent%;
     color: %text_hc%;

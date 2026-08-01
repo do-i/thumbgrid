@@ -1,25 +1,22 @@
 // Tier-1 metadata editing: the four text-valued Exif tags a person actually
 // retypes, on the two formats exiv2 can safely rewrite.
 //
-// These drive DocumentInfo rather than the dialog on purpose - the risk here is
-// entirely in exiv2's value handling, not in the form. In particular
+// These drive DocumentInfo rather than the UI on purpose - the risk here is
+// entirely in exiv2's value handling, not in the rows. In particular
 // UserComment is an Undefined-typed value carrying a "charset=" header that
 // exiv2 includes in its string form; getting that wrong silently stores the
-// header as part of the comment text, which no UI test would catch.
+// header as part of the comment text, which no UI test would catch. The
+// in-place fields that reach these calls are covered by
+// test_file_info_inline_metadata_editing.cpp.
 
 #include "support/thumbgrid_test_support.h"
 
-#include <QDialogButtonBox>
 #include <QDir>
 #include <QFile>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
 #include <QTemporaryDir>
 
 #include <exiv2/exiv2.hpp>
 
-#include "gui/dialogs/metadataeditdialog.h"
 #include "sourcecontainers/documentinfo.h"
 
 class ExifEditingRoundTripsTest : public QObject {
@@ -30,7 +27,6 @@ private slots:
     void anEmptyValueRemovesTheTag();
     void anInvalidDateTimeIsRejectedAndNothingIsWritten();
     void onlyRewritableFormatsAreOffered();
-    void theFormSavesOnlyWhatChangedAndBlocksABadDate();
 };
 
 namespace {
@@ -161,51 +157,6 @@ void ExifEditingRoundTripsTest::onlyRewritableFormatsAreOffered() {
     QVERIFY(!DocumentInfo::supportsMetadataEditing(bmp));
     QVERIFY(!DocumentInfo::supportsMetadataEditing(root.filePath(QStringLiteral("a.mp4"))));
     QVERIFY(DocumentInfo::supportsMetadataEditing(root.filePath(QStringLiteral("a.JPEG"))));
-}
-
-// The form is driven directly rather than through Core: Core::editMetadataAt()
-// runs it with exec(), which would block the test. accept()/reject() on a
-// dialog that was never exec'd is non-blocking, so clicking Save here exercises
-// the real validation path without a nested event loop.
-void ExifEditingRoundTripsTest::theFormSavesOnlyWhatChangedAndBlocksABadDate() {
-    QMap<QString, QString> current;
-    current.insert(kMake, QStringLiteral("OldCam"));
-    current.insert(kDate, QStringLiteral("2020:01:01 00:00:00"));
-
-    MetadataEditDialog dialog(QStringLiteral("photo.jpg"), current);
-    QCOMPARE(dialog.fieldFor(kMake)->text(), QStringLiteral("OldCam"));
-    QVERIFY2(dialog.fieldFor(kModel)->text().isEmpty(),
-             "a tag the file does not have should start blank");
-
-    // Nothing touched yet: saving must not rewrite tags that were never edited.
-    QVERIFY2(dialog.editedValues().isEmpty(), "an untouched form must report no changes");
-
-    auto *buttons = dialog.findChild<QDialogButtonBox *>();
-    QVERIFY(buttons != nullptr);
-    QPushButton *save = buttons->button(QDialogButtonBox::Save);
-    QVERIFY(save != nullptr);
-
-    // A malformed date must not close the form.
-    dialog.fieldFor(kDate)->setText(QStringLiteral("26/07/2026"));
-    save->click();
-    QVERIFY2(dialog.result() != QDialog::Accepted, "a malformed Date/Time must block Save");
-    auto *error = dialog.findChild<QLabel *>(QStringLiteral("metadataEditError"));
-    QVERIFY(error != nullptr);
-    QVERIFY2(error->isVisibleTo(&dialog), "the reason must be shown, not just the refusal");
-
-    // Fix it, and change one more field; clear the Make to prove a blanked
-    // field is reported (as a removal) rather than skipped as "unchanged".
-    dialog.fieldFor(kDate)->setText(QStringLiteral("2026:07:26 10:30:00"));
-    dialog.fieldFor(kMake)->clear();
-    save->click();
-    QCOMPARE(dialog.result(), int(QDialog::Accepted));
-
-    const QMap<QString, QString> edited = dialog.editedValues();
-    QCOMPARE(edited.size(), 2);
-    QCOMPARE(edited.value(kDate), QStringLiteral("2026:07:26 10:30:00"));
-    QVERIFY2(edited.contains(kMake) && edited.value(kMake).isEmpty(),
-             "a cleared field must be reported as an explicit removal");
-    QVERIFY2(!edited.contains(kModel), "an untouched blank field must not be reported");
 }
 
 TG_BEHAVIOR_TEST_MAIN(ExifEditingRoundTripsTest)

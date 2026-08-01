@@ -29,6 +29,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     customwidgets/styledcombobox.cpp
     customwidgets/colorselectorbutton.cpp
     customwidgets/entryinfoitem.cpp
+    customwidgets/datetimepickerpopup.cpp
     customwidgets/ssidebar.cpp
 
     dialogs/custommessagebox.cpp
@@ -39,7 +40,6 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     dialogs/duplicatefinderdialog.cpp
     dialogs/duplicateresultsmodel.cpp
     dialogs/fileinfodialog.cpp
-    dialogs/metadataeditdialog.cpp
     dialogs/shortcutcreatordialog.cpp
     dialogs/printdialog.cpp
 

@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QLabel>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QTabWidget>
 #include <QTemporaryDir>
@@ -31,14 +32,17 @@ namespace {
 // both tabs are children of the dialog regardless of which tab is current, so
 // searching the whole dialog and matching on the name label finds any row.
 // The value label elides long text and moves the full string to its tooltip
-// (EntryInfoItem::updateElidedText), so prefer the tooltip when set.
+// (EntryInfoItem::updateElidedText), so prefer the tooltip when set. An
+// editable row shows its value in a QLineEdit instead, which never elides.
 QString rowValueByName(QWidget *root, const QString &rowName) {
     for(EntryInfoItem *item : root->findChildren<EntryInfoItem *>()) {
         const QList<QLabel *> labels = item->findChildren<QLabel *>();
-        if(labels.size() >= 2 && labels.at(0)->text() == rowName) {
-            const QString tip = labels.at(1)->toolTip();
-            return tip.isEmpty() ? labels.at(1)->text() : tip;
-        }
+        if(labels.size() < 2 || labels.at(0)->text() != rowName)
+            continue;
+        if(QLineEdit *editor = item->valueEditor())
+            return editor->text();
+        const QString tip = labels.at(1)->toolTip();
+        return tip.isEmpty() ? labels.at(1)->text() : tip;
     }
     return QString();
 }
@@ -131,21 +135,17 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     QVERIFY2(exifIndex >= 0 && generalIndex >= 0, "Both tabs should exist.");
     QVERIFY2(!dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be disabled for a folder target.");
 
-    // Strip metadata lives here rather than in the context menu. It must be
-    // present but refuse a folder - disabled, not hidden, so its absence can
-    // never be misread as "this file carries no metadata".
-    QPushButton *stripButton = dialog->stripMetadataButton();
-    QVERIFY2(stripButton != nullptr, "The File info window should offer a strip metadata button.");
-    QVERIFY2(stripButton->isVisibleTo(dialog), "The strip button should be visible in the dialog.");
-    QVERIFY2(!stripButton->isEnabled(), "Strip metadata should be disabled for a folder target.");
-    QVERIFY2(!stripButton->isDefault() && !stripButton->autoDefault(),
+    // Clear metadata lives here rather than in the context menu, and it belongs
+    // to the EXIF tab: General is a read-only view and must offer no action at
+    // all. A folder cannot even reach the EXIF tab, so the button is away.
+    QPushButton *clearButton = dialog->stripMetadataButton();
+    QVERIFY2(clearButton != nullptr, "The File info window should offer a clear metadata button.");
+    QCOMPARE(dialog->tabs()->currentIndex(), generalIndex);
+    QVERIFY2(!clearButton->isVisibleTo(dialog),
+             "the read-only General tab should show no action buttons");
+    QVERIFY2(!clearButton->isEnabled(), "Clear metadata should be disabled for a folder target.");
+    QVERIFY2(!clearButton->isDefault() && !clearButton->autoDefault(),
              "a destructive button must never be the dialog's default (Enter) button");
-
-    // Edit is gated more narrowly than Strip: it needs a format exiv2 can
-    // rewrite, so a folder disables both.
-    QPushButton *editButton = dialog->editMetadataButton();
-    QVERIFY2(editButton != nullptr, "The File info window should offer an edit metadata button.");
-    QVERIFY2(!editButton->isEnabled(), "Edit metadata should be disabled for a folder target.");
 
     // --- Live-follow: selecting a tagged jpeg (no re-invoking the action)
     // updates the path and enables the EXIF tab. ---
@@ -153,25 +153,61 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(taggedPath).absoluteFilePath());
     QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be enabled for a tagged jpeg.");
     QTRY_COMPARE(rowValueByName(dialog, "Make"), QStringLiteral("TestCam"));
-    QTRY_VERIFY2(stripButton->isEnabled(), "Strip metadata should be enabled for a writable jpeg.");
-    QTRY_VERIFY2(editButton->isEnabled(), "Edit metadata should be enabled for a jpeg.");
+    QTRY_VERIFY2(clearButton->isEnabled(), "Clear metadata should be enabled for a writable jpeg.");
 
     // Switch to the EXIF tab so the next case can prove it snaps back.
     dialog->tabs()->setCurrentIndex(exifIndex);
     QCOMPARE(dialog->tabs()->currentIndex(), exifIndex);
 
-    // --- Live-follow: selecting a tagless png disables the EXIF tab again
-    // and snaps the current tab back to General. ---
+    // A writable jpeg's four tier-1 tags are input fields, not text - the tab
+    // is where this file gets written, so its action button rides with it.
+    QVERIFY2(clearButton->isVisibleTo(dialog),
+             "Clear metadata should appear with the EXIF tab.");
+    EntryInfoItem *makeRow = dialog->editableRow(QStringLiteral("Exif.Image.Make"));
+    QVERIFY2(makeRow != nullptr && makeRow->valueEditor() != nullptr,
+             "Make should be editable in place on a writable jpeg.");
+    QCOMPARE(makeRow->valueEditor()->text(), QStringLiteral("TestCam"));
+    QVERIFY2(!makeRow->valueEditor()->isReadOnly(), "the field should accept typing directly");
+    // ...and listed once: the read-only dump must not repeat a tag that already
+    // has a field.
+    int makeRows = 0;
+    for(EntryInfoItem *item : dialog->findChildren<EntryInfoItem *>()) {
+        const QList<QLabel *> labels = item->findChildren<QLabel *>();
+        if(!labels.isEmpty() && labels.at(0)->text() == QLatin1String("Make"))
+            ++makeRows;
+    }
+    QCOMPARE(makeRows, 1);
+
+    // --- Live-follow: a tagless png keeps the tab open. Having no metadata is
+    // a state worth seeing (and the Clear metadata button reaching), so the tab
+    // gates on the file being able to carry Exif, not on it having any. ---
     grid->select(untaggedPng);
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(untaggedPath).absoluteFilePath());
-    QTRY_VERIFY2(!dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be disabled for a tagless png.");
+    QTRY_VERIFY2(dialog->tabs()->isTabEnabled(exifIndex),
+                 "EXIF tab should stay open for an image with no tags.");
+    QCOMPARE(dialog->tabs()->currentIndex(), exifIndex);
+    QVERIFY2(rowValueByName(dialog, "Make").isEmpty(), "the png has no tags to list");
+    // Empty is said out loud rather than shown as a blank pane.
+    auto *emptyNote = dialog->tabs()->widget(exifIndex)->findChild<QLabel *>();
+    QVERIFY(emptyNote != nullptr);
+    QTRY_VERIFY2(emptyNote->isVisibleTo(dialog), "an empty EXIF tab should say it is empty");
+    // A png with no *Exif* tags can still carry XMP or text chunks, so the
+    // button stays available - and now it is reachable, which is the point.
+    QTRY_VERIFY2(clearButton->isEnabled(), "Clear metadata should stay enabled for a tagless png.");
+    QVERIFY2(clearButton->isVisibleTo(dialog), "the button rides with the EXIF tab");
+    // A png is not rewritable by tier 1, so it gets no input fields even when it
+    // does carry Exif - editing and clearing gate on different rules.
+    QVERIFY2(dialog->editableRow(QStringLiteral("Exif.Image.Make")) == nullptr,
+             "a png should offer no editable metadata fields");
+
+    // --- ...but a folder has no EXIF to speak of at all: the tab closes and
+    // takes the current tab back to General with it. ---
+    grid->select(subDir);
+    QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(subPath).absoluteFilePath());
+    QTRY_VERIFY2(!dialog->tabs()->isTabEnabled(exifIndex), "EXIF tab should be disabled for a folder.");
     QTRY_COMPARE(dialog->tabs()->currentIndex(), generalIndex);
-    // Still enabled: a png with no *Exif* tags can carry XMP or text chunks, so
-    // the button gates on the file being a strippable image, not on the EXIF tab.
-    QTRY_VERIFY2(stripButton->isEnabled(), "Strip metadata should stay enabled for a tagless png.");
-    // ...but a png is not rewritable by tier 1, so editing stays off even
-    // though stripping is available. The two buttons gate on different rules.
-    QTRY_VERIFY2(!editButton->isEnabled(), "Edit metadata should be disabled for a png.");
+    QVERIFY2(!clearButton->isVisibleTo(dialog),
+             "back on General, the button row should be gone again");
 
     if(qEnvironmentVariableIsSet("THUMBGRID_TEST_VISUAL"))
         QTest::qWait(1500);

@@ -454,7 +454,9 @@ void Core::stripMetadataAt(const QString &path) {
         mw->showMessage(tr("Cannot strip metadata from this file type"));
         return;
     }
-    if(!mw->showConfirmation(tr("Strip metadata"),
+    // Titled like the button that raised it ("Clear metadata"); the action it
+    // runs keeps its original name (stripMetadata) for shortcut compatibility.
+    if(!mw->showConfirmation(tr("Clear metadata"),
                              tr("Permanently remove all metadata from \"%1\"?\n"
                                 "This rewrites the file and cannot be undone.")
                                  .arg(QFileInfo(path).fileName()),
@@ -462,30 +464,30 @@ void Core::stripMetadataAt(const QString &path) {
         return;
     if(img->stripMetadata()) {
         reloadImage(path);
+        // The window that raised this is still open on the rows just deleted,
+        // and nothing else retargets it: the selection did not change, so the
+        // grid's statusTextChanged never fires. Without this the EXIF tab keeps
+        // showing metadata the file no longer has until it is reopened.
+        retargetFileInfoDialog();
         mw->showMessageSuccess(tr("Metadata removed"));
     } else {
         mw->showMessage(tr("Could not remove metadata"));
     }
 }
 
-// Opens the tier-1 metadata form for one file and writes back whatever changed.
-// No confirmation prompt, unlike stripMetadata(): the form itself is the
-// confirmation (it shows current values, and Cancel is right there), and every
-// field it can touch is individually recoverable by retyping it.
-void Core::editMetadataAt(const QString &path) {
+// Writes one tag committed in the File info window's EXIF tab. No confirmation
+// prompt, unlike stripMetadata(): a single text field is individually
+// recoverable by retyping it, and the user typed it deliberately into a field
+// that showed the old value.
+void Core::saveMetadataTagAt(const QString &path, const QString &key, const QString &value) {
     if(path.isEmpty() || !DocumentInfo::supportsMetadataEditing(path))
         return;
     DocumentInfo docInfo(path);
-    MetadataEditDialog dialog(QFileInfo(path).fileName(), docInfo.getEditableTags(), mw);
-    if(dialog.exec() != QDialog::Accepted)
-        return;
-    const QMap<QString, QString> changed = dialog.editedValues();
-    if(changed.isEmpty()) {
-        mw->showMessage(tr("No changes"));
-        return;
-    }
-    if(!docInfo.setEditableTags(changed)) {
+    if(!docInfo.setEditableTags({{key, value}})) {
         mw->showMessage(tr("Could not save metadata"));
+        // Puts the rejected field back to what is actually on disk, so the row
+        // never keeps a value the file does not have.
+        retargetFileInfoDialog();
         return;
     }
     // Same refresh stripMetadata() does: the image and its cached tag maps both
@@ -1203,8 +1205,12 @@ void Core::showFileInfoDialog() {
         fileInfoDialog.reset(new FileInfoDialog(mw));
         connect(fileInfoDialog.get(), &FileInfoDialog::stripMetadataRequested,
                 this, &Core::stripMetadataAt);
-        connect(fileInfoDialog.get(), &FileInfoDialog::editMetadataRequested,
-                this, &Core::editMetadataAt);
+        // Queued: the signal originates in a row's line edit, and the write ends
+        // in retargetFileInfoDialog(), which deletes and rebuilds that very row.
+        // Returning to the event loop first keeps the sender alive for the rest
+        // of its own event handler.
+        connect(fileInfoDialog.get(), &FileInfoDialog::metadataEditRequested,
+                this, &Core::saveMetadataTagAt, Qt::QueuedConnection);
     }
     const QStringList selection = currentSelection();
     fileInfoDialog->setTarget(selection.isEmpty() ? QString() : selection.first());
