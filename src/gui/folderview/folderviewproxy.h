@@ -39,6 +39,7 @@ public slots:
     void setStatusText(const QString& text);
     void setStatusFooterVisible(bool mode);
     void startRename(const QString& name);
+    void setSearchMatched(bool matched);
 
 protected:
     void showEvent(QShowEvent *event) override;
@@ -58,6 +59,7 @@ signals:
     void selectionChanged();
     void convertFormatRequested(const QString& format);
     void renameRequested(const QString& name);
+    void searchQueryChanged(const QString& prefix);
 
 private:
     std::shared_ptr<FolderView> folderView;

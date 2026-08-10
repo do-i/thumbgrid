@@ -1,6 +1,7 @@
 #include "foldergridview.h"
 
 #include <algorithm>
+#include <utility>
 
 // TODO: create a base class for this and the one on panel
 
@@ -123,8 +124,20 @@ void FolderGridView::show() {
 // probably unneeded
 void FolderGridView::hide() {
     cancelRename();
+    exitSearchMode();
     ThumbnailView::hide();
     clearFocus();
+}
+
+// a repopulate means we are looking at a different (or re-read) directory
+void FolderGridView::populate(int count) {
+    exitSearchMode();
+    ThumbnailView::populate(count);
+}
+
+void FolderGridView::setDirectoryPath(QString path) {
+    exitSearchMode();
+    ThumbnailView::setDirectoryPath(std::move(path));
 }
 
 void FolderGridView::setShowLabels(bool mode) {
@@ -391,8 +404,19 @@ bool FolderGridView::focusNextPrevChild(bool) {
 }
 
 void FolderGridView::keyPressEvent(QKeyEvent *event) {
+    // The search owns the keyboard while it is active, so nothing below runs -
+    // not the selection keys, and not the shortcuts in actionManager.
+    if(handleSearchKey(event))
+        return;
+
     ThumbnailView::keyPressEvent(event);
     event->accept();
+
+    bool plainKey = !(event->modifiers() & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier));
+    if(plainKey && event->text() == QStringLiteral("/") && thumbnails.count()) {
+        enterSearchMode();
+        return;
+    }
 
     if(event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
         emit itemActivated(lastSelected());
@@ -528,6 +552,132 @@ void FolderGridView::cancelRename() {
     setFocus();
 }
 
+bool FolderGridView::searchMode() const {
+    return mSearchMode;
+}
+
+QString FolderGridView::searchQuery() const {
+    return mSearchQuery;
+}
+
+void FolderGridView::enterSearchMode() {
+    mSearchMode = true;
+    mSearchQuery.clear();
+    mSearchMatched = true;
+    updateSearchIndicator();
+}
+
+void FolderGridView::exitSearchMode() {
+    if(!mSearchMode)
+        return;
+    mSearchMode = false;
+    mSearchQuery.clear();
+    mSearchMatched = true;
+    if(searchIndicator)
+        searchIndicator->hide();
+}
+
+void FolderGridView::setSearchMatched(bool matched) {
+    if(!mSearchMode || mSearchMatched == matched)
+        return;
+    mSearchMatched = matched;
+    updateSearchIndicator();
+}
+
+bool FolderGridView::handleSearchKey(QKeyEvent *event) {
+    if(!mSearchMode)
+        return false;
+    event->accept();
+
+    switch(event->key()) {
+    case Qt::Key_Escape:
+        exitSearchMode();
+        return true;
+    case Qt::Key_Backspace:
+        // backspacing past the first character deletes the leading `/` as well,
+        // which is what leaves search mode
+        if(mSearchQuery.isEmpty()) {
+            exitSearchMode();
+            return true;
+        }
+        mSearchQuery.chop(1);
+        mSearchMatched = true;
+        updateSearchIndicator();
+        if(!mSearchQuery.isEmpty())
+            emit searchQueryChanged(mSearchQuery);
+        return true;
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+        exitSearchMode();
+        emit itemActivated(lastSelected());
+        return true;
+    default:
+        break;
+    }
+
+    // Ctrl+Alt is AltGr on some layouts and does produce text; any other
+    // Ctrl/Alt/Meta combination is a shortcut, which gets swallowed rather
+    // than typed into the query.
+    bool ctrl = event->modifiers().testFlag(Qt::ControlModifier);
+    bool alt  = event->modifiers().testFlag(Qt::AltModifier);
+    if(event->modifiers().testFlag(Qt::MetaModifier) || (ctrl != alt))
+        return true;
+
+    QString text = event->text();
+    if(!text.isEmpty() && text.at(0).isPrint()) {
+        mSearchQuery.append(text);
+        updateSearchIndicator();
+        emit searchQueryChanged(mSearchQuery);
+    }
+    // anything else (arrows, function keys, shortcut combinations) is swallowed
+    return true;
+}
+
+void FolderGridView::updateSearchIndicator() {
+    if(!mSearchMode)
+        return;
+    if(!searchIndicator) {
+        searchIndicator = new QLabel(viewport());
+        searchIndicator->setObjectName(QStringLiteral("gridSearchIndicator"));
+        searchIndicator->setTextInteractionFlags(Qt::NoTextInteraction);
+        searchIndicator->setFocusPolicy(Qt::NoFocus);
+    }
+    const auto &cs = settings->colorScheme();
+    // dim red marks a prefix that matches nothing; the query is kept either way
+    // so the next backspace gets back to a matching one
+    QString textColor = mSearchMatched ? cs.text.name() : QStringLiteral("#e05252");
+    searchIndicator->setStyleSheet(QStringLiteral(
+        "QLabel { background: %1; color: %2; border: 1px solid %3;"
+        " border-radius: 2px; padding: 2px 6px; }")
+        .arg(cs.widget.name(), textColor, cs.accent.name()));
+    searchIndicator->setText(QStringLiteral("/") + mSearchQuery);
+    positionSearchIndicator();
+    searchIndicator->show();
+    searchIndicator->raise();
+}
+
+void FolderGridView::positionSearchIndicator() {
+    if(!searchIndicator)
+        return;
+    QSize size = searchIndicator->sizeHint();
+    constexpr int margin = 6;
+    searchIndicator->setGeometry(margin,
+                                 viewport()->height() - size.height() - margin,
+                                 size.width(), size.height());
+}
+
+void FolderGridView::focusOutEvent(QFocusEvent *event) {
+    // a popup (context menu) stealing focus is not navigating away
+    if(event->reason() != Qt::PopupFocusReason && event->reason() != Qt::ActiveWindowFocusReason)
+        exitSearchMode();
+    ThumbnailView::focusOutEvent(event);
+}
+
+void FolderGridView::hideEvent(QHideEvent *event) {
+    exitSearchMode();
+    ThumbnailView::hideEvent(event);
+}
+
 bool FolderGridView::eventFilter(QObject *o, QEvent *ev) {
     if(renameEditor && o == renameEditor) {
         if(ev->type() == QEvent::KeyPress) {
@@ -594,5 +744,7 @@ void FolderGridView::resizeEvent(QResizeEvent *event) {
         loadVisibleThumbnailsDelayed();
         if(renameIndex >= 0)
             positionRenameEditor();
+        if(mSearchMode)
+            positionSearchIndicator();
     }
 }

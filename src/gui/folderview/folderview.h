@@ -46,6 +46,7 @@ public slots:
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
     void startRename(const QString& name);
+    void setSearchMatched(bool matched);
 
 
 protected:
@@ -73,6 +74,7 @@ signals:
     void selectionChanged();
     void convertFormatRequested(const QString& format);
     void renameRequested(const QString& name);
+    void searchQueryChanged(const QString& prefix);
 
 private slots:
     void onSortingSelected(int);

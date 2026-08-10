@@ -194,6 +194,7 @@ public slots:
     void copyPathClipboard();
     void openFromClipboard();
     void renameCurrentSelection(const QString& newName);
+    void searchFolderView(const QString& prefix);
     void sortBy(SortingMode mode);
     void sortByName();
     void sortByTime();

@@ -72,6 +72,7 @@ void MW::setupUi() {
     connect(folderView.get(), &FolderViewProxy::moveUrlsRequested, this, &MW::moveUrlsRequested);
     connect(folderView.get(), &FolderViewProxy::convertFormatRequested, this, &MW::convertFormatRequested);
     connect(folderView.get(), &FolderViewProxy::renameRequested, this, &MW::renameRequested);
+    connect(folderView.get(), &FolderViewProxy::searchQueryChanged, this, &MW::searchQueryChanged);
     connect(folderView.get(), &FolderViewProxy::showFoldersChanged, this, &MW::showFoldersChanged);
 
     centralWidget.reset(new CentralWidget(docWidget, folderView, this));
@@ -427,6 +428,11 @@ void MW::toggleFullscreenInfoBar() {
         infoBarFullscreen->showWhenReady();
     else
         infoBarFullscreen->hide();
+}
+
+// tells the folder view whether the prefix it last emitted matched anything
+void MW::setFolderViewSearchMatched(bool matched) {
+    folderView->setSearchMatched(matched);
 }
 
 void MW::toggleRenameOverlay(QString currentName) {

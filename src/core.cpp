@@ -143,6 +143,7 @@ void Core::connectComponents() {
     connect(mw, &MW::saveAsRequested,       this, &Core::saveCurrentFileAs);
     connect(mw, &MW::resizeRequested,       this, &Core::resize);
     connect(mw, &MW::renameRequested,       this, &Core::renameCurrentSelection);
+    connect(mw, &MW::searchQueryChanged,    this, &Core::searchFolderView);
     connect(mw, &MW::sortingSelected,       this, &Core::sortBy);
     connect(mw, &MW::showFoldersChanged,    this, &Core::setFoldersDisplay);
     connect(mw, &MW::discardEditsRequested, this, &Core::discardEdits);
@@ -977,6 +978,12 @@ void Core::sortBy(SortingMode mode) {
 void Core::setFoldersDisplay(bool mode) {
     if(folderViewPresenter.showDirs() != mode)
         folderViewPresenter.setShowDirs(mode);
+}
+
+// Type-ahead search in the folder grid: the view owns the typed prefix, we
+// resolve it against the model and report back whether it matched.
+void Core::searchFolderView(const QString& prefix) {
+    mw->setFolderViewSearchMatched(folderViewPresenter.selectByNamePrefix(prefix));
 }
 
 void Core::renameCurrentSelection(const QString& newName) {

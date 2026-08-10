@@ -176,6 +176,8 @@ signals:
     void showFoldersChanged(bool);
     void resizeRequested(QSize);
     void renameRequested(QString);
+    // folder view type-ahead search: the typed prefix, resolved by Core
+    void searchQueryChanged(QString);
     void cropRequested(QRect);
     void discardEditsRequested();
     void saveAsClicked();
@@ -209,6 +211,7 @@ signals:
     void playbackFinished();
 
 public slots:
+    void setFolderViewSearchMatched(bool matched);
     void setupFullUi();
     void showDefault();
     void showCropPanel();

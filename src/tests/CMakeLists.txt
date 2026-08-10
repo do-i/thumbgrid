@@ -258,6 +258,14 @@ add_test(
     COMMAND thumbgrid_grid_inline_rename_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_grid_type_ahead_search_test
+    behavior/test_grid_type_ahead_search.cpp
+)
+add_test(
+    NAME "Slash starts a type-ahead search that moves the grid cursor"
+    COMMAND thumbgrid_grid_type_ahead_search_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_convert_folder_selection_test
     behavior/test_convert_folder_selection.cpp
 )

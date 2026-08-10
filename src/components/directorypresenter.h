@@ -36,6 +36,11 @@ public:
     QStringList selectedPaths() const;
     SelectionInfo selectionInfo() const;
 
+    // Moves the cursor to the first entry (in view order) whose name starts
+    // with prefix, case-insensitively. Returns false when nothing matches, in
+    // which case the current selection is left alone.
+    bool selectByNamePrefix(const QString& prefix);
+
 
 signals:
     void dirActivated(const QString& dirPath);

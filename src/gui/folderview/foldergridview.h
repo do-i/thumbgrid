@@ -2,6 +2,7 @@
 
 #include <QGraphicsWidget>
 #include <QContextMenuEvent>
+#include <QLabel>
 #include <QLineEdit>
 
 #include "gui/customwidgets/thumbnailview.h"
@@ -23,9 +24,20 @@ public:
     // begins editing the current selection's name in place, over its cell
     void startRename(const QString& name);
 
+    // type-ahead search: `/` starts it, typed characters extend the prefix.
+    // While it is active every key belongs to the search, so no regular
+    // shortcut fires. Escape (or backspacing over the leading `/`) leaves it.
+    bool searchMode() const;
+    QString searchQuery() const;
+    void exitSearchMode();
+    // feedback for the last emitted query, pushed back down once it is resolved
+    void setSearchMatched(bool matched);
+
 public slots:
     void show();
     void hide();
+    void populate(int count) override;
+    void setDirectoryPath(QString path) override;
 
     void selectFirst();
     void selectLast();
@@ -62,6 +74,16 @@ private:
     int renameIndex = -1;
     void positionRenameEditor();
 
+    bool mSearchMode = false;
+    bool mSearchMatched = true;
+    QString mSearchQuery;
+    QLabel *searchIndicator = nullptr;
+    void enterSearchMode();
+    void updateSearchIndicator();
+    void positionSearchIndicator();
+    // returns true if the event was consumed by the active search
+    bool handleSearchKey(QKeyEvent *event);
+
 private slots:
     void onitemSelected();
     void commitRename();
@@ -88,9 +110,12 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent *event) override;
     bool focusNextPrevChild(bool) override;
     bool eventFilter(QObject *o, QEvent *ev) override;
+    void focusOutEvent(QFocusEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
 
 signals:
     void thumbnailSizeChanged(int);
     void convertFormatRequested(const QString& format);
     void renameRequested(const QString& name);
+    void searchQueryChanged(const QString& prefix);
 };
