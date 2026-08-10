@@ -911,8 +911,10 @@ void SettingsDialog::readSettings() {
 
     // language
     QString langName = langs.value(settings->language());
+    // Fall back on the *display* name: the combo is not editable, so passing the
+    // locale code here silently left the previous entry selected.
     if(langName.isEmpty() || ui->langComboBox->findText(langName) == -1)
-        ui->langComboBox->setCurrentText("en_US");
+        ui->langComboBox->setCurrentText(langs.value("en_US"));
     else
         ui->langComboBox->setCurrentText(langName);
 
