@@ -471,3 +471,11 @@ foreach(scenario fresh upgrade current downgrade retired-key-prune theme-recover
         COMMAND thumbgrid_settings_migration_gates_test ${scenario}
     )
 endforeach()
+
+thumbgrid_add_behavior_test(thumbgrid_theme_stylesheet_substitution_test
+    behavior/test_theme_stylesheet_is_fully_substituted.cpp
+)
+add_test(
+    NAME "The themed stylesheet substitutes every token so dialogs are not left unstyled"
+    COMMAND thumbgrid_theme_stylesheet_substitution_test
+)
