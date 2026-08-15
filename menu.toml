@@ -72,7 +72,7 @@ description = "Migrate a custom theme and its colors to the current format"
 
 [[items]]
 id = "release-status"
-label = "Release status - show develop/main state"
+label = "Step 0 - Check release status (changes nothing)"
 key = "s"
 command = ["scripts/release.sh", "status"]
 group = "Release"
@@ -81,18 +81,18 @@ description = "Show origin develop/main state, unreleased commits and the next a
 
 [[items]]
 id = "release-cut"
-label = "Cut release - fast-forward main to develop and tag"
+label = "Step 1 - Cut release (tag main, starts the CI build)"
 key = "e"
 command = ["scripts/release.sh", "cut"]
 group = "Release"
 tags = ["tag", "version", "cut", "publish", "develop", "main"]
-description = "Fast-forward main to origin/develop, tag the new version and push both atomically"
+description = "Fast-forward main to origin/develop, tag the new version and push both atomically. Pushing the tag starts the binary build on GitHub Actions automatically"
 
 [[items]]
 id = "aur-publish"
-label = "AUR publish - promote a GitHub release to thumbgrid-bin"
+label = "Step 2 - Publish AUR (after the CI binaries are ready)"
 key = "a"
 command = ["scripts/publish-aur.sh"]
 group = "Release"
 tags = ["aur", "arch", "package", "publish"]
-description = "Promote an existing GitHub release to the thumbgrid-bin AUR package"
+description = "Promote an existing GitHub release to the thumbgrid-bin AUR package. The binary build in between is automatic (GitHub Actions \"Arch package\" / \"macOS package\") and must finish first"
