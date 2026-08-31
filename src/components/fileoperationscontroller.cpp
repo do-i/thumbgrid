@@ -382,6 +382,14 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
             skipped++;
             continue;
         }
+        // Counted as skipped rather than left to fail: the save path refuses
+        // these too, but reaching it would report them as conversion errors
+        // when the file is fine and the target format is simply not usable
+        // at this size.
+        if(!DocumentInfo::canEncodeToFormat(ext, QSize(img->width(), img->height()))) {
+            skipped++;
+            continue;
+        }
         QString dest = fi.absolutePath() + "/" + fi.completeBaseName() + "." + ext;
         if(QFileInfo::exists(dest))
             overwrites = true;

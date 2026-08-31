@@ -170,11 +170,28 @@ thumbgrid can open some extra formats via third-party image plugins.
 | Format  | Plugin |
 | ------- | ------------- |
 | WebP | Qt ImageFormats (`qt6-imageformats` / `qt6-image-formats-plugins`) |
-| JPEG-XL | [github.com/novomesk/qt-jpegxl-image-plugin](https://github.com/novomesk/qt-jpegxl-image-plugin) |
-| AVIF | [github.com/novomesk/qt-avif-image-plugin](https://github.com/novomesk/qt-avif-image-plugin) |
+| HEIF / HEIC | KDE [kimageformats](https://invent.kde.org/frameworks/kimageformats) (`kimageformats` + `libheif`) |
+| JPEG-XL | kimageformats (`+ libjxl`), or [github.com/novomesk/qt-jpegxl-image-plugin](https://github.com/novomesk/qt-jpegxl-image-plugin) |
+| AVIF | kimageformats (`+ libavif`), or [github.com/novomesk/qt-avif-image-plugin](https://github.com/novomesk/qt-avif-image-plugin) |
+| RAW | kimageformats (`+ libraw`), or [https://gitlab.com/mardy/qtraw](https://gitlab.com/mardy/qtraw) |
 | APNG | [github.com/Skycoder42/QtApng](https://github.com/Skycoder42/QtApng) |
-| HEIF / HEIC | [github.com/jakar/qt-heif-image-plugin](https://github.com/jakar/qt-heif-image-plugin) |
-| RAW | [https://gitlab.com/mardy/qtraw](https://gitlab.com/mardy/qtraw) |
+
+The Arch packages depend on `kimageformats` and `libheif`, so HEIC works out of
+the box there and no manual step is needed. kimageformats dlopens its codec
+backends, which is why `libheif` is named separately - installing the plugin
+alone leaves HEIC unreadable. Installing the other optional backends listed
+above (`libavif`, `libjxl`, `libraw`) enables those formats through the same
+plugin package.
+
+HEIC files are read-write: thumbgrid can view them and convert other images to
+HEIC. Two limits are worth knowing:
+
+- Metadata is read-only. exiv2 cannot write into HEIF containers, so the tag
+  editor and the metadata-removal actions are disabled for HEIC files. Reading
+  Exif and XMP out of them works normally.
+- Images smaller than 64x64 cannot be saved as HEIC. The encoder cannot
+  describe a frame that small and produces a transposed or garbled picture
+  without reporting an error, so thumbgrid declines the conversion instead.
 
 # Installation
 

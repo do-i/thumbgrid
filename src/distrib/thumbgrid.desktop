@@ -9,5 +9,5 @@ Terminal=false
 Type=Application
 StartupWMClass=thumbgrid
 Categories=Qt;Graphics;Viewer;
-MimeType=video/webm;image/jpeg;image/gif;image/png;image/bmp;image/webp;
+MimeType=video/webm;image/jpeg;image/gif;image/png;image/bmp;image/webp;image/heif;image/heic;
 Keywords=image;view;thumbgrid;picture;gif;jpeg;webm;

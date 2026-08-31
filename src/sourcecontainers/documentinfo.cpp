@@ -113,6 +113,20 @@ void DocumentInfo::detectFormat() {
     } else if(mimeName == "image/avif") {
         mFormat = "avif";
         mDocumentType = detectAnimatedAvif() ? DocumentType::ANIMATED : DocumentType::STATIC;
+    } else if(mimeName == "image/heif" || mimeName == "image/heic") {
+        // One container, several extensions: heic/heif/hif for hevc-coded files,
+        // avci for avc-coded ones. The decoder plugin registers a separate key
+        // per extension, and QImageReader given an explicit format does not fall
+        // back to sniffing, so hand it the file's own suffix when that is a key
+        // it knows and the generic one otherwise.
+        static const QSet<QByteArray> heifKeys = {"heic", "heif", "hif", "avci", "hej2"};
+        mFormat = QString::fromUtf8(heifKeys.contains(suffix) ? suffix : QByteArrayLiteral("heif"));
+        // Unlike the formats above, heif decoding is never built into Qt itself -
+        // it always comes from an optional plugin. Without one the read yields a
+        // blank image, so mark the file unviewable instead and let the grid show
+        // it as a file-type icon with a clear message on activation.
+        mDocumentType = QImageReader::supportedImageFormats().contains(mFormat.toUtf8())
+                            ? DocumentType::STATIC : DocumentType::NONE;
     } else if(mimeName == "image/bmp") {
         mFormat = "bmp";
         mDocumentType = DocumentType::STATIC;
@@ -562,15 +576,57 @@ bool DocumentInfo::supportsMetadataEditing(const QString &filePath) {
 #endif
 }
 
+// libheif hands the picture to x265, whose default 64x64 coding tree unit
+// cannot describe a smaller frame. It does not report this: the encode
+// "succeeds" and the file reads back transposed (64x48 -> 48x64) or plainly
+// garbled (100x50 -> 86x64). Measured 2026-08-31 against libheif 1.23.1 with
+// kimageformats 6.29; sizes at or above the floor round-tripped exactly.
+// Refused up front rather than left to fail, because a silently wrong image on
+// disk is worse than a conversion that declines to run.
+bool DocumentInfo::canEncodeToFormat(const QString &format, const QSize &size) {
+    static const int heifMinDimension = 64;
+    static const QSet<QString> heifFormats = {QStringLiteral("heic"), QStringLiteral("heif"),
+                                              QStringLiteral("hif"),  QStringLiteral("avci"),
+                                              QStringLiteral("hej2")};
+    if(!heifFormats.contains(format.toLower()))
+        return true;
+    return size.width() >= heifMinDimension && size.height() >= heifMinDimension;
+}
+
+// exiv2 reads metadata out of every container thumbgrid opens, but it writes
+// back into only a subset. Probed with exiv2 0.28 on 2026-08-31: BMFF-based
+// files (heic/heif/avif/cr3) are refused outright with "Writing to BMFF images
+// is not supported", and jxl is not recognised as a writable type at all. An
+// allowlist rather than a BMFF denylist, so a format nobody probed cannot reach
+// a rewrite path by default - the cost of a wrong "no" is a greyed-out action,
+// the cost of a wrong "yes" is an irreversible-sounding confirmation for an
+// operation that always fails.
+bool DocumentInfo::supportsMetadataWriting(const QString &filePath) {
+#ifdef USE_EXIV2
+    const QString suffix = QFileInfo(filePath).suffix().toLower();
+    return suffix == QLatin1String("jpg")  || suffix == QLatin1String("jpeg") ||
+           suffix == QLatin1String("jfif") || suffix == QLatin1String("png")  ||
+           suffix == QLatin1String("webp") || suffix == QLatin1String("tif")  ||
+           suffix == QLatin1String("tiff");
+#else
+    Q_UNUSED(filePath)
+    return false;
+#endif
+}
+
 // Wider than supportsMetadataEditing() on purpose: the Xmp tab only reads, so
 // the gate is "can this container hold an XMP packet at all", which png and tiff
 // can even though exiv2 will not rewrite Exif into them.
 bool DocumentInfo::supportsXmp(const QString &filePath) {
 #ifdef USE_EXIV2
     const QString suffix = QFileInfo(filePath).suffix().toLower();
-    return suffix == QLatin1String("jpg") || suffix == QLatin1String("jpeg") ||
-           suffix == QLatin1String("png") || suffix == QLatin1String("webp") ||
-           suffix == QLatin1String("tif") || suffix == QLatin1String("tiff");
+    // heif is read-only here for the same reason it is absent from the editing
+    // gates - exiv2 parses its XMP packet fine but cannot write one back.
+    return suffix == QLatin1String("jpg")  || suffix == QLatin1String("jpeg") ||
+           suffix == QLatin1String("png")  || suffix == QLatin1String("webp") ||
+           suffix == QLatin1String("tif")  || suffix == QLatin1String("tiff") ||
+           suffix == QLatin1String("heic") || suffix == QLatin1String("heif") ||
+           suffix == QLatin1String("hif");
 #else
     Q_UNUSED(filePath)
     return false;

@@ -27,7 +27,7 @@ jobs:
       image: archlinux:base-devel
     steps:
       - name: Install build tooling
-        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf exiv2 opencv mpv pacman-contrib
+        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats kimageformats libheif qt6-tools pkgconf exiv2 opencv mpv pacman-contrib
 
       - uses: actions/checkout@v7
         with:

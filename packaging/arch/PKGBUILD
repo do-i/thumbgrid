@@ -24,6 +24,12 @@ depends=(
   'qt6-base'
   'qt6-svg'
   'qt6-imageformats'
+  # kimageformats supplies the Qt plugin that decodes heif/heic (and avif, jxl,
+  # raw). Its codec backends are dlopened, so Arch lists them as optdepends of
+  # kimageformats - libheif has to be named here or heic silently stays
+  # unreadable on a clean install.
+  'kimageformats'
+  'libheif'
   'exiv2'
   'opencv'
   'mpv'

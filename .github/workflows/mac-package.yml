@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Install build tooling
-        run: brew install cmake ninja qt opencv exiv2 mpv pkg-config create-dmg
+        run: brew install cmake ninja qt opencv exiv2 mpv pkg-config create-dmg extra-cmake-modules libheif
 
       - uses: actions/checkout@v7
         with:
@@ -45,6 +45,41 @@ jobs:
         run: |
           mkdir -p build/src/thumbgrid.app/Contents/lib/thumbgrid
           cp build/lib/thumbgrid/player_mpv.so build/src/thumbgrid.app/Contents/lib/thumbgrid/
+
+      # heif/heic decoding is not part of Qt; it comes from KDE's kimageformats
+      # plugin, which Homebrew does not package, so it is built here against the
+      # same Qt the app links. Only the heif plugin is kept - the rest of
+      # kimageformats' codecs are not installed, so cmake skips them.
+      - name: Build heif image plugin
+        run: |
+          version=6.29.0
+          curl -fsSL -o kimageformats.tar.gz \
+            "https://github.com/KDE/kimageformats/archive/refs/tags/v${version}.tar.gz"
+          tar xf kimageformats.tar.gz
+          # KIMAGEFORMATS_HEIF defaults to OFF upstream, and libheif is only
+          # probed inside that option's if(), so without it LibHeif_FOUND stays
+          # unset and the kimg_heif target is never created at all.
+          cmake -S "kimageformats-${version}" -B kif-build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix qt);$(brew --prefix extra-cmake-modules)" \
+            -DKIMAGEFORMATS_HEIF=ON \
+            -DBUILD_TESTING=OFF
+          cmake --build kif-build --target kimg_heif
+
+      # Must land before macdeployqt: the deploy step is what walks the bundle's
+      # plugins and pulls their dylib dependencies (libheif and its codecs) into
+      # Contents/Frameworks. A plugin copied in afterwards would ship with
+      # unresolved @rpath references and fail to load.
+      - name: Copy heif image plugin into app bundle
+        run: |
+          app="build/src/thumbgrid.app"
+          mkdir -p "$app/Contents/PlugIns/imageformats"
+          plugin="$(find kif-build -name 'kimg_heif.*' -type f | head -1)"
+          if [[ -z "$plugin" ]]; then
+            echo "::error::kimg_heif was not built - refusing to ship a bundle without heic support"
+            exit 1
+          fi
+          cp "$plugin" "$app/Contents/PlugIns/imageformats/"
 
       - name: Deploy Qt runtime
         run: macdeployqt build/src/thumbgrid.app -verbose=2

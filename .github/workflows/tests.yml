@@ -17,7 +17,7 @@ jobs:
       QT_QPA_PLATFORM: offscreen
     steps:
       - name: Install build tooling
-        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats qt6-tools pkgconf exiv2 opencv mpv
+        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats kimageformats libheif qt6-tools pkgconf exiv2 opencv mpv
 
       - uses: actions/checkout@v7
         with:

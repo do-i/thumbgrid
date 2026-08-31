@@ -487,3 +487,11 @@ add_test(
     NAME "The themed stylesheet substitutes every token so dialogs are not left unstyled"
     COMMAND thumbgrid_theme_stylesheet_substitution_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_heif_images_test
+    behavior/test_heif_images_are_viewable.cpp
+)
+add_test(
+    NAME "Heif images are viewable and their metadata is read-only"
+    COMMAND thumbgrid_heif_images_test
+)

@@ -451,7 +451,12 @@ void Core::stripMetadataAt(const QString &path) {
     auto img = model->getImage(path);
     if(!img)
         return;
-    if(img->type() != STATIC && img->type() != ANIMATED) {
+    // The type gate alone is not enough: a heif is a perfectly ordinary STATIC
+    // image that exiv2 simply cannot rewrite, and without this the user would
+    // get the "cannot be undone" confirmation below for an operation that can
+    // only fail.
+    if((img->type() != STATIC && img->type() != ANIMATED) ||
+       !DocumentInfo::supportsMetadataWriting(path)) {
         mw->showMessage(tr("Cannot strip metadata from this file type"));
         return;
     }
@@ -522,7 +527,8 @@ void Core::runScopedMetadataRemoval(const QString &path, const QString &title,
     auto img = model->getImage(path);
     if(!img)
         return;
-    if(img->type() != STATIC && img->type() != ANIMATED) {
+    if((img->type() != STATIC && img->type() != ANIMATED) ||
+       !DocumentInfo::supportsMetadataWriting(path)) {
         mw->showMessage(tr("Cannot remove metadata from this file type"));
         return;
     }

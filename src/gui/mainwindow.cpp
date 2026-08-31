@@ -654,6 +654,7 @@ QString MW::getSaveFileName(QString filePath) {
     if(writerFormats.contains("jp2"))  filters.append("JPEG 2000 (*.jp2 *.j2k *.jpf *.jpx *.jpm *.jpgx)");
     if(writerFormats.contains("jxl"))  filters.append("JPEG-XL (*.jxl)");
     if(writerFormats.contains("avif")) filters.append("AVIF (*.avif *.avifs)");
+    if(writerFormats.contains("heic")) filters.append("HEIF (*.heic *.heif *.hif)");
     if(writerFormats.contains("tif"))  filters.append("TIFF (*.tif *.tiff)");
     if(writerFormats.contains("bmp"))  filters.append("BMP (*.bmp)");
     if(PlatformDesktop::supportsIcoSaveFormat() && writerFormats.contains("ico"))

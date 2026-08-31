@@ -167,6 +167,14 @@ public:
     // Exiv2 keys can only be written to formats exiv2 can safely rewrite; this
     // gates the UI so the editor is never offered for a file it cannot save.
     static bool supportsMetadataEditing(const QString &filePath);
+    // Narrower question than supportsMetadataEditing(): can exiv2 rewrite this
+    // container at all? Gates the destructive removal actions, which are offered
+    // for more formats than the tag editor is.
+    static bool supportsMetadataWriting(const QString &filePath);
+    // Guards heif encoding, which silently produces a transposed or garbled
+    // picture below a floor the encoder never reports. Always true for every
+    // other format. See the implementation for the measurement.
+    static bool canEncodeToFormat(const QString &format, const QSize &size);
 
     // Raw (uninterpreted) current values for editableTagKeys(), keyed by exiv2
     // key. Missing tags are absent from the map rather than empty-valued.

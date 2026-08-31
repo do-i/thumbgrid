@@ -82,6 +82,14 @@ void ImageStatic::loadICO() {
 bool ImageStatic::save(QString destPath) {
     QFileInfo fi(destPath);
     QString ext = fi.suffix();
+    // The single choke point for every write route (save, save-as, convert), so
+    // a format that cannot faithfully encode this image is refused here once
+    // rather than in each caller.
+    if(!DocumentInfo::canEncodeToFormat(ext, isEdited() ? imageEdited->size() : image->size())) {
+        qCWarning(logLoader) << "ImageStatic::save() -" << ext
+                             << "cannot encode an image this small:" << destPath;
+        return false;
+    }
     // png compression note from libpng
     // Note that tests have shown that zlib compression levels 3-6 usually perform as well
     // as level 9 for PNG images, and do considerably fewer caclulations
