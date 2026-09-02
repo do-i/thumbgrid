@@ -52,9 +52,28 @@ jobs:
       # kimageformats' codecs are not installed, so cmake skips them.
       - name: Build heif image plugin
         run: |
-          version=6.29.0
-          curl -fsSL -o kimageformats.tar.gz \
-            "https://github.com/KDE/kimageformats/archive/refs/tags/v${version}.tar.gz"
+          # kimageformats hard-requires an ECM of at least its own release
+          # version - find_package(ECM <that exact version>) at the top of its
+          # CMakeLists - and the two ship together in one KDE Frameworks
+          # release. Homebrew's extra-cmake-modules trails the newest KDE tag by
+          # a release often enough that pinning a version here breaks the build
+          # the moment the two drift apart, so build the kimageformats that
+          # matches whatever ECM brew actually installed.
+          # Read it out of the very file find_package(ECM) consults, rather
+          # than from brew's formula version - that is the number the version
+          # check will actually compare against.
+          ecm_version_file="$(brew --prefix extra-cmake-modules)/share/ECM/cmake/ECMConfigVersion.cmake"
+          version="$(sed -n 's/^set(PACKAGE_VERSION "\(.*\)")$/\1/p' "$ecm_version_file")"
+          if [[ -z "$version" ]]; then
+            echo "::error::Could not read the installed ECM version from $ecm_version_file"
+            exit 1
+          fi
+          echo "Building kimageformats ${version} to match the installed extra-cmake-modules"
+          if ! curl -fsSL -o kimageformats.tar.gz \
+            "https://github.com/KDE/kimageformats/archive/refs/tags/v${version}.tar.gz"; then
+            echo "::error::No kimageformats release tagged v${version} to pair with the installed extra-cmake-modules"
+            exit 1
+          fi
           tar xf kimageformats.tar.gz
           # KIMAGEFORMATS_HEIF defaults to OFF upstream, and libheif is only
           # probed inside that option's if(), so without it LibHeif_FOUND stays
