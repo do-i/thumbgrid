@@ -29,8 +29,10 @@ public:
     // with aspect kept becomes "fit within" so other aspect ratios are not
     // stretched when the same spec is applied to several images.
     ResizeSpec spec() const;
-    // Retitles the dialog for the grid flow, which writes new files instead
-    // of editing the open image.
+    // Switches to the grid flow, which writes new files instead of editing the
+    // open image: adds Long edge and Shrink only, and with more than one image
+    // turns W x H into a "fit within" box (an exact size would stretch images
+    // of other shapes). specSelected then fires on OK instead of sizeSelected.
     void setCopyMode(int imageCount);
 
 public slots:
@@ -45,6 +47,16 @@ private:
     void updateToTargetValues();
     int lastEdited; // 0 - width, 1 - height
     void resetResCheckBox();
+    void setupFilterCombo();
+    ScalingFilter selectedFilter() const;
+
+    bool copyMode = false;
+    bool multiImage = false;
+    // copy-mode only controls, built in code next to the .ui ones
+    QRadioButton *byLongEdge;
+    QLabel *longEdgeLabel;
+    QSpinBox *longEdge;
+    QCheckBox *shrinkOnly;
 
 private slots:
     void widthChanged(int);
@@ -59,6 +71,7 @@ private slots:
     void onAspectRatioCheckbox();
     void onPercentageRadioButton();
     void onAbsoluteSizeRadioButton();
+    void onLongEdgeRadioButton();
 signals:
     void sizeSelected(QSize);
     void specSelected(ResizeSpec);

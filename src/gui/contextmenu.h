@@ -27,6 +27,8 @@ private:
     QTimer mTimer;
 
     void fillOpenWithMenu();
+    // the zoom and transform rows are icon-only; name each with its shortcut
+    void updateToolTips();
 
 signals:
     void showScriptSettings();

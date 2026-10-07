@@ -40,6 +40,17 @@ QSize targetSize(const QSize &source, const ResizeSpec &spec) {
                 return QSize();
             target = spec.size;
             break;
+        case ResizeSpec::LongEdge: {
+            if(spec.longEdge <= 0)
+                return QSize();
+            bool landscape = source.width() >= source.height();
+            int longSide = landscape ? source.width() : source.height();
+            int shortSide = landscape ? source.height() : source.width();
+            // the long side is exact by definition; round only the short one
+            int scaledShort = qMax(1, qRound(static_cast<double>(shortSide) * spec.longEdge / longSide));
+            target = landscape ? QSize(spec.longEdge, scaledShort) : QSize(scaledShort, spec.longEdge);
+            break;
+        }
     }
     if(target == source)
         return QSize();

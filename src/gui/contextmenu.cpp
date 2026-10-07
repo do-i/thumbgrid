@@ -168,8 +168,32 @@ void ContextMenu::setImageEntriesEnabled(bool mode) {
     ui->findDuplicates->setEnabled(mode);
 }
 
+void ContextMenu::updateToolTips() {
+    // refreshed on every show so a rebound shortcut is never stale
+    struct Entry { ActionButton *button; QString action; QString name; };
+    const QList<Entry> buttons = {
+        {ui->zoomIn, "zoomIn", tr("Zoom in")},
+        {ui->zoomOut, "zoomOut", tr("Zoom out")},
+        {ui->zoomOriginal, "fitNormal", tr("Original size")},
+        {ui->fitWidth, "fitWidth", tr("Fit width")},
+        {ui->fitWindow, "fitWindow", tr("Fit window")},
+        {ui->fitWindowStretch, "fitWindowStretch", tr("Fit window (stretch)")},
+        {ui->rotateLeft, "rotateLeft", tr("Rotate left")},
+        {ui->rotateRight, "rotateRight", tr("Rotate right")},
+        {ui->flipH, "flipH", tr("Flip horizontally")},
+        {ui->flipV, "flipV", tr("Flip vertically")},
+        {ui->crop, "crop", tr("Crop")},
+        {ui->resize, "resize", tr("Resize...")},
+    };
+    for(const Entry &e : buttons) {
+        QString shortcut = actionManager->shortcutForAction(actionManager->currentContext(), e.action);
+        e.button->setToolTip(shortcut.isEmpty() ? e.name : e.name + " (" + shortcut + ")");
+    }
+}
+
 void ContextMenu::showAt(QPoint pos) {
     switchToMainPage();
+    updateToolTips();
     QRect geom = geometry();
     geom.moveTopLeft(pos);
     setGeometry(geom);

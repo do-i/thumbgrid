@@ -21,9 +21,37 @@ ResizeDialog::ResizeDialog(QSize originalSize,  QWidget *parent) :
                              " x " +
                              QString::number(originalSize.height()));
 
+    // Copy-mode controls. Parented to the frame that holds the other two radio
+    // buttons so all three stay mutually exclusive; hidden until setCopyMode().
+    byLongEdge = new QRadioButton(tr("By Long Edge:"), ui->resFrame);
+    byLongEdge->setObjectName("byLongEdge");
+    ui->verticalLayout_6->addWidget(byLongEdge);
+    longEdgeLabel = new QLabel(tr("Long edge:"), ui->resFrame);
+    longEdge = new QSpinBox(ui->resFrame);
+    longEdge->setObjectName("longEdge");
+    longEdge->setRange(1, 65535);
+    longEdge->setSuffix(" px");
+    longEdge->setValue(qMax(originalSize.width(), originalSize.height()));
+    longEdge->setEnabled(false);
+    int row = ui->resGridLayout->rowCount();
+    ui->resGridLayout->addWidget(longEdgeLabel, row, 0);
+    ui->resGridLayout->addWidget(longEdge, row, 1);
+    shrinkOnly = new QCheckBox(tr("Only shrink (skip images already smaller)"), ui->resFrame);
+    shrinkOnly->setObjectName("shrinkOnly");
+    shrinkOnly->setChecked(true);
+    ui->verticalLayout_3->insertWidget(ui->verticalLayout_3->indexOf(ui->keepAspectRatio) + 1, shrinkOnly);
+    for(QWidget *w : {static_cast<QWidget *>(byLongEdge), static_cast<QWidget *>(longEdgeLabel),
+                      static_cast<QWidget *>(longEdge), static_cast<QWidget *>(shrinkOnly)})
+        w->hide();
+
+    setupFilterCombo();
+
     desktopSize = qApp->primaryScreen()->size();
-    connect(ui->byPercentage,   &QRadioButton::toggled, this, &ResizeDialog::onPercentageRadioButton);
-    connect(ui->byAbsoluteSize, &QRadioButton::toggled, this, &ResizeDialog::onAbsoluteSizeRadioButton);
+    // toggled fires for the button being switched off as well; react only to
+    // the one switched on, or the old mode re-enables its own controls
+    connect(ui->byPercentage, &QRadioButton::toggled, this, [this](bool on) { if(on) onPercentageRadioButton(); });
+    connect(ui->byAbsoluteSize, &QRadioButton::toggled, this, [this](bool on) { if(on) onAbsoluteSizeRadioButton(); });
+    connect(byLongEdge, &QRadioButton::toggled, this, [this](bool on) { if(on) onLongEdgeRadioButton(); });
     connect(ui->percent, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ResizeDialog::percentChanged);
     connect(ui->width,  qOverload<int>(&QSpinBox::valueChanged), this, &ResizeDialog::widthChanged);
     connect(ui->height, qOverload<int>(&QSpinBox::valueChanged), this, &ResizeDialog::heightChanged);
@@ -41,11 +69,35 @@ ResizeDialog::~ResizeDialog() {
 }
 
 void ResizeDialog::sizeSelect() {
-    if(targetSize != originalSize) {
-        emit sizeSelected(targetSize);
+    settings->setResizeFilter(selectedFilter());
+    // In copy mode "no change" is decided per image (ResizeCopy::targetSize),
+    // since the seed image's size says nothing about the others.
+    if(copyMode)
         emit specSelected(spec());
-    }
+    else if(targetSize != originalSize)
+        emit sizeSelected(targetSize);
     this->accept();
+}
+
+void ResizeDialog::setupFilterCombo() {
+    // The .ui ships a disabled placeholder; fill it with what ImageLib::scaled
+    // can actually do in this build.
+    ui->comboBox->clear();
+    ui->comboBox->addItem(tr("Nearest"), QI_FILTER_NEAREST);
+    ui->comboBox->addItem(tr("Bilinear"), QI_FILTER_BILINEAR);
+#ifdef USE_OPENCV
+    ui->comboBox->addItem(tr("Bilinear + sharpen"), QI_FILTER_CV_BILINEAR_SHARPEN);
+    ui->comboBox->addItem(tr("Bicubic"), QI_FILTER_CV_CUBIC);
+    ui->comboBox->addItem(tr("Bicubic + sharpen"), QI_FILTER_CV_CUBIC_SHARPEN);
+#endif
+    int index = ui->comboBox->findData(settings->resizeFilter());
+    ui->comboBox->setCurrentIndex(index < 0 ? 1 : index);
+    ui->comboBox->setEnabled(true);
+    ui->label_4->setEnabled(true);
+}
+
+ScalingFilter ResizeDialog::selectedFilter() const {
+    return static_cast<ScalingFilter>(ui->comboBox->currentData().toInt());
 }
 
 void ResizeDialog::setCommonResolution(int index) {
@@ -64,7 +116,9 @@ void ResizeDialog::setCommonResolution(int index) {
         case 11: res = QSize(3840, 2160); break;
         default: res = originalSize; break;
     }
-    if(ui->keepAspectRatio->isChecked())
+    if(multiImage)
+        targetSize = res; // the box itself; each image is fitted into it later
+    else if(ui->keepAspectRatio->isChecked())
         targetSize = originalSize.scaled(res, Qt::KeepAspectRatio);
     else
         targetSize = originalSize.scaled(res, Qt::IgnoreAspectRatio);
@@ -76,18 +130,41 @@ ResizeSpec ResizeDialog::spec() const {
     if(ui->byPercentage->isChecked()) {
         spec.mode = ResizeSpec::Percent;
         spec.percent = ui->percent->value();
+    } else if(byLongEdge->isChecked()) {
+        spec.mode = ResizeSpec::LongEdge;
+        spec.longEdge = longEdge->value();
     } else {
-        spec.mode = ui->keepAspectRatio->isChecked() ? ResizeSpec::FitWithin : ResizeSpec::Exact;
+        // with several images the W x H is a box to fit into, never a stretch
+        bool fit = multiImage || ui->keepAspectRatio->isChecked();
+        spec.mode = fit ? ResizeSpec::FitWithin : ResizeSpec::Exact;
         spec.size = targetSize;
     }
+    // the in-place picture view edit has no skip rule: it does what was asked
+    spec.shrinkOnly = copyMode && shrinkOnly->isChecked();
+    spec.filter = selectedFilter();
     return spec;
 }
 
 void ResizeDialog::setCopyMode(int imageCount) {
-    if(imageCount > 1)
+    copyMode = true;
+    multiImage = imageCount > 1;
+    byLongEdge->show();
+    longEdgeLabel->show();
+    longEdge->show();
+    shrinkOnly->show();
+    if(multiImage) {
         setWindowTitle(tr("Resize %1 images (saves copies)").arg(imageCount));
-    else
+        ui->byAbsoluteSize->setText(tr("Fit Within:"));
+        // W and H become the two independent sides of the box
+        ui->keepAspectRatio->blockSignals(true);
+        ui->keepAspectRatio->setChecked(false);
+        ui->keepAspectRatio->blockSignals(false);
+        ui->keepAspectRatio->hide();
+        // "expanding" past a box has no per-image meaning
+        ui->fillDesktopButton->hide();
+    } else {
         setWindowTitle(tr("Resize (saves a copy)"));
+    }
 }
 
 QSize ResizeDialog::newSize() {
@@ -124,7 +201,10 @@ void ResizeDialog::updateToTargetValues() {
 }
 
 void ResizeDialog::fitDesktop() {
-    targetSize = originalSize.scaled(desktopSize, Qt::KeepAspectRatio);
+    if(multiImage)
+        targetSize = desktopSize; // the box itself, as with the common sizes
+    else
+        targetSize = originalSize.scaled(desktopSize, Qt::KeepAspectRatio);
     updateToTargetValues();
 }
 
@@ -147,7 +227,11 @@ void ResizeDialog::onAbsoluteSizeRadioButton() {
     ui->width->setEnabled(true);
     ui->height->setEnabled(true);
     ui->percent->setEnabled(false);
+    longEdge->setEnabled(false);
     ui->keepAspectRatio->setEnabled(true);
+    // percentage mode forces aspect on; a multi-image box must stay unlinked
+    if(multiImage)
+        ui->keepAspectRatio->setChecked(false);
 
     ui->width->blockSignals(false);
     ui->height->blockSignals(false);
@@ -164,6 +248,7 @@ void ResizeDialog::onPercentageRadioButton() {
     ui->width->setEnabled(false);
     ui->height->setEnabled(false);
     ui->percent->setEnabled(true);
+    longEdge->setEnabled(false);
     ui->keepAspectRatio->setChecked(true);
     ui->keepAspectRatio->setEnabled(false);
     percentChanged(ui->percent->value());
@@ -172,6 +257,15 @@ void ResizeDialog::onPercentageRadioButton() {
     ui->height->blockSignals(false);
     ui->percent->blockSignals(false);
     ui->keepAspectRatio->blockSignals(false);
+}
+
+void ResizeDialog::onLongEdgeRadioButton() {
+    ui->width->setEnabled(false);
+    ui->height->setEnabled(false);
+    ui->percent->setEnabled(false);
+    ui->keepAspectRatio->setEnabled(false);
+    longEdge->setEnabled(true);
+    longEdge->setFocus();
 }
 
 void ResizeDialog::resetResCheckBox() {

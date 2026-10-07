@@ -11,11 +11,13 @@ struct ResizeSpec {
     enum Mode : std::uint8_t {
         Percent,    // percent of each image's own size
         FitWithin,  // largest size inside `size` that keeps the image's aspect
-        Exact       // exactly `size`, aspect ignored
+        Exact,      // exactly `size`, aspect ignored
+        LongEdge    // longer side becomes `longEdge` px, aspect kept
     };
     Mode mode = Percent;
     double percent = 100.0;
     QSize size;
+    int longEdge = 0;
     // Skip any image that would not get smaller - a copy that is the same size
     // or an upscale is rarely what a batch resize from the grid is for.
     bool shrinkOnly = true;

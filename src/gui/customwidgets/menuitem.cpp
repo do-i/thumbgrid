@@ -31,7 +31,8 @@ MenuItem::MenuItem(QWidget *parent)
 }
 
 MenuItem::~MenuItem() {
-    delete spacer;
+    // spacer is owned by mLayout (addSpacerItem) and deleted with it; deleting
+    // it here as well was a double free whenever a menu was actually destroyed
 }
 
 void MenuItem::setText(const QString& text) {

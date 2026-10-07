@@ -205,6 +205,9 @@ public:
     bool expandImage();
     ScalingFilter scalingFilter();
     void setScalingFilter(ScalingFilter mode);
+    // filter used by the Resize dialog; separate from the viewer's zoom filter
+    ScalingFilter resizeFilter();
+    void setResizeFilter(ScalingFilter mode);
     bool smoothAnimatedImages();
     void setSmoothAnimatedImages(bool mode);
     bool panelFullscreenOnly();

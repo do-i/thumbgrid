@@ -105,6 +105,7 @@ QString settingGroupFor(const QString &key) {
         {"slideshowInterval", "Document"}, {"defaultFitMode", "Document"}, {"keepFitMode", "Document"},
         {"focusPointIn1to1Mode", "Document"}, {"unlockMinZoom", "Document"}, {"zoomStep", "Document"},
         {"useFixedZoomLevels", "Document"}, {"fixedZoomLevels", "Document"}, {"scalingFilter", "Document"},
+        {"resizeFilter", "Document"},
         {"imageScrolling", "Document"}, {"mouseScrollingSpeed", "Document"}, {"trackpadDetection", "Document"},
         {"clickableEdges", "Document"}, {"clickableEdgesVisible", "Document"}, {"thumbPanelStyle", "Document"},
         {"panelPosition", "Document"}, {"panelPinned", "Document"}, {"panelPreviewsSize", "Document"},
@@ -1936,6 +1937,23 @@ ScalingFilter Settings::scalingFilter() {
 
 void Settings::setScalingFilter(ScalingFilter mode) {
     settings->writeSetting("scalingFilter", mode);
+}
+//------------------------------------------------------------------------------
+ScalingFilter Settings::resizeFilter() {
+    int mode = settings->readSetting("resizeFilter", QI_FILTER_BILINEAR).toInt();
+#ifdef USE_OPENCV
+    if(mode < QI_FILTER_NEAREST || mode > QI_FILTER_CV_CUBIC_SHARPEN)
+        mode = QI_FILTER_BILINEAR;
+#else
+    // the CV_* filters only exist in OpenCV builds
+    if(mode != QI_FILTER_NEAREST && mode != QI_FILTER_BILINEAR)
+        mode = QI_FILTER_BILINEAR;
+#endif
+    return static_cast<ScalingFilter>(mode);
+}
+
+void Settings::setResizeFilter(ScalingFilter mode) {
+    settings->writeSetting("resizeFilter", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothAnimatedImages() {

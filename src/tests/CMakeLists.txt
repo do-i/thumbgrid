@@ -218,6 +218,22 @@ add_test(
     COMMAND thumbgrid_grid_resize_copies_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_resize_dialog_modes_test
+    behavior/test_resize_dialog_modes.cpp
+)
+add_test(
+    NAME "The resize dialog offers per-flow controls and reports the right per-image rule"
+    COMMAND thumbgrid_resize_dialog_modes_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_viewer_menu_tooltips_test
+    behavior/test_viewer_menu_icons_have_tooltips.cpp
+)
+add_test(
+    NAME "Picture view menu icons name their action on hover"
+    COMMAND thumbgrid_viewer_menu_tooltips_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_exif_editing_test
     behavior/test_exif_editing_round_trips.cpp
 )

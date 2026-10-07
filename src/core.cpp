@@ -1244,7 +1244,8 @@ void Core::rotateByDegrees(int degrees) {
 }
 
 void Core::resize(QSize size) {
-    edit_template(false, tr("Resize"), { ImageLib::scaled }, size, QI_FILTER_BILINEAR);
+    // the dialog stores its filter choice before emitting
+    edit_template(false, tr("Resize"), { ImageLib::scaled }, size, settings->resizeFilter());
 }
 
 void Core::resizeSelectionToCopies(ResizeSpec spec) {

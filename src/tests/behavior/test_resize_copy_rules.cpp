@@ -19,6 +19,7 @@ private slots:
     void fitWithinKeepsEachImageAspect();
     void fitWithinSnapsToTheBoxTheDialogShowed();
     void exactIgnoresAspect();
+    void longEdgeSetsTheLongerSideOfEachImage();
     void shrinkOnlySkipsAnythingNotSmaller();
     void unchangedSizeIsAlwaysSkipped();
     void copyPathAddsSizeSuffixAndAvoidsCollisions();
@@ -81,6 +82,20 @@ void ResizeCopyRulesTest::fitWithinSnapsToTheBoxTheDialogShowed() {
 
 void ResizeCopyRulesTest::exactIgnoresAspect() {
     QCOMPARE(ResizeCopy::targetSize(QSize(400, 200), boxed(ResizeSpec::Exact, QSize(300, 50))), QSize(300, 50));
+}
+
+void ResizeCopyRulesTest::longEdgeSetsTheLongerSideOfEachImage() {
+    ResizeSpec spec;
+    spec.mode = ResizeSpec::LongEdge;
+    spec.longEdge = 200;
+    QCOMPARE(ResizeCopy::targetSize(QSize(400, 300), spec), QSize(200, 150));
+    QCOMPARE(ResizeCopy::targetSize(QSize(300, 400), spec), QSize(150, 200));
+    QCOMPARE(ResizeCopy::targetSize(QSize(1000, 1000), spec), QSize(200, 200));
+    // the long side is exact and the short one rounds: 400 * 100/600 = 66.67 -> 67
+    spec.longEdge = 100;
+    QCOMPARE(ResizeCopy::targetSize(QSize(600, 400), spec), QSize(100, 67));
+    // already at or below the long edge: nothing to shrink
+    QVERIFY(!ResizeCopy::targetSize(QSize(80, 60), spec).isValid());
 }
 
 void ResizeCopyRulesTest::shrinkOnlySkipsAnythingNotSmaller() {
