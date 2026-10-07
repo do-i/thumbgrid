@@ -12,6 +12,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     script.cpp
     fileoperations.cpp
     logging.cpp
+    resizecopy.cpp
 )
 
 if(WIN32)

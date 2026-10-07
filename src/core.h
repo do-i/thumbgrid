@@ -149,6 +149,7 @@ private slots:
     void onFileModified(const QString& filePath);
     void showResizeDialog();
     void resize(QSize size);
+    void resizeSelectionToCopies(ResizeSpec spec);
     void flipH();
     void flipV();
     void crop(QRect rect);

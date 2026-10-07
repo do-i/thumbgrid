@@ -33,6 +33,12 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     connect(convertItem, &ContextMenuItem::pressed, this, &GridContextMenu::switchToConvertPage);
     mainLayout->addWidget(convertItem);
 
+    // writes resized copies of the selection; the originals are never touched
+    resizeItem = makeItem(tr("Resize..."), ":/res/icons/common/menuitem/resize16.png");
+    resizeItem->setObjectName("menuResize");
+    resizeItem->setAction("resize");
+    mainLayout->addWidget(resizeItem);
+
     renameItem = makeItem(tr("Rename..."), ":/res/icons/common/overlay/edit16.png");
     renameItem->setObjectName("menuRename");
     renameItem->setAction("renameFile");
@@ -177,6 +183,7 @@ void GridContextMenu::addSeparator(QWidget *page, QVBoxLayout *layout) {
 
 void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
     convertItem->setEnabled(info.total() > 0 && info.allConvertible);
+    resizeItem->setEnabled(info.total() > 0 && info.allConvertible);
     renameItem->setEnabled(info.total() == 1);
     copyPathItem->setEnabled(info.total() > 0);
     fileInfoItem->setEnabled(info.total() == 1);

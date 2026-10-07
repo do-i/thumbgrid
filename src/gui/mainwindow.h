@@ -175,6 +175,7 @@ signals:
     void convertFormatRequested(QString);
     void showFoldersChanged(bool);
     void resizeRequested(QSize);
+    void resizeCopiesRequested(ResizeSpec);
     void renameRequested(QString);
     // folder view type-ahead search: the typed prefix, resolved by Core
     void searchQueryChanged(QString);
@@ -223,6 +224,9 @@ public slots:
     void showSaveDialog(QString filePath);
     QString getSaveFileName(QString fileName);
     void showResizeDialog(QSize initialSize);
+    // grid flow: the dialog is seeded from one image but its choice is applied
+    // to all `imageCount` selected images, written as new files
+    void showResizeCopiesDialog(QSize seedSize, int imageCount);
     void showSettings();
     void triggerFullScreen();
     void showMessageDirectory(QString dirName);

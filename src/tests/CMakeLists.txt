@@ -202,6 +202,22 @@ add_test(
     COMMAND thumbgrid_grid_context_menu_gating_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_resize_copy_rules_test
+    behavior/test_resize_copy_rules.cpp
+)
+add_test(
+    NAME "Resize-to-copy sizes, names and writes copies without touching originals"
+    COMMAND thumbgrid_resize_copy_rules_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_grid_resize_copies_test
+    behavior/test_grid_resize_writes_copies.cpp
+)
+add_test(
+    NAME "Resize from the grid menu writes resized copies of the selection"
+    COMMAND thumbgrid_grid_resize_copies_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_exif_editing_test
     behavior/test_exif_editing_round_trips.cpp
 )

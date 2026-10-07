@@ -35,6 +35,7 @@ protected:
 private:
     QStackedWidget *stack;
     ContextMenuItem *convertItem;
+    ContextMenuItem *resizeItem;
     ContextMenuItem *renameItem;
     ContextMenuItem *copyPathItem;
     ContextMenuItem *fileInfoItem;

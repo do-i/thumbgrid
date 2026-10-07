@@ -12,6 +12,7 @@
 #include <QRadioButton>
 #include <QSpinBox>
 #include <QVBoxLayout>
+#include "utils/resizecopy.h"
 
 namespace Ui {
     class ResizeDialog;
@@ -24,6 +25,13 @@ public:
     explicit ResizeDialog(QSize initialSize, QWidget *parent = nullptr);
     ~ResizeDialog() override;
     QSize newSize();
+    // The choice as a per-image rule: percentage stays a percentage, a W x H
+    // with aspect kept becomes "fit within" so other aspect ratios are not
+    // stretched when the same spec is applied to several images.
+    ResizeSpec spec() const;
+    // Retitles the dialog for the grid flow, which writes new files instead
+    // of editing the open image.
+    void setCopyMode(int imageCount);
 
 public slots:
     int exec() override;
@@ -53,4 +61,5 @@ private slots:
     void onAbsoluteSizeRadioButton();
 signals:
     void sizeSelected(QSize);
+    void specSelected(ResizeSpec);
 };

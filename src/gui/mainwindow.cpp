@@ -705,6 +705,13 @@ void MW::showResizeDialog(QSize initialSize) {
     dialog.exec();
 }
 
+void MW::showResizeCopiesDialog(QSize seedSize, int imageCount) {
+    ResizeDialog dialog(seedSize, this);
+    dialog.setCopyMode(imageCount);
+    connect(&dialog, &ResizeDialog::specSelected, this, &MW::resizeCopiesRequested);
+    dialog.exec();
+}
+
 DialogResult MW::fileReplaceDialog(QString src, QString dst, FileReplaceMode mode, bool multiple) {
     FileReplaceDialog dialog(this);
     dialog.setModal(true);

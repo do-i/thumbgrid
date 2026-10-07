@@ -12,6 +12,15 @@ FileOperationsController::FileOperationsController(MW *mw, QObject *parent)
 {
 }
 
+FileOperationsController::~FileOperationsController() {
+    // the worker only touches its own files, but its completion report targets
+    // this object - stop after the current file and let it drain first
+    if(resizeThread) {
+        cancelResize = true;
+        resizeThread->wait();
+    }
+}
+
 void FileOperationsController::setModel(std::shared_ptr<DirectoryModel> newModel) {
     model = std::move(newModel);
 }
@@ -351,19 +360,7 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
     // Expand any selected directory to its directly contained convertible
     // images (non-recursive); a folder with nothing convertible contributes
     // nothing and falls through to the "Nothing to convert" message below.
-    QStringList expandedPaths;
-    for(const QString &path : paths) {
-        if(QFileInfo(path).isDir()) {
-            QDirIterator it(path, QDir::Files | QDir::Hidden);
-            while(it.hasNext()) {
-                QString entry = it.next();
-                if(DocumentInfo::isConvertibleImageFile(entry))
-                    expandedPaths << entry;
-            }
-        } else {
-            expandedPaths << path;
-        }
-    }
+    QStringList expandedPaths = expandSelectedFolders(paths);
 
     QList<ConvertJob> jobs;
     int skipped = 0;
@@ -429,4 +426,83 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
         mw->showWarning(tr("Converted %1, failed %2").arg(converted).arg(failed));
     else
         mw->showError(tr("Could not convert file(s)"));
+}
+
+QStringList FileOperationsController::expandSelectedFolders(const QStringList& paths) {
+    QStringList expandedPaths;
+    for(const QString &path : paths) {
+        if(QFileInfo(path).isDir()) {
+            QDirIterator it(path, QDir::Files | QDir::Hidden);
+            while(it.hasNext()) {
+                QString entry = it.next();
+                if(DocumentInfo::isConvertibleImageFile(entry))
+                    expandedPaths << entry;
+            }
+        } else {
+            expandedPaths << path;
+        }
+    }
+    return expandedPaths;
+}
+
+bool FileOperationsController::isResizeRunning() const {
+    return resizeThread != nullptr;
+}
+
+// Copies only: the originals and the model's cached images are never written,
+// so the worker needs no access to the model and cannot clobber a user's
+// unsaved edit. New files reach the grid through the directory watcher.
+void FileOperationsController::resizeToCopies(const QStringList& paths, const ResizeSpec& spec) {
+    if(isResizeRunning()) {
+        mw->showMessage(tr("A resize is already running"));
+        return;
+    }
+    QStringList files = expandSelectedFolders(paths);
+    if(files.isEmpty()) {
+        mw->showMessage(tr("Nothing to resize"));
+        return;
+    }
+    auto tally = [](ResizeCopy::Outcome outcome, int &resized, int &skipped, int &failed) {
+        switch(outcome) {
+            case ResizeCopy::Outcome::Resized: resized++; break;
+            case ResizeCopy::Outcome::Skipped: skipped++; break;
+            case ResizeCopy::Outcome::Failed:  failed++;  break;
+        }
+    };
+    if(files.size() == 1) {
+        int resized = 0, skipped = 0, failed = 0;
+        tally(ResizeCopy::resizeFile(files.first(), spec).outcome, resized, skipped, failed);
+        reportResize(resized, skipped, failed);
+        return;
+    }
+
+    mw->showMessage(tr("Resizing %1 images...").arg(files.size()));
+    cancelResize = false;
+    resizeThread = QThread::create([this, files, spec, tally]() {
+        int resized = 0, skipped = 0, failed = 0;
+        QSet<QString> reserved;
+        for(const QString &path : files) {
+            if(cancelResize)
+                break;
+            tally(ResizeCopy::resizeFile(path, spec, &reserved).outcome, resized, skipped, failed);
+        }
+        QMetaObject::invokeMethod(this, [this, resized, skipped, failed]() {
+            resizeThread = nullptr;
+            reportResize(resized, skipped, failed);
+        }, Qt::QueuedConnection);
+    });
+    connect(resizeThread, &QThread::finished, resizeThread, &QObject::deleteLater);
+    resizeThread->start(QThread::LowPriority);
+}
+
+void FileOperationsController::reportResize(int resized, int skipped, int failed) {
+    if(resized && !skipped && !failed)
+        mw->showMessageSuccess(tr("Resized %1 file(s)").arg(resized));
+    else if(resized)
+        mw->showWarning(tr("Resized %1, skipped %2, failed %3").arg(resized).arg(skipped).arg(failed));
+    else if(failed)
+        mw->showError(tr("Could not resize file(s)"));
+    else
+        mw->showMessage(tr("Nothing to resize - images are not larger than the target"));
+    emit resizeFinished(resized, skipped, failed);
 }

@@ -87,6 +87,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     GridContextMenu *menu = openContextMenuFor(grid);
     QVERIFY2(menu != nullptr, "The grid context menu should exist.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert enabled for single png.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuResize")->isEnabled(), "Resize enabled for single png.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single png.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuFileInfo")->isEnabled(), "File info enabled for single png.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for single png.");
@@ -99,6 +100,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     grid->select(animGif);
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for gif.");
+    QVERIFY2(!menu->findChild<ContextMenuItem *>("menuResize")->isEnabled(), "Resize disabled for gif.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single gif.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuFileInfo")->isEnabled(), "File info enabled for single gif.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for single gif.");
@@ -111,6 +113,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     grid->select(QList<int>{aPng, bPng});
     menu = openContextMenuFor(grid);
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert enabled for two pngs.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuResize")->isEnabled(), "Resize enabled for two pngs.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename disabled for multi-selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuFileInfo")->isEnabled(), "File info disabled for multi-selection.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for two pngs.");
@@ -123,6 +126,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     grid->select(QList<int>{aPng, animGif});
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for png+gif.");
+    QVERIFY2(!menu->findChild<ContextMenuItem *>("menuResize")->isEnabled(), "Resize disabled for png+gif.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename disabled for png+gif (multi).");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuFileInfo")->isEnabled(), "File info disabled for png+gif (multi).");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for png+gif.");
@@ -132,6 +136,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     grid->select(withimgDir);
     menu = openContextMenuFor(grid);
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert enabled for folder with image.");
+    QVERIFY2(menu->findChild<ContextMenuItem *>("menuResize")->isEnabled(), "Resize enabled for folder with image.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single folder.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuFileInfo")->isEnabled(), "File info enabled for single folder with image.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for folder with image.");
@@ -141,6 +146,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     grid->select(noimgDir);
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for folder without image.");
+    QVERIFY2(!menu->findChild<ContextMenuItem *>("menuResize")->isEnabled(), "Resize disabled for folder without image.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename enabled for single folder.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuFileInfo")->isEnabled(), "File info enabled for single folder without image.");
     QVERIFY2(menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path enabled for folder without image.");
@@ -151,6 +157,7 @@ void GridContextMenuGatingTest::gridContextMenuGatesFileOpsOnSelection() {
     grid->select(parentTile);
     menu = openContextMenuFor(grid);
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuConvert")->isEnabled(), "Convert disabled for empty selection.");
+    QVERIFY2(!menu->findChild<ContextMenuItem *>("menuResize")->isEnabled(), "Resize disabled for empty selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuRename")->isEnabled(), "Rename disabled for empty selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuFileInfo")->isEnabled(), "File info disabled for empty selection.");
     QVERIFY2(!menu->findChild<ContextMenuItem *>("menuCopyPath")->isEnabled(), "Copy path disabled for empty selection.");

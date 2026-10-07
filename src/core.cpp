@@ -15,6 +15,7 @@
 
 #include <QFile>
 #include <QFileDialog>
+#include <QImageReader>
 #include <utility>
 
 Core::Core()
@@ -142,6 +143,7 @@ void Core::connectComponents() {
     connect(mw, &MW::saveRequested,         this, &Core::saveCurrentFile);
     connect(mw, &MW::saveAsRequested,       this, &Core::saveCurrentFileAs);
     connect(mw, &MW::resizeRequested,       this, &Core::resize);
+    connect(mw, &MW::resizeCopiesRequested, this, &Core::resizeSelectionToCopies);
     connect(mw, &MW::renameRequested,       this, &Core::renameCurrentSelection);
     connect(mw, &MW::searchQueryChanged,    this, &Core::searchFolderView);
     connect(mw, &MW::sortingSelected,       this, &Core::sortBy);
@@ -1173,6 +1175,30 @@ void Core::requestSavePath() {
 void Core::showResizeDialog() {
     if(model->isEmpty())
         return;
+    if(mw->currentViewMode() == MODE_FOLDERVIEW) {
+        // The grid writes resized copies of the whole selection. An in-place
+        // edit here would never be shown or saved, so it is not offered.
+        QStringList images = FileOperationsController::expandSelectedFolders(currentSelection());
+        QSize seed;
+        // seed from the most recently selected image; header only, no decode
+        for(auto it = images.crbegin(); it != images.crend() && !seed.isValid(); ++it) {
+            DocumentInfo info(*it);
+            if(info.type() != STATIC)
+                continue;
+            QSize size = QImageReader(*it).size();
+            // the loader bakes exif rotation into the pixels; match it
+            if(info.exifOrientation() >= 5)
+                size.transpose();
+            if(!size.isEmpty())
+                seed = size;
+        }
+        if(!seed.isValid()) {
+            mw->showMessage(tr("Nothing to resize"));
+            return;
+        }
+        mw->showResizeCopiesDialog(seed, images.size());
+        return;
+    }
     auto img = model->getImage(selectedPath());
     if(img)
         mw->showResizeDialog(img->size());
@@ -1219,6 +1245,12 @@ void Core::rotateByDegrees(int degrees) {
 
 void Core::resize(QSize size) {
     edit_template(false, tr("Resize"), { ImageLib::scaled }, size, QI_FILTER_BILINEAR);
+}
+
+void Core::resizeSelectionToCopies(ResizeSpec spec) {
+    if(model->isEmpty())
+        return;
+    fileOps->resizeToCopies(currentSelection(), spec);
 }
 
 void Core::crop(QRect rect) {

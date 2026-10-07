@@ -41,8 +41,10 @@ ResizeDialog::~ResizeDialog() {
 }
 
 void ResizeDialog::sizeSelect() {
-    if(targetSize != originalSize)
+    if(targetSize != originalSize) {
         emit sizeSelected(targetSize);
+        emit specSelected(spec());
+    }
     this->accept();
 }
 
@@ -67,6 +69,25 @@ void ResizeDialog::setCommonResolution(int index) {
     else
         targetSize = originalSize.scaled(res, Qt::IgnoreAspectRatio);
     updateToTargetValues();
+}
+
+ResizeSpec ResizeDialog::spec() const {
+    ResizeSpec spec;
+    if(ui->byPercentage->isChecked()) {
+        spec.mode = ResizeSpec::Percent;
+        spec.percent = ui->percent->value();
+    } else {
+        spec.mode = ui->keepAspectRatio->isChecked() ? ResizeSpec::FitWithin : ResizeSpec::Exact;
+        spec.size = targetSize;
+    }
+    return spec;
+}
+
+void ResizeDialog::setCopyMode(int imageCount) {
+    if(imageCount > 1)
+        setWindowTitle(tr("Resize %1 images (saves copies)").arg(imageCount));
+    else
+        setWindowTitle(tr("Resize (saves a copy)"));
 }
 
 QSize ResizeDialog::newSize() {
