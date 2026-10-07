@@ -95,26 +95,85 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <location filename="../../gui/contextmenu.cpp" line="175"/>
+        <source>Zoom in</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="176"/>
+        <source>Zoom out</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="177"/>
+        <source>Original size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="178"/>
+        <source>Fit width</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="179"/>
+        <source>Fit window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="180"/>
+        <source>Fit window (stretch)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="181"/>
+        <source>Rotate left</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="182"/>
+        <source>Rotate right</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="183"/>
+        <source>Flip horizontally</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="184"/>
+        <source>Flip vertically</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="185"/>
+        <source>Crop</source>
+        <translation type="unfinished">Kırp</translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="186"/>
+        <source>Resize...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Image info</source>
         <translation type="vanished">Görsel bilgisi</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="106"/>
         <source>Strip metadata</source>
-        <translation>Meta verileri kaldır</translation>
+        <translation type="vanished">Meta verileri kaldır</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="110"/>
+        <location filename="../../gui/contextmenu.cpp" line="109"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="118"/>
+        <location filename="../../gui/contextmenu.cpp" line="117"/>
         <source>Back</source>
         <translation>Geri</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="121"/>
+        <location filename="../../gui/contextmenu.cpp" line="120"/>
         <source>Configure menu</source>
         <translation>Menüyü düzenle</translation>
     </message>
@@ -136,42 +195,47 @@
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="293"/>
+        <location filename="../../core.cpp" line="297"/>
         <source>Updated: </source>
         <translation>Güncellendi: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="298"/>
+        <location filename="../../core.cpp" line="302"/>
         <source>Welcome to </source>
         <translation>Hoş geldiniz</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="298"/>
+        <location filename="../../core.cpp" line="302"/>
         <source> version </source>
         <translation> sürüm </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="305"/>
+        <location filename="../../core.cpp" line="309"/>
         <source>Shuffle mode: OFF</source>
         <translation>Karıştırma modu: KAPALI</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="308"/>
+        <location filename="../../core.cpp" line="312"/>
         <source>Shuffle mode: ON</source>
         <translation>Karıştırma modu: AÇIK</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="317"/>
+        <location filename="../../core.cpp" line="321"/>
         <source>Slideshow: OFF</source>
         <translation>Slayt gösterisi: KAPALI</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="321"/>
+        <location filename="../../core.cpp" line="327"/>
         <source>Slideshow: ON</source>
         <translation>Slayt gösterisi: AÇIK</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="374"/>
+        <location filename="../../core.cpp" line="344"/>
+        <source>Directory is empty.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="403"/>
         <source>Cannot display this file type</source>
         <translation>Bu dosya türü görüntülenemiyor</translation>
     </message>
@@ -236,91 +300,218 @@
         <translation type="vanished">Silinemiyor</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="421"/>
+        <location filename="../../core.cpp" line="462"/>
         <source>Cannot strip metadata from this file type</source>
         <translation>Bu dosya türünden meta veriler kaldırılamıyor</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="426"/>
+        <location filename="../../core.cpp" line="467"/>
+        <source>Clear metadata</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="468"/>
+        <source>Permanently remove all metadata from &quot;%1&quot;?
+This rewrites the file and cannot be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="480"/>
         <source>Metadata removed</source>
         <translation>Meta veriler kaldırıldı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="428"/>
+        <location filename="../../core.cpp" line="482"/>
         <source>Could not remove metadata</source>
         <translation>Meta veriler kaldırılamadı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="492"/>
+        <location filename="../../core.cpp" line="493"/>
+        <source>Remove all Exif</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="494"/>
+        <source>Permanently remove every Exif tag from &quot;%1&quot;?
+XMP and the colour profile are not affected.
+This rewrites the file and cannot be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="497"/>
+        <source>Exif removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="497"/>
+        <source>Could not remove Exif</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="502"/>
+        <source>Remove all XMP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="503"/>
+        <source>Permanently remove every XMP property from &quot;%1&quot;?
+Exif and the colour profile are not affected.
+This rewrites the file and cannot be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="506"/>
+        <source>XMP removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="506"/>
+        <source>Could not remove XMP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="511"/>
+        <source>Remove colour profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="512"/>
+        <source>Permanently remove the embedded colour profile from &quot;%1&quot;?
+Exif and XMP are not affected, but the image may be displayed with different colours afterwards.
+This rewrites the file and cannot be undone.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="516"/>
+        <source>Colour profile removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="517"/>
+        <source>Could not remove the colour profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="534"/>
+        <source>Cannot remove metadata from this file type</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="559"/>
+        <source>Could not save XMP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="565"/>
+        <source>XMP saved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="592"/>
+        <source>Could not save property</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="598"/>
+        <source>Property saved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="608"/>
+        <source>Could not remove property</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="614"/>
+        <source>Property removed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="626"/>
+        <source>Could not save metadata</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="637"/>
+        <source>Metadata saved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="700"/>
         <source>File copied</source>
         <translation>Dosya kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="523"/>
+        <location filename="../../core.cpp" line="731"/>
         <source>%1 items cut</source>
         <translation>%1 öğe kesildi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="523"/>
+        <location filename="../../core.cpp" line="731"/>
         <source>Item cut</source>
         <translation>Öğe kesildi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="525"/>
+        <location filename="../../core.cpp" line="733"/>
         <source>%1 items copied</source>
         <translation>%1 öğe kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="525"/>
+        <location filename="../../core.cpp" line="733"/>
         <source>Item copied</source>
         <translation>Öğe kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="581"/>
+        <location filename="../../core.cpp" line="789"/>
         <source>Nothing to paste</source>
         <translation>Yapıştırılacak bir şey yok</translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1196"/>
+        <source>Nothing to resize</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <source>Move</source>
         <translation type="vanished">Taşı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="591"/>
+        <location filename="../../core.cpp" line="799"/>
         <source>%1 items moved</source>
         <translation>%1 öğe taşındı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="591"/>
+        <location filename="../../core.cpp" line="799"/>
         <source>Item moved</source>
         <translation>Öğe taşındı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="594"/>
+        <location filename="../../core.cpp" line="807"/>
         <source>%1 items pasted</source>
         <translation>%1 öğe yapıştırıldı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="594"/>
+        <location filename="../../core.cpp" line="807"/>
         <source>Item pasted</source>
         <translation>Öğe yapıştırıldı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="610"/>
+        <location filename="../../core.cpp" line="823"/>
         <source>Path copied</source>
         <translation>Dosya yolu kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="610"/>
+        <location filename="../../core.cpp" line="823"/>
         <source>%1 paths copied</source>
         <translation>%1 yol kopyalandı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="753"/>
+        <location filename="../../core.cpp" line="1009"/>
         <source>File exists</source>
         <translation>Dosya zaten var</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="753"/>
+        <location filename="../../core.cpp" line="1009"/>
         <source>Overwrite file?</source>
         <translation>Dosyanın üzerine yazılsın mı?</translation>
     </message>
@@ -381,113 +572,108 @@ Devam edilsin mi?</translation>
         <translation type="vanished">Dosya kopyalandı.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="875"/>
+        <location filename="../../core.cpp" line="1131"/>
         <source>Move to...</source>
         <translation type="unfinished">Şuraya taşı...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="880"/>
-        <source>Cannot move a folder into itself</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../core.cpp" line="941"/>
+        <location filename="../../core.cpp" line="1217"/>
         <source>Perform action &quot;</source>
         <translation>Eylemi gerçekleştir: &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="941"/>
+        <location filename="../../core.cpp" line="1217"/>
         <source>Changes will be saved immediately.</source>
         <translation>Değişiklikler hemen kaydedilecektir.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="959"/>
+        <location filename="../../core.cpp" line="1235"/>
         <source>Flip horizontal</source>
         <translation>Yatay çevir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="963"/>
+        <location filename="../../core.cpp" line="1239"/>
         <source>Flip vertical</source>
         <translation>Dikey çevir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="967"/>
+        <location filename="../../core.cpp" line="1243"/>
         <source>Rotate</source>
         <translation>Döndür</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="971"/>
+        <location filename="../../core.cpp" line="1248"/>
         <source>Resize</source>
         <translation>Yeniden boyutlandır</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="977"/>
+        <location filename="../../core.cpp" line="1260"/>
         <source>Crop</source>
         <translation>Kırp</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1007"/>
+        <location filename="../../core.cpp" line="1290"/>
         <source>File saved</source>
         <translation>Dosya kaydedildi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1010"/>
+        <location filename="../../core.cpp" line="1293"/>
         <source>Could not save file</source>
         <translation>Dosya kaydedilemedi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1127"/>
-        <location filename="../../core.cpp" line="1128"/>
+        <location filename="../../core.cpp" line="1429"/>
+        <location filename="../../core.cpp" line="1430"/>
         <source>New Folder</source>
         <translation>Yeni Klasör</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1127"/>
+        <location filename="../../core.cpp" line="1429"/>
         <source>Folder name:</source>
         <translation>Klasör adı:</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1135"/>
+        <location filename="../../core.cpp" line="1437"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>Klasör adı yol ayırıcıları içeremez.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1169"/>
+        <location filename="../../core.cpp" line="1471"/>
         <source>Could not open image</source>
         <translation>Görüntü açılamadı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1173"/>
+        <location filename="../../core.cpp" line="1475"/>
         <source>Can only print static images</source>
         <translation>Sadece hareketsiz görüntüler yazdırılabilir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1221"/>
+        <location filename="../../core.cpp" line="1523"/>
         <source>Cannot view root folder.</source>
         <translation>Kök klasör görüntülenemiyor.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1229"/>
+        <location filename="../../core.cpp" line="1531"/>
         <source>Could not open path: </source>
         <translation>Dosya yolu açılamadı: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1269"/>
+        <location filename="../../core.cpp" line="1571"/>
         <source>Could not load folder: </source>
         <translation>Klasör yüklenemedi: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1327"/>
+        <location filename="../../core.cpp" line="1629"/>
         <source>Already at root folder.</source>
         <translation>Zaten kök klasördesiniz.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1494"/>
+        <location filename="../../core.cpp" line="1796"/>
         <source>End of directory.</source>
         <translation>Dizin sonu.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1544"/>
+        <location filename="../../core.cpp" line="1846"/>
         <source>Cannot display file: </source>
         <translation>Dosya görüntülenemiyor: </translation>
     </message>
@@ -496,7 +682,7 @@ Devam edilsin mi?</translation>
         <translation type="vanished">Yükleme başarısız: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1587"/>
+        <location filename="../../core.cpp" line="1889"/>
         <source>Error: could not load image.</source>
         <translation>Hata: Görüntü yüklenemedi.</translation>
     </message>
@@ -581,306 +767,319 @@ Devam edilsin mi?</translation>
 <context>
     <name>CustomMessageBox</name>
     <message>
-        <location filename="../../gui/dialogs/custommessagebox.cpp" line="109"/>
+        <location filename="../../gui/dialogs/custommessagebox.cpp" line="111"/>
         <source>OK</source>
         <translation type="unfinished">Tamam</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/custommessagebox.cpp" line="110"/>
+        <location filename="../../gui/dialogs/custommessagebox.cpp" line="112"/>
         <source>Cancel</source>
         <translation type="unfinished">İptal</translation>
     </message>
 </context>
 <context>
+    <name>DateTimePickerPopup</name>
+    <message>
+        <location filename="../../gui/customwidgets/datetimepickerpopup.cpp" line="42"/>
+        <source>Now</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/datetimepickerpopup.cpp" line="49"/>
+        <source>Set</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>DuplicateFinderDialog</name>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="90"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="469"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="91"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="470"/>
         <source>Find Duplicates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="146"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="147"/>
         <source>Mode:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="147"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="148"/>
         <source>One image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="149"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="150"/>
         <source>Compare folders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="151"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="152"/>
         <source>Within folders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="176"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="177"/>
         <source>Image:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="179"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="180"/>
         <source>Browse...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="182"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="183"/>
         <source>Select image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="192"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="193"/>
         <source>Source folders (reference):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="197"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="376"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="198"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="377"/>
         <source>Search in:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="204"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="205"/>
         <source>Include subfolders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="208"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="209"/>
         <source>Similarity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="224"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="225"/>
         <source>Match rotated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="225"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="226"/>
         <source>Match mirrored</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="235"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="510"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="236"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="511"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="239"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="240"/>
         <source>Clear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="246"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="257"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="247"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="258"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="266"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="267"/>
         <source>Filter:</source>
         <translation type="unfinished">Filtre:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="268"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="269"/>
         <source>name or path...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="270"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="271"/>
         <source>Min similarity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="315"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="316"/>
         <source>Preview</source>
         <translation type="unfinished">Ön izleme</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="329"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="330"/>
         <source>Reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="330"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="331"/>
         <source>Match</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="336"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="337"/>
         <source>Smart select</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="341"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="342"/>
         <source>Select all matches</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="342"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="343"/>
         <source>Keep largest resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="343"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="344"/>
         <source>Keep largest file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="344"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="345"/>
         <source>Keep newest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="345"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="346"/>
         <source>Keep oldest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="347"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="348"/>
         <source>Clear selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="351"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="352"/>
         <source>0 selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="354"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="355"/>
         <source>Move selected...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="357"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="358"/>
         <source>Delete selected...</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="366"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="367"/>
         <source>%n selected</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="380"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="381"/>
         <source>Target folders (searched for copies of the sources):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="383"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="384"/>
         <source>Folders to dedupe:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="445"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="446"/>
         <source>Select an image to search for.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="447"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="448"/>
         <source>Add at least one source folder.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="449"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="450"/>
         <source>Add at least one folder to search in.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="476"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="477"/>
         <source>Scanning...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="477"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="478"/>
         <source>Cancel</source>
         <translation type="unfinished">İptal</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="485"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="486"/>
         <source>%1 files · %2 hashed · %3 matches</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="516"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="517"/>
         <source>Cancelled</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="518"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="519"/>
         <source>Done · %n match(es)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="545"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="546"/>
         <source>Move %n file(s) to trash?</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="547"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="559"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="635"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="548"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="560"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="636"/>
         <source>Move to trash</source>
         <translation type="unfinished">Çöp kutusuna taşı</translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="557"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="558"/>
         <source>Moved %n file(s) to trash</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="560"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="561"/>
         <source>Could not trash %n file(s):</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="574"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="575"/>
         <source>Move duplicates to...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="588"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="622"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="589"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="623"/>
         <source>Move duplicates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="588"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="589"/>
         <source>Could not create %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="620"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="621"/>
         <source>Moved %n file(s) to %1</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="623"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="624"/>
         <source>Could not move %n file(s):</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="633"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="634"/>
         <source>Open</source>
         <translation type="unfinished">Aç</translation>
     </message>
@@ -926,6 +1125,14 @@ Devam edilsin mi?</translation>
     </message>
 </context>
 <context>
+    <name>EntryInfoItem</name>
+    <message>
+        <location filename="../../gui/customwidgets/entryinfoitem.cpp" line="248"/>
+        <source>Copy</source>
+        <translation type="unfinished">Kopyala</translation>
+    </message>
+</context>
+<context>
     <name>FVOptionsPopup</name>
     <message>
         <location filename="../../gui/folderview/fvoptionspopup.ui" line="32"/>
@@ -941,214 +1148,368 @@ Devam edilsin mi?</translation>
 <context>
     <name>FileInfoDialog</name>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="27"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="86"/>
         <source>File info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="39"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="98"/>
         <source>No selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="49"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="108"/>
         <source>General</source>
         <translation type="unfinished">Genel</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="61"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="121"/>
+        <source>No metadata</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="133"/>
         <source>EXIF</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="103"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="123"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="148"/>
+        <source>No XMP metadata</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="160"/>
+        <source>XMP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="172"/>
+        <source>No ICC profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="177"/>
+        <source>ICC</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="197"/>
+        <source>Remove all Exif</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="198"/>
+        <source>Permanently remove every Exif tag from this file. XMP and the colour profile are not affected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="200"/>
+        <source>Remove all XMP</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="201"/>
+        <source>Permanently remove every XMP property from this file. Exif and the colour profile are not affected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="203"/>
+        <source>Remove colour profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="204"/>
+        <source>Permanently remove the embedded ICC colour profile. Exif and XMP are not affected.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="221"/>
+        <source>Remove properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="414"/>
         <source>Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="104"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="125"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="416"/>
+        <source>Symlink to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="425"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="445"/>
         <source>Permissions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="106"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="127"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="427"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="447"/>
         <source>Owner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="114"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="435"/>
         <source>Contains</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="115"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="436"/>
         <source>%n file(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="116"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="437"/>
         <source>%n folder(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="117"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="129"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="438"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="449"/>
         <source>Modified</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="124"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="444"/>
         <source>Size</source>
         <translation type="unfinished">Boyut</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="128"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="448"/>
         <source>Created</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="513"/>
+        <source>Showing %1 of %2 tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="574"/>
+        <source>Pick a date and time</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="614"/>
+        <source>Date/Time must look like 2026:07:26 10:30:00.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="683"/>
+        <source>Standard properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="696"/>
+        <source>Custom properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="710"/>
+        <source>This file already holds the maximum of %1 custom properties.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="715"/>
+        <source>Showing %1 of %2 properties.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="717"/>
+        <source>%1 metadata is shown read-only; ThumbGrid does not write XMP into %1 files.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="720"/>
+        <source>This file is read-only, so its XMP cannot be edited.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="750"/>
+        <source>One per line</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="774"/>
+        <source>Namespace URI</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="821"/>
+        <source>A property needs a key, for example Xmp.dc.title.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="836"/>
+        <source>&quot;%1&quot; is a standard property - edit it in the field above.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="837"/>
+        <source>&quot;%1&quot; belongs to a standard schema, so it cannot be edited here.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="849"/>
+        <source>A key looks like Xmp.prefix.Name.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="855"/>
+        <source>&quot;%1&quot; is a new namespace prefix, so it needs a namespace URI.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="967"/>
+        <source>(unknown)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="968"/>
+        <source>%1 (broken link)</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>FileOperationsController</name>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="31"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="109"/>
         <source>Copy</source>
         <translation type="unfinished">Kopyala</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="38"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="120"/>
         <source>Move</source>
         <translation type="unfinished">Taşı</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="55"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="137"/>
         <source>%1 &quot;%2&quot; to &quot;%3&quot;?</source>
         <translation type="unfinished">&quot;%2&quot; öğesini &quot;%3&quot; konumuna %1?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="57"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="139"/>
         <source>%1 %2 items to &quot;%3&quot;?</source>
         <translation type="unfinished">%2 öğeyi &quot;%3&quot; konumuna %1?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="146"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="246"/>
         <source>Could not create directory </source>
         <translation type="unfinished">Dizin oluşturulamadı </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="175"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="275"/>
         <source>File moved.</source>
         <translation type="unfinished">Dosya taşındı.</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="175"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="275"/>
         <source>File copied.</source>
         <translation type="unfinished">Dosya kopyalandı.</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="177"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="277"/>
         <source>File exists</source>
         <translation type="unfinished">Dosya zaten var</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="177"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="277"/>
         <source>Destination file exists. Overwrite?</source>
         <translation type="unfinished">Dosya hedefte var. Üzerine yazılsın mı?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="190"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="290"/>
         <source>Cannot move to trash</source>
         <translation type="unfinished">Çöp kutusuna taşınamıyor</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="190"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="290"/>
         <source>Cannot delete</source>
         <translation type="unfinished">Silinemiyor</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="207"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="307"/>
         <source>Move </source>
         <translation type="unfinished">Taşı </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="207"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="307"/>
         <source> items to trash?</source>
         <translation type="unfinished"> öğeyi çöp kutusuna taşı?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="208"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="308"/>
         <source>Move item to trash?</source>
         <translation type="unfinished">Öğeyi çöp kutusuna taşımak istiyor musunuz?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="210"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="310"/>
         <source>Delete </source>
         <translation type="unfinished">Sil </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="210"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="310"/>
         <source> items permanently?</source>
         <translation type="unfinished"> öğeyi kalıcı olarak sil?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="211"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="311"/>
         <source>Delete item permanently?</source>
         <translation type="unfinished">Kalıcı olarak silmek istiyor musunuz?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="212"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="312"/>
         <source>Move to trash</source>
         <translation type="unfinished">Çöp kutusuna taşı</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="212"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="312"/>
         <source>Delete permanently</source>
         <translation type="unfinished">Kalıcı olarak sil</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="228"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="331"/>
         <source>Moved to trash</source>
         <translation type="unfinished">Çöp kutusuna taşındı</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="228"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="331"/>
         <source>File removed</source>
         <translation type="unfinished">Dosya kaldırıldı</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="233"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="336"/>
         <source>Moved to trash: </source>
         <translation type="unfinished">Çöp kutusuna taşındı: </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="233"/>
-        <location filename="../../components/fileoperationscontroller.cpp" line="235"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="336"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="338"/>
         <source> files</source>
         <translation type="unfinished"> dosya</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="235"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="338"/>
         <source>Removed: </source>
         <translation type="unfinished">Kaldırıldı: </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="298"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="397"/>
         <source>Nothing to convert</source>
         <translation type="unfinished">Dönüştürülecek bir şey yok</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="301"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="400"/>
         <source>Convert</source>
         <translation type="unfinished">Dönüştür</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="302"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="401"/>
         <source>Some files already exist and will be overwritten.
 
 Continue?</source>
@@ -1157,19 +1518,54 @@ Continue?</source>
 Devam edilsin mi?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="325"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="424"/>
         <source>Converted %1 file(s)</source>
         <translation type="unfinished">%1 dosya dönüştürüldü</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="327"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="426"/>
         <source>Converted %1, failed %2</source>
         <translation type="unfinished">%1 dönüştürüldü, %2 başarısız</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="329"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="428"/>
         <source>Could not convert file(s)</source>
         <translation type="unfinished">Dosya(lar) dönüştürülemedi</translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="457"/>
+        <source>A resize is already running</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="462"/>
+        <source>Nothing to resize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="479"/>
+        <source>Resizing %1 images...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="500"/>
+        <source>Resized %1 file(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="502"/>
+        <source>Resized %1, skipped %2, failed %3</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="504"/>
+        <source>Could not resize file(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="506"/>
+        <source>Nothing to resize - images are not larger than the target</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1329,62 +1725,72 @@ Devam edilsin mi?</translation>
         <translation>Şuna dönüştür...</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="36"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="37"/>
+        <source>Resize...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="42"/>
         <source>Rename...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="41"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="47"/>
         <source>Copy path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="52"/>
         <source>File info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="57"/>
         <source>Move to...</source>
         <translation type="unfinished">Şuraya taşı...</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="56"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="62"/>
         <source>Move to trash</source>
         <translation type="unfinished">Çöp kutusuna taşı</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="61"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="67"/>
         <source>Find duplicates...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="69"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="75"/>
         <source>Delete permanently</source>
         <translation type="unfinished">Kalıcı olarak sil</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="78"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="87"/>
+        <source>Start slideshow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="93"/>
         <source>Header title bar</source>
         <translation>Başlık çubuğu</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="82"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="97"/>
         <source>Left side panel</source>
         <translation>Sol yan panel</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="86"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="101"/>
         <source>Bottom status bar</source>
         <translation>Alt durum çubuğu</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="93"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="108"/>
         <source>Settings</source>
         <translation type="unfinished">Ayarlar</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="105"/>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="120"/>
         <source>Back</source>
         <translation>Geri</translation>
     </message>
@@ -1411,40 +1817,40 @@ Devam edilsin mi?</translation>
 <context>
     <name>MW</name>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="581"/>
+        <location filename="../../gui/mainwindow.cpp" line="683"/>
         <source>Save File as...</source>
         <translation>Dosyayı farklı kaydet...</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="917"/>
+        <location filename="../../gui/mainwindow.cpp" line="1009"/>
         <source>Folder view</source>
         <translation>Klasör görünümü</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="857"/>
-        <location filename="../../gui/mainwindow.cpp" line="918"/>
-        <location filename="../../gui/mainwindow.cpp" line="922"/>
-        <location filename="../../gui/mainwindow.cpp" line="923"/>
+        <location filename="../../gui/mainwindow.cpp" line="966"/>
+        <location filename="../../gui/mainwindow.cpp" line="1010"/>
+        <location filename="../../gui/mainwindow.cpp" line="1014"/>
+        <location filename="../../gui/mainwindow.cpp" line="1015"/>
         <source>No file opened.</source>
         <translation>Açık dosya yok.</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="82"/>
+        <location filename="../../gui/mainwindow.cpp" line="83"/>
         <source>Crop</source>
         <translation type="unfinished">Kırp</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="981"/>
+        <location filename="../../gui/mainwindow.cpp" line="1073"/>
         <source>Fit Window</source>
         <translation>Pencereye sığdır</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="985"/>
+        <location filename="../../gui/mainwindow.cpp" line="1077"/>
         <source>Fit Width</source>
         <translation>Genişliğe sığdır</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="989"/>
+        <location filename="../../gui/mainwindow.cpp" line="1081"/>
         <source>Fit 1:1</source>
         <translation>Gerçek boyutta göster 1:1</translation>
     </message>
@@ -1560,181 +1966,260 @@ Devam edilsin mi?</translation>
         <translation>Diğer dosya türlerini göster</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="271"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="289"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="555"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="501"/>
         <source>Make</source>
         <translation>Marka</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="275"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="293"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="557"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="501"/>
         <source>Model</source>
         <translation>Model</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="279"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="297"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="559"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="502"/>
         <source>Date/Time</source>
         <translation>Tarih/Saat</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="286"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="289"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="304"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="307"/>
         <source>ExposureTime</source>
         <translation>Pozlama süresi</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="286"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="289"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="304"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="307"/>
         <source> sec</source>
         <translation> saniye</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="297"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="315"/>
         <source>F Number</source>
         <translation>F numarası</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="302"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="320"/>
         <source>ISO Speed ratings</source>
         <translation>ISO hız derecesi</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="306"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="324"/>
         <source>Flash</source>
         <translation>Flaş</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="312"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="330"/>
         <source>Focal Length</source>
         <translation>Odak uzaklığı</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="312"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="330"/>
         <source> mm</source>
         <translation> mm</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="321"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="339"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="502"/>
         <source>UserComment</source>
         <translation>Kullanıcı yorumu</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="63"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="505"/>
+        <source>Profile</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="506"/>
+        <source>Primaries</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="507"/>
+        <source>Transfer function</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="508"/>
+        <source>Profile size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="509"/>
+        <source>%1 bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="561"/>
+        <source>Comment</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="684"/>
+        <source>Title</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="685"/>
+        <source>Description</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="686"/>
+        <source>Author</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="687"/>
+        <source>Copyright</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="688"/>
+        <source>Keywords</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="689"/>
+        <source>Rating</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="690"/>
+        <source>Label</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="90"/>
         <source>Operation completed succesfully.</source>
         <translation>İşlem başarıyla tamamlandı.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="65"/>
+        <location filename="../../utils/fileoperations.cpp" line="92"/>
         <source>Destination file exists.</source>
         <translation>Dosya hedefte var.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="67"/>
+        <location filename="../../utils/fileoperations.cpp" line="94"/>
         <source>Destination directory exists.</source>
         <translation>Dizin hedefte var.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="69"/>
+        <location filename="../../utils/fileoperations.cpp" line="96"/>
         <source>Source file is not writable.</source>
         <translation>Kaynak dosya yazılabilir değildir.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="71"/>
+        <location filename="../../utils/fileoperations.cpp" line="98"/>
         <source>Destination is not writable.</source>
         <translation>Hedef yazılabilir değildir.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="73"/>
+        <location filename="../../utils/fileoperations.cpp" line="100"/>
         <source>Source file does not exist.</source>
         <translation>Kaynak dosya mevcut değil.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="75"/>
+        <location filename="../../utils/fileoperations.cpp" line="102"/>
         <source>Destination does not exist.</source>
         <translation>Hedef mevcut değil.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="77"/>
+        <location filename="../../utils/fileoperations.cpp" line="104"/>
         <source>Directory is not empty.</source>
         <translation>Dizin boş değil.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="79"/>
+        <location filename="../../utils/fileoperations.cpp" line="106"/>
         <source>Containing directory is not writable.</source>
         <translation>İçeren dizin yazılabilir değil.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="81"/>
+        <location filename="../../utils/fileoperations.cpp" line="108"/>
         <source>Nothing to do.</source>
         <translation>Yapılacak bir şey yok.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="83"/>
+        <location filename="../../utils/fileoperations.cpp" line="110"/>
+        <source>Invalid name. Enter a file name without slashes, and not &quot;.&quot; or &quot;..&quot;.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="112"/>
+        <source>Cannot copy or move a folder into itself.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="114"/>
         <source>Other error.</source>
         <translation>Belirtilmeyen hata.</translation>
     </message>
     <message>
-        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="387"/>
+        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="393"/>
         <source>Text file</source>
         <translation>Metin dosyası</translation>
     </message>
     <message>
-        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="387"/>
+        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="393"/>
         <source> file</source>
         <translation> dosya</translation>
     </message>
     <message>
-        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="389"/>
+        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="395"/>
         <source>Unknown format</source>
         <translation>Bilinmeyen biçim</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1127"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1203"/>
         <source>Global</source>
         <translation type="unfinished">Genel</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1128"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1204"/>
         <source>Grid</source>
         <translation type="unfinished">Izgara</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1128"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1204"/>
         <source>Document</source>
         <translation type="unfinished">Belge</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1133"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1209"/>
         <source>%1  (script)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="70"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="71"/>
         <source>Add...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="71"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="72"/>
         <source>Remove</source>
         <translation type="unfinished">Kaldır</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="77"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="78"/>
         <source>Select folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/custommessagebox.h" line="32"/>
         <source>Yes</source>
-        <translation type="unfinished">Evet</translation>
+        <translation type="obsolete">Evet</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/custommessagebox.h" line="33"/>
         <source>No</source>
-        <translation type="unfinished">Hayır</translation>
+        <translation type="obsolete">Hayır</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/custommessagebox.h" line="36"/>
         <source>OK</source>
-        <translation type="unfinished">Tamam</translation>
+        <translation type="obsolete">Tamam</translation>
     </message>
 </context>
 <context>
@@ -1795,16 +2280,19 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.ui" line="330"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="86"/>
         <source>Nearest</source>
         <translation>Nearest</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.ui" line="335"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="87"/>
         <source>Bilinear</source>
         <translation>Bilinear</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.ui" line="340"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="90"/>
         <source>Bicubic</source>
         <translation>Bicubic</translation>
     </message>
@@ -1907,6 +2395,46 @@ Devam edilsin mi?</translation>
         <location filename="../../gui/dialogs/resizedialog.cpp" line="19"/>
         <source>Reset:</source>
         <translation>Sıfırla:</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="26"/>
+        <source>By Long Edge:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="29"/>
+        <source>Long edge:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="39"/>
+        <source>Only shrink (skip images already smaller)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="89"/>
+        <source>Bilinear + sharpen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="91"/>
+        <source>Bicubic + sharpen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="156"/>
+        <source>Resize %1 images (saves copies)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="157"/>
+        <source>Fit Within:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="166"/>
+        <source>Resize (saves a copy)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -2318,7 +2846,7 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="1572"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="412"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="472"/>
         <source>Size</source>
         <translation>Boyut</translation>
     </message>
@@ -2580,7 +3108,7 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3020"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="686"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="760"/>
         <source>Custom</source>
         <translation>Özel</translation>
     </message>
@@ -2591,12 +3119,13 @@ Devam edilsin mi?</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4071"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="552"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="613"/>
         <source>+ New shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4173"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
         <source>Context</source>
         <translation>Bağlam</translation>
     </message>
@@ -2665,7 +3194,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3184"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="178"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="238"/>
         <source>Accent</source>
         <translation>Vurgu rengi</translation>
     </message>
@@ -2679,86 +3208,85 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3225"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="179"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="239"/>
         <source>Text</source>
         <translation>Metin rengi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3273"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="180"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="240"/>
         <source>Icons</source>
         <translation>İkonlar</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3308"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="181"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="241"/>
         <source>Window background</source>
         <translation>Pencere arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3343"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="182"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="242"/>
         <source>Control background</source>
         <translation>Kontrol arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3378"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="183"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="243"/>
         <source>Control border</source>
         <translation>Kontrol kenarlığı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3413"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="184"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="244"/>
         <source>Scrollbar</source>
         <translation>Kaydırma çubuğu</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3438"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="332"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="596"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="392"/>
         <source>Grid</source>
         <translation>Izgara</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3473"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="186"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="246"/>
         <source>Grid background</source>
         <translation>Izgara arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3508"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="187"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="247"/>
         <source>Grid top bar</source>
         <translation>Izgara üst çubuğu</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3543"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="188"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="248"/>
         <source>Thumbnail cell</source>
         <translation>Küçük resim hücresi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3578"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="189"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="249"/>
         <source>Filename label</source>
         <translation>Dosya adı etiketi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3613"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="190"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="250"/>
         <source>Selected filename label</source>
         <translation>Seçili dosya adı etiketi</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3648"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="191"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="251"/>
         <source>Selection highlight</source>
         <translation>Seçim vurgusu</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3683"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="192"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="252"/>
         <source>Folder-icon tint</source>
         <translation>Klasör simgesi tonu</translation>
     </message>
@@ -2769,13 +3297,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3743"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="194"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="254"/>
         <source>Fullscreen background</source>
         <translation>Tam ekran arka planı</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3778"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="195"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="255"/>
         <source>Overlay background</source>
         <translation>Yer paylaşımlı arka plan</translation>
     </message>
@@ -2793,7 +3321,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="3813"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="196"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="256"/>
         <source>Overlay text</source>
         <translation>Yer paylaşımlı metin</translation>
     </message>
@@ -2837,13 +3365,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4100"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1709"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1856"/>
         <source>Edit</source>
         <translation>Düzenle</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4113"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1426"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1569"/>
         <source>Remove</source>
         <translation>Kaldır</translation>
     </message>
@@ -2853,7 +3381,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="4163"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
         <source>Action</source>
         <translation>İşlem</translation>
     </message>
@@ -3071,7 +3599,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="5448"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1473"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1616"/>
         <source>OK</source>
         <translation>Tamam</translation>
     </message>
@@ -3082,32 +3610,32 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="5455"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1474"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1617"/>
         <source>Cancel</source>
         <translation>İptal</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="97"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="157"/>
         <source>Preferences — </source>
         <translation>Tercihler — </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="126"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="186"/>
         <source>Show full version</source>
         <translation>Tam sürümü göster</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="132"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="192"/>
         <source>Version</source>
         <translation>Sürüm</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="133"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="193"/>
         <source>&lt;b&gt;thumbgrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Build: %2</source>
         <translation>&lt;b&gt;thumbgrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Yapı: %2</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="324"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="384"/>
         <source>Shortcuts</source>
         <translation>Kısayollar</translation>
     </message>
@@ -3116,33 +3644,32 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">Ayrıca, Kısayollar bölümünde betiklere kısayol atayabilirsiniz.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="326"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="386"/>
         <source>Start in grid view by default</source>
         <translation>Varsayılan olarak ızgara görünümünde başlat</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="327"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="387"/>
         <source>Show grid top bar</source>
         <translation>Izgara üst çubuğunu göster</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="328"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="388"/>
         <source>Grid filename font size:</source>
         <translation>Izgara dosya adı yazı tipi boyutu:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="329"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="389"/>
         <source>Grid navigation</source>
         <translation>Izgara gezinme</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="333"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="393"/>
         <source>Grid display</source>
         <translation>Izgara görünümü</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="348"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="597"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="408"/>
         <source>Document</source>
         <translation>Belge</translation>
     </message>
@@ -3151,230 +3678,233 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">Geçerli bağlamı sıfırla</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="325"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="385"/>
         <source>Every script is also listed on the Shortcuts page, where you can assign it a key.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="395"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="455"/>
         <source>Stored data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="396"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="456"/>
         <source>Data stored on this computer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="399"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="459"/>
         <source>Everything the app remembers about your files and folders. Delete a row with its ✕ button, or check rows to delete them together — right away or on every exit.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="405"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="465"/>
         <source>Select all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="412"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="472"/>
         <source>Store</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="412"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="472"/>
         <source>Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="437"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="498"/>
         <source>Delete %1 now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="449"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="510"/>
         <source>Delete selected now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="455"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="516"/>
         <source>Delete selected every time the app exits</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="515"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="576"/>
         <source>Delete %1? This cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="516"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="577"/>
         <source>Delete %n selected data store(s)? This cannot be undone.</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="517"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="578"/>
         <source>Delete stored data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="559"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="620"/>
         <source>Shortcut preset:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="581"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="642"/>
         <source>Switch shortcut preset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="582"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="643"/>
         <source>Switching to &quot;%1&quot; replaces all current keyboard/mouse shortcuts with that preset&apos;s bindings. This cannot be undone from this dialog. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="595"/>
         <source>Global</source>
-        <translation>Genel</translation>
+        <translation type="vanished">Genel</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="601"/>
         <source>Search</source>
-        <translation>Ara</translation>
+        <translation type="vanished">Ara</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="660"/>
+        <source>Search actions, keys and contexts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
         <source>Key</source>
         <translation>Tuş</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
         <source>Count</source>
         <translation>Sayı</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="609"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
         <source>Enabled</source>
         <translation>Etkin</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="674"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="748"/>
         <source>%1 (unavailable)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1300"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1429"/>
         <source>User script &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1364"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1507"/>
         <source>Select the primary key. Add or remove keys below; system defaults are marked.</source>
         <translation>Birincil tuşu seçin. Aşağıda tuş ekleyip kaldırabilirsiniz; sistem varsayılanları işaretlenmiştir.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1403"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1546"/>
         <source>No keys assigned.</source>
         <translation>Atanmış tuş yok.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1419"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1562"/>
         <source>default</source>
         <translation>varsayılan</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1441"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1584"/>
         <source>Add key:</source>
         <translation>Tuş ekle:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1455"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1598"/>
         <source>&quot;%1&quot; is already assigned to this action.</source>
         <translation>&quot;%1&quot; zaten bu eyleme atanmış.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1461"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1596"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1604"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1739"/>
         <source>&quot;%1&quot; is also used by: %2</source>
         <translation>&quot;%1&quot; ayrıca şurada da kullanılıyor: %2</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1572"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1715"/>
         <source>Move &quot;%1&quot; from %2 to %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1572"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1715"/>
         <source>Copy &quot;%1&quot; from %2 to %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1579"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1722"/>
         <source>This widens its reach: it will run in every screen, not only in the %1 view (a view-specific binding for the same key still overrides it).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1583"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1726"/>
         <source>This narrows its reach: it runs in every screen today, and afterwards it will run only in the %1 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1586"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1729"/>
         <source>The global binding stays as it is; the %1 copy simply overrides it while that view is active.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1589"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1732"/>
         <source>It will run only in the %1 view instead of the %2 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1591"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1734"/>
         <source>It will run in the %1 view as well as the %2 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1598"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1741"/>
         <source>Continuing takes those keys over in the %1 context.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1600"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1743"/>
         <source>Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1601"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1744"/>
         <source>Move shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1601"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1744"/>
         <source>Copy shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1625"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1772"/>
         <source>Edit keys...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1630"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1777"/>
         <source>Move to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1631"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1778"/>
         <source>Copy to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1635"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1782"/>
         <source>No keys bound in %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1718"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1865"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3411,7 +3941,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">Kısayolu düzenle</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1840"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1999"/>
         <source>Navigate to mpv binary</source>
         <translation>mpv program dosyasına git</translation>
     </message>
@@ -3548,34 +4078,28 @@ li.checked::marker { content: &quot;\2612&quot;; }
 <context>
     <name>main</name>
     <message>
-        <location filename="../../main.cpp" line="114"/>
         <source>File or directory path.</source>
-        <translation>Dosya veya dizin yolu.</translation>
+        <translation type="vanished">Dosya veya dizin yolu.</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="117"/>
         <source>Generate all thumbnails for directory.</source>
-        <translation>Dizindeki tüm küçük resimleri oluştur.</translation>
+        <translation type="vanished">Dizindeki tüm küçük resimleri oluştur.</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="118"/>
         <source>directory-path</source>
-        <translation>dizin-yolu</translation>
+        <translation type="vanished">dizin-yolu</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="120"/>
         <source>Thumbnail size. Current size is used if not specified.</source>
-        <translation>Küçük resim boyutu. Belirtilmediği takdirde şu anki boyut kullanılır.</translation>
+        <translation type="vanished">Küçük resim boyutu. Belirtilmediği takdirde şu anki boyut kullanılır.</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="121"/>
         <source>thumbnail-size</source>
-        <translation>küçük resim-boyutu</translation>
+        <translation type="vanished">küçük resim-boyutu</translation>
     </message>
     <message>
-        <location filename="../../main.cpp" line="123"/>
         <source>Show build options.</source>
-        <translation>Derleme seçeneklerini göster.</translation>
+        <translation type="vanished">Derleme seçeneklerini göster.</translation>
     </message>
 </context>
 </TS>
