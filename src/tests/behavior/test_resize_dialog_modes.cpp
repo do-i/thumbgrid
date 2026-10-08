@@ -18,6 +18,8 @@ class ResizeDialogModesTest : public QObject {
     Q_OBJECT
 
 private slots:
+    // first: runs against a fresh install's unset setting
+    void qualityDefaultsToStandardBilinear();
     void pictureViewHidesCopyOnlyControls();
     void singleCopyKeepsExactSizeAvailable();
     void severalImagesTurnSizeIntoAnIndependentBox();
@@ -34,6 +36,18 @@ T *child(ResizeDialog &dialog, const char *name) {
 }
 
 } // namespace
+
+void ResizeDialogModesTest::qualityDefaultsToStandardBilinear() {
+    // bilinear is what resize always used before the choice existed
+    QCOMPARE(settings->resizeFilter(), QI_FILTER_BILINEAR);
+    ResizeDialog dialog(QSize(400, 200));
+    QCOMPARE(child<QLabel>(dialog, "label_4")->text(), QStringLiteral("Quality:"));
+    auto *quality = child<QComboBox>(dialog, "comboBox");
+    QCOMPARE(quality->currentData().toInt(), int(QI_FILTER_BILINEAR));
+    QVERIFY(quality->currentText().startsWith("Standard"));
+    QVERIFY(!quality->toolTip().isEmpty());
+    QCOMPARE(dialog.spec().filter, QI_FILTER_BILINEAR);
+}
 
 void ResizeDialogModesTest::pictureViewHidesCopyOnlyControls() {
     ResizeDialog dialog(QSize(400, 200));

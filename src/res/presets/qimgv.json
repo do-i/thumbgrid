@@ -217,6 +217,9 @@
         "prevDirectory": [
             "$Shift+Left"
         ],
+        "resize": [
+            "R"
+        ],
         "toggleFolderViewTopBar": [
             "$Ctrl+T"
         ],

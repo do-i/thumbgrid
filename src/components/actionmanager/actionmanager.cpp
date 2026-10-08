@@ -332,6 +332,25 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound" << key << "=toggleImageInfo in" << contextToString(ctx);
         }
     }
+    // Resize gained a grid flow (resized copies of the selection), and presets now
+    // bind it there with the same key as the picture view. Existing mappings only
+    // had it in document, and the generic pass below cannot add it: resize is an
+    // old action. Mirror the user's own document key rather than the preset's, so
+    // a rebound resize stays one key in both places. Skipped when the grid already
+    // reaches resize (grid or global) or the key means something else there.
+    if(lastVer < QVersionNumber(2026,10,1)) {
+        const QString key = shortcuts[MODE_DOCUMENT].key("resize");
+        const bool gridHasResize = !shortcuts[MODE_FOLDERVIEW].key("resize").isEmpty() ||
+                                   !shortcuts[MODE_GLOBAL].key("resize").isEmpty();
+        if(!key.isEmpty() && !gridHasResize &&
+           !shortcuts[MODE_FOLDERVIEW].contains(key) && !shortcuts[MODE_GLOBAL].contains(key)) {
+            shortcuts[MODE_FOLDERVIEW].insert(key, "resize");
+            // document+grid now share the binding; store it the way defaults
+            // do (hoisted to global) so an untouched preset still compares equal
+            Settings::collapseShortcutContexts(shortcuts);
+            qCDebug(logSettings) << "[actionManager]: bound" << key << "=resize in grid";
+        }
+    }
     // add new default actions, per context
     for(ViewMode ctx : shortcutContexts()) {
         ContextMap &cur = shortcuts[ctx];

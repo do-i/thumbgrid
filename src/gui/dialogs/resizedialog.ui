@@ -301,7 +301,7 @@
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Filter:</string>
+           <string>Quality:</string>
           </property>
          </widget>
         </item>

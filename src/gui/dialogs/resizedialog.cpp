@@ -81,15 +81,18 @@ void ResizeDialog::sizeSelect() {
 
 void ResizeDialog::setupFilterCombo() {
     // The .ui ships a disabled placeholder; fill it with what ImageLib::scaled
-    // can actually do in this build.
+    // can actually do in this build. Named by result, with the method in
+    // brackets for anyone who wants to know exactly what runs.
     ui->comboBox->clear();
-    ui->comboBox->addItem(tr("Nearest"), QI_FILTER_NEAREST);
-    ui->comboBox->addItem(tr("Bilinear"), QI_FILTER_BILINEAR);
+    ui->comboBox->addItem(tr("Fastest (nearest)"), QI_FILTER_NEAREST);
+    ui->comboBox->addItem(tr("Standard (bilinear)"), QI_FILTER_BILINEAR);
 #ifdef USE_OPENCV
-    ui->comboBox->addItem(tr("Bilinear + sharpen"), QI_FILTER_CV_BILINEAR_SHARPEN);
-    ui->comboBox->addItem(tr("Bicubic"), QI_FILTER_CV_CUBIC);
-    ui->comboBox->addItem(tr("Bicubic + sharpen"), QI_FILTER_CV_CUBIC_SHARPEN);
+    ui->comboBox->addItem(tr("Standard, sharpened (bilinear)"), QI_FILTER_CV_BILINEAR_SHARPEN);
+    ui->comboBox->addItem(tr("High (bicubic)"), QI_FILTER_CV_CUBIC);
+    ui->comboBox->addItem(tr("High, sharpened (bicubic)"), QI_FILTER_CV_CUBIC_SHARPEN);
 #endif
+    ui->comboBox->setToolTip(tr("How pixels are resampled. Higher quality is slower; "
+                                "sharpened keeps fine detail crisp when shrinking."));
     int index = ui->comboBox->findData(settings->resizeFilter());
     ui->comboBox->setCurrentIndex(index < 0 ? 1 : index);
     ui->comboBox->setEnabled(true);

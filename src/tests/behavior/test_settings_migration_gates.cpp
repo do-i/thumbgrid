@@ -336,6 +336,90 @@ bool fileInfoBackfillSkipsAnExistingBinding() {
                    "File info already had a document binding, so Alt+I must not be added there too.");
 }
 
+// Writes a shortcuts.json fixture with the given document and grid sections.
+bool seedDocumentAndGridShortcuts(const QJsonObject &document, const QJsonObject &grid) {
+    QJsonObject root;
+    root.insert("document", document);
+    root.insert("grid", grid);
+    QFile shortcutsFile(configDir() + "/shortcuts.json");
+    if(!require(shortcutsFile.open(QIODevice::WriteOnly | QIODevice::Truncate),
+                "Failed to write the shortcuts.json fixture."))
+        return false;
+    shortcutsFile.write(QJsonDocument(root).toJson());
+    shortcutsFile.close();
+    return true;
+}
+
+// Resize gained a grid flow, so an upgrading user gets their picture-view resize
+// key in the grid as well - the same key the qimgv preset now binds there.
+bool resizeReachesTheGridOnUpgrade() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 9, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("resize", QJsonArray{QStringLiteral("R")});
+    QJsonObject grid;
+    grid.insert("goUp", QJsonArray{QStringLiteral("Backspace")});
+    if(!seedDocumentAndGridShortcuts(document, grid))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 9, 2));
+
+    return require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "R") == QLatin1String("resize"),
+                   "R should open Resize in the grid after the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "R") == QLatin1String("resize"),
+                   "R must keep opening Resize in the picture view.") &&
+           require(actionManager->allDefaultShortcuts().value(MODE_GLOBAL).value("R") == QLatin1String("resize"),
+                   "The qimgv preset binds R in both views, so its defaults should carry it globally.");
+}
+
+// The grid gets the user's own picture-view key, not the preset's.
+bool resizeGridBackfillFollowsTheUsersKey() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 9, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("resize", QJsonArray{QStringLiteral("F9")});
+    if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 9, 2));
+
+    return require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "F9") == QLatin1String("resize"),
+                   "A rebound resize key should be mirrored into the grid.") &&
+           require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "R").isEmpty(),
+                   "The preset's R must not be added when the user moved resize elsewhere.");
+}
+
+// A key that already means something in the grid is never taken over.
+bool resizeGridBackfillSkipsATakenKey() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 9, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("resize", QJsonArray{QStringLiteral("R")});
+    QJsonObject grid;
+    grid.insert("reloadImage", QJsonArray{QStringLiteral("R")});
+    if(!seedDocumentAndGridShortcuts(document, grid))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 9, 2));
+
+    return require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "R") == QLatin1String("reloadImage"),
+                   "The grid's own R binding must survive the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "R") == QLatin1String("resize"),
+                   "The picture view keeps R for Resize.");
+}
+
 bool runScenario(const QString &scenario) {
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
@@ -363,6 +447,12 @@ bool runScenario(const QString &scenario) {
         return fileInfoBackfillsFromThePresetKey();
     if(scenario == QLatin1String("file-info-backfill-skips-existing"))
         return fileInfoBackfillSkipsAnExistingBinding();
+    if(scenario == QLatin1String("resize-grid-backfill"))
+        return resizeReachesTheGridOnUpgrade();
+    if(scenario == QLatin1String("resize-grid-backfill-follows-user-key"))
+        return resizeGridBackfillFollowsTheUsersKey();
+    if(scenario == QLatin1String("resize-grid-backfill-skips-taken-key"))
+        return resizeGridBackfillSkipsATakenKey();
     return fail("Unknown scenario: " + scenario);
 }
 
