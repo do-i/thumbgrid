@@ -2289,26 +2289,27 @@ Fortfahren?</translation>
         <translation>Seitenverhältnis beibehalten</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="304"/>
         <source>Filter:</source>
-        <translation>Filter:</translation>
+        <translation type="vanished">Filter:</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="304"/>
+        <source>Quality:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.ui" line="330"/>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="86"/>
         <source>Nearest</source>
         <translatorcomment>Would be to confusing to translate</translatorcomment>
         <translation>Nearest</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.ui" line="335"/>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="87"/>
         <source>Bilinear</source>
         <translation>Bilinear</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.ui" line="340"/>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="90"/>
         <source>Bicubic</source>
         <translation>Bicubic</translation>
     </message>
@@ -2428,27 +2429,47 @@ Fortfahren?</translation>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="89"/>
-        <source>Bilinear + sharpen</source>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="87"/>
+        <source>Fastest (nearest)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="88"/>
+        <source>Standard (bilinear)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="90"/>
+        <source>Standard, sharpened (bilinear)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.cpp" line="91"/>
-        <source>Bicubic + sharpen</source>
+        <source>High (bicubic)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="156"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="92"/>
+        <source>High, sharpened (bicubic)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="94"/>
+        <source>How pixels are resampled. Higher quality is slower; sharpened keeps fine detail crisp when shrinking.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="159"/>
         <source>Resize %1 images (saves copies)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="157"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="160"/>
         <source>Fit Within:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="166"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="169"/>
         <source>Resize (saves a copy)</source>
         <translation type="unfinished"></translation>
     </message>
