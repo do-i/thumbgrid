@@ -31,14 +31,14 @@ class DateTimePickerPopup;
 // Every metadata tab now writes, and each writes only its own kind: the EXIF
 // tab has its four editable text tags, the XMP tab has a curated typed set plus
 // a grid for custom properties, and the ICC tab can discard the profile. Each
-// tab carries exactly one removal button, scoped to that tab
-// (docs/2026-08-01-001 §6) - so clearing everything is three deliberate acts in
-// three places rather than one button that reaches across the file. The
+// tab carries exactly one removal button, scoped to that tab - so clearing
+// everything is three deliberate acts in three places rather than one button
+// that reaches across the file. The
 // whole-file strip is deliberately *not* here any more; it remains an
 // ActionManager action reachable by shortcut and menu, which is also the only
 // route that removes Iptc, since Iptc has no tab of its own.
 //
-// Buttons follow one visibility rule (docs/2026-08-01-001 §7): hidden when they do
+// Buttons follow one visibility rule: hidden when they do
 // not belong on the current tab *or* when there is nothing for them to remove,
 // and merely disabled when there is something to remove but the file cannot be
 // written. Greying therefore means exactly one thing - "there is something

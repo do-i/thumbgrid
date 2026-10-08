@@ -172,7 +172,7 @@ private slots:
     // The File info window's scoped removals, one per metadata tab. Each
     // mirrors stripMetadataAt(): same type gate, same confirmation, same
     // reload-and-retarget refresh - but each removes only its own kind, which is
-    // what lets the three buttons live in three tabs (docs/2026-08-01-001 §6).
+    // what lets the three buttons live in three tabs.
     void removeAllExifAt(const QString &path);
     void removeAllXmpAt(const QString &path);
     void removeIccProfileAt(const QString &path);

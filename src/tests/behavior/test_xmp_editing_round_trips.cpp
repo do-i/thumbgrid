@@ -16,8 +16,6 @@
 //   * clearing a LangAlt property must not take other languages with it;
 //   * each scoped removal has to leave the other two kinds alone, which is what
 //     lets the three buttons live in three tabs.
-//
-// See docs/2026-08-01-001.
 
 #include "support/thumbgrid_test_support.h"
 

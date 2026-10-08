@@ -26,7 +26,7 @@ public:
     // Makes the *name* cell an editor too, which turns the row into a grid row:
     // a custom XMP property is identified by its key, so the key has to be
     // typeable. Rows whose name is fixed furniture (every curated row) leave
-    // this off. See docs/2026-08-01-001 §5.
+    // this off.
     void setNameEditable(bool _editable);
     // A short multi-line value editor, one item per line - the only unambiguous
     // way to edit an XMP array, since exiv2's displayed form joins items with
@@ -45,14 +45,14 @@ public:
     // A third cell, revealed only when a grid row names an XMP prefix the file
     // does not already declare: writing such a prefix throws unless its
     // namespace URI is registered first, so the row asks for one rather than
-    // failing at the write (docs/2026-08-01-001 §5).
+    // failing at the write.
     void setExtraVisible(bool visible);
     void setExtraPlaceholder(const QString &text);
     QString currentExtra() const;
     QLineEdit *extraEditor() { return extraVisible ? &extraEdit : nullptr; }
     // Greys the row out and refuses edits: used for a value too long to show in
     // full, which must never be committed back or the elision would truncate the
-    // file's real data (docs/2026-08-01-001 §8).
+    // file's real data.
     void setValueReadOnly(bool readOnly);
 
     // Reports the editor's current text as an edit if it differs from the value

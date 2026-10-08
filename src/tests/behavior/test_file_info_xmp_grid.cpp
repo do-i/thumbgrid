@@ -9,8 +9,6 @@
 // One long test method rather than several, matching the other File info
 // behaviour tests: the window is built once by a single Core and retargeted
 // through each case, which is also how it is used.
-//
-// See docs/2026-08-01-001 §5 (grid), §6 (removals), §7 (visibility).
 
 #include "support/thumbgrid_test_support.h"
 

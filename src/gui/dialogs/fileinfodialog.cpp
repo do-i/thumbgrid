@@ -32,7 +32,7 @@ const QLatin1String kDateTimeKey("Exif.Image.DateTime");
 // the user types are the same string.
 const QLatin1String kExifDateTimeFormat("yyyy:MM:dd HH:mm:ss");
 
-// Defensive display caps (docs/2026-08-01-001 §8). What cannot be capped is
+// Defensive display caps. What cannot be capped is
 // exiv2 parsing the packet; what can is widget construction, which is where the
 // cost is. Two numbers rather than one because the kinds differ in how many
 // entries legitimately occur: XMP properties are authored a handful at a time,
@@ -350,7 +350,7 @@ void FileInfoDialog::setTarget(const QString &path) {
     updateActionButtons();
 }
 
-// One rule for all three removals (docs/2026-08-01-001 §7): hidden when the button
+// One rule for all three removals: hidden when the button
 // does not belong on the current tab *or* when there is nothing for it to
 // remove; disabled only when there is something to remove but the file cannot be
 // written. Greying therefore says exactly one thing - "there is something here,
@@ -801,7 +801,7 @@ void FileInfoDialog::ensureTrailingBlankRow() {
     addCustomXmpRow(QString(), QString(), true);
 }
 
-// One grid row, committed as a whole. Row states, per docs/2026-08-01-001 §5:
+// One grid row, committed as a whole. Row states:
 // blank is the affordance and is never written; a value with no key is invalid
 // and writes nothing; a key with no value is legal and is written as an
 // empty-valued property; clearing the key of an existing row erases it.

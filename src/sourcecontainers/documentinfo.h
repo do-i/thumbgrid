@@ -78,7 +78,7 @@ public:
     // "Profile" from "Profile size".
     QList<QPair<QString, QString>> getIccProfileInfo();
 
-    // --- XMP / ICC writing (docs/2026-08-01-001) ----------------------------
+    // --- XMP / ICC writing (exiv2 behaviour verified against 0.28.8) --------
     //
     // Three separate write gates, because the three metadata kinds are not
     // writable in the same set of containers. tiff is outside all of them: its
@@ -145,7 +145,7 @@ public:
     bool hasXmpMetadata();
     bool hasIccProfile();
 
-    // Defensive limits (docs/2026-08-01-001 §8). Constants rather than
+    // Defensive limits. Constants rather than
     // settings: a configurable cap is an invitation to raise it and meet the
     // pathology it exists to prevent. None is reachable by intentional use -
     // keywords are items inside one Xmp.dc.subject bag, not one property each.

@@ -211,7 +211,7 @@ void EntryInfoItem::commitEdit() {
     const QString newValue = editorText();
     // A grid row commits both cells at once. Committing per field would write a
     // key-only property the moment focus left the key cell, then rewrite it when
-    // the value arrived - two writes for one entry (docs/2026-08-01-001 §5).
+    // the value arrived - two writes for one entry.
     if(nameEditable) {
         const QString newName = nameEdit.text();
         const QString newExtra = currentExtra();
