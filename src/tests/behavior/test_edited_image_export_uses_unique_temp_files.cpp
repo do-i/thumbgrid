@@ -49,8 +49,8 @@ void EditedImageExportUsesUniqueTempFilesTest::exportingTheSameEditedImageTwiceY
     QTest::keyClick(grid, Qt::Key_Return);
     QTRY_COMPARE(window->currentViewMode(), MODE_DOCUMENT);
 
-    // Mark the image edited without touching disk (document view edits are
-    // in-memory only; edit_template() only saves in folder view).
+    // Mark the image edited without touching disk (picture view edits are
+    // in-memory only until saved).
     QVERIFY2(actionManager->invokeAction("rotateLeft"), "rotateLeft action should be invocable.");
 
     QApplication::clipboard()->clear();

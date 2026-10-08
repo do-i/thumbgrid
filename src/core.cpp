@@ -1211,41 +1211,44 @@ std::shared_ptr<ImageStatic> Core::getEditableImage(const QString &filePath) {
 }
 
 template<typename... Args>
-void Core::edit_template(bool save, QString action, const std::function<std::unique_ptr<QImage>(std::shared_ptr<const QImage>, Args...)>& editFunc, Args&&... as) {
+void Core::edit_template(const std::function<std::unique_ptr<QImage>(std::shared_ptr<const QImage>, Args...)>& editFunc, Args&&... as) {
     if(model->isEmpty())
         return;
-    if(save && !mw->showConfirmation(action, tr("Perform action \"") + action + "\"? \n\n" + tr("Changes will be saved immediately."), true))
-        return;
+    // an unsaved edit of the shown image; the user saves (or discards) it
     for(const auto& path : currentSelection()) {
         auto img = getEditableImage(path);
         if(!img)
             continue;
         img->setEditedImage(std::unique_ptr<const QImage>( editFunc(img->getImage(), std::forward<Args>(as)...).release() ));
         model->updateImage(path, std::static_pointer_cast<Image>(img));
-        if(save) {
-            saveFile(path);
-            if(state.currentFilePath != path)
-                model->unload(path);
-        }
     }
     updateInfoString();
 }
 
+// Flip and rotate are picture-view edits, like crop: the result is shown and
+// saved deliberately. From the grid they used to overwrite every selected
+// original straight after a confirmation, unseen - so the grid ignores them.
 void Core::flipH() {
-    edit_template((mw->currentViewMode() == MODE_FOLDERVIEW), tr("Flip horizontal"), { ImageLib::flippedH });
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        return;
+    edit_template({ ImageLib::flippedH });
 }
 
 void Core::flipV() {
-    edit_template((mw->currentViewMode() == MODE_FOLDERVIEW), tr("Flip vertical"), { ImageLib::flippedV });
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        return;
+    edit_template({ ImageLib::flippedV });
 }
 
 void Core::rotateByDegrees(int degrees) {
-    edit_template((mw->currentViewMode() == MODE_FOLDERVIEW), tr("Rotate"), { ImageLib::rotated }, degrees);
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        return;
+    edit_template({ ImageLib::rotated }, degrees);
 }
 
 void Core::resize(QSize size) {
     // the dialog stores its filter choice before emitting
-    edit_template(false, tr("Resize"), { ImageLib::scaled }, size, settings->resizeFilter());
+    edit_template({ ImageLib::scaled }, size, settings->resizeFilter());
 }
 
 void Core::resizeSelectionToCopies(ResizeSpec spec) {
@@ -1257,7 +1260,7 @@ void Core::resizeSelectionToCopies(ResizeSpec spec) {
 void Core::crop(QRect rect) {
     if(mw->currentViewMode() == MODE_FOLDERVIEW)
         return;
-    edit_template(false, tr("Crop"), { ImageLib::cropped }, rect);
+    edit_template({ ImageLib::cropped }, rect);
 }
 
 // ---------------------------------------------------------------- image operations ^

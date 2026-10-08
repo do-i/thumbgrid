@@ -577,103 +577,96 @@ Fortfahren?</translation>
         <translation type="unfinished">Verschieben nach...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1217"/>
         <source>Perform action &quot;</source>
-        <translation>Aktion ausführen &quot;</translation>
+        <translation type="vanished">Aktion ausführen &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1217"/>
         <source>Changes will be saved immediately.</source>
-        <translation>Änderungen werden sofort gespeichert.</translation>
+        <translation type="vanished">Änderungen werden sofort gespeichert.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1235"/>
         <source>Flip horizontal</source>
-        <translation>Spiegel horizontal</translation>
+        <translation type="vanished">Spiegel horizontal</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1239"/>
         <source>Flip vertical</source>
-        <translation>Spiegel vertikal</translation>
+        <translation type="vanished">Spiegel vertikal</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1243"/>
         <source>Rotate</source>
-        <translation>Drehe</translation>
+        <translation type="vanished">Drehe</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1248"/>
         <source>Resize</source>
-        <translation>Größe ändern</translation>
+        <translation type="vanished">Größe ändern</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1260"/>
         <source>Crop</source>
-        <translation>Zuschneiden</translation>
+        <translation type="vanished">Zuschneiden</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1290"/>
+        <location filename="../../core.cpp" line="1293"/>
         <source>File saved</source>
         <translation>Datei gespeichert</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1293"/>
+        <location filename="../../core.cpp" line="1296"/>
         <source>Could not save file</source>
         <translation>Datei konnte nicht gespeichert werden</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1429"/>
-        <location filename="../../core.cpp" line="1430"/>
+        <location filename="../../core.cpp" line="1432"/>
+        <location filename="../../core.cpp" line="1433"/>
         <source>New Folder</source>
         <translation>Neuer Ordner</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1429"/>
+        <location filename="../../core.cpp" line="1432"/>
         <source>Folder name:</source>
         <translation>Ordnername:</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1437"/>
+        <location filename="../../core.cpp" line="1440"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>Der Ordnername darf keine Pfadtrennzeichen enthalten.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1471"/>
+        <location filename="../../core.cpp" line="1474"/>
         <source>Could not open image</source>
         <translation>Bild konnte nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1475"/>
+        <location filename="../../core.cpp" line="1478"/>
         <source>Can only print static images</source>
         <translation>Nur unbewegte Bilder können gedruckt werden</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1523"/>
+        <location filename="../../core.cpp" line="1526"/>
         <source>Cannot view root folder.</source>
         <translation>Das Stammverzeichnis kann nicht angezeigt werden.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1531"/>
+        <location filename="../../core.cpp" line="1534"/>
         <source>Could not open path: </source>
         <translation>Pfad konnte nicht geöffnet werden: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1571"/>
+        <location filename="../../core.cpp" line="1574"/>
         <source>Could not load folder: </source>
         <translation>Ordner konnte nicht geladen werden: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1629"/>
+        <location filename="../../core.cpp" line="1632"/>
         <source>Already at root folder.</source>
         <translation>Bereits im Stammverzeichnis.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1796"/>
+        <location filename="../../core.cpp" line="1799"/>
         <source>End of directory.</source>
         <translation>Ende des Ordners.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1846"/>
+        <location filename="../../core.cpp" line="1849"/>
         <source>Cannot display file: </source>
         <translation>Datei kann nicht angezeigt werden: </translation>
     </message>
@@ -682,7 +675,7 @@ Fortfahren?</translation>
         <translation type="vanished">Laden fehlgeschlagen: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1889"/>
+        <location filename="../../core.cpp" line="1892"/>
         <source>Error: could not load image.</source>
         <translation>Fehler: Das Bild konnte nicht geladen werden.</translation>
     </message>

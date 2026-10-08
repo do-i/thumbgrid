@@ -226,6 +226,14 @@ add_test(
     COMMAND thumbgrid_resize_dialog_modes_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_flip_rotate_picture_view_only_test
+    behavior/test_flip_and_rotate_only_work_in_picture_view.cpp
+)
+add_test(
+    NAME "Flip and rotate only work in the picture view"
+    COMMAND thumbgrid_flip_rotate_picture_view_only_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_viewer_menu_tooltips_test
     behavior/test_viewer_menu_icons_have_tooltips.cpp
 )

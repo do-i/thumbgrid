@@ -119,7 +119,7 @@ private:
     QStringList currentSelection();
 
     template<typename... Args>
-    void edit_template(bool save, QString actionName, const std::function<std::unique_ptr<QImage>(std::shared_ptr<const QImage>, Args...)>& func, Args&&... as);
+    void edit_template(const std::function<std::unique_ptr<QImage>(std::shared_ptr<const QImage>, Args...)>& func, Args&&... as);
 
 
 private slots:

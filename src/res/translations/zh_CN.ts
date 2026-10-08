@@ -577,103 +577,96 @@ Continue?</source>
         <translation type="unfinished">移动到...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1217"/>
         <source>Perform action &quot;</source>
-        <translation>执行操作 \&quot;</translation>
+        <translation type="vanished">执行操作 \&quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1217"/>
         <source>Changes will be saved immediately.</source>
-        <translation>更改将立即保存.</translation>
+        <translation type="vanished">更改将立即保存.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1235"/>
         <source>Flip horizontal</source>
-        <translation>水平翻转</translation>
+        <translation type="vanished">水平翻转</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1239"/>
         <source>Flip vertical</source>
-        <translation>垂直翻转</translation>
+        <translation type="vanished">垂直翻转</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1243"/>
         <source>Rotate</source>
-        <translation>旋转</translation>
+        <translation type="vanished">旋转</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1248"/>
         <source>Resize</source>
-        <translation>调整大小</translation>
+        <translation type="vanished">调整大小</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1260"/>
         <source>Crop</source>
-        <translation>裁剪</translation>
+        <translation type="vanished">裁剪</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1290"/>
+        <location filename="../../core.cpp" line="1293"/>
         <source>File saved</source>
         <translation>文件已保存</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1293"/>
+        <location filename="../../core.cpp" line="1296"/>
         <source>Could not save file</source>
         <translation>不能保存文件</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1429"/>
-        <location filename="../../core.cpp" line="1430"/>
+        <location filename="../../core.cpp" line="1432"/>
+        <location filename="../../core.cpp" line="1433"/>
         <source>New Folder</source>
         <translation>新建文件夹</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1429"/>
+        <location filename="../../core.cpp" line="1432"/>
         <source>Folder name:</source>
         <translation>文件夹名称：</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1437"/>
+        <location filename="../../core.cpp" line="1440"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>文件夹名称不能包含路径分隔符。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1471"/>
+        <location filename="../../core.cpp" line="1474"/>
         <source>Could not open image</source>
         <translation>不能打开图片</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1475"/>
+        <location filename="../../core.cpp" line="1478"/>
         <source>Can only print static images</source>
         <translation>只能打印静态图片</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1523"/>
+        <location filename="../../core.cpp" line="1526"/>
         <source>Cannot view root folder.</source>
         <translation>无法查看根文件夹。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1531"/>
+        <location filename="../../core.cpp" line="1534"/>
         <source>Could not open path: </source>
         <translation>不能打开的路径: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1571"/>
+        <location filename="../../core.cpp" line="1574"/>
         <source>Could not load folder: </source>
         <translation>不能载入的目录: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1629"/>
+        <location filename="../../core.cpp" line="1632"/>
         <source>Already at root folder.</source>
         <translation>已在根文件夹。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1796"/>
+        <location filename="../../core.cpp" line="1799"/>
         <source>End of directory.</source>
         <translation>目录末尾.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1846"/>
+        <location filename="../../core.cpp" line="1849"/>
         <source>Cannot display file: </source>
         <translation>无法显示文件：</translation>
     </message>
@@ -682,7 +675,7 @@ Continue?</source>
         <translation type="vanished">加载失败: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1889"/>
+        <location filename="../../core.cpp" line="1892"/>
         <source>Error: could not load image.</source>
         <translation>错误: 不能载入图片.</translation>
     </message>

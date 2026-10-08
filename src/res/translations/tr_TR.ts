@@ -577,103 +577,96 @@ Devam edilsin mi?</translation>
         <translation type="unfinished">Şuraya taşı...</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1217"/>
         <source>Perform action &quot;</source>
-        <translation>Eylemi gerçekleştir: &quot;</translation>
+        <translation type="vanished">Eylemi gerçekleştir: &quot;</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1217"/>
         <source>Changes will be saved immediately.</source>
-        <translation>Değişiklikler hemen kaydedilecektir.</translation>
+        <translation type="vanished">Değişiklikler hemen kaydedilecektir.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1235"/>
         <source>Flip horizontal</source>
-        <translation>Yatay çevir</translation>
+        <translation type="vanished">Yatay çevir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1239"/>
         <source>Flip vertical</source>
-        <translation>Dikey çevir</translation>
+        <translation type="vanished">Dikey çevir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1243"/>
         <source>Rotate</source>
-        <translation>Döndür</translation>
+        <translation type="vanished">Döndür</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1248"/>
         <source>Resize</source>
-        <translation>Yeniden boyutlandır</translation>
+        <translation type="vanished">Yeniden boyutlandır</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1260"/>
         <source>Crop</source>
-        <translation>Kırp</translation>
+        <translation type="vanished">Kırp</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1290"/>
+        <location filename="../../core.cpp" line="1293"/>
         <source>File saved</source>
         <translation>Dosya kaydedildi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1293"/>
+        <location filename="../../core.cpp" line="1296"/>
         <source>Could not save file</source>
         <translation>Dosya kaydedilemedi</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1429"/>
-        <location filename="../../core.cpp" line="1430"/>
+        <location filename="../../core.cpp" line="1432"/>
+        <location filename="../../core.cpp" line="1433"/>
         <source>New Folder</source>
         <translation>Yeni Klasör</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1429"/>
+        <location filename="../../core.cpp" line="1432"/>
         <source>Folder name:</source>
         <translation>Klasör adı:</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1437"/>
+        <location filename="../../core.cpp" line="1440"/>
         <source>Folder name cannot contain path separators.</source>
         <translation>Klasör adı yol ayırıcıları içeremez.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1471"/>
+        <location filename="../../core.cpp" line="1474"/>
         <source>Could not open image</source>
         <translation>Görüntü açılamadı</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1475"/>
+        <location filename="../../core.cpp" line="1478"/>
         <source>Can only print static images</source>
         <translation>Sadece hareketsiz görüntüler yazdırılabilir</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1523"/>
+        <location filename="../../core.cpp" line="1526"/>
         <source>Cannot view root folder.</source>
         <translation>Kök klasör görüntülenemiyor.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1531"/>
+        <location filename="../../core.cpp" line="1534"/>
         <source>Could not open path: </source>
         <translation>Dosya yolu açılamadı: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1571"/>
+        <location filename="../../core.cpp" line="1574"/>
         <source>Could not load folder: </source>
         <translation>Klasör yüklenemedi: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1629"/>
+        <location filename="../../core.cpp" line="1632"/>
         <source>Already at root folder.</source>
         <translation>Zaten kök klasördesiniz.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1796"/>
+        <location filename="../../core.cpp" line="1799"/>
         <source>End of directory.</source>
         <translation>Dizin sonu.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1846"/>
+        <location filename="../../core.cpp" line="1849"/>
         <source>Cannot display file: </source>
         <translation>Dosya görüntülenemiyor: </translation>
     </message>
@@ -682,7 +675,7 @@ Devam edilsin mi?</translation>
         <translation type="vanished">Yükleme başarısız: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1889"/>
+        <location filename="../../core.cpp" line="1892"/>
         <source>Error: could not load image.</source>
         <translation>Hata: Görüntü yüklenemedi.</translation>
     </message>
