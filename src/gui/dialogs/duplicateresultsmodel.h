@@ -10,7 +10,8 @@
 
 // Two-level tree of duplicate search results: parent rows are reference
 // (source) images, children are their matches (docs/003 §3.3). With a
-// single group it reads as a flat table.
+// single group it reads as a flat table. Every row's checkbox marks that
+// row's own file, so a reference can be removed instead of its matches.
 class DuplicateResultsModel : public QAbstractItemModel {
     Q_OBJECT
 public:
@@ -28,20 +29,24 @@ public:
     explicit DuplicateResultsModel(QObject *parent = nullptr);
 
     enum SmartSelectMode : std::uint8_t {
-        SELECT_ALL, KEEP_LARGEST_RESOLUTION, KEEP_LARGEST_FILE,
+        SELECT_ALL, SELECT_ALL_REFERENCES, KEEP_LARGEST_RESOLUTION, KEEP_LARGEST_FILE,
         KEEP_NEWEST, KEEP_OLDEST, CLEAR_SELECTION
     };
 
     void clear();
     void addMatch(const DuplicateMatch &match);
     void setThumbnail(const QString &path, const QPixmap &pixmap);
-    // check all matches per group except the "best" one by the given
-    // criterion; the group's source image also competes for "best"
+    // SELECT_ALL checks every match, SELECT_ALL_REFERENCES every reference;
+    // the KEEP_* modes check all matches per group except the "best" one by
+    // the given criterion, and the group's source image also competes for
+    // "best". Every mode leaves at least one copy per group unchecked.
     void smartSelect(SmartSelectMode mode);
     void removeMatchesForPaths(const QStringList &paths);
     qint64 checkedBytes() const;
     QStringList checkedPaths() const;
     QStringList allMatchPaths() const;
+    // groups whose reference and every match are all checked
+    int groupsWithEveryCopyChecked() const;
     int matchCount() const;
     QModelIndex groupIndex(const QString &sourcePath) const;
 
@@ -67,6 +72,7 @@ private:
         QString sourcePath;
         QSize dimensions;
         qint64 fileSize = 0;
+        Qt::CheckState checked = Qt::Unchecked;
         QPixmap thumb;
         QVector<MatchRow> rows;
     };

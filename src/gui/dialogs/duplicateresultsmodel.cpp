@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QLocale>
 #include <QSet>
+#include <algorithm>
 
 DuplicateResultsModel::DuplicateResultsModel(QObject *parent) : QAbstractItemModel(parent) {
 }
@@ -57,12 +58,36 @@ void DuplicateResultsModel::setThumbnail(const QString &path, const QPixmap &pix
 }
 
 QStringList DuplicateResultsModel::checkedPaths() const {
+    // a file can be one group's reference and another group's match
     QStringList paths;
-    for(const Group &group : mGroups)
+    QSet<QString> seen;
+    auto add = [&](const QString &path) {
+        if(!seen.contains(path)) {
+            seen.insert(path);
+            paths << path;
+        }
+    };
+    for(const Group &group : mGroups) {
+        if(group.checked == Qt::Checked)
+            add(group.sourcePath);
         for(const MatchRow &row : group.rows)
             if(row.checked == Qt::Checked)
-                paths << row.match.matchPath;
+                add(row.match.matchPath);
+    }
     return paths;
+}
+
+int DuplicateResultsModel::groupsWithEveryCopyChecked() const {
+    int count = 0;
+    for(const Group &group : mGroups) {
+        if(group.checked != Qt::Checked)
+            continue;
+        bool all = std::all_of(group.rows.begin(), group.rows.end(),
+                               [](const MatchRow &row) { return row.checked == Qt::Checked; });
+        if(all)
+            count++;
+    }
+    return count;
 }
 
 QStringList DuplicateResultsModel::allMatchPaths() const {
@@ -76,7 +101,8 @@ QStringList DuplicateResultsModel::allMatchPaths() const {
 void DuplicateResultsModel::smartSelect(SmartSelectMode mode) {
     for(int g = 0; g < mGroups.count(); g++) {
         Group &group = mGroups[g];
-        if(mode == SELECT_ALL || mode == CLEAR_SELECTION) {
+        group.checked = (mode == SELECT_ALL_REFERENCES) ? Qt::Checked : Qt::Unchecked;
+        if(mode == SELECT_ALL || mode == SELECT_ALL_REFERENCES || mode == CLEAR_SELECTION) {
             for(MatchRow &row : group.rows)
                 row.checked = (mode == SELECT_ALL) ? Qt::Checked : Qt::Unchecked;
         } else {
@@ -145,10 +171,13 @@ void DuplicateResultsModel::removeMatchesForPaths(const QStringList &paths) {
 
 qint64 DuplicateResultsModel::checkedBytes() const {
     qint64 total = 0;
-    for(const Group &group : mGroups)
+    for(const Group &group : mGroups) {
+        if(group.checked == Qt::Checked)
+            total += group.fileSize;
         for(const MatchRow &row : group.rows)
             if(row.checked == Qt::Checked)
                 total += row.match.matchFileSize;
+    }
     return total;
 }
 
@@ -215,15 +244,8 @@ QVariant DuplicateResultsModel::groupData(const Group &group, int column, int ro
         maxSim = qMax(maxSim, row.match.similarity);
     if(role == SimilarityRole)
         return maxSim;
-    if(role == Qt::CheckStateRole && column == COL_CHECK) {
-        int checked = 0;
-        for(const MatchRow &row : group.rows)
-            if(row.checked == Qt::Checked)
-                checked++;
-        if(checked == 0)
-            return Qt::Unchecked;
-        return (checked == group.rows.count()) ? Qt::Checked : Qt::PartiallyChecked;
-    }
+    if(role == Qt::CheckStateRole && column == COL_CHECK)
+        return group.checked;
     if(role == Qt::DecorationRole && column == COL_THUMB)
         return group.thumb;
     if(role == Qt::DisplayRole || role == SortRole) {
@@ -286,22 +308,12 @@ bool DuplicateResultsModel::setData(const QModelIndex &index, const QVariant &va
     if(!index.isValid() || role != Qt::CheckStateRole || index.column() != COL_CHECK)
         return false;
     auto state = static_cast<Qt::CheckState>(value.toInt());
-    if(isGroupIndex(index)) {
-        // checking a group checks/unchecks all its matches
-        Group &group = mGroups[index.row()];
-        Qt::CheckState target = (state == Qt::Unchecked) ? Qt::Unchecked : Qt::Checked;
-        for(MatchRow &row : group.rows)
-            row.checked = target;
-        emit dataChanged(this->index(0, COL_CHECK, index),
-                         this->index(group.rows.count() - 1, COL_CHECK, index), {Qt::CheckStateRole});
-    } else {
-        Group &group = mGroups[int(index.internalId()) - 1];
-        group.rows[index.row()].checked = (state == Qt::Unchecked) ? Qt::Unchecked : Qt::Checked;
-    }
+    Qt::CheckState target = (state == Qt::Unchecked) ? Qt::Unchecked : Qt::Checked;
+    if(isGroupIndex(index))
+        mGroups[index.row()].checked = target;
+    else
+        mGroups[int(index.internalId()) - 1].rows[index.row()].checked = target;
     emit dataChanged(index, index, {Qt::CheckStateRole});
-    QModelIndex groupIdx = isGroupIndex(index) ? index : index.parent();
-    QModelIndex groupCheck = this->index(groupIdx.row(), COL_CHECK);
-    emit dataChanged(groupCheck, groupCheck, {Qt::CheckStateRole});
     emitCheckedCount();
     return true;
 }

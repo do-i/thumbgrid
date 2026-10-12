@@ -1,5 +1,6 @@
 #include "duplicatefinderdialog.h"
 
+#include <QActionGroup>
 #include <QButtonGroup>
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -25,6 +26,7 @@
 #include <QSlider>
 #include <QSpinBox>
 #include <QStackedWidget>
+#include <QStyle>
 #include <QTreeView>
 #include <QVBoxLayout>
 #include "gui/dialogs/custommessagebox.h"
@@ -114,6 +116,7 @@ DuplicateFinderDialog::DuplicateFinderDialog(QWidget *parent) : QDialog(parent) 
     const QByteArray header = settings->duplicateFinderHeader();
     if(!header.isEmpty())
         mTreeView->header()->restoreState(header);
+    ensureCheckColumnFits(); // a saved state may predate the wider column
     mSimilaritySpin->setValue(settings->duplicateFinderSimilarity());
     mRecursiveBox->setChecked(settings->duplicateFinderRecursive());
     mRotatedBox->setChecked(settings->duplicateFinderRotated());
@@ -288,7 +291,7 @@ void DuplicateFinderDialog::setupResultsZone() {
     mTreeView->setAlternatingRowColors(true);
     mTreeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     mTreeView->header()->setStretchLastSection(true);
-    mTreeView->setColumnWidth(DuplicateResultsModel::COL_CHECK, 36);
+    ensureCheckColumnFits();
     mTreeView->setColumnWidth(DuplicateResultsModel::COL_THUMB, THUMB_SIZE + 12);
     mTreeView->setColumnWidth(DuplicateResultsModel::COL_SIMILARITY, 110);
     mTreeView->setColumnWidth(DuplicateResultsModel::COL_DIMENSIONS, 100);
@@ -334,20 +337,48 @@ void DuplicateFinderDialog::setupPreviewAndActions() {
     mainLayout->addWidget(previewBox);
 
     auto *bottomRow = new QHBoxLayout();
-    auto *smartSelect = new QPushButton(tr("Smart select"), this);
-    auto *smartMenu = new QMenu(smartSelect);
+    mSmartSelectButton = new QPushButton(tr("Smart select"), this);
+    mSmartSelectButton->setObjectName("duplicateFinderSmartSelectButton");
+    auto *smartMenu = new QMenu(mSmartSelectButton);
+    mSmartRules = new QActionGroup(this);
+    mSmartRules->setExclusionPolicy(QActionGroup::ExclusionPolicy::ExclusiveOptional);
     auto addSmart = [&](const QString &text, DuplicateResultsModel::SmartSelectMode mode) {
-        smartMenu->addAction(text, this, [this, mode] { mModel->smartSelect(mode); });
+        QAction *action = smartMenu->addAction(text);
+        bool isRule = (mode != DuplicateResultsModel::CLEAR_SELECTION);
+        if(isRule) {
+            action->setCheckable(true);
+            mSmartRules->addAction(action);
+        }
+        connect(action, &QAction::triggered, this, [this, action, mode, isRule] {
+            mApplyingSmartSelect = true;
+            mModel->smartSelect(mode);
+            mApplyingSmartSelect = false;
+            showSmartRule(isRule ? action : nullptr);
+        });
+        return action;
     };
-    addSmart(tr("Select all matches"), DuplicateResultsModel::SELECT_ALL);
+    // texts are set per mode in updateModeUi()
+    mSelectMatchesAction = addSmart(QString(), DuplicateResultsModel::SELECT_ALL);
+    mSelectMatchesAction->setObjectName("selectAllMatchesAction");
+    mSelectReferencesAction = addSmart(QString(), DuplicateResultsModel::SELECT_ALL_REFERENCES);
+    mSelectReferencesAction->setObjectName("selectAllReferencesAction");
+    smartMenu->addSeparator();
     addSmart(tr("Keep largest resolution"), DuplicateResultsModel::KEEP_LARGEST_RESOLUTION);
     addSmart(tr("Keep largest file"), DuplicateResultsModel::KEEP_LARGEST_FILE);
     addSmart(tr("Keep newest"), DuplicateResultsModel::KEEP_NEWEST);
     addSmart(tr("Keep oldest"), DuplicateResultsModel::KEEP_OLDEST);
     smartMenu->addSeparator();
     addSmart(tr("Clear selection"), DuplicateResultsModel::CLEAR_SELECTION);
-    smartSelect->setMenu(smartMenu);
-    bottomRow->addWidget(smartSelect);
+    mSmartSelectButton->setMenu(smartMenu);
+    bottomRow->addWidget(mSmartSelectButton);
+    // the button names the rule only while the checks still match it
+    connect(mModel, &QAbstractItemModel::dataChanged, this,
+            [this](const QModelIndex &, const QModelIndex &, const QList<int> &roles) {
+                if(!mApplyingSmartSelect && roles.contains(Qt::CheckStateRole))
+                    showSmartRule(nullptr);
+            });
+    connect(mModel, &QAbstractItemModel::modelReset, this, [this] { showSmartRule(nullptr); });
+    connect(mModel, &QAbstractItemModel::rowsInserted, this, [this] { showSmartRule(nullptr); });
 
     mSelectionLabel = new QLabel(tr("0 selected"), this);
     bottomRow->addWidget(mSelectionLabel);
@@ -360,6 +391,7 @@ void DuplicateFinderDialog::setupPreviewAndActions() {
     mDeleteButton->setEnabled(false);
     bottomRow->addWidget(mDeleteButton);
     mainLayout->addLayout(bottomRow);
+    updateModeUi();
 
     connect(mMoveButton, &QPushButton::clicked, this, &DuplicateFinderDialog::moveChecked);
     connect(mDeleteButton, &QPushButton::clicked, this, &DuplicateFinderDialog::deleteChecked);
@@ -371,6 +403,14 @@ void DuplicateFinderDialog::setupPreviewAndActions() {
 }
 
 void DuplicateFinderDialog::updateModeUi() {
+    if(mSelectMatchesAction) { // the actions row is built after the setup zone
+        bool compare = mModeCompare->isChecked();
+        mSelectMatchesAction->setText(compare ? tr("Select all in target folders")
+                                              : tr("Select all matches"));
+        mSelectReferencesAction->setText(compare ? tr("Select all in source folders")
+                                                 : tr("Select all references"));
+        showSmartRule(mSmartRules->checkedAction());
+    }
     if(mModeSingle->isChecked()) {
         mSourceStack->setVisible(true);
         mSourceStack->setCurrentIndex(0);
@@ -385,6 +425,23 @@ void DuplicateFinderDialog::updateModeUi() {
     }
     if(mStartButton) // rows are built after the mode row on first setup
         updateStartEnabled();
+}
+
+void DuplicateFinderDialog::showSmartRule(QAction *rule) {
+    if(rule)
+        rule->setChecked(true);
+    else if(QAction *checked = mSmartRules->checkedAction())
+        checked->setChecked(false);
+    mSmartSelectButton->setText(rule ? rule->text() : tr("Smart select"));
+}
+
+void DuplicateFinderDialog::ensureCheckColumnFits() {
+    // column 0 also holds the branch arrow and, for matches, one level of
+    // indentation, so a fixed width pushes the match checkboxes out of view
+    int needed = mTreeView->indentation() * 2
+                 + mTreeView->style()->pixelMetric(QStyle::PM_IndicatorWidth, nullptr, mTreeView) + 12;
+    if(mTreeView->columnWidth(DuplicateResultsModel::COL_CHECK) < needed)
+        mTreeView->setColumnWidth(DuplicateResultsModel::COL_CHECK, needed);
 }
 
 void DuplicateFinderDialog::presetFor(const QString &path, const QString &currentDirectory) {
@@ -534,10 +591,18 @@ void DuplicateFinderDialog::closeEvent(QCloseEvent *event) {
 //------------------------------------------------------------------------------
 
 void DuplicateFinderDialog::deleteChecked() {
-    deletePaths(mModel->checkedPaths());
+    deletePaths(mModel->checkedPaths(), everyCopyCheckedWarning());
 }
 
-void DuplicateFinderDialog::deletePaths(const QStringList &paths) {
+QString DuplicateFinderDialog::everyCopyCheckedWarning() const {
+    int groups = mModel->groupsWithEveryCopyChecked();
+    if(groups == 0)
+        return QString();
+    return tr("Every copy is selected in %n group(s); no copy of those images will remain.",
+              nullptr, groups);
+}
+
+void DuplicateFinderDialog::deletePaths(const QStringList &paths, const QString &warning) {
     if(paths.isEmpty())
         return;
     qint64 bytes = 0;
@@ -545,6 +610,8 @@ void DuplicateFinderDialog::deletePaths(const QStringList &paths) {
         bytes += QFileInfo(path).size();
     QString msg = tr("Move %n file(s) to trash?", nullptr, paths.count())
                   + QString(" (%1)").arg(QLocale().formattedDataSize(bytes, 1));
+    if(!warning.isEmpty())
+        msg += "\n\n" + warning;
     if(!CustomMessageBox::confirm(this, tr("Move to trash"), msg, true))
         return;
     QStringList removed, failed;
@@ -571,6 +638,11 @@ QString DuplicateFinderDialog::searchRootFor(const QString &path) const {
 
 void DuplicateFinderDialog::moveChecked() {
     if(mModel->checkedPaths().isEmpty())
+        return;
+    QString warning = everyCopyCheckedWarning();
+    if(!warning.isEmpty()
+       && QMessageBox::warning(this, tr("Move duplicates"), warning,
+                               QMessageBox::Ok | QMessageBox::Cancel) != QMessageBox::Ok)
         return;
     QString dest = QFileDialog::getExistingDirectory(this, tr("Move duplicates to..."));
     if(!dest.isEmpty())
@@ -632,8 +704,7 @@ void DuplicateFinderDialog::onResultsContextMenu(const QPoint &pos) {
     QString path = idx.data(DuplicateResultsModel::FilePathRole).toString();
     QMenu menu(this);
     menu.addAction(tr("Open"), this, [this, path] { emit openFileRequested(path); });
-    if(idx.parent().isValid())
-        menu.addAction(tr("Move to trash"), this, [this, path] { deletePaths({path}); });
+    menu.addAction(tr("Move to trash"), this, [this, path] { deletePaths({path}); });
     menu.exec(mTreeView->viewport()->mapToGlobal(pos));
 }
 

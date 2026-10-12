@@ -1,8 +1,10 @@
 #include "support/thumbgrid_test_support.h"
+#include <QAction>
 #include <QDir>
 #include <QImage>
 #include <QPainter>
 #include <QPushButton>
+#include <QStyle>
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QTreeView>
@@ -45,6 +47,8 @@ private slots:
     void clearButtonResetsResults();
     void folderSelectionSeedsCompareOrWithinMode();
     void smartSelectKeepsTheBestCopy();
+    void selectAllChoosesSourceOrTargetSide();
+    void matchCheckboxesFitTheirColumn();
     void movingCheckedFilesCreatesAuditableSession();
     void deletingCheckedFilesGoesThroughDangerConfirm();
     void findDuplicatesActionOpensSeededDialog();
@@ -157,6 +161,76 @@ void DuplicateFinderDialogTest::smartSelectKeepsTheBestCopy() {
     QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 0);
     dialog.resultsModel()->smartSelect(DuplicateResultsModel::SELECT_ALL);
     QCOMPARE(dialog.resultsModel()->checkedPaths().count(), 2);
+}
+
+void DuplicateFinderDialogTest::selectAllChoosesSourceOrTargetSide() {
+    DuplicateFinderDialog dialog;
+    dialog.presetForSelection({tmp.filePath("src"), tmp.filePath("tgt")}, "");
+    dialog.findChild<QPushButton *>("duplicateFinderStartButton")->click();
+    QTRY_COMPARE_WITH_TIMEOUT(dialog.resultsModel()->matchCount(), 2, 15000);
+    QTRY_VERIFY(!dialog.finder()->isRunning());
+    auto *model = dialog.resultsModel();
+    QModelIndex group = model->index(0, DuplicateResultsModel::COL_CHECK);
+    // compare mode names both sides by folder role
+    auto *matchesAction = dialog.findChild<QAction *>("selectAllMatchesAction");
+    auto *referencesAction = dialog.findChild<QAction *>("selectAllReferencesAction");
+    QVERIFY(matchesAction && referencesAction);
+    QCOMPARE(matchesAction->text(), QString("Select all in target folders"));
+    QCOMPARE(referencesAction->text(), QString("Select all in source folders"));
+
+    // target side: both copies under tgt/, the source image stays, and the
+    // button names the applied rule like a combo box would
+    auto *smartButton = dialog.findChild<QPushButton *>("duplicateFinderSmartSelectButton");
+    QVERIFY(smartButton);
+    QCOMPARE(smartButton->text(), QString("Smart select"));
+    matchesAction->trigger();
+    QCOMPARE(smartButton->text(), matchesAction->text());
+    QVERIFY(matchesAction->isChecked());
+    QStringList checked = model->checkedPaths();
+    QCOMPARE(checked.count(), 2);
+    for(const QString &path : checked)
+        QVERIFY(path.startsWith(tmp.filePath("tgt")));
+    QCOMPARE(group.data(Qt::CheckStateRole).toInt(), int(Qt::Unchecked));
+
+    // source side: only src/A.png, the target copies stay
+    referencesAction->trigger();
+    QCOMPARE(smartButton->text(), referencesAction->text());
+    QVERIFY(referencesAction->isChecked() && !matchesAction->isChecked());
+    QCOMPARE(model->checkedPaths(), QStringList{tmp.filePath("src/A.png")});
+    QCOMPARE(group.data(Qt::CheckStateRole).toInt(), int(Qt::Checked));
+    QCOMPARE(model->groupsWithEveryCopyChecked(), 0);
+
+    // the reference checkbox is its own file: checking it touches no match,
+    // and checking every match too is flagged as losing every copy
+    model->smartSelect(DuplicateResultsModel::CLEAR_SELECTION);
+    QVERIFY(model->setData(group, Qt::Checked, Qt::CheckStateRole));
+    // hand-editing a check means the rule no longer describes the selection
+    QCOMPARE(smartButton->text(), QString("Smart select"));
+    QVERIFY(!referencesAction->isChecked());
+    QCOMPARE(model->checkedPaths().count(), 1);
+    for(int r = 0; r < model->rowCount(model->index(0, 0)); r++)
+        model->setData(model->index(r, DuplicateResultsModel::COL_CHECK, model->index(0, 0)),
+                       Qt::Checked, Qt::CheckStateRole);
+    QCOMPARE(model->checkedPaths().count(), 3);
+    QCOMPARE(model->groupsWithEveryCopyChecked(), 1);
+}
+
+void DuplicateFinderDialogTest::matchCheckboxesFitTheirColumn() {
+    DuplicateFinderDialog dialog;
+    dialog.presetFor(tmp.filePath("src/A.png"), tmp.filePath("tgt"));
+    dialog.show();
+    dialog.findChild<QPushButton *>("duplicateFinderStartButton")->click();
+    QTRY_COMPARE_WITH_TIMEOUT(dialog.resultsModel()->matchCount(), 2, 15000);
+    QTRY_VERIFY(!dialog.finder()->isRunning());
+    // a match's check cell is what is left of column 0 after the branch
+    // arrow and one indentation level; it must still hold the indicator
+    auto *view = dialog.resultsView();
+    QModelIndex group = view->model()->index(0, 0);
+    QModelIndex match = view->model()->index(0, DuplicateResultsModel::COL_CHECK, group);
+    int indicator = view->style()->pixelMetric(QStyle::PM_IndicatorWidth, nullptr, view);
+    QVERIFY2(view->visualRect(match).width() >= indicator,
+             qPrintable(QString("check cell %1px < indicator %2px")
+                            .arg(view->visualRect(match).width()).arg(indicator)));
 }
 
 void DuplicateFinderDialogTest::movingCheckedFilesCreatesAuditableSession() {

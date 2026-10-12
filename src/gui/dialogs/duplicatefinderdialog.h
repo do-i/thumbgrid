@@ -6,6 +6,8 @@
 #include "components/thumbnailer/thumbnailer.h"
 #include "duplicateresultsmodel.h"
 
+class QAction;
+class QActionGroup;
 class QButtonGroup;
 class QCheckBox;
 class QLabel;
@@ -68,7 +70,11 @@ private:
     void setupPreviewAndActions();
     void updateModeUi();
     void updateStartEnabled();
-    void deletePaths(const QStringList &paths);
+    void ensureCheckColumnFits();
+    // shows the applied smart-select rule on its button; nullptr resets it
+    void showSmartRule(QAction *rule);
+    void deletePaths(const QStringList &paths, const QString &warning = QString());
+    QString everyCopyCheckedWarning() const;
     QString searchRootFor(const QString &path) const;
     static QString previewInfoHtml(const QString &path, const QSize &otherDims, qint64 otherSize);
     void requestThumbnail(const QString &path);
@@ -100,6 +106,10 @@ private:
     QTreeView *mTreeView = nullptr;
     QLabel *mSelectionLabel = nullptr;
     QPushButton *mMoveButton = nullptr, *mDeleteButton = nullptr;
+    QPushButton *mSmartSelectButton = nullptr;
+    QActionGroup *mSmartRules = nullptr;
+    QAction *mSelectMatchesAction = nullptr, *mSelectReferencesAction = nullptr;
+    bool mApplyingSmartSelect = false;
     QLabel *mSourcePreview = nullptr, *mMatchPreview = nullptr,
            *mSourceInfo = nullptr, *mMatchInfo = nullptr;
     QStringList mSearchRoots;
