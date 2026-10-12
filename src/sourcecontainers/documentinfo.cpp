@@ -576,6 +576,17 @@ bool DocumentInfo::supportsMetadataEditing(const QString &filePath) {
 #endif
 }
 
+bool DocumentInfo::supportsExif(const QString &filePath) {
+#ifdef USE_EXIV2
+    const QString suffix = QFileInfo(filePath).suffix().toLower();
+    return supportsMetadataEditing(filePath) || suffix == QLatin1String("heic") ||
+           suffix == QLatin1String("heif") || suffix == QLatin1String("hif");
+#else
+    Q_UNUSED(filePath)
+    return false;
+#endif
+}
+
 // libheif hands the picture to x265, whose default 64x64 coding tree unit
 // cannot describe a smaller frame. It does not report this: the encode
 // "succeeds" and the file reads back transposed (64x48 -> 48x64) or plainly

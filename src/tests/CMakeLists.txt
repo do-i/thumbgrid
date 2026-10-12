@@ -535,3 +535,11 @@ add_test(
     NAME "Heif images are viewable and their metadata is read-only"
     COMMAND thumbgrid_heif_images_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_file_info_heif_exif_test
+    behavior/test_file_info_lists_heif_exif.cpp
+)
+add_test(
+    NAME "File info lists a heif's Exif read-only"
+    COMMAND thumbgrid_file_info_heif_exif_test
+)

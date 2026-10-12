@@ -2,6 +2,7 @@
 
 #include <QAction>
 #include <QApplication>
+#include <QCheckBox>
 #include <QDateTime>
 #include <QDir>
 #include <QFile>
@@ -15,6 +16,8 @@
 #include <QLocale>
 #include <QPainter>
 #include <QPushButton>
+#include <QScrollArea>
+#include <QSignalBlocker>
 #include <QTabWidget>
 #include <QVBoxLayout>
 
@@ -108,16 +111,30 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mTabs->addTab(generalTab, tr("General"));
 
     // EXIF tab: rows are (re)built by populateExifTab(); the tab is shown for
-    // a format Exiv2 can write Exif into (jpeg/webp), with a placeholder for
-    // the ones that currently carry none, and hidden entirely for kinds that
-    // can't store Exif at all (png, gif, video, text, folders).
+    // a format Exiv2 can read Exif from (jpeg/webp editable, heif read-only),
+    // with a placeholder for the ones that currently carry none, and hidden
+    // entirely for kinds that can't store Exif at all (png, gif, video, text,
+    // folders).
     mExifTab = new QWidget(mTabs);
     auto *exifLayout = new QVBoxLayout(mExifTab);
-    mExifRowsContainer = new QWidget(mExifTab);
+    // A phone photo carries well over a hundred tags once the full list is on;
+    // without scrolling the rows would set the dialog's minimum height and push
+    // it off the screen.
+    mExifScroll = new QScrollArea(mExifTab);
+    mExifScroll->setWidgetResizable(true);
+    mExifScroll->setFrameShape(QFrame::NoFrame);
+    mExifScroll->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    mExifRowsContainer = new QWidget(mExifScroll);
     mExifRowsLayout = new QVBoxLayout(mExifRowsContainer);
     mExifRowsLayout->setContentsMargins(0, 0, 0, 0);
     mExifRowsLayout->setSpacing(0);
-    exifLayout->addWidget(mExifRowsContainer);
+    mExifRowsLayout->addStretch(1);
+    mExifScroll->setWidget(mExifRowsContainer);
+    // setWidget() turns background filling on for both, which paints the
+    // palette's light base under the rows instead of the tab's own colour.
+    mExifScroll->viewport()->setAutoFillBackground(false);
+    mExifRowsContainer->setAutoFillBackground(false);
+    exifLayout->addWidget(mExifScroll, 1);
     mExifPlaceholder = new QLabel(tr("No metadata"), mExifTab);
     mExifPlaceholder->setAlignment(Qt::AlignCenter);
     mExifPlaceholder->hide();
@@ -129,7 +146,19 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
     mExifError->setWordWrap(true);
     mExifError->hide();
     exifLayout->addWidget(mExifError);
-    exifLayout->addStretch(1);
+    // The same setting as the Settings dialog's "Show full metadata", offered
+    // where its effect is visible: the short summary is nine tags, and a camera
+    // file whose other hundred seem simply missing gives no hint it exists.
+    mShowAllTagsCheckBox = new QCheckBox(tr("Show all tags"), mExifTab);
+    mShowAllTagsCheckBox->setObjectName(QStringLiteral("showAllTagsCheckBox"));
+    connect(mShowAllTagsCheckBox, &QCheckBox::toggled, this, [this](bool checked) {
+        if(checked == settings->showFullMetadata())
+            return;
+        settings->setShowFullMetadata(checked);
+        populateExifTab(mTargetPath);
+        updateActionButtons();
+    });
+    exifLayout->addWidget(mShowAllTagsCheckBox);
     mTabs->addTab(mExifTab, tr("EXIF"));
     mTabs->setTabVisible(mTabs->indexOf(mExifTab), false);
 
@@ -462,28 +491,30 @@ void FileInfoDialog::populateExifTab(const QString &path) {
     QMap<QString, QString> tags;
     QFileInfo fi(path);
     bool editable = false;
-    // Whether the format is one exiv2 can write Exif into at all (jpeg/webp),
-    // which is what decides the tab - not whether this particular file is
-    // currently writable, nor whether it happens to carry any tags today. A
-    // photo with its metadata already stripped is exactly the case where
-    // someone opens this tab to put a date or a comment back; a png has
-    // nowhere for that write to go, so it gets no tab to open.
+    // Whether the format is one exiv2 can read Exif from at all (jpeg/webp,
+    // plus the read-only heif family), which is what decides the tab - not
+    // whether this particular file is currently writable, nor whether it
+    // happens to carry any tags today. A photo with its metadata already
+    // stripped is exactly the case where someone opens this tab to put a date
+    // or a comment back; a png has nowhere for that write to go, so it gets no
+    // tab to open.
     bool canCarryExif = false;
+    const bool fullList = settings->showFullMetadata();
     if(!path.isEmpty() && fi.isFile()) {
         DocumentInfo docInfo(path);
         if((docInfo.type() == DocumentType::STATIC || docInfo.type() == DocumentType::ANIMATED) &&
-           DocumentInfo::supportsMetadataEditing(path)) {
+           DocumentInfo::supportsExif(path)) {
             canCarryExif = true;
             // Honor the global metadata verbosity toggle the same way the
             // document view does (Core::showDocument).
-            tags = settings->showFullMetadata() ? docInfo.getAllTags()
-                                                : docInfo.getExifTags();
+            tags = fullList ? docInfo.getAllTags() : docInfo.getExifTags();
             // The format supports writing; whether we are allowed to write to
             // *this* file also needs it to be writable. A read-only jpeg still
             // lists its tags, just as text. The fields come first: they are
             // the only rows here the user can act on, and the read-only dump
-            // below them can run to dozens of entries.
-            editable = fi.isWritable();
+            // below them can run to dozens of entries. A heif lists its tags
+            // the same way, but exiv2 cannot write them back into it.
+            editable = DocumentInfo::supportsMetadataEditing(path) && fi.isWritable();
             if(editable) {
                 mEditableOriginals = docInfo.getEditableTags();
                 for(const QString &key : DocumentInfo::editableTagKeys())
@@ -516,6 +547,13 @@ void FileInfoDialog::populateExifTab(const QString &path) {
         addExifRow(it.key(), it.value());
         ++shown;
     }
+    // The full list is keyed by exiv2 key ("Exif.Photo.ExposureBiasValue"),
+    // which the default column clips past recognition. Widened for every row,
+    // the editable fields too, so the columns line up as on the XMP tab.
+    if(fullList) {
+        for(EntryInfoItem *row : mExifRows)
+            row->setNameWidth(kXmpKeyColumnWidth);
+    }
     mHasExif = canCarryExif && !tags.isEmpty();
     mExifWritable = editable;
 
@@ -526,6 +564,14 @@ void FileInfoDialog::populateExifTab(const QString &path) {
     // is hidden rather than merely disabled, and whatever tab they arrive with
     // has to fall back to General.
     mExifPlaceholder->setVisible(canCarryExif && mExifRows.isEmpty());
+    mExifScroll->setVisible(!mExifRows.isEmpty());
+    {
+        // Re-read every populate, so a change made in the Settings dialog
+        // shows up here too; no signal, since this *is* the setting.
+        const QSignalBlocker blocker(mShowAllTagsCheckBox);
+        mShowAllTagsCheckBox->setChecked(settings->showFullMetadata());
+    }
+    mShowAllTagsCheckBox->setVisible(canCarryExif);
     if(!canCarryExif && wasCurrent)
         mTabs->setCurrentIndex(mTabs->indexOf(mGeneralTab));
 }
@@ -541,7 +587,8 @@ void FileInfoDialog::clearExifRows() {
 void FileInfoDialog::addExifRow(const QString &name, const QString &value) {
     auto *row = new EntryInfoItem(mExifRowsContainer);
     row->setInfo(name, value);
-    mExifRowsLayout->addWidget(row);
+    // Before the trailing stretch, which keeps short lists at the top.
+    mExifRowsLayout->insertWidget(mExifRowsLayout->count() - 1, row);
     mExifRows.append(row);
 }
 
@@ -555,7 +602,8 @@ void FileInfoDialog::addEditableExifRow(const QString &key, const QString &value
     }
     connect(row, &EntryInfoItem::valueEdited, this,
             [this, key](const QString &newValue) { commitEditableTag(key, newValue); });
-    mExifRowsLayout->addWidget(row);
+    // Before the trailing stretch, which keeps short lists at the top.
+    mExifRowsLayout->insertWidget(mExifRowsLayout->count() - 1, row);
     mExifRows.append(row);
     mEditableRows.insert(key, row);
 }

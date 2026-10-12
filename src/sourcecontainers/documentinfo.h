@@ -167,6 +167,10 @@ public:
     // Exiv2 keys can only be written to formats exiv2 can safely rewrite; this
     // gates the UI so the editor is never offered for a file it cannot save.
     static bool supportsMetadataEditing(const QString &filePath);
+    // Wider than supportsMetadataEditing(): can this container be *read* for
+    // Exif. Adds the heif family, which exiv2 parses but will not rewrite, so
+    // its tags are listed without being offered for editing.
+    static bool supportsExif(const QString &filePath);
     // Narrower question than supportsMetadataEditing(): can exiv2 rewrite this
     // container at all? Gates the destructive removal actions, which are offered
     // for more formats than the tag editor is.

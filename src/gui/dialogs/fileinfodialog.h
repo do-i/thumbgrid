@@ -14,6 +14,8 @@ class QHideEvent;
 class QShowEvent;
 class QEvent;
 class QPushButton;
+class QCheckBox;
+class QScrollArea;
 class QDateTime;
 class EntryInfoItem;
 class DateTimePickerPopup;
@@ -179,6 +181,8 @@ private:
     // Shown in place of the rows when an image simply has no tags.
     QLabel *mExifPlaceholder = nullptr;
     QLabel *mExifError = nullptr;
+    QScrollArea *mExifScroll = nullptr;
+    QCheckBox *mShowAllTagsCheckBox = nullptr;
 
     QWidget *mXmpTab = nullptr;
     QWidget *mXmpRowsContainer = nullptr;
