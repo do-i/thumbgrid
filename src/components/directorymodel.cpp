@@ -1,6 +1,7 @@
 #include "directorymodel.h"
 
 #include <utility>
+#include "sourcecontainers/imagestatic.h"
 
 DirectoryModel::DirectoryModel(QObject *parent) :
     QObject(parent),
@@ -20,9 +21,13 @@ DirectoryModel::DirectoryModel(QObject *parent) :
     connect(&dirManager, &DirectoryManager::sortingChanged, this, &DirectoryModel::onSortingChanged);
     connect(&loader, &Loader::loadFinished, this, &DirectoryModel::onImageReady);
     connect(&loader, &Loader::loadFailed, this, &DirectoryModel::loadFailed);
+    // one write at a time; the encoders thread internally where they can
+    savePool.setMaxThreadCount(1);
 }
 
 DirectoryModel::~DirectoryModel() {
+    // let a running save reach its file: closing the window must not lose it
+    savePool.waitForDone();
     loader.clearTasks();
     delete scaler;
 }
@@ -254,26 +259,74 @@ bool DirectoryModel::saveFile(const QString &filePath) {
 }
 
 bool DirectoryModel::saveFile(const QString &filePath, const QString &destPath) {
-    if(!containsFile(filePath) || !cache.contains(filePath))
+    if(!containsFile(filePath) || !cache.contains(filePath) || isSaving(filePath))
         return false;
     auto img = cache.get(filePath);
-    if(img->save(destPath)) {
-        if(filePath == destPath) { // replace
-            dirManager.updateFileEntry(destPath);
-            emit fileModified(destPath);
-        } else { // manually add if we are saving to the same dir
-            QFileInfo fiSrc(filePath);
-            QFileInfo fiDest(destPath);
-            // handle same dir
-            if(fiSrc.absolutePath() == fiDest.absolutePath()) {
-                // overwrite
-                if(!dirManager.containsFile(destPath) && dirManager.insertFileEntry(destPath))
-                    emit fileModified(destPath);
-            }
-        }
-        return true;
-    }
+    if(!img->save(destPath))
+        return false;
+    onFileWritten(filePath, destPath);
+    return true;
+}
+
+bool DirectoryModel::saveFileAsync(const QString &filePath, const QString &destPath) {
+    if(!containsFile(filePath) || !cache.contains(filePath) || isSaving(filePath))
+        return false;
+    auto img = std::dynamic_pointer_cast<ImageStatic>(cache.get(filePath));
+    if(!img)
+        return false;
+    auto job = img->writeJob(destPath);
+    if(!job)
+        return false;
+    pendingSaves.insert(filePath, {img, *job});
+    dirManager.beginSave(destPath);
+    // The worker gets its own copy of the job and nothing else; the result
+    // comes back as a queued call, and the destructor waits for the pool, so
+    // it never outlives this model.
+    savePool.start([this, filePath, job = *job]() {
+        const bool success = ImageWriter::write(job);
+        QMetaObject::invokeMethod(this, [this, filePath, success]() {
+            finishSave(filePath, success);
+        }, Qt::QueuedConnection);
+    });
+    return true;
+}
+
+bool DirectoryModel::isSaving(const QString &filePath) const {
+    return pendingSaves.contains(filePath);
+}
+
+bool DirectoryModel::isSaveTarget(const QString &destPath) const {
+    for(const auto &pending : pendingSaves)
+        if(pending.job.destPath == destPath)
+            return true;
     return false;
+}
+
+void DirectoryModel::finishSave(const QString &filePath, bool success) {
+    const PendingSave pending = pendingSaves.take(filePath);
+    const QString destPath = pending.job.destPath;
+    dirManager.endSave(destPath);
+    if(success) {
+        pending.img->onWritten(pending.job);
+        onFileWritten(filePath, destPath);
+    }
+    emit saveFinished(filePath, destPath, success);
+}
+
+void DirectoryModel::onFileWritten(const QString &filePath, const QString &destPath) {
+    if(filePath == destPath) { // replace
+        dirManager.updateFileEntry(destPath);
+        emit fileModified(destPath);
+    } else { // manually add if we are saving to the same dir
+        QFileInfo fiSrc(filePath);
+        QFileInfo fiDest(destPath);
+        // handle same dir
+        if(fiSrc.absolutePath() == fiDest.absolutePath()) {
+            // overwrite
+            if(!dirManager.containsFile(destPath) && dirManager.insertFileEntry(destPath))
+                emit fileModified(destPath);
+        }
+    }
 }
 
 // dirManager events
@@ -287,6 +340,10 @@ void DirectoryModel::onFileAdded(QString filePath) {
 }
 
 void DirectoryModel::onFileModified(const QString& filePath) {
+    // the watcher sees a save land before the save reports back; reloading
+    // then would drop an edit made meanwhile, and finishSave() refreshes it
+    if(isSaveTarget(filePath))
+        return;
     QDateTime modTime = lastModified(filePath);
     if(modTime.isValid()) {
         auto img = cache.get(filePath);

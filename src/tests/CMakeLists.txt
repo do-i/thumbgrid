@@ -543,3 +543,11 @@ add_test(
     NAME "File info lists a heif's Exif read-only"
     COMMAND thumbgrid_file_info_heif_exif_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_save_off_gui_thread_test
+    behavior/test_saving_an_edit_writes_off_the_gui_thread.cpp
+)
+add_test(
+    NAME "Saving an edit writes off the GUI thread and replaces the file atomically"
+    COMMAND thumbgrid_save_off_gui_thread_test
+)

@@ -1,7 +1,6 @@
 #include "resizecopy.h"
 
 #include <QDir>
-#include <QFile>
 #include <QFileInfo>
 #include <cstdlib>
 #include "sourcecontainers/documentinfo.h"
@@ -97,14 +96,8 @@ Result resizeFile(const QString &sourcePath, const ResizeSpec &spec, QSet<QStrin
     image.setEditedImage(std::unique_ptr<const QImage>(scaled.release()));
     // ImageStatic::save carries the source's Exif/IPTC/XMP over and resets the
     // orientation/dimension tags to match the already-upright scaled pixels
-    if(image.save(result.destPath)) {
-        result.outcome = Outcome::Resized;
-    } else {
-        // the path was free before (copyPath), so anything there now is our
-        // own partial write - SafeSave only restores files that existed
-        QFile::remove(result.destPath);
-        result.outcome = Outcome::Failed;
-    }
+    // a failed write leaves nothing behind: the file is only created whole
+    result.outcome = image.save(result.destPath) ? Outcome::Resized : Outcome::Failed;
     return result;
 }
 

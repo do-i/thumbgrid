@@ -8,7 +8,7 @@
 #include "core.h"
 
 #include "platform/platformdesktop.h"
-#include "utils/safesave.h"
+#include "utils/imagewriter.h"
 #include "utils/logging.h"
 #include "utils/apppaths.h"
 #include "gui/dialogs/custommessagebox.h"
@@ -165,6 +165,7 @@ void Core::connectComponents() {
     connect(model.get(), &DirectoryModel::imageUpdated,   this, &Core::onModelItemUpdated);
     connect(model.get(), &DirectoryModel::sortingChanged, this, &Core::onModelSortingChanged);
     connect(model.get(), &DirectoryModel::loadFailed,     this, &Core::onLoadFailed);
+    connect(model.get(), &DirectoryModel::saveFinished,   this, &Core::onSaveFinished);
 
     connect(&slideshowTimer, &QTimer::timeout, this, &Core::nextImageSlideshow);
 }
@@ -863,18 +864,13 @@ void Core::openFromClipboard() {
         if(destPath.isEmpty())
             return;
 
-        QFileInfo fi(destPath);
-        QString ext = fi.suffix();
-        int quality = 95;
-        if(ext.compare("png", Qt::CaseInsensitive) == 0)
-            quality = 30;
-        else if(ext.compare("jpg", Qt::CaseInsensitive) == 0 || ext.compare("jpeg", Qt::CaseInsensitive) == 0)
-            quality = settings->JPEGSaveQuality();
-
-        bool success = SafeSave::withBackup(destPath, destPath, [&]() {
-            return image.save(destPath, ext.toStdString().c_str(), quality);
-        });
-        if(success)
+        const QString ext = QFileInfo(destPath).suffix();
+        ImageWriteJob job;
+        job.image = image;
+        job.destPath = destPath;
+        job.format = ext.toLower().toLatin1();
+        job.quality = ImageWriter::qualityFor(ext);
+        if(ImageWriter::write(job))
             loadPath(destPath);
     }
 }
@@ -960,7 +956,7 @@ QMimeData *Core::getMimeDataForImage(const std::shared_ptr<Image>& img, MimeData
                 // copy, or two selections) must never collide on one path.
                 QString exportPath = mExportTmpDir->filePath(QStringLiteral("export-%1.png").arg(mExportFileCounter++));
                 // use faster compression for drag'n'drop
-                int pngQuality = (target == TARGET_DROP) ? 80 : 30;
+                int pngQuality = (target == TARGET_DROP) ? 80 : ImageWriter::qualityFor(QStringLiteral("png"));
                 if(img->getImage()->save(exportPath, nullptr, pngQuality))
                     path = exportPath;
                 else
@@ -1265,40 +1261,50 @@ void Core::crop(QRect rect) {
 
 // ---------------------------------------------------------------- image operations ^
 
-bool Core::saveFile(const QString &filePath) {
-    return saveFile(filePath, filePath);
-}
-
-bool Core::saveFile(const QString &filePath, const QString &newPath) {
-    if(!model->saveFile(filePath, newPath))
-        return false;
-    mw->hideSaveOverlay();
-    // switch to the new file
-    if(model->containsFile(newPath) && state.currentFilePath != newPath) {
-        discardEdits();
-        if(mw->currentViewMode() == MODE_DOCUMENT)
-            loadPath(newPath);
-    }
-    return true;
-}
-
 void Core::saveCurrentFile() {
     saveCurrentFileAs(selectedPath());
 }
 
+// Encoding can take seconds (heic, avif, large png), so a still image is
+// written on a worker and the save overlay waits in a busy state meanwhile.
 void Core::saveCurrentFileAs(const QString& destPath) {
     if(model->isEmpty())
         return;
-    if(saveFile(selectedPath(), destPath)) {
-        mw->showMessageSuccess(tr("File saved"));
-        updateInfoString();
-    } else {
-        mw->showError(tr("Could not save file"));
+    const QString filePath = selectedPath();
+    // already writing this one; a second save would only repeat it
+    if(model->isSaving(filePath))
+        return;
+    if(model->saveFileAsync(filePath, destPath)) {
+        syncSaveOverlay();
+        return;
     }
+    // anything the worker does not take (animations, refused formats)
+    onSaveFinished(filePath, destPath, model->saveFile(filePath, destPath));
+}
+
+void Core::onSaveFinished(const QString& filePath, const QString& destPath, bool success) {
+    if(!success) {
+        syncSaveOverlay();
+        mw->showError(tr("Could not save file"));
+        return;
+    }
+    // switch to the new file, unless the user has moved on meanwhile
+    if(filePath == state.currentFilePath && model->containsFile(destPath) && filePath != destPath) {
+        discardEdits();
+        if(mw->currentViewMode() == MODE_DOCUMENT)
+            loadPath(destPath);
+    }
+    syncSaveOverlay();
+    mw->showMessageSuccess(tr("File saved"));
+    updateInfoString();
 }
 
 void Core::discardEdits() {
     if(model->isEmpty())
+        return;
+    // the edit is being written; dropping it now would leave the shown image
+    // disagreeing with the file
+    if(model->isSaving(selectedPath()))
         return;
 
     std::shared_ptr<Image> img = model->getImage(selectedPath());
@@ -1308,6 +1314,22 @@ void Core::discardEdits() {
         model->updateImage(selectedPath(), img);
     }
     mw->hideSaveOverlay();
+}
+
+// The save overlay follows the shown image: visible while it has unsaved
+// edits, busy while it is being written.
+void Core::syncSaveOverlay() {
+    const QString &path = state.currentFilePath;
+    syncSaveOverlay(model->isLoaded(path) ? model->getImage(path) : nullptr);
+}
+
+void Core::syncSaveOverlay(const std::shared_ptr<Image>& img) {
+    if(!img || !img->isEdited()) {
+        mw->hideSaveOverlay();
+        return;
+    }
+    mw->showSaveOverlay();
+    mw->setSaveOverlayBusy(model->isSaving(img->filePath()));
 }
 
 // todo: remove?
@@ -1907,7 +1929,7 @@ void Core::guiSetImage(const std::shared_ptr<Image>& img) {
     } else if(type == TEXT) {
         mw->showText(img->filePath());
     }
-    img->isEdited() ? mw->showSaveOverlay() : mw->hideSaveOverlay();
+    syncSaveOverlay(img);
 }
 
 void Core::updateInfoString() {

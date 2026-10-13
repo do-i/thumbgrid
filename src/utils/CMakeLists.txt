@@ -8,7 +8,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     imagelib.cpp
     inputmap.cpp
     randomizer.cpp
-    safesave.cpp
+    imagewriter.cpp
     script.cpp
     fileoperations.cpp
     logging.cpp

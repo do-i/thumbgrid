@@ -250,6 +250,7 @@ public slots:
     void updateCropPanelData();
     void showSaveOverlay();
     void hideSaveOverlay();
+    void setSaveOverlayBusy(bool busy);
     void showChangelogWindow();
     void showChangelogWindow(QString text);
     void fitWindow();

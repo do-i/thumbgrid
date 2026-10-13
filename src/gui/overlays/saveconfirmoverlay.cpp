@@ -31,6 +31,13 @@ void SaveConfirmOverlay::readSettings() {
     update();
 }
 
+void SaveConfirmOverlay::setBusy(bool busy) {
+    ui->label->setText(busy ? tr("Saving…") : tr("Unsaved edits"));
+    ui->saveButton->setEnabled(!busy);
+    ui->saveAsButton->setEnabled(!busy);
+    ui->discardButton->setEnabled(!busy);
+}
+
 SaveConfirmOverlay::~SaveConfirmOverlay()
 {
     delete ui;

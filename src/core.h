@@ -112,8 +112,8 @@ private:
     void startSlideshow();
     void stopSlideshow();
 
-    bool saveFile(const QString &filePath, const QString &newPath);
-    bool saveFile(const QString &filePath);
+    void syncSaveOverlay();
+    void syncSaveOverlay(const std::shared_ptr<Image>& img);
 
     std::shared_ptr<ImageStatic> getEditableImage(const QString &filePath);
     QStringList currentSelection();
@@ -147,6 +147,7 @@ private slots:
     void onFileRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo);
     void onFileAdded(const QString& filePath);
     void onFileModified(const QString& filePath);
+    void onSaveFinished(const QString& filePath, const QString& destPath, bool success);
     void showResizeDialog();
     void resize(QSize size);
     void resizeSelectionToCopies(ResizeSpec spec);

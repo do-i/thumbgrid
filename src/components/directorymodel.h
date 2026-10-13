@@ -1,11 +1,16 @@
 #pragma once
 
+#include <QHash>
 #include <QObject>
+#include <QThreadPool>
 #include "cache/cache.h"
 #include "directorymanager/directorymanager.h"
 #include "scaler/scaler.h"
 #include "loader/loader.h"
 #include "utils/fileoperations.h"
+#include "utils/imagewriter.h"
+
+class ImageStatic;
 
 class DirectoryModel : public QObject {
     Q_OBJECT
@@ -72,6 +77,11 @@ public:
 
     bool saveFile(const QString &filePath);
     bool saveFile(const QString &filePath, const QString &destPath);
+    // Writes filePath's image to destPath on a worker thread; saveFinished()
+    // follows. False when no write was started (unsupported image or format,
+    // or filePath is already being saved).
+    bool saveFileAsync(const QString &filePath, const QString &destPath);
+    bool isSaving(const QString &filePath) const;
 
     bool containsDir(QString dirPath) const;
     FileListSource source();
@@ -89,12 +99,25 @@ signals:
     void indexChanged(int oldIndex, int index);
     void imageReady(const std::shared_ptr<Image>& img, const QString&);
     void imageUpdated(const QString& filePath);
+    void saveFinished(const QString& filePath, const QString& destPath, bool success);
 
 private:
     DirectoryManager dirManager;
     Loader loader;
     Cache cache;
     FileListSource fileListSource;
+
+    struct PendingSave {
+        std::shared_ptr<ImageStatic> img;
+        ImageWriteJob job;
+    };
+    // keyed by the saved file's path
+    QHash<QString, PendingSave> pendingSaves;
+    QThreadPool savePool;
+
+    void onFileWritten(const QString &filePath, const QString &destPath);
+    void finishSave(const QString &filePath, bool success);
+    bool isSaveTarget(const QString &destPath) const;
 
 private slots:
     void onImageReady(const std::shared_ptr<Image>& img, const QString &path);

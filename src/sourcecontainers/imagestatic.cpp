@@ -1,10 +1,8 @@
 #include "imagestatic.h"
-#include "utils/safesave.h"
 #include <time.h>
 
 #include <utility>
 #include "utils/logging.h"
-#include "utils/pathstring.h"
 
 ImageStatic::ImageStatic(QString _path)
     : Image(std::move(_path))
@@ -78,86 +76,47 @@ void ImageStatic::loadICO() {
     mLoaded = true;
 }
 
-// TODO: move saving to directorymodel
-bool ImageStatic::save(QString destPath) {
-    QFileInfo fi(destPath);
-    QString ext = fi.suffix();
+std::optional<ImageWriteJob> ImageStatic::writeJob(const QString &destPath) {
+    const QString ext = QFileInfo(destPath).suffix();
     // The single choke point for every write route (save, save-as, convert), so
     // a format that cannot faithfully encode this image is refused here once
     // rather than in each caller.
-    if(!DocumentInfo::canEncodeToFormat(ext, isEdited() ? imageEdited->size() : image->size())) {
-        qCWarning(logLoader) << "ImageStatic::save() -" << ext
+    if(!DocumentInfo::canEncodeToFormat(ext, size())) {
+        qCWarning(logLoader) << "ImageStatic::writeJob() -" << ext
                              << "cannot encode an image this small:" << destPath;
-        return false;
+        return std::nullopt;
     }
-    // png compression note from libpng
-    // Note that tests have shown that zlib compression levels 3-6 usually perform as well
-    // as level 9 for PNG images, and do considerably fewer caclulations
-    int quality = 95;
-    if(ext.compare("png", Qt::CaseInsensitive) == 0)
-        quality = 30;
-    else if(ext.compare("jpg", Qt::CaseInsensitive) == 0 || ext.compare("jpeg", Qt::CaseInsensitive) == 0)
-        quality = settings->JPEGSaveQuality();
+    ImageWriteJob job;
+    job.image = *getImage();
+    job.destPath = destPath;
+    job.format = ext.toLower().toLatin1();
+    job.quality = ImageWriter::qualityFor(ext);
+    job.metadataSource = mPath;
+    return job;
+}
 
-#ifdef USE_EXIV2
-    // Qt's QImage::save() drops all metadata, so grab the source file's
-    // Exif/Iptc/Xmp now (before mPath may be overwritten) to re-attach later.
-    Exiv2::ExifData srcExif;
-    Exiv2::IptcData srcIptc;
-    Exiv2::XmpData  srcXmp;
-    bool haveSrcMeta = false;
-    try {
-        auto srcImage = Exiv2::ImageFactory::open(toStdString(mPath));
-        if(srcImage.get()) {
-            srcImage->readMetadata();
-            srcExif = srcImage->exifData();
-            srcIptc = srcImage->iptcData();
-            srcXmp  = srcImage->xmpData();
-            haveSrcMeta = !srcExif.empty() || !srcIptc.empty() || !srcXmp.empty();
-        }
-    } catch(...) {
-        haveSrcMeta = false;
+void ImageStatic::onWritten(const ImageWriteJob &job) {
+    // QImage copies share their data, so the cache key tells whether the edit
+    // that was written is still the current one.
+    if(isEdited() && imageEdited->cacheKey() == job.image.cacheKey()) {
+        // the edit is on disk now: it becomes the clean image
+        image = imageEdited;
+        discardEditedImage();
+    } else if(job.destPath == mPath && image->cacheKey() != job.image.cacheKey()) {
+        // edited again while the write ran: what is on disk is the older
+        // edit, so it becomes the clean image under the newer one
+        image = std::make_shared<const QImage>(job.image);
     }
-#endif
-
-    // save file
-    bool success = SafeSave::withBackup(destPath, mDocInfo->filePath(), [&]() {
-        if(isEdited()) {
-            bool ok = imageEdited->save(destPath, ext.toStdString().c_str(), quality);
-            image.swap(imageEdited);
-            discardEditedImage();
-            return ok;
-        }
-        return image->save(destPath, ext.toStdString().c_str(), quality);
-    });
-
-#ifdef USE_EXIV2
-    // Re-attach the source metadata that QImage::save() stripped. Best-effort:
-    // any failure (unsupported format, etc.) leaves the pixel save intact.
-    if(success && haveSrcMeta) {
-        try {
-            auto dstImage = Exiv2::ImageFactory::open(toStdString(destPath));
-            if(dstImage.get()) {
-                // thumbgrid bakes exif rotation into pixels on load, so the saved
-                // pixels are always upright - normalize orientation/dimensions
-                // to avoid viewers rotating an already-upright image.
-                srcExif["Exif.Image.Orientation"]     = uint16_t(1);
-                srcExif["Exif.Photo.PixelXDimension"] = uint32_t(image->width());
-                srcExif["Exif.Photo.PixelYDimension"] = uint32_t(image->height());
-                dstImage->setExifData(srcExif);
-                dstImage->setIptcData(srcIptc);
-                dstImage->setXmpData(srcXmp);
-                dstImage->writeMetadata();
-            }
-        } catch(...) {
-            qCWarning(logLoader) << "ImageStatic::save() - could not write metadata to" << destPath;
-        }
-    }
-#endif
-
-    if(destPath == mPath && success)
+    if(job.destPath == mPath)
         mDocInfo->refresh();
-    return success;
+}
+
+bool ImageStatic::save(QString destPath) {
+    auto job = writeJob(destPath);
+    if(!job || !ImageWriter::write(*job))
+        return false;
+    onWritten(*job);
+    return true;
 }
 
 bool ImageStatic::save() {

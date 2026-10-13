@@ -7,6 +7,8 @@
 #include "utils/imagelib.h"
 #include <settings.h>
 #include <QIcon>
+#include <optional>
+#include "utils/imagewriter.h"
 
 class ImageStatic : public Image {
 public:
@@ -24,6 +26,13 @@ public:
 
     bool setEditedImage(std::unique_ptr<const QImage> imageEditedNew);
     bool discardEditedImage();
+
+    // save() in two halves, so the write itself can run off the GUI thread:
+    // writeJob() snapshots what to write (empty if destPath cannot take this
+    // image), ImageWriter::write() runs it, and onWritten() applies a
+    // successful write back here.
+    std::optional<ImageWriteJob> writeJob(const QString &destPath);
+    void onWritten(const ImageWriteJob &job);
 
 public slots:
     void crop(QRect newRect);

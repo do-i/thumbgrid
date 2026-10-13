@@ -14,6 +14,8 @@ class SaveConfirmOverlay : public OverlayWidget
 public:
     explicit SaveConfirmOverlay(FloatingWidgetContainer *parent = nullptr);
     ~SaveConfirmOverlay() override;
+    // while the edit is being written: say so, and take no further choice
+    void setBusy(bool busy);
 
 signals:
     void saveClicked();

@@ -805,6 +805,11 @@ void MW::hideSaveOverlay() {
     saveOverlay->hide();
 }
 
+void MW::setSaveOverlayBusy(bool busy) {
+    if(saveOverlay)
+        saveOverlay->setBusy(busy);
+}
+
 void MW::showChangelogWindow() {
     changelogWindow->show();
 }

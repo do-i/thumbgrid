@@ -7,6 +7,7 @@
 #include <QSize>
 #include <QDebug>
 #include <QDateTime>
+#include <QHash>
 #include <QRegularExpression>
 
 #include <vector>
@@ -87,7 +88,18 @@ public:
 
     QStringList fileList() const;
 
+    // A save replaces its file through a temporary sibling (QSaveFile names it
+    // "<file>.XXXXXX" and renames it over the file). The watcher reports that
+    // sibling like any new file; from beginSave() until shortly after
+    // endSave() it is not listed, so the rename cannot read as the file being
+    // replaced by another entry.
+    void beginSave(const QString &filePath);
+    void endSave(const QString &filePath);
+
 private:
+    QHash<QString, int> savingFiles;
+    bool isSaveTempFile(const QString &path) const;
+
     QRegularExpression regex;
     QCollator collator;
     std::vector<FSEntry> fileEntryVec, dirEntryVec;

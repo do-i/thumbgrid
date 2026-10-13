@@ -1,5 +1,7 @@
 #include "directorymanager.h"
 
+#include <QTimer>
+
 #include <utility>
 #include "utils/logging.h"
 #include "utils/pathstring.h"
@@ -624,6 +626,28 @@ bool DirectoryManager::fileWatcherActive() {
     return watcher->isObserving();
 }
 
+void DirectoryManager::beginSave(const QString &filePath) {
+    savingFiles[filePath]++;
+}
+
+void DirectoryManager::endSave(const QString &filePath) {
+    // the watcher thread may still be delivering the save's events
+    QTimer::singleShot(2000, this, [this, filePath]() {
+        auto it = savingFiles.find(filePath);
+        if(it != savingFiles.end() && --it.value() <= 0)
+            savingFiles.erase(it);
+    });
+}
+
+bool DirectoryManager::isSaveTempFile(const QString &path) const {
+    for(auto it = savingFiles.cbegin(); it != savingFiles.cend(); ++it) {
+        const QString &file = it.key();
+        if(path.size() == file.size() + 7 && path.startsWith(file) && path.at(file.size()) == u'.')
+            return true;
+    }
+    return false;
+}
+
 //----------------------------------------------------------------------------
 // fs watcher events  ( onFile___External() )
 // these take file NAMES, not paths
@@ -635,6 +659,8 @@ void DirectoryManager::onFileRemovedExternal(const QString& fileName) {
 
 void DirectoryManager::onFileAddedExternal(const QString& fileName) {
     QString fullPath = watcher->watchPath() + "/" + fileName;
+    if(isSaveTempFile(fullPath))
+        return;
     if(isDir(fullPath))
         insertDirEntry(fullPath);
     else
