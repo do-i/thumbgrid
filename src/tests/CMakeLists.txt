@@ -170,6 +170,14 @@ add_test(
     COMMAND thumbgrid_viewer_arrow_wheel_scroll_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_picture_context_menu_esc_test
+    behavior/test_picture_context_menu_esc_only_closes_the_menu.cpp
+)
+add_test(
+    NAME "Esc in the picture context menu only closes the menu"
+    COMMAND thumbgrid_picture_context_menu_esc_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

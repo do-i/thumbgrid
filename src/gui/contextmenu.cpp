@@ -233,9 +233,10 @@ void ContextMenu::keyPressEvent(QKeyEvent *event) {
     // todo: keyboard navigation
     if(key == "Up") {}
     if(key == "Down") {}
+    // Esc only closes the menu; passing it on too would also run the global
+    // Esc binding (leave fullscreen / exit)
     if(key == "Esc")
         hide();
-    if(key == "Enter") {}
-    else
+    else if(key != "Enter")
         actionManager->processEvent(event);
 }
