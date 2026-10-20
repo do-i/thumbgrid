@@ -43,7 +43,6 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     dialogs/shortcutcreatordialog.cpp
     dialogs/printdialog.cpp
 
-    overlays/changelogwindow.cpp
     overlays/clickzoneoverlay.cpp
     overlays/controlsoverlay.cpp
     overlays/copyoverlay.cpp
@@ -99,7 +98,6 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     dialogs/shortcutcreatordialog.ui
     dialogs/printdialog.ui
 
-    overlays/changelogwindow.ui
     overlays/copyoverlay.ui
     overlays/floatingmessage.ui
     overlays/fullscreeninfooverlay.ui

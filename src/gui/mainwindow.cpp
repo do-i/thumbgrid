@@ -814,15 +814,6 @@ void MW::setSaveOverlayBusy(bool busy) {
         saveOverlay->setBusy(busy);
 }
 
-void MW::showChangelogWindow() {
-    changelogWindow->show();
-}
-
-void MW::showChangelogWindow(QString text) {
-    changelogWindow->setText(std::move(text));
-    changelogWindow->show();
-}
-
 void MW::triggerCropPanel() {
     if(activeSidePanel != SIDEPANEL_CROP) {
         showCropPanel();

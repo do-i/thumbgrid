@@ -214,8 +214,6 @@ public:
     void setPanelFullscreenOnly(bool mode);
     QVersionNumber lastVersion();
     void setLastVersion(QVersionNumber &ver);
-    void setShowChangelogs(bool mode);
-    bool showChangelogs();
     qreal backgroundOpacity();
     void setBackgroundOpacity(qreal value);
     bool blurBackground();

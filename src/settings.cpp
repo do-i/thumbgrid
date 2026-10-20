@@ -91,7 +91,7 @@ QString settingGroupFor(const QString &key) {
         {"infoBarWindowed", "General"}, {"language", "General"}, {"openInFullscreen", "General"},
         {"showFullMetadata", "General"}, {"windowTitleExtendedInfo", "General"}, {"zoomIndicatorMode", "General"},
         {"firstRun", "General"}, {"lastVerMajor", "General"}, {"lastVerMinor", "General"},
-        {"lastVerMicro", "General"}, {"showChangelogs", "General"},
+        {"lastVerMicro", "General"},
         // Grid
         {"sortingMode", "Grid"}, {"sortFolders", "Grid"}, {"allowBrowseRoot", "Grid"},
         {"showHiddenFiles", "Grid"}, {"showOtherFileTypes", "Grid"}, {"folderEndAction", "Grid"},
@@ -661,7 +661,8 @@ void Settings::writeSetting(const QString &key, const QVariant &value) {
 void Settings::runVersionedSettingsMigrations(const QVersionNumber &lastVer) {
     if(lastVer < QVersionNumber(2026, 7, 7))
         migrateConfigGroups();
-    if(lastVer < QVersionNumber(2026, 7, 14))
+    // re-run whenever a key joins the retired list (pruning is idempotent)
+    if(lastVer < QVersionNumber(2026, 10, 3))
         pruneRetiredSettings();
 }
 
@@ -674,6 +675,9 @@ void Settings::pruneRetiredSettings() {
         // The crop panel lost its "Crop & Save" button, so there is no longer a
         // default action to pick between.
         {QStringLiteral("defaultCropAction"), QStringLiteral("Document")},
+        // The never-finished changelog window was removed along with its
+        // "don't show again" switch.
+        {QStringLiteral("showChangelogs"), QStringLiteral("General")},
     };
     bool removed = false;
     for(auto it = retiredKeys.constBegin(); it != retiredKeys.constEnd(); ++it) {
@@ -1205,14 +1209,6 @@ void Settings::setLastVersion(QVersionNumber &ver) {
     settings->writeSetting("lastVerMajor", ver.majorVersion());
     settings->writeSetting("lastVerMinor", ver.minorVersion());
     settings->writeSetting("lastVerMicro", ver.microVersion());
-}
-//------------------------------------------------------------------------------
-void Settings::setShowChangelogs(bool mode) {
-    settings->writeSetting("showChangelogs", mode);
-}
-
-bool Settings::showChangelogs() {
-    return settings->readSetting("showChangelogs", true).toBool();
 }
 //------------------------------------------------------------------------------
 qreal Settings::backgroundOpacity() {

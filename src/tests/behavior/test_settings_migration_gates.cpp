@@ -102,6 +102,8 @@ bool upgradePrunesRetiredKeys() {
     conf.setValue("Document/defaultCropAction", 1);
     conf.setValue("defaultCropAction", 1);
     conf.setValue("Document/panelCenterSelection", true);
+    conf.setValue("General/showChangelogs", false);
+    conf.setValue("showChangelogs", false);
     conf.sync();
 
     Settings::getInstance();
@@ -109,6 +111,8 @@ bool upgradePrunesRetiredKeys() {
     QSettings after;
     return require(!after.contains("Document/defaultCropAction"), "Grouped defaultCropAction should be pruned on upgrade.") &&
            require(!after.contains("defaultCropAction"), "Flat defaultCropAction should be pruned on upgrade.") &&
+           require(!after.contains("General/showChangelogs") && !after.contains("showChangelogs"),
+                   "The retired showChangelogs switch should be pruned on upgrade.") &&
            require(after.contains("Document/panelCenterSelection"), "Pruning must not touch live keys.");
 }
 
