@@ -420,6 +420,63 @@ bool resizeGridBackfillSkipsATakenKey() {
                    "The picture view keeps R for Resize.");
 }
 
+// Arrows became scroll actions: an upgrading user still on the old qimgv
+// defaults gets them, keeping prev/next and seeking as their fallbacks.
+bool arrowKeysBecomeScrollActionsOnUpgrade() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("prevImage", QJsonArray{QStringLiteral("Left"), QStringLiteral("PgUp")});
+    document.insert("nextImage", QJsonArray{QStringLiteral("Right")});
+    document.insert("seekVideoBackward", QJsonArray{QStringLiteral("Ctrl+Left")});
+    document.insert("zoomIn", QJsonArray{QStringLiteral("Ctrl+Up"), QStringLiteral("+")});
+    if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+
+    const auto bound = [](const char *key, const char *action) {
+        return actionManager->actionForShortcut(MODE_DOCUMENT, key) == QLatin1String(action);
+    };
+    return require(bound("Left", "scrollLeft") && bound("Right", "scrollRight"),
+                   "Left/Right should move from prev/next to the scroll actions.") &&
+           require(bound("Up", "scrollUp") && bound("Down", "scrollDown"),
+                   "Unbound Up/Down should get the scroll actions.") &&
+           require(bound("Ctrl+Left", "scrollLeftFine") && bound("Ctrl+Right", "scrollRightFine") &&
+                   bound("Ctrl+Up", "scrollUpFine") && bound("Ctrl+Down", "scrollDownFine"),
+                   "Ctrl+arrows should move to the fine scroll actions.") &&
+           require(bound("PgUp", "prevImage") && bound("+", "zoomIn"),
+                   "The user's other keys for those actions must survive.");
+}
+
+// A key the user deliberately rebound is never taken over.
+bool arrowKeyMigrationKeepsCustomBindings() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("crop", QJsonArray{QStringLiteral("Left")});
+    document.insert("rotateRight", QJsonArray{QStringLiteral("Ctrl+Right")});
+    if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+
+    return require(actionManager->actionForShortcut(MODE_DOCUMENT, "Left") == QLatin1String("crop"),
+                   "A customised Left must survive the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "Ctrl+Right") == QLatin1String("rotateRight"),
+                   "A customised Ctrl+Right must survive the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "Right") == QLatin1String("scrollRight"),
+                   "A free Right should still get its scroll action.");
+}
+
 bool runScenario(const QString &scenario) {
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
@@ -453,6 +510,10 @@ bool runScenario(const QString &scenario) {
         return resizeGridBackfillFollowsTheUsersKey();
     if(scenario == QLatin1String("resize-grid-backfill-skips-taken-key"))
         return resizeGridBackfillSkipsATakenKey();
+    if(scenario == QLatin1String("arrow-keys-become-scroll-actions"))
+        return arrowKeysBecomeScrollActionsOnUpgrade();
+    if(scenario == QLatin1String("arrow-key-migration-keeps-custom-bindings"))
+        return arrowKeyMigrationKeepsCustomBindings();
     return fail("Unknown scenario: " + scenario);
 }
 

@@ -216,10 +216,6 @@ void ViewerWidget::setInteractionEnabled(bool mode) {
         connect(this, &ViewerWidget::zoomOut,        imageViewer.get(), &ImageViewerV2::zoomOut);
         connect(this, &ViewerWidget::zoomInCursor,   imageViewer.get(), &ImageViewerV2::zoomInCursor);
         connect(this, &ViewerWidget::zoomOutCursor,  imageViewer.get(), &ImageViewerV2::zoomOutCursor);
-        connect(this, &ViewerWidget::scrollUp,       imageViewer.get(), &ImageViewerV2::scrollUp);
-        connect(this, &ViewerWidget::scrollDown,     imageViewer.get(), &ImageViewerV2::scrollDown);
-        connect(this, &ViewerWidget::scrollLeft,     imageViewer.get(), &ImageViewerV2::scrollLeft);
-        connect(this, &ViewerWidget::scrollRight,    imageViewer.get(), &ImageViewerV2::scrollRight);
         connect(this, &ViewerWidget::fitWindow,      imageViewer.get(), &ImageViewerV2::setFitWindow);
         connect(this, &ViewerWidget::fitWidth,       imageViewer.get(), &ImageViewerV2::setFitWidth);
         connect(this, &ViewerWidget::fitOriginal,    imageViewer.get(), &ImageViewerV2::setFitOriginal);
@@ -231,10 +227,6 @@ void ViewerWidget::setInteractionEnabled(bool mode) {
         disconnect(this, &ViewerWidget::zoomOut,       imageViewer.get(), &ImageViewerV2::zoomOut);
         disconnect(this, &ViewerWidget::zoomInCursor,  imageViewer.get(), &ImageViewerV2::zoomInCursor);
         disconnect(this, &ViewerWidget::zoomOutCursor, imageViewer.get(), &ImageViewerV2::zoomOutCursor);
-        disconnect(this, &ViewerWidget::scrollUp,      imageViewer.get(), &ImageViewerV2::scrollUp);
-        disconnect(this, &ViewerWidget::scrollDown,    imageViewer.get(), &ImageViewerV2::scrollDown);
-        disconnect(this, &ViewerWidget::scrollLeft,    imageViewer.get(), &ImageViewerV2::scrollLeft);
-        disconnect(this, &ViewerWidget::scrollRight,   imageViewer.get(), &ImageViewerV2::scrollRight);
         disconnect(this, &ViewerWidget::fitWindow,     imageViewer.get(), &ImageViewerV2::setFitWindow);
         disconnect(this, &ViewerWidget::fitWidth,      imageViewer.get(), &ImageViewerV2::setFitWidth);
         disconnect(this, &ViewerWidget::fitOriginal,   imageViewer.get(), &ImageViewerV2::setFitOriginal);
@@ -697,8 +689,6 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
         videoPlayer->pauseResume();
         return;
     }
-    if(handleViewportKey(event))
-        return;
     if(currentWidget == IMAGEVIEWER && imageViewer->isDisplaying()) {
         // switch to fitWidth via up arrow
         if(ShortcutBuilder::fromEvent(event) == "Up" && !actionManager->actionForShortcut(MODE_DOCUMENT, "Up").isEmpty()) {
@@ -722,30 +712,32 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
     }
 }
 
-// Arrow keys scroll the text viewer / pan a zoomed image; Ctrl+arrow moves in
-// fine steps. They take over only while there is something to scroll along
-// that axis, otherwise the key falls through to its bound action (prev/next..).
-bool ViewerWidget::handleViewportKey(QKeyEvent *event) {
-    // macOS reports arrow keys with the keypad modifier
-    Qt::KeyboardModifiers mods = event->modifiers() & ~Qt::KeypadModifier;
-    if(mods != Qt::NoModifier && mods != Qt::ControlModifier)
-        return false;
-    bool fine = (mods == Qt::ControlModifier);
-    int dx = 0, dy = 0;
-    switch(event->key()) {
-    case Qt::Key_Up:    dy = -1; break;
-    case Qt::Key_Down:  dy =  1; break;
-    case Qt::Key_Left:  dx = -1; break;
-    case Qt::Key_Right: dx =  1; break;
-    default: return false;
-    }
+void ViewerWidget::scrollUp()        { scrollView(0, -1, false); }
+void ViewerWidget::scrollDown()      { scrollView(0,  1, false); }
+void ViewerWidget::scrollLeft()      { scrollView(-1, 0, false); }
+void ViewerWidget::scrollRight()     { scrollView( 1, 0, false); }
+void ViewerWidget::scrollUpFine()    { scrollView(0, -1, true); }
+void ViewerWidget::scrollDownFine()  { scrollView(0,  1, true); }
+void ViewerWidget::scrollLeftFine()  { scrollView(-1, 0, true); }
+void ViewerWidget::scrollRightFine() { scrollView( 1, 0, true); }
+
+// Text scrolls vertically by wheel-lines (fine: one line); an image pans only
+// along an axis it overflows, stopping at its edge. Otherwise horizontal
+// scrolls fall back to what these keys did before they became scroll actions.
+void ViewerWidget::scrollView(int dx, int dy, bool fine) {
     if(currentWidget == TEXTVIEWER && dy) {
         textViewer->scrollLines(dy * (fine ? 1 : QApplication::wheelScrollLines()));
-        return true;
+        return;
     }
-    if(currentWidget == IMAGEVIEWER && imageViewer->isDisplaying())
-        return imageViewer->keyPan(dx, dy, fine);
-    return false;
+    if(currentWidget == IMAGEVIEWER && mInteractionEnabled && imageViewer->isDisplaying() &&
+       imageViewer->keyPan(dx, dy, fine))
+        return;
+    if(!dx)
+        return;
+    if(fine)
+        (dx < 0) ? seekBackward() : seekForward();
+    else
+        actionManager->invokeAction((dx < 0) ? "prevImage" : "nextImage");
 }
 
 void ViewerWidget::leaveEvent(QEvent *event) {

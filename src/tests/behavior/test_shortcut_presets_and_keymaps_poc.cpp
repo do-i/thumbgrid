@@ -44,7 +44,7 @@ void ShortcutPresetsAndKeymapsPocTest::firstRunSeedsShortcutsFromQimgv() {
              "A freshly seeded mapping equals its preset, so modified is false.");
 
     // Representative qimgv bindings survived materialization.
-    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "Right"), QStringLiteral("nextImage"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "Right"), QStringLiteral("scrollRight"));
     QCOMPARE(actionManager->actionForShortcut(MODE_GLOBAL, "Esc"), QStringLiteral("closeFullScreenOrExit"));
 }
 

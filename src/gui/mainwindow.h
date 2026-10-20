@@ -196,6 +196,10 @@ signals:
     void scrollDown();
     void scrollLeft();
     void scrollRight();
+    void scrollUpFine();
+    void scrollDownFine();
+    void scrollLeftFine();
+    void scrollRightFine();
     void pauseVideo();
     void stopPlayback();
     void seekVideoForward();

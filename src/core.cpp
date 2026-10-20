@@ -189,6 +189,10 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::scrollDown, mw, &MW::scrollDown);
     connect(actionManager, &ActionManager::scrollLeft, mw, &MW::scrollLeft);
     connect(actionManager, &ActionManager::scrollRight, mw, &MW::scrollRight);
+    connect(actionManager, &ActionManager::scrollUpFine, mw, &MW::scrollUpFine);
+    connect(actionManager, &ActionManager::scrollDownFine, mw, &MW::scrollDownFine);
+    connect(actionManager, &ActionManager::scrollLeftFine, mw, &MW::scrollLeftFine);
+    connect(actionManager, &ActionManager::scrollRightFine, mw, &MW::scrollRightFine);
     connect(actionManager, &ActionManager::resize, this, &Core::showResizeDialog);
     connect(actionManager, &ActionManager::flipH, this, &Core::flipH);
     connect(actionManager, &ActionManager::flipV, this, &Core::flipV);

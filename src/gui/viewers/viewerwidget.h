@@ -40,7 +40,7 @@ public:
     QWidget *videoControlsWidget();
 
 private:
-    bool handleViewportKey(QKeyEvent *event);
+    void scrollView(int dx, int dy, bool fine);
     QVBoxLayout layout;
     std::unique_ptr<ImageViewerV2> imageViewer;
     std::unique_ptr<VideoPlayerInitProxy> videoPlayer;
@@ -80,10 +80,6 @@ signals:
     void zoomOut();
     void zoomInCursor();
     void zoomOutCursor();
-    void scrollUp();
-    void scrollDown();
-    void scrollLeft();
-    void scrollRight();
     void fitWindow();
     void fitWidth();
     void fitOriginal();
@@ -100,6 +96,18 @@ signals:
     void scaleChanged();
 
 public slots:
+    // Scroll the text viewer / pan a zoomed image (Fine: small steps). When
+    // there is nothing to scroll that way the key keeps its old meaning:
+    // left/right go to the previous/next file, fine left/right seek a video.
+    void scrollUp();
+    void scrollDown();
+    void scrollLeft();
+    void scrollRight();
+    void scrollUpFine();
+    void scrollDownFine();
+    void scrollLeftFine();
+    void scrollRightFine();
+
     bool showVideo(QString file);
     bool showText(const QString& file);
     void stopPlayback();

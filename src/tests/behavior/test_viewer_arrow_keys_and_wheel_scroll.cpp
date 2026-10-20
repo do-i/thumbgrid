@@ -12,9 +12,9 @@
 #include "gui/mainwindow.h"
 #include "gui/viewers/imageviewerv2.h"
 #include "gui/viewers/textviewer.h"
-#include "gui/viewers/viewerwidget.h"
 
-// Arrow keys scroll text / pan a zoomed image (Ctrl+arrow in fine steps), and
+// Arrow keys scroll text / pan a zoomed image (Ctrl+arrow in fine steps) through
+// the configurable scroll actions, and
 // scrolling stops at the end instead of jumping to the neighbouring file -
 // reaching the bottom of a long file used to silently open the next one.
 
@@ -37,6 +37,14 @@ void wheelNotch(QWidget *target, int angleY) {
                       Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
     QSpontaneKeyEvent::setSpontaneous(&event);
     qApp->notify(target, &event);
+    QCoreApplication::processEvents();
+}
+
+// Presses a key the way the app resolves it: through the active shortcut
+// mapping. (QTest key events carry no native scancode, which ShortcutBuilder
+// needs to name a key, so they would never reach a binding.)
+void press(const char *key) {
+    actionManager->invokeAction(actionManager->actionForShortcut(MODE_DOCUMENT, QString::fromLatin1(key)));
     QCoreApplication::processEvents();
 }
 
@@ -90,9 +98,15 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
     QTRY_COMPARE(window->currentViewMode(), MODE_DOCUMENT);
     QTRY_VERIFY(window->windowTitle().contains("a-big.png"));
 
-    auto viewerWidget = window->findChild<ViewerWidget *>();
     auto imageViewer = window->findChild<ImageViewerV2 *>();
-    QVERIFY(viewerWidget && imageViewer);
+    QVERIFY(imageViewer);
+
+    // The arrows are ordinary, rebindable actions in the default mapping.
+    const QStringList keys{"Up", "Down", "Left", "Right", "Ctrl+Up", "Ctrl+Down", "Ctrl+Left", "Ctrl+Right"};
+    const QStringList actions{"scrollUp", "scrollDown", "scrollLeft", "scrollRight",
+                              "scrollUpFine", "scrollDownFine", "scrollLeftFine", "scrollRightFine"};
+    for(int i = 0; i < keys.size(); ++i)
+        QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, keys[i]), actions[i]);
     QTRY_VERIFY(imageViewer->isDisplaying());
     QTest::qWait(150);
     QScrollBar *hs = imageViewer->horizontalScrollBar();
@@ -104,23 +118,23 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
 
     // Down pans the zoomed image instead of doing nothing.
     const int v0 = vs->value();
-    QTest::keyClick(viewerWidget, Qt::Key_Down);
+    press("Down");
     QTRY_VERIFY(vs->value() > v0);
 
     // Ctrl+Right pans by one fine, unanimated step.
     const int h0 = hs->value();
-    QTest::keyClick(viewerWidget, Qt::Key_Right, Qt::ControlModifier);
+    press("Ctrl+Right");
     QCOMPARE(hs->value(), h0 + 24);
 
     // Right pans, then stops at the edge rather than opening the next file.
     for(int i = 0; i < 20; ++i)
-        QTest::keyClick(viewerWidget, Qt::Key_Right);
+        press("Right");
     // the image's right edge lands on the view's right edge (scrollbars span a
     // much larger scene, so their maximum isn't the image edge)
     QTRY_VERIFY(qAbs(imageViewer->scaledRectR().right() - imageViewer->width()) <= 2);
     QTest::qWait(300);
     const int hEdge = hs->value();
-    QTest::keyClick(viewerWidget, Qt::Key_Right);
+    press("Right");
     QTest::qWait(300);
     QCOMPARE(hs->value(), hEdge);
     QVERIFY2(window->windowTitle().contains("a-big.png"),
@@ -157,11 +171,11 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
 
     // Up/Down scroll the text by wheel-lines, Ctrl by a single line.
     const int t0 = tvs->value();
-    QTest::keyClick(viewerWidget, Qt::Key_Up);
+    press("Up");
     QCOMPARE(tvs->value(), t0 - QApplication::wheelScrollLines());
-    QTest::keyClick(viewerWidget, Qt::Key_Up, Qt::ControlModifier);
+    press("Ctrl+Up");
     QCOMPARE(tvs->value(), t0 - QApplication::wheelScrollLines() - 1);
-    QTest::keyClick(viewerWidget, Qt::Key_Down, Qt::ControlModifier);
+    press("Ctrl+Down");
     QCOMPARE(tvs->value(), t0 - QApplication::wheelScrollLines());
     QVERIFY(window->windowTitle().contains("b-long.txt"));
 
@@ -175,11 +189,11 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
     QTRY_VERIFY2(!window->windowTitle().contains("c-short.txt"),
                  "Wheel over a text file that fits should change file.");
 
-    // A fitting image leaves Left to its bound action (previous file).
+    // Nothing to pan on a fitting image: Left falls back to the previous file.
     core.loadPath(root.filePath("gallery/d-small.png"));
     QTRY_VERIFY(window->windowTitle().contains("d-small.png"));
     QTRY_VERIFY(imageViewer->isDisplaying());
-    QTest::keyClick(viewerWidget, Qt::Key_Left);
+    press("Left");
     QTRY_VERIFY2(window->windowTitle().contains("c-short.txt"),
                  "Left on a fitting image should go to the previous file.");
 }

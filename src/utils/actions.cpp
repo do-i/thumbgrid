@@ -98,4 +98,8 @@ void Actions::init() {
     mActions.insert("stripMetadata", QVersionNumber(1,0,5));
     mActions.insert("togglePlacesPanel", QVersionNumber(1,0,6));
     mActions.insert("findDuplicates", QVersionNumber(2026,7,10));
+    mActions.insert("scrollUpFine", QVersionNumber(2026,10,3));
+    mActions.insert("scrollDownFine", QVersionNumber(2026,10,3));
+    mActions.insert("scrollLeftFine", QVersionNumber(2026,10,3));
+    mActions.insert("scrollRightFine", QVersionNumber(2026,10,3));
 }

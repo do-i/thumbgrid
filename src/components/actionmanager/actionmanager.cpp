@@ -351,6 +351,34 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound" << key << "=resize in grid";
         }
     }
+    // Arrows became scroll/pan actions (Ctrl+arrow: fine steps), replacing the
+    // old prev/next, zoom and video-seek defaults on those keys; the scroll
+    // actions fall back to prev/next and seeking when there is nothing to scroll.
+    // Follow the active preset: move a key over only when the preset now binds it
+    // to a scroll action and the user still has it unbound or on the old default.
+    if(lastVer < QVersionNumber(2026,10,3)) {
+        const QMap<QString, QString> oldDefaults{
+            {"Left", "prevImage"}, {"Right", "nextImage"},
+            {expandModifierTokens("$Ctrl+Up"), "zoomIn"},
+            {expandModifierTokens("$Ctrl+Down"), "zoomOut"},
+            {expandModifierTokens("$Ctrl+Left"), "seekVideoBackward"},
+            {expandModifierTokens("$Ctrl+Right"), "seekVideoForward"}};
+        ContextMap &doc = shortcuts[MODE_DOCUMENT];
+        QMapIterator<QString, QString> i(defaults[MODE_DOCUMENT]);
+        while(i.hasNext()) {
+            i.next();
+            if(!i.value().startsWith("scroll"))
+                continue;
+            const QString cur = doc.value(i.key());
+            const QString global = shortcuts[MODE_GLOBAL].value(i.key());
+            const bool free = cur.isEmpty() ? (global.isEmpty() || global == oldDefaults.value(i.key()))
+                                            : cur == oldDefaults.value(i.key());
+            if(free && cur != i.value()) {
+                doc.insert(i.key(), i.value());
+                qCDebug(logSettings) << "[actionManager]: bound" << i.key() << "=" << i.value() << "in document";
+            }
+        }
+    }
     // add new default actions, per context
     for(ViewMode ctx : shortcutContexts()) {
         ContextMap &cur = shortcuts[ctx];

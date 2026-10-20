@@ -82,10 +82,6 @@ public slots:
     virtual void zoomInCursor();
     virtual void zoomOutCursor();
     virtual void readSettings();
-    virtual void scrollUp();
-    virtual void scrollDown();
-    virtual void scrollLeft();
-    virtual void scrollRight();
     virtual void startAnimation();
     virtual void stopAnimation();
     virtual void closeImage();

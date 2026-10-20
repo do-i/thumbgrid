@@ -121,7 +121,6 @@
             "$Shift+Right"
         ],
         "nextImage": [
-            "Right",
             "WheelDown",
             "XButton2"
         ],
@@ -129,7 +128,6 @@
             "$Shift+Left"
         ],
         "prevImage": [
-            "Left",
             "WheelUp",
             "XButton1"
         ],
@@ -157,14 +155,26 @@
         "scrollDown": [
             "Down"
         ],
+        "scrollDownFine": [
+            "$Ctrl+Down"
+        ],
+        "scrollLeft": [
+            "Left"
+        ],
+        "scrollLeftFine": [
+            "$Ctrl+Left"
+        ],
+        "scrollRight": [
+            "Right"
+        ],
+        "scrollRightFine": [
+            "$Ctrl+Right"
+        ],
         "scrollUp": [
             "Up"
         ],
-        "seekVideoBackward": [
-            "$Ctrl+Left"
-        ],
-        "seekVideoForward": [
-            "$Ctrl+Right"
+        "scrollUpFine": [
+            "$Ctrl+Up"
         ],
         "setWallpaper": [
             "$Ctrl+W"

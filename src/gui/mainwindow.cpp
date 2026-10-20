@@ -99,6 +99,10 @@ void MW::setupUi() {
     connect(this, &MW::scrollDown,  viewerWidget.get(), &ViewerWidget::scrollDown);
     connect(this, &MW::scrollLeft,  viewerWidget.get(), &ViewerWidget::scrollLeft);
     connect(this, &MW::scrollRight, viewerWidget.get(), &ViewerWidget::scrollRight);
+    connect(this, &MW::scrollUpFine,    viewerWidget.get(), &ViewerWidget::scrollUpFine);
+    connect(this, &MW::scrollDownFine,  viewerWidget.get(), &ViewerWidget::scrollDownFine);
+    connect(this, &MW::scrollLeftFine,  viewerWidget.get(), &ViewerWidget::scrollLeftFine);
+    connect(this, &MW::scrollRightFine, viewerWidget.get(), &ViewerWidget::scrollRightFine);
     connect(this, &MW::pauseVideo,     viewerWidget.get(), &ViewerWidget::pauseResumePlayback);
     connect(this, &MW::stopPlayback,   viewerWidget.get(), &ViewerWidget::stopPlayback);
     connect(this, &MW::seekVideoForward, viewerWidget.get(), &ViewerWidget::seekForward);

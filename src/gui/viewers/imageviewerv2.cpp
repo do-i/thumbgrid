@@ -410,22 +410,6 @@ bool ImageViewerV2::isDisplaying() const {
     return (pixmap != nullptr);
 }
 
-void ImageViewerV2::scrollUp() {
-    scroll(0, -DEFAULT_SCROLL_DISTANCE, true);
-}
-
-void ImageViewerV2::scrollDown() {
-    scroll(0, DEFAULT_SCROLL_DISTANCE, true);
-}
-
-void ImageViewerV2::scrollLeft() {
-    scroll(-DEFAULT_SCROLL_DISTANCE, 0, true);
-}
-
-void ImageViewerV2::scrollRight() {
-    scroll(DEFAULT_SCROLL_DISTANCE, 0, true);
-}
-
 // Pans by one step (or a fine step, unanimated) along an axis the image overflows.
 // snapToEdges() holds the view at the image edge, so panning stops there.
 // shift by 2px in case of img edge misalignment, same as wheelScroll()
