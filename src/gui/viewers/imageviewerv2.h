@@ -53,6 +53,8 @@ public:
     bool hasAnimation() const;
 
     QSize scaledSizeR() const;
+    // keyboard panning; false when the image doesn't overflow along that axis
+    bool keyPan(int dx, int dy, bool fine);
 
     void pauseResume();
     void enableDrags();
@@ -150,6 +152,7 @@ private:
     MouseInteractionState mouseInteraction;
     const int SCROLL_UPDATE_RATE = 7;
     const int DEFAULT_SCROLL_DISTANCE = 240;
+    const int FINE_SCROLL_DISTANCE = 24;
     const qreal TRACKPAD_SCROLL_MULTIPLIER = 0.7;
     const qreal WHEEL_SCROLL_MULTIPLIER = 2.0f;
     const int ANIMATION_SPEED = 150;

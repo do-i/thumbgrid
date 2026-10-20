@@ -426,6 +426,21 @@ void ImageViewerV2::scrollRight() {
     scroll(DEFAULT_SCROLL_DISTANCE, 0, true);
 }
 
+// Pans by one step (or a fine step, unanimated) along an axis the image overflows.
+// snapToEdges() holds the view at the image edge, so panning stops there.
+// shift by 2px in case of img edge misalignment, same as wheelScroll()
+bool ImageViewerV2::keyPan(int dx, int dy, bool fine) {
+    if(!pixmap)
+        return false;
+    QSize sz = scaledSizeR();
+    if((dx && sz.width()  <= viewport()->width()  + 2) ||
+       (dy && sz.height() <= viewport()->height() + 2) || (!dx && !dy))
+        return false;
+    int step = fine ? FINE_SCROLL_DISTANCE : DEFAULT_SCROLL_DISTANCE;
+    scroll(dx * step, dy * step, !fine);
+    return true;
+}
+
 // temporary override till application restart
 void ImageViewerV2::toggleTransparencyGrid() {
     transparencyGrid = !transparencyGrid;
@@ -712,16 +727,13 @@ void ImageViewerV2::trackpadScroll(QWheelEvent *event) {
     snapToEdges();
 }
 
-// Mouse-wheel scroll by interval; ignores the event (passthrough) when the
-// image has nothing left to scroll to.
+// Mouse-wheel scroll by interval. Once the image is taller than the view the
+// event is always consumed, so scrolling stops at the edge instead of jumping
+// to another file; it passes through only when there is nothing to scroll.
 void ImageViewerV2::wheelScroll(QWheelEvent *event) {
     QPoint angleDelta = event->angleDelta();
-    QRect imgRect = scaledRectR();
     // shift by 2px in case of img edge misalignment
-    // todo: maybe even increase it to skip small distance scrolls?
-    if((event->angleDelta().y() < 0 && imgRect.bottom() > height() + 2) ||
-       (event->angleDelta().y() > 0 && imgRect.top()    < -2))
-    {
+    if(angleDelta.y() && scaledSizeR().height() > viewport()->height() + 2) {
         event->accept();
         scroll(0, -angleDelta.y() * WHEEL_SCROLL_MULTIPLIER * settings->mouseScrollingSpeed(), true);
     } else {
@@ -1049,6 +1061,12 @@ void ImageViewerV2::scrollSmooth(int dx, int dy) {
             if(!redirect)
                 newEndFrame = oldEndFrame + static_cast<int>(dx);
         }
+        // don't animate past the image edge (snapToEdges() would hold the view
+        // there anyway, and held keys would pile up an invisible overshoot)
+        QRect imgRect = scaledRectR();
+        if(imgRect.width() > width())
+            newEndFrame = qBound(currentXPos + imgRect.left(), newEndFrame,
+                                 currentXPos + imgRect.right() - width());
         scrollTimeLineX->stop();
         scrollTimeLineX->setFrameRange(currentXPos, newEndFrame);
         scrollTimeLineX->start();
@@ -1067,6 +1085,12 @@ void ImageViewerV2::scrollSmooth(int dx, int dy) {
             if(!redirect)
                 newEndFrame = oldEndFrame + static_cast<int>(dy);
         }
+        // don't animate past the image edge (snapToEdges() would hold the view
+        // there anyway, and held keys would pile up an invisible overshoot)
+        QRect imgRect = scaledRectR();
+        if(imgRect.height() > height())
+            newEndFrame = qBound(currentYPos + imgRect.top(), newEndFrame,
+                                 currentYPos + imgRect.bottom() - height());
         scrollTimeLineY->stop();
         scrollTimeLineY->setFrameRange(currentYPos, newEndFrame);
         scrollTimeLineY->start();

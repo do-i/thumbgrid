@@ -40,6 +40,7 @@ public:
     QWidget *videoControlsWidget();
 
 private:
+    bool handleViewportKey(QKeyEvent *event);
     QVBoxLayout layout;
     std::unique_ptr<ImageViewerV2> imageViewer;
     std::unique_ptr<VideoPlayerInitProxy> videoPlayer;

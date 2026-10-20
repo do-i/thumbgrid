@@ -5,6 +5,7 @@
 #include <QFontDatabase>
 #include <QScrollBar>
 #include <QStringDecoder>
+#include <QWheelEvent>
 
 #include "settings.h"
 
@@ -123,4 +124,23 @@ void TextViewer::clear() {
     highlighter = nullptr;
     textEdit->clear();
     noticeLabel->hide();
+}
+
+void TextViewer::scrollLines(int lines) {
+    // the vertical scrollbar of QPlainTextEdit counts in lines
+    QScrollBar *vs = textEdit->verticalScrollBar();
+    vs->setValue(vs->value() + lines);
+}
+
+// The text edit ignores wheel events once it can't scroll any further and they
+// propagate here. Swallow them so reaching the end of a long file doesn't jump
+// to the next one; a file that fits entirely still passes the wheel through.
+void TextViewer::wheelEvent(QWheelEvent *event) {
+    if(event->angleDelta().y() != 0 && event->modifiers() == Qt::NoModifier &&
+       textEdit->verticalScrollBar()->maximum() > 0)
+    {
+        event->accept();
+        return;
+    }
+    event->ignore();
 }

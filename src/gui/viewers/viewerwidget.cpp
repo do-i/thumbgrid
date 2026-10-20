@@ -5,6 +5,8 @@
 
 #include "viewerwidget.h"
 
+#include <QApplication>
+
 #include <utility>
 
 #include "platform/platformdesktop.h"
@@ -695,6 +697,8 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
         videoPlayer->pauseResume();
         return;
     }
+    if(handleViewportKey(event))
+        return;
     if(currentWidget == IMAGEVIEWER && imageViewer->isDisplaying()) {
         // switch to fitWidth via up arrow
         if(ShortcutBuilder::fromEvent(event) == "Up" && !actionManager->actionForShortcut(MODE_DOCUMENT, "Up").isEmpty()) {
@@ -716,6 +720,32 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
             return;
         }
     }
+}
+
+// Arrow keys scroll the text viewer / pan a zoomed image; Ctrl+arrow moves in
+// fine steps. They take over only while there is something to scroll along
+// that axis, otherwise the key falls through to its bound action (prev/next..).
+bool ViewerWidget::handleViewportKey(QKeyEvent *event) {
+    // macOS reports arrow keys with the keypad modifier
+    Qt::KeyboardModifiers mods = event->modifiers() & ~Qt::KeypadModifier;
+    if(mods != Qt::NoModifier && mods != Qt::ControlModifier)
+        return false;
+    bool fine = (mods == Qt::ControlModifier);
+    int dx = 0, dy = 0;
+    switch(event->key()) {
+    case Qt::Key_Up:    dy = -1; break;
+    case Qt::Key_Down:  dy =  1; break;
+    case Qt::Key_Left:  dx = -1; break;
+    case Qt::Key_Right: dx =  1; break;
+    default: return false;
+    }
+    if(currentWidget == TEXTVIEWER && dy) {
+        textViewer->scrollLines(dy * (fine ? 1 : QApplication::wheelScrollLines()));
+        return true;
+    }
+    if(currentWidget == IMAGEVIEWER && imageViewer->isDisplaying())
+        return imageViewer->keyPan(dx, dy, fine);
+    return false;
 }
 
 void ViewerWidget::leaveEvent(QEvent *event) {

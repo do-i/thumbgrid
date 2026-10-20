@@ -15,6 +15,11 @@ public:
 
     bool showFile(const QString &filePath);
     void clear();
+    // scrolls by text lines; clamps at the start/end of the file
+    void scrollLines(int lines);
+
+protected:
+    void wheelEvent(QWheelEvent *event) override;
 
 private slots:
     void readSettings();

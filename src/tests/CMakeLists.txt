@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_viewer_arrow_wheel_scroll_test
+    behavior/test_viewer_arrow_keys_and_wheel_scroll.cpp
+)
+add_test(
+    NAME "Arrow keys and wheel scroll within the current file in document view"
+    COMMAND thumbgrid_viewer_arrow_wheel_scroll_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

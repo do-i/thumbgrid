@@ -185,16 +185,14 @@
             "+",
             "=",
             "$Ctrl++",
-            "$Ctrl+=",
-            "$Ctrl+Up"
+            "$Ctrl+="
         ],
         "zoomInCursor": [
             "$Ctrl+WheelUp"
         ],
         "zoomOut": [
             "-",
-            "$Ctrl+-",
-            "$Ctrl+Down"
+            "$Ctrl+-"
         ],
         "zoomOutCursor": [
             "$Ctrl+WheelDown"
