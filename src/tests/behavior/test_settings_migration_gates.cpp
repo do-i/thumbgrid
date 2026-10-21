@@ -457,6 +457,37 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
                    "The user's other keys for those actions must survive.");
 }
 
+// The upgrade follows the selected preset: leftie binds the arrows to the same
+// scroll actions, so a leftie config on its old defaults gets them too.
+bool arrowKeysFollowTheSelectedPreset() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("prevImage", QJsonArray{QStringLiteral("Left"), QStringLiteral("PgUp")});
+    document.insert("nextImage", QJsonArray{QStringLiteral("PgDown"), QStringLiteral("Right")});
+    document.insert("seekVideoBackward", QJsonArray{QStringLiteral("Ctrl+Left")});
+    document.insert("seekVideoForward", QJsonArray{QStringLiteral("Ctrl+Right")});
+    if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
+        return false;
+
+    Settings::getInstance()->setSelectedPreset(QStringLiteral("leftie"));
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+
+    const auto bound = [](ViewMode ctx, const char *key, const char *action) {
+        return actionManager->actionForShortcut(ctx, key) == QLatin1String(action);
+    };
+    return require(bound(MODE_DOCUMENT, "Left", "scrollLeft") && bound(MODE_DOCUMENT, "Right", "scrollRight") &&
+                   bound(MODE_DOCUMENT, "Up", "scrollUp") && bound(MODE_DOCUMENT, "Ctrl+Left", "scrollLeftFine"),
+                   "A leftie config should get the scroll actions on the arrows.") &&
+           require(bound(MODE_DOCUMENT, "PgUp", "prevImage") && bound(MODE_DOCUMENT, "PgDown", "nextImage"),
+                   "PgUp/PgDown keep changing file.") &&
+           require(bound(MODE_FOLDERVIEW, "Enter", "openSelected") && bound(MODE_FOLDERVIEW, "Backspace", "goUp"),
+                   "A leftie config should get the grid keys too.");
+}
+
 // A key the user deliberately rebound is never taken over.
 bool arrowKeyMigrationKeepsCustomBindings() {
     QSettings conf;
@@ -563,6 +594,8 @@ bool runScenario(const QString &scenario) {
         return resizeGridBackfillSkipsATakenKey();
     if(scenario == QLatin1String("arrow-keys-become-scroll-actions"))
         return arrowKeysBecomeScrollActionsOnUpgrade();
+    if(scenario == QLatin1String("arrow-keys-follow-the-selected-preset"))
+        return arrowKeysFollowTheSelectedPreset();
     if(scenario == QLatin1String("arrow-key-migration-keeps-custom-bindings"))
         return arrowKeyMigrationKeepsCustomBindings();
     if(scenario == QLatin1String("grid-keys-become-actions"))

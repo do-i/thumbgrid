@@ -115,7 +115,6 @@
         ],
         "nextImage": [
             "PgDown",
-            "Right",
             "WheelDown",
             "XButton2"
         ],
@@ -123,7 +122,6 @@
             "$Shift+Left"
         ],
         "prevImage": [
-            "Left",
             "PgUp",
             "WheelUp",
             "XButton1"
@@ -143,11 +141,29 @@
         "saveAs": [
             "$Ctrl+S"
         ],
-        "seekVideoBackward": [
+        "scrollDown": [
+            "Down"
+        ],
+        "scrollDownFine": [
+            "$Ctrl+Down"
+        ],
+        "scrollLeft": [
+            "Left"
+        ],
+        "scrollLeftFine": [
             "$Ctrl+Left"
         ],
-        "seekVideoForward": [
+        "scrollRight": [
+            "Right"
+        ],
+        "scrollRightFine": [
             "$Ctrl+Right"
+        ],
+        "scrollUp": [
+            "Up"
+        ],
+        "scrollUpFine": [
+            "$Ctrl+Up"
         ],
         "toggleFullscreenInfoBar": [
             "$Shift+F"

@@ -103,7 +103,7 @@ void ShortcutPresetsAndKeymapsPocTest::presetWithEmptyContextSurvivesDialogRound
     QVERIFY2(!settings->shortcutsModified(), "Right after applyPreset the mapping equals the preset.");
 
     // Leftie's context split survived loading (not everything under global).
-    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "Right"), QStringLiteral("nextImage"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "Right"), QStringLiteral("scrollRight"));
     QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "F7"), QStringLiteral("createDirectory"));
     QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Right"), QString());
 

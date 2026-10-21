@@ -561,7 +561,7 @@ target_include_directories(thumbgrid_settings_migration_gates_test PRIVATE ${CMA
 target_link_libraries(thumbgrid_settings_migration_gates_test PRIVATE thumbgrid_app_objects Qt6::Test)
 add_dependencies(thumbgrid_behavior_tests_all thumbgrid_settings_migration_gates_test)
 
-foreach(scenario fresh upgrade current downgrade retired-key-prune theme-recovery state-recovery duplicate-finder-state-recovery shortcut-recovery shortcut-preset-recovery shortcut-new-action-backfill file-info-preset-backfill file-info-backfill-skips-existing resize-grid-backfill resize-grid-backfill-follows-user-key resize-grid-backfill-skips-taken-key arrow-keys-become-scroll-actions arrow-key-migration-keeps-custom-bindings grid-keys-become-actions grid-key-migration-keeps-custom-bindings)
+foreach(scenario fresh upgrade current downgrade retired-key-prune theme-recovery state-recovery duplicate-finder-state-recovery shortcut-recovery shortcut-preset-recovery shortcut-new-action-backfill file-info-preset-backfill file-info-backfill-skips-existing resize-grid-backfill resize-grid-backfill-follows-user-key resize-grid-backfill-skips-taken-key arrow-keys-become-scroll-actions arrow-keys-follow-the-selected-preset arrow-key-migration-keeps-custom-bindings grid-keys-become-actions grid-key-migration-keeps-custom-bindings)
     add_test(
         NAME "Settings migration gates: ${scenario}"
         COMMAND thumbgrid_settings_migration_gates_test ${scenario}
