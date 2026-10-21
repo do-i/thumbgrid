@@ -269,10 +269,12 @@ void DuplicateFinderDialog::setupResultsZone() {
     auto *filterRow = new QHBoxLayout();
     filterRow->addWidget(new QLabel(tr("Filter:"), this));
     mFilterEdit = new QLineEdit(this);
+    mFilterEdit->setObjectName("duplicateFinderFilterEdit");
     mFilterEdit->setPlaceholderText(tr("name or path..."));
     filterRow->addWidget(mFilterEdit, 1);
     filterRow->addWidget(new QLabel(tr("Min similarity:"), this));
     mMinSimilaritySpin = new QSpinBox(this);
+    mMinSimilaritySpin->setObjectName("duplicateFinderMinSimilaritySpin");
     mMinSimilaritySpin->setRange(0, 100);
     mMinSimilaritySpin->setValue(0);
     mMinSimilaritySpin->setSuffix("%");
@@ -663,7 +665,10 @@ void DuplicateFinderDialog::moveCheckedTo(const QString &dest) {
     }
     QString sessionPath = destDir.filePath(session);
     QFile manifest(sessionPath + "/manifest.txt");
-    manifest.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text);
+    if(!manifest.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        QMessageBox::warning(this, tr("Move duplicates"), tr("Could not create %1").arg(manifest.fileName()));
+        return;
+    }
     QTextStream manifestOut(&manifest);
     QStringList moved, failed;
     for(const QString &path : paths) {

@@ -2,8 +2,10 @@
 #include <QAction>
 #include <QDir>
 #include <QImage>
+#include <QLineEdit>
 #include <QPainter>
 #include <QPushButton>
+#include <QSpinBox>
 #include <QStyle>
 #include <QTemporaryDir>
 #include <QTimer>
@@ -43,6 +45,7 @@ private:
 private slots:
     void initTestCase();
     void dialogRunsSearchAndShowsGroupedResults();
+    void filterAndMinSimilarityNarrowTheResults();
     void startButtonTracksRequiredFields();
     void clearButtonResetsResults();
     void folderSelectionSeedsCompareOrWithinMode();
@@ -96,6 +99,41 @@ void DuplicateFinderDialogTest::dialogRunsSearchAndShowsGroupedResults() {
         QTest::qWait(200);
         dialog.grab().save(shot);
     }
+}
+
+void DuplicateFinderDialogTest::filterAndMinSimilarityNarrowTheResults() {
+    DuplicateFinderDialog dialog;
+    dialog.presetFor(tmp.filePath("src/A.png"), tmp.filePath("tgt"));
+    dialog.show();
+    dialog.findChild<QPushButton *>("duplicateFinderStartButton")->click();
+    QTRY_COMPARE_WITH_TIMEOUT(dialog.resultsModel()->matchCount(), 2, 15000);
+    QTRY_VERIFY(!dialog.finder()->isRunning());
+    auto *view = dialog.resultsView();
+    auto *filter = dialog.findChild<QLineEdit *>("duplicateFinderFilterEdit");
+    auto *minSimilarity = dialog.findChild<QSpinBox *>("duplicateFinderMinSimilaritySpin");
+    QVERIFY(filter && minSimilarity);
+    const auto matchesShown = [view]() {
+        return view->model()->rowCount() ? view->model()->rowCount(view->model()->index(0, 0)) : 0;
+    };
+
+    filter->setText("REENC");
+    QCOMPARE(matchesShown(), 1);
+    QVERIFY(view->model()->index(0, 0, view->model()->index(0, 0))
+                .data(DuplicateResultsModel::FilePathRole).toString().endsWith("reenc.jpg"));
+    filter->setText("no-such-file");
+    QCOMPARE(view->model()->rowCount(), 0);
+    filter->clear();
+    QCOMPARE(matchesShown(), 2);
+
+    // both fixture matches score 100%, so a floor above that hides them all
+    auto *proxy = dialog.findChild<DuplicateResultsProxy *>();
+    QVERIFY(proxy);
+    proxy->setMinSimilarity(101);
+    QCOMPARE(view->model()->rowCount(), 0);
+    minSimilarity->setValue(100);
+    QCOMPARE(matchesShown(), 2);
+    minSimilarity->setValue(0);
+    QCOMPARE(matchesShown(), 2);
 }
 
 void DuplicateFinderDialogTest::startButtonTracksRequiredFields() {
