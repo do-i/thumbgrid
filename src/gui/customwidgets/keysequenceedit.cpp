@@ -18,11 +18,25 @@ void KeySequenceEdit::keyPressEvent(QKeyEvent *e) {
 }
 
 void KeySequenceEdit::mousePressEvent(QMouseEvent *e) {
+    if(mFocusClick)
+        return;
     processEvent(e);
 }
 
 void KeySequenceEdit::mouseReleaseEvent(QMouseEvent *e) {
+    if(mFocusClick) {
+        mFocusClick = false;
+        return;
+    }
     processEvent(e);
+}
+
+// Qt focuses the button before delivering the press, so remember that this
+// press is the one that focused it: clicking to start recording would
+// otherwise bind the click itself.
+void KeySequenceEdit::focusInEvent(QFocusEvent *e) {
+    mFocusClick = (e->reason() == Qt::MouseFocusReason);
+    QPushButton::focusInEvent(e);
 }
 
 void KeySequenceEdit::wheelEvent(QWheelEvent *e) {

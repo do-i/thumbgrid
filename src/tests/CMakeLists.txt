@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_shortcut_capture_test
+    behavior/test_shortcut_capture_records_any_input.cpp
+)
+add_test(
+    NAME "The shortcut capture button records keys, clicks and wheel without the dialog taking them"
+    COMMAND thumbgrid_shortcut_capture_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_shortcuts_table_space_toggles_test
     behavior/test_shortcuts_table_space_toggles_enabled.cpp
 )
