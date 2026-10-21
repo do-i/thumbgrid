@@ -118,6 +118,9 @@
             "WheelDown",
             "XButton2"
         ],
+        "pauseVideo": [
+            "Space"
+        ],
         "prevDirectory": [
             "$Shift+Left"
         ],

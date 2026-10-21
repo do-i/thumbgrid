@@ -396,6 +396,19 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
                 qCDebug(logSettings) << "[actionManager]: bound" << g.key() << "=" << g.value() << "in grid";
             }
         }
+        // Space paused a shown video in code, ahead of any binding; it now runs its
+        // binding (qimgv's toggleFitMode and leftie's pauseVideo both pause a video).
+        // Hand the preset's Space to a config that leaves Space unbound.
+        const bool spaceBound = shortcuts[MODE_GLOBAL].contains("Space") ||
+                                shortcuts[MODE_DOCUMENT].contains("Space");
+        for(ViewMode ctx : {MODE_GLOBAL, MODE_DOCUMENT}) {
+            const QString action = defaults[ctx].value("Space");
+            if(spaceBound || action.isEmpty())
+                continue;
+            shortcuts[ctx].insert("Space", action);
+            qCDebug(logSettings) << "[actionManager]: bound Space =" << action << "in" << contextToString(ctx);
+            break;
+        }
     }
     // add new default actions, per context
     for(ViewMode ctx : shortcutContexts()) {

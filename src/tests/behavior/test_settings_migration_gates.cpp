@@ -488,6 +488,43 @@ bool arrowKeysFollowTheSelectedPreset() {
                    "A leftie config should get the grid keys too.");
 }
 
+// Space used to pause a video in code; it now runs its binding. A config with
+// Space unbound gets the preset's (leftie: pauseVideo, qimgv: toggleFitMode),
+// and a Space the user bound is left alone.
+bool spaceGetsThePresetBinding() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("crop", QJsonArray{QStringLiteral("N")});
+    if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
+        return false;
+
+    Settings::getInstance()->setSelectedPreset(QStringLiteral("leftie"));
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+    return require(actionManager->actionForShortcut(MODE_DOCUMENT, "Space") == QLatin1String("pauseVideo"),
+                   "A leftie config with Space unbound should get Space = pauseVideo.");
+}
+
+bool spaceMigrationKeepsCustomBinding() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("nextImage", QJsonArray{QStringLiteral("Space")});
+    if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
+        return false;
+
+    Settings::getInstance()->setSelectedPreset(QStringLiteral("leftie"));
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+    return require(actionManager->actionForShortcut(MODE_DOCUMENT, "Space") == QLatin1String("nextImage"),
+                   "A customised Space must survive the upgrade.");
+}
+
 // A key the user deliberately rebound is never taken over.
 bool arrowKeyMigrationKeepsCustomBindings() {
     QSettings conf;
@@ -596,6 +633,10 @@ bool runScenario(const QString &scenario) {
         return arrowKeysBecomeScrollActionsOnUpgrade();
     if(scenario == QLatin1String("arrow-keys-follow-the-selected-preset"))
         return arrowKeysFollowTheSelectedPreset();
+    if(scenario == QLatin1String("space-gets-the-preset-binding"))
+        return spaceGetsThePresetBinding();
+    if(scenario == QLatin1String("space-migration-keeps-custom-binding"))
+        return spaceMigrationKeepsCustomBinding();
     if(scenario == QLatin1String("arrow-key-migration-keeps-custom-bindings"))
         return arrowKeyMigrationKeepsCustomBindings();
     if(scenario == QLatin1String("grid-keys-become-actions"))
