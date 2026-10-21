@@ -7,6 +7,7 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QLineEdit>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSignalSpy>
@@ -26,6 +27,8 @@ private slots:
     void longEdgeIsReportedAndOnlyItsSpinBoxIsLive();
     void shrinkOnlyIsOnByDefaultAndCanBeTurnedOff();
     void chosenFilterIsReportedAndRemembered();
+    // last: loads the app style sheet, which the slots above run without
+    void sizeFieldsShowTheirValuesUnderTheStyleSheet();
 };
 
 namespace {
@@ -159,6 +162,28 @@ void ResizeDialogModesTest::chosenFilterIsReportedAndRemembered() {
     QCOMPARE(settings->resizeFilter(), QI_FILTER_NEAREST);
     ResizeDialog reopened(QSize(400, 200));
     QCOMPARE(child<QComboBox>(reopened, "comboBox")->currentData().toInt(), int(QI_FILTER_NEAREST));
+}
+
+// Under Qt 6.12 a style-sheeted NoButtons spin box got a 1px-wide edit field:
+// the size fields looked empty and could not be typed into.
+void ResizeDialogModesTest::sizeFieldsShowTheirValuesUnderTheStyleSheet() {
+    settings->loadStylesheet();
+    QVERIFY(!qApp->styleSheet().isEmpty());
+    ResizeDialog dialog(QSize(400, 200));
+    dialog.show();
+    QVERIFY(QTest::qWaitForWindowExposed(&dialog));
+    QCOMPARE(child<QSpinBox>(dialog, "width")->text(), QStringLiteral("400"));
+    for(const char *name : {"width", "height", "percent"}) {
+        auto *field = child<QAbstractSpinBox>(dialog, name);
+        QVERIFY(field);
+        auto *edit = field->findChild<QLineEdit *>();
+        QVERIFY(edit);
+        QVERIFY2(edit->width() > field->width() / 2,
+                 qPrintable(QStringLiteral("%1's edit field is only %2px wide").arg(name).arg(edit->width())));
+    }
+    const QString shot = qEnvironmentVariable("TG_RESIZE_DIALOG_SHOT");
+    if(!shot.isEmpty())
+        dialog.grab().save(shot);
 }
 
 TG_BEHAVIOR_TEST_MAIN(ResizeDialogModesTest)

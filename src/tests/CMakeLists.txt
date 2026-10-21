@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_crop_panel_fields_test
+    behavior/test_crop_panel_fields_show_and_take_values.cpp
+)
+add_test(
+    NAME "Crop panel fields show the selection and take typed values"
+    COMMAND thumbgrid_crop_panel_fields_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_tab_reaches_picture_view_bindings_test
     behavior/test_tab_reaches_picture_view_bindings.cpp
 )

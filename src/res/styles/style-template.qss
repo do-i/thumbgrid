@@ -385,16 +385,11 @@ SidePanel QDoubleSpinBox:focus
     border-color: %button_hover%;
 }
 
-SidePanel QSpinBox::up-button,
-SidePanel QDoubleSpinBox::up-button
-{
-    max-width: 0px;
-    max-height: 0px;
-    width:0px;
-}
-
-SidePanel QSpinBox::down-button,
-SidePanel QDoubleSpinBox::down-button
+/* Spin boxes without arrows. Under a style sheet Qt 6.12 gives a NoButtons
+   spin box a 1px-wide edit field (no value shown, nothing to type into), so
+   these keep UpDownArrows and collapse the buttons here instead. */
+QAbstractSpinBox[hiddenButtons="true"]::up-button,
+QAbstractSpinBox[hiddenButtons="true"]::down-button
 {
     max-width: 0px;
     max-height: 0px;

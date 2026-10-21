@@ -135,7 +135,10 @@
            <set>Qt::AlignCenter</set>
           </property>
           <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
+           <enum>QAbstractSpinBox::UpDownArrows</enum>
+          </property>
+          <property name="hiddenButtons" stdset="0">
+           <bool>true</bool>
           </property>
           <property name="keyboardTracking">
            <bool>false</bool>
@@ -171,7 +174,10 @@
            <set>Qt::AlignCenter</set>
           </property>
           <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
+           <enum>QAbstractSpinBox::UpDownArrows</enum>
+          </property>
+          <property name="hiddenButtons" stdset="0">
+           <bool>true</bool>
           </property>
           <property name="keyboardTracking">
            <bool>false</bool>
@@ -238,7 +244,10 @@
            <set>Qt::AlignCenter</set>
           </property>
           <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
+           <enum>QAbstractSpinBox::UpDownArrows</enum>
+          </property>
+          <property name="hiddenButtons" stdset="0">
+           <bool>true</bool>
           </property>
           <property name="keyboardTracking">
            <bool>false</bool>
@@ -277,7 +286,10 @@
            <set>Qt::AlignCenter</set>
           </property>
           <property name="buttonSymbols">
-           <enum>QAbstractSpinBox::NoButtons</enum>
+           <enum>QAbstractSpinBox::UpDownArrows</enum>
+          </property>
+          <property name="hiddenButtons" stdset="0">
+           <bool>true</bool>
           </property>
           <property name="keyboardTracking">
            <bool>false</bool>
@@ -397,7 +409,10 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::NoButtons</enum>
+            <enum>QAbstractSpinBox::UpDownArrows</enum>
+           </property>
+           <property name="hiddenButtons" stdset="0">
+            <bool>true</bool>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
@@ -435,7 +450,10 @@
             <set>Qt::AlignCenter</set>
            </property>
            <property name="buttonSymbols">
-            <enum>QAbstractSpinBox::NoButtons</enum>
+            <enum>QAbstractSpinBox::UpDownArrows</enum>
+           </property>
+           <property name="hiddenButtons" stdset="0">
+            <bool>true</bool>
            </property>
            <property name="keyboardTracking">
             <bool>false</bool>
