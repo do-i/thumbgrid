@@ -111,7 +111,11 @@ void DuplicateImageHashingTest::rotatedAndMirroredCopiesMatchViaVariants() {
         found = found || ImageHasher::hammingDistance(v, hRotated) <= threshold;
     QVERIFY2(found, "rotation variants should match a rotated copy");
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    QImage mirrored = scene.flipped(Qt::Horizontal);
+#else
     QImage mirrored = scene.mirrored(true, false);
+#endif
     quint64 hMirrored = ImageHasher::phash(mirrored);
     auto withMirrors = ImageHasher::phashVariants(scene, false, true);
     QCOMPARE(withMirrors.size(), 2);
