@@ -4,8 +4,10 @@
 #include <QStyleOption>
 #include <QTimer>
 #include <QPainter>
+#include <QPointer>
 #include "components/actionmanager/actionmanager.h"
 #include "components/scriptmanager/scriptmanager.h"
+#include "gui/customwidgets/contextmenuitem.h"
 
 namespace Ui {
 class ContextMenu;
@@ -27,6 +29,12 @@ private:
     QTimer mTimer;
 
     void fillOpenWithMenu();
+    // keyboard navigation over the rows of the current page
+    QPointer<ContextMenuItem> mHighlighted;
+    QList<ContextMenuItem*> navigableItems();
+    void setHighlighted(ContextMenuItem *item);
+    void moveHighlight(int step);
+    void activateHighlighted();
     // the zoom and transform rows are icon-only; name each with its shortcut
     void updateToolTips();
 

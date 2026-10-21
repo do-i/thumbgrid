@@ -11,6 +11,8 @@ public:
     ContextMenuItem(QWidget *parent = nullptr);
     ~ContextMenuItem() override;
     void setAction(QString mAction);
+    // runs the item as a press would (keyboard activation)
+    void trigger();
 
 signals:
     void pressed();

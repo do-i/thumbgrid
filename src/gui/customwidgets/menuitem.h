@@ -21,6 +21,10 @@ public:
     QString shortcut();
     void setIconPath(QString path);
     void setPassthroughClicks(bool mode);
+    bool passesClicksThrough() const;
+    // keyboard highlight; styled like hover via the "highlighted" property
+    void setHighlighted(bool mode);
+    bool isHighlighted() const;
 
 protected:
     IconButton mIconWidget;

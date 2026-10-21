@@ -16,6 +16,10 @@ void ContextMenuItem::setAction(QString text) {
     setShortcutText(actionManager->shortcutForAction(actionManager->currentContext(), mAction));
 }
 
+void ContextMenuItem::trigger() {
+    onPress();
+}
+
 void ContextMenuItem::onPress() {
     emit pressed();
     if(!mAction.isEmpty())

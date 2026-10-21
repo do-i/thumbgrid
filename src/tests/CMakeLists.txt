@@ -194,6 +194,22 @@ add_test(
     COMMAND thumbgrid_grid_keys_actions_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_context_menu_keyboard_test
+    behavior/test_picture_context_menu_keyboard_navigation.cpp
+)
+add_test(
+    NAME "The picture context menu can be used with the keyboard"
+    COMMAND thumbgrid_context_menu_keyboard_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_space_pauses_video_test
+    behavior/test_space_pauses_video.cpp
+)
+add_test(
+    NAME "Space pauses a video through its fit-mode binding"
+    COMMAND thumbgrid_space_pauses_video_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

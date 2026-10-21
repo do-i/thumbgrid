@@ -1,6 +1,8 @@
 #include "contextmenu.h"
 #include "ui_contextmenu.h"
 
+#include <algorithm>
+
 ContextMenu::ContextMenu(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ContextMenu)
@@ -143,11 +145,60 @@ void ContextMenu::fillOpenWithMenu() {
 }
 
 void ContextMenu::switchToMainPage() {
+    setHighlighted(nullptr);
     ui->stackedWidget->setCurrentIndex(0);
 }
 
 void ContextMenu::switchToScriptsPage() {
+    setHighlighted(nullptr);
     ui->stackedWidget->setCurrentIndex(1);
+}
+
+// rows of the current page that can be used, top to bottom (the icon-button
+// rows at the top are mouse-only)
+QList<ContextMenuItem*> ContextMenu::navigableItems() {
+    QWidget *page = ui->stackedWidget->currentWidget();
+    QList<ContextMenuItem*> items;
+    for(ContextMenuItem *item : page->findChildren<ContextMenuItem*>())
+        if(item->isVisible() && item->isEnabled())
+            items << item;
+    std::sort(items.begin(), items.end(), [page](ContextMenuItem *a, ContextMenuItem *b) {
+        return a->mapTo(page, QPoint(0, 0)).y() < b->mapTo(page, QPoint(0, 0)).y();
+    });
+    return items;
+}
+
+void ContextMenu::setHighlighted(ContextMenuItem *item) {
+    for(ContextMenuItem *each : findChildren<ContextMenuItem*>())
+        each->setHighlighted(each == item);
+    mHighlighted = item;
+}
+
+// first press highlights the first (Down) or last (Up) row; then wraps around
+void ContextMenu::moveHighlight(int step) {
+    const QList<ContextMenuItem*> items = navigableItems();
+    if(items.isEmpty())
+        return;
+    const int current = items.indexOf(mHighlighted.data());
+    int next;
+    if(current < 0)
+        next = (step > 0) ? 0 : items.count() - 1;
+    else
+        next = (current + step + items.count()) % items.count();
+    setHighlighted(items.at(next));
+}
+
+void ContextMenu::activateHighlighted() {
+    ContextMenuItem *item = mHighlighted.data();
+    if(!item || !navigableItems().contains(item))
+        return;
+    // rows that open another page (Open with..., Back) keep the menu open, the
+    // way a click on them does; everything else closes it first
+    if(item->passesClicksThrough()) {
+        hide();
+        setHighlighted(nullptr);
+    }
+    item->trigger();
 }
 
 void ContextMenu::setImageEntriesEnabled(bool mode) {
@@ -192,7 +243,7 @@ void ContextMenu::updateToolTips() {
 }
 
 void ContextMenu::showAt(QPoint pos) {
-    switchToMainPage();
+    switchToMainPage(); // also clears the keyboard highlight
     updateToolTips();
     QRect geom = geometry();
     geom.moveTopLeft(pos);
@@ -228,15 +279,23 @@ void ContextMenu::paintEvent(QPaintEvent *event) {
 }
 
 void ContextMenu::keyPressEvent(QKeyEvent *event) {
-    quint32 nativeScanCode = event->nativeScanCode();
-    QString key = actionManager->keyForNativeScancode(nativeScanCode);
-    // todo: keyboard navigation
-    if(key == "Up") {}
-    if(key == "Down") {}
-    // Esc only closes the menu; passing it on too would also run the global
-    // Esc binding (leave fullscreen / exit)
-    if(key == "Esc")
+    switch(event->key()) {
+    case Qt::Key_Escape:
+        // only closes the menu; passing it on too would also run the global
+        // Esc binding (leave fullscreen / exit)
         hide();
-    else if(key != "Enter")
+        break;
+    case Qt::Key_Up:
+        moveHighlight(-1);
+        break;
+    case Qt::Key_Down:
+        moveHighlight(1);
+        break;
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+        activateHighlighted();
+        break;
+    default:
         actionManager->processEvent(event);
+    }
 }

@@ -60,6 +60,24 @@ void MenuItem::setPassthroughClicks(bool mode) {
     passthroughClicks = mode;
 }
 
+bool MenuItem::passesClicksThrough() const {
+    return passthroughClicks;
+}
+
+void MenuItem::setHighlighted(bool mode) {
+    if(isHighlighted() == mode)
+        return;
+    setProperty("highlighted", mode);
+    // property selectors are only re-evaluated on a re-polish
+    style()->unpolish(this);
+    style()->polish(this);
+    update();
+}
+
+bool MenuItem::isHighlighted() const {
+    return property("highlighted").toBool();
+}
+
 void MenuItem::paintEvent(QPaintEvent *event) {
     Q_UNUSED(event)
     QStyleOption opt;
