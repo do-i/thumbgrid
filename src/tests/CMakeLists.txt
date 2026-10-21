@@ -178,6 +178,14 @@ add_test(
     COMMAND thumbgrid_picture_context_menu_esc_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_rename_overlay_rebound_keys_test
+    behavior/test_rename_overlay_follows_rebound_keys.cpp
+)
+add_test(
+    NAME "The rename overlay lets a rebound rename key through"
+    COMMAND thumbgrid_rename_overlay_rebound_keys_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )
