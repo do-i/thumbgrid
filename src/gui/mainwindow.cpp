@@ -191,7 +191,18 @@ ViewMode MW::currentViewMode() {
     return centralWidget->currentViewMode();
 }
 
+// A video has nothing to fit, so the fit actions pause/resume it instead. That
+// is what Space does on a video by default (it is bound to toggleFitMode).
+bool MW::fitActionPausesVideo() {
+    if(!viewerWidget->isShowingVideo())
+        return false;
+    viewerWidget->pauseResumePlayback();
+    return true;
+}
+
 void MW::fitWindow() {
+    if(fitActionPausesVideo())
+        return;
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWindow();
     } else {
@@ -200,6 +211,8 @@ void MW::fitWindow() {
 }
 
 void MW::fitWidth() {
+    if(fitActionPausesVideo())
+        return;
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWidth();
     } else {
@@ -208,6 +221,8 @@ void MW::fitWidth() {
 }
 
 void MW::fitOriginal() {
+    if(fitActionPausesVideo())
+        return;
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitOriginal();
     } else {
@@ -216,6 +231,8 @@ void MW::fitOriginal() {
 }
 
 void MW::fitWindowStretch() {
+    if(fitActionPausesVideo())
+        return;
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWindowStretch();
     } else {
@@ -226,6 +243,8 @@ void MW::fitWindowStretch() {
 // switch between 1:1 and Fit All
 // TODO: move to viewerWidget?
 void MW::switchFitMode() {
+    if(fitActionPausesVideo())
+        return;
     if(viewerWidget->fitMode() == FIT_WINDOW)
         viewerWidget->setFitMode(FIT_ORIGINAL);
     else

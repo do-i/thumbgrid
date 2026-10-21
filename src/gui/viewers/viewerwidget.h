@@ -34,6 +34,7 @@ public:
     bool showAnimation(const std::shared_ptr<QMovie>& movie);
     void onScalingFinished(std::unique_ptr<QPixmap> scaled);
     bool isDisplaying();
+    bool isShowingVideo() const;
     bool lockZoomEnabled();
     bool lockViewEnabled();
     ScalingFilter scalingFilter();

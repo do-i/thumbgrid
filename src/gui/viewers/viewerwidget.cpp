@@ -369,6 +369,10 @@ void ViewerWidget::closeImage() {
     showCursor();
 }
 
+bool ViewerWidget::isShowingVideo() const {
+    return currentWidget == VIDEOPLAYER;
+}
+
 void ViewerWidget::pauseResumePlayback() {
     if(currentWidget == VIDEOPLAYER)
         videoPlayer.get()->pauseResume();
@@ -685,10 +689,6 @@ bool ViewerWidget::focusNextPrevChild(bool mode) {
 
 void ViewerWidget::keyPressEvent(QKeyEvent *event) {
     event->accept();
-    if(currentWidget == VIDEOPLAYER && event->key() == Qt::Key_Space) {
-        videoPlayer->pauseResume();
-        return;
-    }
     actionManager->processEvent(event);
 }
 

@@ -82,6 +82,7 @@ public:
     DialogResult fileReplaceDialog(QString source, QString target, FileReplaceMode mode, bool multiple);
 
 private:
+    bool fitActionPausesVideo();
     std::shared_ptr<ViewerWidget> viewerWidget;
     QHBoxLayout layout;
     QTimer windowGeometryChangeTimer;
