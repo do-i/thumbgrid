@@ -22,7 +22,8 @@
         "pasteFile": ["$Ctrl+V"]
     },
     "document": {
-        "nextImage": ["Space", "PgDown", "Right"],
+        "nextImage": ["PgDown", "Right"],
+        "pauseVideo": ["Space"],
         "prevImage": ["PgUp", "Left"],
         "folderView": ["Backspace", "Enter"],
         "zoomIn": ["+", "="],

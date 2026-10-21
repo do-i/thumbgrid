@@ -397,8 +397,14 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             }
         }
         // Space paused a shown video in code, ahead of any binding; it now runs its
-        // binding (qimgv's toggleFitMode and leftie's pauseVideo both pause a video).
-        // Hand the preset's Space to a config that leaves Space unbound.
+        // binding (qimgv's toggleFitMode and the others' pauseVideo both pause a
+        // video). Hand the preset's Space to a config that leaves Space unbound, or
+        // that still has gwenview/irfanview/xnviewmp's old Space = nextImage.
+        const bool oldNextImageDefault =
+            QStringList{"gwenview", "irfanview", "xnviewmp"}.contains(settings->selectedPreset()) &&
+            shortcuts[MODE_DOCUMENT].value("Space") == "nextImage";
+        if(oldNextImageDefault)
+            shortcuts[MODE_DOCUMENT].remove("Space");
         const bool spaceBound = shortcuts[MODE_GLOBAL].contains("Space") ||
                                 shortcuts[MODE_DOCUMENT].contains("Space");
         for(ViewMode ctx : {MODE_GLOBAL, MODE_DOCUMENT}) {

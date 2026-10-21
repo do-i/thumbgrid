@@ -525,6 +525,27 @@ bool spaceMigrationKeepsCustomBinding() {
                    "A customised Space must survive the upgrade.");
 }
 
+// gwenview, irfanview and xnviewmp used to bind Space to nextImage; a config
+// still on that default moves Space to pauseVideo, keeping its other keys.
+bool spaceMovesOffTheOldNextImageDefault() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("nextImage", QJsonArray{QStringLiteral("Space"), QStringLiteral("PgDown")});
+    if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
+        return false;
+
+    Settings::getInstance()->setSelectedPreset(QStringLiteral("gwenview"));
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+    return require(actionManager->actionForShortcut(MODE_DOCUMENT, "Space") == QLatin1String("pauseVideo"),
+                   "A gwenview config on its old Space default should get Space = pauseVideo.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "PgDown") == QLatin1String("nextImage"),
+                   "PgDown keeps changing file.");
+}
+
 // A key the user deliberately rebound is never taken over.
 bool arrowKeyMigrationKeepsCustomBindings() {
     QSettings conf;
@@ -635,6 +656,8 @@ bool runScenario(const QString &scenario) {
         return arrowKeysFollowTheSelectedPreset();
     if(scenario == QLatin1String("space-gets-the-preset-binding"))
         return spaceGetsThePresetBinding();
+    if(scenario == QLatin1String("space-moves-off-the-old-next-image-default"))
+        return spaceMovesOffTheOldNextImageDefault();
     if(scenario == QLatin1String("space-migration-keeps-custom-binding"))
         return spaceMigrationKeepsCustomBinding();
     if(scenario == QLatin1String("arrow-key-migration-keeps-custom-bindings"))

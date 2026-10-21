@@ -14,7 +14,8 @@
         "moveToTrash": ["Del"]
     },
     "document": {
-        "nextImage": ["Space", "Right"],
+        "nextImage": ["Right"],
+        "pauseVideo": ["Space"],
         "prevImage": ["Backspace", "Left"]
     },
     "grid": {
