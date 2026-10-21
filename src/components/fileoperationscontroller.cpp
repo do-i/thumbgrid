@@ -225,7 +225,7 @@ void FileOperationsController::doInteractiveCopyMove(QString path, QString destD
     }
 // DIR (RECURSIVE) ============================================================================
     QDir srcDir(srcFi.absoluteFilePath());
-    QFileInfo dstFi(destDirectory + "/" + srcFi.baseName());
+    QFileInfo dstFi(destDirectory + "/" + srcFi.fileName());
     QDir dstDir(dstFi.absoluteFilePath());
     if(dstFi.exists() && !dstFi.isDir()) { // overwriting file with a folder
         if(!overwriteFiles && !overwriteFiles.all) {
@@ -248,7 +248,6 @@ void FileOperationsController::doInteractiveCopyMove(QString path, QString destD
         return;
     }
     // copy / move all contents
-    // TODO: skip symlinks? test
     QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
     for(const auto& entry : entryList) {
         doInteractiveCopyMove(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), move, overwriteFiles);

@@ -498,6 +498,14 @@ add_test(
     COMMAND thumbgrid_copy_move_contained_destination_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_copy_folder_keeps_dotted_name_test
+    behavior/test_copy_folder_keeps_dotted_name.cpp
+)
+add_test(
+    NAME "Copying a folder keeps a dotted name whole"
+    COMMAND thumbgrid_copy_folder_keeps_dotted_name_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_document_view_fit_modes_test
     behavior/test_document_view_fit_modes.cpp
 )

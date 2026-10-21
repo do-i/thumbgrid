@@ -1523,7 +1523,7 @@ void Core::print() {
         mw->showError(tr("Can only print static images"));
         return;
     }
-    QString pdfPath = model->directoryPath() + "/" + img->baseName() + ".pdf";
+    QString pdfPath = model->directoryPath() + "/" + QFileInfo(img->filePath()).completeBaseName() + ".pdf";
     p.setImage(img->getImage());
     p.setOutputPath(pdfPath);
     p.exec();
@@ -1713,7 +1713,7 @@ void Core::nextDirectory() {
             if(!setDirectory(next))
                 return;
             QFileInfo fi(next);
-            mw->showMessageDirectory(fi.baseName());
+            mw->showMessageDirectory(fi.fileName());
             int index = nearestViewableIndex(0, 1);
             if(index >= 0)
                 loadFileIndex(index, false, true);
@@ -1736,7 +1736,7 @@ void Core::prevDirectory(bool selectLast) {
             if(!setDirectory(prev))
                 return;
             QFileInfo fi(prev);
-            mw->showMessageDirectory(fi.baseName());
+            mw->showMessageDirectory(fi.fileName());
             int index = selectLast ? nearestViewableIndex(model->fileCount() - 1, -1)
                                    : nearestViewableIndex(0, 1);
             if(index >= 0)
