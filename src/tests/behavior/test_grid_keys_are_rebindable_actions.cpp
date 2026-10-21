@@ -1,6 +1,7 @@
 #include "support/thumbgrid_test_support.h"
 
 #include <QDir>
+#include <QSignalSpy>
 #include <QTemporaryDir>
 
 #include "core.h"
@@ -62,6 +63,19 @@ void GridKeysAreRebindableActionsTest::gridKeysRunTheirBoundActions() {
     QVERIFY(!grid->searchMode());
     QVERIFY(actionManager->invokeAction("startSearch"));
     QVERIFY2(grid->searchMode(), "startSearch should enter type-to-search.");
+
+    // Mid-search, app-wide shortcut combos and function keys still run (they
+    // used to be swallowed); the search and its query are left as they were.
+    disconnect(actionManager, &ActionManager::toggleStatusFooter, nullptr, nullptr);
+    disconnect(actionManager, &ActionManager::toggleFullscreen, nullptr, nullptr);
+    QSignalSpy footerAction(actionManager, &ActionManager::toggleStatusFooter);
+    QSignalSpy fullscreenAction(actionManager, &ActionManager::toggleFullscreen);
+    QTest::keyClick(grid, Qt::Key_B, Qt::ControlModifier);
+    QTest::keyClick(grid, Qt::Key_F11);
+    QCOMPARE(footerAction.count(), 1);
+    QCOMPARE(fullscreenAction.count(), 1);
+    QVERIFY(grid->searchMode());
+    QCOMPARE(grid->searchQuery(), QString());
     grid->exitSearchMode();
 
     // Unbinding a key really turns it off now.

@@ -590,12 +590,20 @@ bool FolderGridView::handleSearchKey(QKeyEvent *event) {
     }
 
     // Ctrl+Alt is AltGr on some layouts and does produce text; any other
-    // Ctrl/Alt/Meta combination is a shortcut, which gets swallowed rather
-    // than typed into the query.
+    // Ctrl/Alt/Meta combination, and the function keys, are shortcuts rather
+    // than query text. App-wide (global) ones still run, so Ctrl+Q or F11 work
+    // mid-search; grid ones stay inert so they can't fight the search over the
+    // selection.
     bool ctrl = event->modifiers().testFlag(Qt::ControlModifier);
     bool alt  = event->modifiers().testFlag(Qt::AltModifier);
-    if(event->modifiers().testFlag(Qt::MetaModifier) || (ctrl != alt))
+    bool functionKey = event->key() >= Qt::Key_F1 && event->key() <= Qt::Key_F35;
+    if(functionKey || event->modifiers().testFlag(Qt::MetaModifier) || (ctrl != alt)) {
+        const QString shortcut = ShortcutBuilder::fromEvent(event);
+        const QString action = actionManager->actionForShortcut(MODE_GLOBAL, shortcut);
+        if(!action.isEmpty() && actionManager->actionForShortcut(MODE_FOLDERVIEW, shortcut) == action)
+            actionManager->invokeAction(action);
         return true;
+    }
 
     QString text = event->text();
     if(!text.isEmpty() && text.at(0).isPrint()) {
@@ -603,7 +611,7 @@ bool FolderGridView::handleSearchKey(QKeyEvent *event) {
         updateSearchIndicator();
         emit searchQueryChanged(mSearchQuery);
     }
-    // anything else (arrows, function keys, shortcut combinations) is swallowed
+    // anything else (arrows, other non-text keys) is swallowed
     return true;
 }
 
