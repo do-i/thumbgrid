@@ -76,7 +76,13 @@ public:
 public slots:
     int exec() override;
 
+protected:
+    // Space on any cell of a shortcuts-table row toggles that row's Enabled box.
+    bool eventFilter(QObject *watched, QEvent *event) override;
+
 private:
+    // Makes the row of (context, action) current again after the table rebuilds.
+    void setCurrentShortcutRow(ViewMode context, const QString &action, int column);
     void readColorScheme();
     void setColorScheme(ColorScheme colors);
     ColorScheme collectColorScheme();

@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_shortcuts_table_space_toggles_test
+    behavior/test_shortcuts_table_space_toggles_enabled.cpp
+)
+add_test(
+    NAME "Space toggles the current shortcut row and keeps it current"
+    COMMAND thumbgrid_shortcuts_table_space_toggles_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_crop_panel_fields_test
     behavior/test_crop_panel_fields_show_and_take_values.cpp
 )

@@ -131,17 +131,12 @@ public:
         if(!index.data(Qt::CheckStateRole).isValid() || !(index.flags() & Qt::ItemIsUserCheckable))
             return QStyledItemDelegate::editorEvent(event, model, option, index);
 
-        if(event->type() == QEvent::MouseButtonRelease) {
-            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
-            if(mouseEvent->button() != Qt::LeftButton || !option.rect.contains(mouseEvent->pos()))
-                return false;
-        } else if(event->type() == QEvent::KeyPress) {
-            QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-            if(keyEvent->key() != Qt::Key_Space && keyEvent->key() != Qt::Key_Select)
-                return false;
-        } else {
+        // Space is handled for the whole row by SettingsDialog::eventFilter
+        if(event->type() != QEvent::MouseButtonRelease)
             return false;
-        }
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+        if(mouseEvent->button() != Qt::LeftButton || !option.rect.contains(mouseEvent->pos()))
+            return false;
 
         const Qt::CheckState state = static_cast<Qt::CheckState>(index.data(Qt::CheckStateRole).toInt());
         return model->setData(index, state == Qt::Checked ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
@@ -693,9 +688,14 @@ void SettingsDialog::setupShortcutsPage() {
             return;
         const QString action = item->data(Qt::UserRole).toString();
         const ViewMode context = static_cast<ViewMode>(item->data(kShortcutContextRole).toInt());
+        const int column = ui->shortcutsTableWidget->currentColumn();
         setShortcutEnabled(context, action, item->checkState() == Qt::Checked);
+        // the rebuild drops the current cell; keep the toggled row current so
+        // Space can switch it straight back
         updateShortcutsTable();
+        setCurrentShortcutRow(context, action, column >= 0 ? column : ShortcutColumnEnabled);
     });
+    ui->shortcutsTableWidget->installEventFilter(this);
     connect(ui->shortcutsTableWidget, &QTableWidget::cellDoubleClicked,
             this, [this](int row, int column) {
         if(column == ShortcutColumnKey)
@@ -1216,6 +1216,33 @@ QString SettingsDialog::shortcutActionAtRow(int row) const {
     // which is the one column that is always there.
     QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, ShortcutColumnContext);
     return item ? item->data(Qt::UserRole).toString() : QString();
+}
+//------------------------------------------------------------------------------
+// Rows are selected whole, so Space acts on the row's Enabled box whichever of
+// its cells is current.
+bool SettingsDialog::eventFilter(QObject *watched, QEvent *event) {
+    if(watched == ui->shortcutsTableWidget && event->type() == QEvent::KeyPress) {
+        auto *keyEvent = static_cast<QKeyEvent *>(event);
+        if((keyEvent->key() == Qt::Key_Space || keyEvent->key() == Qt::Key_Select) &&
+           keyEvent->modifiers() == Qt::NoModifier) {
+            QTableWidgetItem *item = ui->shortcutsTableWidget->item(
+                ui->shortcutsTableWidget->currentRow(), ShortcutColumnEnabled);
+            if(item && (item->flags() & Qt::ItemIsUserCheckable)) {
+                item->setCheckState(item->checkState() == Qt::Checked ? Qt::Unchecked : Qt::Checked);
+                return true;
+            }
+        }
+    }
+    return QDialog::eventFilter(watched, event);
+}
+//------------------------------------------------------------------------------
+void SettingsDialog::setCurrentShortcutRow(ViewMode context, const QString &action, int column) {
+    for(int row = 0; row < ui->shortcutsTableWidget->rowCount(); row++) {
+        if(shortcutActionAtRow(row) == action && shortcutContextAtRow(row) == context) {
+            ui->shortcutsTableWidget->setCurrentCell(row, column);
+            return;
+        }
+    }
 }
 //------------------------------------------------------------------------------
 ViewMode SettingsDialog::shortcutContextAtRow(int row) const {
