@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_tab_reaches_picture_view_bindings_test
+    behavior/test_tab_reaches_picture_view_bindings.cpp
+)
+add_test(
+    NAME "Tab and Shift+Tab reach their bindings in the picture view"
+    COMMAND thumbgrid_tab_reaches_picture_view_bindings_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_viewer_arrow_wheel_scroll_test
     behavior/test_viewer_arrow_keys_and_wheel_scroll.cpp
 )
