@@ -46,6 +46,7 @@ public slots:
     void onFullscreenModeChanged(bool mode);
     void onSortingChanged(SortingMode mode);
     void startRename(const QString& name);
+    void startSearch();
     void setSearchMatched(bool matched);
 
 

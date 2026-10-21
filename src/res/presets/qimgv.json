@@ -213,7 +213,6 @@
             "F7"
         ],
         "documentView": [
-            "Enter",
             "U"
         ],
         "goUp": [
@@ -222,11 +221,20 @@
         "nextDirectory": [
             "$Shift+Right"
         ],
+        "openSelected": [
+            "Enter"
+        ],
         "prevDirectory": [
             "$Shift+Left"
         ],
         "resize": [
             "R"
+        ],
+        "selectAll": [
+            "$Ctrl+A"
+        ],
+        "startSearch": [
+            "/"
         ],
         "toggleFolderViewTopBar": [
             "$Ctrl+T"

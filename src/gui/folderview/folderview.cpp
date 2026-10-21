@@ -271,6 +271,10 @@ void FolderView::startRename(const QString& name) {
     ui->thumbnailGrid->startRename(name);
 }
 
+void FolderView::startSearch() {
+    ui->thumbnailGrid->startSearch();
+}
+
 void FolderView::setSearchMatched(bool matched) {
     ui->thumbnailGrid->setSearchMatched(matched);
 }

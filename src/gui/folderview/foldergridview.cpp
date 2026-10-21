@@ -182,19 +182,6 @@ void FolderGridView::focusOnSelection() {
     ensureVisible(thumb, 0, 0);
 }
 
-void FolderGridView::selectAll() {
-    QList<int> list;
-    for(int i = 0; i < thumbnails.count(); i++)
-        list << i;
-    // preserve last selected index by putting it at the end of a new selection
-    // this is simpler but it changes selection order a bit
-    if(lastSelected() != -1) {
-        // in this case list is sorted so no need to indexOf()
-        list.move(lastSelected(), list.count() - 1);
-    }
-    select(list);
-}
-
 void FolderGridView::selectAbove() {
     if(!thumbnails.count() || lastSelected() == -1 || flowLayout->sameRow(0, lastSelected()))
         return;
@@ -412,28 +399,10 @@ void FolderGridView::keyPressEvent(QKeyEvent *event) {
     ThumbnailView::keyPressEvent(event);
     event->accept();
 
-    bool plainKey = !(event->modifiers() & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier));
-    if(plainKey && event->text() == QStringLiteral("/") && thumbnails.count()) {
-        enterSearchMode();
-        return;
-    }
-
-    if(event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return) {
-        emit itemActivated(lastSelected());
-        return;
-    }
-
-    // temporary, will be configurable later
-    if(event->key() == Qt::Key_Backspace) {
-        actionManager->invokeAction("goUp");
-        return;
-    }
-
+    // Enter, Backspace, Ctrl+A and "/" are ordinary bindings (openSelected,
+    // goUp, selectAll, startSearch) and reach them through processEvent below
     if(event->modifiers() & Qt::ControlModifier) {
-        if(ShortcutBuilder::fromEvent(event) == "Ctrl+A")
-            selectAll();
-        else
-            actionManager->processEvent(event);
+        actionManager->processEvent(event);
         return;
     }
 
@@ -565,6 +534,11 @@ void FolderGridView::enterSearchMode() {
     mSearchQuery.clear();
     mSearchMatched = true;
     updateSearchIndicator();
+}
+
+void FolderGridView::startSearch() {
+    if(thumbnails.count())
+        enterSearchMode();
 }
 
 void FolderGridView::exitSearchMode() {

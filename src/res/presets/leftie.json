@@ -195,6 +195,18 @@
         ],
         "toggleImageInfo": [
             "$Alt+I"
+        ],
+        "goUp": [
+            "Backspace"
+        ],
+        "openSelected": [
+            "Enter"
+        ],
+        "selectAll": [
+            "$Ctrl+A"
+        ],
+        "startSearch": [
+            "/"
         ]
     }
 }

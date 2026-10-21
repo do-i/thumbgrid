@@ -251,6 +251,9 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::toggleStatusFooter, this, &Core::toggleStatusFooter);
     connect(actionManager, &ActionManager::pasteFile, this, &Core::pasteFile);
     connect(actionManager, &ActionManager::toggleFolderViewTopBar, this, &Core::toggleFolderViewTopBar);
+    connect(actionManager, &ActionManager::openSelected, this, &Core::openSelected);
+    connect(actionManager, &ActionManager::selectAll, this, &Core::selectAll);
+    connect(actionManager, &ActionManager::startSearch, this, &Core::startSearch);
     connect(actionManager, &ActionManager::togglePlacesPanel, this, &Core::togglePlacesPanel);
 }
 
@@ -676,6 +679,22 @@ void Core::toggleFolderView() {
 void Core::toggleFolderViewTopBar() {
     settings->setFolderViewTopBar(!settings->folderViewTopBar());
     settings->sendChangeNotification();
+}
+
+// grid-only actions: open the selected item, select every entry, type-to-search
+void Core::openSelected() {
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        folderViewPresenter.openSelected();
+}
+
+void Core::selectAll() {
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        folderViewPresenter.selectAll();
+}
+
+void Core::startSearch() {
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        mw->startFolderSearch();
 }
 
 void Core::togglePlacesPanel() {

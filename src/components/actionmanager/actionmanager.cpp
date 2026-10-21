@@ -378,6 +378,24 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
                 qCDebug(logSettings) << "[actionManager]: bound" << i.key() << "=" << i.value() << "in document";
             }
         }
+        // The grid used to handle Enter, Backspace, Ctrl+A and "/" in code, ahead
+        // of any binding; they are now the actions below. Hand the preset's key to
+        // the action unless the user bound that key in the grid to something else
+        // (Enter's old documentView default never ran there, so it is replaced).
+        const QStringList gridActions{"openSelected", "goUp", "selectAll", "startSearch"};
+        ContextMap &grid = shortcuts[MODE_FOLDERVIEW];
+        QMapIterator<QString, QString> g(defaults[MODE_FOLDERVIEW]);
+        while(g.hasNext()) {
+            g.next();
+            if(!gridActions.contains(g.value()))
+                continue;
+            const QString cur = grid.value(g.key());
+            const bool free = cur.isEmpty() || (g.key() == "Enter" && cur == "documentView");
+            if(free && cur != g.value()) {
+                grid.insert(g.key(), g.value());
+                qCDebug(logSettings) << "[actionManager]: bound" << g.key() << "=" << g.value() << "in grid";
+            }
+        }
     }
     // add new default actions, per context
     for(ViewMode ctx : shortcutContexts()) {

@@ -113,7 +113,7 @@ void TheSameKeyRunsDifferentActionsPerContextTest::resettingDefaultsCanTargetOne
 
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "C"), QStringLiteral("nextImage"));
     QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "C"), QString());
-    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Enter"), QStringLiteral("documentView"));
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Enter"), QStringLiteral("openSelected"));
     QVERIFY2(!actionManager->allDefaultShortcuts().value(MODE_GLOBAL).isEmpty(),
              "Global defaults should be available to restored contexts.");
 }

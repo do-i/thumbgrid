@@ -19,7 +19,6 @@ public:
     const int THUMBNAIL_SIZE_MIN = 80;  // px
     const int THUMBNAIL_SIZE_MAX = 400;  // these should be divisible by ZOOM_STEP
     const int ZOOM_STEP = 20;
-    void selectAll();
 
     // begins editing the current selection's name in place, over its cell
     void startRename(const QString& name);
@@ -30,6 +29,8 @@ public:
     bool searchMode() const;
     QString searchQuery() const;
     void exitSearchMode();
+    // enters type-ahead search when there is something to search
+    void startSearch();
     // feedback for the last emitted query, pushed back down once it is resolved
     void setSearchMatched(bool matched);
 

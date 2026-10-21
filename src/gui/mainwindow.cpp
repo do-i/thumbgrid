@@ -439,6 +439,10 @@ void MW::setFolderViewSearchMatched(bool matched) {
     folderView->setSearchMatched(matched);
 }
 
+void MW::startFolderSearch() {
+    folderView->startSearch();
+}
+
 void MW::toggleRenameOverlay(QString currentName) {
     // in folder view, rename happens in place over the selected cell
     if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {

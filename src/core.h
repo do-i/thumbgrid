@@ -223,6 +223,9 @@ public slots:
     void enableFolderView();
     void toggleFolderView();
     void toggleFolderViewTopBar();
+    void openSelected();
+    void selectAll();
+    void startSearch();
     void togglePlacesPanel();
     void toggleSlideshow();
     void onPlaybackFinished();

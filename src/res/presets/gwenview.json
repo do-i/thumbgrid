@@ -41,8 +41,10 @@
     },
     "grid": {
         "createDirectory": ["F10"],
-        "documentView": ["Enter"],
         "goUp": ["Backspace"],
-        "moveFile": ["M"]
+        "moveFile": ["M"],
+        "openSelected": ["Enter"],
+        "selectAll": ["$Ctrl+A"],
+        "startSearch": ["/"]
     }
 }

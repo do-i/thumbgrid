@@ -20,6 +20,10 @@
     "grid": {
         "moveFile": ["M"],
         "removeFile": ["$Shift+Del"],
-        "renameFile": ["F2"]
+        "renameFile": ["F2"],
+        "goUp": ["Backspace"],
+        "openSelected": ["Enter"],
+        "selectAll": ["$Ctrl+A"],
+        "startSearch": ["/"]
     }
 }

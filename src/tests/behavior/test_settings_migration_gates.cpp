@@ -481,6 +481,53 @@ bool arrowKeyMigrationKeepsCustomBindings() {
                    "A free Right should still get its scroll action.");
 }
 
+// The grid's hard-coded Enter / Backspace / Ctrl+A / "/" became actions: an
+// upgrading config gets them, replacing Enter's never-reached documentView.
+bool gridKeysBecomeActionsOnUpgrade() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject grid;
+    grid.insert("documentView", QJsonArray{QStringLiteral("Enter"), QStringLiteral("U")});
+    if(!seedDocumentAndGridShortcuts(QJsonObject(), grid))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+
+    const auto bound = [](const char *key, const char *action) {
+        return actionManager->actionForShortcut(MODE_FOLDERVIEW, key) == QLatin1String(action);
+    };
+    return require(bound("Enter", "openSelected"), "Enter should open the selected item.") &&
+           require(bound("Backspace", "goUp"), "Backspace should go up a folder.") &&
+           require(bound("Ctrl+A", "selectAll"), "Ctrl+A should select all.") &&
+           require(bound("/", "startSearch"), "/ should start the search.") &&
+           require(bound("U", "documentView"), "The user's other documentView key must survive.");
+}
+
+// A grid key the user bound to something else is left alone.
+bool gridKeyMigrationKeepsCustomBindings() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject grid;
+    grid.insert("createDirectory", QJsonArray{QStringLiteral("Backspace")});
+    if(!seedDocumentAndGridShortcuts(QJsonObject(), grid))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+
+    return require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Backspace") == QLatin1String("createDirectory"),
+                   "A customised grid Backspace must survive the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Enter") == QLatin1String("openSelected"),
+                   "A free Enter should still get openSelected.");
+}
+
 bool runScenario(const QString &scenario) {
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
@@ -518,6 +565,10 @@ bool runScenario(const QString &scenario) {
         return arrowKeysBecomeScrollActionsOnUpgrade();
     if(scenario == QLatin1String("arrow-key-migration-keeps-custom-bindings"))
         return arrowKeyMigrationKeepsCustomBindings();
+    if(scenario == QLatin1String("grid-keys-become-actions"))
+        return gridKeysBecomeActionsOnUpgrade();
+    if(scenario == QLatin1String("grid-key-migration-keeps-custom-bindings"))
+        return gridKeyMigrationKeepsCustomBindings();
     return fail("Unknown scenario: " + scenario);
 }
 

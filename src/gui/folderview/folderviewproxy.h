@@ -39,6 +39,7 @@ public slots:
     void setStatusText(const QString& text);
     void setStatusFooterVisible(bool mode);
     void startRename(const QString& name);
+    void startSearch();
     void setSearchMatched(bool matched);
 
 protected:

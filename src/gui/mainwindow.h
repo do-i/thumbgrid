@@ -263,6 +263,7 @@ public slots:
     void showContextMenu();
     void onSortingChanged(SortingMode);
     void toggleRenameOverlay(QString currentName);
+    void startFolderSearch();
     void setFilterNearest();
     void setFilterBilinear();
     void setFilter(ScalingFilter filter);

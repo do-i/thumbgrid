@@ -65,6 +65,9 @@ QString ShortcutBuilder::processKeyEvent(QKeyEvent *event) {
     if(event->type() != QEvent::KeyPress || isModifier(Qt::Key(event->key())))
         return "";
 #if defined(__linux__) || defined(__FreeBSD__) || defined(_WIN32)
+    // synthetic events (tests, accessibility tools) carry no scancode
+    if(event->nativeScanCode() == 0)
+        return fromEventWithoutScanCode(event);
     return fromEventNativeScanCode(event);
 #else
     return fromEventText(event);
@@ -121,6 +124,17 @@ QString ShortcutBuilder::fromEventNativeScanCode(QKeyEvent *event) {
     }
 
     return sequence;
+}
+//------------------------------------------------------------------------------
+// Names a key that arrived without a native scancode. Punctuation is named by
+// the character it types ("/", not "Slash"), as the keymaps name it; with Shift
+// the shifted character stands alone, same as fromEventNativeScanCode().
+QString ShortcutBuilder::fromEventWithoutScanCode(QKeyEvent *event) {
+    const QString text = event->text();
+    const QChar chr = text.size() == 1 ? text.at(0) : QChar();
+    if(chr.isPrint() && !chr.isLetterOrNumber() && !chr.isSpace())
+        return (event->modifiers() == Qt::ShiftModifier) ? text : modifierKeys(event) + text;
+    return fromEventText(event);
 }
 //------------------------------------------------------------------------------
 QString ShortcutBuilder::fromEventText(QKeyEvent *event) {

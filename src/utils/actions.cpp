@@ -102,4 +102,7 @@ void Actions::init() {
     mActions.insert("scrollDownFine", QVersionNumber(2026,10,3));
     mActions.insert("scrollLeftFine", QVersionNumber(2026,10,3));
     mActions.insert("scrollRightFine", QVersionNumber(2026,10,3));
+    mActions.insert("openSelected", QVersionNumber(2026,10,3));
+    mActions.insert("selectAll", QVersionNumber(2026,10,3));
+    mActions.insert("startSearch", QVersionNumber(2026,10,3));
 }

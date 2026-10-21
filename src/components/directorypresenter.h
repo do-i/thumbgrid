@@ -40,6 +40,10 @@ public:
     // with prefix, case-insensitively. Returns false when nothing matches, in
     // which case the current selection is left alone.
     bool selectByNamePrefix(const QString& prefix);
+    // opens the most recently selected entry (folder, file or the ".." tile)
+    void openSelected();
+    // selects every directory entry; the ".." tile is not one
+    void selectAll();
 
 
 signals:

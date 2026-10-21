@@ -284,6 +284,29 @@ SelectionInfo DirectoryPresenter::selectionInfo() const {
     return info;
 }
 
+void DirectoryPresenter::openSelected() {
+    if(!view)
+        return;
+    const QList<int> selected = view->selection();
+    if(!selected.isEmpty())
+        onItemActivated(selected.last());
+}
+
+void DirectoryPresenter::selectAll() {
+    if(!model || !view)
+        return;
+    const int offset = parentOffset();
+    const int count = mShowDirs ? model->totalCount() : model->fileCount();
+    QList<int> list;
+    for(int i = offset; i < offset + count; i++)
+        list << i;
+    // keep the most recently selected entry last, so it stays the focus
+    const QList<int> current = view->selection();
+    if(!current.isEmpty() && list.contains(current.last()))
+        list.move(list.indexOf(current.last()), list.count() - 1);
+    view->select(list);
+}
+
 bool DirectoryPresenter::selectByNamePrefix(const QString& prefix) {
     if(!model || !view || prefix.isEmpty())
         return false;

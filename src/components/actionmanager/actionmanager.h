@@ -104,6 +104,9 @@ signals:
     void scrollDownFine();
     void scrollLeftFine();
     void scrollRightFine();
+    void openSelected();
+    void selectAll();
+    void startSearch();
     void zoomIn();
     void zoomOut();
     void zoomInCursor();

@@ -205,6 +205,11 @@ void FolderViewProxy::startRename(const QString& name) {
         folderView->startRename(name);
 }
 
+void FolderViewProxy::startSearch() {
+    if(folderView)
+        folderView->startSearch();
+}
+
 void FolderViewProxy::setSearchMatched(bool matched) {
     if(folderView)
         folderView->setSearchMatched(matched);
