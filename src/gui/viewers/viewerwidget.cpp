@@ -689,27 +689,7 @@ void ViewerWidget::keyPressEvent(QKeyEvent *event) {
         videoPlayer->pauseResume();
         return;
     }
-    if(currentWidget == IMAGEVIEWER && imageViewer->isDisplaying()) {
-        // switch to fitWidth via up arrow
-        if(ShortcutBuilder::fromEvent(event) == "Up" && !actionManager->actionForShortcut(MODE_DOCUMENT, "Up").isEmpty()) {
-            if(imageViewer->fitMode() == FIT_WINDOW && imageViewer->scaledImageFits()) {
-                imageViewer->setFitWidth();
-                return;
-            }
-        }
-    }
-    if(actionManager->processEvent(event))
-        return;
-    if(currentWidget == IMAGEVIEWER && event->modifiers() == Qt::NoModifier) {
-        if(event->key() == Qt::Key_Left) {
-            actionManager->invokeAction("prevImage");
-            return;
-        }
-        if(event->key() == Qt::Key_Right) {
-            actionManager->invokeAction("nextImage");
-            return;
-        }
-    }
+    actionManager->processEvent(event);
 }
 
 void ViewerWidget::scrollUp()        { scrollView(0, -1, false); }
@@ -722,16 +702,22 @@ void ViewerWidget::scrollLeftFine()  { scrollView(-1, 0, true); }
 void ViewerWidget::scrollRightFine() { scrollView( 1, 0, true); }
 
 // Text scrolls vertically by wheel-lines (fine: one line); an image pans only
-// along an axis it overflows, stopping at its edge. Otherwise horizontal
-// scrolls fall back to what these keys did before they became scroll actions.
+// along an axis it overflows, stopping at its edge. Otherwise the keys fall
+// back to what they did before they became scroll actions: up switches a
+// window-fitted image to fit-width, left/right change file or seek a video.
 void ViewerWidget::scrollView(int dx, int dy, bool fine) {
     if(currentWidget == TEXTVIEWER && dy) {
         textViewer->scrollLines(dy * (fine ? 1 : QApplication::wheelScrollLines()));
         return;
     }
-    if(currentWidget == IMAGEVIEWER && mInteractionEnabled && imageViewer->isDisplaying() &&
-       imageViewer->keyPan(dx, dy, fine))
-        return;
+    if(currentWidget == IMAGEVIEWER && mInteractionEnabled && imageViewer->isDisplaying()) {
+        if(imageViewer->keyPan(dx, dy, fine))
+            return;
+        if(dy < 0 && !fine && imageViewer->fitMode() == FIT_WINDOW && imageViewer->scaledImageFits()) {
+            imageViewer->setFitWidth();
+            return;
+        }
+    }
     if(!dx)
         return;
     if(fine)

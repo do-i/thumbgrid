@@ -12,6 +12,7 @@
 #include "gui/mainwindow.h"
 #include "gui/viewers/imageviewerv2.h"
 #include "gui/viewers/textviewer.h"
+#include "gui/viewers/viewerwidget.h"
 
 // Arrow keys scroll text / pan a zoomed image (Ctrl+arrow in fine steps) through
 // the configurable scroll actions, and
@@ -196,6 +197,25 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
     press("Left");
     QTRY_VERIFY2(window->windowTitle().contains("c-short.txt"),
                  "Left on a fitting image should go to the previous file.");
+
+    // Up on a window-fitted image has nothing to scroll, so it switches to
+    // fit-width (this used to be a special case ahead of the bindings).
+    core.loadPath(root.filePath("gallery/d-small.png"));
+    QTRY_VERIFY(window->windowTitle().contains("d-small.png"));
+    QTRY_VERIFY(imageViewer->isDisplaying());
+    imageViewer->setFitWindow();
+    QCOMPARE(imageViewer->fitMode(), FIT_WINDOW);
+    press("Up");
+    QCOMPARE(imageViewer->fitMode(), FIT_WIDTH);
+
+    // An unbound Left really does nothing now (it used to fall back to the
+    // previous file in code).
+    auto viewerWidget = window->findChild<ViewerWidget *>();
+    QVERIFY(viewerWidget);
+    actionManager->removeAllShortcuts("scrollLeft");
+    QTest::keyClick(viewerWidget, Qt::Key_Left);
+    QTest::qWait(200);
+    QVERIFY2(window->windowTitle().contains("d-small.png"), "An unbound Left must not change file.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(ViewerArrowKeysAndWheelScrollTest)
