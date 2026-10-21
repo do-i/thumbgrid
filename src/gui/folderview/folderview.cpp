@@ -275,6 +275,10 @@ void FolderView::startSearch() {
     ui->thumbnailGrid->startSearch();
 }
 
+void FolderView::navigate(GridNavigation direction) {
+    ui->thumbnailGrid->navigate(direction);
+}
+
 void FolderView::setSearchMatched(bool matched) {
     ui->thumbnailGrid->setSearchMatched(matched);
 }

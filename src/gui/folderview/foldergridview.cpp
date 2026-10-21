@@ -3,6 +3,41 @@
 #include <algorithm>
 #include <utility>
 
+namespace {
+
+bool isNavigationAction(const QString &action) {
+    static const QStringList actions{"selectPrevious", "selectNext", "selectAbove", "selectBelow",
+                                     "selectPageUp", "selectPageDown", "selectFirst", "selectLast"};
+    return actions.contains(action);
+}
+
+// the keys that used to move the selection in code, named as bindings name them
+QString navigationKeyName(int key) {
+    switch(key) {
+    case Qt::Key_Left:     return QStringLiteral("Left");
+    case Qt::Key_Right:    return QStringLiteral("Right");
+    case Qt::Key_Up:       return QStringLiteral("Up");
+    case Qt::Key_Down:     return QStringLiteral("Down");
+    case Qt::Key_PageUp:   return QStringLiteral("PgUp");
+    case Qt::Key_PageDown: return QStringLiteral("PgDown");
+    case Qt::Key_Home:     return QStringLiteral("Home");
+    case Qt::Key_End:      return QStringLiteral("End");
+    default:               return QString();
+    }
+}
+
+// the event's binding name without Shift, Alt or Meta
+QString plainKeyName(const QKeyEvent *event) {
+    QKeyEvent plain(event->type(), event->key(),
+                    event->modifiers() & ~(Qt::ShiftModifier | Qt::AltModifier | Qt::MetaModifier),
+                    event->nativeScanCode(), event->nativeVirtualKey(), event->nativeModifiers(),
+                    event->text());
+    return ShortcutBuilder::fromEvent(&plain);
+}
+
+} // namespace
+
+
 // TODO: create a base class for this and the one on panel
 
 namespace {
@@ -406,34 +441,38 @@ void FolderGridView::keyPressEvent(QKeyEvent *event) {
         return;
     }
 
-    // handle selection
-    switch (event->key()) {
-    case Qt::Key_Left:
-        selectPrev();
-        break;
-    case Qt::Key_Right:
-        selectNext();
-        break;
-    case Qt::Key_Up:
-        selectAbove();
-        break;
-    case Qt::Key_Down:
-        selectBelow();
-        break;
-    case Qt::Key_PageUp:
-        pageUp();
-        break;
-    case Qt::Key_PageDown:
-        pageDown();
-        break;
-    case Qt::Key_Home:
-        selectFirst();
-        break;
-    case Qt::Key_End:
-        selectLast();
-        break;
-    default:
-        actionManager->processEvent(event);
+    // The arrows, PgUp/PgDown and Home/End run the selection action their plain
+    // key is bound to. Shift, Alt and Meta don't change which one (Shift only
+    // makes it extend the selection), and the plain key wins over a binding on
+    // the modified combo - as when these moves were hard-coded. Matched by Qt
+    // key, so the numpad arrows count too.
+    const QString navigationKey = navigationKeyName(event->key());
+    if(!navigationKey.isEmpty()) {
+        const QString action = actionManager->actionForShortcut(MODE_FOLDERVIEW, navigationKey);
+        if(isNavigationAction(action)) {
+            actionManager->invokeAction(action);
+            return;
+        }
+    }
+    if(actionManager->processEvent(event))
+        return;
+    // An unbound modified key falls back to its plain key's selection action,
+    // so Shift extends the selection on any key bound to one.
+    const QString action = actionManager->actionForShortcut(MODE_FOLDERVIEW, plainKeyName(event));
+    if(isNavigationAction(action))
+        actionManager->invokeAction(action);
+}
+
+void FolderGridView::navigate(GridNavigation direction) {
+    switch(direction) {
+    case GridNavigation::Previous: selectPrev(); break;
+    case GridNavigation::Next:     selectNext(); break;
+    case GridNavigation::Above:    selectAbove(); break;
+    case GridNavigation::Below:    selectBelow(); break;
+    case GridNavigation::PageUp:   pageUp(); break;
+    case GridNavigation::PageDown: pageDown(); break;
+    case GridNavigation::First:    selectFirst(); break;
+    case GridNavigation::Last:     selectLast(); break;
     }
 }
 

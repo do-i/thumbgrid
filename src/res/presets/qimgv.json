@@ -233,6 +233,30 @@
         "selectAll": [
             "$Ctrl+A"
         ],
+        "selectPrevious": [
+            "Left"
+        ],
+        "selectNext": [
+            "Right"
+        ],
+        "selectAbove": [
+            "Up"
+        ],
+        "selectBelow": [
+            "Down"
+        ],
+        "selectPageUp": [
+            "PgUp"
+        ],
+        "selectPageDown": [
+            "PgDown"
+        ],
+        "selectFirst": [
+            "Home"
+        ],
+        "selectLast": [
+            "End"
+        ],
         "startSearch": [
             "/"
         ],

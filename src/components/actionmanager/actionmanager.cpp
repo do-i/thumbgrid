@@ -415,6 +415,17 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound Space =" << action << "in" << contextToString(ctx);
             break;
         }
+        // The grid moved its selection with these keys in code, ahead of any
+        // binding; they are now the selection actions. A grid binding on one of
+        // them never ran, so replacing it keeps the grid behaving as before.
+        const QMap<QString, QString> gridMoves{
+            {"Left", "selectPrevious"}, {"Right", "selectNext"}, {"Up", "selectAbove"},
+            {"Down", "selectBelow"}, {"PgUp", "selectPageUp"}, {"PgDown", "selectPageDown"},
+            {"Home", "selectFirst"}, {"End", "selectLast"}};
+        for(auto move = gridMoves.cbegin(); move != gridMoves.cend(); ++move) {
+            grid.insert(move.key(), move.value());
+            qCDebug(logSettings) << "[actionManager]: bound" << move.key() << "=" << move.value() << "in grid";
+        }
     }
     // add new default actions, per context
     for(ViewMode ctx : shortcutContexts()) {

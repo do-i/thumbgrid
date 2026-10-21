@@ -105,4 +105,12 @@ void Actions::init() {
     mActions.insert("openSelected", QVersionNumber(2026,10,3));
     mActions.insert("selectAll", QVersionNumber(2026,10,3));
     mActions.insert("startSearch", QVersionNumber(2026,10,3));
+    mActions.insert("selectPrevious", QVersionNumber(2026,10,3));
+    mActions.insert("selectNext", QVersionNumber(2026,10,3));
+    mActions.insert("selectAbove", QVersionNumber(2026,10,3));
+    mActions.insert("selectBelow", QVersionNumber(2026,10,3));
+    mActions.insert("selectPageUp", QVersionNumber(2026,10,3));
+    mActions.insert("selectPageDown", QVersionNumber(2026,10,3));
+    mActions.insert("selectFirst", QVersionNumber(2026,10,3));
+    mActions.insert("selectLast", QVersionNumber(2026,10,3));
 }

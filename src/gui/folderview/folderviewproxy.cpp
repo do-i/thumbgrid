@@ -210,6 +210,11 @@ void FolderViewProxy::startSearch() {
         folderView->startSearch();
 }
 
+void FolderViewProxy::navigate(GridNavigation direction) {
+    if(folderView)
+        folderView->navigate(direction);
+}
+
 void FolderViewProxy::setSearchMatched(bool matched) {
     if(folderView)
         folderView->setSearchMatched(matched);

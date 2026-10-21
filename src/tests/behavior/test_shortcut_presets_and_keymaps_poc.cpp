@@ -105,7 +105,7 @@ void ShortcutPresetsAndKeymapsPocTest::presetWithEmptyContextSurvivesDialogRound
     // Leftie's context split survived loading (not everything under global).
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "Right"), QStringLiteral("scrollRight"));
     QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "F7"), QStringLiteral("createDirectory"));
-    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Right"), QString());
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Right"), QStringLiteral("selectNext"));
 
     // Mirror SettingsDialog::saveShortcuts(): rebuild the active mapping from a
     // draft copy of the current shortcuts, as happens unconditionally on Apply/OK.

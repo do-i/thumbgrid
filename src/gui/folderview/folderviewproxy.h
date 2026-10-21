@@ -40,6 +40,7 @@ public slots:
     void setStatusFooterVisible(bool mode);
     void startRename(const QString& name);
     void startSearch();
+    void navigate(GridNavigation direction);
     void setSearchMatched(bool matched);
 
 protected:

@@ -617,6 +617,39 @@ bool gridKeyMigrationKeepsCustomBindings() {
                    "A free Enter should still get openSelected.");
 }
 
+// The grid's arrows, PgUp/PgDown and Home/End moved the selection in code; they
+// are now the selection actions. An upgrading config gets all eight in the
+// grid, replacing any grid binding on those keys (it never ran).
+bool gridNavigationKeysBecomeActions() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 2));
+    conf.sync();
+
+    QJsonObject grid;
+    grid.insert("createDirectory", QJsonArray{QStringLiteral("Right"), QStringLiteral("F7")});
+    QJsonObject document;
+    document.insert("scrollLeft", QJsonArray{QStringLiteral("Left")});
+    if(!seedDocumentAndGridShortcuts(document, grid))
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 2));
+
+    const auto bound = [](ViewMode ctx, const char *key, const char *action) {
+        return actionManager->actionForShortcut(ctx, key) == QLatin1String(action);
+    };
+    return require(bound(MODE_FOLDERVIEW, "Left", "selectPrevious") && bound(MODE_FOLDERVIEW, "Right", "selectNext") &&
+                   bound(MODE_FOLDERVIEW, "Up", "selectAbove") && bound(MODE_FOLDERVIEW, "Down", "selectBelow") &&
+                   bound(MODE_FOLDERVIEW, "PgUp", "selectPageUp") && bound(MODE_FOLDERVIEW, "PgDown", "selectPageDown") &&
+                   bound(MODE_FOLDERVIEW, "Home", "selectFirst") && bound(MODE_FOLDERVIEW, "End", "selectLast"),
+                   "The grid should get all eight selection actions.") &&
+           require(bound(MODE_FOLDERVIEW, "F7", "createDirectory"),
+                   "The other key of a replaced grid binding must survive.") &&
+           require(bound(MODE_DOCUMENT, "Left", "scrollLeft"),
+                   "The picture view's arrows are untouched.");
+}
+
 bool runScenario(const QString &scenario) {
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
@@ -662,6 +695,8 @@ bool runScenario(const QString &scenario) {
         return spaceMigrationKeepsCustomBinding();
     if(scenario == QLatin1String("arrow-key-migration-keeps-custom-bindings"))
         return arrowKeyMigrationKeepsCustomBindings();
+    if(scenario == QLatin1String("grid-navigation-keys-become-actions"))
+        return gridNavigationKeysBecomeActions();
     if(scenario == QLatin1String("grid-keys-become-actions"))
         return gridKeysBecomeActionsOnUpgrade();
     if(scenario == QLatin1String("grid-key-migration-keeps-custom-bindings"))

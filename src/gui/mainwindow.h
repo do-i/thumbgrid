@@ -265,6 +265,7 @@ public slots:
     void onSortingChanged(SortingMode);
     void toggleRenameOverlay(QString currentName);
     void startFolderSearch();
+    void navigateFolderGrid(GridNavigation direction);
     void setFilterNearest();
     void setFilterBilinear();
     void setFilter(ScalingFilter filter);

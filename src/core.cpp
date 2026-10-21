@@ -254,6 +254,19 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::openSelected, this, &Core::openSelected);
     connect(actionManager, &ActionManager::selectAll, this, &Core::selectAll);
     connect(actionManager, &ActionManager::startSearch, this, &Core::startSearch);
+    const QList<QPair<void (ActionManager::*)(), GridNavigation>> gridMoves{
+        {&ActionManager::selectPrevious, GridNavigation::Previous},
+        {&ActionManager::selectNext,     GridNavigation::Next},
+        {&ActionManager::selectAbove,    GridNavigation::Above},
+        {&ActionManager::selectBelow,    GridNavigation::Below},
+        {&ActionManager::selectPageUp,   GridNavigation::PageUp},
+        {&ActionManager::selectPageDown, GridNavigation::PageDown},
+        {&ActionManager::selectFirst,    GridNavigation::First},
+        {&ActionManager::selectLast,     GridNavigation::Last}};
+    for(const auto &move : gridMoves) {
+        const GridNavigation direction = move.second;
+        connect(actionManager, move.first, this, [this, direction]() { navigateGrid(direction); });
+    }
     connect(actionManager, &ActionManager::togglePlacesPanel, this, &Core::togglePlacesPanel);
 }
 
@@ -695,6 +708,11 @@ void Core::selectAll() {
 void Core::startSearch() {
     if(mw->currentViewMode() == MODE_FOLDERVIEW)
         mw->startFolderSearch();
+}
+
+void Core::navigateGrid(GridNavigation direction) {
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        mw->navigateFolderGrid(direction);
 }
 
 void Core::togglePlacesPanel() {

@@ -226,6 +226,7 @@ public slots:
     void openSelected();
     void selectAll();
     void startSearch();
+    void navigateGrid(GridNavigation direction);
     void togglePlacesPanel();
     void toggleSlideshow();
     void onPlaybackFinished();

@@ -25,6 +25,14 @@
         "goUp": ["Backspace"],
         "openSelected": ["Enter"],
         "selectAll": ["$Ctrl+A"],
-        "startSearch": ["/"]
+        "startSearch": ["/"],
+        "selectPrevious": ["Left"],
+        "selectNext": ["Right"],
+        "selectAbove": ["Up"],
+        "selectBelow": ["Down"],
+        "selectPageUp": ["PgUp"],
+        "selectPageDown": ["PgDown"],
+        "selectFirst": ["Home"],
+        "selectLast": ["End"]
     }
 }

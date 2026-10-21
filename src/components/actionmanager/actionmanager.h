@@ -107,6 +107,14 @@ signals:
     void openSelected();
     void selectAll();
     void startSearch();
+    void selectPrevious();
+    void selectNext();
+    void selectAbove();
+    void selectBelow();
+    void selectPageUp();
+    void selectPageDown();
+    void selectFirst();
+    void selectLast();
     void zoomIn();
     void zoomOut();
     void zoomInCursor();

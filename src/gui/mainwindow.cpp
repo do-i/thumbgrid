@@ -462,6 +462,10 @@ void MW::startFolderSearch() {
     folderView->startSearch();
 }
 
+void MW::navigateFolderGrid(GridNavigation direction) {
+    folderView->navigate(direction);
+}
+
 void MW::toggleRenameOverlay(QString currentName) {
     // in folder view, rename happens in place over the selected cell
     if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {

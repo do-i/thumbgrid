@@ -11,6 +11,9 @@
 #include "gui/folderview/gridcontextmenu.h"
 #include "components/actionmanager/actionmanager.h"
 
+// selection moves in the folder grid, one per action (selectPrevious ...)
+enum class GridNavigation { Previous, Next, Above, Below, PageUp, PageDown, First, Last };
+
 class FolderGridView : public ThumbnailView {
     Q_OBJECT
 public:
@@ -31,6 +34,9 @@ public:
     void exitSearchMode();
     // enters type-ahead search when there is something to search
     void startSearch();
+    // moves the selection (extends it while Shift is held); the grid actions
+    // selectPrevious ... selectLast
+    void navigate(GridNavigation direction);
     // feedback for the last emitted query, pushed back down once it is resolved
     void setSearchMatched(bool matched);
 
