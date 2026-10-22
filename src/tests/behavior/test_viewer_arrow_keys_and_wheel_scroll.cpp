@@ -18,7 +18,8 @@
 // the configurable scroll actions, and
 // scrolling stops at the end instead of jumping to the neighbouring file -
 // reaching the bottom of a long file used to silently open the next one. The
-// wheel's text scrolling is a binding too (scrollOrPrevImage/scrollOrNextImage).
+// wheel's text scrolling is a binding too (scrollOrPrevImage/scrollOrNextImage),
+// and Ctrl+wheel runs the zoom actions, which resize the text.
 
 class ViewerArrowKeysAndWheelScrollTest : public QObject {
     Q_OBJECT
@@ -33,10 +34,10 @@ namespace {
 // sends keys. Synthetic sendEvent() wheel events don't propagate to parents,
 // which is exactly the path that used to turn an unscrollable notch into
 // "next file".
-void wheelNotch(QWidget *target, int angleY) {
+void wheelNotch(QWidget *target, int angleY, Qt::KeyboardModifiers modifiers = Qt::NoModifier) {
     const QPointF local = QRectF(target->rect()).center();
     QWheelEvent event(local, target->mapToGlobal(local), QPoint(0, 0), QPoint(0, angleY),
-                      Qt::NoButton, Qt::NoModifier, Qt::NoScrollPhase, false);
+                      Qt::NoButton, modifiers, Qt::NoScrollPhase, false);
     QSpontaneKeyEvent::setSpontaneous(&event);
     qApp->notify(target, &event);
     QCoreApplication::processEvents();
@@ -262,6 +263,32 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
     QTest::qWait(200);
     QVERIFY2(window->windowTitle().contains("c-short.txt"), "An unbound wheel must not change file.");
     actionManager->addShortcut(MODE_DOCUMENT, "WheelDown", wheelDownAction);
+
+    // The zoom actions resize the text: a zoom key...
+    const qreal size0 = textEdit->font().pointSizeF();
+    actionManager->invokeAction("zoomIn");
+    QCOMPARE(textEdit->font().pointSizeF(), size0 + 1);
+    actionManager->invokeAction("zoomOutCursor");
+    QCOMPARE(textEdit->font().pointSizeF(), size0);
+    // ...and Ctrl+wheel, through its binding: bound to zoom out, Ctrl+WheelUp
+    // shrinks the text (Qt's own handling would grow it).
+    actionManager->addShortcut(MODE_DOCUMENT, "Ctrl+WheelUp", "zoomOutCursor");
+    wheelNotch(textEdit->viewport(), 120, Qt::ControlModifier);
+    QCOMPARE(textEdit->font().pointSizeF(), size0 - 1);
+    // Bound to another action, Ctrl+wheel runs it instead of zooming.
+    actionManager->addShortcut(MODE_DOCUMENT, "Ctrl+WheelUp", "nextImage");
+    wheelNotch(textEdit->viewport(), 120, Qt::ControlModifier);
+    QTRY_VERIFY2(window->windowTitle().contains("d-small.png"),
+                 "A Ctrl+wheel bound to nextImage should change file over a text file.");
+    // Unbound, it keeps Qt's own text zoom.
+    actionManager->removeShortcut(MODE_DOCUMENT, "Ctrl+WheelUp");
+    QVERIFY(actionManager->actionForShortcut(MODE_DOCUMENT, "Ctrl+WheelUp").isEmpty());
+    core.loadPath(root.filePath("gallery/c-short.txt"));
+    QTRY_VERIFY(window->windowTitle().contains("c-short.txt"));
+    const qreal size1 = textEdit->font().pointSizeF();
+    wheelNotch(textEdit->viewport(), 120, Qt::ControlModifier);
+    QCOMPARE(textEdit->font().pointSizeF(), size1 + 1);
+    QVERIFY(window->windowTitle().contains("c-short.txt"));
 }
 
 TG_BEHAVIOR_TEST_MAIN(ViewerArrowKeysAndWheelScrollTest)

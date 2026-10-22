@@ -49,6 +49,19 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     textViewer.reset(new TextViewer(this));
     layout.addWidget(textViewer.get());
     textViewer->hide();
+    // the zoom actions change the text size of a shown text file
+    for(auto zoom : {&ViewerWidget::zoomIn, &ViewerWidget::zoomInCursor}) {
+        connect(this, zoom, this, [this]() {
+            if(currentWidget == TEXTVIEWER)
+                textViewer->zoom(1);
+        });
+    }
+    for(auto zoom : {&ViewerWidget::zoomOut, &ViewerWidget::zoomOutCursor}) {
+        connect(this, zoom, this, [this]() {
+            if(currentWidget == TEXTVIEWER)
+                textViewer->zoom(-1);
+        });
+    }
     videoControls = new VideoControlsProxyWrapper(this);
 
     // tmp no wrapper

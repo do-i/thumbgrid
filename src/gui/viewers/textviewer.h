@@ -19,6 +19,8 @@ public:
     void scrollLines(int lines);
     // true when the file is longer than the view
     bool canScroll() const;
+    // changes the text size by steps points
+    void zoom(int steps);
 
 private slots:
     void readSettings();

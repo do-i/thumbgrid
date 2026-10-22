@@ -27,18 +27,19 @@ namespace {
 // in for the wheel's scrollOrPrevImage/scrollOrNextImage actions, so it only
 // happens while the wheel is bound to one of them or to nothing; any other
 // binding gets the wheel instead. A file that fits passes the wheel on.
+// A wheel with modifiers goes to its binding too (Ctrl+wheel: the zoom
+// actions, which resize the text); only an unbound one gets Qt's own handling.
 class TextEdit : public QPlainTextEdit {
 public:
     using QPlainTextEdit::QPlainTextEdit;
 
 protected:
     void wheelEvent(QWheelEvent *event) override {
-        if(event->modifiers() == Qt::NoModifier) {
-            const QString action = actionManager->actionForShortcut(MODE_DOCUMENT, ShortcutBuilder::fromEvent(event));
-            if(!action.isEmpty() && action != "scrollOrPrevImage" && action != "scrollOrNextImage") {
-                event->ignore();
-                return;
-            }
+        const QString action = actionManager->actionForShortcut(MODE_DOCUMENT, ShortcutBuilder::fromEvent(event));
+        const bool scrollAction = action == "scrollOrPrevImage" || action == "scrollOrNextImage";
+        if(!action.isEmpty() && !(scrollAction && event->modifiers() == Qt::NoModifier)) {
+            event->ignore();
+            return;
         }
         QPlainTextEdit::wheelEvent(event);
         if(event->modifiers() == Qt::NoModifier && verticalScrollBar()->maximum() > 0)
@@ -164,4 +165,8 @@ void TextViewer::scrollLines(int lines) {
 
 bool TextViewer::canScroll() const {
     return textEdit->verticalScrollBar()->maximum() > 0;
+}
+
+void TextViewer::zoom(int steps) {
+    textEdit->zoomIn(steps);
 }
