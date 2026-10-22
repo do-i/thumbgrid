@@ -21,6 +21,7 @@
 #include <QStyleOptionButton>
 #include <QVBoxLayout>
 #include <QRadioButton>
+#include <QComboBox>
 #include <functional>
 #include "gui/customwidgets/keysequenceedit.h"
 #include "utils/imagelib.h"
@@ -1192,6 +1193,7 @@ void SettingsDialog::readShortcuts() {
     rebuildShortcutDraftLookup();
     settings->readShortcutPrimary(mShortcutPrimary);
     settings->readDisabledShortcuts(mShortcutDisabled);
+    mShortcutFallback = actionManager->scrollFallbackOverrides();
     updateShortcutsTable();
     refreshShortcutPresetCombo();
 }
@@ -1634,6 +1636,32 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     warning->setWordWrap(true);
     mainLayout->addWidget(warning);
 
+    // A scroll action's fallback: what runs when there is nothing to scroll
+    // that way (a fitting picture, a short text file, a video).
+    QComboBox *fallbackBox = nullptr;
+    const QString defaultFallback = ActionManager::defaultScrollFallback(action);
+    if(ActionManager::hasScrollFallback(action)) {
+        QHBoxLayout *fallbackRow = new QHBoxLayout();
+        fallbackRow->addWidget(new QLabel(tr("When there is nothing to scroll:"), &dialog));
+        fallbackBox = new QComboBox(&dialog);
+        fallbackBox->setObjectName("shortcutFallbackComboBox");
+        const auto label = [&](const QString &name, const QString &text) {
+            return name == defaultFallback ? tr("%1 (default)").arg(text) : text;
+        };
+        fallbackBox->addItem(label(QString(), tr("Nothing")), QString());
+        QStringList candidates = appActions->getList();
+        candidates.sort(Qt::CaseInsensitive);
+        for(const QString &candidate : candidates) {
+            if(!ActionManager::hasScrollFallback(candidate) && !candidate.startsWith(QLatin1String("scrollOr")))
+                fallbackBox->addItem(label(candidate, shortcutActionLabel(candidate)), candidate);
+        }
+        const QString saved = mShortcutFallback.value(action, defaultFallback);
+        const int current = fallbackBox->findData(saved == QLatin1String("none") ? QString() : saved);
+        fallbackBox->setCurrentIndex(current < 0 ? 0 : current);
+        fallbackRow->addWidget(fallbackBox, 1);
+        mainLayout->addLayout(fallbackRow);
+    }
+
     connect(adder, &KeySequenceEdit::edited, &dialog, [&]() {
         const QString seq = adder->sequence();
         if(seq.isEmpty())
@@ -1673,6 +1701,13 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     if(dialog.exec() != QDialog::Accepted)
         return;
 
+    if(fallbackBox) {
+        const QString chosen = fallbackBox->currentData().toString();
+        if(chosen == defaultFallback)
+            mShortcutFallback.remove(action);
+        else
+            mShortcutFallback.insert(action, chosen.isEmpty() ? QStringLiteral("none") : chosen);
+    }
     // Commit the edited key set and primary choice into the draft model.
     setActionShortcuts(mShortcutDraft[context], action, keys);
     rebuildShortcutDraftLookup();
@@ -2032,6 +2067,7 @@ void SettingsDialog::saveShortcuts() {
     }
     actionManager->saveShortcuts();
     settings->saveShortcutPrimary(mShortcutPrimary);
+    actionManager->setScrollFallbackOverrides(mShortcutFallback);
     settings->saveDisabledShortcuts(mShortcutDisabled);
 }
 //------------------------------------------------------------------------------

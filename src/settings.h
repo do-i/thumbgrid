@@ -147,6 +147,9 @@ public:
     void readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary);
     void saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> &primary);
     void readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled);
+    // overrides of the scroll actions' fallbacks: action -> action, "none" for none
+    void readShortcutFallbacks(QMap<QString, QString> &fallbacks);
+    void saveShortcutFallbacks(const QMap<QString, QString> &fallbacks);
     void saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled);
     // [Shortcuts] pointers: selected preset id and whether the active mapping has
     // diverged from it. Only these pointers live in the .conf; the mapping is in

@@ -729,12 +729,14 @@ void ViewerWidget::scrollDownFine()  { scrollView(0,  1, true); }
 void ViewerWidget::scrollLeftFine()  { scrollView(-1, 0, true); }
 void ViewerWidget::scrollRightFine() { scrollView( 1, 0, true); }
 
-// Text scrolls vertically by wheel-lines (fine: one line); an image pans only
-// along an axis it overflows, stopping at its edge. Otherwise the keys fall
-// back to what they did before they became scroll actions: up switches a
-// window-fitted image to fit-width, left/right change file or seek a video.
+// Text that can scroll scrolls vertically by wheel-lines (fine: one line),
+// stopping at its ends; an image pans only along an axis it overflows, stopping
+// at its edge, and up switches a window-fitted image to fit-width. When there
+// is nothing to scroll that way the action runs its fallback (Settings >
+// Shortcuts): by default left/right change file and fine left/right seek a
+// video.
 void ViewerWidget::scrollView(int dx, int dy, bool fine) {
-    if(currentWidget == TEXTVIEWER && dy) {
+    if(currentWidget == TEXTVIEWER && dy && textViewer->canScroll()) {
         textViewer->scrollLines(dy * (fine ? 1 : QApplication::wheelScrollLines()));
         return;
     }
@@ -746,12 +748,12 @@ void ViewerWidget::scrollView(int dx, int dy, bool fine) {
             return;
         }
     }
-    if(!dx)
-        return;
+    QString action = (dx < 0) ? "scrollLeft" : (dx > 0) ? "scrollRight" : (dy < 0) ? "scrollUp" : "scrollDown";
     if(fine)
-        (dx < 0) ? seekBackward() : seekForward();
-    else
-        actionManager->invokeAction((dx < 0) ? "prevImage" : "nextImage");
+        action += "Fine";
+    const QString fallback = actionManager->scrollFallback(action);
+    if(!fallback.isEmpty())
+        actionManager->invokeAction(fallback);
 }
 
 void ViewerWidget::scrollOrPrevImage() { scrollOrChangeFile(-1); }

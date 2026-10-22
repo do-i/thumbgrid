@@ -1529,6 +1529,20 @@ void Settings::saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> 
     writeShortcutStringMapJson(settings->mShortcutsJsonPath, "_primary", primary);
 }
 
+// Stored as "_fallback": { "document": { action: fallback } }, the view the
+// scroll actions work in.
+void Settings::readShortcutFallbacks(QMap<QString, QString> &fallbacks) {
+    QMap<ViewMode, QMap<QString, QString>> values;
+    readShortcutStringMapJson(settings->mShortcutsJsonPath, "_fallback", values);
+    fallbacks = values.value(MODE_DOCUMENT);
+}
+
+void Settings::saveShortcutFallbacks(const QMap<QString, QString> &fallbacks) {
+    QMap<ViewMode, QMap<QString, QString>> values;
+    values.insert(MODE_DOCUMENT, fallbacks);
+    writeShortcutStringMapJson(settings->mShortcutsJsonPath, "_fallback", values);
+}
+
 void Settings::readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled) {
     readShortcutStringListJson(settings->mShortcutsJsonPath, "_disabled", disabled);
 }

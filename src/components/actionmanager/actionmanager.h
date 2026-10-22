@@ -65,6 +65,15 @@ public:
     static QList<PresetInfo> availablePresets();
     static QString selectedPreset();
     void applyPreset(const QString &id);
+    // A scroll action (scrollUp ... scrollRightFine) runs its fallback action
+    // when there is nothing to scroll that way: previous/next file for the
+    // arrows and video seek for the fine ones by default, editable per action
+    // in Settings > Shortcuts. Overrides map action -> fallback ("none": none).
+    static bool hasScrollFallback(const QString &action);
+    static QString defaultScrollFallback(const QString &action);
+    QString scrollFallback(const QString &action) const;
+    const QMap<QString, QString> &scrollFallbackOverrides() const;
+    void setScrollFallbackOverrides(const QMap<QString, QString> &overrides);
 public slots:
     bool invokeAction(const QString &actionName);
 private:
@@ -74,6 +83,7 @@ private:
     ViewMode context = MODE_DOCUMENT;
     // set by a wheel turned with the right button held (RMB+WheelUp/Down)
     bool rightButtonWheel = false;
+    QMap<QString, QString> scrollFallbacks;
 
     static void initDefaults();
     static void initActions();

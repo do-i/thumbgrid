@@ -158,6 +158,7 @@ private:
     QMap<ViewMode, QHash<QString, QString>> mShortcutDraftLookup;
     QMap<ViewMode, QMap<QString, QString>> mShortcutPrimary;
     QMap<ViewMode, QStringList> mShortcutDisabled;
+    QMap<QString, QString> mShortcutFallback; // scroll action fallback overrides
     QLineEdit *mShortcutSearchEdit = nullptr;
     QComboBox *mShortcutPresetComboBox = nullptr;
     // Cleared on a theme change so the icons pick up the new icon colour.

@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_scroll_fallback_settings_test
+    behavior/test_scroll_fallback_is_editable_in_settings.cpp
+)
+add_test(
+    NAME "A scroll action's fallback is editable in Settings"
+    COMMAND thumbgrid_scroll_fallback_settings_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_clickable_edges_test
     behavior/test_clickable_edges_are_bindings.cpp
 )

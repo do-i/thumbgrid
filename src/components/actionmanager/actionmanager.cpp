@@ -35,6 +35,21 @@ QString expandModifierTokens(QString keys) {
     return keys;
 }
 
+// the scroll actions' built-in fallbacks (empty: none)
+const QMap<QString, QString> &scrollFallbackDefaults() {
+    static const QMap<QString, QString> defaults{
+        {"scrollUp", ""}, {"scrollDown", ""},
+        {"scrollLeft", "prevImage"}, {"scrollRight", "nextImage"},
+        {"scrollUpFine", ""}, {"scrollDownFine", ""},
+        {"scrollLeftFine", "seekVideoBackward"}, {"scrollRightFine", "seekVideoForward"}};
+    return defaults;
+}
+
+// a fallback may not be a scroll action itself (which could loop back)
+bool isScrollFamilyAction(const QString &action) {
+    return scrollFallbackDefaults().contains(action) || action.startsWith(QLatin1String("scrollOr"));
+}
+
 QList<ViewMode> shortcutContexts() {
     return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW, MODE_COPYMOVE};
 }
@@ -504,6 +519,7 @@ void ActionManager::applyPreset(const QString &id) {
     actionManager->rebuildShortcutLookup();
     settings->saveDisabledShortcuts(QMap<ViewMode, QStringList>());
     settings->saveShortcutPrimary(QMap<ViewMode, QMap<QString, QString>>());
+    actionManager->setScrollFallbackOverrides(QMap<QString, QString>());
     actionManager->saveShortcuts();
     // Selecting a preset is never "modified", by definition — force it rather than
     // leaning on saveShortcuts()'s derived shortcuts==defaults comparison, which is
@@ -618,8 +634,45 @@ ActionType ActionManager::validateAction(const QString &actionName) {
     return ActionType::ACTION_INVALID;
 }
 //------------------------------------------------------------------------------
+bool ActionManager::hasScrollFallback(const QString &action) {
+    return scrollFallbackDefaults().contains(action);
+}
+
+QString ActionManager::defaultScrollFallback(const QString &action) {
+    return scrollFallbackDefaults().value(action);
+}
+
+QString ActionManager::scrollFallback(const QString &action) const {
+    const QString fallback = scrollFallbacks.value(action, defaultScrollFallback(action));
+    if(fallback == QLatin1String("none") || isScrollFamilyAction(fallback))
+        return QString();
+    return fallback;
+}
+
+const QMap<QString, QString> &ActionManager::scrollFallbackOverrides() const {
+    return scrollFallbacks;
+}
+
+void ActionManager::setScrollFallbackOverrides(const QMap<QString, QString> &overrides) {
+    scrollFallbacks.clear();
+    for(auto it = overrides.cbegin(); it != overrides.cend(); ++it) {
+        const bool valid = it.value() == QLatin1String("none") ||
+                           (!isScrollFamilyAction(it.value()) && validateAction(it.value()) != ACTION_INVALID);
+        if(hasScrollFallback(it.key()) && valid && it.value() != defaultScrollFallback(it.key()))
+            scrollFallbacks.insert(it.key(), it.value());
+    }
+    settings->saveShortcutFallbacks(scrollFallbacks);
+}
+//------------------------------------------------------------------------------
 void ActionManager::readShortcuts() {
     settings->readShortcuts(shortcuts);
+    QMap<QString, QString> fallbacks;
+    settings->readShortcutFallbacks(fallbacks);
+    scrollFallbacks.clear();
+    for(auto it = fallbacks.cbegin(); it != fallbacks.cend(); ++it) {
+        if(hasScrollFallback(it.key()) && (it.value() == QLatin1String("none") || validateAction(it.value()) != ACTION_INVALID))
+            scrollFallbacks.insert(it.key(), it.value());
+    }
     // a shortcuts.json from before a context existed has no section for it;
     // seed it so an empty context still compares equal to the defaults
     for(ViewMode ctx : shortcutContexts())

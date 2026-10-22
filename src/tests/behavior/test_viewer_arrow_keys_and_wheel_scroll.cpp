@@ -22,7 +22,9 @@
 // wheel's text scrolling is a binding too (scrollOrPrevImage/scrollOrNextImage),
 // and Ctrl+wheel runs the zoom actions, which resize the text. With image
 // scrolling set to trackpad and wheel, the same actions pan a tall image. A
-// wheel turned with the right button held is RMB+WheelUp/RMB+WheelDown.
+// wheel turned with the right button held is RMB+WheelUp/RMB+WheelDown. What a
+// scroll action does when there is nothing to scroll is its configurable
+// fallback.
 
 class ViewerArrowKeysAndWheelScrollTest : public QObject {
     Q_OBJECT
@@ -375,6 +377,34 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
     QCOMPARE(imageViewer->currentScale(), scale1);
     QVERIFY(window->windowTitle().contains("a-big.png"));
     QVERIFY(!contextMenuShown());
+
+    // The scroll actions' fallbacks default to what they always did...
+    QCOMPARE(actionManager->scrollFallback("scrollLeft"), QStringLiteral("prevImage"));
+    QCOMPARE(actionManager->scrollFallback("scrollRight"), QStringLiteral("nextImage"));
+    QCOMPARE(actionManager->scrollFallback("scrollLeftFine"), QStringLiteral("seekVideoBackward"));
+    QCOMPARE(actionManager->scrollFallback("scrollRightFine"), QStringLiteral("seekVideoForward"));
+    QVERIFY(actionManager->scrollFallback("scrollDown").isEmpty());
+    // ...and can be switched off or changed, and are saved.
+    actionManager->setScrollFallbackOverrides({{"scrollLeft", "none"}, {"scrollDown", "nextImage"}});
+    core.loadPath(root.filePath("gallery/d-small.png"));
+    QTRY_VERIFY(window->windowTitle().contains("d-small.png"));
+    QTRY_VERIFY(imageViewer->isDisplaying());
+    actionManager->invokeAction("scrollLeft");
+    QTest::qWait(200);
+    QVERIFY2(window->windowTitle().contains("d-small.png"), "Left with no fallback must not change file.");
+    core.loadPath(root.filePath("gallery/c-short.txt"));
+    QTRY_VERIFY(window->windowTitle().contains("c-short.txt"));
+    QTRY_COMPARE(tvs->maximum(), 0);
+    actionManager->invokeAction("scrollDown");
+    QTRY_VERIFY2(window->windowTitle().contains("d-small.png"),
+                 "Down with nothing to scroll should run its nextImage fallback.");
+    QMap<QString, QString> saved;
+    settings->readShortcutFallbacks(saved);
+    QCOMPARE(saved, (QMap<QString, QString>{{"scrollLeft", "none"}, {"scrollDown", "nextImage"}}));
+    // A scroll action can't be another one's fallback (it could loop).
+    actionManager->setScrollFallbackOverrides({{"scrollRight", "scrollLeft"}});
+    QCOMPARE(actionManager->scrollFallback("scrollRight"), QStringLiteral("nextImage"));
+    actionManager->setScrollFallbackOverrides({});
 }
 
 TG_BEHAVIOR_TEST_MAIN(ViewerArrowKeysAndWheelScrollTest)
