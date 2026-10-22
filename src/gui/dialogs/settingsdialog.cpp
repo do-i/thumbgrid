@@ -1349,10 +1349,21 @@ QString SettingsDialog::primaryShortcut(ViewMode context, const QString &action)
         return savedPrimary;
     // No explicit choice yet: prefer a user override (a key that is not a system
     // default) so custom bindings become primary; otherwise fall back to the
-    // first system default.
+    // first system default, a keyboard key ahead of a mouse input (PgUp rather
+    // than LMB_LeftEdge for prevImage).
     const QStringList defaults = defaultShortcuts(context, action);
     for(const QString &key : candidates)
         if(!defaults.contains(key))
+            return key;
+    const auto isMouseInput = [](const QString &key) {
+        const QString input = key.section('+', -1);
+        for(const char *mouse : {"LMB", "RMB", "MiddleButton", "XButton", "Wheel"})
+            if(input.startsWith(QLatin1String(mouse)))
+                return true;
+        return false;
+    };
+    for(const QString &key : candidates)
+        if(!isMouseInput(key))
             return key;
     return candidates.first();
 }
@@ -1616,6 +1627,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     addRow->addWidget(new QLabel(tr("Add key:"), &dialog));
     KeySequenceEdit *adder = new KeySequenceEdit(&dialog);
     addRow->addWidget(adder, 1);
+    addRow->addWidget(adder->createClickZoneButton(&dialog));
     mainLayout->addLayout(addRow);
 
     QLabel *warning = new QLabel(&dialog);

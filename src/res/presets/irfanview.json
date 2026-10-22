@@ -14,9 +14,9 @@
         "moveToTrash": ["Del"]
     },
     "document": {
-        "nextImage": ["Right"],
+        "nextImage": ["Right", "LMB_RightEdge"],
         "pauseVideo": ["Space"],
-        "prevImage": ["Backspace", "Left"],
+        "prevImage": ["Backspace", "Left", "LMB_LeftEdge"],
         "zoomInCursor": ["RMB+WheelUp"],
         "zoomOutCursor": ["RMB+WheelDown"]
     },

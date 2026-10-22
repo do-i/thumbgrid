@@ -114,6 +114,7 @@
             "$Shift+Right"
         ],
         "nextImage": [
+            "LMB_RightEdge",
             "PgDown",
             "XButton2"
         ],
@@ -124,6 +125,7 @@
             "$Shift+Left"
         ],
         "prevImage": [
+            "LMB_LeftEdge",
             "PgUp",
             "XButton1"
         ],

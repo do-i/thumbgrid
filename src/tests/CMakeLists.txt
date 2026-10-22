@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_clickable_edges_test
+    behavior/test_clickable_edges_are_bindings.cpp
+)
+add_test(
+    NAME "Clickable edges are bindings"
+    COMMAND thumbgrid_clickable_edges_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_copy_overlay_keys_test
     behavior/test_copy_overlay_keys_are_bindings.cpp
 )

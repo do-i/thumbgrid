@@ -1,5 +1,7 @@
 #include "keysequenceedit.h"
 
+#include <QMenu>
+
 KeySequenceEdit::KeySequenceEdit(QWidget *parent) : QPushButton(parent), mSequence("") {
     QPushButton::setText(tr("[Enter sequence]"));
 }
@@ -58,10 +60,25 @@ void KeySequenceEdit::processEvent(QEvent *e) {
     QInputEvent *inputEvent = dynamic_cast<QInputEvent *>(e);
     if(!inputEvent)
         return;
-    QString tmp = ShortcutBuilder::fromEvent(inputEvent);
-    if(!tmp.isEmpty()) {
-        mSequence = tmp;
-        this->setText(mSequence);
-        emit edited();
-    }
+    record(ShortcutBuilder::fromEvent(inputEvent));
+}
+
+void KeySequenceEdit::record(const QString &sequence) {
+    if(sequence.isEmpty())
+        return;
+    mSequence = sequence;
+    this->setText(mSequence);
+    emit edited();
+}
+
+QPushButton *KeySequenceEdit::createClickZoneButton(QWidget *parent) {
+    auto *button = new QPushButton(tr("Click zone"), parent);
+    button->setAccessibleName("clickZoneButton");
+    button->setAutoDefault(false);
+    button->setToolTip(tr("Clicks in the picture's left and right edges (with clickable edges on)"));
+    auto *menu = new QMenu(button);
+    menu->addAction(tr("Left edge click"), this, [this]() { record(QStringLiteral("LMB_LeftEdge")); });
+    menu->addAction(tr("Right edge click"), this, [this]() { record(QStringLiteral("LMB_RightEdge")); });
+    button->setMenu(menu);
+    return button;
 }

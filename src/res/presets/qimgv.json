@@ -121,12 +121,14 @@
             "$Shift+Right"
         ],
         "nextImage": [
+            "LMB_RightEdge",
             "XButton2"
         ],
         "prevDirectory": [
             "$Shift+Left"
         ],
         "prevImage": [
+            "LMB_LeftEdge",
             "XButton1"
         ],
         "print": [

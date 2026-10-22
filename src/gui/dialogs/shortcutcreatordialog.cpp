@@ -1,6 +1,7 @@
 #include "shortcutcreatordialog.h"
 #include "ui_shortcutcreatordialog.h"
 
+#include <QBoxLayout>
 #include <QPushButton>
 #include <QIcon>
 
@@ -10,6 +11,11 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
 {
     ui->setupUi(this);
     setWindowTitle("Add shortcut");
+    if(auto box = qobject_cast<QBoxLayout *>(ui->sequenceEdit->parentWidget()->layout())) {
+        const int at = box->indexOf(ui->sequenceEdit);
+        if(at >= 0)
+            box->insertWidget(at + 1, ui->sequenceEdit->createClickZoneButton(this));
+    }
 
     // Each shortcut belongs to one context. Global bindings run in every screen;
     // view-specific bindings override them for the same key.

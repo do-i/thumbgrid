@@ -24,9 +24,9 @@
         "openSettings": ["$Ctrl+$Shift+Comma"]
     },
     "document": {
-        "nextImage": ["PgDown", "Right"],
+        "nextImage": ["PgDown", "Right", "LMB_RightEdge"],
         "pauseVideo": ["Space"],
-        "prevImage": ["PgUp", "Left"],
+        "prevImage": ["PgUp", "Left", "LMB_LeftEdge"],
         "goUp": ["Backspace"],
         "zoomIn": ["+", "=", "$Ctrl++"],
         "zoomOut": ["-", "$Ctrl+-"],

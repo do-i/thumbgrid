@@ -70,6 +70,8 @@ private:
     void updateVideoControlsVisibility();
 
     bool eventFilter(QObject *object, QEvent *event) override;
+    ActiveHighlightZone clickZoneAt(const QPoint &pos);
+    QString clickZoneAction(ActiveHighlightZone zone, const QString &click);
 
 private slots:
     void onScaleChanged(qreal);

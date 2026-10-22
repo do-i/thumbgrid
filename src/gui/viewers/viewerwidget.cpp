@@ -555,32 +555,50 @@ void ViewerWidget::hideCursor() {
 // we can't process mouse events in the overlay
 // cause they won't propagate to the ImageViewer, only to overlay's container (this widget)
 // so we just grab them before they reach ImageViewer and do the needful
+ActiveHighlightZone ViewerWidget::clickZoneAt(const QPoint &pos) {
+    if(clickZoneOverlay->leftZone().contains(pos))
+        return HIGHLIGHT_LEFT;
+    if(clickZoneOverlay->rightZone().contains(pos))
+        return HIGHLIGHT_RIGHT;
+    return HIGHLIGHT_NONE;
+}
+
+// the action bound to click (e.g. "LMB", "Ctrl+LMB") in zone: the bindings
+// LMB_LeftEdge / LMB_RightEdge, with any modifiers in front
+QString ViewerWidget::clickZoneAction(ActiveHighlightZone zone, const QString &click) {
+    const QString edge = (zone == HIGHLIGHT_LEFT) ? QStringLiteral("_LeftEdge") : QStringLiteral("_RightEdge");
+    return actionManager->actionForShortcut(MODE_DOCUMENT, click + edge);
+}
+
 bool ViewerWidget::eventFilter(QObject *object, QEvent *event) {
-    // catch press and doubleclick
-    // force doubleclick to act as press event for click zones
+    // A left click in an edge zone runs its LMB_LeftEdge / LMB_RightEdge
+    // binding (previous / next file by default) instead of reaching the
+    // picture; a double-click counts as one more click, so quick clicks keep
+    // stepping. Unbound, it is an ordinary click on the picture.
     if(event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick) {
         // disable feature for very small windows
         if(width() <= 250)
             return false;
 
         auto mouseEvent = dynamic_cast<QMouseEvent*>(event);
-        if(mouseEvent->button() != Qt::LeftButton || mouseEvent->modifiers()) {
+        if(mouseEvent->button() != Qt::LeftButton) {
             clickZoneOverlay->disableHighlight();
             return false;
         }
-        if(clickZoneOverlay->leftZone().contains(mouseEvent->pos())) {
+        const ActiveHighlightZone zone = clickZoneAt(mouseEvent->pos());
+        if(zone != HIGHLIGHT_NONE) {
+            QString click = ShortcutBuilder::fromEvent(mouseEvent);
+            click.remove(QStringLiteral("_DoubleClick"));
+            const QString action = clickZoneAction(zone, click);
+            if(action.isEmpty()) {
+                clickZoneOverlay->disableHighlight();
+                return false;
+            }
             clickZoneOverlay->setPressed(true);
-            clickZoneOverlay->highlightLeft();
+            clickZoneOverlay->setHighlightedZone(zone);
             imageViewer.get()->disableDrags();
-            actionManager->invokeAction("prevImage");
+            actionManager->invokeAction(action);
             return true; // do not pass the event to imageViewer
-        }
-        if(clickZoneOverlay->rightZone().contains(mouseEvent->pos())) {
-            clickZoneOverlay->setPressed(true);
-            clickZoneOverlay->highlightRight();
-            imageViewer.get()->disableDrags();
-            actionManager->invokeAction("nextImage");
-            return true;
         }
     }
     // right click produces QEvent::ContextMenu instead of QEvent::MouseButtonPress
@@ -606,14 +624,11 @@ bool ViewerWidget::eventFilter(QObject *object, QEvent *event) {
             auto enterEvent = dynamic_cast<QEnterEvent*>(event);
             mousePos = enterEvent->position().toPoint();
         }
-        if(clickZoneOverlay->leftZone().contains(mousePos)) {
+        // only an edge whose plain click is bound lights up
+        const ActiveHighlightZone zone = clickZoneAt(mousePos);
+        if(zone != HIGHLIGHT_NONE && !clickZoneAction(zone, QStringLiteral("LMB")).isEmpty()) {
             clickZoneOverlay->setPressed(false);
-            clickZoneOverlay->highlightLeft();
-            setCursor(Qt::PointingHandCursor);
-            return true;
-        } else if(clickZoneOverlay->rightZone().contains(mousePos)) {
-            clickZoneOverlay->setPressed(false);
-            clickZoneOverlay->highlightRight();
+            clickZoneOverlay->setHighlightedZone(zone);
             setCursor(Qt::PointingHandCursor);
             return true;
         } else {

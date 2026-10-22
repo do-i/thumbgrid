@@ -428,10 +428,11 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound Space =" << action << "in" << contextToString(ctx);
             break;
         }
-        // Wheel gestures handled in code, ahead of any binding, are now bindings:
-        // right button held + wheel zooms the picture (RMB+WheelUp/Down) and
-        // Ctrl+wheel resizes the grid's thumbnails. Bind the preset's action to
-        // each unless the user already bound that name there.
+        // Mouse gestures handled in code, ahead of any binding, are now bindings:
+        // right button held + wheel zooms the picture (RMB+WheelUp/Down),
+        // Ctrl+wheel resizes the grid's thumbnails, and a click in a clickable
+        // edge changes file (LMB_LeftEdge/RightEdge). Bind the preset's action
+        // to each unless the user already bound that name there.
         const auto bindPresetKey = [this](ViewMode view, const QString &key) {
             if(shortcuts[MODE_GLOBAL].contains(key) || shortcuts[view].contains(key))
                 return;
@@ -448,6 +449,8 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
         bindPresetKey(MODE_DOCUMENT, "RMB+WheelDown");
         bindPresetKey(MODE_FOLDERVIEW, expandModifierTokens("$Ctrl+WheelUp"));
         bindPresetKey(MODE_FOLDERVIEW, expandModifierTokens("$Ctrl+WheelDown"));
+        bindPresetKey(MODE_DOCUMENT, "LMB_LeftEdge");
+        bindPresetKey(MODE_DOCUMENT, "LMB_RightEdge");
         // The grid moved its selection with these keys in code, ahead of any
         // binding; they are now the selection actions. A grid binding on one of
         // them never ran, so replacing it keeps the grid behaving as before.
