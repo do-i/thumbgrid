@@ -28,6 +28,10 @@ void KeySequenceEdit::mouseReleaseEvent(QMouseEvent *e) {
         mFocusClick = false;
         return;
     }
+    if(mWheelWhileRightHeld && e->button() == Qt::RightButton) {
+        mWheelWhileRightHeld = false;
+        return;
+    }
     processEvent(e);
 }
 
@@ -41,6 +45,8 @@ void KeySequenceEdit::focusInEvent(QFocusEvent *e) {
 
 void KeySequenceEdit::wheelEvent(QWheelEvent *e) {
     processEvent(e);
+    if(e->buttons() & Qt::RightButton)
+        mWheelWhileRightHeld = true;
 }
 
 // block native tab-switching so we can use it in shortcuts

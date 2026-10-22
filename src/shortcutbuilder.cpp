@@ -26,6 +26,9 @@ QString ShortcutBuilder::processWheelEvent(QWheelEvent *event) {
         sequence = "WheelDown";
     else if(event->angleDelta().rx() > 0)
         sequence = "WheelUp";
+    // turned with the right button held (zooms the picture by default)
+    if(event->buttons() & Qt::RightButton)
+        sequence.prepend("RMB+");
     sequence.prepend(modifierKeys(event));
     return sequence;
 }

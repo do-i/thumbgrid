@@ -16,7 +16,9 @@
     "document": {
         "nextImage": ["Right"],
         "pauseVideo": ["Space"],
-        "prevImage": ["Backspace", "Left"]
+        "prevImage": ["Backspace", "Left"],
+        "zoomInCursor": ["RMB+WheelUp"],
+        "zoomOutCursor": ["RMB+WheelDown"]
     },
     "grid": {
         "moveFile": ["M"],

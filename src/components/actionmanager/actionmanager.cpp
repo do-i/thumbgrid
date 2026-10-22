@@ -1,5 +1,7 @@
 #include "actionmanager.h"
 
+#include <utility>
+
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -419,6 +421,21 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound Space =" << action << "in" << contextToString(ctx);
             break;
         }
+        // A wheel turned with the right button held zoomed the picture in code,
+        // ahead of any binding; it is now RMB+WheelUp/RMB+WheelDown. Bind the
+        // preset's action to each unless the user already bound that name.
+        for(const QString key : {"RMB+WheelUp", "RMB+WheelDown"}) {
+            if(shortcuts[MODE_GLOBAL].contains(key) || shortcuts[MODE_DOCUMENT].contains(key))
+                continue;
+            for(ViewMode ctx : {MODE_GLOBAL, MODE_DOCUMENT}) {
+                const QString action = defaults[ctx].value(key);
+                if(action.isEmpty())
+                    continue;
+                shortcuts[ctx].insert(key, action);
+                qCDebug(logSettings) << "[actionManager]: bound" << key << "=" << action << "in" << contextToString(ctx);
+                break;
+            }
+        }
         // The grid moved its selection with these keys in code, ahead of any
         // binding; they are now the selection actions. A grid binding on one of
         // them never ran, so replacing it keeps the grid behaving as before.
@@ -603,6 +620,18 @@ void ActionManager::readShortcuts() {
 }
 //------------------------------------------------------------------------------
 bool ActionManager::processEvent(QInputEvent *event) {
+    // A wheel turned with the right button held is a gesture of its own; the
+    // release that ends it is not a right click (which opens the context menu),
+    // even when the gesture's binding has switched the view under the cursor.
+    if(auto wheel = dynamic_cast<QWheelEvent *>(event)) {
+        if(wheel->buttons() & Qt::RightButton)
+            actionManager->rightButtonWheel = true;
+    } else if(auto mouse = dynamic_cast<QMouseEvent *>(event); mouse && mouse->button() == Qt::RightButton) {
+        if(mouse->type() == QEvent::MouseButtonPress)
+            actionManager->rightButtonWheel = false;
+        else if(mouse->type() == QEvent::MouseButtonRelease && std::exchange(actionManager->rightButtonWheel, false))
+            return false;
+    }
     return actionManager->invokeActionForShortcut(actionManager->context, ShortcutBuilder::fromEvent(event));
 }
 //------------------------------------------------------------------------------

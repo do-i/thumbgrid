@@ -8,6 +8,7 @@
 #include <QWheelEvent>
 
 #include "core.h"
+#include "gui/contextmenu.h"
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
 #include "gui/viewers/imageviewerv2.h"
@@ -20,7 +21,8 @@
 // reaching the bottom of a long file used to silently open the next one. The
 // wheel's text scrolling is a binding too (scrollOrPrevImage/scrollOrNextImage),
 // and Ctrl+wheel runs the zoom actions, which resize the text. With image
-// scrolling set to trackpad and wheel, the same actions pan a tall image.
+// scrolling set to trackpad and wheel, the same actions pan a tall image. A
+// wheel turned with the right button held is RMB+WheelUp/RMB+WheelDown.
 
 class ViewerArrowKeysAndWheelScrollTest : public QObject {
     Q_OBJECT
@@ -35,10 +37,11 @@ namespace {
 // sends keys. Synthetic sendEvent() wheel events don't propagate to parents,
 // which is exactly the path that used to turn an unscrollable notch into
 // "next file".
-void wheelNotch(QWidget *target, int angleY, Qt::KeyboardModifiers modifiers = Qt::NoModifier) {
+void wheelNotch(QWidget *target, int angleY, Qt::KeyboardModifiers modifiers = Qt::NoModifier,
+                Qt::MouseButtons buttons = Qt::NoButton) {
     const QPointF local = QRectF(target->rect()).center();
     QWheelEvent event(local, target->mapToGlobal(local), QPoint(0, 0), QPoint(0, angleY),
-                      Qt::NoButton, modifiers, Qt::NoScrollPhase, false);
+                      buttons, modifiers, Qt::NoScrollPhase, false);
     QSpontaneKeyEvent::setSpontaneous(&event);
     qApp->notify(target, &event);
     QCoreApplication::processEvents();
@@ -324,6 +327,54 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
                  "With trackpad-only scrolling the action should change file.");
     settings->setImageScrolling(SCROLL_BY_TRACKPAD_AND_WHEEL);
     settings->sendChangeNotification();
+
+    // A wheel turned with the right button held runs RMB+WheelUp/RMB+WheelDown,
+    // zoom at the cursor by default (which way depends on the fresh profile's
+    // wheel migration), and the release that ends it opens no context menu.
+    QVERIFY(QStringList({"zoomInCursor", "zoomOutCursor"})
+                .contains(actionManager->actionForShortcut(MODE_DOCUMENT, "RMB+WheelUp")));
+    core.loadPath(root.filePath("gallery/a-big.png"));
+    QTRY_VERIFY(window->windowTitle().contains("a-big.png"));
+    QTRY_VERIFY(imageViewer->isDisplaying());
+    QTest::qWait(150);
+    QWidget *viewport = imageViewer->viewport();
+    const auto rightButtonWheel = [&]() {
+        QTest::mousePress(viewport, Qt::RightButton, Qt::NoModifier, viewport->rect().center());
+        wheelNotch(viewport, 120, Qt::NoModifier, Qt::RightButton);
+        QTest::mouseRelease(viewport, Qt::RightButton, Qt::NoModifier, viewport->rect().center());
+        QTest::qWait(150);
+    };
+    const auto contextMenuShown = [&]() {
+        auto menu = window->findChild<ContextMenu *>();
+        return menu && menu->isVisible();
+    };
+    // (a plain right click does open it)
+    QTest::mouseClick(viewport, Qt::RightButton, Qt::NoModifier, viewport->rect().center());
+    QTRY_VERIFY(contextMenuShown());
+    viewerWidget->hideContextMenu();
+    QTRY_VERIFY(!contextMenuShown());
+    const float scale0 = imageViewer->currentScale();
+    rightButtonWheel();
+    QTRY_VERIFY2(imageViewer->currentScale() != scale0, "Right button + wheel should zoom by default.");
+    QVERIFY2(!contextMenuShown(), "Ending a right button + wheel zoom must not open the context menu.");
+    // Bound to another action, it runs that instead.
+    actionManager->addShortcut(MODE_DOCUMENT, "RMB+WheelUp", "nextImage");
+    rightButtonWheel();
+    QTRY_VERIFY2(window->windowTitle().contains("b-long.txt"),
+                 "Right button + wheel bound to nextImage should change file.");
+    QVERIFY(!contextMenuShown());
+    // Unbound, it does nothing.
+    actionManager->removeShortcut(MODE_DOCUMENT, "RMB+WheelUp");
+    actionManager->removeShortcut(MODE_GLOBAL, "RMB+WheelUp");
+    core.loadPath(root.filePath("gallery/a-big.png"));
+    QTRY_VERIFY(window->windowTitle().contains("a-big.png"));
+    QTRY_VERIFY(imageViewer->isDisplaying());
+    QTest::qWait(150);
+    const float scale1 = imageViewer->currentScale();
+    rightButtonWheel();
+    QCOMPARE(imageViewer->currentScale(), scale1);
+    QVERIFY(window->windowTitle().contains("a-big.png"));
+    QVERIFY(!contextMenuShown());
 }
 
 TG_BEHAVIOR_TEST_MAIN(ViewerArrowKeysAndWheelScrollTest)

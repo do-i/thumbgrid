@@ -24,6 +24,9 @@ private:
     QString mSequence;
     // the click that focused the button only starts recording; it is not a binding
     bool mFocusClick = false;
+    // a wheel turned with the right button held records as RMB+Wheel...; the
+    // button's release that follows is part of it, not a binding of its own
+    bool mWheelWhileRightHeld = false;
 
 signals:
     void edited();

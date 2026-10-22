@@ -72,6 +72,8 @@ private:
     ShortcutMap defaults, shortcuts;
     QMap<ViewMode, QHash<QString, QString>> shortcutLookup;
     ViewMode context = MODE_DOCUMENT;
+    // set by a wheel turned with the right button held (RMB+WheelUp/Down)
+    bool rightButtonWheel = false;
 
     static void initDefaults();
     static void initActions();

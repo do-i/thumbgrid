@@ -28,6 +28,8 @@
         "folderView": ["Backspace", "Enter"],
         "zoomIn": ["+", "="],
         "zoomOut": ["-"],
+        "zoomInCursor": ["RMB+WheelUp"],
+        "zoomOutCursor": ["RMB+WheelDown"],
         "rotateLeft": ["L"],
         "rotateRight": ["R"],
         "flipH": ["H"],

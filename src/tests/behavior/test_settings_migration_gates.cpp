@@ -455,6 +455,8 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
                    "Ctrl+arrows should move to the fine scroll actions.") &&
            require(bound("WheelUp", "scrollOrPrevImage") && bound("WheelDown", "scrollOrNextImage"),
                    "The wheel should move from prev/next to the scroll-or-change-file actions.") &&
+           require(bound("RMB+WheelUp", "zoomInCursor") && bound("RMB+WheelDown", "zoomOutCursor"),
+                   "The right button + wheel zoom should become bindings.") &&
            require(bound("PgUp", "prevImage") && bound("XButton2", "nextImage") && bound("+", "zoomIn"),
                    "The user's other keys for those actions must survive.");
 }
@@ -558,6 +560,7 @@ bool arrowKeyMigrationKeepsCustomBindings() {
     document.insert("crop", QJsonArray{QStringLiteral("Left")});
     document.insert("rotateRight", QJsonArray{QStringLiteral("Ctrl+Right")});
     document.insert("zoomOut", QJsonArray{QStringLiteral("WheelDown")});
+    document.insert("rotateLeft", QJsonArray{QStringLiteral("RMB+WheelDown")});
     if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
         return false;
 
@@ -571,6 +574,8 @@ bool arrowKeyMigrationKeepsCustomBindings() {
                    "A customised Ctrl+Right must survive the upgrade.") &&
            require(actionManager->actionForShortcut(MODE_DOCUMENT, "WheelDown") == QLatin1String("zoomOut"),
                    "A customised WheelDown must survive the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "RMB+WheelDown") == QLatin1String("rotateLeft"),
+                   "A customised RMB+WheelDown must survive the upgrade.") &&
            require(actionManager->actionForShortcut(MODE_DOCUMENT, "Right") == QLatin1String("scrollRight"),
                    "A free Right should still get its scroll action.") &&
            require(actionManager->actionForShortcut(MODE_DOCUMENT, "WheelUp") == QLatin1String("scrollOrPrevImage"),

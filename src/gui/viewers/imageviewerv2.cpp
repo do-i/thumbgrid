@@ -629,14 +629,13 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event) {
         return;
     }
 
+    // RMB+WheelUp/RMB+WheelDown run their binding (zoom at the cursor by
+    // default); either way the right button's release then doesn't open the
+    // context menu
     if(event->buttons() & Qt::RightButton) {
         event->accept();
         mouseInteraction = MOUSE_WHEEL_ZOOM;
-        int angleDelta = event->angleDelta().ry();
-        if(angleDelta > 0)
-            zoomInCursor();
-        else if(angleDelta < 0)
-            zoomOutCursor();
+        actionManager->processEvent(event);
     } else if(event->modifiers() == Qt::NoModifier) {
         if(!isWheelScroll(event)) {
             trackpadScroll(event);

@@ -187,14 +187,16 @@
             "I"
         ],
         "zoomInCursor": [
-            "$Ctrl+WheelUp"
+            "$Ctrl+WheelUp",
+            "RMB+WheelUp"
         ],
         "zoomOut": [
             "$Ctrl+-",
             "O"
         ],
         "zoomOutCursor": [
-            "$Ctrl+WheelDown"
+            "$Ctrl+WheelDown",
+            "RMB+WheelDown"
         ]
     },
     "grid": {

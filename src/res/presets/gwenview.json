@@ -30,6 +30,8 @@
         "goUp": ["Backspace"],
         "zoomIn": ["+", "=", "$Ctrl++"],
         "zoomOut": ["-", "$Ctrl+-"],
+        "zoomInCursor": ["RMB+WheelUp"],
+        "zoomOutCursor": ["RMB+WheelDown"],
         "fitWindow": ["1"],
         "fitWidth": ["2"],
         "fitNormal": ["3"],

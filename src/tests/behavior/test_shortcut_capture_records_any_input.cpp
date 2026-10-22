@@ -30,9 +30,9 @@ void pressNamedKey(QWidget *target, const QString &name, Qt::Key key, Qt::Keyboa
     QCoreApplication::processEvents();
 }
 
-void wheelNotch(QWidget *target, int angleY) {
+void wheelNotch(QWidget *target, int angleY, Qt::MouseButtons buttons = Qt::NoButton) {
     const QPointF local = QRectF(target->rect()).center();
-    QWheelEvent wheel(local, target->mapToGlobal(local), QPoint(), QPoint(0, angleY), Qt::NoButton,
+    QWheelEvent wheel(local, target->mapToGlobal(local), QPoint(), QPoint(0, angleY), buttons,
                       Qt::NoModifier, Qt::NoScrollPhase, false);
     QSpontaneKeyEvent::setSpontaneous(&wheel);
     qApp->notify(target, &wheel);
@@ -75,6 +75,15 @@ void ShortcutCaptureTest::recordsKeysClicksAndWheelButNotTheFocusingClick() {
 
     QTest::mouseDClick(edit, Qt::LeftButton);
     QCOMPARE(recorded.last(), QStringLiteral("LMB_DoubleClick"));
+
+    // a wheel turned with the right button held records as RMB+WheelUp, and the
+    // release that ends the gesture doesn't replace it with a plain RMB
+    QTest::mousePress(edit, Qt::RightButton);
+    wheelNotch(edit, 120, Qt::RightButton);
+    QTest::mouseRelease(edit, Qt::RightButton);
+    QCOMPARE(edit->text(), QStringLiteral("RMB+WheelUp"));
+    QTest::mouseClick(edit, Qt::RightButton);
+    QCOMPARE(edit->text(), QStringLiteral("RMB"));
 
     // a right click can start recording too, and is not recorded either
     ok->setFocus();
