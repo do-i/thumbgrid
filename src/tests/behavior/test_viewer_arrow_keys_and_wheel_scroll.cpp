@@ -17,7 +17,8 @@
 // Arrow keys scroll text / pan a zoomed image (Ctrl+arrow in fine steps) through
 // the configurable scroll actions, and
 // scrolling stops at the end instead of jumping to the neighbouring file -
-// reaching the bottom of a long file used to silently open the next one.
+// reaching the bottom of a long file used to silently open the next one. The
+// wheel's text scrolling is a binding too (scrollOrPrevImage/scrollOrNextImage).
 
 class ViewerArrowKeysAndWheelScrollTest : public QObject {
     Q_OBJECT
@@ -216,6 +217,51 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
     QTest::keyClick(viewerWidget, Qt::Key_Left);
     QTest::qWait(200);
     QVERIFY2(window->windowTitle().contains("d-small.png"), "An unbound Left must not change file.");
+
+    // The wheel's default bindings are the scroll-or-change-file actions (which
+    // wheel direction gets which depends on the fresh profile's migration).
+    const QStringList wheelActions{"scrollOrPrevImage", "scrollOrNextImage"};
+    const QString wheelDownAction = actionManager->actionForShortcut(MODE_DOCUMENT, "WheelDown");
+    QVERIFY(wheelActions.contains(wheelDownAction));
+    QVERIFY(wheelActions.contains(actionManager->actionForShortcut(MODE_DOCUMENT, "WheelUp")));
+
+    // Run from a key, the action scrolls a long text file by wheel-lines...
+    core.loadPath(root.filePath("gallery/b-long.txt"));
+    QTRY_VERIFY(window->windowTitle().contains("b-long.txt"));
+    QTRY_VERIFY(tvs->maximum() > 10);
+    QCOMPARE(tvs->value(), 0);
+    actionManager->invokeAction("scrollOrNextImage");
+    QCOMPARE(tvs->value(), QApplication::wheelScrollLines());
+    // ...and at the end it stays put rather than opening the next file.
+    tvs->setValue(tvs->maximum());
+    actionManager->invokeAction("scrollOrNextImage");
+    QTest::qWait(100);
+    QCOMPARE(tvs->value(), tvs->maximum());
+    QVERIFY(window->windowTitle().contains("b-long.txt"));
+
+    // Bound to another action, the wheel runs it even while the text can scroll
+    // (the text view used to scroll it in code, ahead of any binding).
+    tvs->setValue(0);
+    actionManager->addShortcut(MODE_DOCUMENT, "WheelDown", "nextImage");
+    wheelNotch(textEdit->viewport(), -120);
+    QTRY_VERIFY2(window->windowTitle().contains("c-short.txt"),
+                 "A wheel bound to nextImage should change file over a long text file.");
+
+    // Unbound, the wheel still scrolls a long text file but changes nothing else.
+    actionManager->removeShortcut(MODE_DOCUMENT, "WheelDown");
+    QVERIFY(actionManager->actionForShortcut(MODE_DOCUMENT, "WheelDown").isEmpty());
+    core.loadPath(root.filePath("gallery/b-long.txt"));
+    QTRY_VERIFY(window->windowTitle().contains("b-long.txt"));
+    QTRY_VERIFY(tvs->maximum() > 10);
+    wheelNotch(textEdit->viewport(), -120);
+    QVERIFY2(tvs->value() > 0, "An unbound wheel should still scroll a long text file.");
+    core.loadPath(root.filePath("gallery/c-short.txt"));
+    QTRY_VERIFY(window->windowTitle().contains("c-short.txt"));
+    QTRY_COMPARE(tvs->maximum(), 0);
+    wheelNotch(textEdit->viewport(), -120);
+    QTest::qWait(200);
+    QVERIFY2(window->windowTitle().contains("c-short.txt"), "An unbound wheel must not change file.");
+    actionManager->addShortcut(MODE_DOCUMENT, "WheelDown", wheelDownAction);
 }
 
 TG_BEHAVIOR_TEST_MAIN(ViewerArrowKeysAndWheelScrollTest)

@@ -115,7 +115,6 @@
         ],
         "nextImage": [
             "PgDown",
-            "WheelDown",
             "XButton2"
         ],
         "pauseVideo": [
@@ -126,7 +125,6 @@
         ],
         "prevImage": [
             "PgUp",
-            "WheelUp",
             "XButton1"
         ],
         "reloadImage": [
@@ -155,6 +153,12 @@
         ],
         "scrollLeftFine": [
             "$Ctrl+Left"
+        ],
+        "scrollOrNextImage": [
+            "WheelDown"
+        ],
+        "scrollOrPrevImage": [
+            "WheelUp"
         ],
         "scrollRight": [
             "Right"

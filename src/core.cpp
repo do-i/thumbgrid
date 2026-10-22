@@ -193,6 +193,8 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::scrollDownFine, mw, &MW::scrollDownFine);
     connect(actionManager, &ActionManager::scrollLeftFine, mw, &MW::scrollLeftFine);
     connect(actionManager, &ActionManager::scrollRightFine, mw, &MW::scrollRightFine);
+    connect(actionManager, &ActionManager::scrollOrPrevImage, mw, &MW::scrollOrPrevImage);
+    connect(actionManager, &ActionManager::scrollOrNextImage, mw, &MW::scrollOrNextImage);
     connect(actionManager, &ActionManager::resize, this, &Core::showResizeDialog);
     connect(actionManager, &ActionManager::flipH, this, &Core::flipH);
     connect(actionManager, &ActionManager::flipV, this, &Core::flipV);

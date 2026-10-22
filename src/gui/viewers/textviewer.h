@@ -17,9 +17,8 @@ public:
     void clear();
     // scrolls by text lines; clamps at the start/end of the file
     void scrollLines(int lines);
-
-protected:
-    void wheelEvent(QWheelEvent *event) override;
+    // true when the file is longer than the view
+    bool canScroll() const;
 
 private slots:
     void readSettings();

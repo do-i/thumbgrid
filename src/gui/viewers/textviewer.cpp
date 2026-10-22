@@ -7,6 +7,7 @@
 #include <QStringDecoder>
 #include <QWheelEvent>
 
+#include "components/actionmanager/actionmanager.h"
 #include "settings.h"
 
 #ifdef USE_KSYNTAXHIGHLIGHTING
@@ -17,6 +18,35 @@
 #else
 #include "textsyntaxhighlighter.h"
 #endif
+
+namespace {
+
+// While the file can scroll, the wheel scrolls it here (keeping smooth,
+// high-resolution and trackpad scrolling) and stops at its ends instead of
+// passing on, so the end of a long file doesn't open the next one. This stands
+// in for the wheel's scrollOrPrevImage/scrollOrNextImage actions, so it only
+// happens while the wheel is bound to one of them or to nothing; any other
+// binding gets the wheel instead. A file that fits passes the wheel on.
+class TextEdit : public QPlainTextEdit {
+public:
+    using QPlainTextEdit::QPlainTextEdit;
+
+protected:
+    void wheelEvent(QWheelEvent *event) override {
+        if(event->modifiers() == Qt::NoModifier) {
+            const QString action = actionManager->actionForShortcut(MODE_DOCUMENT, ShortcutBuilder::fromEvent(event));
+            if(!action.isEmpty() && action != "scrollOrPrevImage" && action != "scrollOrNextImage") {
+                event->ignore();
+                return;
+            }
+        }
+        QPlainTextEdit::wheelEvent(event);
+        if(event->modifiers() == Qt::NoModifier && verticalScrollBar()->maximum() > 0)
+            event->accept();
+    }
+};
+
+} // namespace
 
 TextViewer::TextViewer(QWidget *parent) : QWidget(parent) {
     setAccessibleName("textViewer");
@@ -30,7 +60,7 @@ TextViewer::TextViewer(QWidget *parent) : QWidget(parent) {
     noticeLabel->hide();
     layout.addWidget(noticeLabel);
 
-    textEdit = new QPlainTextEdit(this);
+    textEdit = new TextEdit(this);
     textEdit->setReadOnly(true);
     textEdit->setFrameShape(QFrame::NoFrame);
     // keep keyboard focus with the main window so all navigation shortcuts
@@ -132,15 +162,6 @@ void TextViewer::scrollLines(int lines) {
     vs->setValue(vs->value() + lines);
 }
 
-// The text edit ignores wheel events once it can't scroll any further and they
-// propagate here. Swallow them so reaching the end of a long file doesn't jump
-// to the next one; a file that fits entirely still passes the wheel through.
-void TextViewer::wheelEvent(QWheelEvent *event) {
-    if(event->angleDelta().y() != 0 && event->modifiers() == Qt::NoModifier &&
-       textEdit->verticalScrollBar()->maximum() > 0)
-    {
-        event->accept();
-        return;
-    }
-    event->ignore();
+bool TextViewer::canScroll() const {
+    return textEdit->verticalScrollBar()->maximum() > 0;
 }

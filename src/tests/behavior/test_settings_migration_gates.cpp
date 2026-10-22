@@ -432,8 +432,8 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
     conf.sync();
 
     QJsonObject document;
-    document.insert("prevImage", QJsonArray{QStringLiteral("Left"), QStringLiteral("PgUp")});
-    document.insert("nextImage", QJsonArray{QStringLiteral("Right")});
+    document.insert("prevImage", QJsonArray{QStringLiteral("Left"), QStringLiteral("PgUp"), QStringLiteral("WheelUp")});
+    document.insert("nextImage", QJsonArray{QStringLiteral("Right"), QStringLiteral("WheelDown"), QStringLiteral("XButton2")});
     document.insert("seekVideoBackward", QJsonArray{QStringLiteral("Ctrl+Left")});
     document.insert("zoomIn", QJsonArray{QStringLiteral("Ctrl+Up"), QStringLiteral("+")});
     if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
@@ -453,7 +453,9 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
            require(bound("Ctrl+Left", "scrollLeftFine") && bound("Ctrl+Right", "scrollRightFine") &&
                    bound("Ctrl+Up", "scrollUpFine") && bound("Ctrl+Down", "scrollDownFine"),
                    "Ctrl+arrows should move to the fine scroll actions.") &&
-           require(bound("PgUp", "prevImage") && bound("+", "zoomIn"),
+           require(bound("WheelUp", "scrollOrPrevImage") && bound("WheelDown", "scrollOrNextImage"),
+                   "The wheel should move from prev/next to the scroll-or-change-file actions.") &&
+           require(bound("PgUp", "prevImage") && bound("XButton2", "nextImage") && bound("+", "zoomIn"),
                    "The user's other keys for those actions must survive.");
 }
 
@@ -555,6 +557,7 @@ bool arrowKeyMigrationKeepsCustomBindings() {
     QJsonObject document;
     document.insert("crop", QJsonArray{QStringLiteral("Left")});
     document.insert("rotateRight", QJsonArray{QStringLiteral("Ctrl+Right")});
+    document.insert("zoomOut", QJsonArray{QStringLiteral("WheelDown")});
     if(!seedDocumentAndGridShortcuts(document, QJsonObject()))
         return false;
 
@@ -566,8 +569,12 @@ bool arrowKeyMigrationKeepsCustomBindings() {
                    "A customised Left must survive the upgrade.") &&
            require(actionManager->actionForShortcut(MODE_DOCUMENT, "Ctrl+Right") == QLatin1String("rotateRight"),
                    "A customised Ctrl+Right must survive the upgrade.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "WheelDown") == QLatin1String("zoomOut"),
+                   "A customised WheelDown must survive the upgrade.") &&
            require(actionManager->actionForShortcut(MODE_DOCUMENT, "Right") == QLatin1String("scrollRight"),
-                   "A free Right should still get its scroll action.");
+                   "A free Right should still get its scroll action.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "WheelUp") == QLatin1String("scrollOrPrevImage"),
+                   "A free WheelUp should still get its scroll action.");
 }
 
 // The grid's hard-coded Enter / Backspace / Ctrl+A / "/" became actions: an

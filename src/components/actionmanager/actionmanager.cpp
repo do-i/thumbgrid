@@ -354,11 +354,15 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
     // Arrows became scroll/pan actions (Ctrl+arrow: fine steps), replacing the
     // old prev/next, zoom and video-seek defaults on those keys; the scroll
     // actions fall back to prev/next and seeking when there is nothing to scroll.
-    // Follow the active preset: move a key over only when the preset now binds it
-    // to a scroll action and the user still has it unbound or on the old default.
+    // The wheel likewise became scrollOrPrevImage/scrollOrNextImage: the text
+    // view scrolled it in code, ahead of any binding, and prev/next stays their
+    // fallback. Follow the active preset: move a key over only when the preset
+    // now binds it to a scroll action and the user still has it unbound or on
+    // the old default.
     if(lastVer < QVersionNumber(2026,10,3)) {
         const QMap<QString, QString> oldDefaults{
             {"Left", "prevImage"}, {"Right", "nextImage"},
+            {"WheelUp", "prevImage"}, {"WheelDown", "nextImage"},
             {expandModifierTokens("$Ctrl+Up"), "zoomIn"},
             {expandModifierTokens("$Ctrl+Down"), "zoomOut"},
             {expandModifierTokens("$Ctrl+Left"), "seekVideoBackward"},

@@ -113,4 +113,6 @@ void Actions::init() {
     mActions.insert("selectPageDown", QVersionNumber(2026,10,3));
     mActions.insert("selectFirst", QVersionNumber(2026,10,3));
     mActions.insert("selectLast", QVersionNumber(2026,10,3));
+    mActions.insert("scrollOrPrevImage", QVersionNumber(2026,10,3));
+    mActions.insert("scrollOrNextImage", QVersionNumber(2026,10,3));
 }

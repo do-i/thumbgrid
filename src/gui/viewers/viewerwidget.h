@@ -42,6 +42,7 @@ public:
 
 private:
     void scrollView(int dx, int dy, bool fine);
+    void scrollOrChangeFile(int dy);
     QVBoxLayout layout;
     std::unique_ptr<ImageViewerV2> imageViewer;
     std::unique_ptr<VideoPlayerInitProxy> videoPlayer;
@@ -108,6 +109,10 @@ public slots:
     void scrollDownFine();
     void scrollLeftFine();
     void scrollRightFine();
+    // The wheel's actions: scroll a text file that can scroll, stopping at its
+    // ends; anywhere else go to the previous/next file.
+    void scrollOrPrevImage();
+    void scrollOrNextImage();
 
     bool showVideo(QString file);
     bool showText(const QString& file);

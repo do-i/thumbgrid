@@ -121,14 +121,12 @@
             "$Shift+Right"
         ],
         "nextImage": [
-            "WheelDown",
             "XButton2"
         ],
         "prevDirectory": [
             "$Shift+Left"
         ],
         "prevImage": [
-            "WheelUp",
             "XButton1"
         ],
         "print": [
@@ -163,6 +161,12 @@
         ],
         "scrollLeftFine": [
             "$Ctrl+Left"
+        ],
+        "scrollOrNextImage": [
+            "WheelDown"
+        ],
+        "scrollOrPrevImage": [
+            "WheelUp"
         ],
         "scrollRight": [
             "Right"

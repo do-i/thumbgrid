@@ -104,6 +104,8 @@ signals:
     void scrollDownFine();
     void scrollLeftFine();
     void scrollRightFine();
+    void scrollOrPrevImage();
+    void scrollOrNextImage();
     void openSelected();
     void selectAll();
     void startSearch();
