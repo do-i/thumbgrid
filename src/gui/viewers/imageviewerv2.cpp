@@ -1,5 +1,6 @@
 #include "imageviewerv2.h"
 
+#include "components/actionmanager/actionmanager.h"
 #include "platform/platformdesktop.h"
 
 #include "utils/imagelib.h"
@@ -639,7 +640,9 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event) {
     } else if(event->modifiers() == Qt::NoModifier) {
         if(!isWheelScroll(event)) {
             trackpadScroll(event);
-        } else if(settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL) {
+        } else if(settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL &&
+                  actionManager->viewerHandlesWheel(event)) {
+            // stands in for the wheel's scrollOrPrevImage/scrollOrNextImage
             wheelScroll(event);
         } else {
             event->ignore();

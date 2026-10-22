@@ -44,6 +44,11 @@ public:
     void resetDefaults(ViewMode context);
     void resetDefaults(const QString& action);
     QString actionForShortcut(ViewMode context, const QString &keys);
+    // Whether a viewer may scroll the picture view's wheel itself (keeping smooth
+    // and trackpad scrolling) rather than leave it to the binding: true while an
+    // unmodified wheel is bound to scrollOrPrevImage/scrollOrNextImage, or the
+    // wheel is unbound.
+    bool viewerHandlesWheel(QWheelEvent *event);
     const QString shortcutForAction(ViewMode context, const QString& action);
     // Returns every shortcut bound to action across all contexts (used for key filters).
     const QStringList shortcutsForAction(const QString& action);

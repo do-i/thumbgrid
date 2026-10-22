@@ -492,6 +492,14 @@ QString ActionManager::actionForShortcut(ViewMode context, const QString &keys) 
     return actionManager->lookupActionForShortcut(context, keys);
 }
 
+bool ActionManager::viewerHandlesWheel(QWheelEvent *event) {
+    const QString action = lookupActionForShortcut(MODE_DOCUMENT, ShortcutBuilder::fromEvent(event));
+    if(action.isEmpty())
+        return true;
+    return event->modifiers() == Qt::NoModifier &&
+           (action == "scrollOrPrevImage" || action == "scrollOrNextImage");
+}
+
 // returns first shortcut that is found in the given context
 const QString ActionManager::shortcutForAction(ViewMode context, const QString& action) {
     const QString contextKey = shortcuts[context].key(action, "");

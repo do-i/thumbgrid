@@ -19,7 +19,8 @@
 // scrolling stops at the end instead of jumping to the neighbouring file -
 // reaching the bottom of a long file used to silently open the next one. The
 // wheel's text scrolling is a binding too (scrollOrPrevImage/scrollOrNextImage),
-// and Ctrl+wheel runs the zoom actions, which resize the text.
+// and Ctrl+wheel runs the zoom actions, which resize the text. With image
+// scrolling set to trackpad and wheel, the same actions pan a tall image.
 
 class ViewerArrowKeysAndWheelScrollTest : public QObject {
     Q_OBJECT
@@ -289,6 +290,40 @@ void ViewerArrowKeysAndWheelScrollTest::arrowKeysAndWheelScrollWithinTheCurrentF
     wheelNotch(textEdit->viewport(), 120, Qt::ControlModifier);
     QCOMPARE(textEdit->font().pointSizeF(), size1 + 1);
     QVERIFY(window->windowTitle().contains("c-short.txt"));
+
+    // A tall image pans on the wheel only while the wheel is bound to the scroll
+    // actions; bound to another action, that action runs (it used to be
+    // swallowed by the image viewer while the image could pan).
+    core.loadPath(root.filePath("gallery/a-big.png"));
+    QTRY_VERIFY(window->windowTitle().contains("a-big.png"));
+    QTRY_VERIFY(imageViewer->isDisplaying());
+    QTest::qWait(150);
+    QVERIFY(imageViewer->scaledRectR().height() > imageViewer->viewport()->height());
+    actionManager->addShortcut(MODE_DOCUMENT, "WheelUp", "nextImage");
+    const int top0 = imageViewer->scaledRectR().top();
+    wheelNotch(imageViewer->viewport(), 120);
+    QTRY_VERIFY2(window->windowTitle().contains("b-long.txt"),
+                 "A wheel bound to nextImage should change file over a tall image.");
+    actionManager->addShortcut(MODE_DOCUMENT, "WheelUp",
+                               wheelDownAction == "scrollOrNextImage" ? "scrollOrPrevImage" : "scrollOrNextImage");
+
+    // Run from a key, the action pans the tall image instead of changing file...
+    core.loadPath(root.filePath("gallery/a-big.png"));
+    QTRY_VERIFY(window->windowTitle().contains("a-big.png"));
+    QTRY_VERIFY(imageViewer->isDisplaying());
+    QTest::qWait(150);
+    QTRY_COMPARE(imageViewer->scaledRectR().top(), top0);
+    actionManager->invokeAction("scrollOrNextImage");
+    QTRY_VERIFY(imageViewer->scaledRectR().top() < top0);
+    QVERIFY(window->windowTitle().contains("a-big.png"));
+    // ...but with the wheel set to change file, it changes file.
+    settings->setImageScrolling(SCROLL_BY_TRACKPAD);
+    settings->sendChangeNotification();
+    actionManager->invokeAction("scrollOrNextImage");
+    QTRY_VERIFY2(window->windowTitle().contains("b-long.txt"),
+                 "With trackpad-only scrolling the action should change file.");
+    settings->setImageScrolling(SCROLL_BY_TRACKPAD_AND_WHEEL);
+    settings->sendChangeNotification();
 }
 
 TG_BEHAVIOR_TEST_MAIN(ViewerArrowKeysAndWheelScrollTest)

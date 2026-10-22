@@ -743,13 +743,18 @@ void ViewerWidget::scrollOrPrevImage() { scrollOrChangeFile(-1); }
 void ViewerWidget::scrollOrNextImage() { scrollOrChangeFile( 1); }
 
 // A text file that can scroll scrolls by wheel-lines and stops at its ends, so
-// the end of a long file doesn't open the next one; anything else changes file.
-// Over the text itself the text edit does the wheel scrolling (see TextViewer).
+// the end of a long file doesn't open the next one; with image scrolling set to
+// trackpad and wheel, an image taller than the window pans the same way.
+// Anything else changes file. Over the text or image itself the viewer does the
+// wheel scrolling (see TextViewer and ImageViewerV2::wheelEvent).
 void ViewerWidget::scrollOrChangeFile(int dy) {
     if(currentWidget == TEXTVIEWER && textViewer->canScroll()) {
         textViewer->scrollLines(dy * QApplication::wheelScrollLines());
         return;
     }
+    if(currentWidget == IMAGEVIEWER && mInteractionEnabled && imageViewer->isDisplaying() &&
+       settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL && imageViewer->keyPan(0, dy, false))
+        return;
     actionManager->invokeAction((dy < 0) ? "prevImage" : "nextImage");
 }
 

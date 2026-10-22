@@ -35,9 +35,7 @@ public:
 
 protected:
     void wheelEvent(QWheelEvent *event) override {
-        const QString action = actionManager->actionForShortcut(MODE_DOCUMENT, ShortcutBuilder::fromEvent(event));
-        const bool scrollAction = action == "scrollOrPrevImage" || action == "scrollOrNextImage";
-        if(!action.isEmpty() && !(scrollAction && event->modifiers() == Qt::NoModifier)) {
+        if(!actionManager->viewerHandlesWheel(event)) {
             event->ignore();
             return;
         }
