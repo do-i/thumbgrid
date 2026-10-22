@@ -176,6 +176,8 @@ void migrateLegacyThemeConf(const QString &confDir, QSettings *themeConf) {
 QString shortcutContextToken(ViewMode context) {
     if(context == MODE_GLOBAL)
         return QStringLiteral("global");
+    if(context == MODE_COPYMOVE)
+        return QStringLiteral("copyMove");
     return context == MODE_FOLDERVIEW ? QStringLiteral("grid")
                                       : QStringLiteral("document");
 }
@@ -183,6 +185,8 @@ QString shortcutContextToken(ViewMode context) {
 ViewMode shortcutContextFromToken(const QString &token) {
     if(token == QLatin1String("global"))
         return MODE_GLOBAL;
+    if(token == QLatin1String("copyMove"))
+        return MODE_COPYMOVE;
     return (token == QLatin1String("grid") || token == QLatin1String("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -192,7 +196,8 @@ bool isShortcutContextToken(const QString &token) {
     return token == QLatin1String("grid") ||
            token == QLatin1String("folderview") ||
            token == QLatin1String("global") ||
-           token == QLatin1String("document");
+           token == QLatin1String("document") ||
+           token == QLatin1String("copyMove");
 }
 
 QStringList normalizedShortcutKeys(QStringList keys) {

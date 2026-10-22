@@ -460,6 +460,9 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
            require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Ctrl+WheelUp") == QLatin1String("zoomIn") &&
                    actionManager->actionForShortcut(MODE_FOLDERVIEW, "Ctrl+WheelDown") == QLatin1String("zoomOut"),
                    "The grid's Ctrl+wheel thumbnail resize should become bindings.") &&
+           require(actionManager->actionForShortcut(MODE_COPYMOVE, "1") == QLatin1String("sendToFolder1") &&
+                   actionManager->actionForShortcut(MODE_COPYMOVE, "9") == QLatin1String("sendToFolder9"),
+                   "The Copy / Move overlay's digits should become bindings.") &&
            require(bound("PgUp", "prevImage") && bound("XButton2", "nextImage") && bound("+", "zoomIn"),
                    "The user's other keys for those actions must survive.");
 }

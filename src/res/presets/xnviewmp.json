@@ -60,5 +60,16 @@
         "selectLast": ["End"],
         "zoomIn": ["$Ctrl+WheelUp"],
         "zoomOut": ["$Ctrl+WheelDown"]
+    },
+    "copyMove": {
+        "sendToFolder1": ["1"],
+        "sendToFolder2": ["2"],
+        "sendToFolder3": ["3"],
+        "sendToFolder4": ["4"],
+        "sendToFolder5": ["5"],
+        "sendToFolder6": ["6"],
+        "sendToFolder7": ["7"],
+        "sendToFolder8": ["8"],
+        "sendToFolder9": ["9"]
     }
 }

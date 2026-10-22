@@ -919,6 +919,11 @@ void MW::hideCropPanel() {
     activeSidePanel = SIDEPANEL_NONE;
 }
 
+void MW::sendToCopyFolder(int slot) {
+    if(copyOverlay && copyOverlay->isVisible())
+        copyOverlay->sendToFolder(slot);
+}
+
 void MW::triggerCopyOverlay() {
     if(!viewerWidget->isDisplaying())
         return;

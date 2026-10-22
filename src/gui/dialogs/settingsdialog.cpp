@@ -1201,6 +1201,8 @@ namespace {
 QString contextLabel(ViewMode context) {
     if(context == MODE_GLOBAL)
         return QObject::tr("Global");
+    if(context == MODE_COPYMOVE)
+        return QObject::tr("Copy / Move");
     return (context == MODE_FOLDERVIEW) ? QObject::tr("Grid") : QObject::tr("Document");
 }
 // Script actions are stored as "s:<name>"; never show the raw id to the user.
@@ -1265,6 +1267,8 @@ QIcon SettingsDialog::shortcutContextIcon(ViewMode context) const {
         name = QStringLiteral("folderview16");
     else if(context == MODE_DOCUMENT)
         name = QStringLiteral("document-view16");
+    else if(context == MODE_COPYMOVE)
+        name = QStringLiteral("copy16");
     else
         name = QStringLiteral("global16");
 
@@ -1319,7 +1323,8 @@ QString SettingsDialog::draftActionForShortcut(ViewMode context, const QString &
     if(key.isEmpty())
         return QString();
     const QString contextAction = mShortcutDraftLookup.value(context).value(key);
-    if(!contextAction.isEmpty() || context == MODE_GLOBAL)
+    // Global bindings don't reach the Copy / Move overlay's own keys
+    if(!contextAction.isEmpty() || context == MODE_GLOBAL || context == MODE_COPYMOVE)
         return contextAction;
     return mShortcutDraftLookup.value(MODE_GLOBAL).value(key);
 }
@@ -1398,8 +1403,8 @@ void SettingsDialog::updateShortcutsTable() {
 
     const QBrush disabledBrush = palette().brush(QPalette::Disabled, QPalette::Text);
     // Contexts are listed in scope order - widest first - so the default sort by
-    // the Context column reads Global, Grid, Document.
-    const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT};
+    // the Context column reads Global, Grid, Document, Copy / Move.
+    const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT, MODE_COPYMOVE};
     for(int order = 0; order < contexts.size(); order++) {
         const ViewMode context = contexts.at(order);
         const ActionManager::ContextMap defaults = actionManager->allDefaultShortcuts().value(context);
@@ -1803,10 +1808,12 @@ void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
 
     QMenu *moveMenu = menu.addMenu(tr("Move to"));
     QMenu *copyMenu = menu.addMenu(tr("Copy to"));
-    if(candidateShortcuts(src, action).isEmpty()) {
+    if(candidateShortcuts(src, action).isEmpty() || src == MODE_COPYMOVE) {
         // Keep the entries on screen but disabled, so the reason is visible
-        // rather than the commands just being absent.
-        const QString reason = tr("No keys bound in %1").arg(contextLabel(src));
+        // rather than the commands just being absent. Copy / Move keys only
+        // work while that overlay is open, so they have nowhere to go.
+        const QString reason = (src == MODE_COPYMOVE) ? tr("Only used in the Copy / Move overlay")
+                                                      : tr("No keys bound in %1").arg(contextLabel(src));
         moveMenu->addAction(reason)->setEnabled(false);
         copyMenu->addAction(reason)->setEnabled(false);
     } else {

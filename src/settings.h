@@ -78,7 +78,9 @@ enum ImageScrolling : std::uint8_t {
 enum ViewMode : std::uint8_t {
     MODE_DOCUMENT,
     MODE_FOLDERVIEW,
-    MODE_GLOBAL
+    MODE_GLOBAL,
+    // shortcut context only: keys of the open Copy/Move overlay
+    MODE_COPYMOVE
 };
 
 enum FolderEndAction : std::uint8_t {

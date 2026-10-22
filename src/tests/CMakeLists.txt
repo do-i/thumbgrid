@@ -162,6 +162,14 @@ add_test(
     COMMAND thumbgrid_other_file_types_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_copy_overlay_keys_test
+    behavior/test_copy_overlay_keys_are_bindings.cpp
+)
+add_test(
+    NAME "Copy / Move overlay folder keys are bindings"
+    COMMAND thumbgrid_copy_overlay_keys_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_grid_navigation_keys_test
     behavior/test_grid_navigation_keys_are_actions.cpp
 )

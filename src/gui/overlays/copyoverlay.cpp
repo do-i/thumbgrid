@@ -14,8 +14,6 @@ CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent) :
     ui->headerLabel->setText(tr("Copy to..."));
     mode = OVERLAY_COPY;
 
-    createShortcuts();
-
     paths = settings->savedPaths();
     if(paths.count() < maxPathCount)
         createDefaultPaths();
@@ -35,6 +33,7 @@ CopyOverlay::~CopyOverlay() {
 }
 
 void CopyOverlay::show() {
+    updateShortcutLabels();
     OverlayWidget::show();
     setFocus();
 }
@@ -73,16 +72,24 @@ void CopyOverlay::createPathWidgets() {
     for(int i = 0; i < count; i++) {
         PathSelectorMenuItem *item = new PathSelectorMenuItem(this);
         item->setDirectory(paths.at(i));
-        item->setShortcutText(shortcuts.key(i));
         connect(item, &PathSelectorMenuItem::directorySelected, this, &CopyOverlay::requestFileOperation);
         pathWidgets.append(item);
         ui->pathSelectorsLayout->addWidget(item);
     }
+    updateShortcutLabels();
 }
 
-void CopyOverlay::createShortcuts() {
-    for(int i = 0; i < maxPathCount; i++)
-        shortcuts.insert(QString::number(i + 1), i);
+// each folder shows the key bound to its sendToFolder action
+void CopyOverlay::updateShortcutLabels() {
+    for(int i = 0; i < pathWidgets.count(); i++) {
+        const QString action = QStringLiteral("sendToFolder%1").arg(i + 1);
+        pathWidgets.at(i)->setShortcutText(actionManager->shortcutForAction(MODE_COPYMOVE, action));
+    }
+}
+
+void CopyOverlay::sendToFolder(int slot) {
+    if(slot >= 0 && slot < pathWidgets.count())
+        requestFileOperation(pathWidgets.at(slot)->directory());
 }
 
 void CopyOverlay::requestFileOperation(const QString& path) {
@@ -164,11 +171,15 @@ bool CopyOverlay::focusNextPrevChild(bool mode) {
     return false;
 }
 
+// Keys bound in the Copy / Move context (sendToFolder1..9: the digits by
+// default) run first; every other key reaches the shortcuts as usual. A
+// modified key without a binding of its own there uses its plain key's, as
+// when the digits were hard-coded (Shift+1 picks the first folder too).
 void CopyOverlay::keyPressEvent(QKeyEvent *event) {
     event->accept();
-    QString key = actionManager->keyForNativeScancode(event->nativeScanCode());
-    if(shortcuts.contains(key))
-        requestFileOperation(pathWidgets.at(shortcuts[key])->directory());
-    else
+    QString action = actionManager->actionForShortcut(MODE_COPYMOVE, ShortcutBuilder::fromEvent(event));
+    if(action.isEmpty())
+        action = actionManager->actionForShortcut(MODE_COPYMOVE, actionManager->keyForNativeScancode(event->nativeScanCode()));
+    if(action.isEmpty() || !actionManager->invokeAction(action))
         actionManager->processEvent(event);
 }

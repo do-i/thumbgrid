@@ -36,7 +36,7 @@ QString expandModifierTokens(QString keys) {
 }
 
 QList<ViewMode> shortcutContexts() {
-    return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW};
+    return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW, MODE_COPYMOVE};
 }
 
 QStringList shortcutKeysFromJson(const QJsonValue &value) {
@@ -118,10 +118,12 @@ void ActionManager::initDefaults() {
     ContextMap global;
     ContextMap document;
     ContextMap grid;
+    ContextMap copyMove;
     insertShortcutObject(root.value("shortcuts").toObject(), global);
     insertShortcutObject(root.value("global").toObject(), global);
     insertShortcutObject(root.value("document").toObject(), document);
     insertShortcutObject(root.value("grid").toObject(), grid);
+    insertShortcutObject(root.value("copyMove").toObject(), copyMove);
     // Per-OS overrides: pick the current-OS block (windows/macos/linux), falling
     // back to "default". (Legacy preset files used "apple"; treat it as macos.)
     const QJsonObject platform = root.value("platform").toObject();
@@ -137,6 +139,7 @@ void ActionManager::initDefaults() {
     loaded.insert(MODE_GLOBAL, global);
     loaded.insert(MODE_DOCUMENT, document);
     loaded.insert(MODE_FOLDERVIEW, grid);
+    loaded.insert(MODE_COPYMOVE, copyMove);
     // Presets spell a binding out in every context it applies to (leftie, for one,
     // repeats folderView/nextDirectory/prevDirectory/toggleImageInfo verbatim under
     // both document and grid). shortcuts.json does not store that shape: reading it
@@ -190,6 +193,8 @@ ViewMode ActionManager::currentContext() const {
 QString ActionManager::contextToString(ViewMode context) {
     if(context == MODE_GLOBAL)
         return QStringLiteral("global");
+    if(context == MODE_COPYMOVE)
+        return QStringLiteral("copyMove");
     return (context == MODE_FOLDERVIEW) ? QStringLiteral("grid")
                                         : QStringLiteral("document");
 }
@@ -197,6 +202,8 @@ QString ActionManager::contextToString(ViewMode context) {
 ViewMode ActionManager::contextFromString(const QString &name) {
     if(name == QStringLiteral("global"))
         return MODE_GLOBAL;
+    if(name == QStringLiteral("copyMove"))
+        return MODE_COPYMOVE;
     return (name == QStringLiteral("grid") || name == QStringLiteral("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -525,7 +532,7 @@ bool ActionManager::viewerHandlesWheel(QWheelEvent *event) {
 // returns first shortcut that is found in the given context
 const QString ActionManager::shortcutForAction(ViewMode context, const QString& action) {
     const QString contextKey = shortcuts[context].key(action, "");
-    if(!contextKey.isEmpty() || context == MODE_GLOBAL)
+    if(!contextKey.isEmpty() || context == MODE_GLOBAL || context == MODE_COPYMOVE)
         return contextKey;
     return shortcuts[MODE_GLOBAL].key(action, "");
 }
@@ -576,7 +583,8 @@ QString ActionManager::lookupActionForShortcut(ViewMode context, const QString &
     if(shortcut.isEmpty())
         return QString();
     const QString contextAction = shortcutLookup.value(context).value(shortcut);
-    if(!contextAction.isEmpty() || context == MODE_GLOBAL)
+    // Global bindings don't reach the Copy / Move overlay's own keys
+    if(!contextAction.isEmpty() || context == MODE_GLOBAL || context == MODE_COPYMOVE)
         return contextAction;
     return shortcutLookup.value(MODE_GLOBAL).value(shortcut);
 }
@@ -609,6 +617,10 @@ ActionType ActionManager::validateAction(const QString &actionName) {
 //------------------------------------------------------------------------------
 void ActionManager::readShortcuts() {
     settings->readShortcuts(shortcuts);
+    // a shortcuts.json from before a context existed has no section for it;
+    // seed it so an empty context still compares equal to the defaults
+    for(ViewMode ctx : shortcutContexts())
+        shortcuts[ctx];
     QMap<ViewMode, QStringList> disabled;
     settings->readDisabledShortcuts(disabled);
     for(auto ctx = shortcuts.begin(); ctx != shortcuts.end(); ++ctx) {

@@ -113,6 +113,16 @@ signals:
     void scrollRightFine();
     void scrollOrPrevImage();
     void scrollOrNextImage();
+    // copy/move to the Copy / Move overlay's numbered folders
+    void sendToFolder1();
+    void sendToFolder2();
+    void sendToFolder3();
+    void sendToFolder4();
+    void sendToFolder5();
+    void sendToFolder6();
+    void sendToFolder7();
+    void sendToFolder8();
+    void sendToFolder9();
     void openSelected();
     void selectAll();
     void startSearch();

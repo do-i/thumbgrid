@@ -16,6 +16,7 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     ui->contextComboBox->addItem(tr("Global"), ActionManager::contextToString(MODE_GLOBAL));
     ui->contextComboBox->addItem(tr("Document"), ActionManager::contextToString(MODE_DOCUMENT));
     ui->contextComboBox->addItem(tr("Grid"), ActionManager::contextToString(MODE_FOLDERVIEW));
+    ui->contextComboBox->addItem(tr("Copy / Move"), ActionManager::contextToString(MODE_COPYMOVE));
     ui->contextComboBox->setCurrentIndex(0);
 
     actionList = appActions->getList();

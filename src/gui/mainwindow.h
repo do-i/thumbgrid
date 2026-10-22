@@ -249,6 +249,8 @@ public slots:
     void showWarning(QString text);
     void showError(QString text);
     void triggerMoveOverlay();
+    // copies/moves to the open Copy / Move overlay's folder at slot (0-based)
+    void sendToCopyFolder(int slot);
     void closeFullScreenOrExit();
     void close();
     void triggerCropPanel();

@@ -205,6 +205,12 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::scrollRightFine, mw, &MW::scrollRightFine);
     connect(actionManager, &ActionManager::scrollOrPrevImage, mw, &MW::scrollOrPrevImage);
     connect(actionManager, &ActionManager::scrollOrNextImage, mw, &MW::scrollOrNextImage);
+    const QList<void (ActionManager::*)()> sendToFolder{
+        &ActionManager::sendToFolder1, &ActionManager::sendToFolder2, &ActionManager::sendToFolder3,
+        &ActionManager::sendToFolder4, &ActionManager::sendToFolder5, &ActionManager::sendToFolder6,
+        &ActionManager::sendToFolder7, &ActionManager::sendToFolder8, &ActionManager::sendToFolder9};
+    for(int slot = 0; slot < sendToFolder.size(); slot++)
+        connect(actionManager, sendToFolder.at(slot), mw, [this, slot]() { mw->sendToCopyFolder(slot); });
     connect(actionManager, &ActionManager::resize, this, &Core::showResizeDialog);
     connect(actionManager, &ActionManager::flipH, this, &Core::flipH);
     connect(actionManager, &ActionManager::flipV, this, &Core::flipV);

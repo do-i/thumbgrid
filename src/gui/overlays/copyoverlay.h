@@ -27,6 +27,8 @@ public:
     void saveSettings();    
     void setDialogMode(CopyOverlayMode _mode);
     CopyOverlayMode operationMode();
+    // copies/moves to the folder at slot (0-based), if there is one
+    void sendToFolder(int slot);
 
 public slots:
     void show();
@@ -47,12 +49,11 @@ private slots:
 private:
     void createDefaultPaths();
     void createPathWidgets();
-    void createShortcuts();
+    void updateShortcutLabels();
     Ui::CopyOverlay *ui;
     QList<PathSelectorMenuItem*> pathWidgets;
     const int maxPathCount = 9;
     QStringList paths;
-    QMap<QString, int> shortcuts;
     CopyOverlayMode mode;
     void removePathWidgets();
 
