@@ -476,6 +476,38 @@ void FolderGridView::navigate(GridNavigation direction) {
     }
 }
 
+// The grid's mouse binding for name (e.g. "Ctrl+LMB_Drag"); a modified one
+// without a binding of its own uses the plain one (plainName), as when these
+// gestures were hard-coded.
+namespace {
+QString gridMouseAction(const QString &name, const QString &plainName) {
+    const QString action = actionManager->actionForShortcut(MODE_FOLDERVIEW, name);
+    return action.isEmpty() ? actionManager->actionForShortcut(MODE_FOLDERVIEW, plainName) : action;
+}
+} // namespace
+
+// A double-click on a tile runs LMB_TileDoubleClick (openSelected by default,
+// which opens the clicked tile); it is its own name because a double-click on
+// empty space reaches the plain LMB_DoubleClick binding. Unbound, it does nothing.
+void FolderGridView::itemDoubleClicked(int index, QMouseEvent *event) {
+    QString name = ShortcutBuilder::fromEvent(event);
+    name.replace(QStringLiteral("_DoubleClick"), QStringLiteral("_TileDoubleClick"));
+    const QString action = gridMouseAction(name, QStringLiteral("LMB_TileDoubleClick"));
+    if(action == QLatin1String("openSelected"))
+        emit itemActivated(index);
+    else if(!action.isEmpty())
+        actionManager->invokeAction(action);
+}
+
+// Dragging the selection runs the grid's LMB_Drag binding: dragFileOut by
+// default, which drags the selected files out of the app.
+void FolderGridView::selectionDragged(QMouseEvent *event) {
+    QMouseEvent press(QEvent::MouseButtonPress, event->position(), event->globalPosition(),
+                      Qt::LeftButton, Qt::LeftButton, event->modifiers());
+    if(gridMouseAction(ShortcutBuilder::fromDrag(&press), QStringLiteral("LMB_Drag")) == QLatin1String("dragFileOut"))
+        emit draggedOut();
+}
+
 void FolderGridView::wheelEvent(QWheelEvent *event) {
     // Ctrl+WheelUp/Ctrl+WheelDown run their grid binding (zoomIn/zoomOut, which
     // change the thumbnail size, by default)

@@ -97,8 +97,8 @@ void ShortcutCaptureTest::recordsKeysClicksAndWheelButNotTheFocusingClick() {
         recordedFromMenu << edit->text();
     }
     QCOMPARE(recordedFromMenu, QStringList({"LMB_LeftEdge", "LMB_RightEdge", "LMB_Drag", "RMB_Drag",
-                                            "MiddleButton_Drag"}));
-    QCOMPARE(recorded.last(), QStringLiteral("MiddleButton_Drag"));
+                                            "MiddleButton_Drag", "LMB_TileDoubleClick"}));
+    QCOMPARE(recorded.last(), QStringLiteral("LMB_TileDoubleClick"));
 
     // a right click can start recording too, and is not recorded either
     ok->setFocus();

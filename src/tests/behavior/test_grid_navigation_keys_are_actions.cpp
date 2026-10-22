@@ -5,6 +5,7 @@
 #include <QTemporaryDir>
 
 #include "core.h"
+#include "gui/customwidgets/thumbnailwidget.h"
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
 
@@ -14,7 +15,9 @@
 // selectNext, selectAbove, selectBelow, selectPageUp, selectPageDown,
 // selectFirst and selectLast, and behave exactly as before by default - while
 // another key can take a move, and unbinding a key turns its move off.
-// Ctrl+wheel resizing the thumbnails is a grid binding too (zoomIn/zoomOut).
+// Ctrl+wheel resizing the thumbnails is a grid binding too (zoomIn/zoomOut), and
+// so are a tile's double-click (LMB_TileDoubleClick: openSelected) and dragging
+// the selection out (the grid's LMB_Drag: dragFileOut).
 
 class GridNavigationKeysAreActionsTest : public QObject {
     Q_OBJECT
@@ -46,6 +49,24 @@ void pressWithShift(Qt::Key key, const QString &name) {
     QKeyEvent shiftUp(QEvent::KeyRelease, Qt::Key_Shift, Qt::NoModifier, 50, 0, 0);
     QApplication::sendEvent(gGrid, &shiftUp);
     QCoreApplication::processEvents();
+}
+
+void sendMouse(QEvent::Type type, QPoint pos, Qt::MouseButtons held) {
+    QMouseEvent event(type, pos, gGrid->viewport()->mapToGlobal(pos), Qt::LeftButton, held, Qt::NoModifier);
+    QApplication::sendEvent(gGrid->viewport(), &event);
+    QCoreApplication::processEvents();
+}
+
+// the viewport position of a tile showing a file (not the ".." tile)
+QPoint fileTilePos() {
+    QList<ThumbnailWidget *> tiles;
+    for(QGraphicsItem *item : gGrid->items())
+        if(auto tile = qgraphicsitem_cast<ThumbnailWidget *>(item))
+            tiles << tile;
+    std::sort(tiles.begin(), tiles.end(), [](ThumbnailWidget *a, ThumbnailWidget *b) {
+        return std::make_pair(a->y(), a->x()) < std::make_pair(b->y(), b->x());
+    });
+    return gGrid->mapFromScene(tiles.at(2)->sceneBoundingRect().center());
 }
 
 void ctrlWheel(int angleY) {
@@ -177,6 +198,41 @@ void GridNavigationKeysAreActionsTest::navigationKeysMoveTheSelectionAsBefore() 
     ctrlWheel(120);
     QVERIFY(sizes.isEmpty());
     QCOMPARE(footer.count(), 3);
+
+    // Dragging the selection out is the grid's LMB_Drag: dragFileOut by
+    // default; unbound, nothing. (The real drag-and-drop is cut off here.)
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "LMB_Drag"), QStringLiteral("dragFileOut"));
+    disconnect(gGrid, &FolderGridView::draggedOut, nullptr, nullptr);
+    QSignalSpy draggedOut(gGrid, &FolderGridView::draggedOut);
+    const QPoint tile = fileTilePos();
+    const auto dragTile = [&]() {
+        sendMouse(QEvent::MouseButtonPress, tile, Qt::LeftButton);
+        sendMouse(QEvent::MouseMove, tile + QPoint(30, 30), Qt::LeftButton);
+        sendMouse(QEvent::MouseMove, tile + QPoint(60, 60), Qt::LeftButton);
+        sendMouse(QEvent::MouseButtonRelease, tile + QPoint(60, 60), Qt::NoButton);
+    };
+    dragTile();
+    QVERIFY2(!draggedOut.isEmpty(), "Dragging a selected tile should drag the selection out.");
+    draggedOut.clear();
+    actionManager->removeShortcut(MODE_FOLDERVIEW, "LMB_Drag");
+    dragTile();
+    QVERIFY2(draggedOut.isEmpty(), "With LMB_Drag unbound in the grid, nothing is dragged out.");
+
+    // A tile's double-click is LMB_TileDoubleClick: another action can take it,
+    // unbound it does nothing, and by default it opens the tile.
+    QCOMPARE(actionManager->actionForShortcut(MODE_FOLDERVIEW, "LMB_TileDoubleClick"), QStringLiteral("openSelected"));
+    actionManager->addShortcut(MODE_FOLDERVIEW, "LMB_TileDoubleClick", "toggleStatusFooter");
+    sendMouse(QEvent::MouseButtonDblClick, tile, Qt::LeftButton);
+    QCOMPARE(footer.count(), 4);
+    QCOMPARE(window->currentViewMode(), MODE_FOLDERVIEW);
+    actionManager->removeShortcut(MODE_FOLDERVIEW, "LMB_TileDoubleClick");
+    sendMouse(QEvent::MouseButtonDblClick, tile, Qt::LeftButton);
+    QTest::qWait(100);
+    QCOMPARE(footer.count(), 4);
+    QCOMPARE(window->currentViewMode(), MODE_FOLDERVIEW);
+    actionManager->addShortcut(MODE_FOLDERVIEW, "LMB_TileDoubleClick", "openSelected");
+    sendMouse(QEvent::MouseButtonDblClick, tile, Qt::LeftButton);
+    QTRY_COMPARE(window->currentViewMode(), MODE_DOCUMENT);
 }
 
 TG_BEHAVIOR_TEST_MAIN(GridNavigationKeysAreActionsTest)

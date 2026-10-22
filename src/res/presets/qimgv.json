@@ -236,7 +236,8 @@
             "$Shift+Right"
         ],
         "openSelected": [
-            "Enter"
+            "Enter",
+            "LMB_TileDoubleClick"
         ],
         "prevDirectory": [
             "$Shift+Left"
@@ -285,6 +286,9 @@
         ],
         "zoomOut": [
             "$Ctrl+WheelDown"
+        ],
+        "dragFileOut": [
+            "LMB_Drag"
         ]
     },
     "copyMove": {

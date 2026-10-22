@@ -132,6 +132,11 @@ protected:
 
     SelectionInfo selectionInfo() const;
 
+    // A left double-click on the item at index, and a left drag of the selection
+    // past the drag distance; by default they activate the item and start the
+    // drag-and-drop of the selection.
+    virtual void itemDoubleClicked(int index, QMouseEvent *event);
+    virtual void selectionDragged(QMouseEvent *event);
     virtual ThumbnailWidget *createThumbnailWidget() = 0;
     virtual void addItemToLayout(ThumbnailWidget* widget, int pos) = 0;
     virtual void removeItemFromLayout(int pos) = 0;

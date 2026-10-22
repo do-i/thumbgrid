@@ -75,7 +75,8 @@ QPushButton *KeySequenceEdit::createMouseGestureButton(QWidget *parent) {
     auto *button = new QPushButton(tr("Mouse gestures"), parent);
     button->setAccessibleName("mouseGestureButton");
     button->setAutoDefault(false);
-    button->setToolTip(tr("Clicks in the picture's left and right edges (with clickable edges on), and drags"));
+    button->setToolTip(tr("Clicks in the picture's left and right edges (with clickable edges on), "
+                          "drags, and double-clicks on a grid thumbnail"));
     auto *menu = new QMenu(button);
     menu->addAction(tr("Left edge click"), this, [this]() { record(QStringLiteral("LMB_LeftEdge")); });
     menu->addAction(tr("Right edge click"), this, [this]() { record(QStringLiteral("LMB_RightEdge")); });
@@ -83,6 +84,8 @@ QPushButton *KeySequenceEdit::createMouseGestureButton(QWidget *parent) {
     menu->addAction(tr("Left drag"), this, [this]() { record(QStringLiteral("LMB_Drag")); });
     menu->addAction(tr("Right drag"), this, [this]() { record(QStringLiteral("RMB_Drag")); });
     menu->addAction(tr("Middle drag"), this, [this]() { record(QStringLiteral("MiddleButton_Drag")); });
+    menu->addSeparator();
+    menu->addAction(tr("Thumbnail double-click"), this, [this]() { record(QStringLiteral("LMB_TileDoubleClick")); });
     button->setMenu(menu);
     return button;
 }

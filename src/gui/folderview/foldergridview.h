@@ -109,6 +109,8 @@ protected:
 
     void keyPressEvent(QKeyEvent *event) override;
     void wheelEvent(QWheelEvent *event) override;
+    void itemDoubleClicked(int index, QMouseEvent *event) override;
+    void selectionDragged(QMouseEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
 

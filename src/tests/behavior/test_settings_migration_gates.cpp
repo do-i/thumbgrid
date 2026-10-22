@@ -461,6 +461,9 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
                    "The clickable edges should become bindings.") &&
            require(bound("LMB_Drag", "dragPan") && bound("RMB_Drag", "dragZoom"),
                    "The picture's left/right drags should become bindings.") &&
+           require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "LMB_TileDoubleClick") == QLatin1String("openSelected") &&
+                   actionManager->actionForShortcut(MODE_FOLDERVIEW, "LMB_Drag") == QLatin1String("dragFileOut"),
+                   "A grid tile's double-click and drag should become bindings.") &&
            require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Ctrl+WheelUp") == QLatin1String("zoomIn") &&
                    actionManager->actionForShortcut(MODE_FOLDERVIEW, "Ctrl+WheelDown") == QLatin1String("zoomOut"),
                    "The grid's Ctrl+wheel thumbnail resize should become bindings.") &&

@@ -712,8 +712,16 @@ void ThumbnailView::mouseMoveEvent(QMouseEvent *event) {
     if(QLineF(dragStartPos, event->pos()).length() >= 40) {
         auto *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(dragStartPos));
         if(item && selection().contains(thumbnails.indexOf(item)))
-            emit draggedOut();
+            selectionDragged(event);
     }
+}
+
+void ThumbnailView::selectionDragged(QMouseEvent *) {
+    emit draggedOut();
+}
+
+void ThumbnailView::itemDoubleClicked(int index, QMouseEvent *) {
+    emit itemActivated(index);
 }
 
 void ThumbnailView::mouseReleaseEvent(QMouseEvent *event) {
@@ -731,7 +739,7 @@ void ThumbnailView::mouseDoubleClickEvent(QMouseEvent *event) {
     if(event->button() == Qt::LeftButton) {
         ThumbnailWidget *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(event->pos()));
         if(item) {
-            emit itemActivated(thumbnails.indexOf(item));
+            itemDoubleClicked(thumbnails.indexOf(item), event);
             return;
         }
     }

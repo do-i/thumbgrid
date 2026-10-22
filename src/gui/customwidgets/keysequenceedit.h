@@ -10,9 +10,10 @@ public:
     KeySequenceEdit(QWidget *parent);
     QString sequence();    
     void setText(const QString &text);
-    // Clicks in the picture's edge zones (LMB_LeftEdge / LMB_RightEdge) and
-    // drags (LMB_Drag ...) can't be recorded by clicking this button, so dialogs
-    // put this menu button, which records them, next to it.
+    // Clicks in the picture's edge zones (LMB_LeftEdge / LMB_RightEdge), drags
+    // (LMB_Drag ...) and thumbnail double-clicks (LMB_TileDoubleClick) can't be
+    // recorded by clicking this button, so dialogs put this menu button, which
+    // records them, next to it.
     QPushButton *createMouseGestureButton(QWidget *parent);
 
 protected:

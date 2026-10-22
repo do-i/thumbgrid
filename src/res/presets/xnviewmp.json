@@ -49,7 +49,7 @@
         "goUp": ["Backspace"],
         "moveFile": ["M"],
         "toggleImageInfo": ["I"],
-        "openSelected": ["Enter"],
+        "openSelected": ["Enter", "LMB_TileDoubleClick"],
         "selectAll": ["$Ctrl+A"],
         "startSearch": ["/"],
         "selectPrevious": ["Left"],
@@ -61,7 +61,8 @@
         "selectFirst": ["Home"],
         "selectLast": ["End"],
         "zoomIn": ["$Ctrl+WheelUp"],
-        "zoomOut": ["$Ctrl+WheelDown"]
+        "zoomOut": ["$Ctrl+WheelDown"],
+        "dragFileOut": ["LMB_Drag"]
     },
     "copyMove": {
         "sendToFolder1": ["1"],

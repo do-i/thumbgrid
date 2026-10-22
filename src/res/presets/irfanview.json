@@ -27,7 +27,7 @@
         "removeFile": ["$Shift+Del"],
         "renameFile": ["F2"],
         "goUp": ["Backspace"],
-        "openSelected": ["Enter"],
+        "openSelected": ["Enter", "LMB_TileDoubleClick"],
         "selectAll": ["$Ctrl+A"],
         "startSearch": ["/"],
         "selectPrevious": ["Left"],
@@ -39,7 +39,8 @@
         "selectFirst": ["Home"],
         "selectLast": ["End"],
         "zoomIn": ["$Ctrl+WheelUp"],
-        "zoomOut": ["$Ctrl+WheelDown"]
+        "zoomOut": ["$Ctrl+WheelDown"],
+        "dragFileOut": ["LMB_Drag"]
     },
     "copyMove": {
         "sendToFolder1": ["1"],

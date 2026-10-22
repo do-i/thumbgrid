@@ -233,7 +233,8 @@
             "Backspace"
         ],
         "openSelected": [
-            "Enter"
+            "Enter",
+            "LMB_TileDoubleClick"
         ],
         "selectAll": [
             "$Ctrl+A"
@@ -270,6 +271,9 @@
         ],
         "zoomOut": [
             "$Ctrl+WheelDown"
+        ],
+        "dragFileOut": [
+            "LMB_Drag"
         ]
     },
     "copyMove": {
