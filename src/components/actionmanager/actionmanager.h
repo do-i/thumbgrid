@@ -123,6 +123,11 @@ signals:
     void scrollRightFine();
     void scrollOrPrevImage();
     void scrollOrNextImage();
+    // drag actions: only bindings of drags (LMB_Drag ...) run them; invoked
+    // any other way they do nothing
+    void dragPan();
+    void dragZoom();
+    void dragFileOut();
     // copy/move to the Copy / Move overlay's numbered folders
     void sendToFolder1();
     void sendToFolder2();

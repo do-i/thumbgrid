@@ -170,6 +170,14 @@ add_test(
     COMMAND thumbgrid_scroll_fallback_settings_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_picture_drags_test
+    behavior/test_picture_drags_are_bindings.cpp
+)
+add_test(
+    NAME "Picture drags are bindings"
+    COMMAND thumbgrid_picture_drags_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_clickable_edges_test
     behavior/test_clickable_edges_are_bindings.cpp
 )

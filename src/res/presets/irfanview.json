@@ -14,6 +14,8 @@
         "moveToTrash": ["Del"]
     },
     "document": {
+        "dragPan": ["LMB_Drag"],
+        "dragZoom": ["RMB_Drag"],
         "nextImage": ["Right", "LMB_RightEdge"],
         "pauseVideo": ["Space"],
         "prevImage": ["Backspace", "Left", "LMB_LeftEdge"],

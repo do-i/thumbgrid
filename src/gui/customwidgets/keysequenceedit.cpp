@@ -71,14 +71,18 @@ void KeySequenceEdit::record(const QString &sequence) {
     emit edited();
 }
 
-QPushButton *KeySequenceEdit::createClickZoneButton(QWidget *parent) {
-    auto *button = new QPushButton(tr("Click zone"), parent);
-    button->setAccessibleName("clickZoneButton");
+QPushButton *KeySequenceEdit::createMouseGestureButton(QWidget *parent) {
+    auto *button = new QPushButton(tr("Mouse gestures"), parent);
+    button->setAccessibleName("mouseGestureButton");
     button->setAutoDefault(false);
-    button->setToolTip(tr("Clicks in the picture's left and right edges (with clickable edges on)"));
+    button->setToolTip(tr("Clicks in the picture's left and right edges (with clickable edges on), and drags"));
     auto *menu = new QMenu(button);
     menu->addAction(tr("Left edge click"), this, [this]() { record(QStringLiteral("LMB_LeftEdge")); });
     menu->addAction(tr("Right edge click"), this, [this]() { record(QStringLiteral("LMB_RightEdge")); });
+    menu->addSeparator();
+    menu->addAction(tr("Left drag"), this, [this]() { record(QStringLiteral("LMB_Drag")); });
+    menu->addAction(tr("Right drag"), this, [this]() { record(QStringLiteral("RMB_Drag")); });
+    menu->addAction(tr("Middle drag"), this, [this]() { record(QStringLiteral("MiddleButton_Drag")); });
     button->setMenu(menu);
     return button;
 }

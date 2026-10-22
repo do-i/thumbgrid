@@ -1,6 +1,7 @@
 #include "imageviewerv2.h"
 
 #include "components/actionmanager/actionmanager.h"
+#include "shortcutbuilder.h"
 #include "platform/platformdesktop.h"
 
 #include "utils/imagelib.h"
@@ -542,6 +543,12 @@ bool ImageViewerV2::hasAnimation() const {
 //  mousePressPos: used to filter out accidental zoom events
 //  mouseInteraction: tracks which action we are performing since the last mousePressEvent()
 //
+// A drag runs the drag action bound to it - LMB_Drag, RMB_Drag,
+// MiddleButton_Drag, with modifiers in front (a modified drag with no binding of
+// its own uses the plain one): dragPan (left by default) pans the picture, or
+// drags the file out when it fits the window; dragZoom (right by default) zooms
+// around the press point; dragFileOut drags the file out. An unbound drag does
+// nothing, and its release is an ordinary click.
 void ImageViewerV2::mousePressEvent(QMouseEvent *event) {
     if(!pixmap) {
         QWidget::mousePressEvent(event);
@@ -549,22 +556,28 @@ void ImageViewerV2::mousePressEvent(QMouseEvent *event) {
     }
     mouseMoveStartPos = event->pos();
     mousePressPos = mouseMoveStartPos;
-    if(event->button() & Qt::RightButton) {
+    pressButton = event->button();
+    pressDragAction = actionManager->actionForShortcut(MODE_DOCUMENT, ShortcutBuilder::fromDrag(event));
+    if(pressDragAction.isEmpty() && event->modifiers())
+        pressDragAction = actionManager->actionForShortcut(MODE_DOCUMENT, ShortcutBuilder::fromDrag(event, false));
+    if(pressDragAction == QLatin1String("dragZoom"))
         setZoomAnchor(event->pos());
-    } else {
+    if(!(event->button() & Qt::RightButton))
         QGraphicsView::mousePressEvent(event);
-    }
 }
 
 void ImageViewerV2::mouseMoveEvent(QMouseEvent *event) {
     QWidget::mouseMoveEvent(event);
     if(!pixmap || mouseInteraction == MouseInteractionState::MOUSE_DRAG || mouseInteraction == MouseInteractionState::MOUSE_WHEEL_ZOOM)
         return;
+    if(!(event->buttons() & pressButton)) {
+        event->ignore();
+        return;
+    }
 
-    if(event->buttons() & Qt::LeftButton) {
-        // ---------------- DRAG / PAN -------------------
-        // select which action to start
-        if(mouseInteraction == MouseInteractionState::MOUSE_NONE) {
+    // select which action to start
+    if(mouseInteraction == MouseInteractionState::MOUSE_NONE) {
+        if(pressDragAction == QLatin1String("dragPan")) {
             if(scaledImageFits()) {
                 if(dragsEnabled)
                     mouseInteraction = MouseInteractionState::MOUSE_DRAG_BEGIN;
@@ -573,38 +586,36 @@ void ImageViewerV2::mouseMoveEvent(QMouseEvent *event) {
                 if(cursor().shape() != Qt::ClosedHandCursor)
                     setCursor(Qt::ClosedHandCursor);
             }
-        }
-        // emit a signal to start dnd; set flag to ignore further mouse move events
-        if(mouseInteraction == MouseInteractionState::MOUSE_DRAG_BEGIN) {
-            if( (abs(mousePressPos.x() - event->pos().x()) > dragThreshold) ||
-                 abs(mousePressPos.y() - event->pos().y()) > dragThreshold)
-            {
-                mouseInteraction = MouseInteractionState::MOUSE_NONE;
-                emit draggedOut();
-            }
-        }
-        // panning
-        if(mouseInteraction == MouseInteractionState::MOUSE_PAN) {
-            mousePan(event);
-        }
-        return;
-    } else if(event->buttons() & Qt::RightButton) {
-        // ------------------- ZOOM ----------------------
-        // filter out possible mouse jitter by ignoring low delta drags
-        if(mouseInteraction == MouseInteractionState::MOUSE_ZOOM || abs(mousePressPos.y() - event->pos().y()) > zoomThreshold / dpr) {
-            if(cursor().shape() != Qt::SizeVerCursor) {
+        } else if(pressDragAction == QLatin1String("dragFileOut")) {
+            if(dragsEnabled)
+                mouseInteraction = MouseInteractionState::MOUSE_DRAG_BEGIN;
+        } else if(pressDragAction == QLatin1String("dragZoom")) {
+            // filter out possible mouse jitter by ignoring low delta drags
+            if(abs(mousePressPos.y() - event->pos().y()) > zoomThreshold / dpr) {
+                mouseInteraction = MouseInteractionState::MOUSE_ZOOM;
                 setCursor(Qt::SizeVerCursor);
+                // avoid visible lags by forcing fast scale for large viewport sizes
+                // this value possibly needs tweaking
+                if(viewport()->width() * viewport()->height() > LARGE_VIEWPORT_SIZE)
+                    forceFastScale = true;
             }
-            mouseInteraction = MouseInteractionState::MOUSE_ZOOM;
-            // avoid visible lags by forcing fast scale for large viewport sizes
-            // this value possibly needs tweaking
-            if(viewport()->width() * viewport()->height() > LARGE_VIEWPORT_SIZE)
-                forceFastScale = true;
-            mouseMoveZoom(event);
+        } else {
+            event->ignore();
+            return;
         }
-        return;
-    } else {
-        event->ignore();
+    }
+    // emit a signal to start dnd; set flag to ignore further mouse move events
+    if(mouseInteraction == MouseInteractionState::MOUSE_DRAG_BEGIN) {
+        if( (abs(mousePressPos.x() - event->pos().x()) > dragThreshold) ||
+             abs(mousePressPos.y() - event->pos().y()) > dragThreshold)
+        {
+            mouseInteraction = MouseInteractionState::MOUSE_NONE;
+            emit draggedOut();
+        }
+    } else if(mouseInteraction == MouseInteractionState::MOUSE_PAN) {
+        mousePan(event);
+    } else if(mouseInteraction == MouseInteractionState::MOUSE_ZOOM) {
+        mouseMoveZoom(event);
     }
 }
 

@@ -22,6 +22,8 @@
         "pasteFile": ["$Ctrl+V"]
     },
     "document": {
+        "dragPan": ["LMB_Drag"],
+        "dragZoom": ["RMB_Drag"],
         "nextImage": ["PgDown", "Right", "LMB_RightEdge"],
         "pauseVideo": ["Space"],
         "prevImage": ["PgUp", "Left", "LMB_LeftEdge"],

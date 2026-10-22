@@ -137,6 +137,10 @@ private:
     QTimer *animationTimer, *scaleTimer;
     QScrollBar *hs, *vs;
     QPoint mouseMoveStartPos, mousePressPos, drawPos;
+    // the drag action bound to the drag the last press may start (dragPan,
+    // dragZoom, dragFileOut; empty: none) and the button that started it
+    QString pressDragAction;
+    Qt::MouseButton pressButton = Qt::NoButton;
     bool transparencyGrid, expandImage,    smoothAnimatedImages,
          smoothUpscaling,  forceFastScale, keepFitMode,
          loopPlayback,     mIsFullscreen,  scrollBarWorkaround,

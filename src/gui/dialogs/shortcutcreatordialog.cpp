@@ -14,7 +14,7 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     if(auto box = qobject_cast<QBoxLayout *>(ui->sequenceEdit->parentWidget()->layout())) {
         const int at = box->indexOf(ui->sequenceEdit);
         if(at >= 0)
-            box->insertWidget(at + 1, ui->sequenceEdit->createClickZoneButton(this));
+            box->insertWidget(at + 1, ui->sequenceEdit->createMouseGestureButton(this));
     }
 
     // Each shortcut belongs to one context. Global bindings run in every screen;

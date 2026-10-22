@@ -115,6 +115,9 @@ void Actions::init() {
     mActions.insert("selectLast", QVersionNumber(2026,10,3));
     mActions.insert("scrollOrPrevImage", QVersionNumber(2026,10,3));
     mActions.insert("scrollOrNextImage", QVersionNumber(2026,10,3));
+    mActions.insert("dragPan", QVersionNumber(2026,10,3));
+    mActions.insert("dragZoom", QVersionNumber(2026,10,3));
+    mActions.insert("dragFileOut", QVersionNumber(2026,10,3));
     for(int slot = 1; slot <= 9; slot++)
         mActions.insert(QStringLiteral("sendToFolder%1").arg(slot), QVersionNumber(2026,10,3));
 }

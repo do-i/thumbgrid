@@ -85,14 +85,20 @@ void ShortcutCaptureTest::recordsKeysClicksAndWheelButNotTheFocusingClick() {
     QTest::mouseClick(edit, Qt::RightButton);
     QCOMPARE(edit->text(), QStringLiteral("RMB"));
 
-    // edge-zone clicks can't be clicked into the button; its Click zone menu
-    // records them
-    QPushButton *zones = edit->createClickZoneButton(&dialog);
-    QVERIFY(zones->menu() && zones->menu()->actions().size() == 2);
-    zones->menu()->actions().at(0)->trigger();
-    QCOMPARE(edit->text(), QStringLiteral("LMB_LeftEdge"));
-    zones->menu()->actions().at(1)->trigger();
-    QCOMPARE(recorded.last(), QStringLiteral("LMB_RightEdge"));
+    // edge-zone clicks and drags can't be clicked into the button; its Mouse
+    // gestures menu records them
+    QPushButton *gestures = edit->createMouseGestureButton(&dialog);
+    QVERIFY(gestures->menu());
+    QStringList recordedFromMenu;
+    for(QAction *entry : gestures->menu()->actions()) {
+        if(entry->isSeparator())
+            continue;
+        entry->trigger();
+        recordedFromMenu << edit->text();
+    }
+    QCOMPARE(recordedFromMenu, QStringList({"LMB_LeftEdge", "LMB_RightEdge", "LMB_Drag", "RMB_Drag",
+                                            "MiddleButton_Drag"}));
+    QCOMPARE(recorded.last(), QStringLiteral("MiddleButton_Drag"));
 
     // a right click can start recording too, and is not recorded either
     ok->setFocus();

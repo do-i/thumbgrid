@@ -445,9 +445,10 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
         }
         // Mouse gestures handled in code, ahead of any binding, are now bindings:
         // right button held + wheel zooms the picture (RMB+WheelUp/Down),
-        // Ctrl+wheel resizes the grid's thumbnails, and a click in a clickable
-        // edge changes file (LMB_LeftEdge/RightEdge). Bind the preset's action
-        // to each unless the user already bound that name there.
+        // Ctrl+wheel resizes the grid's thumbnails, a click in a clickable edge
+        // changes file (LMB_LeftEdge/RightEdge), and the picture's left/right
+        // drags pan/zoom (LMB_Drag/RMB_Drag). Bind the preset's action to each
+        // unless the user already bound that name there.
         const auto bindPresetKey = [this](ViewMode view, const QString &key) {
             if(shortcuts[MODE_GLOBAL].contains(key) || shortcuts[view].contains(key))
                 return;
@@ -464,6 +465,8 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
         bindPresetKey(MODE_DOCUMENT, "RMB+WheelDown");
         bindPresetKey(MODE_FOLDERVIEW, expandModifierTokens("$Ctrl+WheelUp"));
         bindPresetKey(MODE_FOLDERVIEW, expandModifierTokens("$Ctrl+WheelDown"));
+        bindPresetKey(MODE_DOCUMENT, "LMB_Drag");
+        bindPresetKey(MODE_DOCUMENT, "RMB_Drag");
         bindPresetKey(MODE_DOCUMENT, "LMB_LeftEdge");
         bindPresetKey(MODE_DOCUMENT, "LMB_RightEdge");
         // The grid moved its selection with these keys in code, ahead of any

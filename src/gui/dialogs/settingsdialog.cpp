@@ -1629,7 +1629,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     addRow->addWidget(new QLabel(tr("Add key:"), &dialog));
     KeySequenceEdit *adder = new KeySequenceEdit(&dialog);
     addRow->addWidget(adder, 1);
-    addRow->addWidget(adder->createClickZoneButton(&dialog));
+    addRow->addWidget(adder->createMouseGestureButton(&dialog));
     mainLayout->addLayout(addRow);
 
     QLabel *warning = new QLabel(&dialog);

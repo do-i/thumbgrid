@@ -36,18 +36,29 @@ QString ShortcutBuilder::processWheelEvent(QWheelEvent *event) {
 // Detects mouse button clicks only
 // DoubleClick works only for LMB
 // Otherwise treated as a regular click
+QString ShortcutBuilder::buttonName(Qt::MouseButton button) {
+    if(button == Qt::LeftButton)
+        return "LMB";
+    if(button == Qt::RightButton)
+        return "RMB";
+    if(button == Qt::MiddleButton)
+        return "MiddleButton";
+    if(button == Qt::XButton1)
+        return "XButton1";
+    if(button == Qt::XButton2)
+        return "XButton2";
+    return "";
+}
+//------------------------------------------------------------------------------
+QString ShortcutBuilder::fromDrag(QMouseEvent *press, bool withModifiers) {
+    const QString button = buttonName(press->button());
+    if(button.isEmpty())
+        return "";
+    return (withModifiers ? modifierKeys(press) : QString()) + button + "_Drag";
+}
+//------------------------------------------------------------------------------
 QString ShortcutBuilder::processMouseEvent(QMouseEvent *event) {
-    QString sequence;
-    if(event->button() == Qt::LeftButton)
-        sequence = "LMB";
-    else if(event->button() == Qt::RightButton)
-        sequence = "RMB";
-    else if(event->button() == Qt::MiddleButton)
-        sequence = "MiddleButton";
-    else if(event->button() == Qt::XButton1)
-        sequence = "XButton1";
-    else if(event->button() == Qt::XButton2)
-        sequence = "XButton2";
+    QString sequence = buttonName(event->button());
 
     sequence.prepend(modifierKeys(event));
 

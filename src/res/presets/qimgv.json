@@ -82,6 +82,12 @@
         "discardEdits": [
             "$Ctrl+Z"
         ],
+        "dragPan": [
+            "LMB_Drag"
+        ],
+        "dragZoom": [
+            "RMB_Drag"
+        ],
         "fitNormal": [
             "3"
         ],
