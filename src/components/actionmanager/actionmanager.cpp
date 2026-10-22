@@ -421,21 +421,26 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound Space =" << action << "in" << contextToString(ctx);
             break;
         }
-        // A wheel turned with the right button held zoomed the picture in code,
-        // ahead of any binding; it is now RMB+WheelUp/RMB+WheelDown. Bind the
-        // preset's action to each unless the user already bound that name.
-        for(const QString key : {"RMB+WheelUp", "RMB+WheelDown"}) {
-            if(shortcuts[MODE_GLOBAL].contains(key) || shortcuts[MODE_DOCUMENT].contains(key))
-                continue;
-            for(ViewMode ctx : {MODE_GLOBAL, MODE_DOCUMENT}) {
+        // Wheel gestures handled in code, ahead of any binding, are now bindings:
+        // right button held + wheel zooms the picture (RMB+WheelUp/Down) and
+        // Ctrl+wheel resizes the grid's thumbnails. Bind the preset's action to
+        // each unless the user already bound that name there.
+        const auto bindPresetKey = [this](ViewMode view, const QString &key) {
+            if(shortcuts[MODE_GLOBAL].contains(key) || shortcuts[view].contains(key))
+                return;
+            for(ViewMode ctx : {MODE_GLOBAL, view}) {
                 const QString action = defaults[ctx].value(key);
                 if(action.isEmpty())
                     continue;
                 shortcuts[ctx].insert(key, action);
                 qCDebug(logSettings) << "[actionManager]: bound" << key << "=" << action << "in" << contextToString(ctx);
-                break;
+                return;
             }
-        }
+        };
+        bindPresetKey(MODE_DOCUMENT, "RMB+WheelUp");
+        bindPresetKey(MODE_DOCUMENT, "RMB+WheelDown");
+        bindPresetKey(MODE_FOLDERVIEW, expandModifierTokens("$Ctrl+WheelUp"));
+        bindPresetKey(MODE_FOLDERVIEW, expandModifierTokens("$Ctrl+WheelDown"));
         // The grid moved its selection with these keys in code, ahead of any
         // binding; they are now the selection actions. A grid binding on one of
         // them never ran, so replacing it keeps the grid behaving as before.

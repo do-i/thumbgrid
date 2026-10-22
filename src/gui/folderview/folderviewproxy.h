@@ -41,6 +41,7 @@ public slots:
     void startRename(const QString& name);
     void startSearch();
     void navigate(GridNavigation direction);
+    void zoomThumbnails(int steps);
     void setSearchMatched(bool matched);
 
 protected:

@@ -271,6 +271,12 @@
         ],
         "toggleImageInfo": [
             "I"
+        ],
+        "zoomIn": [
+            "$Ctrl+WheelUp"
+        ],
+        "zoomOut": [
+            "$Ctrl+WheelDown"
         ]
     },
     "platform": {

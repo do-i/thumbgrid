@@ -48,6 +48,8 @@ public slots:
     void startRename(const QString& name);
     void startSearch();
     void navigate(GridNavigation direction);
+    // bigger (steps > 0) or smaller thumbnails
+    void zoomThumbnails(int steps);
     void setSearchMatched(bool matched);
 
 

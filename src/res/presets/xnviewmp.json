@@ -57,6 +57,8 @@
         "selectPageUp": ["PgUp"],
         "selectPageDown": ["PgDown"],
         "selectFirst": ["Home"],
-        "selectLast": ["End"]
+        "selectLast": ["End"],
+        "zoomIn": ["$Ctrl+WheelUp"],
+        "zoomOut": ["$Ctrl+WheelDown"]
     }
 }

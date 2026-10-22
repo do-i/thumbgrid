@@ -477,11 +477,11 @@ void FolderGridView::navigate(GridNavigation direction) {
 }
 
 void FolderGridView::wheelEvent(QWheelEvent *event) {
+    // Ctrl+WheelUp/Ctrl+WheelDown run their grid binding (zoomIn/zoomOut, which
+    // change the thumbnail size, by default)
     if(event->modifiers().testFlag(Qt::ControlModifier)) {
-        if(event->pixelDelta().y() > 0 || event->angleDelta().y() > 0)
-            zoomIn();
-        else if(event->pixelDelta().y() < 0 || event->angleDelta().y() < 0)
-            zoomOut();
+        event->accept();
+        actionManager->processEvent(event);
     } else {
         event->accept();
         int pixelDelta = event->pixelDelta().y();

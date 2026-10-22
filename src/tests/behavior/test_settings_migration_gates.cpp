@@ -457,6 +457,9 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
                    "The wheel should move from prev/next to the scroll-or-change-file actions.") &&
            require(bound("RMB+WheelUp", "zoomInCursor") && bound("RMB+WheelDown", "zoomOutCursor"),
                    "The right button + wheel zoom should become bindings.") &&
+           require(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Ctrl+WheelUp") == QLatin1String("zoomIn") &&
+                   actionManager->actionForShortcut(MODE_FOLDERVIEW, "Ctrl+WheelDown") == QLatin1String("zoomOut"),
+                   "The grid's Ctrl+wheel thumbnail resize should become bindings.") &&
            require(bound("PgUp", "prevImage") && bound("XButton2", "nextImage") && bound("+", "zoomIn"),
                    "The user's other keys for those actions must survive.");
 }

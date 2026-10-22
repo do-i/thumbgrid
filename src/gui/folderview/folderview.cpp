@@ -279,6 +279,13 @@ void FolderView::navigate(GridNavigation direction) {
     ui->thumbnailGrid->navigate(direction);
 }
 
+void FolderView::zoomThumbnails(int steps) {
+    for(; steps > 0; --steps)
+        ui->thumbnailGrid->zoomIn();
+    for(; steps < 0; ++steps)
+        ui->thumbnailGrid->zoomOut();
+}
+
 void FolderView::setSearchMatched(bool matched) {
     ui->thumbnailGrid->setSearchMatched(matched);
 }

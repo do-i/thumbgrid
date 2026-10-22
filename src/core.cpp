@@ -181,10 +181,20 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::toggleFullscreen, mw, &MW::triggerFullScreen);
     connect(actionManager, &ActionManager::lockZoom, mw, &MW::toggleLockZoom);
     connect(actionManager, &ActionManager::lockView, mw, &MW::toggleLockView);
-    connect(actionManager, &ActionManager::zoomIn, mw, &MW::zoomIn);
-    connect(actionManager, &ActionManager::zoomOut, mw, &MW::zoomOut);
-    connect(actionManager, &ActionManager::zoomInCursor, mw, &MW::zoomInCursor);
-    connect(actionManager, &ActionManager::zoomOutCursor, mw, &MW::zoomOutCursor);
+    // in the folder grid the zoom actions change the thumbnail size
+    const QList<QPair<void (ActionManager::*)(), void (MW::*)()>> zooms{
+        {&ActionManager::zoomIn, &MW::zoomIn}, {&ActionManager::zoomOut, &MW::zoomOut},
+        {&ActionManager::zoomInCursor, &MW::zoomInCursor}, {&ActionManager::zoomOutCursor, &MW::zoomOutCursor}};
+    for(const auto &zoom : zooms) {
+        const auto viewerZoom = zoom.second;
+        const int steps = (viewerZoom == &MW::zoomIn || viewerZoom == &MW::zoomInCursor) ? 1 : -1;
+        connect(actionManager, zoom.first, this, [this, viewerZoom, steps]() {
+            if(mw->currentViewMode() == MODE_FOLDERVIEW)
+                mw->zoomFolderGrid(steps);
+            else
+                emit (mw->*viewerZoom)();
+        });
+    }
     connect(actionManager, &ActionManager::scrollUp, mw, &MW::scrollUp);
     connect(actionManager, &ActionManager::scrollDown, mw, &MW::scrollDown);
     connect(actionManager, &ActionManager::scrollLeft, mw, &MW::scrollLeft);

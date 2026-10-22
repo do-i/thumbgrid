@@ -256,6 +256,12 @@
         ],
         "startSearch": [
             "/"
+        ],
+        "zoomIn": [
+            "$Ctrl+WheelUp"
+        ],
+        "zoomOut": [
+            "$Ctrl+WheelDown"
         ]
     }
 }

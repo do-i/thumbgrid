@@ -215,6 +215,11 @@ void FolderViewProxy::navigate(GridNavigation direction) {
         folderView->navigate(direction);
 }
 
+void FolderViewProxy::zoomThumbnails(int steps) {
+    if(folderView)
+        folderView->zoomThumbnails(steps);
+}
+
 void FolderViewProxy::setSearchMatched(bool matched) {
     if(folderView)
         folderView->setSearchMatched(matched);

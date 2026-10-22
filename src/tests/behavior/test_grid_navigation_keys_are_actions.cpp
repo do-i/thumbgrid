@@ -14,6 +14,7 @@
 // selectNext, selectAbove, selectBelow, selectPageUp, selectPageDown,
 // selectFirst and selectLast, and behave exactly as before by default - while
 // another key can take a move, and unbinding a key turns its move off.
+// Ctrl+wheel resizing the thumbnails is a grid binding too (zoomIn/zoomOut).
 
 class GridNavigationKeysAreActionsTest : public QObject {
     Q_OBJECT
@@ -44,6 +45,15 @@ void pressWithShift(Qt::Key key, const QString &name) {
     press(key, name, Qt::ShiftModifier);
     QKeyEvent shiftUp(QEvent::KeyRelease, Qt::Key_Shift, Qt::NoModifier, 50, 0, 0);
     QApplication::sendEvent(gGrid, &shiftUp);
+    QCoreApplication::processEvents();
+}
+
+void ctrlWheel(int angleY) {
+    QWidget *viewport = gGrid->viewport();
+    const QPointF local = QRectF(viewport->rect()).center();
+    QWheelEvent wheel(local, viewport->mapToGlobal(local), QPoint(), QPoint(0, angleY), Qt::NoButton,
+                      Qt::ControlModifier, Qt::NoScrollPhase, false);
+    QApplication::sendEvent(viewport, &wheel);
     QCoreApplication::processEvents();
 }
 
@@ -142,6 +152,31 @@ void GridNavigationKeysAreActionsTest::navigationKeysMoveTheSelectionAsBefore() 
     press(Qt::Key_Right, "Right");
     QVERIFY(single(5));
     QCOMPARE(footer.count(), 2);
+
+    // Ctrl+wheel resizes the thumbnails through its grid binding (zoomIn or
+    // zoomOut, depending on the fresh profile's wheel migration)...
+    // (each resize is signalled more than once, so compare sizes, not counts)
+    QSignalSpy sizes(gGrid, &FolderGridView::thumbnailSizeChanged);
+    const auto lastSize = [&]() { return sizes.last().at(0).toInt(); };
+    QVERIFY(QStringList({"zoomIn", "zoomOut"}).contains(actionManager->actionForShortcut(MODE_FOLDERVIEW, "Ctrl+WheelUp")));
+    ctrlWheel(120);
+    QVERIFY2(!sizes.isEmpty(), "Ctrl+wheel should resize the thumbnails.");
+    // ...and the zoom actions do it from any key bound in the grid.
+    const int size0 = lastSize();
+    actionManager->invokeAction("zoomOut");
+    QVERIFY(lastSize() < size0);
+    actionManager->invokeAction("zoomInCursor");
+    QCOMPARE(lastSize(), size0);
+    // Bound to another action, Ctrl+wheel runs that instead; unbound, nothing.
+    sizes.clear();
+    actionManager->addShortcut(MODE_FOLDERVIEW, "Ctrl+WheelUp", "toggleStatusFooter");
+    ctrlWheel(120);
+    QVERIFY(sizes.isEmpty());
+    QCOMPARE(footer.count(), 3);
+    actionManager->removeShortcut(MODE_FOLDERVIEW, "Ctrl+WheelUp");
+    ctrlWheel(120);
+    QVERIFY(sizes.isEmpty());
+    QCOMPARE(footer.count(), 3);
 }
 
 TG_BEHAVIOR_TEST_MAIN(GridNavigationKeysAreActionsTest)
