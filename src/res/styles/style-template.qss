@@ -518,21 +518,18 @@ VideoControls QPushButton[accessibleName="VideoControlTextButton"][checked="true
     color: %text%;
 }
 
-QFrame[accessibleName="VideoControlPopup"],
-QFrame[accessibleName="VideoControlVolumePopup"] {
+QFrame[accessibleName="VideoControlPopup"] {
     background-color: %widget%;
     border: 1px solid %text_lc2%;
     border-radius: 5px;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QLabel,
-QFrame[accessibleName="VideoControlVolumePopup"] QLabel {
+QFrame[accessibleName="VideoControlPopup"] QLabel {
     color: %text_hc2%;
     font-size: 11px;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"],
-QFrame[accessibleName="VideoControlVolumePopup"] QPushButton[accessibleName="VideoControlPopupButton"] {
+QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"] {
     color: %text_hc%;
     background-color: %button%;
     border: 1px solid %button_hover%;
@@ -541,8 +538,7 @@ QFrame[accessibleName="VideoControlVolumePopup"] QPushButton[accessibleName="Vid
     font-size: 11px;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover,
-QFrame[accessibleName="VideoControlVolumePopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover {
+QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover {
     background-color: %button_hover%;
     border-color: %text_lc2%;
 }

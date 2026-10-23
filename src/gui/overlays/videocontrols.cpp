@@ -20,15 +20,13 @@ QWidget *createVideoControlSeparator(QWidget *parent) {
 VideoControls::VideoControls(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VideoControls),
+    mode(PLAYBACK_VIDEO),
     loopABButton(new QPushButton("A-B", this)),
     speedButton(new QPushButton("1.00x", this)),
-    volumeMuteButton(new QPushButton(tr("Mute"), this)),
     resetSpeedButton(new QPushButton(tr("Reset 1.00x"), this)),
-    volumeSlider(new QSlider(Qt::Horizontal)),
+    volumeSlider(new QSlider(Qt::Horizontal, this)),
     speedSlider(new QSlider(Qt::Horizontal)),
-    volumePopupLabel(new QLabel("100%")),
     speedPopupLabel(new QLabel("1.00x")),
-    volumePopup(new QFrame(this, Qt::Popup)),
     speedPopup(new QFrame(this, Qt::Popup)),
     loopABState(LOOP_AB_CLEAR),
     loopStartPosition(0)
@@ -44,11 +42,7 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->horizontalLayout_2->setSpacing(2);
     ui->horizontalSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
     ui->horizontalSpacer_2->changeSize(4, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
-    volumePopup->setAccessibleName("VideoControlVolumePopup");
     speedPopup->setAccessibleName("VideoControlPopup");
-    auto *volumePopupLayout = new QVBoxLayout(volumePopup);
-    volumePopupLayout->setContentsMargins(8, 8, 8, 8);
-    volumePopupLayout->setSpacing(6);
     auto *speedPopupLayout = new QVBoxLayout(speedPopup);
     speedPopupLayout->setContentsMargins(8, 8, 8, 8);
     speedPopupLayout->setSpacing(6);
@@ -64,7 +58,7 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->nextFrameButton->setToolTip(tr("Next frame"));
     ui->muteButton->setIconPath(":/res/icons/common/buttons/videocontrols/mute-on24.png");
     ui->muteButton->setAction("");
-    ui->muteButton->setToolTip(tr("Volume"));
+    ui->muteButton->setToolTip(tr("Mute / unmute"));
     ui->pauseButton->setFixedSize(24, 24);
     ui->prevFrameButton->setFixedSize(24, 24);
     ui->nextFrameButton->setFixedSize(24, 24);
@@ -94,22 +88,13 @@ VideoControls::VideoControls(QWidget *parent) :
 
     volumeSlider->setAccessibleName("VideoControlVolumeSlider");
     volumeSlider->setFocusPolicy(Qt::NoFocus);
-    volumeSlider->setToolTip(tr("Volume"));
     volumeSlider->setRange(0, 100);
-    volumeSlider->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-    volumeSlider->setMinimumWidth(180);
-    volumeSlider->setTickPosition(QSlider::TicksBelow);
-    volumeSlider->setTickInterval(10);
+    volumeSlider->setSingleStep(5);
+    volumeSlider->setPageStep(10);
+    volumeSlider->setFixedSize(60, 24);
     volumeSlider->setValue(settings->volume());
-    volumePopupLabel->setAlignment(Qt::AlignCenter);
-    volumePopupLabel->setToolTip(tr("Volume"));
     updateVolumeText(volumeSlider->value());
-    volumeMuteButton->setAccessibleName("VideoControlPopupButton");
-    volumeMuteButton->setFocusPolicy(Qt::NoFocus);
-    volumeMuteButton->setFixedSize(180, 24);
-    volumePopupLayout->addWidget(volumePopupLabel);
-    volumePopupLayout->addWidget(volumeMuteButton);
-    volumePopupLayout->addWidget(volumeSlider);
+    ui->horizontalLayout->insertWidget(3, volumeSlider);
 
     ui->horizontalLayout->insertWidget(4, createVideoControlSeparator(this));
 
@@ -142,10 +127,7 @@ VideoControls::VideoControls(QWidget *parent) :
     lastPosition = -1;
 
     connect(ui->seekBar, &VideoSlider::sliderMovedX, this, &VideoControls::seek);
-    connect(ui->muteButton, &ActionButton::clicked, this, [this]() {
-        showPopupBelow(ui->muteButton, volumePopup);
-    });
-    connect(volumeMuteButton, &QPushButton::clicked, this, &VideoControls::toggleMuteRequested);
+    connect(ui->muteButton, &ActionButton::clicked, this, &VideoControls::toggleMuteRequested);
     connect(volumeSlider, &QSlider::valueChanged, this, [this](int value) {
         updateVolumeText(value);
         emit volumeChanged(value);
@@ -188,7 +170,6 @@ void VideoControls::setMode(PlaybackMode _mode) {
     speedButton->setVisible( (mode == PLAYBACK_VIDEO) );
     loopABButton->setVisible( (mode == PLAYBACK_VIDEO) );
     if(mode != PLAYBACK_VIDEO) {
-        volumePopup->hide();
         speedPopup->hide();
     }
     updateResponsiveVisibility();
@@ -249,13 +230,10 @@ void VideoControls::onPlaybackPaused(bool mode) {
 }
 
 void VideoControls::onVideoMuted(bool mode) {
-    if(mode) {
+    if(mode)
         ui->muteButton->setIconPath(":res/icons/common/buttons/videocontrols/mute-on24.png");
-        volumeMuteButton->setText(tr("Unmute"));
-    } else {
+    else
         ui->muteButton->setIconPath(":res/icons/common/buttons/videocontrols/mute-off24.png");
-        volumeMuteButton->setText(tr("Mute"));
-    }
 }
 
 void VideoControls::setVolume(int volume) {
@@ -300,7 +278,7 @@ void VideoControls::resetPlaybackSpeed() {
 }
 
 void VideoControls::updateVolumeText(int volume) {
-    volumePopupLabel->setText(QString::number(qBound(0, volume, 100)) + "%");
+    volumeSlider->setToolTip(tr("Volume: %1%").arg(qBound(0, volume, 100)));
 }
 
 void VideoControls::updateSpeedText(int value) {
@@ -320,4 +298,5 @@ void VideoControls::updateResponsiveVisibility() {
     ui->durationLabel->setVisible(!compact);
     ui->separatorLabel->setVisible(!compact);
     ui->positionLabel->setVisible(!veryCompact);
+    volumeSlider->setVisible(mode == PLAYBACK_VIDEO && !veryCompact);
 }

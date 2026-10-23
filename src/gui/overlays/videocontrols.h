@@ -65,13 +65,10 @@ private:
     PlaybackMode mode;
     QPushButton *loopABButton;
     QPushButton *speedButton;
-    QPushButton *volumeMuteButton;
     QPushButton *resetSpeedButton;
     QSlider *volumeSlider;
     QSlider *speedSlider;
-    QLabel *volumePopupLabel;
     QLabel *speedPopupLabel;
-    QFrame *volumePopup;
     QFrame *speedPopup;
     LoopABState loopABState;
     int loopStartPosition;

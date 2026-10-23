@@ -656,6 +656,14 @@ add_test(
     COMMAND thumbgrid_theme_stylesheet_substitution_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_video_mute_volume_controls_test
+    behavior/test_video_mute_and_volume_are_separate_controls.cpp
+)
+add_test(
+    NAME "The video speaker button only toggles mute and the volume slider sits next to it"
+    COMMAND thumbgrid_video_mute_volume_controls_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_heif_images_test
     behavior/test_heif_images_are_viewable.cpp
 )
