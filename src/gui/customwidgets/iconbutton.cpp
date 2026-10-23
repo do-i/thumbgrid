@@ -28,7 +28,6 @@ void IconButton::setChecked(bool mode) {
 }
 
 void IconButton::mousePressEvent(QMouseEvent *event) {
-    Q_UNUSED(event)
     if(mCheckable) {
         setChecked(!this->property("checked").toBool());
         emit toggled(mChecked);
@@ -38,6 +37,8 @@ void IconButton::mousePressEvent(QMouseEvent *event) {
     }
     style()->unpolish(this);
     style()->polish(this);
+    if(!mCheckable && event->button() == Qt::LeftButton)
+        emit pressed();
 }
 
 void IconButton::mouseReleaseEvent(QMouseEvent *event) {

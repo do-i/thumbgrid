@@ -49,6 +49,9 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     // Track the actual audio-output (system / per-app) volume so the UI can
     // reflect the real output level, not just mpv's internal software gain.
     mpv_observe_property(mpv, 0, "ao-volume", MPV_FORMAT_DOUBLE);
+    // Tells when the audio output comes up or goes away, so mute can move
+    // between the software mute and the audio output's own (see applyMute).
+    mpv_observe_property(mpv, 0, "current-ao", MPV_FORMAT_STRING);
     mpv_set_wakeup_callback(mpv, wakeup, this);
 }
 
@@ -139,6 +142,12 @@ void MpvWidget::handle_mpv_event(mpv_event *event) {
                 double vol = *reinterpret_cast<double*>(prop->data);
                 emit volumeChanged(static_cast<int>(vol + 0.5));
             }
+        } else if(strcmp(prop->name, "current-ao") == 0) {
+            const bool active = (prop->format == MPV_FORMAT_STRING);
+            if(active != mAudioOutputActive) {
+                mAudioOutputActive = active;
+                applyMute();
+            }
         }
         break;
     }
@@ -177,14 +186,26 @@ void MpvWidget::on_update(void *ctx) {
 }
 
 void MpvWidget::setMuted(bool mode) {
-    if(mode)
-        mpv::qt::set_property(mpv, "mute", "yes");
-    else
-        mpv::qt::set_property(mpv, "mute", "no");
+    mMuted = mode;
+    applyMute();
+}
+
+// The software `mute` only silences audio that hasn't been decoded yet, so what
+// already sits in the audio buffers (~100 ms) keeps playing after muting. While
+// the audio output exists, mute that instead (the system / per-app stream),
+// which is immediate both ways; the software mute covers the time before it
+// starts. The stream's mute is remembered by PulseAudio and restored with the
+// next stream, so ours is imposed again every time the audio output comes up.
+void MpvWidget::applyMute() {
+    if(mAudioOutputActive && mpv::qt::set_property(mpv, "ao-mute", mMuted) >= 0) {
+        mpv::qt::set_property(mpv, "mute", false);
+        return;
+    }
+    mpv::qt::set_property(mpv, "mute", mMuted);
 }
 
 bool MpvWidget::muted() {
-    return mpv::qt::get_property_variant(mpv, "mute").toBool();
+    return mMuted;
 }
 
 int MpvWidget::volume() {

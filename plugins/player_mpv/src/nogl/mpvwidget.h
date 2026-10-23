@@ -43,6 +43,9 @@ private slots:
 
 private:
     void handle_mpv_event(mpv_event *event);
+    void applyMute();
     
     mpv_handle *mpv;
+    bool mMuted = false;
+    bool mAudioOutputActive = false;
 };

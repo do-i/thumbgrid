@@ -13,7 +13,7 @@ class VideoMuteAndVolumeAreSeparateControlsTest : public QObject {
     Q_OBJECT
 
 private slots:
-    void theSpeakerTogglesMuteWithoutOpeningAPopup();
+    void theSpeakerTogglesMuteOnPressWithoutOpeningAPopup();
     void theVolumeSliderSitsInlineNextToTheSpeaker();
 };
 
@@ -43,17 +43,22 @@ struct Bar {
 };
 }
 
-void VideoMuteAndVolumeAreSeparateControlsTest::theSpeakerTogglesMuteWithoutOpeningAPopup() {
+void VideoMuteAndVolumeAreSeparateControlsTest::theSpeakerTogglesMuteOnPressWithoutOpeningAPopup() {
     Bar bar;
     QVERIFY(QTest::qWaitForWindowExposed(&bar.row));
     QVERIFY(bar.speaker);
 
     QSignalSpy mute(bar.controls, &VideoControls::toggleMuteRequested);
-    QTest::mouseClick(bar.speaker, Qt::LeftButton);
+    // it acts on the press, without waiting for the release
+    QTest::mousePress(bar.speaker, Qt::LeftButton);
+    QCOMPARE(mute.count(), 1);
+    QTest::mouseRelease(bar.speaker, Qt::LeftButton);
     QCOMPARE(mute.count(), 1);
     QCOMPARE(QApplication::activePopupWidget(), nullptr);
 
     QTest::mouseClick(bar.speaker, Qt::LeftButton);
+    QCOMPARE(mute.count(), 2);
+    QTest::mouseClick(bar.speaker, Qt::RightButton);
     QCOMPARE(mute.count(), 2);
 }
 

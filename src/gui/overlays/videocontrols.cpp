@@ -127,7 +127,9 @@ VideoControls::VideoControls(QWidget *parent) :
     lastPosition = -1;
 
     connect(ui->seekBar, &VideoSlider::sliderMovedX, this, &VideoControls::seek);
-    connect(ui->muteButton, &ActionButton::clicked, this, &VideoControls::toggleMuteRequested);
+    // on press, not release: a click's press-to-release time would add to the
+    // time it takes the sound to stop
+    connect(ui->muteButton, &ActionButton::pressed, this, &VideoControls::toggleMuteRequested);
     connect(volumeSlider, &QSlider::valueChanged, this, [this](int value) {
         updateVolumeText(value);
         emit volumeChanged(value);
