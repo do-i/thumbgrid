@@ -45,6 +45,20 @@ const QMap<QString, QString> &scrollFallbackDefaults() {
     return defaults;
 }
 
+// in a video, where there is never anything to scroll, the scroll actions and
+// the wheel's scrollOrPrevImage/scrollOrNextImage run these instead: the arrows
+// and the wheel seek (wheel up: forward, as in mpv and a slider), the fine
+// arrows seek as they always did
+const QMap<QString, QString> &videoScrollFallbackDefaults() {
+    static const QMap<QString, QString> defaults{
+        {"scrollUp", ""}, {"scrollDown", ""},
+        {"scrollLeft", "seekVideoBackward"}, {"scrollRight", "seekVideoForward"},
+        {"scrollUpFine", ""}, {"scrollDownFine", ""},
+        {"scrollLeftFine", "seekVideoBackward"}, {"scrollRightFine", "seekVideoForward"},
+        {"scrollOrPrevImage", "seekVideoForward"}, {"scrollOrNextImage", "seekVideoBackward"}};
+    return defaults;
+}
+
 // a fallback may not be a scroll action itself (which could loop back)
 bool isScrollFamilyAction(const QString &action) {
     return scrollFallbackDefaults().contains(action) || action.startsWith(QLatin1String("scrollOr"));
@@ -547,6 +561,7 @@ void ActionManager::applyPreset(const QString &id) {
     settings->saveDisabledShortcuts(QMap<ViewMode, QStringList>());
     settings->saveShortcutPrimary(QMap<ViewMode, QMap<QString, QString>>());
     actionManager->setScrollFallbackOverrides(QMap<QString, QString>());
+    actionManager->setVideoScrollFallbackOverrides(QMap<QString, QString>());
     actionManager->saveShortcuts();
     // Selecting a preset is never "modified", by definition — force it rather than
     // leaning on saveShortcuts()'s derived shortcuts==defaults comparison, which is
@@ -670,10 +685,7 @@ QString ActionManager::defaultScrollFallback(const QString &action) {
 }
 
 QString ActionManager::scrollFallback(const QString &action) const {
-    const QString fallback = scrollFallbacks.value(action, defaultScrollFallback(action));
-    if(fallback == QLatin1String("none") || isScrollFamilyAction(fallback))
-        return QString();
-    return fallback;
+    return resolvedFallback(scrollFallbacks.value(action, defaultScrollFallback(action)));
 }
 
 const QMap<QString, QString> &ActionManager::scrollFallbackOverrides() const {
@@ -681,25 +693,58 @@ const QMap<QString, QString> &ActionManager::scrollFallbackOverrides() const {
 }
 
 void ActionManager::setScrollFallbackOverrides(const QMap<QString, QString> &overrides) {
-    scrollFallbacks.clear();
-    for(auto it = overrides.cbegin(); it != overrides.cend(); ++it) {
-        const bool valid = it.value() == QLatin1String("none") ||
-                           (!isScrollFamilyAction(it.value()) && validateAction(it.value()) != ACTION_INVALID);
-        if(hasScrollFallback(it.key()) && valid && it.value() != defaultScrollFallback(it.key()))
-            scrollFallbacks.insert(it.key(), it.value());
-    }
+    scrollFallbacks = validFallbackOverrides(overrides, scrollFallbackDefaults());
     settings->saveShortcutFallbacks(scrollFallbacks);
+}
+
+bool ActionManager::hasVideoScrollFallback(const QString &action) {
+    return videoScrollFallbackDefaults().contains(action);
+}
+
+QString ActionManager::defaultVideoScrollFallback(const QString &action) {
+    return videoScrollFallbackDefaults().value(action);
+}
+
+QString ActionManager::videoScrollFallback(const QString &action) const {
+    return resolvedFallback(videoScrollFallbacks.value(action, defaultVideoScrollFallback(action)));
+}
+
+const QMap<QString, QString> &ActionManager::videoScrollFallbackOverrides() const {
+    return videoScrollFallbacks;
+}
+
+void ActionManager::setVideoScrollFallbackOverrides(const QMap<QString, QString> &overrides) {
+    videoScrollFallbacks = validFallbackOverrides(overrides, videoScrollFallbackDefaults());
+    settings->saveShortcutVideoFallbacks(videoScrollFallbacks);
+}
+
+QString ActionManager::resolvedFallback(const QString &fallback) {
+    if(fallback == QLatin1String("none") || isScrollFamilyAction(fallback))
+        return QString();
+    return fallback;
+}
+
+// keeps the overrides of actions that have a fallback, set to "none" or to a
+// valid non-scroll action other than the default
+QMap<QString, QString> ActionManager::validFallbackOverrides(const QMap<QString, QString> &overrides,
+                                                             const QMap<QString, QString> &defaults) {
+    QMap<QString, QString> valid;
+    for(auto it = overrides.cbegin(); it != overrides.cend(); ++it) {
+        const bool usable = it.value() == QLatin1String("none") ||
+                            (!isScrollFamilyAction(it.value()) && validateAction(it.value()) != ACTION_INVALID);
+        if(defaults.contains(it.key()) && usable && it.value() != defaults.value(it.key()))
+            valid.insert(it.key(), it.value());
+    }
+    return valid;
 }
 //------------------------------------------------------------------------------
 void ActionManager::readShortcuts() {
     settings->readShortcuts(shortcuts);
     QMap<QString, QString> fallbacks;
     settings->readShortcutFallbacks(fallbacks);
-    scrollFallbacks.clear();
-    for(auto it = fallbacks.cbegin(); it != fallbacks.cend(); ++it) {
-        if(hasScrollFallback(it.key()) && (it.value() == QLatin1String("none") || validateAction(it.value()) != ACTION_INVALID))
-            scrollFallbacks.insert(it.key(), it.value());
-    }
+    scrollFallbacks = validFallbackOverrides(fallbacks, scrollFallbackDefaults());
+    settings->readShortcutVideoFallbacks(fallbacks);
+    videoScrollFallbacks = validFallbackOverrides(fallbacks, videoScrollFallbackDefaults());
     // a shortcuts.json from before a context existed has no section for it;
     // seed it so an empty context still compares equal to the defaults
     for(ViewMode ctx : shortcutContexts())

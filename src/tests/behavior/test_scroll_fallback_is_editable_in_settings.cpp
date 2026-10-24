@@ -9,7 +9,8 @@
 
 // What a scroll action does when there is nothing to scroll (Left on a picture
 // that fits: the previous file) used to be fixed in code. The action's key
-// dialog now has a "When there is nothing to scroll" choice, which Apply saves.
+// dialog now has a "When there is nothing to scroll" choice, and an "In a
+// video" one, which Apply saves.
 
 class ScrollFallbackIsEditableInSettingsTest : public QObject {
     Q_OBJECT
@@ -83,6 +84,23 @@ void ScrollFallbackIsEditableInSettingsTest::theKeyDialogEditsTheFallback() {
         hasPicker = fallback != nullptr;
     });
     QVERIFY2(!hasPicker, "Only scroll actions have a fallback.");
+
+    // The wheel's scrollOrNextImage has only a fallback in a video: seeking
+    // back (wheel down, as in mpv and a slider).
+    QString videoShown;
+    editKeyDialog(table, rowFor(dialog, table, "scrollOrNextImage", MODE_DOCUMENT), [&](QComboBox *fallback) {
+        hasPicker = fallback != nullptr;
+        QWidget *keyDialog = QApplication::activeModalWidget();
+        auto video = keyDialog->findChild<QComboBox *>("shortcutVideoFallbackComboBox");
+        QVERIFY2(video, "The wheel's action should offer its fallback in a video.");
+        videoShown = video->currentText();
+        video->setCurrentIndex(video->findData(QStringLiteral("nextImage")));
+    });
+    QVERIFY2(!hasPicker, "The wheel's action changes file rather than running a fallback.");
+    QCOMPARE(videoShown, QStringLiteral("seekVideoBackward (default)"));
+    dialog.findChild<QPushButton *>("applyButton")->click();
+    QCOMPARE(actionManager->videoScrollFallback("scrollOrNextImage"), QStringLiteral("nextImage"));
+    actionManager->setVideoScrollFallbackOverrides({});
 }
 
 TG_BEHAVIOR_TEST_MAIN(ScrollFallbackIsEditableInSettingsTest)

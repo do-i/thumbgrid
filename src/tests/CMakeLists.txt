@@ -282,6 +282,14 @@ add_test(
     COMMAND thumbgrid_space_pauses_video_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_video_arrows_wheel_seek_test
+    behavior/test_video_arrows_and_wheel_seek.cpp
+)
+add_test(
+    NAME "Arrows and the wheel seek in a video"
+    COMMAND thumbgrid_video_arrows_wheel_seek_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

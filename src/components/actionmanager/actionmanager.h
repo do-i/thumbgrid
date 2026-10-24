@@ -81,6 +81,14 @@ public:
     QString scrollFallback(const QString &action) const;
     const QMap<QString, QString> &scrollFallbackOverrides() const;
     void setScrollFallbackOverrides(const QMap<QString, QString> &overrides);
+    // In a video there is nothing to scroll, and the scroll actions and the
+    // wheel's scrollOrPrevImage/scrollOrNextImage run their video fallback
+    // instead (seek by default; up/down: nothing), editable the same way.
+    static bool hasVideoScrollFallback(const QString &action);
+    static QString defaultVideoScrollFallback(const QString &action);
+    QString videoScrollFallback(const QString &action) const;
+    const QMap<QString, QString> &videoScrollFallbackOverrides() const;
+    void setVideoScrollFallbackOverrides(const QMap<QString, QString> &overrides);
 public slots:
     bool invokeAction(const QString &actionName);
 private:
@@ -92,7 +100,10 @@ private:
     bool hasOverlayContext = false;
     // set by a wheel turned with the right button held (RMB+WheelUp/Down)
     bool rightButtonWheel = false;
-    QMap<QString, QString> scrollFallbacks;
+    QMap<QString, QString> scrollFallbacks, videoScrollFallbacks;
+    static QString resolvedFallback(const QString &fallback);
+    QMap<QString, QString> validFallbackOverrides(const QMap<QString, QString> &overrides,
+                                                  const QMap<QString, QString> &defaults);
 
     static void initDefaults();
     static void initActions();

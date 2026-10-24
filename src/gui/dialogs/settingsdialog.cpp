@@ -1194,6 +1194,7 @@ void SettingsDialog::readShortcuts() {
     settings->readShortcutPrimary(mShortcutPrimary);
     settings->readDisabledShortcuts(mShortcutDisabled);
     mShortcutFallback = actionManager->scrollFallbackOverrides();
+    mShortcutVideoFallback = actionManager->videoScrollFallbackOverrides();
     updateShortcutsTable();
     refreshShortcutPresetCombo();
 }
@@ -1641,29 +1642,41 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     mainLayout->addWidget(warning);
 
     // A scroll action's fallback: what runs when there is nothing to scroll
-    // that way (a fitting picture, a short text file, a video).
-    QComboBox *fallbackBox = nullptr;
-    const QString defaultFallback = ActionManager::defaultScrollFallback(action);
-    if(ActionManager::hasScrollFallback(action)) {
+    // that way (a fitting picture, a short text file), and its fallback in a
+    // video, which the wheel's scrollOr actions have too.
+    const auto addFallbackRow = [&](const QString &caption, const QString &objectName,
+                                    const QString &defaultFallback, const QString &saved) {
         QHBoxLayout *fallbackRow = new QHBoxLayout();
-        fallbackRow->addWidget(new QLabel(tr("When there is nothing to scroll:"), &dialog));
-        fallbackBox = new QComboBox(&dialog);
-        fallbackBox->setObjectName("shortcutFallbackComboBox");
+        fallbackRow->addWidget(new QLabel(caption, &dialog));
+        QComboBox *box = new QComboBox(&dialog);
+        box->setObjectName(objectName);
         const auto label = [&](const QString &name, const QString &text) {
             return name == defaultFallback ? tr("%1 (default)").arg(text) : text;
         };
-        fallbackBox->addItem(label(QString(), tr("Nothing")), QString());
+        box->addItem(label(QString(), tr("Nothing")), QString());
         QStringList candidates = appActions->getList();
         candidates.sort(Qt::CaseInsensitive);
         for(const QString &candidate : candidates) {
             if(!ActionManager::hasScrollFallback(candidate) && !candidate.startsWith(QLatin1String("scrollOr")))
-                fallbackBox->addItem(label(candidate, shortcutActionLabel(candidate)), candidate);
+                box->addItem(label(candidate, shortcutActionLabel(candidate)), candidate);
         }
-        const QString saved = mShortcutFallback.value(action, defaultFallback);
-        const int current = fallbackBox->findData(saved == QLatin1String("none") ? QString() : saved);
-        fallbackBox->setCurrentIndex(current < 0 ? 0 : current);
-        fallbackRow->addWidget(fallbackBox, 1);
+        const int current = box->findData(saved == QLatin1String("none") ? QString() : saved);
+        box->setCurrentIndex(current < 0 ? 0 : current);
+        fallbackRow->addWidget(box, 1);
         mainLayout->addLayout(fallbackRow);
+        return box;
+    };
+    QComboBox *fallbackBox = nullptr;
+    const QString defaultFallback = ActionManager::defaultScrollFallback(action);
+    if(ActionManager::hasScrollFallback(action)) {
+        fallbackBox = addFallbackRow(tr("When there is nothing to scroll:"), "shortcutFallbackComboBox",
+                                     defaultFallback, mShortcutFallback.value(action, defaultFallback));
+    }
+    QComboBox *videoFallbackBox = nullptr;
+    const QString defaultVideoFallback = ActionManager::defaultVideoScrollFallback(action);
+    if(ActionManager::hasVideoScrollFallback(action)) {
+        videoFallbackBox = addFallbackRow(tr("In a video:"), "shortcutVideoFallbackComboBox", defaultVideoFallback,
+                                          mShortcutVideoFallback.value(action, defaultVideoFallback));
     }
 
     connect(adder, &KeySequenceEdit::edited, &dialog, [&]() {
@@ -1711,6 +1724,13 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
             mShortcutFallback.remove(action);
         else
             mShortcutFallback.insert(action, chosen.isEmpty() ? QStringLiteral("none") : chosen);
+    }
+    if(videoFallbackBox) {
+        const QString chosen = videoFallbackBox->currentData().toString();
+        if(chosen == defaultVideoFallback)
+            mShortcutVideoFallback.remove(action);
+        else
+            mShortcutVideoFallback.insert(action, chosen.isEmpty() ? QStringLiteral("none") : chosen);
     }
     // Commit the edited key set and primary choice into the draft model.
     setActionShortcuts(mShortcutDraft[context], action, keys);
@@ -2073,6 +2093,7 @@ void SettingsDialog::saveShortcuts() {
     actionManager->saveShortcuts();
     settings->saveShortcutPrimary(mShortcutPrimary);
     actionManager->setScrollFallbackOverrides(mShortcutFallback);
+    actionManager->setVideoScrollFallbackOverrides(mShortcutVideoFallback);
     settings->saveDisabledShortcuts(mShortcutDisabled);
 }
 //------------------------------------------------------------------------------

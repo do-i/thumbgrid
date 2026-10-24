@@ -898,7 +898,7 @@ void ViewerWidget::scrollRightFine() { scrollView( 1, 0, true); }
 // at its edge, and up switches a window-fitted image to fit-width. When there
 // is nothing to scroll that way the action runs its fallback (Settings >
 // Shortcuts): by default left/right change file and fine left/right seek a
-// video.
+// video. A video has its own fallbacks, by default seeking for both.
 void ViewerWidget::scrollView(int dx, int dy, bool fine) {
     if(currentWidget == TEXTVIEWER && dy && textViewer->canScroll()) {
         textViewer->scrollLines(dy * (fine ? 1 : QApplication::wheelScrollLines()));
@@ -915,7 +915,8 @@ void ViewerWidget::scrollView(int dx, int dy, bool fine) {
     QString action = (dx < 0) ? "scrollLeft" : (dx > 0) ? "scrollRight" : (dy < 0) ? "scrollUp" : "scrollDown";
     if(fine)
         action += "Fine";
-    const QString fallback = actionManager->scrollFallback(action);
+    const QString fallback = (currentWidget == VIDEOPLAYER) ? actionManager->videoScrollFallback(action)
+                                                            : actionManager->scrollFallback(action);
     if(!fallback.isEmpty())
         actionManager->invokeAction(fallback);
 }
@@ -925,8 +926,9 @@ void ViewerWidget::scrollOrNextImage() { scrollOrChangeFile( 1); }
 
 // A text file that can scroll scrolls by wheel-lines and stops at its ends, so
 // the end of a long file doesn't open the next one; with image scrolling set to
-// trackpad and wheel, an image taller than the window pans the same way.
-// Anything else changes file. Over the text or image itself the viewer does the
+// trackpad and wheel, an image taller than the window pans the same way. A
+// video runs the action's video fallback (seek by default); anything else
+// changes file. Over the text or image itself the viewer does the
 // wheel scrolling (see TextViewer and ImageViewerV2::wheelEvent).
 void ViewerWidget::scrollOrChangeFile(int dy) {
     if(currentWidget == TEXTVIEWER && textViewer->canScroll()) {
@@ -936,6 +938,12 @@ void ViewerWidget::scrollOrChangeFile(int dy) {
     if(currentWidget == IMAGEVIEWER && mInteractionEnabled && imageViewer->isDisplaying() &&
        settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL && imageViewer->keyPan(0, dy, false))
         return;
+    if(currentWidget == VIDEOPLAYER) {
+        const QString fallback = actionManager->videoScrollFallback((dy < 0) ? "scrollOrPrevImage" : "scrollOrNextImage");
+        if(!fallback.isEmpty())
+            actionManager->invokeAction(fallback);
+        return;
+    }
     actionManager->invokeAction((dy < 0) ? "prevImage" : "nextImage");
 }
 

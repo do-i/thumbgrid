@@ -152,6 +152,9 @@ public:
     // overrides of the scroll actions' fallbacks: action -> action, "none" for none
     void readShortcutFallbacks(QMap<QString, QString> &fallbacks);
     void saveShortcutFallbacks(const QMap<QString, QString> &fallbacks);
+    // the same for their fallbacks in a video
+    void readShortcutVideoFallbacks(QMap<QString, QString> &fallbacks);
+    void saveShortcutVideoFallbacks(const QMap<QString, QString> &fallbacks);
     void saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled);
     // [Shortcuts] pointers: selected preset id and whether the active mapping has
     // diverged from it. Only these pointers live in the .conf; the mapping is in

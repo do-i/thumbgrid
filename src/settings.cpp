@@ -1548,6 +1548,19 @@ void Settings::saveShortcutFallbacks(const QMap<QString, QString> &fallbacks) {
     writeShortcutStringMapJson(settings->mShortcutsJsonPath, "_fallback", values);
 }
 
+// "_videoFallback", shaped like "_fallback"
+void Settings::readShortcutVideoFallbacks(QMap<QString, QString> &fallbacks) {
+    QMap<ViewMode, QMap<QString, QString>> values;
+    readShortcutStringMapJson(settings->mShortcutsJsonPath, "_videoFallback", values);
+    fallbacks = values.value(MODE_DOCUMENT);
+}
+
+void Settings::saveShortcutVideoFallbacks(const QMap<QString, QString> &fallbacks) {
+    QMap<ViewMode, QMap<QString, QString>> values;
+    values.insert(MODE_DOCUMENT, fallbacks);
+    writeShortcutStringMapJson(settings->mShortcutsJsonPath, "_videoFallback", values);
+}
+
 void Settings::readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled) {
     readShortcutStringListJson(settings->mShortcutsJsonPath, "_disabled", disabled);
 }
