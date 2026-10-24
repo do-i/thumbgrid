@@ -86,7 +86,7 @@ QString settingGroupFor(const QString &key) {
     static const QHash<QString, QString> groups = {
         // General
         {"theme", "General"}, {"backgroundOpacity", "General"}, {"blurBackground", "General"},
-        {"autoResizeWindow", "General"}, {"autoResizeLimit", "General"}, {"cursorAutohiding", "General"},
+        {"autoResizeWindow", "General"}, {"autoResizeLimit", "General"}, {"cursorAutohiding", "General"}, {"cursorAutohideMode", "General"},
         {"defaultViewMode", "General"}, {"enableSmoothScroll", "General"}, {"infoBarFullscreen", "General"},
         {"infoBarWindowed", "General"}, {"language", "General"}, {"openInFullscreen", "General"},
         {"showFullMetadata", "General"}, {"windowTitleExtendedInfo", "General"}, {"zoomIndicatorMode", "General"},
@@ -2022,12 +2022,20 @@ void Settings::setWindowTitleExtendedInfo(bool mode) {
 }
 
 //------------------------------------------------------------------------------
-bool Settings::cursorAutohide() {
-    return settings->readSetting("cursorAutohiding", true).toBool();
+// Full screen only by default. Before the mode there was the on/off
+// "cursorAutohiding" (always on unless turned off): off stays never.
+CursorAutohideMode Settings::cursorAutohide() {
+    int mode = settings->readSetting("cursorAutohideMode", -1).toInt();
+    if(mode == -1)
+        mode = settings->readSetting("cursorAutohiding", true).toBool() ? CURSOR_AUTOHIDE_FULLSCREEN
+                                                                        : CURSOR_AUTOHIDE_NEVER;
+    if(mode < 0 || mode > 2)
+        mode = CURSOR_AUTOHIDE_FULLSCREEN;
+    return static_cast<CursorAutohideMode>(mode);
 }
 
-void Settings::setCursorAutohide(bool mode) {
-    settings->writeSetting("cursorAutohiding", mode);
+void Settings::setCursorAutohide(CursorAutohideMode mode) {
+    settings->writeSetting("cursorAutohideMode", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::firstRun() {

@@ -290,6 +290,14 @@ add_test(
     COMMAND thumbgrid_video_arrows_wheel_seek_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_cursor_autohide_mode_test
+    behavior/test_cursor_autohide_mode.cpp
+)
+add_test(
+    NAME "The idle mouse pointer hides only in full screen by default"
+    COMMAND thumbgrid_cursor_autohide_mode_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

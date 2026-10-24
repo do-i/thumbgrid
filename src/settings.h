@@ -102,6 +102,13 @@ enum ThumbPanelStyle : std::uint8_t {
     TH_PANEL_EXTENDED
 };
 
+// when the viewer hides an idle mouse pointer
+enum CursorAutohideMode : std::uint8_t {
+    CURSOR_AUTOHIDE_NEVER,
+    CURSOR_AUTOHIDE_FULLSCREEN,
+    CURSOR_AUTOHIDE_ALWAYS
+};
+
 class Settings : public QObject
 {
     Q_OBJECT
@@ -251,8 +258,8 @@ public:
     void setFirstRun(bool mode);
 
     void sync();
-    bool cursorAutohide();
-    void setCursorAutohide(bool mode);
+    CursorAutohideMode cursorAutohide();
+    void setCursorAutohide(CursorAutohideMode mode);
 
     bool infoBarFullscreen();
     void setInfoBarFullscreen(bool mode);

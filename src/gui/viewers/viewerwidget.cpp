@@ -686,7 +686,8 @@ void ViewerWidget::hideCursor() {
     // ignore when menu is up
     if(contextMenu && contextMenu->isVisible())
         return;
-    if(settings->cursorAutohide()) {
+    const CursorAutohideMode autohide = settings->cursorAutohide();
+    if(autohide == CURSOR_AUTOHIDE_ALWAYS || (autohide == CURSOR_AUTOHIDE_FULLSCREEN && mIsFullscreen)) {
         // force hide on wayland until we can get the cursor pos
         if(mWaylandCursorWorkaround) {
             setCursor(QCursor(Qt::BlankCursor));
@@ -839,6 +840,12 @@ void ViewerWidget::showContextMenu(QPoint pos) {
 void ViewerWidget::onFullscreenModeChanged(bool mode) {
     imageViewer->onFullscreenModeChanged(mode);
     mIsFullscreen = mode;
+    // a pointer hidden only in full screen comes back on leaving it; entering
+    // it hides an idle one
+    if(!mode && settings->cursorAutohide() == CURSOR_AUTOHIDE_FULLSCREEN)
+        showCursor();
+    else
+        hideCursorTimed(false);
 }
 
 void ViewerWidget::readSettings() {

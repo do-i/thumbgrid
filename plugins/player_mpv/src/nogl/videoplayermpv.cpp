@@ -27,6 +27,8 @@ VideoPlayerMpv::VideoPlayerMpv(QWidget *parent) : VideoPlayer(parent) {
     // So the cover must itself be a native window -- then raise() restacks it
     // above mpv at the X level and it actually hides the video.
     mBlankOverlay->setAttribute(Qt::WA_NativeWindow);
+    // native too, so pass the pointer's moves on like MpvWidget does
+    mBlankOverlay->setMouseTracking(true);
     // Paint solid black via the palette; a stylesheet background is unreliable
     // on a native, layout-less child window.
     mBlankOverlay->setAutoFillBackground(true);

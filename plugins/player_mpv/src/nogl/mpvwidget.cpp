@@ -21,6 +21,11 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     mpv_set_option_string(mpv, "vo", "gpu,xv,x11");
 
     this->setAttribute(Qt::WA_TransparentForMouseEvents, true);
+    // A native window gets the pointer's X events itself despite the attribute
+    // above, and Qt drops a buttonless move at a widget without mouse tracking
+    // instead of passing it on: the viewer never saw the mouse move over a
+    // video, so a pointer it had auto-hidden never came back.
+    setMouseTracking(true);
     mpv_set_option_string(mpv, "input-cursor", "no");   // no mouse handling
     mpv_set_option_string(mpv, "cursor-autohide", "no");// no cursor-autohide, we handle that
     //mpv_set_option_string(mpv, "terminal", "yes");
