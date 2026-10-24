@@ -10,6 +10,10 @@ struct VideoControlsStateBuffer {
     bool paused = true;
     bool videoMuted = true;
     PlaybackMode mode = PLAYBACK_VIDEO;
+    int clipStart = -1;
+    int clipEnd = -1;
+    bool clipEditing = false;
+    bool loop = false;
 };
 
 class VideoControlsProxyWrapper : public QWidget {
@@ -29,8 +33,9 @@ signals:
     void seekBackward();
     void volumeChanged(int volume);
     void playbackSpeedChanged(double speed);
-    void loopABChanged(int startPosition, int endPosition);
     void toggleMuteRequested();
+    void clipHandlePressed(int handle);
+    void clipHandleMoved(int handle, int pos);
 
 public slots:
     void setPlaybackDuration(int);
@@ -39,6 +44,8 @@ public slots:
     void onPlaybackPaused(bool);
     void onVideoMuted(bool);
     void setVolume(int);
+    void setClip(int start, int end, bool editing);
+    void setLoop(bool mode);
 
 private:
     VideoControls *videoControls;

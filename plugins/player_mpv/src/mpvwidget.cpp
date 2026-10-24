@@ -39,6 +39,9 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
 
     // Loop video
     setRepeat(true);
+    // stay on the last frame at the end instead of unloading the file, so a
+    // video that doesn't loop can be played again (eof-reached tells the end)
+    mpv::qt::set_property(mpv, "keep-open", "yes");
 
     // Unmute
     setMuted(false);
@@ -46,6 +49,7 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG);
+    mpv_observe_property(mpv, 0, "eof-reached", MPV_FORMAT_FLAG);
     // Track the actual audio-output (system / per-app) volume so the UI can
     // reflect the real output level, not just mpv's internal software gain.
     mpv_observe_property(mpv, 0, "ao-volume", MPV_FORMAT_DOUBLE);
@@ -123,15 +127,18 @@ void MpvWidget::handle_mpv_event(mpv_event *event) {
         if(strcmp(prop->name, "time-pos") == 0) {
             if (prop->format == MPV_FORMAT_DOUBLE) {
                 double time = *reinterpret_cast<double*>(prop->data);
-                emit positionChanged(static_cast<int>(time));
+                emit positionChanged(qRound(time * 1000));
             }
         } else if(strcmp(prop->name, "duration") == 0) {
             if(prop->format == MPV_FORMAT_DOUBLE) {
                 double time = *reinterpret_cast<double*>(prop->data);
-                emit durationChanged(static_cast<int>(time));
+                emit durationChanged(qRound(time * 1000));
             } else if(prop->format == MPV_FORMAT_NONE) {
                 emit playbackFinished();
             }
+        } else if(strcmp(prop->name, "eof-reached") == 0) {
+            if(prop->format == MPV_FORMAT_FLAG && *reinterpret_cast<int*>(prop->data))
+                emit playbackFinished();
         } else if(strcmp(prop->name, "pause") == 0) {
             int mode = *reinterpret_cast<int*>(prop->data);
             emit videoPaused(mode == 1);
@@ -233,8 +240,8 @@ void MpvWidget::setLoopAB(int startPosition, int endPosition) {
         mpv::qt::set_property_variant(mpv, "ab-loop-b", "no");
         return;
     }
-    mpv::qt::set_property_variant(mpv, "ab-loop-a", startPosition);
-    mpv::qt::set_property_variant(mpv, "ab-loop-b", endPosition);
+    mpv::qt::set_property_variant(mpv, "ab-loop-a", startPosition / 1000.0);
+    mpv::qt::set_property_variant(mpv, "ab-loop-b", endPosition / 1000.0);
 }
 
 void MpvWidget::setRepeat(bool mode) {

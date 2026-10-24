@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "gui/viewers/imageviewerv2.h"
 #include "gui/viewers/textviewer.h"
+#include "gui/viewers/videoclip.h"
 #include "gui/viewers/videoplayerinitproxy.h"
 #include "gui/overlays/videocontrolsproxy.h"
 #include "gui/overlays/zoomindicatoroverlayproxy.h"
@@ -69,6 +70,23 @@ private:
     bool shouldShowVideoControls();
     void updateVideoControlsVisibility();
 
+    // the shown video's clip; applyVideoClip() puts it on the controls and the
+    // player whenever it changes
+    VideoClip videoClip;
+    VideoClip::State mLastClipState = VideoClip::CLIP_NONE;
+    int mVideoPosition = 0;
+    bool mVideoPaused = true;
+    // a dragged handle's frame is shown, at most every PREVIEW_SEEK_MS
+    QTimer mPreviewSeekTimer;
+    int mPreviewSeekTarget = -1;
+    int mPreviewSeekSent = -1;
+    static constexpr int PREVIEW_SEEK_MS = 40;
+    void applyVideoClip();
+    // a frame step while editing moves the last-touched handle a frame
+    void stepClipHandle(int frames);
+    void previewSeek(int pos);
+    void seekVideoTo(int pos);
+
     bool eventFilter(QObject *object, QEvent *event) override;
     ActiveHighlightZone clickZoneAt(const QPoint &pos);
     QString clickZoneAction(ActiveHighlightZone zone, const QString &click);
@@ -77,6 +95,9 @@ private slots:
     void onScaleChanged(qreal);
     void onVideoPlaybackFinished();
     void onAnimationPlaybackFinished();
+    void onVideoPositionChanged(int pos);
+    void onClipHandlePressed(int handle);
+    void onClipHandleMoved(int handle, int pos);
 
 signals:
     void scalingRequested(QSize, ScalingFilter);
@@ -140,7 +161,14 @@ public slots:
     void volumeDown();
     void setVolume(int volume);
     void setPlaybackSpeed(double speed);
-    void setLoopAB(int startPosition, int endPosition);
+    // the clip: the bracket button / its keys, and loop (clip or whole file)
+    void toggleClipEdit();
+    void commitClipEdit();
+    void cancelClipEdit();
+    void clearClip();
+    void setClipStart();
+    void setClipEnd();
+    void toggleVideoLoop();
 
     void startPlayback();
     void showContextMenu();

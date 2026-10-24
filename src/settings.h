@@ -80,7 +80,9 @@ enum ViewMode : std::uint8_t {
     MODE_FOLDERVIEW,
     MODE_GLOBAL,
     // shortcut context only: keys of the open Copy/Move overlay
-    MODE_COPYMOVE
+    MODE_COPYMOVE,
+    // shortcut context only: keys while a video's clip is being edited
+    MODE_CLIPEDIT
 };
 
 enum FolderEndAction : std::uint8_t {

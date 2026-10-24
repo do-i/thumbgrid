@@ -22,6 +22,10 @@
         "pasteFile": ["$Ctrl+V"]
     },
     "document": {
+        "clearClip": ["|"],
+        "setClipEnd": ["]"],
+        "setClipStart": ["["],
+        "toggleVideoLoop": ["\\"],
         "dragPan": ["LMB_Drag"],
         "dragZoom": ["RMB_Drag"],
         "nextImage": ["PgDown", "Right", "LMB_RightEdge"],
@@ -74,5 +78,9 @@
         "sendToFolder7": ["7"],
         "sendToFolder8": ["8"],
         "sendToFolder9": ["9"]
+    },
+    "clipEdit": {
+        "cancelClipEdit": ["Esc"],
+        "commitClipEdit": ["Enter"]
     }
 }

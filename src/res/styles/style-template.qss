@@ -487,6 +487,7 @@ VideoControls [accessibleName="ButtonSetRight"]:hover {
 
 VideoControls [accessibleName="Button"]:pressed,
 VideoControls [accessibleName="Button"][pressed="true"],
+VideoControls [accessibleName="Button"][checked="true"],
 VideoControls [accessibleName="ButtonSetLeft"]:pressed,
 VideoControls [accessibleName="ButtonSetLeft"][pressed="true"],
 VideoControls [accessibleName="ButtonSetRight"]:pressed,

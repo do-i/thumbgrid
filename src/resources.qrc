@@ -32,6 +32,12 @@
         <file>res/icons/common/buttons/panel-small/remove12@2x.png</file>
         <file>res/icons/common/buttons/panel-small/root12.png</file>
         <file>res/icons/common/buttons/panel-small/root12@2x.png</file>
+        <file>res/icons/common/buttons/videocontrols/clip24.png</file>
+        <file>res/icons/common/buttons/videocontrols/clip24@2x.png</file>
+        <file>res/icons/common/buttons/videocontrols/clip-edit24.png</file>
+        <file>res/icons/common/buttons/videocontrols/clip-edit24@2x.png</file>
+        <file>res/icons/common/buttons/videocontrols/loop24.png</file>
+        <file>res/icons/common/buttons/videocontrols/loop24@2x.png</file>
         <file>res/icons/common/buttons/videocontrols/mute-off24.png</file>
         <file>res/icons/common/buttons/videocontrols/mute-off24@2x.png</file>
         <file>res/icons/common/buttons/videocontrols/mute-on24.png</file>
@@ -44,6 +50,8 @@
         <file>res/icons/common/buttons/videocontrols/skip-backwards24@2x.png</file>
         <file>res/icons/common/buttons/videocontrols/skip-forward24.png</file>
         <file>res/icons/common/buttons/videocontrols/skip-forward24@2x.png</file>
+        <file>res/icons/common/menuitem/clip16.png</file>
+        <file>res/icons/common/menuitem/clip16@2x.png</file>
         <file>res/icons/common/menuitem/copy16.png</file>
         <file>res/icons/common/menuitem/copy16@2x.png</file>
         <file>res/icons/common/menuitem/document-view16.png</file>

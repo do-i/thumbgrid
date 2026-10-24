@@ -69,8 +69,13 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     clickZoneOverlay = new ClickZoneOverlay(this);
 
     connect(videoPlayer.get(), &VideoPlayer::playbackFinished, this, &ViewerWidget::onVideoPlaybackFinished);
-    connect(videoPlayer.get(), &VideoPlayer::durationChanged, this, [this](int) {
+    connect(videoPlayer.get(), &VideoPlayer::durationChanged, this, [this](int duration) {
+        videoClip.setDuration(duration);
         updateVideoControlsVisibility();
+    });
+    connect(videoPlayer.get(), &VideoPlayer::positionChanged, this, &ViewerWidget::onVideoPositionChanged);
+    connect(videoPlayer.get(), &VideoPlayer::videoPaused, this, [this](bool paused) {
+        mVideoPaused = paused;
     });
     // Reflect the real audio-output volume (reported by the player) on the
     // controls slider, so it matches the actual OS/per-app sound level.
@@ -81,8 +86,17 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     connect(videoControls, &VideoControlsProxyWrapper::seek,      this, &ViewerWidget::seek);
     connect(videoControls, &VideoControlsProxyWrapper::volumeChanged, this, &ViewerWidget::setVolume);
     connect(videoControls, &VideoControlsProxyWrapper::playbackSpeedChanged, this, &ViewerWidget::setPlaybackSpeed);
-    connect(videoControls, &VideoControlsProxyWrapper::loopABChanged, this, &ViewerWidget::setLoopAB);
     connect(videoControls, &VideoControlsProxyWrapper::toggleMuteRequested, this, &ViewerWidget::toggleMute);
+    // VideoSlider::ClipHandle and VideoClip::Handle number the handles alike
+    connect(videoControls, &VideoControlsProxyWrapper::clipHandlePressed, this, &ViewerWidget::onClipHandlePressed);
+    connect(videoControls, &VideoControlsProxyWrapper::clipHandleMoved, this, &ViewerWidget::onClipHandleMoved);
+    connect(&videoClip, &VideoClip::changed, this, &ViewerWidget::applyVideoClip);
+    mPreviewSeekTimer.setSingleShot(true);
+    mPreviewSeekTimer.setInterval(PREVIEW_SEEK_MS);
+    connect(&mPreviewSeekTimer, &QTimer::timeout, this, [this]() {
+        if(mPreviewSeekTarget != mPreviewSeekSent)
+            previewSeek(mPreviewSeekTarget);
+    });
 
     enableImageViewer();
     setInteractionEnabled(true);
@@ -183,6 +197,8 @@ void ViewerWidget::disableVideoPlayer() {
         disconnect(videoPlayer.get(), &VideoPlayer::positionChanged, videoControls, &VideoControlsProxyWrapper::setPlaybackPosition);
         disconnect(videoPlayer.get(), &VideoPlayer::videoPaused,     videoControls, &VideoControlsProxyWrapper::onPlaybackPaused);
         videoPlayer->setPaused(true);
+        videoClip.reset();
+        applyVideoClip();
         // Hide the player when leaving it. Otherwise its last decoded frame
         // lingers and briefly flashes when we switch to an image.
         // The old "do not hide, late GL frames corrupt the imageviewer" caveat
@@ -209,8 +225,15 @@ void ViewerWidget::onScaleChanged(qreal scale) {
 }
 
 void ViewerWidget::onVideoPlaybackFinished() {
-    if(currentWidget == VIDEOPLAYER)
-        emit playbackFinished();
+    if(currentWidget != VIDEOPLAYER)
+        return;
+    // mpv's A-B loop may not repeat a clip that runs to the very end
+    if(videoClip.isActive() && videoClip.loop()) {
+        seekVideoTo(videoClip.start());
+        videoPlayer->setPaused(false);
+        return;
+    }
+    emit playbackFinished();
 }
 
 void ViewerWidget::onAnimationPlaybackFinished() {
@@ -298,6 +321,10 @@ bool ViewerWidget::showAnimation(const std::shared_ptr<QMovie>& movie) {
 bool ViewerWidget::showVideo(QString file) {
     stopPlayback();
     enableVideoPlayer();
+    // every file starts without a clip and with loop off
+    videoClip.reset();
+    mVideoPosition = 0;
+    applyVideoClip();
     videoPlayer->showVideo(std::move(file));
     updateVideoControlsVisibility();
     // Restore the pointer on every switch; it auto-hides again after the idle
@@ -386,50 +413,72 @@ bool ViewerWidget::isShowingVideo() const {
     return currentWidget == VIDEOPLAYER;
 }
 
+// With an active clip, play resumes inside it, and starts over from the clip's
+// start when stopped outside it or at its end.
 void ViewerWidget::pauseResumePlayback() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->pauseResume();
-    else if(imageViewer->hasAnimation())
+    if(currentWidget == VIDEOPLAYER) {
+        const int target = mVideoPaused ? videoClip.resumeTarget(mVideoPosition) : -1;
+        if(target >= 0) {
+            seekVideoTo(target);
+            videoPlayer->setPaused(false);
+        } else {
+            videoPlayer.get()->pauseResume();
+        }
+    } else if(imageViewer->hasAnimation())
         imageViewer->pauseResume();
 }
 
 void ViewerWidget::seek(int pos) {
     if(currentWidget == VIDEOPLAYER) {
-        videoPlayer.get()->seek(pos);
+        seekVideoTo(videoClip.seekTarget(pos));
     } else if(imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->showAnimationFrame(pos);
     }
 }
 
+// seconds; an active clip keeps the seek inside it
 void ViewerWidget::seekRelative(int pos) {
-    if(currentWidget == VIDEOPLAYER)
+    if(currentWidget != VIDEOPLAYER)
+        return;
+    if(videoClip.isActive())
+        seekVideoTo(videoClip.seekTarget(mVideoPosition + pos * 1000));
+    else
         videoPlayer.get()->seekRelative(pos);
 }
 
 void ViewerWidget::seekBackward() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->seekRelative(-10);
+    seekRelative(-10);
 }
 
 void ViewerWidget::seekForward() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->seekRelative(10);
+    seekRelative(10);
+}
+
+void ViewerWidget::seekVideoTo(int pos) {
+    videoPlayer->seek(pos);
+    mVideoPosition = pos;
 }
 
 void ViewerWidget::frameStep() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->frameStep();
-    else if(imageViewer->hasAnimation()) {
+    if(currentWidget == VIDEOPLAYER) {
+        if(videoClip.isEditing())
+            stepClipHandle(1);
+        else
+            videoPlayer.get()->frameStep();
+    } else if(imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->nextFrame();
     }
 }
 
 void ViewerWidget::frameStepBack() {
-    if(currentWidget == VIDEOPLAYER)
-        videoPlayer.get()->frameStepBack();
-    else if(imageViewer->hasAnimation()) {
+    if(currentWidget == VIDEOPLAYER) {
+        if(videoClip.isEditing())
+            stepClipHandle(-1);
+        else
+            videoPlayer.get()->frameStepBack();
+    } else if(imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->prevFrame();
     }
@@ -466,9 +515,121 @@ void ViewerWidget::setPlaybackSpeed(double speed) {
         videoPlayer->setPlaybackSpeed(speed);
 }
 
-void ViewerWidget::setLoopAB(int startPosition, int endPosition) {
+void ViewerWidget::toggleClipEdit() {
     if(currentWidget == VIDEOPLAYER)
-        videoPlayer->setLoopAB(startPosition, endPosition);
+        videoClip.toggleEdit();
+}
+
+void ViewerWidget::commitClipEdit() {
+    if(currentWidget == VIDEOPLAYER)
+        videoClip.commitEdit();
+}
+
+void ViewerWidget::cancelClipEdit() {
+    if(currentWidget == VIDEOPLAYER)
+        videoClip.cancelEdit();
+}
+
+void ViewerWidget::clearClip() {
+    if(currentWidget == VIDEOPLAYER)
+        videoClip.clear();
+}
+
+void ViewerWidget::setClipStart() {
+    if(currentWidget == VIDEOPLAYER)
+        videoClip.markStart(mVideoPosition);
+}
+
+void ViewerWidget::setClipEnd() {
+    if(currentWidget == VIDEOPLAYER)
+        videoClip.markEnd(mVideoPosition);
+}
+
+void ViewerWidget::toggleVideoLoop() {
+    if(currentWidget == VIDEOPLAYER)
+        videoClip.toggleLoop();
+}
+
+// Shows the clip on the controls and hands it to the player: mpv repeats an
+// active clip that loops (A-B loop), and without a clip loop repeats the file.
+// A clip that doesn't loop is stopped at its end in onVideoPositionChanged().
+void ViewerWidget::applyVideoClip() {
+    const VideoClip::State state = videoClip.state();
+    videoControls->setClip(videoClip.hasRange() ? videoClip.start() : -1, videoClip.end(), videoClip.isEditing());
+    videoControls->setLoop(videoClip.loop());
+    if(videoClip.isActive() && videoClip.loop())
+        videoPlayer->setLoopAB(videoClip.start(), videoClip.end());
+    else
+        videoPlayer->setLoopAB(-1, -1);
+    videoPlayer->setLoopPlayback(videoClip.loop() && !videoClip.isActive());
+    // Esc / Enter cancel / commit while editing
+    if(videoClip.isEditing())
+        actionManager->setOverlayContext(MODE_CLIPEDIT);
+    else
+        actionManager->clearOverlayContext();
+    // leaving edit mode: the clip is ready to play from its start
+    if(state == VideoClip::CLIP_ACTIVE && mLastClipState == VideoClip::CLIP_EDITING)
+        seekVideoTo(videoClip.start());
+    mLastClipState = state;
+}
+
+void ViewerWidget::onVideoPositionChanged(int pos) {
+    if(currentWidget != VIDEOPLAYER)
+        return;
+    mVideoPosition = pos;
+    if(!mVideoPaused && videoClip.reachedEnd(pos)) {
+        videoPlayer->setPaused(true);
+        mVideoPaused = true;
+        seekVideoTo(videoClip.end());
+    }
+}
+
+// grabbing a handle pauses the video on the handle's frame
+void ViewerWidget::onClipHandlePressed(int handle) {
+    if(currentWidget != VIDEOPLAYER || !videoClip.isEditing())
+        return;
+    if(!mVideoPaused) {
+        videoPlayer->setPaused(true);
+        mVideoPaused = true;
+    }
+    const auto which = VideoClip::Handle(handle);
+    const int pos = (which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end();
+    // marks it as the one a frame step moves
+    videoClip.moveHandle(which, pos);
+    previewSeek(pos);
+}
+
+void ViewerWidget::onClipHandleMoved(int handle, int pos) {
+    if(currentWidget != VIDEOPLAYER || !videoClip.isEditing())
+        return;
+    const auto which = VideoClip::Handle(handle);
+    videoClip.moveHandle(which, pos);
+    previewSeek((which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end());
+}
+
+// to the next / previous frame boundary, shown paused
+void ViewerWidget::stepClipHandle(int frames) {
+    const double fps = videoPlayer->frameRate();
+    const double frame = 1000.0 / (fps > 0 ? fps : 25.0);
+    const VideoClip::Handle which = videoClip.lastHandle();
+    const int pos = (which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end();
+    videoClip.moveHandle(which, qRound((qRound(pos / frame) + frames) * frame));
+    if(!mVideoPaused) {
+        videoPlayer->setPaused(true);
+        mVideoPaused = true;
+    }
+    previewSeek((which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end());
+}
+
+// Seeks to pos at most every PREVIEW_SEEK_MS while a handle is dragged; the
+// last position is always seeked to.
+void ViewerWidget::previewSeek(int pos) {
+    mPreviewSeekTarget = pos;
+    if(mPreviewSeekTimer.isActive())
+        return;
+    mPreviewSeekSent = pos;
+    seekVideoTo(pos);
+    mPreviewSeekTimer.start();
 }
 
 bool ViewerWidget::isDisplaying() {
@@ -695,9 +856,12 @@ void ViewerWidget::readSettings() {
     }
 }
 
+// The slideshow turns looping off so it can move on. A video's loop is its
+// own button's (off for every new file), so ending the slideshow leaves it be.
 void ViewerWidget::setLoopPlayback(bool mode) {
     imageViewer->setLoopPlayback(mode);
-    videoPlayer->setLoopPlayback(mode);
+    if(!mode)
+        videoClip.setLoop(false);
 }
 
 void ViewerWidget::hideContextMenu() {

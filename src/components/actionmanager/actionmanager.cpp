@@ -51,7 +51,7 @@ bool isScrollFamilyAction(const QString &action) {
 }
 
 QList<ViewMode> shortcutContexts() {
-    return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW, MODE_COPYMOVE};
+    return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW, MODE_COPYMOVE, MODE_CLIPEDIT};
 }
 
 QStringList shortcutKeysFromJson(const QJsonValue &value) {
@@ -134,11 +134,13 @@ void ActionManager::initDefaults() {
     ContextMap document;
     ContextMap grid;
     ContextMap copyMove;
+    ContextMap clipEdit;
     insertShortcutObject(root.value("shortcuts").toObject(), global);
     insertShortcutObject(root.value("global").toObject(), global);
     insertShortcutObject(root.value("document").toObject(), document);
     insertShortcutObject(root.value("grid").toObject(), grid);
     insertShortcutObject(root.value("copyMove").toObject(), copyMove);
+    insertShortcutObject(root.value("clipEdit").toObject(), clipEdit);
     // Per-OS overrides: pick the current-OS block (windows/macos/linux), falling
     // back to "default". (Legacy preset files used "apple"; treat it as macos.)
     const QJsonObject platform = root.value("platform").toObject();
@@ -155,6 +157,7 @@ void ActionManager::initDefaults() {
     loaded.insert(MODE_DOCUMENT, document);
     loaded.insert(MODE_FOLDERVIEW, grid);
     loaded.insert(MODE_COPYMOVE, copyMove);
+    loaded.insert(MODE_CLIPEDIT, clipEdit);
     // Presets spell a binding out in every context it applies to (leftie, for one,
     // repeats folderView/nextDirectory/prevDirectory/toggleImageInfo verbatim under
     // both document and grid). shortcuts.json does not store that shape: reading it
@@ -201,6 +204,19 @@ void ActionManager::setContext(ViewMode context) {
     actionManager->context = context;
 }
 //------------------------------------------------------------------------------
+bool ActionManager::isOverlayContext(ViewMode context) {
+    return context == MODE_COPYMOVE || context == MODE_CLIPEDIT;
+}
+//------------------------------------------------------------------------------
+void ActionManager::setOverlayContext(ViewMode context) {
+    actionManager->overlayContext = context;
+    actionManager->hasOverlayContext = true;
+}
+//------------------------------------------------------------------------------
+void ActionManager::clearOverlayContext() {
+    actionManager->hasOverlayContext = false;
+}
+//------------------------------------------------------------------------------
 ViewMode ActionManager::currentContext() const {
     return context;
 }
@@ -210,6 +226,8 @@ QString ActionManager::contextToString(ViewMode context) {
         return QStringLiteral("global");
     if(context == MODE_COPYMOVE)
         return QStringLiteral("copyMove");
+    if(context == MODE_CLIPEDIT)
+        return QStringLiteral("clipEdit");
     return (context == MODE_FOLDERVIEW) ? QStringLiteral("grid")
                                         : QStringLiteral("document");
 }
@@ -219,6 +237,8 @@ ViewMode ActionManager::contextFromString(const QString &name) {
         return MODE_GLOBAL;
     if(name == QStringLiteral("copyMove"))
         return MODE_COPYMOVE;
+    if(name == QStringLiteral("clipEdit"))
+        return MODE_CLIPEDIT;
     return (name == QStringLiteral("grid") || name == QStringLiteral("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -558,7 +578,7 @@ bool ActionManager::viewerHandlesWheel(QWheelEvent *event) {
 // returns first shortcut that is found in the given context
 const QString ActionManager::shortcutForAction(ViewMode context, const QString& action) {
     const QString contextKey = shortcuts[context].key(action, "");
-    if(!contextKey.isEmpty() || context == MODE_GLOBAL || context == MODE_COPYMOVE)
+    if(!contextKey.isEmpty() || context == MODE_GLOBAL || isOverlayContext(context))
         return contextKey;
     return shortcuts[MODE_GLOBAL].key(action, "");
 }
@@ -609,8 +629,8 @@ QString ActionManager::lookupActionForShortcut(ViewMode context, const QString &
     if(shortcut.isEmpty())
         return QString();
     const QString contextAction = shortcutLookup.value(context).value(shortcut);
-    // Global bindings don't reach the Copy / Move overlay's own keys
-    if(!contextAction.isEmpty() || context == MODE_GLOBAL || context == MODE_COPYMOVE)
+    // Global bindings don't reach the Copy / Move overlay's or clip editing's own keys
+    if(!contextAction.isEmpty() || context == MODE_GLOBAL || isOverlayContext(context))
         return contextAction;
     return shortcutLookup.value(MODE_GLOBAL).value(shortcut);
 }
@@ -712,6 +732,10 @@ bool ActionManager::processEvent(QInputEvent *event) {
         else if(mouse->type() == QEvent::MouseButtonRelease && std::exchange(actionManager->rightButtonWheel, false))
             return false;
     }
-    return actionManager->invokeActionForShortcut(actionManager->context, ShortcutBuilder::fromEvent(event));
+    const QString shortcut = ShortcutBuilder::fromEvent(event);
+    if(actionManager->hasOverlayContext &&
+       actionManager->invokeActionForShortcut(actionManager->overlayContext, shortcut))
+        return true;
+    return actionManager->invokeActionForShortcut(actionManager->context, shortcut);
 }
 //------------------------------------------------------------------------------

@@ -178,6 +178,8 @@ QString shortcutContextToken(ViewMode context) {
         return QStringLiteral("global");
     if(context == MODE_COPYMOVE)
         return QStringLiteral("copyMove");
+    if(context == MODE_CLIPEDIT)
+        return QStringLiteral("clipEdit");
     return context == MODE_FOLDERVIEW ? QStringLiteral("grid")
                                       : QStringLiteral("document");
 }
@@ -187,6 +189,8 @@ ViewMode shortcutContextFromToken(const QString &token) {
         return MODE_GLOBAL;
     if(token == QLatin1String("copyMove"))
         return MODE_COPYMOVE;
+    if(token == QLatin1String("clipEdit"))
+        return MODE_CLIPEDIT;
     return (token == QLatin1String("grid") || token == QLatin1String("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -197,7 +201,8 @@ bool isShortcutContextToken(const QString &token) {
            token == QLatin1String("folderview") ||
            token == QLatin1String("global") ||
            token == QLatin1String("document") ||
-           token == QLatin1String("copyMove");
+           token == QLatin1String("copyMove") ||
+           token == QLatin1String("clipEdit");
 }
 
 QStringList normalizedShortcutKeys(QStringList keys) {

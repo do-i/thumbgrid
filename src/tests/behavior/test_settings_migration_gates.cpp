@@ -470,6 +470,10 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
            require(actionManager->actionForShortcut(MODE_COPYMOVE, "1") == QLatin1String("sendToFolder1") &&
                    actionManager->actionForShortcut(MODE_COPYMOVE, "9") == QLatin1String("sendToFolder9"),
                    "The Copy / Move overlay's digits should become bindings.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "[") == QLatin1String("setClipStart") &&
+                   actionManager->actionForShortcut(MODE_DOCUMENT, "\\") == QLatin1String("toggleVideoLoop") &&
+                   actionManager->actionForShortcut(MODE_CLIPEDIT, "Esc") == QLatin1String("cancelClipEdit"),
+                   "The video clip keys should be bound on upgrade.") &&
            require(bound("PgUp", "prevImage") && bound("XButton2", "nextImage") && bound("+", "zoomIn"),
                    "The user's other keys for those actions must survive.");
 }

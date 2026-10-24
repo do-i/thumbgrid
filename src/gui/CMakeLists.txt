@@ -72,6 +72,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     viewers/textviewer.cpp
     viewers/textsyntaxhighlighter.cpp
     viewers/videoplayer.cpp
+    viewers/videoclip.cpp
     viewers/videoplayerinitproxy.cpp
     viewers/viewerwidget.cpp
 

@@ -76,6 +76,9 @@
         ]
     },
     "document": {
+        "clearClip": [
+            "|"
+        ],
         "crop": [
             "X"
         ],
@@ -188,6 +191,12 @@
         "scrollUpFine": [
             "$Ctrl+Up"
         ],
+        "setClipEnd": [
+            "]"
+        ],
+        "setClipStart": [
+            "["
+        ],
         "setWallpaper": [
             "$Ctrl+W"
         ],
@@ -202,6 +211,9 @@
         ],
         "toggleSlideshow": [
             "`"
+        ],
+        "toggleVideoLoop": [
+            "\\"
         ],
         "zoomIn": [
             "+",
@@ -318,6 +330,14 @@
         ],
         "sendToFolder9": [
             "9"
+        ]
+    },
+    "clipEdit": {
+        "cancelClipEdit": [
+            "Esc"
+        ],
+        "commitClipEdit": [
+            "Enter"
         ]
     },
     "platform": {

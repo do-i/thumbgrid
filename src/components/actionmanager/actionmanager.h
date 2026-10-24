@@ -35,6 +35,13 @@ public:
     // sync with the visible screen by CentralWidget.
     void setContext(ViewMode context);
     ViewMode currentContext() const;
+    // Copy / Move and clip edit: keys that only work while that is open, and
+    // that global bindings don't reach
+    static bool isOverlayContext(ViewMode context);
+    // While set, processEvent() tries this context's bindings first and falls
+    // back to the active context's (clip editing sets MODE_CLIPEDIT)
+    void setOverlayContext(ViewMode context);
+    void clearOverlayContext();
     static QString contextToString(ViewMode context);
     static ViewMode contextFromString(const QString &name);
 
@@ -81,6 +88,8 @@ private:
     ShortcutMap defaults, shortcuts;
     QMap<ViewMode, QHash<QString, QString>> shortcutLookup;
     ViewMode context = MODE_DOCUMENT;
+    ViewMode overlayContext = MODE_CLIPEDIT;
+    bool hasOverlayContext = false;
     // set by a wheel turned with the right button held (RMB+WheelUp/Down)
     bool rightButtonWheel = false;
     QMap<QString, QString> scrollFallbacks;
@@ -190,6 +199,14 @@ signals:
     void toggleScalingFilter();
     void showInDirectory();
     void toggleMute();
+    // the clip of a video: the bracket button's edit mode and its keys
+    void toggleClipEdit();
+    void commitClipEdit();
+    void cancelClipEdit();
+    void clearClip();
+    void setClipStart();
+    void setClipEnd();
+    void toggleVideoLoop();
     void volumeUp();
     void volumeDown();
     void toggleSlideshow();

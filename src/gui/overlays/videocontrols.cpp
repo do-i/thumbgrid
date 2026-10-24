@@ -1,5 +1,6 @@
 #include "videocontrols.h"
 #include "ui_videocontrols.h"
+#include "gui/viewers/videoclip.h"
 #include <QFontDatabase>
 #include <QFrame>
 #include <QHBoxLayout>
@@ -15,21 +16,33 @@ QWidget *createVideoControlSeparator(QWidget *parent) {
     separator->setFixedSize(1, 14);
     return separator;
 }
+
+// a toggle that is on: pressed look, icon in the seek bar's clip color
+void setButtonOn(ActionButton *button, bool on, const QColor &onColor) {
+    button->setProperty("checked", on);
+    if(on) {
+        button->setColor(onColor);
+    } else {
+        button->setColor(settings->colorScheme().icons);
+        button->setColorMode(ICON_COLOR_THEME);
+    }
+    button->style()->unpolish(button);
+    button->style()->polish(button);
+}
 }
 
 VideoControls::VideoControls(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VideoControls),
     mode(PLAYBACK_VIDEO),
-    loopABButton(new QPushButton("A-B", this)),
+    clipButton(new ActionButton(this)),
+    loopButton(new ActionButton(this)),
     speedButton(new QPushButton("1.00x", this)),
     resetSpeedButton(new QPushButton(tr("Reset 1.00x"), this)),
     volumeSlider(new QSlider(Qt::Horizontal, this)),
     speedSlider(new QSlider(Qt::Horizontal)),
     speedPopupLabel(new QLabel("1.00x")),
-    speedPopup(new QFrame(this, Qt::Popup)),
-    loopABState(LOOP_AB_CLEAR),
-    loopStartPosition(0)
+    speedPopup(new QFrame(this, Qt::Popup))
 {
     ui->setupUi(this);
     this->setAttribute(Qt::WA_NoMousePropagation, true);
@@ -78,11 +91,23 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->positionLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     ui->durationLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
-    loopABButton->setAccessibleName("VideoControlTextButton");
-    loopABButton->setFocusPolicy(Qt::NoFocus);
-    loopABButton->setToolTip(tr("Loop A-B"));
-    loopABButton->setFixedSize(34, 24);
-    ui->horizontalLayout_2->insertWidget(2, loopABButton);
+    clipButton->setObjectName("clipButton");
+    clipButton->setAccessibleName("Button");
+    clipButton->setAction("toggleClipEdit");
+    clipButton->setFixedSize(24, 24);
+    // right-click clears the clip
+    clipButton->installEventFilter(this);
+    loopButton->setObjectName("loopButton");
+    loopButton->setAccessibleName("Button");
+    loopButton->setIconPath(":res/icons/common/buttons/videocontrols/loop24.png");
+    loopButton->setAction("toggleVideoLoop");
+    loopButton->setFixedSize(24, 24);
+    ui->horizontalLayout_2->addSpacing(3);
+    ui->horizontalLayout_2->addWidget(clipButton);
+    ui->horizontalLayout_2->addWidget(loopButton);
+    updateClipButton(false, false);
+    setLoop(false);
+    ui->seekBar->setClipMinGap(VideoClip::MIN_GAP_MS);
 
     ui->horizontalLayout->insertWidget(1, createVideoControlSeparator(this));
 
@@ -127,6 +152,8 @@ VideoControls::VideoControls(QWidget *parent) :
     lastPosition = -1;
 
     connect(ui->seekBar, &VideoSlider::sliderMovedX, this, &VideoControls::seek);
+    connect(ui->seekBar, &VideoSlider::clipHandlePressed, this, &VideoControls::clipHandlePressed);
+    connect(ui->seekBar, &VideoSlider::clipHandleMoved, this, &VideoControls::clipHandleMoved);
     // on press, not release: a click's press-to-release time would add to the
     // time it takes the sound to stop
     connect(ui->muteButton, &ActionButton::pressed, this, &VideoControls::toggleMuteRequested);
@@ -143,22 +170,6 @@ VideoControls::VideoControls(QWidget *parent) :
         showPopupBelow(speedButton, speedPopup);
     });
     connect(resetSpeedButton, &QPushButton::clicked, this, &VideoControls::resetPlaybackSpeed);
-    connect(loopABButton, &QPushButton::clicked, this, [this]() {
-        if(loopABState == LOOP_AB_CLEAR) {
-            loopABState = LOOP_AB_START_SET;
-            loopStartPosition = qMax(0, lastPosition);
-            updateLoopButton();
-        } else if(loopABState == LOOP_AB_START_SET) {
-            const int endPosition = qMax(loopStartPosition + 1, lastPosition);
-            loopABState = LOOP_AB_ACTIVE;
-            emit loopABChanged(loopStartPosition, endPosition);
-            updateLoopButton();
-        } else {
-            resetLoopAB();
-            emit loopABChanged(-1, -1);
-        }
-    });
-    updateLoopButton();
     updateResponsiveVisibility();
 }
 
@@ -170,17 +181,20 @@ void VideoControls::setMode(PlaybackMode _mode) {
     mode = _mode;
     ui->muteButton->setVisible( (mode == PLAYBACK_VIDEO) );
     speedButton->setVisible( (mode == PLAYBACK_VIDEO) );
-    loopABButton->setVisible( (mode == PLAYBACK_VIDEO) );
+    clipButton->setVisible( (mode == PLAYBACK_VIDEO) );
+    loopButton->setVisible( (mode == PLAYBACK_VIDEO) );
     if(mode != PLAYBACK_VIDEO) {
         speedPopup->hide();
+        setClip(-1, -1, false);
     }
     updateResponsiveVisibility();
 }
 
+// a video's duration and position are in ms, an animation's in frames
 void VideoControls::setPlaybackDuration(int duration) {
     QString durationStr;
     if(mode == PLAYBACK_VIDEO) {
-        int _time = duration;
+        int _time = duration / 1000;
         int hours = _time / 3600;
         _time -= hours * 3600;
         int minutes = _time / 60;
@@ -192,32 +206,34 @@ void VideoControls::setPlaybackDuration(int duration) {
     } else {
         durationStr = QString::number(duration);
     }
-    ui->seekBar->setRange(0, duration - 1);
+    ui->seekBar->setRange(0, (mode == PLAYBACK_VIDEO) ? qMax(0, duration) : duration - 1);
     ui->durationLabel->setText(durationStr);
     ui->positionLabel->setText(durationStr);
     updateGeometry();
     ui->positionLabel->setText("");
-    resetLoopAB();
+    shownSeconds = -1;
 }
 
 void VideoControls::setPlaybackPosition(int position) {
     if(position == lastPosition)
         return;
-    QString positionStr;
     if(mode == PLAYBACK_VIDEO) {
-        int _time = position;
-        int hours = _time / 3600;
-        _time -= hours * 3600;
-        int minutes = _time / 60;
-        int seconds = _time - minutes * 60;
-        positionStr = QString("%1").arg(minutes, 2, 10, QChar('0')) + ":" +
-                      QString("%1").arg(seconds, 2, 10, QChar('0'));
-        if(hours)
-            positionStr.prepend(QString("%1").arg(hours, 2, 10, QChar('0')) + ":");
+        int _time = position / 1000;
+        if(_time != shownSeconds) {
+            shownSeconds = _time;
+            int hours = _time / 3600;
+            _time -= hours * 3600;
+            int minutes = _time / 60;
+            int seconds = _time - minutes * 60;
+            QString positionStr = QString("%1").arg(minutes, 2, 10, QChar('0')) + ":" +
+                                  QString("%1").arg(seconds, 2, 10, QChar('0'));
+            if(hours)
+                positionStr.prepend(QString("%1").arg(hours, 2, 10, QChar('0')) + ":");
+            ui->positionLabel->setText(positionStr);
+        }
     } else {
-        positionStr = QString::number(position + 1);
+        ui->positionLabel->setText(QString::number(position + 1));
     }
-    ui->positionLabel->setText(positionStr);
     ui->seekBar->blockSignals(true);
     ui->seekBar->setValue(position);
     ui->seekBar->blockSignals(false);
@@ -245,22 +261,39 @@ void VideoControls::setVolume(int volume) {
     updateVolumeText(clampedVolume);
 }
 
-void VideoControls::resetLoopAB() {
-    loopABState = LOOP_AB_CLEAR;
-    loopStartPosition = 0;
-    updateLoopButton();
+void VideoControls::setClip(int start, int end, bool editing) {
+    const bool clip = start >= 0;
+    ui->seekBar->setClip(start, end, clip && editing);
+    updateClipButton(clip, clip && editing);
 }
 
-void VideoControls::updateLoopButton() {
-    loopABButton->setProperty("checked", loopABState != LOOP_AB_CLEAR);
-    if(loopABState == LOOP_AB_CLEAR)
-        loopABButton->setText("A-B");
-    else if(loopABState == LOOP_AB_START_SET)
-        loopABButton->setText("A...");
+void VideoControls::setLoop(bool mode) {
+    setButtonOn(loopButton, mode, ui->seekBar->palette().color(QPalette::Highlight));
+    loopButton->setToolTip(mode ? tr("Loop: on") : tr("Loop: off"));
+}
+
+void VideoControls::updateClipButton(bool clip, bool editing) {
+    clipButton->setIconPath(editing ? ":res/icons/common/buttons/videocontrols/clip-edit24.png"
+                                    : ":res/icons/common/buttons/videocontrols/clip24.png");
+    if(editing)
+        clipButton->setToolTip(tr("Done: play the clip between the handles (Esc cancels)"));
+    else if(clip)
+        clipButton->setToolTip(tr("Edit the clip (right-click clears it)"));
     else
-        loopABButton->setText("A-B");
-    loopABButton->style()->unpolish(loopABButton);
-    loopABButton->style()->polish(loopABButton);
+        clipButton->setToolTip(tr("Clip: set a start and an end to play"));
+    setButtonOn(clipButton, clip, ui->seekBar->palette().color(QPalette::Highlight));
+}
+
+bool VideoControls::eventFilter(QObject *watched, QEvent *event) {
+    if(watched == clipButton && event->type() == QEvent::MouseButtonPress &&
+       static_cast<QMouseEvent *>(event)->button() == Qt::RightButton) {
+        actionManager->invokeAction("clearClip");
+        return true;
+    }
+    if(watched == clipButton && event->type() == QEvent::MouseButtonRelease &&
+       static_cast<QMouseEvent *>(event)->button() == Qt::RightButton)
+        return true;
+    return QWidget::eventFilter(watched, event);
 }
 
 void VideoControls::showPopupBelow(QWidget *anchor, QFrame *popup) {

@@ -76,6 +76,9 @@
         ]
     },
     "document": {
+        "clearClip": [
+            "|"
+        ],
         "crop": [
             "N"
         ],
@@ -180,6 +183,12 @@
         "scrollUpFine": [
             "$Ctrl+Up"
         ],
+        "setClipEnd": [
+            "]"
+        ],
+        "setClipStart": [
+            "["
+        ],
         "toggleFullscreenInfoBar": [
             "$Shift+F"
         ],
@@ -188,6 +197,9 @@
         ],
         "toggleSlideshow": [
             "`"
+        ],
+        "toggleVideoLoop": [
+            "\\"
         ],
         "zoomIn": [
             "$Ctrl++",
@@ -303,6 +315,14 @@
         ],
         "sendToFolder9": [
             "9"
+        ]
+    },
+    "clipEdit": {
+        "cancelClipEdit": [
+            "Esc"
+        ],
+        "commitClipEdit": [
+            "Enter"
         ]
     }
 }

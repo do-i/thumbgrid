@@ -18,6 +18,7 @@ public:
     bool showVideo(QString file);
     void setVideoUnscaled(bool mode);
     int volume();
+    double frameRate();
 
 public slots:
     void seek(int pos);
@@ -45,9 +46,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
 
-signals:
-    void playbackFinished();
-
 private slots:
     void readSettings();
     void onPlaybackRestarted();
@@ -59,3 +57,5 @@ private:
 };
 
 extern "C" TEST_COMMON_DLLSPEC VideoPlayer *CreatePlayerWidget();
+// VIDEO_PLAYER_INTERFACE_VERSION this plugin was built against
+extern "C" TEST_COMMON_DLLSPEC int PlayerInterfaceVersion();

@@ -34,6 +34,7 @@ public:
     void setLoopPlayback(bool mode) override;
     void setPlaybackSpeed(double speed) override;
     void setLoopAB(int startPosition, int endPosition) override;
+    double frameRate() override;
     std::shared_ptr<VideoPlayer> getPlayer();
     bool isInitialized();
 

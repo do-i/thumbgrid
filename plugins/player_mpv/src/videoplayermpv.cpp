@@ -53,8 +53,9 @@ void VideoPlayerMpv::onPlaybackRestarted() {
     });
 }
 
+// exact: seeking shows that very frame, not the keyframe before it
 void VideoPlayerMpv::seek(int pos) {
-    m_mpv->command(QVariantList() << "seek" << pos << "absolute");
+    m_mpv->command(QVariantList() << "seek" << pos / 1000.0 << "absolute+exact");
 }
 
 void VideoPlayerMpv::seekRelative(int pos) {
@@ -63,6 +64,9 @@ void VideoPlayerMpv::seekRelative(int pos) {
 
 void VideoPlayerMpv::pauseResume() {
     const bool paused = m_mpv->getProperty("pause").toBool();
+    // stopped on the last frame: play again from the start
+    if(paused && m_mpv->getProperty("eof-reached").toBool())
+        seek(0);
     setPaused(!paused);
 }
 
@@ -104,6 +108,11 @@ void VideoPlayerMpv::setVolume(int vol) {
 
 int VideoPlayerMpv::volume() {
     return m_mpv->volume();
+}
+
+double VideoPlayerMpv::frameRate() {
+    const double fps = m_mpv->getProperty("container-fps").toDouble();
+    return (fps > 0) ? fps : m_mpv->getProperty("estimated-vf-fps").toDouble();
 }
 
 void VideoPlayerMpv::setVideoUnscaled(bool mode) {
@@ -165,4 +174,8 @@ void VideoPlayerMpv::setLoopAB(int startPosition, int endPosition) {
 
 VideoPlayer *CreatePlayerWidget() {
     return new VideoPlayerMpv();
+}
+
+int PlayerInterfaceVersion() {
+    return VIDEO_PLAYER_INTERFACE_VERSION;
 }

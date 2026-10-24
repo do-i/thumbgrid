@@ -687,3 +687,19 @@ add_test(
     NAME "Saving an edit writes off the GUI thread and replaces the file atomically"
     COMMAND thumbgrid_save_off_gui_thread_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_video_clip_range_editor_test
+    behavior/test_video_clip_range_editor.cpp
+)
+add_test(
+    NAME "A video clip is set with two pentagon handles that never cross, then plays and loops inside its range"
+    COMMAND thumbgrid_video_clip_range_editor_test
+)
+
+thumbgrid_add_behavior_test(thumbgrid_video_clip_playback_test
+    behavior/test_video_clip_plays_inside_its_range.cpp
+)
+add_test(
+    NAME "A video clip plays from its start, stops at its end and loops, and a video stops on its last frame"
+    COMMAND thumbgrid_video_clip_playback_test
+)

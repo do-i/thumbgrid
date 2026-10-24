@@ -208,6 +208,13 @@ signals:
     void frameStep();
     void frameStepBack();
     void toggleMute();
+    void toggleClipEdit();
+    void commitClipEdit();
+    void cancelClipEdit();
+    void clearClip();
+    void setClipStart();
+    void setClipEnd();
+    void toggleVideoLoop();
     void volumeUp();
     void volumeDown();
     void toggleTransparencyGrid();

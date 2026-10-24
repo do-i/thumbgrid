@@ -64,6 +64,16 @@ inline bool VideoPlayerInitProxy::initPlayer() {
     }
 
 // load lib
+    // a plugin from before (or after) an interface change would misread
+    // positions, or call into a different vtable
+    typedef int (*interfaceVersionFn)();
+    interfaceVersionFn versionFn = (interfaceVersionFn) playerLib.resolve("PlayerInterfaceVersion");
+    const int version = versionFn ? versionFn() : 1;
+    if(version != VIDEO_PLAYER_INTERFACE_VERSION) {
+        qCWarning(logVideo) << "Not loading" << playerLib.fileName() << "- it is built for player interface"
+                            << version << "but this build needs" << VIDEO_PLAYER_INTERFACE_VERSION;
+        return false;
+    }
     typedef VideoPlayer* (*createPlayerWidgetFn)();
     createPlayerWidgetFn fn = (createPlayerWidgetFn) playerLib.resolve("CreatePlayerWidget");
     if(fn) {
@@ -204,6 +214,10 @@ void VideoPlayerInitProxy::setLoopAB(int startPosition, int endPosition) {
     if(!player)
         return;
     player->setLoopAB(startPosition, endPosition);
+}
+
+double VideoPlayerInitProxy::frameRate() {
+    return player ? player->frameRate() : 0;
 }
 
 void VideoPlayerInitProxy::show() {
