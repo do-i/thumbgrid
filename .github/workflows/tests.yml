@@ -27,6 +27,12 @@ jobs:
       - name: Mark workspace as a safe git directory
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
+      # An image committed without the LFS filter active is stored as a raw
+      # blob; every LFS checkout then shows it modified, and release builds
+      # report their version as "<tag>-dirty". Fail at commit time instead.
+      - name: Check images are committed as LFS pointers
+        run: git lfs fsck --pointers
+
       # Steps in a container run as root, and root bypasses file permission
       # bits: a mode 0400 file still reports as writable. Behavior tests that
       # assert the UI greys out editing for a read-only file therefore fail as
