@@ -22,9 +22,10 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
 
     this->setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
-    //mpv_set_option_string(mpv, "terminal", "yes");
-    //mpv_set_option_string(mpv, "msg-level", "all=v");
     mpv_set_option_string(mpv, "vo", "libmpv");
+    // local files only: no youtube-dl hook, no user/bundled Lua scripts
+    mpv_set_option_string(mpv, "ytdl", "no");
+    mpv_set_option_string(mpv, "load-scripts", "no");
 
     if (mpv_initialize(mpv) < 0)
         throw std::runtime_error("could not initialize mpv context");

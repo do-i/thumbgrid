@@ -20,8 +20,8 @@ VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
 #ifdef _WIN32
     libDirs << QApplication::applicationDirPath() + "/plugins";
 #else
-    QDir libPath(QApplication::applicationDirPath() + "/../lib/thumbgrid");
-    libDirs << (libPath.makeAbsolute() ? libPath.path() : ".") << "/usr/lib/thumbgrid" << "/usr/lib64/thumbgrid";
+    libDirs << QDir::cleanPath(QApplication::applicationDirPath() + "/../lib/thumbgrid")
+            << "/usr/lib/thumbgrid" << "/usr/lib64/thumbgrid";
 #endif
 }
 

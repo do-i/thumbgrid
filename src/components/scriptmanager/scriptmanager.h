@@ -18,8 +18,7 @@ public:
     static ScriptManager* getInstance();
     ~ScriptManager() override;
     void runScript(const QString &scriptName, std::shared_ptr<Image> img);
-    static QString runCommand(const QString& cmd);
-    static void runCommandDetached(const QString& cmd);
+    static QString runCommand(const QString &program, const QStringList &arguments);
     bool scriptExists(const QString& scriptName);
     void readScripts();
     void saveScripts();

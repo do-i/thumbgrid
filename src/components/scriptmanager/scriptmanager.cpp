@@ -58,20 +58,13 @@ void ScriptManager::runScript(const QString &scriptName, std::shared_ptr<Image> 
     }
 }
 
-QString ScriptManager::runCommand(const QString& cmd) {
+QString ScriptManager::runCommand(const QString &program, const QStringList &arguments) {
     QProcess exec;
-    QStringList cmdSplit = ScriptManager::splitCommandLine(cmd);
-    exec.start(cmdSplit.takeAt(0), cmdSplit);
+    exec.start(program, arguments);
     exec.waitForFinished(2000);
     return exec.readAllStandardOutput();
 }
 
-void ScriptManager::runCommandDetached(const QString& cmd) {
-    QStringList cmdSplit = ScriptManager::splitCommandLine(cmd);
-    QProcess::startDetached(cmdSplit.takeAt(0), cmdSplit);
-}
-
-// TODO: what if filename contains one of the tags?
 void ScriptManager::processArguments(QStringList &cmd, const std::shared_ptr<Image>& img) {
     for (auto& i : cmd) {
         if(i.contains("%file%"))

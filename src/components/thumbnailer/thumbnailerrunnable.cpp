@@ -535,8 +535,11 @@ std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbn
                                 << "--sid=no"
                                 << "--no-config"
                                 << "--load-scripts=no"
+                                << "--ytdl=no"
+                                << "--access-references=no"
                                 << "--no-terminal"
                                 << "--o=" + tmpFilePathEsc
+                                << "--"
                                 << path
                   );
     // Check start, timeout and exit status explicitly; on any of them the

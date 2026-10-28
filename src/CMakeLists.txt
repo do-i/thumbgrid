@@ -54,8 +54,7 @@ set_source_files_properties(${APPVERSION_CPP} PROPERTIES GENERATED TRUE)
 set(THUMBGRID_APP_TARGET thumbgrid_app_objects)
 
 set(PLATFORM_DESKTOP_IMPLEMENTATIONS
-    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_linux.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_freebsd.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_unix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_macos.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_windows.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_fallback.cpp
@@ -64,10 +63,8 @@ if(WIN32)
     set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_windows.cpp)
 elseif(APPLE)
     set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_macos.cpp)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_freebsd.cpp)
 elseif(UNIX)
-    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_linux.cpp)
+    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_unix.cpp)
 else()
     set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_fallback.cpp)
 endif()

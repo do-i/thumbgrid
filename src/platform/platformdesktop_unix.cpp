@@ -8,6 +8,7 @@
 #include <QDesktopServices>
 #include <QDir>
 #include <QFileInfo>
+#include <QProcess>
 #include <QSettings>
 #include <QStandardPaths>
 #include <QUrl>
@@ -48,15 +49,24 @@ QString PlatformDesktop::defaultCacheDirectory() {
 }
 
 QString PlatformDesktop::defaultMpvBinary() {
+#ifdef __FreeBSD__
     return "/usr/local/bin/mpv";
+#else
+    return "/usr/bin/mpv";
+#endif
 }
 
 QString PlatformDesktop::folderViewInitialRootPath() {
     return QDir::homePath();
 }
 
-QString PlatformDesktop::folderViewRootPathFor(const QString &) {
+QString PlatformDesktop::folderViewRootPathFor(const QString &path) {
+#ifdef __FreeBSD__
+    Q_UNUSED(path)
     return QString();
+#else
+    return path.startsWith(QDir::homePath()) ? QDir::homePath() : "/";
+#endif
 }
 
 bool PlatformDesktop::isWaylandPlatform() {
@@ -64,7 +74,11 @@ bool PlatformDesktop::isWaylandPlatform() {
 }
 
 bool PlatformDesktop::needsWaylandCursorWorkaround() {
+#ifdef __FreeBSD__
     return false;
+#else
+    return qgetenv("XDG_SESSION_TYPE") == "wayland";
+#endif
 }
 
 void PlatformDesktop::prepareApplicationEnvironment() {
@@ -84,11 +98,11 @@ void PlatformDesktop::showInDirectory(const QString &selectedPath, const QString
         return;
     }
 
-    QString fm = ScriptManager::runCommand("xdg-mime query default inode/directory");
+    QString fm = ScriptManager::runCommand("xdg-mime", {"query", "default", "inode/directory"});
     if(fm.contains("dolphin"))
-        ScriptManager::runCommandDetached("dolphin --select " + selectedPath);
+        QProcess::startDetached("dolphin", {"--select", selectedPath});
     else if(fm.contains("nautilus"))
-        ScriptManager::runCommandDetached("nautilus --select " + selectedPath);
+        QProcess::startDetached("nautilus", {"--select", selectedPath});
     else
         QDesktopServices::openUrl(QUrl::fromLocalFile(fallbackDir));
 }
@@ -108,11 +122,12 @@ bool PlatformDesktop::supportsIcoSaveFormat() {
 bool PlatformDesktop::setWallpaper(const QString &path, QString *errorMessage) {
     const QString session = QString::fromLocal8Bit(qgetenv("DESKTOP_SESSION")).toLower();
     if(session.contains("plasma")) {
-        ScriptManager::runCommand("plasma-apply-wallpaperimage \"" + path + "\"");
+        ScriptManager::runCommand("plasma-apply-wallpaperimage", {path});
         return true;
     }
     if(session.contains("gnome")) {
-        ScriptManager::runCommand("gsettings set org.gnome.desktop.background picture-uri \"" + path + "\"");
+        ScriptManager::runCommand("gsettings", {"set", "org.gnome.desktop.background", "picture-uri",
+                                                QUrl::fromLocalFile(path).toString()});
         return true;
     }
 

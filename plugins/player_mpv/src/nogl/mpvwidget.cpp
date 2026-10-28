@@ -19,6 +19,9 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     // VO first, then fall back to XVideo and plain X11 so playback still works
     // where OpenGL/Vulkan are unavailable (e.g. software rendering / VMs).
     mpv_set_option_string(mpv, "vo", "gpu,xv,x11");
+    // local files only: no youtube-dl hook, no user/bundled Lua scripts
+    mpv_set_option_string(mpv, "ytdl", "no");
+    mpv_set_option_string(mpv, "load-scripts", "no");
 
     this->setAttribute(Qt::WA_TransparentForMouseEvents, true);
     // A native window gets the pointer's X events itself despite the attribute
