@@ -2,10 +2,33 @@
 
 #include <utility>
 
+#include <QDir>
+
 #include "platform/platformdesktop.h"
 #include "gui/dialogs/custommessagebox.h"
 
 // TODO: nuke this and rewrite
+
+namespace {
+// "thumbgrid 2026.10.3": ends every window title.
+QString appTitle() {
+    return QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion();
+}
+
+// A path under the home directory with the home part shown as "~".
+QString tildePath(const QString &path) {
+#ifdef Q_OS_WIN
+    return path;
+#else
+    const QString home = QDir::homePath();
+    if(path == home)
+        return QStringLiteral("~");
+    if(home != "/" && path.startsWith(home + "/"))
+        return "~" + path.mid(home.length());
+    return path;
+#endif
+}
+}
 
 MW::MW(QWidget *parent)
     : FloatingWidgetContainer(parent),
@@ -33,8 +56,7 @@ MW::MW(QWidget *parent)
 
     this->setLayout(&layout);
 
-    setWindowTitle(QCoreApplication::applicationName() + " " +
-                   QCoreApplication::applicationVersion());
+    setWindowTitle(appTitle());
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
@@ -1051,15 +1073,14 @@ void MW::onInfoUpdated() {
 
     QString windowTitle;
     if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
-        windowTitle = info.directoryPath.isEmpty() ? tr("Folder view") : info.directoryPath;
+        windowTitle = info.directoryPath.isEmpty() ? tr("Folder view") : tildePath(info.directoryPath);
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
         folderView->setStatusText(folderStatusText);
     } else if(info.fileName.isEmpty()) {
-        windowTitle = qApp->applicationName();
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
         infoBarWindowed->setStatusText(tr("No file opened."));
     } else {
-        windowTitle = info.filePath;
+        windowTitle = tildePath(info.filePath);
         if(settings->windowTitleExtendedInfo()) {
             windowTitle.prepend(posString + "  ");
             if(!resString.isEmpty())
@@ -1088,7 +1109,7 @@ void MW::onInfoUpdated() {
         infoBarWindowed->setStatusText(documentStatusText());
     }
     updateStatusFooters();
-    setWindowTitle(windowTitle);
+    setWindowTitle(windowTitle.isEmpty() ? appTitle() : windowTitle + " — " + appTitle());
 }
 
 std::shared_ptr<FolderViewProxy> MW::getFolderView() {
