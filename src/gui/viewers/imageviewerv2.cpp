@@ -160,7 +160,13 @@ void ImageViewerV2::readSettings() {
     // before updateMinScale(), which caches the fit scales from the flag
     explicitFit = false; // re-applying the configured default is not an explicit fit
     updateMinScale();
+    const bool legacy = settings->legacyScalingEngine(), sharpen = settings->scalingSharpen();
+    const bool engineChanged = legacy != mLegacyScaling || sharpen != mScalingSharpen;
+    mLegacyScaling = legacy;
+    mScalingSharpen = sharpen;
     setScalingFilter(settings->scalingFilter());
+    if(engineChanged)
+        requestScaling();
     setFitMode(imageFitModeDefault);
 }
 
@@ -477,7 +483,7 @@ void ImageViewerV2::requestScaling() {
         scaleTimer->stop();
     // scene scaling is single-pass bilinear, which artifacts at low zoom; request real scaling
     if(currentScale() < FAST_SCALE_THRESHOLD)
-        emit scalingRequested(scaledSizeR() * dpr, mScalingFilter);
+        emit scalingRequested(scaledSizeR() * dpr, effectiveScalingFilter());
 }
 
 bool ImageViewerV2::imageFits() const {
@@ -497,6 +503,21 @@ bool ImageViewerV2::scaledImageFits() const {
 
 ScalingFilter ImageViewerV2::scalingFilter() const {
     return mScalingFilter;
+}
+
+// The Qt engine honors nearest; every other filter is Qt smooth, sharpened on request.
+ScalingFilter ImageViewerV2::effectiveScalingFilter() const {
+    if(mLegacyScaling || mScalingFilter == QI_FILTER_NEAREST)
+        return mScalingFilter;
+    return mScalingSharpen ? QI_FILTER_QT_SMOOTH_SHARPEN : QI_FILTER_BILINEAR;
+}
+
+bool ImageViewerV2::toggleScalingEngine() {
+#ifdef USE_OPENCV
+    mLegacyScaling = !mLegacyScaling;
+    requestScaling();
+#endif
+    return mLegacyScaling;
 }
 
 QWidget *ImageViewerV2::widget() {

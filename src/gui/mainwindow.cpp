@@ -481,6 +481,15 @@ void MW::toggleScalingFilter() {
     }
 }
 
+// A/B comparison for the scaling engine beta, on the shown image
+void MW::toggleScalingEngine() {
+#ifdef USE_OPENCV
+    showMessage(viewerWidget->toggleScalingEngine() ? tr("Scaling: OpenCV (legacy)") : tr("Scaling: Qt"), 800);
+#else
+    showMessage(tr("This build has no OpenCV scaling to compare with"), 1500);
+#endif
+}
+
 void MW::setFilterNearest() {
     showMessage("Filter: nearest", 600);
     viewerWidget->setFilterNearest();

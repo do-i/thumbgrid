@@ -719,3 +719,11 @@ add_test(
     NAME "A video clip plays from its start, stops at its end and loops, and a video stops on its last frame"
     COMMAND thumbgrid_video_clip_playback_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_scaling_engine_toggle_test
+    behavior/test_scaling_engine_toggle.cpp
+)
+add_test(
+    NAME "Qt scaling engine is the default and the OpenCV comparison toggle flips it"
+    COMMAND thumbgrid_scaling_engine_toggle_test
+)

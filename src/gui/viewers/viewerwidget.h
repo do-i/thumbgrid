@@ -39,6 +39,7 @@ public:
     bool lockZoomEnabled();
     bool lockViewEnabled();
     ScalingFilter scalingFilter();
+    bool toggleScalingEngine();
     QWidget *videoControlsWidget();
 
 private:

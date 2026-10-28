@@ -98,7 +98,7 @@ QString settingGroupFor(const QString &key) {
         {"expandLimit", "Document"}, {"smoothAnimatedImages", "Document"}, {"loopSlideshow", "Document"},
         {"slideshowInterval", "Document"}, {"defaultFitMode", "Document"}, {"keepFitMode", "Document"},
         {"focusPointIn1to1Mode", "Document"}, {"unlockMinZoom", "Document"}, {"zoomStep", "Document"},
-        {"useFixedZoomLevels", "Document"}, {"fixedZoomLevels", "Document"}, {"scalingFilter", "Document"},
+        {"useFixedZoomLevels", "Document"}, {"fixedZoomLevels", "Document"}, {"scalingFilter", "Document"}, {"scalingEngine", "Document"}, {"scalingSharpen", "Document"},
         {"resizeFilter", "Document"},
         {"imageScrolling", "Document"}, {"mouseScrollingSpeed", "Document"}, {"trackpadDetection", "Document"},
         {"clickableEdges", "Document"}, {"clickableEdgesVisible", "Document"}, {"thumbPanelStyle", "Document"},
@@ -1846,6 +1846,26 @@ ScalingFilter Settings::scalingFilter() {
 
 void Settings::setScalingFilter(ScalingFilter mode) {
     settings->writeSetting("scalingFilter", mode);
+}
+
+bool Settings::legacyScalingEngine() {
+#ifdef USE_OPENCV
+    return settings->readSetting("scalingEngine", "qt").toString() == QLatin1String("opencv");
+#else
+    return false;
+#endif
+}
+
+void Settings::setLegacyScalingEngine(bool legacy) {
+    settings->writeSetting("scalingEngine", legacy ? "opencv" : "qt");
+}
+
+bool Settings::scalingSharpen() {
+    return settings->readSetting("scalingSharpen", false).toBool();
+}
+
+void Settings::setScalingSharpen(bool mode) {
+    settings->writeSetting("scalingSharpen", mode);
 }
 //------------------------------------------------------------------------------
 ScalingFilter Settings::resizeFilter() {

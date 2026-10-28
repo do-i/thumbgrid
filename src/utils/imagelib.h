@@ -33,6 +33,8 @@ class ImageLib {
         static std::unique_ptr<QImage> scaled_Qt(const QImage *source, QSize destSize, bool smooth);
         static std::unique_ptr<QImage> scaled_Qt(const std::shared_ptr<const QImage>& source, QSize destSize, bool smooth);
         static void drawTransparencyGrid(QPainter *painter, const QRectF &rect);
+        // unsharp mask matching the legacy OpenCV path: gaussian sigma 2, amount 0.25
+        static void sharpen(QImage &image);
 
 #ifdef USE_OPENCV
         static std::unique_ptr<QImage> scaled_CV(const std::shared_ptr<const QImage>& source, QSize destSize, cv::InterpolationFlags filter, int sharpen);

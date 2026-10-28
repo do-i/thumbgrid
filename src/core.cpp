@@ -248,6 +248,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::findDuplicates, this, &Core::showDuplicateFinder);
     connect(actionManager, &ActionManager::toggleShuffle, this, &Core::toggleShuffle);
     connect(actionManager, &ActionManager::toggleScalingFilter, mw, &MW::toggleScalingFilter);
+    connect(actionManager, &ActionManager::toggleScalingEngine, mw, &MW::toggleScalingEngine);
     connect(actionManager, &ActionManager::showInDirectory, this, &Core::showInDirectory);
     connect(actionManager, &ActionManager::toggleMute, mw, &MW::toggleMute);
     connect(actionManager, &ActionManager::toggleClip, mw, &MW::toggleClip);

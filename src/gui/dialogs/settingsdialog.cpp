@@ -22,6 +22,8 @@
 #include <QVBoxLayout>
 #include <QRadioButton>
 #include <QComboBox>
+#include <QCheckBox>
+#include <QStandardItemModel>
 #include <functional>
 #include "gui/customwidgets/keysequenceedit.h"
 #include "utils/imagelib.h"
@@ -147,6 +149,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     setupAboutPage();
     setupThemePage();
     setupFeatureToggles();
+    setupScalingEngineControls();
     setupSidebar();
     setupMiscControls();
 
@@ -245,6 +248,64 @@ void SettingsDialog::setupThemePage() {
 }
 //------------------------------------------------------------------------------
 // disable or hide controls for features this build lacks
+// Beta comparison of the Qt and OpenCV scaling engines. The engine row sits above the
+// filter row because it decides which filters are listed.
+void SettingsDialog::setupScalingEngineControls() {
+    for(int i = 0; i < ui->scalingQualityComboBox->count(); i++)
+        mScalingFilterNames << ui->scalingQualityComboBox->itemText(i);
+    auto *row = new QHBoxLayout();
+    auto *label = new QLabel(tr("Scaling engine:"));
+    mScalingEngineComboBox = new QComboBox();
+    mScalingEngineComboBox->setObjectName("scalingEngineComboBox");
+    mScalingEngineComboBox->addItem(tr("Qt"));
+    mScalingEngineComboBox->addItem(tr("OpenCV (legacy)"));
+    mScalingEngineComboBox->setToolTip(tr("Being compared before OpenCV is removed. The toggleScalingEngine "
+                                          "shortcut action flips between them on the shown image."));
+    const int labelWidth = qMax(label->sizeHint().width(), ui->scalingQualityLabel->sizeHint().width());
+    label->setFixedWidth(labelWidth);
+    ui->scalingQualityLabel->setFixedWidth(labelWidth);
+    const int comboWidth = ui->scalingQualityComboBox->sizeHint().width();
+    mScalingEngineComboBox->setFixedWidth(comboWidth);
+    ui->scalingQualityComboBox->setFixedWidth(comboWidth);
+    row->addWidget(label);
+    row->addWidget(mScalingEngineComboBox);
+    row->addStretch(1);
+    mScalingSharpenCheckBox = new QCheckBox(tr("Sharpen images shrunk below 50% (Qt engine)"));
+    mScalingSharpenCheckBox->setObjectName("scalingSharpenCheckBox");
+    const int filterRow = ui->verticalLayout_24->indexOf(ui->horizontalLayout_5);
+    ui->verticalLayout_24->insertLayout(filterRow, row);
+    ui->verticalLayout_24->insertWidget(filterRow + 2, mScalingSharpenCheckBox);
+#ifndef USE_OPENCV
+    label->hide();
+    mScalingEngineComboBox->hide();
+#endif
+    connect(mScalingEngineComboBox, &QComboBox::currentIndexChanged, this, &SettingsDialog::updateScalingEngineControls);
+    connect(ui->scalingQualityComboBox, &QComboBox::activated, this, &SettingsDialog::onScalingFilterActivated);
+}
+
+void SettingsDialog::updateScalingEngineControls() {
+    const bool legacy = mScalingEngineComboBox->currentIndex() == 1;
+    mScalingSharpenCheckBox->setEnabled(!legacy);
+    const QSignalBlocker blocker(ui->scalingQualityComboBox);
+    ui->scalingQualityComboBox->clear();
+    if(legacy) {
+        ui->scalingQualityComboBox->addItems(mScalingFilterNames);
+        ui->scalingQualityComboBox->setCurrentIndex(mScalingFilterChoice);
+    } else {
+        ui->scalingQualityComboBox->addItems({mScalingFilterNames.value(QI_FILTER_NEAREST), tr("Smooth")});
+        ui->scalingQualityComboBox->setCurrentIndex(mScalingFilterChoice == QI_FILTER_NEAREST ? 0 : 1);
+    }
+}
+
+void SettingsDialog::onScalingFilterActivated(int index) {
+    if(mScalingEngineComboBox->currentIndex() == 1)
+        mScalingFilterChoice = static_cast<ScalingFilter>(index);
+    else if(index == 0)
+        mScalingFilterChoice = QI_FILTER_NEAREST;
+    else if(mScalingFilterChoice == QI_FILTER_NEAREST)
+        mScalingFilterChoice = mScalingFilterNames.size() > QI_FILTER_CV_CUBIC ? QI_FILTER_CV_CUBIC : QI_FILTER_BILINEAR;
+}
+
 void SettingsDialog::setupFeatureToggles() {
 #ifndef USE_KDE_BLUR
     ui->blurBackgroundCheckBox->setEnabled(false);
@@ -879,7 +940,10 @@ void SettingsDialog::readSettings() {
         ui->fitMode1to1->setChecked(true);
 
     // ##### UI #####
-    ui->scalingQualityComboBox->setCurrentIndex(settings->scalingFilter());
+    mScalingFilterChoice = settings->scalingFilter();
+    mScalingEngineComboBox->setCurrentIndex(settings->legacyScalingEngine() ? 1 : 0);
+    mScalingSharpenCheckBox->setChecked(settings->scalingSharpen());
+    updateScalingEngineControls();
     ui->fullscreenCheckBox->setChecked(settings->fullscreenMode());
     ui->pinPanelCheckBox->setChecked(settings->panelPinned());
     ui->panelPositionComboBox->setCurrentIndex(settings->panelPosition());
@@ -976,7 +1040,9 @@ void SettingsDialog::saveSettings() {
         settings->setFolderEndAction(FOLDER_END_GOTO_ADJACENT);
 
     settings->setMpvBinary(ui->mpvLineEdit->text());
-    settings->setScalingFilter(static_cast<ScalingFilter>(ui->scalingQualityComboBox->currentIndex()));
+    settings->setScalingFilter(mScalingFilterChoice);
+    settings->setLegacyScalingEngine(mScalingEngineComboBox->currentIndex() == 1);
+    settings->setScalingSharpen(mScalingSharpenCheckBox->isChecked());
     settings->setImageScrolling(static_cast<ImageScrolling>(ui->imageScrollingComboBox->currentIndex()));
     settings->setShowSaveOverlay(ui->saveOverlayCheckBox->isChecked());
     settings->setUnloadThumbs(ui->unloadThumbsCheckBox->isChecked());

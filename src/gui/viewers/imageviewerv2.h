@@ -89,6 +89,8 @@ public slots:
     virtual void setFilterNearest();
     virtual void setFilterBilinear();
     virtual void setScalingFilter(ScalingFilter filter);
+    // flips between the Qt and OpenCV engines until settings are re-read; returns true for OpenCV
+    bool toggleScalingEngine();
     void setLoopPlayback(bool mode);
     void toggleTransparencyGrid();
 
@@ -175,6 +177,9 @@ private:
     ImageFitMode imageFitMode, imageFitModeDefault;
     ImageFocusPoint focusIn1to1;
     ScalingFilter mScalingFilter;
+    // beta comparison of the scaling engines (Settings, or the A/B action)
+    bool mLegacyScaling = false, mScalingSharpen = false;
+    ScalingFilter effectiveScalingFilter() const;
 
     void zoomAnchored(float newScale);
     void fitNormal();

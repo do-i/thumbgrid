@@ -194,6 +194,7 @@ signals:
     void stripMetadata();
     void toggleShuffle();
     void toggleScalingFilter();
+    void toggleScalingEngine();
     void showInDirectory();
     void toggleMute();
     // the clip of a video: the bracket button's edit mode and its keys
