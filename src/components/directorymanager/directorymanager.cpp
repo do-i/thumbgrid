@@ -41,6 +41,24 @@ DirectoryManager::DirectoryManager() :
     connect(settings, &Settings::settingsChanged, this, &DirectoryManager::readSettings);
 }
 
+// Natural name sort via one collation key per entry: comparing keys is a byte
+// compare, much cheaper than a full QCollator::compare per std::sort comparison.
+static void sortByName(std::vector<FSEntry> &vec, const QCollator &collator, bool reverse) {
+    std::vector<std::pair<QCollatorSortKey, size_t>> keys;
+    keys.reserve(vec.size());
+    for(size_t i = 0; i < vec.size(); i++)
+        keys.emplace_back(collator.sortKey(vec[i].path), i);
+    std::sort(keys.begin(), keys.end(), [reverse](const auto &a, const auto &b) {
+        int c = a.first.compare(b.first);
+        return reverse ? c > 0 : c < 0;
+    });
+    std::vector<FSEntry> sorted;
+    sorted.reserve(vec.size());
+    for(const auto &key : keys)
+        sorted.push_back(std::move(vec[key.second]));
+    vec = std::move(sorted);
+}
+
 template< typename T, typename Pred >
 typename std::vector<T>::iterator
 insert_sorted(std::vector<T> & vec, T const& item, Pred pred) {
@@ -424,12 +442,16 @@ void DirectoryManager::addEntriesFromDirectoryRecursive(std::vector<FSEntry> &en
     }
 }
 
-void DirectoryManager::sortEntryLists() {
-    if(settings->sortFolders())
-        std::sort(dirEntryVec.begin(), dirEntryVec.end(), compareFunction());
+void DirectoryManager::sortEntries(std::vector<FSEntry> &vec, SortingMode mode) {
+    if(mode == SortingMode::SORT_NAME || mode == SortingMode::SORT_NAME_DESC)
+        sortByName(vec, collator, mode == SortingMode::SORT_NAME_DESC);
     else
-        std::sort(dirEntryVec.begin(), dirEntryVec.end(), [this](const FSEntry &e1, const FSEntry &e2) { return path_entry_compare(e1, e2); });
-    std::sort(fileEntryVec.begin(), fileEntryVec.end(), compareFunction());
+        std::sort(vec.begin(), vec.end(), compareFunction());
+}
+
+void DirectoryManager::sortEntryLists() {
+    sortEntries(dirEntryVec, settings->sortFolders() ? mSortingMode : SortingMode::SORT_NAME);
+    sortEntries(fileEntryVec, mSortingMode);
     fileIndexCacheDirty = true;
     dirIndexCacheDirty = true;
 }

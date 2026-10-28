@@ -292,7 +292,7 @@ void ImageViewerV2::updatePixmap(std::unique_ptr<QPixmap> newPixmap) {
 void ImageViewerV2::showAnimation(std::shared_ptr<QMovie> _movie) {
     if(_movie && _movie->isValid()) {
         reset();
-        movie = _movie;
+        movie = std::move(_movie);
         movie->jumpToFrame(0);
         Qt::TransformationMode mode = smoothAnimatedImages ? Qt::SmoothTransformation : Qt::FastTransformation;
         pixmapItem.setTransformationMode(mode);

@@ -133,6 +133,7 @@ private:
     bool date_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
     using CompareFn = std::function<bool(const FSEntry&, const FSEntry&)>;
     CompareFn compareFunction();
+    void sortEntries(std::vector<FSEntry> &vec, SortingMode mode);
     bool size_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
     bool size_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
     void startFileWatcher(const QString& directoryPath);
