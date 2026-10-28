@@ -478,24 +478,6 @@ void CropOverlay::mouseMoveEvent(QMouseEvent *event) {
             updateSelectionDrawRect();
             updateHandlePositions();
             update();
-        /*} else if(cursorAction == NO_DRAG || cursorAction == SELECTION_START) {
-            // unneeded?
-            endPos = event->pos();
-            //build selection rectangle
-            QPoint tl, br;
-            startPos.x() >= endPos.x() ? tl.setX(endPos.x()) : tl.setX(startPos.x());
-            startPos.y() >= endPos.y() ? tl.setY(endPos.y()) : tl.setY(startPos.y());
-
-            startPos.x() <= endPos.x() ? br.setX(endPos.x()) : br.setX(startPos.x());
-            startPos.y() <= endPos.y() ? br.setY(endPos.y()) : br.setY(startPos.y());
-
-            selectionRect.setTopLeft(mapPointToImage(tl * dpr));
-            selectionRect.setBottomRight(mapPointToImage(br * dpr));
-
-            updateSelectionDrawRect();
-            updateHandlePositions();
-            update();
-        */
         } else { // resizing selection
             resizeSelection(delta.toPoint() / scale);
             moveStartPos = event->pos();

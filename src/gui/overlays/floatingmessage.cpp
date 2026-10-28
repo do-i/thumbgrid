@@ -35,14 +35,6 @@ FloatingMessage::~FloatingMessage() {
 }
 
 void FloatingMessage::readSettings() {
-    /*
-    // don't interfere with the main panel
-    if(settings->panelEnabled() && settings->panelPosition() == PanelHPosition::PANEL_BOTTOM) {
-        preferredPosition = FloatingWidgetPosition::TOP;
-    } else {
-        preferredPosition = FloatingWidgetPosition::BOTTOM;
-    }
-    */
 }
 
 void FloatingMessage::showMessage(QString text, FloatingWidgetPosition position, FloatingMessageIcon icon, int duration) {

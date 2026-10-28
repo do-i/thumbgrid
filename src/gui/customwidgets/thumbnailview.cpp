@@ -239,32 +239,6 @@ void ThumbnailView::populate(int newCount) {
     QElapsedTimer t;
     t.start();
     if(newCount >= 0) {
-        /* test this later
-        // reuse existing items
-        auto currentCount = thumbnails.count();
-        if(currentCount > newCount) {
-            qCDebug(logGui) << this << "removing";
-            for(auto i = currentCount - 1; i >= newCount; i--) {
-                delete thumbnails.takeLast();
-            }
-            // reset existing
-            QList<ThumbnailWidget*>::iterator i;
-            for(i = thumbnails.begin(); i != thumbnails.end(); ++i)
-                (*i)->reset();
-        } else if(currentCount <= newCount) {
-            // reset existing
-            QList<ThumbnailWidget*>::iterator i;
-            for(i = thumbnails.begin(); i != thumbnails.end(); ++i)
-                (*i)->reset();
-            qCDebug(logGui) << this << "adding";
-            for(auto i = currentCount; i < newCount; i++) {
-                ThumbnailWidget *widget = createThumbnailWidget();
-                widget->setThumbnailSize(mThumbnailSize);
-                thumbnails.append(widget);
-                addItemToLayout(widget, i);
-            }
-        }
-        */
 
         if(newCount == thumbnails.count()) {
             QList<ThumbnailWidget*>::iterator i;

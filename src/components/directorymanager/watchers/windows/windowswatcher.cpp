@@ -72,15 +72,6 @@ void WindowsWatcherPrivate::dispatchNotify(PFILE_NOTIFY_INFORMATION notify) {
 
         case FILE_ACTION_MODIFIED:
             emit q->fileModified(name);
-            // ??
-            /*WatcherEvent* event;
-            if (findEventIndexByName(name) != -1)
-                return;
-
-            event = new WatcherEvent(name, WatcherEvent::MODIFIED);
-            event->mTimerId = startTimer(500);
-            directoryEvents.push_back(event);
-            */
             break;
 
         case FILE_ACTION_REMOVED:

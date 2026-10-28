@@ -99,23 +99,6 @@ std::unique_ptr<QImage> ImageLib::exifRotated(std::unique_ptr<QImage> src, int o
     return src;
 }
 //------------------------------------------------------------------------------
-/*
-
-QImage *ImageLib::cropped(QRect newRect, QRect targetRes, bool upscaled) {
-    QImage *cropped = new QImage(targetRes.size(), image->format());
-    if(upscaled) {
-        QImage temp = image->copy(newRect);
-        *cropped = temp.scaled(targetRes.size(), Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
-        QRect target(QPoint(0, 0), targetRes.size());
-        target.moveCenter(cropped->rect().center());
-        *cropped = cropped->copy(target);
-    } else {
-        newRect.moveCenter(image->rect().center());
-        *cropped = image->copy(newRect);
-    }
-    return cropped;
-}
-*/
 
 std::unique_ptr<QImage> ImageLib::scaled(const std::shared_ptr<const QImage>& source, QSize destSize, ScalingFilter filter) {
     if(!source)
