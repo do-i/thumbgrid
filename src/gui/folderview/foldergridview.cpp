@@ -163,6 +163,8 @@ void FolderGridView::hide() {
 // a repopulate means we are looking at a different (or re-read) directory
 void FolderGridView::populate(int count) {
     exitSearchMode();
+    // reused cells would carry the editor over to another file
+    cancelRename();
     ThumbnailView::populate(count);
 }
 
@@ -400,14 +402,6 @@ void FolderGridView::addItemToLayout(ThumbnailWidget* widget, int pos) {
 
 void FolderGridView::removeItemFromLayout(int pos) {
     flowLayout->removeAt(pos);
-}
-
-void FolderGridView::removeAll() {
-    // the widgets backing the editor's cell are about to be destroyed
-    cancelRename();
-    flowLayout->clear();
-    qDeleteAll(thumbnails);
-    thumbnails.clear();
 }
 
 void FolderGridView::updateLayout() {

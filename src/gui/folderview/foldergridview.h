@@ -101,7 +101,6 @@ protected:
     void updateScrollbarIndicator() override;
     void addItemToLayout(ThumbnailWidget *widget, int pos) override;
     void removeItemFromLayout(int pos) override;
-    void removeAll() override;
     void setupLayout();
     ThumbnailWidget *createThumbnailWidget() override;
     void updateLayout() override;

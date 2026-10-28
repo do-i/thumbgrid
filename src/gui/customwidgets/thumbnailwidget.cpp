@@ -161,6 +161,7 @@ void ThumbnailWidget::reset() {
         thumbnail.reset();
     highlighted = false;
     hovered = false;
+    dropHovered = false;
     isLoaded = false;
     update();
 }

@@ -139,7 +139,6 @@ protected:
     virtual ThumbnailWidget *createThumbnailWidget() = 0;
     virtual void addItemToLayout(ThumbnailWidget* widget, int pos) = 0;
     virtual void removeItemFromLayout(int pos) = 0;
-    virtual void removeAll() = 0;
     virtual void updateLayout();
     virtual void fitSceneToContents();
     virtual void updateScrollbarIndicator() = 0;

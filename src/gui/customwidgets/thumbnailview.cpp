@@ -236,20 +236,18 @@ void ThumbnailView::populate(int newCount) {
     QElapsedTimer t;
     t.start();
     if(newCount >= 0) {
-
-        if(newCount == thumbnails.count()) {
-            QList<ThumbnailWidget*>::iterator i;
-            for (i = thumbnails.begin(); i != thumbnails.end(); ++i) {
-                (*i)->reset();
-            }
-        } else {
-            removeAll();
-            for(int i = 0; i < newCount; i++) {
-                ThumbnailWidget *widget = createThumbnailWidget();
-                widget->setThumbnailSize(mThumbnailSize);
-                thumbnails.append(widget);
-                addItemToLayout(widget, i);
-            }
+        // reuse the existing widgets; only the difference is created or destroyed
+        for(int i = thumbnails.count() - 1; i >= newCount; i--) {
+            removeItemFromLayout(i);
+            delete thumbnails.takeLast();
+        }
+        for(auto *widget : std::as_const(thumbnails))
+            widget->reset();
+        for(int i = thumbnails.count(); i < newCount; i++) {
+            ThumbnailWidget *widget = createThumbnailWidget();
+            widget->setThumbnailSize(mThumbnailSize);
+            thumbnails.append(widget);
+            addItemToLayout(widget, i);
         }
     }
     updateLayout();
