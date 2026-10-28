@@ -62,8 +62,7 @@
         ],
         "toggleFullscreen": [
             "F",
-            "F11",
-            "LMB_DoubleClick"
+            "F11"
         ],
         "togglePlacesPanel": [
             "$Ctrl+E"

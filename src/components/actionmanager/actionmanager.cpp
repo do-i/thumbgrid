@@ -519,7 +519,19 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound" << move.key() << "=" << move.value() << "in grid";
         }
     }
-    // add new default actions, per context
+    // qimgv and leftie no longer toggle full screen on a double-click: a quick
+    // double-click on the picture or a video kept flipping the window. Drop it
+    // from a config still on that default; a preset that keeps it (gwenview)
+    // keeps it, and any other action bound to the double-click is left alone.
+    if(lastVer < QVersionNumber(2026,10,4)) {
+        for(ViewMode ctx : shortcutContexts()) {
+            if(shortcuts[ctx].value("LMB_DoubleClick") == "toggleFullscreen" &&
+               defaults[ctx].value("LMB_DoubleClick") != "toggleFullscreen") {
+                shortcuts[ctx].remove("LMB_DoubleClick");
+                qCDebug(logSettings) << "[actionManager]: removed LMB_DoubleClick=toggleFullscreen in" << contextToString(ctx);
+            }
+        }
+    }
     for(ViewMode ctx : shortcutContexts()) {
         ContextMap &cur = shortcuts[ctx];
         QMapIterator<QString, QString> i(defaults[ctx]);

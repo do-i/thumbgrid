@@ -679,7 +679,60 @@ bool gridNavigationKeysBecomeActions() {
                    "The picture view's arrows are untouched.");
 }
 
+// Writes a shortcuts.json fixture binding full screen to F and a double-click.
+bool seedDoubleClickFullscreen() {
+    QJsonObject global;
+    global.insert("toggleFullscreen", QJsonArray{QStringLiteral("F"), QStringLiteral("LMB_DoubleClick")});
+    QJsonObject root;
+    root.insert("global", global);
+    QFile shortcutsFile(configDir() + "/shortcuts.json");
+    if(!require(shortcutsFile.open(QIODevice::WriteOnly | QIODevice::Truncate),
+                "Failed to write the shortcuts.json fixture."))
+        return false;
+    shortcutsFile.write(QJsonDocument(root).toJson());
+    shortcutsFile.close();
+    return true;
+}
+
+// The qimgv preset no longer toggles full screen on a double-click, and a
+// config still on that default loses it on upgrade.
+bool doubleClickFullscreenIsDroppedOnUpgrade() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 3));
+    conf.sync();
+    if(!seedDoubleClickFullscreen())
+        return false;
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 3));
+    return require(actionManager->actionForShortcut(MODE_GLOBAL, "LMB_DoubleClick").isEmpty() &&
+                   actionManager->actionForShortcut(MODE_DOCUMENT, "LMB_DoubleClick").isEmpty(),
+                   "A double-click should no longer toggle full screen.") &&
+           require(actionManager->actionForShortcut(MODE_GLOBAL, "F") == QLatin1String("toggleFullscreen"),
+                   "F keeps toggling full screen.");
+}
+
+// gwenview still binds the double-click to full screen, so its config keeps it.
+bool doubleClickFullscreenStaysWhenThePresetKeepsIt() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 3));
+    conf.sync();
+    if(!seedDoubleClickFullscreen())
+        return false;
+
+    Settings::getInstance()->setSelectedPreset(QStringLiteral("gwenview"));
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 3));
+    return require(actionManager->actionForShortcut(MODE_GLOBAL, "LMB_DoubleClick") == QLatin1String("toggleFullscreen"),
+                   "A gwenview config keeps the double-click full screen.");
+}
+
 bool runScenario(const QString &scenario) {
+    if(scenario == QLatin1String("double-click-fullscreen-dropped"))
+        return doubleClickFullscreenIsDroppedOnUpgrade();
+    if(scenario == QLatin1String("double-click-fullscreen-kept-by-preset"))
+        return doubleClickFullscreenStaysWhenThePresetKeepsIt();
     if(scenario == QLatin1String("fresh"))
         return freshInstallSkipsVersionedMigrations();
     if(scenario == QLatin1String("upgrade"))
