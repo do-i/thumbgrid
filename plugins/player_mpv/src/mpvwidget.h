@@ -1,20 +1,20 @@
 #pragma once
 
 #include <QtCore/QMetaObject>
-#include <QOpenGLWidget>
-#include <QOpenGLContext>
-#include <QOpenGLFramebufferObject>
-
+#include <QWidget>
 #include <mpv/client.h>
-#include <mpv/render_gl.h>
 #include "qthelper.hpp"
 
-#include <QDebug>
-#include <ctime>
-#include <QSurfaceFormat>
-#include <QTimer>
+#ifdef PLAYER_MPV_USE_WID
+using MpvWidgetBase = QWidget;
+#else
+#include <QOpenGLWidget>
+#include <QOpenGLContext>
+#include <mpv/render_gl.h>
+using MpvWidgetBase = QOpenGLWidget;
+#endif
 
-class MpvWidget Q_DECL_FINAL: public QOpenGLWidget {
+class MpvWidget Q_DECL_FINAL : public MpvWidgetBase {
     Q_OBJECT
 public:
     MpvWidget(QWidget *parent = nullptr, Qt::WindowFlags f = Qt::Widget);
@@ -24,15 +24,15 @@ public:
     void setOption(const QString &name, const QVariant &value);
     void setProperty(const QString& name, const QVariant& value);
     QVariant getProperty(const QString& name) const;
-    // Related to this:
+#ifndef PLAYER_MPV_USE_WID
     // https://github.com/gnome-mpv/gnome-mpv/issues/245
-    // Let's hope this wont break more than it fixes
     int width() const {
         return static_cast<int>(QOpenGLWidget::width() * this->devicePixelRatioF());
     }
     int height() const {
         return static_cast<int>(QOpenGLWidget::height() * this->devicePixelRatioF());
     }
+#endif
     void setMuted(bool mode);
     void setRepeat(bool mode);
     bool muted();
@@ -49,21 +49,28 @@ signals:
     void playbackRestarted();
     void volumeChanged(int value);
 
+#ifndef PLAYER_MPV_USE_WID
 protected:
     void initializeGL() override;
     void paintGL() override;
+#endif
 
 private slots:
     void on_mpv_events();
+#ifndef PLAYER_MPV_USE_WID
     void maybeUpdate();
+#endif
 
 private:
     void handle_mpv_event(mpv_event *event);
     void applyMute();
-    static void on_update(void *ctx);
+    void observeProperties();
 
     mpv_handle *mpv;
     bool mMuted = false;
     bool mAudioOutputActive = false;
-    mpv_render_context *mpv_gl;
+#ifndef PLAYER_MPV_USE_WID
+    static void on_update(void *ctx);
+    mpv_render_context *mpv_gl = nullptr;
+#endif
 };

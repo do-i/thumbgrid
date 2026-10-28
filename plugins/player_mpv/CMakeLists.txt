@@ -27,18 +27,19 @@ include(GNUInstallDirs)
 #    rendering the render-API path produces a blank video frame.
 option(PLAYER_MPV_USE_WID "Embed mpv via native window id instead of the OpenGL render API" ON)
 
-if(PLAYER_MPV_USE_WID)
-    set(PLAYER_MPV_WIDGET_SRC src/nogl/mpvwidget.cpp src/nogl/videoplayermpv.cpp)
-    set(PLAYER_MPV_WIDGET_INC src/nogl)
-else()
-    set(PLAYER_MPV_WIDGET_SRC src/mpvwidget.cpp src/videoplayermpv.cpp)
-    set(PLAYER_MPV_WIDGET_INC)
-endif()
+# the player interface is shared with the app, not copied
+set(PLAYER_INTERFACE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../src/gui/viewers)
 
 add_library(player_mpv MODULE
-    src/videoplayer.cpp
-    ${PLAYER_MPV_WIDGET_SRC}
+    ${PLAYER_INTERFACE_DIR}/videoplayer.cpp
+    ${PLAYER_INTERFACE_DIR}/videoplayer.h
+    src/mpvwidget.cpp
+    src/videoplayermpv.cpp
     src/qthelper.hpp)
+
+if(PLAYER_MPV_USE_WID)
+    target_compile_definitions(player_mpv PRIVATE PLAYER_MPV_USE_WID)
+endif()
 
 target_compile_features(player_mpv PRIVATE cxx_std_11)
 
@@ -66,7 +67,7 @@ add_custom_command(TARGET player_mpv POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy "$<TARGET_FILE:player_mpv>" "${CMAKE_BINARY_DIR}/lib/thumbgrid/"
     VERBATIM)
 
-target_include_directories(player_mpv PRIVATE ${PLAYER_MPV_WIDGET_INC} src)
+target_include_directories(player_mpv PRIVATE src ${PLAYER_INTERFACE_DIR})
 
 if(WIN32)
     target_include_directories(player_mpv PRIVATE

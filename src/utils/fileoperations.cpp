@@ -116,6 +116,15 @@ QString FileOperations::decodeResult(const FileOpResult &result) {
     return nullptr;
 }
 
+static FileOpResult checkDestinationDir(const QString &destDirPath) {
+    QFileInfo destDir(destDirPath);
+    if(!destDir.exists())
+        return FileOpResult::DESTINATION_DOES_NOT_EXIST;
+    if(!destDir.isWritable())
+        return FileOpResult::DESTINATION_NOT_WRITABLE;
+    return FileOpResult::SUCCESS;
+}
+
 // Shared by copyFileTo()/moveFileTo(): if destFile already exists, validates it can be
 // replaced and (when force is set) moves it aside to a hash-suffixed tmp path so a failed
 // copy/move can restore it. Returns SUCCESS to mean "proceed"; any other FileOpResult means
@@ -165,15 +174,9 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
         return;
     }
-    QFileInfo destDir(destDirPath);
-    if(!destDir.exists()) {
-        result = FileOpResult::DESTINATION_DOES_NOT_EXIST;
+    result = checkDestinationDir(destDirPath);
+    if(result != FileOpResult::SUCCESS)
         return;
-    }
-    if(!destDir.isWritable()) {
-        result = FileOpResult::DESTINATION_NOT_WRITABLE;
-        return;
-    }
     QFileInfo destFile(destDirPath + "/" + srcFile.fileName());
     result = backupExistingDestination(destFile, force, tmpPath, exists);
     if(result != FileOpResult::SUCCESS)
@@ -215,15 +218,9 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
         result = FileOpResult::SOURCE_NOT_WRITABLE;
         return;
     }
-    QFileInfo destDir(destDirPath);
-    if(!destDir.exists()) {
-        result = FileOpResult::DESTINATION_DOES_NOT_EXIST;
+    result = checkDestinationDir(destDirPath);
+    if(result != FileOpResult::SUCCESS)
         return;
-    }
-    if(!destDir.isWritable()) {
-        result = FileOpResult::DESTINATION_NOT_WRITABLE;
-        return;
-    }
     QFileInfo destFile(destDirPath + "/" + srcFile.fileName());
     result = backupExistingDestination(destFile, force, tmpPath, exists);
     if(result != FileOpResult::SUCCESS)
@@ -273,15 +270,9 @@ void FileOperations::copySymLinkTo(const QString &srcLinkPath, const QString &de
         result = FileOpResult::NOTHING_TO_DO;
         return;
     }
-    QFileInfo destDir(destDirPath);
-    if(!destDir.exists()) {
-        result = FileOpResult::DESTINATION_DOES_NOT_EXIST;
+    result = checkDestinationDir(destDirPath);
+    if(result != FileOpResult::SUCCESS)
         return;
-    }
-    if(!destDir.isWritable()) {
-        result = FileOpResult::DESTINATION_NOT_WRITABLE;
-        return;
-    }
     QString linkTarget = srcLink.symLinkTarget(); // absolute target path (empty if dangling)
     if(linkTarget.isEmpty()) {
         // Can't resolve the target (e.g. broken link); refuse rather than silently lose it.

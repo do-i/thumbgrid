@@ -215,4 +215,7 @@ private:
     void lockZoom();
     void doZoomIn(bool atCursor);
     void doZoomOut(bool atCursor);
+    void setZoomAnchorAt(bool atCursor);
+    void finishZoom(float newScale);
+    void applyInitialFit();
 };

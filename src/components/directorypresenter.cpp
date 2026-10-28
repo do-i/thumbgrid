@@ -126,6 +126,22 @@ void DirectoryPresenter::onFileRemoved(const QString& filePath, int index) {
     emitStatusText();
 }
 
+// moves a view item, keeping it selected if it was
+void DirectoryPresenter::moveItem(int indexFrom, int indexTo) {
+    auto oldSelection = view->selection();
+    view->removeItem(indexFrom);
+    view->insertItem(indexTo);
+    if(oldSelection.contains(indexFrom)) {
+        if(oldSelection.count() == 1) {
+            view->select(indexTo);
+            view->focusOn(indexTo);
+        } else if(oldSelection.count() > 1) {
+            view->select(view->selection() << indexTo);
+        }
+    }
+    emitStatusText();
+}
+
 void DirectoryPresenter::onFileRenamed(const QString& fromPath, int indexFrom, const QString& toPath, int indexTo) {
     Q_UNUSED(fromPath)
     Q_UNUSED(toPath)
@@ -138,19 +154,7 @@ void DirectoryPresenter::onFileRenamed(const QString& fromPath, int indexFrom, c
         indexFrom += parentOffset();
         indexTo += parentOffset();
     }
-    auto oldSelection = view->selection();
-    view->removeItem(indexFrom);
-    view->insertItem(indexTo);
-    // re-select if needed
-    if(oldSelection.contains(indexFrom)) {
-        if(oldSelection.count() == 1) {
-            view->select(indexTo);
-            view->focusOn(indexTo);
-        } else if(oldSelection.count() > 1) {
-            view->select(view->selection() << indexTo);
-        }
-    }
-    emitStatusText();
+    moveItem(indexFrom, indexTo);
 }
 
 void DirectoryPresenter::onFileAdded(QString filePath) {
@@ -183,19 +187,7 @@ void DirectoryPresenter::onDirRenamed(const QString& fromPath, int indexFrom, co
         return;
     indexFrom += parentOffset();
     indexTo += parentOffset();
-    auto oldSelection = view->selection();
-    view->removeItem(indexFrom);
-    view->insertItem(indexTo);
-    // re-select if needed
-    if(oldSelection.contains(indexFrom)) {
-        if(oldSelection.count() == 1) {
-            view->select(indexTo);
-            view->focusOn(indexTo);
-        } else if(oldSelection.count() > 1) {
-            view->select(view->selection() << indexTo);
-        }
-    }
-    emitStatusText();
+    moveItem(indexFrom, indexTo);
 }
 
 void DirectoryPresenter::onDirAdded(QString dirPath) {

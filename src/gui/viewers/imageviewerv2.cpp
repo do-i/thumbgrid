@@ -302,25 +302,25 @@ void ImageViewerV2::showAnimation(std::shared_ptr<QMovie> _movie) {
         emit durationChanged(movie->frameCount());
         emit frameChanged(0);
 
-        // An explicit fit applies to the image the user acted on, so it does not
-        // survive a load - "keep fit mode" keeps the *mode*, not the exemption
-        // from the "Expand images" policy. Cleared before updateMinScale()
-        // because updateFitWindowScale()/updateFitWindowStretchScale() read the
-        // flag and cache the scales that applyFitMode() zooms to below.
-        explicitFit = false; // back to the automatic policy for a new image
-        updateMinScale();
-        if(!keepFitMode || imageFitMode == FIT_FREE)
-            imageFitMode = imageFitModeDefault;
-
-        if(mViewLock == LOCK_NONE) {
-            applyFitMode();
-        } else {
-            imageFitMode = FIT_FREE;
-            fitFree(lockedScale);
-            if(mViewLock == LOCK_ALL)
-                applySavedViewportPos();
-        }
+        applyInitialFit();
         startAnimation();
+    }
+}
+
+// Fit for a newly loaded image. An explicit fit belongs to the image the user
+// acted on, so it is cleared first: updateMinScale() caches the fit scales from it.
+void ImageViewerV2::applyInitialFit() {
+    explicitFit = false;
+    updateMinScale();
+    if(!keepFitMode || imageFitMode == FIT_FREE)
+        imageFitMode = imageFitModeDefault;
+    if(mViewLock == LOCK_NONE) {
+        applyFitMode();
+    } else {
+        imageFitMode = FIT_FREE;
+        fitFree(lockedScale);
+        if(mViewLock == LOCK_ALL)
+            applySavedViewportPos();
     }
 }
 
@@ -337,25 +337,7 @@ void ImageViewerV2::showImage(std::unique_ptr<QPixmap> _pixmap) {
             mode = Qt::FastTransformation;
         pixmapItem.setTransformationMode(mode);
         pixmapItem.show();
-        // An explicit fit applies to the image the user acted on, so it does not
-        // survive a load - "keep fit mode" keeps the *mode*, not the exemption
-        // from the "Expand images" policy. Cleared before updateMinScale()
-        // because updateFitWindowScale()/updateFitWindowStretchScale() read the
-        // flag and cache the scales that applyFitMode() zooms to below.
-        explicitFit = false; // back to the automatic policy for a new image
-        updateMinScale();
-
-        if(!keepFitMode || imageFitMode == FIT_FREE)
-            imageFitMode = imageFitModeDefault;
-
-        if(mViewLock == LOCK_NONE) {
-            applyFitMode();
-        } else {
-            imageFitMode = FIT_FREE;
-            fitFree(lockedScale);
-            if(mViewLock == LOCK_ALL)
-                applySavedViewportPos();
-        }
+        applyInitialFit();
         requestScaling();
         update();
     }
@@ -1160,11 +1142,26 @@ void ImageViewerV2::zoomInCursor() {
     doZoomIn(true);
 }
 
-void ImageViewerV2::doZoomIn(bool atCursor) {
+void ImageViewerV2::setZoomAnchorAt(bool atCursor) {
     if(atCursor && underMouse())
         setZoomAnchor(mapFromGlobal(cursor().pos()));
     else
         setZoomAnchor(viewport()->rect().center());
+}
+
+void ImageViewerV2::finishZoom(float newScale) {
+    zoomAnchored(newScale);
+    centerIfNecessary();
+    snapToEdges();
+    imageFitMode = FIT_FREE;
+    if(pixmapItem.scale() == fitWindowScale)
+        imageFitMode = FIT_WINDOW;
+    else if(pixmapItem.scale() == fitWindowStretchScale)
+        imageFitMode = FIT_WINDOW_STRETCH;
+}
+
+void ImageViewerV2::doZoomIn(bool atCursor) {
+    setZoomAnchorAt(atCursor);
     float newScale = currentScale() * (1.0f + zoomStep);
     if(useFixedZoomLevels && zoomLevels.count()) {
         if(currentScale() < zoomLevels.first()) {
@@ -1181,14 +1178,7 @@ void ImageViewerV2::doZoomIn(bool atCursor) {
             }
         }
     }
-    zoomAnchored(newScale);
-    centerIfNecessary();
-    snapToEdges();
-    imageFitMode = FIT_FREE;
-    if(pixmapItem.scale() == fitWindowScale)
-        imageFitMode = FIT_WINDOW;
-    else if(pixmapItem.scale() == fitWindowStretchScale)
-        imageFitMode = FIT_WINDOW_STRETCH;
+    finishZoom(newScale);
 }
 
 // zoom out around viewport center
@@ -1202,10 +1192,7 @@ void ImageViewerV2::zoomOutCursor() {
 }
 
 void ImageViewerV2::doZoomOut(bool atCursor) {
-    if(atCursor && underMouse())
-        setZoomAnchor(mapFromGlobal(cursor().pos()));
-    else
-        setZoomAnchor(viewport()->rect().center());
+    setZoomAnchorAt(atCursor);
     float newScale = currentScale() * (1.0f - zoomStep);
     if(useFixedZoomLevels && zoomLevels.count()) {
         if(currentScale() > zoomLevels.last()) {
@@ -1222,14 +1209,7 @@ void ImageViewerV2::doZoomOut(bool atCursor) {
             }
         }
     }
-    zoomAnchored(newScale);
-    centerIfNecessary();
-    snapToEdges();
-    imageFitMode = FIT_FREE;
-    if(pixmapItem.scale() == fitWindowScale)
-        imageFitMode = FIT_WINDOW;
-    else if(pixmapItem.scale() == fitWindowStretchScale)
-        imageFitMode = FIT_WINDOW_STRETCH;
+    finishZoom(newScale);
 }
 
 void ImageViewerV2::toggleLockZoom() {

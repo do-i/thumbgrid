@@ -73,67 +73,29 @@ std::unique_ptr<QImage> ImageLib::flippedV(const std::shared_ptr<const QImage>& 
     return flippedVRaw(src.get());
 }
 //------------------------------------------------------------------------------
-std::unique_ptr<const QImage> ImageLib::exifRotated(std::unique_ptr<const QImage> src, int orientation) {
+// nullptr when the orientation needs no transform
+static std::unique_ptr<QImage> exifTransformed(const QImage *src, int orientation) {
     switch(orientation) {
-    case 1: {
-        src = ImageLib::flippedHRaw(src.get());
-    } break;
-    case 2: {
-        src = ImageLib::flippedVRaw(src.get());
-    } break;
-    case 3: {
-        src = ImageLib::flippedHRaw(src.get());
-        src = ImageLib::flippedVRaw(src.get());
-    } break;
-    case 4: {
-        src = ImageLib::rotatedRaw(src.get(), 90);
-    } break;
-    case 5: {
-        src = ImageLib::flippedHRaw(src.get());
-        src = ImageLib::rotatedRaw(src.get(), 90);
-    } break;
-    case 6: {
-        src = ImageLib::flippedVRaw(src.get());
-        src = ImageLib::rotatedRaw(src.get(), 90);
-    } break;
-    case 7: {
-        src = ImageLib::rotatedRaw(src.get(), -90);
-    } break;
-    default: {
-    } break;
+    case 1: return ImageLib::flippedHRaw(src);
+    case 2: return ImageLib::flippedVRaw(src);
+    case 3: return ImageLib::flippedVRaw(ImageLib::flippedHRaw(src).get());
+    case 4: return ImageLib::rotatedRaw(src, 90);
+    case 5: return ImageLib::rotatedRaw(ImageLib::flippedHRaw(src).get(), 90);
+    case 6: return ImageLib::rotatedRaw(ImageLib::flippedVRaw(src).get(), 90);
+    case 7: return ImageLib::rotatedRaw(src, -90);
+    default: return nullptr;
     }
+}
+
+std::unique_ptr<const QImage> ImageLib::exifRotated(std::unique_ptr<const QImage> src, int orientation) {
+    if(auto out = exifTransformed(src.get(), orientation))
+        return out;
     return src;
 }
 //------------------------------------------------------------------------------
 std::unique_ptr<QImage> ImageLib::exifRotated(std::unique_ptr<QImage> src, int orientation) {
-    switch(orientation) {
-    case 1: {
-        src = ImageLib::flippedHRaw(src.get());
-    } break;
-    case 2: {
-        src = ImageLib::flippedVRaw(src.get());
-    } break;
-    case 3: {
-        src = ImageLib::flippedHRaw(src.get());
-        src = ImageLib::flippedVRaw(src.get());
-    } break;
-    case 4: {
-        src = ImageLib::rotatedRaw(src.get(), 90);
-    } break;
-    case 5: {
-        src = ImageLib::flippedHRaw(src.get());
-        src = ImageLib::rotatedRaw(src.get(), 90);
-    } break;
-    case 6: {
-        src = ImageLib::flippedVRaw(src.get());
-        src = ImageLib::rotatedRaw(src.get(), 90);
-    } break;
-    case 7: {
-        src = ImageLib::rotatedRaw(src.get(), -90);
-    } break;
-    default: {
-    } break;
-    }
+    if(auto out = exifTransformed(src.get(), orientation))
+        return out;
     return src;
 }
 //------------------------------------------------------------------------------

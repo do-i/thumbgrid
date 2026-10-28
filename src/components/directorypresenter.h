@@ -69,6 +69,7 @@ private slots:
 
     void onDroppedInto(const QMimeData *data, QObject *source, int targetIndex);
 private:
+    void moveItem(int indexFrom, int indexTo);
     std::shared_ptr<IDirectoryView> view = nullptr;
     std::shared_ptr<DirectoryModel> model = nullptr;
     Thumbnailer thumbnailer;

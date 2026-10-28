@@ -1,69 +1,81 @@
 #include "mpvwidget.h"
+#include <cmath>
+#include <cstring>
 #include <stdexcept>
 
 static void wakeup(void *ctx) {
     QMetaObject::invokeMethod((MpvWidget*)ctx, "on_mpv_events", Qt::QueuedConnection);
 }
 
-static void *get_proc_address(void *ctx, const char *name) {
-    Q_UNUSED(ctx);
+#ifndef PLAYER_MPV_USE_WID
+static void *get_proc_address(void *, const char *name) {
     QOpenGLContext *glctx = QOpenGLContext::currentContext();
     if (!glctx)
         return nullptr;
     return reinterpret_cast<void *>(glctx->getProcAddress(QByteArray(name)));
 }
+#endif
 
 MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
-    : QOpenGLWidget(parent, f)
+    : MpvWidgetBase(parent, f)
 {
     mpv = mpv_create();
     if(!mpv)
         throw std::runtime_error("could not create mpv context");
 
-    this->setAttribute(Qt::WA_TransparentForMouseEvents, true);
-
-    mpv_set_option_string(mpv, "vo", "libmpv");
+#ifdef PLAYER_MPV_USE_WID
+    int64_t wid = winId();
+    mpv_set_option(mpv, "wid", MPV_FORMAT_INT64, &wid);
+#endif
+    setAttribute(Qt::WA_TransparentForMouseEvents, true);
     // local files only: no youtube-dl hook, no user/bundled Lua scripts
     mpv_set_option_string(mpv, "ytdl", "no");
     mpv_set_option_string(mpv, "load-scripts", "no");
 
+#ifdef PLAYER_MPV_USE_WID
+    // gpu first, then xv / x11 for software rendering and VMs
+    mpv_set_option_string(mpv, "vo", "gpu,xv,x11");
+    // a native child swallows hover moves without tracking; cursor autohide needs them
+    setMouseTracking(true);
+    mpv_set_option_string(mpv, "input-cursor", "no");
+    mpv_set_option_string(mpv, "cursor-autohide", "no");
+    mpv::qt::set_property(mpv, "hwdec", "auto-safe");
+    observeProperties();
     if (mpv_initialize(mpv) < 0)
         throw std::runtime_error("could not initialize mpv context");
-
-    // Use software decoding. Hardware decoding ("auto") can select a hwdec
-    // whose GPU surfaces this libmpv OpenGL render path cannot map, producing a
-    // blank video frame for some codecs (and, because playback then stalls, no
-    // audio either) while other codecs play fine.
+#else
+    mpv_set_option_string(mpv, "vo", "libmpv");
+    if (mpv_initialize(mpv) < 0)
+        throw std::runtime_error("could not initialize mpv context");
+    // hwdec surfaces this render path cannot map show up as a blank frame
     mpv::qt::set_property(mpv, "hwdec", "no");
+    observeProperties();
+#endif
+}
 
-    //mpv::qt::set_property(mpv, "video-unscaled", "downscale-big");
-
-    // Loop video
+void MpvWidget::observeProperties() {
     setRepeat(true);
-    // stay on the last frame at the end instead of unloading the file, so a
-    // video that doesn't loop can be played again (eof-reached tells the end)
+    // stay on the last frame at the end so a non-looping video can be replayed
     mpv::qt::set_property(mpv, "keep-open", "yes");
-
-    // Unmute
     setMuted(false);
 
     mpv_observe_property(mpv, 0, "duration", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "time-pos", MPV_FORMAT_DOUBLE);
     mpv_observe_property(mpv, 0, "pause", MPV_FORMAT_FLAG);
     mpv_observe_property(mpv, 0, "eof-reached", MPV_FORMAT_FLAG);
-    // Track the actual audio-output (system / per-app) volume so the UI can
-    // reflect the real output level, not just mpv's internal software gain.
+    // real output (system / per-app) level, not mpv's software gain
     mpv_observe_property(mpv, 0, "ao-volume", MPV_FORMAT_DOUBLE);
-    // Tells when the audio output comes up or goes away, so mute can move
-    // between the software mute and the audio output's own (see applyMute).
+    // audio output up/down moves mute between software and AO mute (applyMute)
     mpv_observe_property(mpv, 0, "current-ao", MPV_FORMAT_STRING);
     mpv_set_wakeup_callback(mpv, wakeup, this);
 }
 
 MpvWidget::~MpvWidget() {
+#ifndef PLAYER_MPV_USE_WID
     makeCurrent();
     if (mpv_gl)
         mpv_render_context_free(mpv_gl);
+#endif
     mpv_terminate_destroy(mpv);
 }
 
@@ -83,6 +95,7 @@ void MpvWidget::setOption(const QString& name, const QVariant& value) {
     mpv::qt::set_property(mpv, name, value);
 }
 
+#ifndef PLAYER_MPV_USE_WID
 void MpvWidget::initializeGL() {
     mpv_opengl_init_params gl_init_params{get_proc_address, nullptr};
     mpv_render_param params[]{
@@ -105,18 +118,32 @@ void MpvWidget::paintGL() {
         {MPV_RENDER_PARAM_FLIP_Y, &flip_y},
         {MPV_RENDER_PARAM_INVALID, nullptr}
     };
-    // See render_gl.h on what OpenGL environment mpv expects, and
-    // other API details.
     mpv_render_context_render(mpv_gl, params);
 }
 
+// Qt skips update() for a minimized window, which makes mpv's render API time
+// out and stutter, so draw by hand there.
+void MpvWidget::maybeUpdate() {
+    if(window()->isMinimized()) {
+        makeCurrent();
+        paintGL();
+        context()->swapBuffers(context()->surface());
+        doneCurrent();
+    } else {
+        update();
+    }
+}
+
+void MpvWidget::on_update(void *ctx) {
+    QMetaObject::invokeMethod((MpvWidget*)ctx, "maybeUpdate");
+}
+#endif
+
 void MpvWidget::on_mpv_events() {
-    // Process all events, until the event queue is empty.
     while (mpv) {
         mpv_event *event = mpv_wait_event(mpv, 0);
-        if (event->event_id == MPV_EVENT_NONE) {
+        if (event->event_id == MPV_EVENT_NONE)
             break;
-        }
         handle_mpv_event(event);
     }
 }
@@ -144,12 +171,9 @@ void MpvWidget::handle_mpv_event(mpv_event *event) {
             int mode = *reinterpret_cast<int*>(prop->data);
             emit videoPaused(mode == 1);
         } else if(strcmp(prop->name, "ao-volume") == 0) {
-            // Only meaningful once the audio output is initialized; before that
-            // the property is unavailable (MPV_FORMAT_NONE) and is ignored.
-            if(prop->format == MPV_FORMAT_DOUBLE) {
-                double vol = *reinterpret_cast<double*>(prop->data);
-                emit volumeChanged(static_cast<int>(vol + 0.5));
-            }
+            // unavailable (MPV_FORMAT_NONE) until the audio output is up
+            if(prop->format == MPV_FORMAT_DOUBLE)
+                emit volumeChanged(static_cast<int>(std::lround(*reinterpret_cast<double*>(prop->data))));
         } else if(strcmp(prop->name, "current-ao") == 0) {
             const bool active = (prop->format == MPV_FORMAT_STRING);
             if(active != mAudioOutputActive) {
@@ -160,37 +184,12 @@ void MpvWidget::handle_mpv_event(mpv_event *event) {
         break;
     }
     case MPV_EVENT_PLAYBACK_RESTART:
-        // Fired once the new file has fresh playback output ready. The player
-        // wrapper uses this to stay hidden during loadfile, avoiding a brief
-        // flash of the previous file's last frame.
+        // the new file has fresh output; the player uses it to end the stale-frame cover
         emit playbackRestarted();
         break;
-    default: ;
-        // Ignore uninteresting or unknown events.
+    default:
+        break;
     }
-}
-
-// Make Qt invoke mpv_render_context_render() to draw a new/updated video frame.
-void MpvWidget::maybeUpdate() {
-    // If the Qt window is not visible, Qt's update() will just skip rendering.
-    // This confuses mpv's render API, and may lead to small occasional
-    // freezes due to video rendering timing out.
-    // Handle this by manually redrawing.
-    // Note: Qt doesn't seem to provide a way to query whether update() will
-    //       be skipped, and the following code still fails when e.g. switching
-    //       to a different workspace with a reparenting window manager.
-    if(window()->isMinimized()) {
-        makeCurrent();
-        paintGL();
-        context()->swapBuffers(context()->surface());
-        doneCurrent();
-    } else {
-        update();
-    }
-}
-
-void MpvWidget::on_update(void *ctx) {
-    QMetaObject::invokeMethod((MpvWidget*)ctx, "maybeUpdate");
 }
 
 void MpvWidget::setMuted(bool mode) {
@@ -198,12 +197,9 @@ void MpvWidget::setMuted(bool mode) {
     applyMute();
 }
 
-// The software `mute` only silences audio that hasn't been decoded yet, so what
-// already sits in the audio buffers (~100 ms) keeps playing after muting. While
-// the audio output exists, mute that instead (the system / per-app stream),
-// which is immediate both ways; the software mute covers the time before it
-// starts. The stream's mute is remembered by PulseAudio and restored with the
-// next stream, so ours is imposed again every time the audio output comes up.
+// Software mute leaves ~100 ms of buffered audio playing, so while the audio
+// output exists mute that instead. PulseAudio restores a stream's mute, hence
+// this is re-applied whenever the audio output comes up.
 void MpvWidget::applyMute() {
     if(mAudioOutputActive && mpv::qt::set_property(mpv, "ao-mute", mMuted) >= 0) {
         mpv::qt::set_property(mpv, "mute", false);
@@ -217,12 +213,11 @@ bool MpvWidget::muted() {
 }
 
 int MpvWidget::volume() {
-    // ao-volume is the real audio-output (system / per-app) level. It is only
-    // available while audio is playing; fall back to full volume otherwise.
+    // ao-volume only exists while audio plays
     QVariant vol = mpv::qt::get_property_variant(mpv, "ao-volume");
     if(!vol.isValid())
         return 100;
-    return static_cast<int>(vol.toDouble() + 0.5);
+    return static_cast<int>(std::lround(vol.toDouble()));
 }
 
 void MpvWidget::setVolume(int vol) {
@@ -246,8 +241,5 @@ void MpvWidget::setLoopAB(int startPosition, int endPosition) {
 }
 
 void MpvWidget::setRepeat(bool mode) {
-    if(mode)
-        mpv::qt::set_property(mpv, "loop-file", "inf");
-    else
-        mpv::qt::set_property(mpv, "loop-file", "no");
+    mpv::qt::set_property(mpv, "loop-file", mode ? "inf" : "no");
 }
