@@ -98,7 +98,7 @@ QString settingGroupFor(const QString &key) {
         {"expandLimit", "Document"}, {"smoothAnimatedImages", "Document"}, {"loopSlideshow", "Document"},
         {"slideshowInterval", "Document"}, {"defaultFitMode", "Document"}, {"keepFitMode", "Document"},
         {"focusPointIn1to1Mode", "Document"}, {"unlockMinZoom", "Document"}, {"zoomStep", "Document"},
-        {"useFixedZoomLevels", "Document"}, {"fixedZoomLevels", "Document"}, {"scalingFilter", "Document"}, {"scalingEngine", "Document"}, {"scalingSharpen", "Document"},
+        {"useFixedZoomLevels", "Document"}, {"fixedZoomLevels", "Document"}, {"scalingFilter", "Document"}, {"scalingSharpen", "Document"},
         {"resizeFilter", "Document"},
         {"imageScrolling", "Document"}, {"mouseScrollingSpeed", "Document"}, {"trackpadDetection", "Document"},
         {"clickableEdges", "Document"}, {"clickableEdgesVisible", "Document"}, {"thumbPanelStyle", "Document"},
@@ -646,6 +646,8 @@ void Settings::pruneRetiredSettings() {
         {QStringLiteral("defaultCropAction"), QStringLiteral("Document")},
         // the changelog window was removed
         {QStringLiteral("showChangelogs"), QStringLiteral("General")},
+        // the OpenCV comparison beta ended with OpenCV's removal
+        {QStringLiteral("scalingEngine"), QStringLiteral("Document")},
     };
     bool removed = false;
     for(auto it = retiredKeys.constBegin(); it != retiredKeys.constEnd(); ++it) {
@@ -1829,39 +1831,23 @@ void Settings::setJPEGSaveQuality(int value) {
 }
 //------------------------------------------------------------------------------
 ScalingFilter Settings::scalingFilter() {
-    int defaultFilter = 1;
-#ifdef USE_OPENCV
-    // default to a nicer QI_FILTER_CV_CUBIC
-    defaultFilter = 3;
-#endif
-    int mode = settings->readSetting("scalingFilter", defaultFilter).toInt();
-#ifndef USE_OPENCV
-    if(mode > 2)
-        mode = 1;
-#endif
-    if(mode < 0 || mode > 4)
-        mode = 1;
-    return static_cast<ScalingFilter>(mode);
+    switch(settings->readSetting("scalingFilter", QI_FILTER_HIGH_QUALITY).toInt()) {
+    case QI_FILTER_NEAREST:
+        return QI_FILTER_NEAREST;
+    case QI_FILTER_BILINEAR:
+    case 2:
+        return QI_FILTER_BILINEAR;
+    default:
+        return QI_FILTER_HIGH_QUALITY;
+    }
 }
 
 void Settings::setScalingFilter(ScalingFilter mode) {
     settings->writeSetting("scalingFilter", mode);
 }
 
-bool Settings::legacyScalingEngine() {
-#ifdef USE_OPENCV
-    return settings->readSetting("scalingEngine", "qt").toString() == QLatin1String("opencv");
-#else
-    return false;
-#endif
-}
-
-void Settings::setLegacyScalingEngine(bool legacy) {
-    settings->writeSetting("scalingEngine", legacy ? "opencv" : "qt");
-}
-
 bool Settings::scalingSharpen() {
-    return settings->readSetting("scalingSharpen", false).toBool();
+    return settings->readSetting("scalingSharpen", true).toBool();
 }
 
 void Settings::setScalingSharpen(bool mode) {
@@ -1869,16 +1855,16 @@ void Settings::setScalingSharpen(bool mode) {
 }
 //------------------------------------------------------------------------------
 ScalingFilter Settings::resizeFilter() {
-    int mode = settings->readSetting("resizeFilter", QI_FILTER_BILINEAR).toInt();
-#ifdef USE_OPENCV
-    if(mode < QI_FILTER_NEAREST || mode > QI_FILTER_CV_CUBIC_SHARPEN)
-        mode = QI_FILTER_BILINEAR;
-#else
-    // the CV_* filters only exist in OpenCV builds
-    if(mode != QI_FILTER_NEAREST && mode != QI_FILTER_BILINEAR)
-        mode = QI_FILTER_BILINEAR;
-#endif
-    return static_cast<ScalingFilter>(mode);
+    switch(settings->readSetting("resizeFilter", QI_FILTER_BILINEAR).toInt()) {
+    case QI_FILTER_NEAREST:
+        return QI_FILTER_NEAREST;
+    case QI_FILTER_HIGH_QUALITY:
+        return QI_FILTER_HIGH_QUALITY;
+    case QI_FILTER_HIGH_QUALITY_SHARPEN:
+        return QI_FILTER_HIGH_QUALITY_SHARPEN;
+    default:
+        return QI_FILTER_BILINEAR;
+    }
 }
 
 void Settings::setResizeFilter(ScalingFilter mode) {

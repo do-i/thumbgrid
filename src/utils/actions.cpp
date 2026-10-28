@@ -121,7 +121,6 @@ void Actions::init() {
     for(int slot = 1; slot <= 9; slot++)
         mActions.insert(QStringLiteral("sendToFolder%1").arg(slot), QVersionNumber(2026,10,3));
     mActions.insert("toggleClip", QVersionNumber(2026,10,3));
-    mActions.insert("toggleScalingEngine", QVersionNumber(2026,10,4));
     mActions.insert("clearClip", QVersionNumber(2026,10,3));
     mActions.insert("setClipStart", QVersionNumber(2026,10,3));
     mActions.insert("setClipEnd", QVersionNumber(2026,10,3));

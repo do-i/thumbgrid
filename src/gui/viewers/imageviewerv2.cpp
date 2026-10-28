@@ -160,12 +160,10 @@ void ImageViewerV2::readSettings() {
     // before updateMinScale(), which caches the fit scales from the flag
     explicitFit = false; // re-applying the configured default is not an explicit fit
     updateMinScale();
-    const bool legacy = settings->legacyScalingEngine(), sharpen = settings->scalingSharpen();
-    const bool engineChanged = legacy != mLegacyScaling || sharpen != mScalingSharpen;
-    mLegacyScaling = legacy;
-    mScalingSharpen = sharpen;
+    const bool sharpenChanged = settings->scalingSharpen() != mScalingSharpen;
+    mScalingSharpen = settings->scalingSharpen();
     setScalingFilter(settings->scalingFilter());
-    if(engineChanged)
+    if(sharpenChanged)
         requestScaling();
     setFitMode(imageFitModeDefault);
 }
@@ -505,19 +503,10 @@ ScalingFilter ImageViewerV2::scalingFilter() const {
     return mScalingFilter;
 }
 
-// The Qt engine honors nearest; every other filter is Qt smooth, sharpened on request.
 ScalingFilter ImageViewerV2::effectiveScalingFilter() const {
-    if(mLegacyScaling || mScalingFilter == QI_FILTER_NEAREST)
-        return mScalingFilter;
-    return mScalingSharpen ? QI_FILTER_QT_SMOOTH_SHARPEN : QI_FILTER_BILINEAR;
-}
-
-bool ImageViewerV2::toggleScalingEngine() {
-#ifdef USE_OPENCV
-    mLegacyScaling = !mLegacyScaling;
-    requestScaling();
-#endif
-    return mLegacyScaling;
+    if(mScalingFilter == QI_FILTER_HIGH_QUALITY && !mScalingSharpen)
+        return QI_FILTER_HIGH_QUALITY_SOFT;
+    return mScalingFilter;
 }
 
 QWidget *ImageViewerV2::widget() {

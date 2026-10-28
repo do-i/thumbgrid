@@ -720,10 +720,10 @@ add_test(
     COMMAND thumbgrid_video_clip_playback_test
 )
 
-thumbgrid_add_behavior_test(thumbgrid_scaling_engine_toggle_test
-    behavior/test_scaling_engine_toggle.cpp
+thumbgrid_add_behavior_test(thumbgrid_scaling_quality_test
+    behavior/test_scaling_quality.cpp
 )
 add_test(
-    NAME "Qt scaling engine is the default and the OpenCV comparison toggle flips it"
-    COMMAND thumbgrid_scaling_engine_toggle_test
+    NAME "High quality scaling is bicubic, sharpened below half size, without OpenCV"
+    COMMAND thumbgrid_scaling_quality_test
 )

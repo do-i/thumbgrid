@@ -50,7 +50,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # USER OPTIONS
-# Exiv2, mpv (video) and OpenCV are mandatory and always built in. Exiv2 enables
+# Exiv2 and mpv (video) are mandatory and always built in. Exiv2 enables
 # reading/writing Exif/Iptc/Xmp metadata, metadata-preserving saves and the
 # strip-metadata action; for tags inside cr3/heif/jxl/avif, exiv2 itself must be
 # built with EXIV2_ENABLE_BMFF (default in exiv2 >= 0.28).
@@ -82,8 +82,6 @@ pkg_check_modules(Exiv2 REQUIRED IMPORTED_TARGET exiv2>=0.28.8)
 if(KDE_SUPPORT)
     find_package(KF6WindowSystem REQUIRED)
 endif()
-
-find_package(OpenCV REQUIRED core imgproc)
 
 ##############################################################
 

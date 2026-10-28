@@ -598,10 +598,6 @@ ScalingFilter ViewerWidget::scalingFilter() {
     return imageViewer->scalingFilter();
 }
 
-bool ViewerWidget::toggleScalingEngine() {
-    return imageViewer->toggleScalingEngine();
-}
-
 void ViewerWidget::mousePressEvent(QMouseEvent *event) {
     hideContextMenu();
     event->ignore();

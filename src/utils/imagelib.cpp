@@ -6,6 +6,18 @@
 #include <thread>
 #include <vector>
 
+// Runs work(from, to) over row bands of [0, rows) on up to 8 threads.
+static void forEachRowBand(int rows, const std::function<void(int, int)> &work) {
+    const int threads = qBound(1, int(std::thread::hardware_concurrency()), 8);
+    const int band = (rows + threads - 1) / threads;
+    std::vector<std::thread> pool;
+    for(int start = band; start < rows; start += band)
+        pool.emplace_back(work, start, std::min(rows, start + band));
+    work(0, std::min(rows, band));
+    for(auto &t : pool)
+        t.join();
+}
+
 void ImageLib::recolor(QPixmap &pixmap, QColor color) {
     if(pixmap.isNull())
         return;
@@ -40,22 +52,17 @@ void ImageLib::sharpen(QImage &image) {
         return i;
     };
     const int w = image.width(), h = image.height(), bytes = w * 4;
+    // detach once here: scanLine() from several threads would race to detach a shared image
+    uchar *const pixels = image.bits();
+    const qsizetype stride = image.bytesPerLine();
     QImage blur(w, h, image.format());
-    const auto parallelRows = [h](const std::function<void(int, int)> &work) {
-        const int threads = qBound(1, int(std::thread::hardware_concurrency()), 8);
-        const int band = (h + threads - 1) / threads;
-        std::vector<std::thread> pool;
-        for(int start = band; start < h; start += band)
-            pool.emplace_back(work, start, std::min(h, start + band));
-        work(0, std::min(h, band));
-        for(auto &t : pool)
-            t.join();
-    };
-    parallelRows([&](int from, int to) {
+    uchar *const blurred = blur.bits();
+    const qsizetype blurStride = blur.bytesPerLine();
+    forEachRowBand(h, [&](int from, int to) {
         std::vector<uchar> line(size_t(w + 2 * radius) * 4);
         std::vector<int> acc(bytes);
         for(int y = from; y < to; y++) {
-            const uchar *src = image.constScanLine(y);
+            const uchar *src = pixels + y * stride;
             for(int i = -radius; i < w + radius; i++)
                 std::memcpy(line.data() + (i + radius) * 4, src + reflect(i, w) * 4, 4);
             std::fill(acc.begin(), acc.end(), 1 << (shift - 1));
@@ -65,24 +72,24 @@ void ImageLib::sharpen(QImage &image) {
                 for(int x = 0; x < bytes; x++)
                     acc[x] += weight * p[x];
             }
-            uchar *dst = blur.scanLine(y);
+            uchar *dst = blurred + y * blurStride;
             for(int x = 0; x < bytes; x++)
                 dst[x] = uchar(acc[x] >> shift);
         }
     });
     QImage original = image.hasAlphaChannel() ? image.copy() : QImage();
-    parallelRows([&](int from, int to) {
+    forEachRowBand(h, [&](int from, int to) {
         std::vector<int> acc(bytes);
         for(int y = from; y < to; y++) {
             std::fill(acc.begin(), acc.end(), 1 << (shift - 1));
             for(int k = 0; k < taps; k++) {
-                const uchar *row = blur.constScanLine(reflect(y + k - radius, h));
+                const uchar *row = blurred + reflect(y + k - radius, h) * blurStride;
                 const int weight = kernel[k];
                 for(int x = 0; x < bytes; x++)
                     acc[x] += weight * row[x];
             }
             // out = 1.25 * src - 0.25 * blur
-            uchar *dst = image.scanLine(y);
+            uchar *dst = pixels + y * stride;
             for(int x = 0; x < bytes; x++)
                 dst[x] = uchar(qBound(0, (5 * dst[x] - (acc[x] >> shift) + 2) >> 2, 255));
         }
@@ -204,33 +211,104 @@ std::unique_ptr<QImage> ImageLib::scaled(const std::shared_ptr<const QImage>& so
             newFmt = QImage::Format_ARGB32;
         scaleTarget.reset(new QImage(source->convertToFormat(newFmt)));
     }
-#ifdef USE_OPENCV
-    if(filter >= QI_FILTER_CV_BILINEAR_SHARPEN && filter <= QI_FILTER_CV_CUBIC_SHARPEN &&
-       !QtOcv::isSupported(scaleTarget->format()))
-        filter = QI_FILTER_BILINEAR;
-#endif
     switch (filter) {
         case QI_FILTER_NEAREST:
             return scaled_Qt(scaleTarget, destSize, false);
-        case QI_FILTER_BILINEAR:
-            return scaled_Qt(scaleTarget, destSize, true);
-        case QI_FILTER_QT_SMOOTH_SHARPEN: {
-            auto dest = scaled_Qt(scaleTarget, destSize, true);
-            if(destSize.width() < scaleTarget->width() / 2)
-                sharpen(*dest);
-            return dest;
-        }
-#ifdef USE_OPENCV
-        case QI_FILTER_CV_BILINEAR_SHARPEN:
-            return scaled_CV(scaleTarget, destSize, cv::INTER_LINEAR, 0);
-        case QI_FILTER_CV_CUBIC:
-            return scaled_CV(scaleTarget, destSize, cv::INTER_CUBIC, 0);
-        case QI_FILTER_CV_CUBIC_SHARPEN:
-            return scaled_CV(scaleTarget, destSize, cv::INTER_CUBIC, 1);
-#endif
+        case QI_FILTER_HIGH_QUALITY:
+        case QI_FILTER_HIGH_QUALITY_SHARPEN:
+        case QI_FILTER_HIGH_QUALITY_SOFT:
+            return scaledHighQuality(*scaleTarget, destSize, filter);
         default:
             return scaled_Qt(scaleTarget, destSize, true);
     }
+}
+
+// Below half size: Qt's smooth (area-averaging) scaling, sharpened unless SOFT.
+// Otherwise bicubic, sharpened when shrinking with the SHARPEN variant.
+std::unique_ptr<QImage> ImageLib::scaledHighQuality(const QImage &source, QSize destSize, ScalingFilter filter) {
+    auto dest = std::make_unique<QImage>();
+    if(source.isNull() || destSize.isEmpty())
+        return dest;
+    const bool shrinking = destSize.width() < source.width();
+    if(destSize.width() < source.width() / 2.0) {
+        *dest = source.scaled(destSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        if(filter != QI_FILTER_HIGH_QUALITY_SOFT)
+            sharpen(*dest);
+    } else {
+        *dest = bicubicScaled(source, destSize);
+        if(filter == QI_FILTER_HIGH_QUALITY_SHARPEN && shrinking)
+            sharpen(*dest);
+    }
+    return dest;
+}
+
+// Separable bicubic with the Keys kernel (a = -0.75) and pixel-center sampling,
+// edges replicated: the same result as OpenCV's INTER_CUBIC to within 1 level.
+QImage ImageLib::bicubicScaled(const QImage &image, QSize destSize) {
+    QImage src = image;
+    if(src.format() != QImage::Format_RGB32 && src.format() != QImage::Format_ARGB32_Premultiplied)
+        src = src.convertToFormat(src.hasAlphaChannel() ? QImage::Format_ARGB32_Premultiplied : QImage::Format_RGB32);
+    constexpr float a = -0.75f;
+    struct Taps { int index[4]; float weight[4]; };
+    const auto taps = [](int dstLen, int srcLen) {
+        std::vector<Taps> result(dstLen);
+        const double step = double(srcLen) / dstLen;
+        for(int d = 0; d < dstLen; d++) {
+            const double pos = (d + 0.5) * step - 0.5;
+            const int base = int(std::floor(pos));
+            const float x = float(pos - base);
+            float *w = result[d].weight;
+            w[0] = ((a * (x + 1) - 5 * a) * (x + 1) + 8 * a) * (x + 1) - 4 * a;
+            w[1] = ((a + 2) * x - (a + 3)) * x * x + 1;
+            w[2] = ((a + 2) * (1 - x) - (a + 3)) * (1 - x) * (1 - x) + 1;
+            w[3] = 1.f - w[0] - w[1] - w[2];
+            for(int k = 0; k < 4; k++)
+                result[d].index[k] = std::clamp(base - 1 + k, 0, srcLen - 1);
+        }
+        return result;
+    };
+    const auto tx = taps(destSize.width(), src.width()), ty = taps(destSize.height(), src.height());
+    const int rowBytes = destSize.width() * 4;
+    // horizontal pass into float rows, then vertical
+    std::vector<float> rows(size_t(src.height()) * rowBytes);
+    forEachRowBand(src.height(), [&](int from, int to) {
+        for(int y = from; y < to; y++) {
+            const uchar *line = src.constScanLine(y);
+            float *row = rows.data() + size_t(y) * rowBytes;
+            for(int x = 0; x < destSize.width(); x++)
+                for(int c = 0; c < 4; c++) {
+                    float sum = 0;
+                    for(int k = 0; k < 4; k++)
+                        sum += tx[x].weight[k] * line[tx[x].index[k] * 4 + c];
+                    row[x * 4 + c] = sum;
+                }
+        }
+    });
+    QImage out(destSize, src.format());
+    uchar *const outBits = out.bits();
+    const qsizetype outStride = out.bytesPerLine();
+    const bool premultiplied = src.format() == QImage::Format_ARGB32_Premultiplied;
+    constexpr int alphaByte = (Q_BYTE_ORDER == Q_LITTLE_ENDIAN) ? 3 : 0;
+    forEachRowBand(destSize.height(), [&](int from, int to) {
+        for(int y = from; y < to; y++) {
+            const float *in[4];
+            for(int k = 0; k < 4; k++)
+                in[k] = rows.data() + size_t(ty[y].index[k]) * rowBytes;
+            uchar *line = outBits + y * outStride;
+            for(int i = 0; i < rowBytes; i++) {
+                float sum = 0;
+                for(int k = 0; k < 4; k++)
+                    sum += ty[y].weight[k] * in[k][i];
+                line[i] = uchar(std::clamp(int(std::lrint(sum)), 0, 255));
+            }
+            // cubic overshoot must not push premultiplied colors past alpha
+            if(premultiplied)
+                for(int i = 0; i < rowBytes; i += 4)
+                    for(int c = 0; c < 4; c++)
+                        line[i + c] = std::min(line[i + c], line[i + alphaByte]);
+        }
+    });
+    return out;
 }
 
 std::unique_ptr<QImage> ImageLib::scaled_Qt(const std::shared_ptr<const QImage>& source, QSize destSize, bool smooth) {
@@ -242,42 +320,3 @@ std::unique_ptr<QImage> ImageLib::scaled_Qt(const std::shared_ptr<const QImage>&
     return dest;
 }
 
-#ifdef USE_OPENCV
-// this probably leaks, needs checking
-std::unique_ptr<QImage> ImageLib::scaled_CV(const std::shared_ptr<const QImage>& source, QSize destSize, cv::InterpolationFlags filter, int sharpen) {
-    if(!source)
-        return std::make_unique<QImage>();
-    QtOcv::MatColorOrder order;
-    cv::Mat srcMat = QtOcv::image2Mat_shared(*source.get(), &order);
-    cv::Size destSizeCv(destSize.width(), destSize.height());
-    auto dest = std::make_unique<QImage>();
-    if(destSize == source->size()) {
-        // TODO: should this return a copy?
-    } else if(destSize.width() > source.get()->width()) { // upscale
-        cv::Mat dstMat(destSizeCv, srcMat.type());
-        cv::resize(srcMat, dstMat, destSizeCv, 0, 0, filter);
-        *dest = QtOcv::mat2Image(dstMat, order, source->format());
-    } else { // downscale
-        float scale = (float)destSize.width() / source->width();
-        if(scale < 0.5f && filter != cv::INTER_NEAREST) {
-            if(filter == cv::INTER_CUBIC)
-                sharpen = 1;
-            filter = cv::INTER_AREA;
-        }
-        cv::Mat dstMat(destSizeCv, srcMat.type());
-        cv::resize(srcMat, dstMat, destSizeCv, 0, 0, filter);
-        if(!sharpen || filter == cv::INTER_NEAREST) {
-            *dest = QtOcv::mat2Image(dstMat, order, source->format());
-        } else {
-            // todo: tweak this
-            double amount = 0.25 * sharpen;
-            // unsharp mask
-            cv::Mat dstMat_sharpened;
-            cv::GaussianBlur(dstMat, dstMat_sharpened, cv::Size(0, 0), 2);
-            cv::addWeighted(dstMat, 1.0 + amount, dstMat_sharpened, -amount, 0, dstMat_sharpened);
-            *dest = QtOcv::mat2Image(dstMat_sharpened, order, source->format());
-        }
-    }
-    return dest;
-}
-#endif

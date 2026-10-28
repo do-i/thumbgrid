@@ -85,12 +85,9 @@ void ResizeDialog::setupFilterCombo() {
     // brackets for anyone who wants to know exactly what runs.
     ui->comboBox->clear();
     ui->comboBox->addItem(tr("Fastest (nearest)"), QI_FILTER_NEAREST);
-    ui->comboBox->addItem(tr("Standard (bilinear)"), QI_FILTER_BILINEAR);
-#ifdef USE_OPENCV
-    ui->comboBox->addItem(tr("Standard, sharpened (bilinear)"), QI_FILTER_CV_BILINEAR_SHARPEN);
-    ui->comboBox->addItem(tr("High (bicubic)"), QI_FILTER_CV_CUBIC);
-    ui->comboBox->addItem(tr("High, sharpened (bicubic)"), QI_FILTER_CV_CUBIC_SHARPEN);
-#endif
+    ui->comboBox->addItem(tr("Standard (smooth)"), QI_FILTER_BILINEAR);
+    ui->comboBox->addItem(tr("High (bicubic)"), QI_FILTER_HIGH_QUALITY);
+    ui->comboBox->addItem(tr("High, sharpened (bicubic)"), QI_FILTER_HIGH_QUALITY_SHARPEN);
     ui->comboBox->setToolTip(tr("How pixels are resampled. Higher quality is slower; "
                                 "sharpened keeps fine detail crisp when shrinking."));
     int index = ui->comboBox->findData(settings->resizeFilter());

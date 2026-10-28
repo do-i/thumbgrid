@@ -121,7 +121,6 @@ add_subdirectory(components)
 add_subdirectory(sourcecontainers)
 add_subdirectory(gui)
 add_subdirectory(utils)
-add_subdirectory(3rdparty/QtOpenCV)
 
 # C++ STANDARD
 target_compile_features(${THUMBGRID_APP_TARGET} PUBLIC cxx_std_17)
@@ -145,8 +144,6 @@ else()
     ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="${QIMGV_PLUGIN_DIR}")
     ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.so")
 endif()
-target_link_libraries(${THUMBGRID_APP_TARGET} PUBLIC ${OpenCV_LIBS})
-target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_OPENCV)
 # optional: KDE KSyntaxHighlighting for the text viewer; without it the
 # built-in fallback highlighter (textsyntaxhighlighter.cpp) is used
 find_package(KF6SyntaxHighlighting QUIET)

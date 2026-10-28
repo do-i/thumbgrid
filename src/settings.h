@@ -49,14 +49,13 @@ enum PanelPosition : std::uint8_t {
     PANEL_RIGHT
 };
 
+// Stored values: 2 was an OpenCV bilinear filter (now read as SMOOTH), 3 and 4 its bicubic ones.
 enum ScalingFilter : std::uint8_t {
-    QI_FILTER_NEAREST,
-    QI_FILTER_BILINEAR,
-    QI_FILTER_CV_BILINEAR_SHARPEN,
-    QI_FILTER_CV_CUBIC,
-    QI_FILTER_CV_CUBIC_SHARPEN,
-    // internal, never stored: Qt smooth plus own sharpening (Qt scaling engine)
-    QI_FILTER_QT_SMOOTH_SHARPEN
+    QI_FILTER_NEAREST = 0,
+    QI_FILTER_BILINEAR = 1,             // "Smooth": Qt smooth scaling
+    QI_FILTER_HIGH_QUALITY = 3,         // bicubic; below half size smooth + sharpen
+    QI_FILTER_HIGH_QUALITY_SHARPEN = 4, // also sharpened when shrinking less (resize dialog)
+    QI_FILTER_HIGH_QUALITY_SOFT = 5     // internal, never stored: no sharpening below half size
 };
 
 enum ZoomIndicatorMode : std::uint8_t {
@@ -216,10 +215,7 @@ public:
     bool expandImage();
     ScalingFilter scalingFilter();
     void setScalingFilter(ScalingFilter mode);
-    // beta comparison: OpenCV (legacy) instead of Qt scaling; always false without OpenCV
-    bool legacyScalingEngine();
-    void setLegacyScalingEngine(bool legacy);
-    // Qt engine: sharpen images shrunk below 50%, like the legacy cubic filter
+    // High quality filter: sharpen images shrunk below 50%
     bool scalingSharpen();
     void setScalingSharpen(bool mode);
     // filter used by the Resize dialog; separate from the viewer's zoom filter

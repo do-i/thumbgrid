@@ -116,9 +116,7 @@ private:
     void setupAboutPage();
     void setupThemePage();
     void setupFeatureToggles();
-    void setupScalingEngineControls();
-    void updateScalingEngineControls();
-    void onScalingFilterActivated(int index);
+    void setupScalingControls();
     void setupMiscControls();
     // repopulate presets, select the active one, mark "(modified)" when diverged
     void refreshShortcutPresetCombo();
@@ -151,11 +149,7 @@ private:
     QMap<QString, QString> mShortcutVideoFallback; // their overrides in a video
     QLineEdit *mShortcutSearchEdit = nullptr;
     QComboBox *mShortcutPresetComboBox = nullptr;
-    QComboBox *mScalingEngineComboBox = nullptr;
     QCheckBox *mScalingSharpenCheckBox = nullptr;
-    // the stored filter; the Qt engine lists only Nearest / Smooth but keeps an OpenCV choice
-    ScalingFilter mScalingFilterChoice = QI_FILTER_BILINEAR;
-    QStringList mScalingFilterNames;
     // Cleared on a theme change so the icons pick up the new icon colour.
     mutable QMap<ViewMode, QIcon> mShortcutContextIcons;
     bool mUpdatingShortcutsTable = false;
