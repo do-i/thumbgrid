@@ -142,7 +142,7 @@ Pushing `v*` fans out to two workflows, both attaching their artifact to the
 same GitHub Release:
 
 - [`arch-package.yml`](.github/workflows/arch-package.yml) — builds the
-  full-featured Arch package (Exiv2 / OpenCV / mpv) and, beyond uploading the
+  full-featured Arch package (Exiv2 / mpv) and, beyond uploading the
   `.pkg.tar.zst`, publishes the **pacman repo** on the `gh-pages` branch
   (`arch/x86_64/`, via `repo-add --prevent-downgrade`). That repo is what
   users' `pacman -Syu` reads, so this step — not AUR — is what ships an update
@@ -152,7 +152,7 @@ same GitHub Release:
 
 ### ABI-only rebuilds
 
-When Arch updates Qt, mpv, Exiv2, or OpenCV, the shipped package can break
+When Arch updates Qt, mpv, or Exiv2, the shipped package can break
 against the new libraries with no thumbgrid code change. Republish the latest
 tag instead of cutting a version: run `arch-package.yml` via
 **`workflow_dispatch`** with `pkgrel` bumped (2, 3, …). It rebuilds the

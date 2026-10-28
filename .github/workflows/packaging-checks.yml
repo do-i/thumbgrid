@@ -30,7 +30,7 @@ jobs:
       image: archlinux:base-devel
     steps:
       # makepkg is part of base-devel; --printsrcinfo never runs build(), so
-      # unlike the full package build we don't need the Qt/exiv2/opencv/mpv
+      # unlike the full package build we don't need the Qt/exiv2/mpv
       # toolchain here.
       - name: Install check tooling
         run: pacman -Syu --noconfirm git pacman-contrib

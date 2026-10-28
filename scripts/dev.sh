@@ -57,7 +57,7 @@ confirm_install() {
     shift
 
     printf 'This installs dependencies for the full thumbgrid build.\n'
-    printf 'Includes feature deps for Exiv2, OpenCV, and mpv.\n\n'
+    printf 'Includes feature deps for Exiv2 and mpv.\n\n'
     printf 'Package manager: %s\n' "$package_manager"
     printf 'Packages:\n'
     printf '  %s\n' "$@"
@@ -95,7 +95,6 @@ install_full_deps() {
             libqt6svg6-dev
             libkf6syntaxhighlighting-dev
             libexiv2-dev
-            libopencv-dev
             libmpv-dev
         )
         confirm_install "apt-get" "${packages[@]}" || return 0
@@ -113,7 +112,6 @@ install_full_deps() {
             qt6-qttools-devel
             kf6-syntax-highlighting-devel
             exiv2-devel
-            opencv-devel
             mpv-libs-devel
         )
         local dnf_cmd=(dnf install -y)
@@ -130,7 +128,6 @@ install_full_deps() {
             qt6-tools
             syntax-highlighting
             exiv2
-            opencv
             mpv
         )
         local pacman_cmd=(pacman -S --needed)
@@ -147,7 +144,6 @@ install_full_deps() {
             qt6-tools-devel
             kf6-syntax-highlighting-devel
             libexiv2-devel
-            opencv-devel
             mpv-devel
         )
         local zypper_cmd=(zypper install -y)
@@ -164,7 +160,6 @@ install_full_deps() {
             qt6-qttools-dev
             syntax-highlighting-dev
             exiv2-dev
-            opencv-dev
             mpv-dev
         )
         local apk_cmd=(apk add)
@@ -178,7 +173,6 @@ install_full_deps() {
             qt
             syntax-highlight
             exiv2
-            opencv
             mpv
             create-dmg
         )
@@ -186,7 +180,7 @@ install_full_deps() {
         brew install "${packages[@]}"
     else
         printf 'No supported package manager found.\n' >&2
-        printf 'Install Git LFS, a C++ compiler, CMake, pkg-config, Qt Widgets, Qt ImageFormats, Qt Svg, Qt Tools, plus Exiv2, OpenCV, and mpv.\n' >&2
+        printf 'Install Git LFS, a C++ compiler, CMake, pkg-config, Qt Widgets, Qt ImageFormats, Qt Svg, Qt Tools, plus Exiv2 and mpv.\n' >&2
         return 1
     fi
 
@@ -222,17 +216,16 @@ configure_project() {
 
     local cmake_args=()
     if [[ "$(uname -s)" == "Darwin" ]] && command -v brew >/dev/null 2>&1; then
-        local qt_prefix opencv_prefix exiv2_prefix mpv_prefix
+        local qt_prefix exiv2_prefix mpv_prefix
         qt_prefix="$(brew --prefix qt 2>/dev/null || true)"
-        opencv_prefix="$(brew --prefix opencv 2>/dev/null || true)"
         exiv2_prefix="$(brew --prefix exiv2 2>/dev/null || true)"
         mpv_prefix="$(brew --prefix mpv 2>/dev/null || true)"
 
         if [[ -n "$qt_prefix" && -d "$qt_prefix" ]]; then
             PATH="$qt_prefix/bin:$PATH"
         fi
-        if [[ -n "$qt_prefix" && -n "$opencv_prefix" ]]; then
-            cmake_args+=("-DCMAKE_PREFIX_PATH=$qt_prefix;$opencv_prefix")
+        if [[ -n "$qt_prefix" ]]; then
+            cmake_args+=("-DCMAKE_PREFIX_PATH=$qt_prefix")
         fi
         if [[ -n "$exiv2_prefix" && -n "$mpv_prefix" ]]; then
             export PKG_CONFIG_PATH="$exiv2_prefix/lib/pkgconfig:$mpv_prefix/lib/pkgconfig:${PKG_CONFIG_PATH:-}"

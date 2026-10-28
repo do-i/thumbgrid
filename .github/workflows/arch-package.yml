@@ -1,10 +1,10 @@
 name: Arch package
 
-# Build the full-featured Arch package (Exiv2 / OpenCV / mpv), attach it to
+# Build the full-featured Arch package (Exiv2 / mpv), attach it to
 # the GitHub release on version tags, and publish/refresh the pacman repo
 # (gh-pages: arch/x86_64/) so `pacman -Syu` picks up the rebuild. Also
 # runnable manually (workflow_dispatch) with a bumped pkgrel to republish an
-# ABI-only rebuild (e.g. after an Arch mpv/exiv2/opencv/Qt update) without
+# ABI-only rebuild (e.g. after an Arch mpv/exiv2/Qt update) without
 # cutting a new app version tag.
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
       image: archlinux:base-devel
     steps:
       - name: Install build tooling
-        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats kimageformats libheif qt6-tools pkgconf exiv2 opencv mpv pacman-contrib
+        run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats kimageformats libheif qt6-tools pkgconf exiv2 mpv pacman-contrib
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

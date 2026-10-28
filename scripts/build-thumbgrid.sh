@@ -4,8 +4,8 @@
 # Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
 # This builds a complete thumbgrid-x64 package. Result is placed in <repo>/thumbgrid-x64_<version>
 # NOTE: the easymodo/qimgv-deps-bin and easymodo/qt-builds URLs below are upstream
-# prebuilt build dependencies (Qt/OpenCV/mpv), not product branding; left as-is.
-# Warning: Some stuff will be left over behind after building (C:/qt and C:/opencv-4.5.5-minimal)
+# prebuilt build dependencies (Qt/mpv), not product branding; left as-is.
+# Warning: Some stuff will be left over behind after building (C:/qt)
 
 #CFL='-ffunction-sections -fdata-sections -march=native -mtune=native -O3 -pipe'
 CFL='-ffunction-sections -fdata-sections -O3 -pipe'
@@ -17,7 +17,6 @@ else
   MSYS_DIR="$(cd "$RUNNER_TEMP" && pwd)/msys64/mingw64"
 fi
 CUSTOM_QT_DIR="C:/qt/5.15.3-mingw64-slim"
-OPENCV_DIR="C:/opencv-minimal-4.5.5"
 SCRIPTS_DIR=$(dirname $(readlink -f $0)) # this file's location (/path/to/thumbgrid/scripts)
 SRC_DIR=$(dirname $SCRIPTS_DIR)
 BUILD_DIR=$SRC_DIR/build
@@ -50,14 +49,6 @@ wget --progress=dot:mega -O 5.15.3-mingw64-slim.7z https://github.com/easymodo/q
 rm 5.15.3-mingw64-slim.7z
 
 # ------------------------------------------------------------------------------
-echo "GETTING OpenCV"
-mkdir $OPENCV_DIR
-cd $OPENCV_DIR
-wget --progress=dot:mega -O opencv-minimal-4.5.5-x64.7z https://github.com/easymodo/qimgv-deps-bin/releases/download/x64/opencv-minimal-4.5.5-x64.7z
-7z x opencv-minimal-4.5.5-x64.7z -y
-rm opencv-minimal-4.5.5-x64.7z
-
-# ------------------------------------------------------------------------------
 echo "GETTING MPV"
 mkdir $MPV_DIR
 cd $MPV_DIR
@@ -66,34 +57,12 @@ wget --progress=dot:mega -O mpv-x64.7z https://github.com/easymodo/qimgv-deps-bi
 rm mpv-x64.7z
 
 # ------------------------------------------------------------------------------
-# We are using prebuilt opencv but feel free to compile instead
-#echo "BUILDING OPENCV"
-#cd $EXT_DIR
-#git clone --depth 1 --branch 4.5.5 https://github.com/opencv/opencv.git
-#cd opencv
-#rm -rf ./build
-#cmake -S ./ -B build -G Ninja \
-#    -DCMAKE_INSTALL_PREFIX="$OPENCV_DIR" \
-#    -DCMAKE_BUILD_TYPE=Release \
-#    -DBUILD_LIST='core,imgproc' \
-#    -DWITH_1394=OFF \
-#    -DWITH_VTK=OFF \
-#    -DWITH_FFMPEG=OFF \
-#    -DWITH_GSTREAMER=OFF \
-#    -DWITH_DSHOW=OFF \
-#    -DWITH_QUIRC=OFF \
-#    -DBUILD_SHARED_LIBS=ON \
-#    -DCMAKE_C_FLAGS="$CFL" -DCMAKE_CXX_FLAGS="$CFL" -DCMAKE_EXE_LINKER_FLAGS="$LDFL"
-#ninja install -C build
-
 # ------------------------------------------------------------------------------
 echo "BUILDING"
 #rm -rf $BUILD_DIR
-sed -i 's|opencv4/||' $SRC_DIR/src/3rdparty/QtOpenCV/cvmatandqimage.{h,cpp}
 cmake -S $SRC_DIR -B $BUILD_DIR -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_PREFIX_PATH=$CUSTOM_QT_DIR \
-    -DOpenCV_DIR=$OPENCV_DIR \
     -DMPV_DIR=$MPV_DIR \
     -DCMAKE_CXX_FLAGS="$CFL" -DCMAKE_EXE_LINKER_FLAGS="$LDFL"
 ninja -C $BUILD_DIR
@@ -199,9 +168,7 @@ cp $EXT_DIR/QtApng/build/plugins/imageformats/qapng.dll $PACKAGE_DIR/imageformat
 cp $EXT_DIR/qt-heif-image-plugin/build/bin/imageformats/libqheif.dll $PACKAGE_DIR/imageformats
 cp $EXT_DIR/qtraw/build/src/imageformats/qtraw.dll $PACKAGE_DIR/imageformats
 
-# 5 - copy opencv & mpv
-cd $OPENCV_DIR/x64/mingw/bin
-cp libopencv_core455.dll libopencv_imgproc455.dll $PACKAGE_DIR
+# 5 - copy mpv
 cd $MPV_DIR/bin/x86_64
 cp mpv.exe libmpv-2.dll $PACKAGE_DIR
 

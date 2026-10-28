@@ -161,7 +161,7 @@ thumbgrid should also obey the global scale factor set in KDE's systemsettings.
 
 ## High quality scaling
 
-thumbgrid supports nicer scaling filters when compiled with `opencv` support (ON by default, but might vary depending on your linux distribution). Filter options are available in __Settings > Scaling__. `Bicubic` or `bilinear+sharpen` is recommended.
+Scaling filters are in __Settings > Document > Scaling quality__. `High quality` (the default) is bicubic, and sharpens images shrunk below half size; `Smooth` is faster and softer.
 
 # Additional image formats
 
@@ -233,7 +233,7 @@ sudo pacman -Sy thumbgrid
 
 Subsequent `sudo pacman -Syu` runs will pick up rebuilt thumbgrid packages
 automatically, including rebuilds triggered by Arch ABI updates to Qt,
-Exiv2, OpenCV, or mpv. The repo is published by
+Exiv2, or mpv. The repo is published by
 [`arch-package.yml`](.github/workflows/arch-package.yml) to the `gh-pages`
 branch on every version tag, and can also be re-triggered manually
 (`workflow_dispatch` with a bumped `pkgrel`) to republish after an
@@ -252,7 +252,7 @@ Download `*.pkg.tar.zst` from a
 
 Requirements: a C++17 compiler (GCC 9+), CMake 3.13+, and Qt6
 (`Core Widgets Svg PrintSupport OpenGLWidgets`). Optional features pull in
-exiv2 (metadata), OpenCV (HQ scaling) and mpv (video).
+exiv2 (metadata) and mpv (video).
 
 The easiest way is the interactive menu, which can install the minimal Qt6
 build dependencies for your distro and then configure / build / run. It needs
@@ -283,8 +283,8 @@ _Note: pass an explicit job count to `--parallel`; with the Makefiles
 generator a bare `--parallel` runs unlimited compile jobs and can exhaust
 memory on smaller machines._
 
-Exiv2 (metadata), the mpv plugin (video playback) and OpenCV (high quality
-scaling) are always built in and require those libraries at build time. The
+Exiv2 (metadata) and the mpv plugin (video playback) are always built in and
+require those libraries at build time. The
 only feature toggle is:
 
 ```

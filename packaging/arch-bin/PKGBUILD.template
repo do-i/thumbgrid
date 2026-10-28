@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-only
 # Copyright (C) 2024-2026 do-i and thumbgrid contributors
 # PKGBUILD template for thumbgrid-bin: installs the prebuilt full-featured
-# package (Qt6 / Exiv2 / OpenCV / mpv) uploaded to the GitHub release by
+# package (Qt6 / Exiv2 / mpv) uploaded to the GitHub release by
 # .github/workflows/arch-package.yml. No local compilation.
 #
 # scripts/publish-aur.sh replaces the @...@ fields in a temporary AUR clone,
@@ -14,7 +14,7 @@ pkgver=@PKGVER@
 pkgrel=@PKGREL@
 # pkgrel of the upstream thumbgrid release asset being repackaged.
 _srcrel=@SRCREL@
-pkgdesc="Qt image viewer (fork of easymodo/qimgv), prebuilt binary release (exiv2/opencv/mpv)"
+pkgdesc="Qt image viewer (fork of easymodo/qimgv), prebuilt binary release (exiv2/mpv)"
 arch=('x86_64')
 url="https://github.com/do-i/thumbgrid"
 license=('GPL-3.0-only')
@@ -29,7 +29,6 @@ depends=(
   'kimageformats'
   'libheif>=1.23.2'  # CVE-2026-84383 (heap overflow)
   'exiv2>=0.28.8'    # CVE-2026-25884, -27596, -27631
-  'opencv'
   'mpv'
 )
 provides=('thumbgrid')
