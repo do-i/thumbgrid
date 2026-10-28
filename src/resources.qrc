@@ -34,8 +34,6 @@
         <file>res/icons/common/buttons/panel-small/root12@2x.png</file>
         <file>res/icons/common/buttons/videocontrols/clip24.png</file>
         <file>res/icons/common/buttons/videocontrols/clip24@2x.png</file>
-        <file>res/icons/common/buttons/videocontrols/clip-edit24.png</file>
-        <file>res/icons/common/buttons/videocontrols/clip-edit24@2x.png</file>
         <file>res/icons/common/buttons/videocontrols/loop24.png</file>
         <file>res/icons/common/buttons/videocontrols/loop24@2x.png</file>
         <file>res/icons/common/buttons/videocontrols/mute-off24.png</file>
@@ -50,8 +48,6 @@
         <file>res/icons/common/buttons/videocontrols/skip-backwards24@2x.png</file>
         <file>res/icons/common/buttons/videocontrols/skip-forward24.png</file>
         <file>res/icons/common/buttons/videocontrols/skip-forward24@2x.png</file>
-        <file>res/icons/common/menuitem/clip16.png</file>
-        <file>res/icons/common/menuitem/clip16@2x.png</file>
         <file>res/icons/common/menuitem/copy16.png</file>
         <file>res/icons/common/menuitem/copy16@2x.png</file>
         <file>res/icons/common/menuitem/document-view16.png</file>
@@ -144,14 +140,11 @@
         <file>res/icons/common/other/go-to-parent-dir.png</file>
         <file>res/icons/common/buttons/panel/folder16.png</file>
         <file>res/icons/common/buttons/panel/folder16@2x.png</file>
-        <file>res/icons/common/other/folder32-scalable.svg</file>
         <file>res/icons/common/buttons/panel/up16.png</file>
         <file>res/icons/common/buttons/panel/up16@2x.png</file>
         <file>res/icons/common/overlay/info16.png</file>
         <file>res/icons/common/overlay/info16@2x.png</file>
         <file>res/icons/common/menuitem/back16.png</file>
-        <file>res/icons/common/menuitem/forward16.png</file>
-        <file>res/icons/common/other/checkerboard.png</file>
         <file>res/icons/common/menuitem/print16.png</file>
         <file>res/icons/common/menuitem/print16@2x.png</file>
         <file>res/icons/common/menuitem/back16@2x.png</file>
@@ -171,17 +164,12 @@
         <file>res/icons/common/settings/appearance32@2x.png</file>
         <file>res/icons/common/settings/general32.png</file>
         <file>res/icons/common/settings/general32@2x.png</file>
-        <file>res/icons/common/settings/scale32.png</file>
-        <file>res/icons/common/settings/scale32@2x.png</file>
-        <file>res/icons/common/settings/shortcuts32_i.png</file>
         <file>res/icons/common/settings/shortcuts32.png</file>
         <file>res/icons/common/settings/shortcuts32@2x.png</file>
         <file>res/icons/common/settings/storeddata32.png</file>
         <file>res/icons/common/settings/storeddata32@2x.png</file>
         <file>res/icons/common/settings/terminal32.png</file>
         <file>res/icons/common/settings/terminal32@2x.png</file>
-        <file>res/icons/common/settings/view32.png</file>
-        <file>res/icons/common/settings/view32@2x.png</file>
         <file>res/icons/common/settings/grid32.png</file>
         <file>res/icons/common/settings/grid32@2x.png</file>
         <file>res/icons/common/settings/document32.png</file>
