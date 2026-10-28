@@ -5,9 +5,8 @@
 #include <QToolTip>
 
 namespace {
-// handle sizes: editable, then the slimmer committed look
-constexpr int EDIT_HEIGHT = 18, EDIT_SQUARE = 7, EDIT_TIP = 6;
-constexpr int SLIM_HEIGHT = 12, SLIM_SQUARE = 3, SLIM_TIP = 4;
+// handle size
+constexpr int HANDLE_HEIGHT = 18, HANDLE_SQUARE = 7, HANDLE_TIP = 6;
 // extra room around a handle that still grabs it
 constexpr int GRAB_MARGIN = 3;
 
@@ -30,17 +29,14 @@ VideoSlider::VideoSlider(QWidget *parent) : QSlider(parent) {
     setMouseTracking(true);
 }
 
-void VideoSlider::setClip(int start, int end, bool editable) {
-    if(start < 0 || end < start) {
+void VideoSlider::setClip(int start, int end) {
+    if(start < 0 || end < start)
         start = end = -1;
-        editable = false;
-    }
-    if(start == mClipStart && end == mClipEnd && editable == mClipEditable)
+    if(start == mClipStart && end == mClipEnd)
         return;
     mClipStart = start;
     mClipEnd = end;
-    mClipEditable = editable;
-    if(!editable) {
+    if(start < 0) {
         mDragHandle = -1;
         unsetCursor();
     }
@@ -59,8 +55,8 @@ int VideoSlider::clipEnd() const {
     return mClipEnd;
 }
 
-bool VideoSlider::clipEditable() const {
-    return mClipEditable;
+bool VideoSlider::draggingClipHandle() const {
+    return mDragHandle >= 0;
 }
 
 // the style's own math, so the clip lines up with the knob
@@ -88,9 +84,9 @@ int VideoSlider::valueForX(int x) const {
 QPolygonF VideoSlider::clipHandleShape(ClipHandle handle) const {
     if(mClipStart < 0)
         return QPolygonF();
-    const int height = mClipEditable ? EDIT_HEIGHT : SLIM_HEIGHT;
-    const qreal square = mClipEditable ? EDIT_SQUARE : SLIM_SQUARE;
-    const qreal tip = mClipEditable ? EDIT_TIP : SLIM_TIP;
+    const int height = HANDLE_HEIGHT;
+    const qreal square = HANDLE_SQUARE;
+    const qreal tip = HANDLE_TIP;
     const qreal xStart = xForValue(mClipStart);
     const qreal xEnd = xForValue(mClipEnd);
     const qreal centerX = (xStart + xEnd) / 2.0;
@@ -110,8 +106,8 @@ QPolygonF VideoSlider::clipHandleShape(ClipHandle handle) const {
     return shape;
 }
 
-// With a clip: the groove, the groove outside the clip darkened, the knob,
-// then the clip's handles on top.
+// With a clip: the groove, the groove outside the clip darkened, the knob
+// (not while a handle is dragged), then the clip's handles on top.
 void VideoSlider::paintEvent(QPaintEvent *event) {
     if(mClipStart < 0 || orientation() != Qt::Horizontal) {
         QSlider::paintEvent(event);
@@ -132,28 +128,25 @@ void VideoSlider::paintEvent(QPaintEvent *event) {
     const QColor shade(0, 0, 0, 120);
     p.fillRect(QRect(QPoint(groove.left(), groove.top()), QPoint(xStart, groove.bottom())), shade);
     p.fillRect(QRect(QPoint(xEnd, groove.top()), QPoint(groove.right(), groove.bottom())), shade);
-    if(mClipEditable) {
-        QColor tint = accent;
-        tint.setAlpha(45);
-        const int bandHeight = EDIT_HEIGHT - 6;
-        p.fillRect(QRect(xStart, (height() - bandHeight) / 2, xEnd - xStart, bandHeight), tint);
+    QColor tint = accent;
+    tint.setAlpha(45);
+    const int bandHeight = HANDLE_HEIGHT - 6;
+    p.fillRect(QRect(xStart, (height() - bandHeight) / 2, xEnd - xStart, bandHeight), tint);
+
+    if(mDragHandle < 0) {
+        opt.subControls = QStyle::SC_SliderHandle;
+        p.drawComplexControl(QStyle::CC_Slider, opt);
     }
 
-    opt.subControls = QStyle::SC_SliderHandle;
-    p.drawComplexControl(QStyle::CC_Slider, opt);
-
-    QColor fill = accent;
-    if(!mClipEditable)
-        fill = fill.lighter(115);
     p.setPen(QPen(accent.darker(160), 1));
-    p.setBrush(fill);
+    p.setBrush(accent);
     p.drawPolygon(clipHandleShape(CLIP_HANDLE_START));
     p.drawPolygon(clipHandleShape(CLIP_HANDLE_END));
 }
 
 // the handle under pos (the nearer one where they are close), or -1
 int VideoSlider::clipHandleAt(QPoint pos) const {
-    if(!mClipEditable || mClipStart < 0)
+    if(mClipStart < 0)
         return -1;
     const QRectF startRect = clipHandleShape(CLIP_HANDLE_START).boundingRect()
                                  .adjusted(-GRAB_MARGIN, -GRAB_MARGIN, GRAB_MARGIN, GRAB_MARGIN);
@@ -182,6 +175,7 @@ void VideoSlider::mousePressEvent(QMouseEvent *event) {
     const int handle = clipHandleAt(event->pos());
     if(handle >= 0) {
         mDragHandle = handle;
+        update();
         const int value = (handle == CLIP_HANDLE_START) ? mClipStart : mClipEnd;
         mDragOffset = event->pos().x() - xForValue(value);
         emit clipHandlePressed(handle);
@@ -224,6 +218,7 @@ void VideoSlider::mouseReleaseEvent(QMouseEvent *event) {
     if(mDragHandle >= 0 && event->button() == Qt::LeftButton) {
         const int handle = mDragHandle;
         mDragHandle = -1;
+        update();
         QToolTip::hideText();
         emit clipHandleReleased(handle);
         return;

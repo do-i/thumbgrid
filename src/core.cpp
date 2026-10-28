@@ -257,9 +257,7 @@ void Core::initActions() {
     connect(actionManager, &ActionManager::toggleScalingFilter, mw, &MW::toggleScalingFilter);
     connect(actionManager, &ActionManager::showInDirectory, this, &Core::showInDirectory);
     connect(actionManager, &ActionManager::toggleMute, mw, &MW::toggleMute);
-    connect(actionManager, &ActionManager::toggleClipEdit, mw, &MW::toggleClipEdit);
-    connect(actionManager, &ActionManager::commitClipEdit, mw, &MW::commitClipEdit);
-    connect(actionManager, &ActionManager::cancelClipEdit, mw, &MW::cancelClipEdit);
+    connect(actionManager, &ActionManager::toggleClip, mw, &MW::toggleClip);
     connect(actionManager, &ActionManager::clearClip, mw, &MW::clearClip);
     connect(actionManager, &ActionManager::setClipStart, mw, &MW::setClipStart);
     connect(actionManager, &ActionManager::setClipEnd, mw, &MW::setClipEnd);

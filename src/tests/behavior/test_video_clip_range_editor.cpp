@@ -9,33 +9,37 @@
 #include "gui/overlays/videocontrols.h"
 #include "gui/viewers/videoclip.h"
 
-// The A-B button became a clip editor: the bracket button puts two pentagon
-// handles on the seek bar (30% and 70% of the video to start with), dragging
-// them sets the clip, and pressing the button again commits it; playback then
-// stays inside the clip, and the loop button repeats it (or, with no clip,
-// the whole file). The handles never cross.
+// The clip button shows two pentagon handles on the seek bar (the start at the
+// playhead, the end halfway from there to the end of the video, at least 1 s
+// later) and playback stays between them; they can be dragged whenever they
+// are shown. Pressing it again hides them and plays the whole video, keeping
+// the range for when they are shown again. The loop button repeats the clip
+// (or, with no clip, the whole file). The handles never cross, and a dragged
+// handle stands in for the playhead.
 
 class VideoClipRangeEditorTest : public QObject {
     Q_OBJECT
 
 private slots:
-    void editingStartsAtThirtyAndSeventyPercent();
+    void aNewClipStartsAtThePlayhead();
+    void aNewClipNearTheEndSpansTheWholeVideo();
     void theHandlesNeverCross();
-    void cancelRestoresTheClipAndCommitKeepsIt();
+    void hidingTheClipKeepsItsRange();
     void markingWithoutAClipMakesOne();
     void anActiveClipKeepsPlaybackInside();
     void anotherFileClearsTheClipAndTheLoop();
     void theSliderDrawsPentagonsPointingInward();
     void draggingAHandleStopsShortOfTheOther();
+    void aDraggedHandleHidesThePlayheadKnob();
     void narrowClipHandlesDoNotOverlap();
     void theClipAndLoopButtonsShowTheState();
     void rightClickOnTheClipButtonClearsTheClip();
-    void theClipKeysAreBoundInEveryContextTheyNeed();
-    void escapeCancelsEditingOnlyWhileEditing();
+    void theClipKeysAreBound();
 };
 
 namespace {
 constexpr int TEN_MINUTES = 10 * 60 * 1000;
+constexpr int PLAYHEAD = 3 * 60 * 1000;
 
 struct Bar {
     QWidget row;
@@ -66,22 +70,52 @@ QPoint centerOf(const QPolygonF &shape) {
 }
 }
 
-void VideoClipRangeEditorTest::editingStartsAtThirtyAndSeventyPercent() {
+void VideoClipRangeEditorTest::aNewClipStartsAtThePlayhead() {
     VideoClip clip;
     clip.setDuration(TEN_MINUTES);
     QVERIFY(!clip.hasRange());
-    clip.toggleEdit();
-    QVERIFY(clip.isEditing());
-    QCOMPARE(clip.start(), 3 * 60 * 1000);
-    QCOMPARE(clip.end(), 7 * 60 * 1000);
-    clip.toggleEdit();
+    clip.toggle(PLAYHEAD);
     QVERIFY(clip.isActive());
+    // the end halfway from the playhead to the end of the video
+    QCOMPARE(clip.start(), PLAYHEAD);
+    QCOMPARE(clip.end(), PLAYHEAD + (TEN_MINUTES - PLAYHEAD) / 2);
+
+    // from the very start: the first half
+    clip.clear();
+    clip.toggle(0);
+    QCOMPARE(clip.start(), 0);
+    QCOMPARE(clip.end(), TEN_MINUTES / 2);
+
+    // with less than 2 s left, half of it is too short: 1 s
+    clip.clear();
+    const int late = TEN_MINUTES - 1500;
+    clip.toggle(late);
+    QCOMPARE(clip.start(), late);
+    QCOMPARE(clip.end(), late + VideoClip::NEW_CLIP_MIN_MS);
+}
+
+void VideoClipRangeEditorTest::aNewClipNearTheEndSpansTheWholeVideo() {
+    VideoClip clip;
+    clip.setDuration(TEN_MINUTES);
+    for(const int pos : {TEN_MINUTES, TEN_MINUTES - 400, TEN_MINUTES - VideoClip::NEW_CLIP_MIN_MS}) {
+        clip.clear();
+        clip.toggle(pos);
+        QVERIFY(clip.isActive());
+        QCOMPARE(clip.start(), 0);
+        QCOMPARE(clip.end(), TEN_MINUTES);
+    }
+    // a video shorter than that is all clip wherever the playhead is
+    clip.clear();
+    clip.setDuration(800);
+    clip.toggle(100);
+    QCOMPARE(clip.start(), 0);
+    QCOMPARE(clip.end(), 800);
 }
 
 void VideoClipRangeEditorTest::theHandlesNeverCross() {
     VideoClip clip;
     clip.setDuration(TEN_MINUTES);
-    clip.toggleEdit();
+    clip.toggle(PLAYHEAD);
     clip.moveHandle(VideoClip::HANDLE_START, TEN_MINUTES);
     QCOMPARE(clip.start(), clip.end() - VideoClip::MIN_GAP_MS);
     clip.moveHandle(VideoClip::HANDLE_END, 0);
@@ -99,27 +133,43 @@ void VideoClipRangeEditorTest::theHandlesNeverCross() {
     QCOMPARE(clip.end(), TEN_MINUTES);
 }
 
-void VideoClipRangeEditorTest::cancelRestoresTheClipAndCommitKeepsIt() {
+void VideoClipRangeEditorTest::hidingTheClipKeepsItsRange() {
     VideoClip clip;
     clip.setDuration(TEN_MINUTES);
-    clip.toggleEdit();
-    clip.cancelEdit();
-    QVERIFY2(!clip.hasRange(), "Cancelling a new clip leaves no clip.");
-
-    clip.toggleEdit();
+    clip.toggle(PLAYHEAD);
     clip.moveHandle(VideoClip::HANDLE_START, 1000);
-    clip.commitEdit();
-    QVERIFY(clip.isActive());
-    QCOMPARE(clip.start(), 1000);
+    clip.moveHandle(VideoClip::HANDLE_END, 5000);
 
-    clip.toggleEdit();
+    // hidden: the whole video plays, the range waits
+    clip.toggle(PLAYHEAD + 60000);
+    QVERIFY(!clip.isActive());
+    QVERIFY(clip.hasRange());
+    QCOMPARE(clip.seekTarget(TEN_MINUTES), TEN_MINUTES);
+    QCOMPARE(clip.resumeTarget(TEN_MINUTES - 1000), -1);
+    QVERIFY(!clip.reachedEnd(5000));
+    // and its handles can't be moved
     clip.moveHandle(VideoClip::HANDLE_START, 2000);
-    clip.cancelEdit();
-    QVERIFY(clip.isActive());
     QCOMPARE(clip.start(), 1000);
 
+    // shown again wherever the playhead is now: the same range
+    clip.toggle(PLAYHEAD + 120000);
+    QVERIFY(clip.isActive());
+    QCOMPARE(clip.start(), 1000);
+    QCOMPARE(clip.end(), 5000);
+
+    // a marking key shows a hidden clip, keeping its other end
+    clip.toggle(0);
+    clip.markStart(2000);
+    QVERIFY(clip.isActive());
+    QCOMPARE(clip.start(), 2000);
+    QCOMPARE(clip.end(), 5000);
+
+    // clearing forgets it: the next clip starts at the playhead
+    clip.toggle(0);
     clip.clear();
     QVERIFY(!clip.hasRange());
+    clip.toggle(PLAYHEAD);
+    QCOMPARE(clip.start(), PLAYHEAD);
 }
 
 void VideoClipRangeEditorTest::markingWithoutAClipMakesOne() {
@@ -135,7 +185,6 @@ void VideoClipRangeEditorTest::markingWithoutAClipMakesOne() {
     QVERIFY(clip.isActive());
     QCOMPARE(clip.start(), 0);
     QCOMPARE(clip.end(), 90000);
-    QCOMPARE(clip.lastHandle(), VideoClip::HANDLE_END);
 }
 
 void VideoClipRangeEditorTest::anActiveClipKeepsPlaybackInside() {
@@ -146,10 +195,7 @@ void VideoClipRangeEditorTest::anActiveClipKeepsPlaybackInside() {
     QCOMPARE(clip.resumeTarget(12345), -1);
     QVERIFY(!clip.reachedEnd(TEN_MINUTES));
 
-    clip.toggleEdit();
-    // while editing nothing is held back yet
-    QCOMPARE(clip.seekTarget(0), 0);
-    clip.commitEdit();
+    clip.toggle(PLAYHEAD);
     const int start = clip.start(), end = clip.end();
     QCOMPARE(clip.seekTarget(0), start);
     QCOMPARE(clip.seekTarget(TEN_MINUTES), end);
@@ -169,8 +215,7 @@ void VideoClipRangeEditorTest::anotherFileClearsTheClipAndTheLoop() {
     VideoClip clip;
     clip.setDuration(TEN_MINUTES);
     QVERIFY2(!clip.loop(), "Loop is off to begin with.");
-    clip.toggleEdit();
-    clip.commitEdit();
+    clip.toggle(PLAYHEAD);
     clip.toggleLoop();
     QVERIFY(clip.loop());
     QSignalSpy changed(&clip, &VideoClip::changed);
@@ -188,7 +233,7 @@ void VideoClipRangeEditorTest::theSliderDrawsPentagonsPointingInward() {
     Bar bar;
     QVERIFY(QTest::qWaitForWindowExposed(&bar.row));
     QVERIFY(bar.seekBar);
-    bar.seekBar->setClip(180000, 420000, true);
+    bar.seekBar->setClip(180000, 420000);
 
     const QPolygonF start = bar.seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_START);
     const QPolygonF end = bar.seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_END);
@@ -205,12 +250,11 @@ void VideoClipRangeEditorTest::theSliderDrawsPentagonsPointingInward() {
     if(qEnvironmentVariableIsSet("TG_GRAB_DIR")) {
         const QString dir = qEnvironmentVariable("TG_GRAB_DIR");
         bar.controls->setPlaybackPosition(250000);
-        bar.controls->setClip(180000, 420000, true);
-        bar.row.grab().save(dir + "/clip-editing.png");
-        bar.controls->setClip(180000, 420000, false);
+        bar.controls->setClip(180000, 420000);
+        bar.row.grab().save(dir + "/clip-on.png");
         bar.controls->setLoop(true);
         bar.row.grab().save(dir + "/clip-active.png");
-        bar.controls->setClip(-1, -1, false);
+        bar.controls->setClip(-1, -1);
         bar.controls->setLoop(false);
         bar.row.grab().save(dir + "/clip-none.png");
     }
@@ -220,7 +264,7 @@ void VideoClipRangeEditorTest::draggingAHandleStopsShortOfTheOther() {
     Bar bar;
     QVERIFY(QTest::qWaitForWindowExposed(&bar.row));
     bar.seekBar->setClipMinGap(VideoClip::MIN_GAP_MS);
-    bar.seekBar->setClip(180000, 420000, true);
+    bar.seekBar->setClip(180000, 420000);
     QSignalSpy moved(bar.seekBar, &VideoSlider::clipHandleMoved);
     QSignalSpy seeks(bar.seekBar, &VideoSlider::sliderMovedX);
 
@@ -244,16 +288,37 @@ void VideoClipRangeEditorTest::draggingAHandleStopsShortOfTheOther() {
     QCOMPARE(seeks.count(), 1);
 }
 
+// The handle's frame is on the video while it's dragged: the playhead knob
+// goes away rather than trailing beside it, and comes back on release.
+void VideoClipRangeEditorTest::aDraggedHandleHidesThePlayheadKnob() {
+    Bar bar;
+    QVERIFY(QTest::qWaitForWindowExposed(&bar.row));
+    bar.controls->setPlaybackPosition(300000);
+    bar.controls->setClip(180000, 420000);
+    const int knobX = bar.seekBar->xForValue(300000);
+    const QRect knobArea(knobX - 4, 0, 9, bar.seekBar->height());
+    auto knobPixels = [&]() { return bar.seekBar->grab().toImage().copy(knobArea); };
+    const QImage idle = knobPixels();
+
+    const QPoint grab = centerOf(bar.seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_START));
+    QTest::mousePress(bar.seekBar, Qt::LeftButton, Qt::NoModifier, grab);
+    QVERIFY(bar.seekBar->draggingClipHandle());
+    QVERIFY2(knobPixels() != idle, "The playhead knob should not be drawn while a handle is dragged.");
+    QTest::mouseRelease(bar.seekBar, Qt::LeftButton, Qt::NoModifier, grab);
+    QVERIFY(!bar.seekBar->draggingClipHandle());
+    QCOMPARE(knobPixels(), idle);
+}
+
 void VideoClipRangeEditorTest::narrowClipHandlesDoNotOverlap() {
     Bar bar;
     QVERIFY(QTest::qWaitForWindowExposed(&bar.row));
-    bar.seekBar->setClip(300000, 300000 + VideoClip::MIN_GAP_MS, true);
+    bar.seekBar->setClip(300000, 300000 + VideoClip::MIN_GAP_MS);
     const QRectF start = bar.seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_START).boundingRect();
     const QRectF end = bar.seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_END).boundingRect();
     QVERIFY2(start.right() <= end.left(),
              qPrintable(QString("start ends at %1, end begins at %2").arg(start.right()).arg(end.left())));
     // and both stay full size, so they can still be grabbed
-    bar.seekBar->setClip(100000, 500000, true);
+    bar.seekBar->setClip(100000, 500000);
     QCOMPARE(start.width(), bar.seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_START).boundingRect().width());
     QCOMPARE(end.width(), bar.seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_END).boundingRect().width());
 }
@@ -268,14 +333,10 @@ void VideoClipRangeEditorTest::theClipAndLoopButtonsShowTheState() {
     QVERIFY(!bar.clipButton->property("checked").toBool());
     QVERIFY(!bar.loopButton->property("checked").toBool());
 
-    bar.controls->setClip(1000, 2000, true);
+    bar.controls->setClip(1000, 2000);
     QVERIFY(bar.clipButton->property("checked").toBool());
-    QVERIFY(bar.seekBar->clipEditable());
-    bar.controls->setClip(1000, 2000, false);
-    QVERIFY(bar.clipButton->property("checked").toBool());
-    QVERIFY(!bar.seekBar->clipEditable());
     QCOMPARE(bar.seekBar->clipStart(), 1000);
-    bar.controls->setClip(-1, -1, false);
+    bar.controls->setClip(-1, -1);
     QVERIFY(!bar.clipButton->property("checked").toBool());
     QCOMPARE(bar.seekBar->clipStart(), -1);
 
@@ -292,7 +353,7 @@ void VideoClipRangeEditorTest::rightClickOnTheClipButtonClearsTheClip() {
     Bar bar;
     QVERIFY(QTest::qWaitForWindowExposed(&bar.row));
     QSignalSpy clear(actionManager, &ActionManager::clearClip);
-    QSignalSpy edit(actionManager, &ActionManager::toggleClipEdit);
+    QSignalSpy edit(actionManager, &ActionManager::toggleClip);
     QTest::mouseClick(bar.clipButton, Qt::RightButton);
     QCOMPARE(clear.count(), 1);
     QCOMPARE(edit.count(), 0);
@@ -304,36 +365,11 @@ void VideoClipRangeEditorTest::rightClickOnTheClipButtonClearsTheClip() {
     QCOMPARE(loop.count(), 1);
 }
 
-void VideoClipRangeEditorTest::theClipKeysAreBoundInEveryContextTheyNeed() {
+void VideoClipRangeEditorTest::theClipKeysAreBound() {
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "["), QStringLiteral("setClipStart"));
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "]"), QStringLiteral("setClipEnd"));
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "\\"), QStringLiteral("toggleVideoLoop"));
     QCOMPARE(actionManager->actionForShortcut(MODE_DOCUMENT, "|"), QStringLiteral("clearClip"));
-    QCOMPARE(actionManager->actionForShortcut(MODE_CLIPEDIT, "Esc"), QStringLiteral("cancelClipEdit"));
-    QCOMPARE(actionManager->actionForShortcut(MODE_CLIPEDIT, "Enter"), QStringLiteral("commitClipEdit"));
-    // global keys don't reach into the clip edit context
-    QVERIFY(actionManager->actionForShortcut(MODE_CLIPEDIT, "[").isEmpty());
-}
-
-void VideoClipRangeEditorTest::escapeCancelsEditingOnlyWhileEditing() {
-    QSignalSpy cancel(actionManager, &ActionManager::cancelClipEdit);
-    QSignalSpy exit(actionManager, &ActionManager::closeFullScreenOrExit);
-    QKeyEvent esc(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
-
-    actionManager->setOverlayContext(MODE_CLIPEDIT);
-    actionManager->processEvent(&esc);
-    QCOMPARE(cancel.count(), 1);
-    QCOMPARE(exit.count(), 0);
-    // keys the context doesn't bind work as usual
-    QSignalSpy loop(actionManager, &ActionManager::toggleVideoLoop);
-    QKeyEvent backslash(QEvent::KeyPress, Qt::Key_Backslash, Qt::NoModifier, "\\");
-    actionManager->processEvent(&backslash);
-    QCOMPARE(loop.count(), 1);
-
-    actionManager->clearOverlayContext();
-    actionManager->processEvent(&esc);
-    QCOMPARE(cancel.count(), 1);
-    QCOMPARE(exit.count(), 1);
 }
 
 TG_BEHAVIOR_TEST_MAIN(VideoClipRangeEditorTest)

@@ -1206,8 +1206,6 @@ QString contextLabel(ViewMode context) {
         return QObject::tr("Global");
     if(context == MODE_COPYMOVE)
         return QObject::tr("Copy / Move");
-    if(context == MODE_CLIPEDIT)
-        return QObject::tr("Clip edit");
     return (context == MODE_FOLDERVIEW) ? QObject::tr("Grid") : QObject::tr("Document");
 }
 // Script actions are stored as "s:<name>"; never show the raw id to the user.
@@ -1274,8 +1272,6 @@ QIcon SettingsDialog::shortcutContextIcon(ViewMode context) const {
         name = QStringLiteral("document-view16");
     else if(context == MODE_COPYMOVE)
         name = QStringLiteral("copy16");
-    else if(context == MODE_CLIPEDIT)
-        name = QStringLiteral("clip16");
     else
         name = QStringLiteral("global16");
 
@@ -1422,7 +1418,7 @@ void SettingsDialog::updateShortcutsTable() {
     const QBrush disabledBrush = palette().brush(QPalette::Disabled, QPalette::Text);
     // Contexts are listed in scope order - widest first - so the default sort by
     // the Context column reads Global, Grid, Document, Copy / Move, Clip edit.
-    const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT, MODE_COPYMOVE, MODE_CLIPEDIT};
+    const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT, MODE_COPYMOVE};
     for(int order = 0; order < contexts.size(); order++) {
         const ViewMode context = contexts.at(order);
         const ActionManager::ContextMap defaults = actionManager->allDefaultShortcuts().value(context);
@@ -1881,10 +1877,9 @@ void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
     QMenu *copyMenu = menu.addMenu(tr("Copy to"));
     if(candidateShortcuts(src, action).isEmpty() || ActionManager::isOverlayContext(src)) {
         // Keep the entries on screen but disabled, so the reason is visible
-        // rather than the commands just being absent. Copy / Move and clip edit
-        // keys only work while that is open, so they have nowhere to go.
+        // rather than the commands just being absent. Copy / Move keys only
+        // work while it is open, so they have nowhere to go.
         const QString reason = (src == MODE_COPYMOVE) ? tr("Only used in the Copy / Move overlay")
-                             : (src == MODE_CLIPEDIT) ? tr("Only used while editing a video clip")
                                                       : tr("No keys bound in %1").arg(contextLabel(src));
         moveMenu->addAction(reason)->setEnabled(false);
         copyMenu->addAction(reason)->setEnabled(false);

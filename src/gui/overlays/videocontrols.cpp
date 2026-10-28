@@ -93,7 +93,7 @@ VideoControls::VideoControls(QWidget *parent) :
 
     clipButton->setObjectName("clipButton");
     clipButton->setAccessibleName("Button");
-    clipButton->setAction("toggleClipEdit");
+    clipButton->setAction("toggleClip");
     clipButton->setFixedSize(24, 24);
     // right-click clears the clip
     clipButton->installEventFilter(this);
@@ -105,7 +105,8 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->horizontalLayout_2->addSpacing(3);
     ui->horizontalLayout_2->addWidget(clipButton);
     ui->horizontalLayout_2->addWidget(loopButton);
-    updateClipButton(false, false);
+    clipButton->setIconPath(":res/icons/common/buttons/videocontrols/clip24.png");
+    updateClipButton(false);
     setLoop(false);
     ui->seekBar->setClipMinGap(VideoClip::MIN_GAP_MS);
 
@@ -185,7 +186,7 @@ void VideoControls::setMode(PlaybackMode _mode) {
     loopButton->setVisible( (mode == PLAYBACK_VIDEO) );
     if(mode != PLAYBACK_VIDEO) {
         speedPopup->hide();
-        setClip(-1, -1, false);
+        setClip(-1, -1);
     }
     updateResponsiveVisibility();
 }
@@ -261,10 +262,9 @@ void VideoControls::setVolume(int volume) {
     updateVolumeText(clampedVolume);
 }
 
-void VideoControls::setClip(int start, int end, bool editing) {
-    const bool clip = start >= 0;
-    ui->seekBar->setClip(start, end, clip && editing);
-    updateClipButton(clip, clip && editing);
+void VideoControls::setClip(int start, int end) {
+    ui->seekBar->setClip(start, end);
+    updateClipButton(start >= 0);
 }
 
 void VideoControls::setLoop(bool mode) {
@@ -272,15 +272,11 @@ void VideoControls::setLoop(bool mode) {
     loopButton->setToolTip(mode ? tr("Loop: on") : tr("Loop: off"));
 }
 
-void VideoControls::updateClipButton(bool clip, bool editing) {
-    clipButton->setIconPath(editing ? ":res/icons/common/buttons/videocontrols/clip-edit24.png"
-                                    : ":res/icons/common/buttons/videocontrols/clip24.png");
-    if(editing)
-        clipButton->setToolTip(tr("Done: play the clip between the handles (Esc cancels)"));
-    else if(clip)
-        clipButton->setToolTip(tr("Edit the clip (right-click clears it)"));
+void VideoControls::updateClipButton(bool clip) {
+    if(clip)
+        clipButton->setToolTip(tr("Clip: play the whole video again (the range is kept; right-click clears it)"));
     else
-        clipButton->setToolTip(tr("Clip: set a start and an end to play"));
+        clipButton->setToolTip(tr("Clip: play only the part between two handles"));
     setButtonOn(clipButton, clip, ui->seekBar->palette().color(QPalette::Highlight));
 }
 

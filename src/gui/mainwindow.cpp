@@ -134,9 +134,7 @@ void MW::setupUi() {
     connect(this, &MW::frameStep,      viewerWidget.get(), &ViewerWidget::frameStep);
     connect(this, &MW::frameStepBack,  viewerWidget.get(), &ViewerWidget::frameStepBack);
     connect(this, &MW::toggleMute,  viewerWidget.get(), &ViewerWidget::toggleMute);
-    connect(this, &MW::toggleClipEdit, viewerWidget.get(), &ViewerWidget::toggleClipEdit);
-    connect(this, &MW::commitClipEdit, viewerWidget.get(), &ViewerWidget::commitClipEdit);
-    connect(this, &MW::cancelClipEdit, viewerWidget.get(), &ViewerWidget::cancelClipEdit);
+    connect(this, &MW::toggleClip, viewerWidget.get(), &ViewerWidget::toggleClip);
     connect(this, &MW::clearClip, viewerWidget.get(), &ViewerWidget::clearClip);
     connect(this, &MW::setClipStart, viewerWidget.get(), &ViewerWidget::setClipStart);
     connect(this, &MW::setClipEnd, viewerWidget.get(), &ViewerWidget::setClipEnd);

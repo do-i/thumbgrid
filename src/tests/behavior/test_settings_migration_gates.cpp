@@ -472,7 +472,7 @@ bool arrowKeysBecomeScrollActionsOnUpgrade() {
                    "The Copy / Move overlay's digits should become bindings.") &&
            require(actionManager->actionForShortcut(MODE_DOCUMENT, "[") == QLatin1String("setClipStart") &&
                    actionManager->actionForShortcut(MODE_DOCUMENT, "\\") == QLatin1String("toggleVideoLoop") &&
-                   actionManager->actionForShortcut(MODE_CLIPEDIT, "Esc") == QLatin1String("cancelClipEdit"),
+                   actionManager->actionForShortcut(MODE_DOCUMENT, "|") == QLatin1String("clearClip"),
                    "The video clip keys should be bound on upgrade.") &&
            require(bound("PgUp", "prevImage") && bound("XButton2", "nextImage") && bound("+", "zoomIn"),
                    "The user's other keys for those actions must survive.");
@@ -728,7 +728,58 @@ bool doubleClickFullscreenStaysWhenThePresetKeepsIt() {
                    "A gwenview config keeps the double-click full screen.");
 }
 
+// 2026.10.3 edited a video clip in a mode with its own context (Esc / Enter
+// cancelled / committed it) and a toggleClipEdit action; the clip button now
+// just shows and hides the clip. A config from then keeps a key bound to the
+// button's action, its clip edit keys go, and they don't land anywhere else.
+bool clipEditContextIsRetired() {
+    QSettings conf;
+    seedExistingConfig(conf, QVersionNumber(2026, 10, 3));
+    conf.sync();
+
+    QJsonObject document;
+    document.insert("toggleClipEdit", QJsonArray{QStringLiteral("C")});
+    document.insert("setClipStart", QJsonArray{QStringLiteral("[")});
+    QJsonObject clipEdit;
+    clipEdit.insert("cancelClipEdit", QJsonArray{QStringLiteral("Esc")});
+    clipEdit.insert("commitClipEdit", QJsonArray{QStringLiteral("Enter")});
+    QJsonObject root;
+    root.insert("document", document);
+    root.insert("clipEdit", clipEdit);
+    QFile shortcutsFile(configDir() + "/shortcuts.json");
+    if(!require(shortcutsFile.open(QIODevice::WriteOnly | QIODevice::Truncate),
+                "Failed to write the shortcuts.json fixture."))
+        return false;
+    shortcutsFile.write(QJsonDocument(root).toJson());
+    shortcutsFile.close();
+
+    Settings::getInstance();
+    actionManager = ActionManager::getInstance();
+    actionManager->adjustFromVersion(QVersionNumber(2026, 10, 3));
+
+    bool leaked = false;
+    for(auto ctx = actionManager->allShortcuts().cbegin(); ctx != actionManager->allShortcuts().cend(); ++ctx) {
+        for(const QString &action : ctx.value())
+            leaked = leaked || action.endsWith(QLatin1String("ClipEdit"));
+    }
+    QFile saved(configDir() + "/shortcuts.json");
+    if(!require(saved.open(QIODevice::ReadOnly), "shortcuts.json should be written back."))
+        return false;
+    const QJsonObject savedRoot = QJsonDocument::fromJson(saved.readAll()).object();
+    return require(actionManager->actionForShortcut(MODE_DOCUMENT, "C") == QLatin1String("toggleClip"),
+                   "A key bound to the clip button's old action should toggle the clip.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "[") == QLatin1String("setClipStart"),
+                   "The other clip keys stay.") &&
+           require(!leaked, "No binding to a retired clip edit action should be left.") &&
+           require(actionManager->actionForShortcut(MODE_DOCUMENT, "Esc") != QLatin1String("cancelClipEdit") &&
+                   actionManager->actionForShortcut(MODE_DOCUMENT, "Enter") != QLatin1String("commitClipEdit"),
+                   "The clip edit keys must not move to the picture view.") &&
+           require(!savedRoot.contains("clipEdit"), "shortcuts.json should drop the clip edit section.");
+}
+
 bool runScenario(const QString &scenario) {
+    if(scenario == QLatin1String("clip-edit-context-retired"))
+        return clipEditContextIsRetired();
     if(scenario == QLatin1String("double-click-fullscreen-dropped"))
         return doubleClickFullscreenIsDroppedOnUpgrade();
     if(scenario == QLatin1String("double-click-fullscreen-kept-by-preset"))

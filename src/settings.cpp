@@ -178,8 +178,6 @@ QString shortcutContextToken(ViewMode context) {
         return QStringLiteral("global");
     if(context == MODE_COPYMOVE)
         return QStringLiteral("copyMove");
-    if(context == MODE_CLIPEDIT)
-        return QStringLiteral("clipEdit");
     return context == MODE_FOLDERVIEW ? QStringLiteral("grid")
                                       : QStringLiteral("document");
 }
@@ -189,8 +187,6 @@ ViewMode shortcutContextFromToken(const QString &token) {
         return MODE_GLOBAL;
     if(token == QLatin1String("copyMove"))
         return MODE_COPYMOVE;
-    if(token == QLatin1String("clipEdit"))
-        return MODE_CLIPEDIT;
     return (token == QLatin1String("grid") || token == QLatin1String("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -201,8 +197,7 @@ bool isShortcutContextToken(const QString &token) {
            token == QLatin1String("folderview") ||
            token == QLatin1String("global") ||
            token == QLatin1String("document") ||
-           token == QLatin1String("copyMove") ||
-           token == QLatin1String("clipEdit");
+           token == QLatin1String("copyMove");
 }
 
 QStringList normalizedShortcutKeys(QStringList keys) {
@@ -349,6 +344,8 @@ void writeShortcutsJson(const QString &path,
             root.remove(key);
     }
     root.remove("_primary");
+    // 2026.10.3's clip edit context (Esc / Enter while editing) is gone
+    root.remove("clipEdit");
     for(auto ctx = shortcuts.cbegin(); ctx != shortcuts.cend(); ++ctx) {
         QJsonObject bindings;
         const QMap<QString, QStringList> byAction = actionToKeys(ctx.value());

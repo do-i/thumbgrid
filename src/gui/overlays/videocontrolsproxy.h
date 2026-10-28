@@ -12,7 +12,6 @@ struct VideoControlsStateBuffer {
     PlaybackMode mode = PLAYBACK_VIDEO;
     int clipStart = -1;
     int clipEnd = -1;
-    bool clipEditing = false;
     bool loop = false;
 };
 
@@ -44,7 +43,7 @@ public slots:
     void onPlaybackPaused(bool);
     void onVideoMuted(bool);
     void setVolume(int);
-    void setClip(int start, int end, bool editing);
+    void setClip(int start, int end);
     void setLoop(bool mode);
 
 private:

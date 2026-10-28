@@ -65,7 +65,7 @@ bool isScrollFamilyAction(const QString &action) {
 }
 
 QList<ViewMode> shortcutContexts() {
-    return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW, MODE_COPYMOVE, MODE_CLIPEDIT};
+    return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW, MODE_COPYMOVE};
 }
 
 QStringList shortcutKeysFromJson(const QJsonValue &value) {
@@ -148,13 +148,11 @@ void ActionManager::initDefaults() {
     ContextMap document;
     ContextMap grid;
     ContextMap copyMove;
-    ContextMap clipEdit;
     insertShortcutObject(root.value("shortcuts").toObject(), global);
     insertShortcutObject(root.value("global").toObject(), global);
     insertShortcutObject(root.value("document").toObject(), document);
     insertShortcutObject(root.value("grid").toObject(), grid);
     insertShortcutObject(root.value("copyMove").toObject(), copyMove);
-    insertShortcutObject(root.value("clipEdit").toObject(), clipEdit);
     // Per-OS overrides: pick the current-OS block (windows/macos/linux), falling
     // back to "default". (Legacy preset files used "apple"; treat it as macos.)
     const QJsonObject platform = root.value("platform").toObject();
@@ -171,7 +169,6 @@ void ActionManager::initDefaults() {
     loaded.insert(MODE_DOCUMENT, document);
     loaded.insert(MODE_FOLDERVIEW, grid);
     loaded.insert(MODE_COPYMOVE, copyMove);
-    loaded.insert(MODE_CLIPEDIT, clipEdit);
     // Presets spell a binding out in every context it applies to (leftie, for one,
     // repeats folderView/nextDirectory/prevDirectory/toggleImageInfo verbatim under
     // both document and grid). shortcuts.json does not store that shape: reading it
@@ -219,7 +216,7 @@ void ActionManager::setContext(ViewMode context) {
 }
 //------------------------------------------------------------------------------
 bool ActionManager::isOverlayContext(ViewMode context) {
-    return context == MODE_COPYMOVE || context == MODE_CLIPEDIT;
+    return context == MODE_COPYMOVE;
 }
 //------------------------------------------------------------------------------
 void ActionManager::setOverlayContext(ViewMode context) {
@@ -240,8 +237,6 @@ QString ActionManager::contextToString(ViewMode context) {
         return QStringLiteral("global");
     if(context == MODE_COPYMOVE)
         return QStringLiteral("copyMove");
-    if(context == MODE_CLIPEDIT)
-        return QStringLiteral("clipEdit");
     return (context == MODE_FOLDERVIEW) ? QStringLiteral("grid")
                                         : QStringLiteral("document");
 }
@@ -251,8 +246,6 @@ ViewMode ActionManager::contextFromString(const QString &name) {
         return MODE_GLOBAL;
     if(name == QStringLiteral("copyMove"))
         return MODE_COPYMOVE;
-    if(name == QStringLiteral("clipEdit"))
-        return MODE_CLIPEDIT;
     return (name == QStringLiteral("grid") || name == QStringLiteral("folderview"))
         ? MODE_FOLDERVIEW
         : MODE_DOCUMENT;
@@ -752,6 +745,13 @@ QMap<QString, QString> ActionManager::validFallbackOverrides(const QMap<QString,
 //------------------------------------------------------------------------------
 void ActionManager::readShortcuts() {
     settings->readShortcuts(shortcuts);
+    // 2026.10.3's clip button action; the clip is no longer edited in a mode
+    for(ContextMap &m : shortcuts) {
+        for(QString &action : m) {
+            if(action == QLatin1String("toggleClipEdit"))
+                action = QStringLiteral("toggleClip");
+        }
+    }
     QMap<QString, QString> fallbacks;
     settings->readShortcutFallbacks(fallbacks);
     scrollFallbacks = validFallbackOverrides(fallbacks, scrollFallbackDefaults());

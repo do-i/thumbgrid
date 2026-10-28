@@ -462,10 +462,7 @@ void ViewerWidget::seekVideoTo(int pos) {
 
 void ViewerWidget::frameStep() {
     if(currentWidget == VIDEOPLAYER) {
-        if(videoClip.isEditing())
-            stepClipHandle(1);
-        else
-            videoPlayer.get()->frameStep();
+        videoPlayer.get()->frameStep();
     } else if(imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->nextFrame();
@@ -474,10 +471,7 @@ void ViewerWidget::frameStep() {
 
 void ViewerWidget::frameStepBack() {
     if(currentWidget == VIDEOPLAYER) {
-        if(videoClip.isEditing())
-            stepClipHandle(-1);
-        else
-            videoPlayer.get()->frameStepBack();
+        videoPlayer.get()->frameStepBack();
     } else if(imageViewer->hasAnimation()) {
         imageViewer->stopAnimation();
         imageViewer->prevFrame();
@@ -515,19 +509,19 @@ void ViewerWidget::setPlaybackSpeed(double speed) {
         videoPlayer->setPlaybackSpeed(speed);
 }
 
-void ViewerWidget::toggleClipEdit() {
-    if(currentWidget == VIDEOPLAYER)
-        videoClip.toggleEdit();
-}
-
-void ViewerWidget::commitClipEdit() {
-    if(currentWidget == VIDEOPLAYER)
-        videoClip.commitEdit();
-}
-
-void ViewerWidget::cancelClipEdit() {
-    if(currentWidget == VIDEOPLAYER)
-        videoClip.cancelEdit();
+// Showing the clip pauses the video; a new clip starts on the paused frame.
+void ViewerWidget::toggleClip() {
+    if(currentWidget != VIDEOPLAYER)
+        return;
+    const bool showing = !videoClip.isActive();
+    const bool fresh = !videoClip.hasRange();
+    if(showing && !mVideoPaused) {
+        videoPlayer->setPaused(true);
+        mVideoPaused = true;
+    }
+    videoClip.toggle(mVideoPosition);
+    if(showing && fresh && videoClip.isActive())
+        seekVideoTo(videoClip.start());
 }
 
 void ViewerWidget::clearClip() {
@@ -555,20 +549,16 @@ void ViewerWidget::toggleVideoLoop() {
 // A clip that doesn't loop is stopped at its end in onVideoPositionChanged().
 void ViewerWidget::applyVideoClip() {
     const VideoClip::State state = videoClip.state();
-    videoControls->setClip(videoClip.hasRange() ? videoClip.start() : -1, videoClip.end(), videoClip.isEditing());
+    videoControls->setClip(videoClip.isActive() ? videoClip.start() : -1, videoClip.end());
     videoControls->setLoop(videoClip.loop());
     if(videoClip.isActive() && videoClip.loop())
         videoPlayer->setLoopAB(videoClip.start(), videoClip.end());
     else
         videoPlayer->setLoopAB(-1, -1);
     videoPlayer->setLoopPlayback(videoClip.loop() && !videoClip.isActive());
-    // Esc / Enter cancel / commit while editing
-    if(videoClip.isEditing())
-        actionManager->setOverlayContext(MODE_CLIPEDIT);
-    else
-        actionManager->clearOverlayContext();
-    // leaving edit mode: the clip is ready to play from its start
-    if(state == VideoClip::CLIP_ACTIVE && mLastClipState == VideoClip::CLIP_EDITING)
+    // a clip shown again around a playhead outside it: go to its start
+    if(state == VideoClip::CLIP_ACTIVE && mLastClipState != VideoClip::CLIP_ACTIVE &&
+       (mVideoPosition < videoClip.start() || mVideoPosition > videoClip.end()))
         seekVideoTo(videoClip.start());
     mLastClipState = state;
 }
@@ -586,38 +576,20 @@ void ViewerWidget::onVideoPositionChanged(int pos) {
 
 // grabbing a handle pauses the video on the handle's frame
 void ViewerWidget::onClipHandlePressed(int handle) {
-    if(currentWidget != VIDEOPLAYER || !videoClip.isEditing())
+    if(currentWidget != VIDEOPLAYER || !videoClip.isActive())
         return;
     if(!mVideoPaused) {
         videoPlayer->setPaused(true);
         mVideoPaused = true;
     }
-    const auto which = VideoClip::Handle(handle);
-    const int pos = (which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end();
-    // marks it as the one a frame step moves
-    videoClip.moveHandle(which, pos);
-    previewSeek(pos);
+    previewSeek((VideoClip::Handle(handle) == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end());
 }
 
 void ViewerWidget::onClipHandleMoved(int handle, int pos) {
-    if(currentWidget != VIDEOPLAYER || !videoClip.isEditing())
+    if(currentWidget != VIDEOPLAYER || !videoClip.isActive())
         return;
     const auto which = VideoClip::Handle(handle);
     videoClip.moveHandle(which, pos);
-    previewSeek((which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end());
-}
-
-// to the next / previous frame boundary, shown paused
-void ViewerWidget::stepClipHandle(int frames) {
-    const double fps = videoPlayer->frameRate();
-    const double frame = 1000.0 / (fps > 0 ? fps : 25.0);
-    const VideoClip::Handle which = videoClip.lastHandle();
-    const int pos = (which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end();
-    videoClip.moveHandle(which, qRound((qRound(pos / frame) + frames) * frame));
-    if(!mVideoPaused) {
-        videoPlayer->setPaused(true);
-        mVideoPaused = true;
-    }
     previewSeek((which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end());
 }
 

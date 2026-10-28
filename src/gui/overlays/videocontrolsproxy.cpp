@@ -37,7 +37,7 @@ void VideoControlsProxyWrapper::init() {
     videoControls->setVolume(stateBuf.volume);
     videoControls->onPlaybackPaused(stateBuf.paused);
     videoControls->onVideoMuted(stateBuf.videoMuted);
-    videoControls->setClip(stateBuf.clipStart, stateBuf.clipEnd, stateBuf.clipEditing);
+    videoControls->setClip(stateBuf.clipStart, stateBuf.clipEnd);
     videoControls->setLoop(stateBuf.loop);
 }
 
@@ -99,13 +99,12 @@ void VideoControlsProxyWrapper::setVolume(int _volume) {
     }
 }
 
-void VideoControlsProxyWrapper::setClip(int start, int end, bool editing) {
+void VideoControlsProxyWrapper::setClip(int start, int end) {
     if(videoControls) {
-        videoControls->setClip(start, end, editing);
+        videoControls->setClip(start, end);
     } else {
         stateBuf.clipStart = start;
         stateBuf.clipEnd = end;
-        stateBuf.clipEditing = editing;
     }
 }
 

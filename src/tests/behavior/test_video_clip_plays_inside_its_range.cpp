@@ -17,11 +17,12 @@
 #include "gui/viewers/videoplayerinitproxy.h"
 #include "gui/viewers/viewerwidget.h"
 
-// A real video in mpv: positions are milliseconds, a committed clip (30% ..
-// 70% to begin with) plays from its start and stops at its end, loop repeats
+// A real video in mpv: positions are milliseconds, a clip (from the
+// playhead to halfway to the end, to begin with) plays from its start and
+// stops at its end, loop repeats
 // it, and without a clip a video that doesn't loop stops on its last frame and
 // plays again from the start (and reports the end, for the slideshow). While
-// the clip is edited, the video shows the frame of the handle being moved.
+// a handle is dragged, the video shows its frame; hiding the clip keeps it.
 
 class VideoClipPlaysInsideItsRangeTest : public QObject {
     Q_OBJECT
@@ -83,15 +84,17 @@ void VideoClipPlaysInsideItsRangeTest::theClipPlaysStopsAndLoopsInsideItsRange()
     const int duration = seekBar->maximum();
     QVERIFY2(duration > 5500 && duration < 6500, qPrintable(QString("duration %1 should be ~6000 ms").arg(duration)));
 
-    // edit: the handles start at 30% and 70%; committing goes to the start
-    actionManager->invokeAction("toggleClipEdit");
-    QVERIFY(seekBar->clipEditable());
+    // the clip button: the start handle at the playhead, the end halfway from
+    // there to the end of the video
+    if(!paused)
+        actionManager->invokeAction("pauseVideo");
+    QTRY_VERIFY(paused);
+    viewerWidget->seek(1500);
+    QTRY_VERIFY2(qAbs(position - 1500) < 150, qPrintable(QString("seek to 1500 landed at %1").arg(position)));
+    actionManager->invokeAction("toggleClip");
     const int start = seekBar->clipStart(), end = seekBar->clipEnd();
-    QCOMPARE(start, duration * 3 / 10);
-    QCOMPARE(end, duration * 7 / 10);
-    actionManager->invokeAction("toggleClipEdit");
-    QVERIFY(!seekBar->clipEditable());
-    QCOMPARE(seekBar->clipStart(), start);
+    QVERIFY2(qAbs(start - 1500) < 150, qPrintable(QString("clip starts at %1, playhead at 1500").arg(start)));
+    QCOMPARE(end, start + (duration - start) / 2);
 
     // play stops at the clip's end
     if(!paused)
@@ -143,26 +146,33 @@ void VideoClipPlaysInsideItsRangeTest::theClipPlaysStopsAndLoopsInsideItsRange()
     QTRY_VERIFY(!paused);
     QTRY_VERIFY2(position < 1500, qPrintable(QString("playing again from %1").arg(position)));
 
-    // editing: grabbing a handle pauses on its frame, dragging shows the
-    // frame it is moved to, a frame step moves it a frame, Esc cancels
-    actionManager->invokeAction("toggleClipEdit");
-    QVERIFY(seekBar->clipEditable());
+    // showing the clip while playing pauses on the frame its start is set to;
+    // grabbing a handle pauses on its frame and dragging shows the frame it
+    // is moved to; hiding the clip and showing it again keeps the range
+    QVERIFY(!paused);
+    actionManager->invokeAction("toggleClip");
+    const int shownAt = seekBar->clipStart();
+    QVERIFY2(shownAt >= 0, "The clip button shows the handles.");
+    QTRY_VERIFY2(paused, "Showing the clip pauses the video.");
+    QTRY_VERIFY2(qAbs(position - shownAt) < 150, qPrintable(QString("showing %1, clip starts at %2").arg(position).arg(shownAt)));
     const QPoint grab = seekBar->clipHandleShape(VideoSlider::CLIP_HANDLE_START).boundingRect().center().toPoint();
-    const QPoint dropped = grab - QPoint(qMax(10, seekBar->width() / 10), 0);
+    const QPoint dropped = grab + QPoint(qMax(10, seekBar->width() / 10), 0);
     QTest::mousePress(seekBar, Qt::LeftButton, Qt::NoModifier, grab);
     QTest::mouseMove(seekBar, dropped);
     QTest::mouseRelease(seekBar, Qt::LeftButton, Qt::NoModifier, dropped);
-    const int dragged = seekBar->clipStart();
-    QVERIFY2(dragged < start, qPrintable(QString("start handle dragged to %1").arg(dragged)));
+    const int dragged = seekBar->clipStart(), draggedEnd = seekBar->clipEnd();
+    QVERIFY2(dragged > shownAt, qPrintable(QString("start handle dragged from %1 to %2").arg(shownAt).arg(dragged)));
     QTRY_VERIFY(paused);
     QTRY_VERIFY2(qAbs(position - dragged) < 150, qPrintable(QString("showing %1, handle at %2").arg(position).arg(dragged)));
-    actionManager->invokeAction("frameStep");
-    QTRY_VERIFY2(seekBar->clipStart() > dragged, "A frame step moves the handle.");
-    QVERIFY2(seekBar->clipStart() - dragged < 300, qPrintable(QString("moved to %1").arg(seekBar->clipStart())));
-    QKeyEvent esc(QEvent::KeyPress, Qt::Key_Escape, Qt::NoModifier);
-    actionManager->processEvent(&esc);
+    actionManager->invokeAction("toggleClip");
     QCOMPARE(seekBar->clipStart(), -1);
-    QVERIFY2(window->isVisible(), "Esc only cancels the edit.");
+    viewerWidget->seek(duration - 300);
+    QTRY_VERIFY2(position > draggedEnd, qPrintable(QString("hidden, a seek past the clip landed at %1").arg(position)));
+    actionManager->invokeAction("toggleClip");
+    QCOMPARE(seekBar->clipStart(), dragged);
+    QCOMPARE(seekBar->clipEnd(), draggedEnd);
+    // shown around a playhead outside it: back to its start
+    QTRY_VERIFY2(qAbs(position - dragged) < 150, qPrintable(QString("at %1, clip starts at %2").arg(position).arg(dragged)));
 }
 
 TG_BEHAVIOR_TEST_MAIN(VideoClipPlaysInsideItsRangeTest)

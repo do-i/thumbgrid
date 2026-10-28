@@ -10,7 +10,6 @@ void VideoClip::reset() {
     mState = CLIP_NONE;
     mStart = mEnd = 0;
     mLoop = false;
-    mLastHandle = HANDLE_START;
     if(wasSet)
         emit changed();
 }
@@ -30,38 +29,25 @@ int VideoClip::duration() const {
     return mDuration;
 }
 
-void VideoClip::toggleEdit() {
-    if(mState == CLIP_EDITING) {
-        commitEdit();
+void VideoClip::toggle(int pos) {
+    if(mState == CLIP_ACTIVE) {
+        mState = CLIP_HIDDEN;
+        emit changed();
         return;
     }
-    if(mDuration <= gap())
-        return;
-    mSavedState = mState;
-    mSavedStart = mStart;
-    mSavedEnd = mEnd;
     if(mState == CLIP_NONE) {
-        mStart = mDuration * 3 / 10;
-        mEnd = mDuration * 7 / 10;
-        mLastHandle = HANDLE_START;
+        if(mDuration <= gap())
+            return;
+        pos = qBound(0, pos, mDuration);
+        if(pos >= mDuration - NEW_CLIP_MIN_MS) {
+            mStart = 0;
+            mEnd = mDuration;
+        } else {
+            mStart = pos;
+            mEnd = pos + qMax(NEW_CLIP_MIN_MS, (mDuration - pos) / 2);
+        }
     }
-    mState = CLIP_EDITING;
-    emit changed();
-}
-
-void VideoClip::commitEdit() {
-    if(mState != CLIP_EDITING)
-        return;
     mState = CLIP_ACTIVE;
-    emit changed();
-}
-
-void VideoClip::cancelEdit() {
-    if(mState != CLIP_EDITING)
-        return;
-    mState = mSavedState;
-    mStart = mSavedStart;
-    mEnd = mSavedEnd;
     emit changed();
 }
 
@@ -75,31 +61,26 @@ void VideoClip::clear() {
 void VideoClip::markStart(int pos) {
     if(mDuration <= gap())
         return;
-    if(mState == CLIP_NONE) {
+    if(mState == CLIP_NONE)
         mEnd = mDuration;
-        mState = CLIP_ACTIVE;
-    }
+    mState = CLIP_ACTIVE;
     mStart = boundedStart(pos);
-    mLastHandle = HANDLE_START;
     emit changed();
 }
 
 void VideoClip::markEnd(int pos) {
     if(mDuration <= gap())
         return;
-    if(mState == CLIP_NONE) {
+    if(mState == CLIP_NONE)
         mStart = 0;
-        mState = CLIP_ACTIVE;
-    }
+    mState = CLIP_ACTIVE;
     mEnd = boundedEnd(pos);
-    mLastHandle = HANDLE_END;
     emit changed();
 }
 
 void VideoClip::moveHandle(Handle handle, int pos) {
-    if(mState == CLIP_NONE)
+    if(mState != CLIP_ACTIVE)
         return;
-    mLastHandle = handle;
     const int bounded = (handle == HANDLE_START) ? boundedStart(pos) : boundedEnd(pos);
     int &value = (handle == HANDLE_START) ? mStart : mEnd;
     if(bounded == value)
@@ -123,10 +104,6 @@ VideoClip::State VideoClip::state() const {
     return mState;
 }
 
-bool VideoClip::isEditing() const {
-    return mState == CLIP_EDITING;
-}
-
 bool VideoClip::isActive() const {
     return mState == CLIP_ACTIVE;
 }
@@ -145,10 +122,6 @@ int VideoClip::end() const {
 
 bool VideoClip::loop() const {
     return mLoop;
-}
-
-VideoClip::Handle VideoClip::lastHandle() const {
-    return mLastHandle;
 }
 
 int VideoClip::seekTarget(int pos) const {

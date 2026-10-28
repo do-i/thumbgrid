@@ -331,14 +331,6 @@
             "9"
         ]
     },
-    "clipEdit": {
-        "cancelClipEdit": [
-            "Esc"
-        ],
-        "commitClipEdit": [
-            "Enter"
-        ]
-    },
     "platform": {
         "macos": {
             "openSettings": [

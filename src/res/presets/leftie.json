@@ -315,13 +315,5 @@
         "sendToFolder9": [
             "9"
         ]
-    },
-    "clipEdit": {
-        "cancelClipEdit": [
-            "Esc"
-        ],
-        "commitClipEdit": [
-            "Enter"
-        ]
     }
 }

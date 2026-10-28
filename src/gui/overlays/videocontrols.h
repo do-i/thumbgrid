@@ -36,9 +36,8 @@ public slots:
     void onVideoMuted(bool);
     void setMode(PlaybackMode _mode);
     void setVolume(int);
-    // the clip on the seek bar (ms); start < 0: none. While editing the
-    // handles can be dragged
-    void setClip(int start, int end, bool editing);
+    // the clip on the seek bar (ms), its handles draggable; start < 0: none
+    void setClip(int start, int end);
     void setLoop(bool mode);
 
 signals:
@@ -56,7 +55,7 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
-    void updateClipButton(bool clip, bool editing);
+    void updateClipButton(bool clip);
     void showPopupBelow(QWidget *anchor, QFrame *popup);
     void resetPlaybackSpeed();
     void updateVolumeText(int volume);

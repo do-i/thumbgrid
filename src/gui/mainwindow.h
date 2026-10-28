@@ -208,9 +208,7 @@ signals:
     void frameStep();
     void frameStepBack();
     void toggleMute();
-    void toggleClipEdit();
-    void commitClipEdit();
-    void cancelClipEdit();
+    void toggleClip();
     void clearClip();
     void setClipStart();
     void setClipEnd();

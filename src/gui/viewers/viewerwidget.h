@@ -83,7 +83,6 @@ private:
     static constexpr int PREVIEW_SEEK_MS = 40;
     void applyVideoClip();
     // a frame step while editing moves the last-touched handle a frame
-    void stepClipHandle(int frames);
     void previewSeek(int pos);
     void seekVideoTo(int pos);
 
@@ -162,9 +161,7 @@ public slots:
     void setVolume(int volume);
     void setPlaybackSpeed(double speed);
     // the clip: the bracket button / its keys, and loop (clip or whole file)
-    void toggleClipEdit();
-    void commitClipEdit();
-    void cancelClipEdit();
+    void toggleClip();
     void clearClip();
     void setClipStart();
     void setClipEnd();

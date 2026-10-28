@@ -78,9 +78,5 @@
         "sendToFolder7": ["7"],
         "sendToFolder8": ["8"],
         "sendToFolder9": ["9"]
-    },
-    "clipEdit": {
-        "cancelClipEdit": ["Esc"],
-        "commitClipEdit": ["Enter"]
     }
 }
