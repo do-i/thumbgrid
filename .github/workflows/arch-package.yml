@@ -29,7 +29,7 @@ jobs:
       - name: Install build tooling
         run: pacman -Syu --noconfirm git git-lfs cmake qt6-base qt6-svg qt6-imageformats kimageformats libheif qt6-tools pkgconf exiv2 opencv mpv pacman-contrib
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0   # tags needed for pkgver fallback / git describe
           lfs: true        # fetch real image bytes; LFS pointer stubs in qrc crash at runtime
@@ -88,7 +88,7 @@ jobs:
           ls -al ./*.pkg.tar.zst
 
       - name: Upload package to the release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         # Also run on workflow_dispatch: an ABI-only rebuild needs its
         # package attached to the existing tag's release too, since the
         # AUR-publish script consumes release assets (multi-srcrel aware).
