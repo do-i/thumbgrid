@@ -144,12 +144,8 @@ public:
     // context as action -> sorted keys, with optional per-action primacy.
     void readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     void saveShortcuts(const QMap<ViewMode, QMap<QString, QString>> &shortcuts);
-    // Storage normalization applied by readShortcuts(): a binding present with the
-    // same action in both document and grid is hoisted into global, and anything a
-    // context repeats from global is dropped. Exposed so the preset defaults can be
-    // put through the identical pass - otherwise `defaults` keeps the per-context
-    // copies the preset file spells out while the mapping read back from disk has
-    // them in global, and the two compare unequal forever after a restart.
+    // Hoists document+grid duplicates into global and drops repeats of global, as readShortcuts() stores them.
+    // Public so preset defaults get the identical pass.
     static bool collapseShortcutContexts(QMap<ViewMode, QMap<QString, QString>> &shortcuts);
     void readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary);
     void saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> &primary);
@@ -161,9 +157,7 @@ public:
     void readShortcutVideoFallbacks(QMap<QString, QString> &fallbacks);
     void saveShortcutVideoFallbacks(const QMap<QString, QString> &fallbacks);
     void saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled);
-    // [Shortcuts] pointers: selected preset id and whether the active mapping has
-    // diverged from it. Only these pointers live in the .conf; the mapping is in
-    // shortcuts.json.
+    // [Shortcuts] pointers: selected preset and whether the mapping diverged (mapping is in shortcuts.json)
     QString selectedPreset();
     void setSelectedPreset(const QString &id);
     bool shortcutsModified();
@@ -314,9 +308,7 @@ public:
     bool videoPlayback();
     void setVideoPlayback(bool mode);
 
-    // Currently selected theme, stored as a readable name in [General]/theme
-    // ("system", "custom", or a preset name). The theme colours themselves live
-    // in the immutable preset files / theme.ini; only this pointer is in the config.
+    // [General]/theme pointer: "system", "custom" or a preset name
     int selectedThemeTid();
     void setSelectedThemeTid(int tid);
 
@@ -415,10 +407,7 @@ private:
     void setupCache();
     void fillVideoFormats();
 
-    // Group-aware access to thumbgrid.conf: keys are stored under the UI
-    // category they belong to (General/Grid/Document/Advanced), so the on-disk
-    // config mirrors the settings dialog. Runtime state (window geometry,
-    // bookmarks, print prefs, ...) lives under [State] in the same file.
+    // Keys are grouped by settings-dialog category; runtime state lives under [State].
     QVariant readSetting(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void writeSetting(const QString &key, const QVariant &value);
     void runVersionedSettingsMigrations(const QVersionNumber &lastVer);

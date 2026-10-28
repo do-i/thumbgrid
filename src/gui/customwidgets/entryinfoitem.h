@@ -18,47 +18,28 @@ public:
     explicit EntryInfoItem(QWidget *parent = nullptr);
     void setInfo(QString _name, QString _value);
 
-    // Swaps the value label for an in-place editor. The editor is frameless
-    // until hovered/focused (see the FileInfoDialog QSS rules), so an editable
-    // row keeps the shape of a read-only one - the user clicks the value and
-    // types, with no separate edit mode to enter.
+    // in-place editor, frameless until hovered/focused, so editable rows look like read-only ones
     void setEditable(bool _editable);
-    // Makes the *name* cell an editor too, which turns the row into a grid row:
-    // a custom XMP property is identified by its key, so the key has to be
-    // typeable. Rows whose name is fixed furniture (every curated row) leave
-    // this off.
+    // editable name cell makes a grid row (custom XMP properties are identified by key)
     void setNameEditable(bool _editable);
-    // A short multi-line value editor, one item per line - the only unambiguous
-    // way to edit an XMP array, since exiv2's displayed form joins items with
-    // ", " and an item may itself contain a comma.
+    // one item per line: XMP array items may contain commas
     void setMultiLine(bool _multiLine);
-    // A trailing "x" that removes the whole row. Revealed by the tab's remove
-    // toggle rather than shown always, so an ordinary read of the tab carries no
-    // delete buttons.
+    // trailing "x" removing the row, revealed by the tab's remove toggle
     void setRemovable(bool _removable);
     void setValuePlaceholder(const QString &text);
     void setNamePlaceholder(const QString &text);
-    // Widens the name column. The default suits the short human labels the
-    // General and EXIF tabs use; a full exiv2 XMP key ("Xmp.photoshop.Headline")
-    // does not fit in it, and a clipped key is not identifiable.
+    // full exiv2 keys need a wider name column
     void setNameWidth(int width);
-    // A third cell, revealed only when a grid row names an XMP prefix the file
-    // does not already declare: writing such a prefix throws unless its
-    // namespace URI is registered first, so the row asks for one rather than
-    // failing at the write.
+    // third cell for the namespace URI of an undeclared prefix
     void setExtraVisible(bool visible);
     void setExtraPlaceholder(const QString &text);
     QString currentExtra() const;
     QLineEdit *extraEditor() { return extraVisible ? &extraEdit : nullptr; }
-    // Greys the row out and refuses edits: used for a value too long to show in
-    // full, which must never be committed back or the elision would truncate the
-    // file's real data.
+    // for values too long to show: committing the elided text would truncate the file's data
     void setValueReadOnly(bool readOnly);
 
-    // Reports the editor's current text as an edit if it differs from the value
-    // the row was given. Idempotent: a second call reports nothing. A grid row
-    // reports name and value together as one rowEdited(), because committing
-    // per field would write a key-only property on the way to a complete one.
+    // Reports a changed value once (idempotent). Grid rows report name and value together,
+    // so no key-only property is written on the way.
     void commitEdit();
 
     // test access; null while the row is read-only
@@ -91,9 +72,7 @@ private:
 
     QString name;
     QString value;
-    // The last committed namespace URI, so filling that cell in on its own is a
-    // change worth reporting - the row is invalid until it is supplied, and
-    // comparing only name and value would swallow the very edit that fixes it.
+    // last committed namespace URI, so supplying it alone counts as an edit
     QString extra;
     bool editable = false;
     bool nameEditable = false;

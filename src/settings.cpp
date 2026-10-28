@@ -29,16 +29,13 @@ QColor colorFromSettings(QSettings *primary, const QString &primaryKey,
 }
 
 int normalizedThemeTid(int tid) {
-    // Older builds used COLORS_CUSTOMIZED at value 5; one interim build used
-    // COLORS_CUSTOM at value 6 after it. Both should now load as custom.
+    // older builds stored custom as 5 or 6
     if(tid == 5 || tid == 6)
         return COLORS_CUSTOM;
     return tid;
 }
 
-// Single source of truth for the tid <-> display-name/token mapping used by
-// themeName()/themeToken()/themeTidFromToken() below. Any tid not listed here
-// (notably COLORS_CUSTOM) falls back to the "Custom"/"custom" pair.
+// tid <-> display name/token; unlisted tids (COLORS_CUSTOM) map to "Custom"
 struct ThemeIdMapping {
     int tid;
     const char *name;  // display name, mirrors the system theme files
@@ -62,8 +59,7 @@ QString themeName(int tid) {
     return QStringLiteral("Custom");
 }
 
-// Lowercase token stored in [General]/theme. Presets use their file basename so
-// the pointer reads naturally in the .ini; "system"/"custom" are derived.
+// lowercase [General]/theme token: preset file basename, or "system"/"custom"
 QString themeToken(int tid) {
     for(const auto &m : kThemeIdMappings)
         if(m.tid == tid)
@@ -79,9 +75,7 @@ int themeTidFromToken(const QString &token) {
     return COLORS_CUSTOM;
 }
 
-// Maps each thumbgrid.conf key to the UI category group it belongs to, so the
-// on-disk config mirrors the settings dialog. Keys not listed here (the Scripts
-// array, the legacy "shortcuts" key) manage their own group and are untouched.
+// Config group per key, mirroring the settings dialog; unlisted keys manage their own group.
 QString settingGroupFor(const QString &key) {
     static const QHash<QString, QString> groups = {
         // General
@@ -139,17 +133,13 @@ QString settingGroupFor(const QString &key) {
 
 QString groupedKey(const QString &key) {
     const QString group = settingGroupFor(key);
-    // QSettings reserves the literal [General] section for ungrouped keys and
-    // would escape an explicit "General" group as [%General]. So General-category
-    // keys are left ungrouped: QSettings then writes them under [General] itself.
+    // QSettings escapes an explicit "General" group, so General keys stay ungrouped
     if(group.isEmpty() || group == QLatin1String("General"))
         return key;
     return group + QLatin1Char('/') + key;
 }
 
-// One-time migration of the pre-INI "theme.conf" (tid under [Colors]) to the new
-// "theme.ini" layout ([Theme] tid/name + [Colors]). Runs only when the new file
-// is absent so a user's custom palette survives the rename.
+// one-time theme.conf -> theme.ini migration, only when theme.ini is absent
 void migrateLegacyThemeConf(const QString &confDir, QSettings *themeConf) {
     const QString legacyPath = confDir + "/theme.conf";
     if(!QFile::exists(legacyPath) || QFile::exists(confDir + "/theme.ini"))
@@ -316,10 +306,7 @@ bool collapseGlobalShortcutDuplicates(QMap<ViewMode, QMap<QString, QString>> &sh
     return shortcuts != before;
 }
 
-// Serialize per-context bindings as { context: { action: [sorted keys] } }.
-// If a primary key has been chosen, the action entry becomes
-// { "keys": [sorted keys], "primacy": "key" }. JSON strings need no escaping
-// for key sequences like "=" or "Ctrl+/" (unlike the old QStringList format).
+// { context: { action: [sorted keys] } }, or { "keys": [...], "primacy": key } when a primary is set
 void writeShortcutsJson(const QString &path,
                         const QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     QJsonObject root;
@@ -353,8 +340,7 @@ void writeShortcutsJson(const QString &path,
             bindings.insert(it.key(), shortcutEntryToJson(it.value(), primary.value(ctx.key()).value(it.key())));
         root.insert(shortcutContextToken(ctx.key()), bindings);
     }
-    // The config dir may not exist yet if QSettings has not flushed; QSaveFile
-    // needs the parent directory to be present.
+    // QSaveFile needs the parent directory
     QDir().mkpath(QFileInfo(path).absolutePath());
     QSaveFile file(path);
     if(file.open(QIODevice::WriteOnly)) {
@@ -518,12 +504,8 @@ void readShortcutStringListJson(const QString &path, const QString &metadataKey,
     }
 }
 
-// DEPRECATED (remove after next release): one-time migration of the old
-// "[Controls] shortcuts=" QStringList (a single comma-joined line) into the new
-// readable shortcuts.json. QSettings does the hard QStringList decode for free,
-// so this reuses the historical "context|action=key" parse (legacy context-less
-// entries were active everywhere and seed both contexts; "eq" decodes to "=").
-// Runs only when shortcuts.json is absent, then drops the stale INI key.
+// DEPRECATED (remove after next release): one-time "[Controls] shortcuts=" -> shortcuts.json migration.
+// Context-less entries seed both contexts; "eq" decodes to "=".
 void migrateLegacyShortcuts(QSettings *settingsConf, const QString &jsonPath) {
     if(QFile::exists(jsonPath))
         return;
@@ -617,24 +599,8 @@ void Settings::setupCache() {
     mThumbCacheDir = new QDir(PlatformDesktop::thumbnailCacheDirectory(mTmpDir->absolutePath()));
     mThumbCacheDir->mkpath(mThumbCacheDir->absolutePath());
 
-    // Sweep leftover "videothumb-*" (video frame export, thumbnailerrunnable.cpp)
-    // and "export-*" (edited-image drag/clipboard export, core.cpp) directories.
-    // Both are QTemporaryDir instances that normally remove themselves on
-    // destruction, but a crash or SIGKILL strands them permanently since
-    // nothing else ever revisits the cache root. Runs after the writability
-    // fallback above, so it sweeps whichever root ended up in use.
-    //
-    // Nothing in this app enforces a single instance - a file manager happily
-    // spawns one process per opened image - so a starting instance must not
-    // delete scratch dirs another one is still using. Two cheap filters keep
-    // it off live data:
-    //   * an age floor, because a videothumb dir exists only for the few
-    //     seconds one frame grab takes and carries no lock of its own;
-    //   * a lock probe, because an export dir lives as long as its owning
-    //     session and is held open by a QLockFile (see Core::mExportTmpLock).
-    //     QLockFile reclaims a lock whose owning pid is gone, so a genuine
-    //     crash leftover is still swept.
-    // Anything skipped here is simply swept by a later launch.
+    // Sweep "videothumb-*" / "export-*" dirs stranded by a crash. There is no single-instance guard, so
+    // skip dirs younger than 5 minutes (frame grabs) or whose lock a live session holds (exports).
     QDir cacheRootDir(mTmpDir->absolutePath());
     const QStringList scratchDirs = cacheRootDir.entryList(
         {QStringLiteral("videothumb-*"), QStringLiteral("export-*")},
@@ -673,17 +639,12 @@ void Settings::runVersionedSettingsMigrations(const QVersionNumber &lastVer) {
         pruneRetiredSettings();
 }
 
-// Drops keys whose feature no longer exists, so a retired setting does not sit
-// in thumbgrid.conf forever. Both spellings are swept: the grouped key written
-// by migrateConfigGroups() and the flat one older configs still use (a retired
-// key is absent from settingGroupFor(), so the grouping pass leaves it flat).
+// drops retired keys, both grouped and flat spellings
 void Settings::pruneRetiredSettings() {
     static const QHash<QString, QString> retiredKeys = {
-        // The crop panel lost its "Crop & Save" button, so there is no longer a
-        // default action to pick between.
+        // the crop panel lost its "Crop & Save" button
         {QStringLiteral("defaultCropAction"), QStringLiteral("Document")},
-        // The never-finished changelog window was removed along with its
-        // "don't show again" switch.
+        // the changelog window was removed
         {QStringLiteral("showChangelogs"), QStringLiteral("General")},
     };
     bool removed = false;
@@ -700,8 +661,6 @@ void Settings::pruneRetiredSettings() {
 }
 
 void Settings::runConfigRecoveryMigrations(const QString &confDir) {
-    // Deliberately cross-platform: importing legacy theme.conf is guarded by
-    // both the source file existing and theme.ini being absent.
     const bool hasThemePointer = settingsConf->contains(QLatin1String("theme"));
     migrateLegacyThemeConf(confDir, themeConf);
     if(!hasThemePointer && themeConf->contains(QLatin1String("Theme/tid"))) {
@@ -714,9 +673,7 @@ void Settings::runConfigRecoveryMigrations(const QString &confDir) {
     if(!settingsConf->contains(presetKey))
         settingsConf->setValue(presetKey, QStringLiteral("qimgv"));
 
-    // Runtime state used to live in its own savedState file; import it into
-    // [State] and delete the old file. Keys already present win, so a stale
-    // legacy file reappearing (restored backup) cannot clobber newer state.
+    // import the old savedState file into [State]; existing keys win
     QSettings *legacyState = PlatformDesktop::createLegacyStateConfig();
     const QString legacyStatePath = legacyState->fileName();
     if(QFile::exists(legacyStatePath)) {
@@ -730,8 +687,7 @@ void Settings::runConfigRecoveryMigrations(const QString &confDir) {
     delete legacyState;
     QFile::remove(legacyStatePath);
 
-    // The duplicate finder state used to be one opaque QVariantMap blob under
-    // State/duplicateFinder; explode it into per-value keys. Existing keys win.
+    // explode the old State/duplicateFinder blob into per-value keys; existing keys win
     const QString dupeBlobKey = QStringLiteral("State/duplicateFinder");
     if(settingsConf->contains(dupeBlobKey)) {
         static const QHash<QString, QString> blobKeyMap = {
@@ -762,8 +718,7 @@ void Settings::setSelectedThemeTid(int tid) {
 }
 //------------------------------------------------------------------------------
 void Settings::migrateConfigGroups() {
-    // Theme selection pointer: old top-level "useSystemColorScheme" boolean or
-    // the theme.ini [Theme]/tid becomes [General]/theme (an ungrouped key).
+    // old "useSystemColorScheme" / theme.ini tid -> [General]/theme
     if(!settingsConf->contains(QLatin1String("theme"))) {
         int tid = COLORS_CUSTOM;
         if(settingsConf->value(QLatin1String("useSystemColorScheme"), false).toBool())
@@ -778,12 +733,7 @@ void Settings::migrateConfigGroups() {
 
     bool moved = false;
 
-    // Legacy folder-view colours used to live in thumbgrid.conf as a fallback,
-    // before the theme file existed. They are theme data, not general settings,
-    // so move any the theme file doesn't already define into theme.ini [Colors]
-    // and drop them from thumbgrid.conf. The pattern sweep also clears orphaned
-    // *Color keys left by old versions (none of the live folderView* settings
-    // end in "Color"), so they stop polluting [General].
+    // move legacy folder-view colors into theme.ini and drop orphaned *Color keys from [General]
     static const QHash<QString, QString> legacyColorKeys = {
         {QStringLiteral("folderViewLabelBackgroundColor"),         QStringLiteral("fv_label_bg")},
         {QStringLiteral("folderViewSelectionColor"),               QStringLiteral("fv_selection")},
@@ -806,9 +756,7 @@ void Settings::migrateConfigGroups() {
         moved = true;
     }
 
-    // Move flat top-level keys that belong to a non-General category into their
-    // group. General-category keys stay ungrouped ([General]). Idempotent: once
-    // moved a key no longer appears among the root childKeys().
+    // move flat keys into their group (idempotent)
     const QStringList flatKeys = settingsConf->childKeys();
     for(const QString &key : flatKeys) {
         const QString group = settingGroupFor(key);
@@ -831,8 +779,7 @@ QString Settings::tmpDir() {
     return mTmpDir->path() + "/";
 }
 //------------------------------------------------------------------------------
-// this here is temporarily, will be moved to some sort of theme manager class
-// Fills the size placeholders, scaled from the application font.
+// fills the size placeholders, scaled from the application font
 static void replaceStylesheetMetrics(QString &styleSheet) {
     // --- widget sizes ---------------------------------------------
     auto fnt = QGuiApplication::font();
@@ -859,10 +806,7 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
 
     // todo
     int button_height = text_height + text_padding_large * 2;
-    // settings dropdowns want a tight ~1px margin above/below the text, not a
-    // fraction of button_height (that left ~0.35*text_height of slack before
-    // the QSS padding even stacks on top). Floor keeps small fonts from
-    // clipping descenders.
+    // tight ~1px margin around the text; the floor keeps descenders from clipping
     int combobox_height = qMax(text_height + 2, 18);
 
     // pseudo-dpi to scale some widget widths
@@ -886,11 +830,7 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
 
 // Fills the color placeholders from the active color scheme.
 static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colors) {
-    // tint color for settings dialog panels; sourced from the active
-    // color scheme (not a fresh native QPalette) so it follows the
-    // selected theme. For COLORS_SYSTEM, colors.widget already equals
-    // QPalette().window().color() (see ThemeStore::colorScheme()), so
-    // this preserves that theme's look unchanged.
+    // panel tint from the active scheme so it follows the selected theme
     QColor sys_text = colors.text;
     QColor sys_window = colors.widget;
     QColor sys_window_tinted, sys_window_tinted_lc, sys_window_tinted_lc2, sys_window_tinted_hc, sys_window_tinted_hc2;
@@ -910,9 +850,7 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
         sys_window_tinted_hc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() - 50);
     }
 
-    // pick the icon variant from the app theme's own background (not the OS
-    // palette) so %icontheme% tracks the selected color scheme, including
-    // for COLORS_SYSTEM where colors.background follows the OS anyway.
+    // icon variant follows the app theme's background, not the OS palette
     styleSheet.replace("%icontheme%",  colors.background.valueF() <= 0.45f ? "dark" : "light");
     styleSheet.replace("%sys_window%",    sys_window.name());
     styleSheet.replace("%sys_window_tinted%",    sys_window_tinted.name());
@@ -924,10 +862,7 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
                                                   + QString::number(sys_text.green()) + ","
                                                   + QString::number(sys_text.blue())  + ",50%)");
 
-    // Destructive-action red. Fixed hue/saturation so it reads as "danger"
-    // in every theme, but the value is picked per theme lightness: a bright
-    // red glares against a dark background, while a dim one has too little
-    // contrast against a light one.
+    // danger red: fixed hue, value per theme lightness for contrast
     QColor danger, danger_hover, danger_pressed, danger_text;
     if(colors.background.valueF() <= 0.45f) {
         danger.setHsv(357, 148, 132);
@@ -1014,8 +949,7 @@ void Settings::loadStylesheet() {
 }
 //------------------------------------------------------------------------------
 void Settings::loadTheme() {
-    // The active selection is a pointer in [General]/theme; the colours come
-    // either from the immutable preset (generated) or the custom palette file.
+    // [General]/theme selects; colors come from the preset or the custom palette
     switch(selectedThemeTid()) {
         case COLORS_SYSTEM:
             setColorScheme(ThemeStore::colorScheme(ColorSchemes::COLORS_SYSTEM));
@@ -1071,13 +1005,8 @@ ColorScheme Settings::customColorScheme() {
     return ColorScheme(base);
 }
 void Settings::saveTheme() {
-    // Persist which theme is selected as a pointer in [General]/theme. The
-    // theme file itself never stores the selection.
     setSelectedThemeTid(mColorScheme.tid);
-    // System and presets are generated from ThemeStore / the palette and must
-    // never overwrite the stored custom palette, otherwise switching to a preset
-    // would discard the user's custom colors. Only persist color values while
-    // the custom theme is active.
+    // only the custom theme persists colors; presets must not overwrite the custom palette
     if(mColorScheme.tid == COLORS_SYSTEM ||
        mColorScheme.tid == COLORS_BLACK || mColorScheme.tid == COLORS_DARK ||
        mColorScheme.tid == COLORS_DARKBLUE || mColorScheme.tid == COLORS_LIGHT ||
@@ -1154,8 +1083,7 @@ QList<QByteArray> Settings::supportedFormats() {
     return formats;
 }
 //------------------------------------------------------------------------------
-// (for open/save dialogs, as a single string)
-// example:  "Images (*.jpg, *.png)"
+// for open/save dialogs: "Images (*.jpg, *.png)"
 QString Settings::supportedFormatsFilter() {
     QString filters;
     auto formats = supportedFormats();
@@ -1177,7 +1105,6 @@ QString Settings::supportedFormatsRegex() {
     return filter;
 }
 //------------------------------------------------------------------------------
-// returns list of mime types
 QStringList Settings::supportedMimeTypes() {
     QStringList filters;
     QList<QByteArray> mimeTypes = QImageReader::supportedMimeTypes();
@@ -1301,8 +1228,7 @@ void Settings::setFolderViewShowInfo(bool mode) {
     settings->writeSetting("folderViewShowInfo", mode);
 }
 //------------------------------------------------------------------------------
-// false = "Cover" (mode A: crop child previews to fill each cell)
-// true  = "Contain" (mode B: fit the whole child image, no cropping)
+// false = cover (crop child previews), true = contain (fit whole image)
 bool Settings::folderViewPreviewFit() {
     return settings->readSetting("folderViewPreviewFit", true).toBool();
 }
@@ -1482,9 +1408,7 @@ void Settings::sendChangeNotification() {
     emit settingsChanged();
 }
 //------------------------------------------------------------------------------
-// Shortcuts live in standalone shortcuts.json as action -> sorted keys per
-// context. Older builds stored them under "[Controls] shortcuts=" as a single
-// QStringList line; migrateLegacyShortcuts() converts that to JSON once.
+// action -> sorted keys per context, in shortcuts.json
 void Settings::readShortcuts(QMap<ViewMode, QMap<QString, QString>> &shortcuts) {
     migrateLegacyShortcuts(settings->settingsConf, settings->mShortcutsJsonPath);
     if(readShortcutsJson(settings->mShortcutsJsonPath, shortcuts))
@@ -1527,8 +1451,7 @@ void Settings::saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> 
     writeShortcutStringMapJson(settings->mShortcutsJsonPath, "_primary", primary);
 }
 
-// Stored as "_fallback": { "document": { action: fallback } }, the view the
-// scroll actions work in.
+// stored as "_fallback": { "document": { action: fallback } }
 void Settings::readShortcutFallbacks(QMap<QString, QString> &fallbacks) {
     QMap<ViewMode, QMap<QString, QString>> values;
     readShortcutStringMapJson(settings->mShortcutsJsonPath, "_fallback", values);
@@ -1645,8 +1568,7 @@ void Settings::setSavedPaths(const QStringList& paths) {
     settings->writeSetting("savedPaths", paths);
 }
 
-// savedPaths() falls back to the home dir, so the "Stored data" page needs a
-// separate way to tell "nothing stored" from "home dir stored".
+// savedPaths() falls back to home, so tell "nothing stored" apart here
 bool Settings::savedPathsStored() {
     return settings->settingsConf->contains(groupedKey("savedPaths"));
 }
@@ -1729,11 +1651,8 @@ int Settings::slideshowInterval() {
     return interval;
 }
 //------------------------------------------------------------------------------
-// The thumbnailer and duplicate-search pools share one budget of
-// idealThreadCount() cores (docs/003 §2.4): each setting's ceiling is the
-// budget minus the other's allocation. Enforced here, not only in the UI,
-// so config-file values can't oversubscribe. The thumbnailer wins ties and
-// only has to leave one core for the finder; minimum is always 1 each.
+// Thumbnailer and duplicate finder share idealThreadCount() cores; each ceiling is the budget minus
+// the other's share (enforced here, not just in the UI). Thumbnailer wins ties; minimum 1 each.
 static int totalCoreBudget() {
     return qMax(1, QThread::idealThreadCount());
 }
@@ -1762,8 +1681,7 @@ void Settings::setDuplicateSearchThreadCount(int count) {
     settings->writeSetting("duplicateSearchThreads", qBound(1, count, maxAllowed));
 }
 
-// Duplicate finder window state, one [State] key per value so the config
-// stays readable; only the two Qt widget-state blobs are binary.
+// one [State] key per value; only the two widget-state blobs are binary
 QByteArray Settings::duplicateFinderGeometry() {
     return settings->readSetting("duplicateFinderGeometry").toByteArray();
 }
@@ -1980,8 +1898,7 @@ void Settings::setWindowTitleExtendedInfo(bool mode) {
 }
 
 //------------------------------------------------------------------------------
-// Full screen only by default. Before the mode there was the on/off
-// "cursorAutohiding" (always on unless turned off): off stays never.
+// full screen only by default; the old "cursorAutohiding" off maps to never
 CursorAutohideMode Settings::cursorAutohide() {
     int mode = settings->readSetting("cursorAutohideMode", -1).toInt();
     if(mode == -1)

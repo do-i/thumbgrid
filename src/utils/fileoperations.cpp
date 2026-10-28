@@ -19,9 +19,7 @@ void FileOperations::removeFile(const QString &filePath, FileOpResult &result) {
 
 void FileOperations::checkCanRemove(const QString &filePath, FileOpResult &result) {
     QFileInfo file(filePath);
-    // exists() resolves the link, so a dangling symlink reads as absent even
-    // though the link itself is right there and removable. Removing a broken
-    // link must stay possible.
+    // exists() resolves links; a dangling link must still be removable
     if(!file.exists() && !file.isSymLink()) {
         result = FileOpResult::SOURCE_DOES_NOT_EXIST;
         return;
@@ -54,14 +52,8 @@ void FileOperations::removeSymLink(const QString &linkPath, FileOpResult &result
 }
 
 void FileOperations::removeDir(const QString &dirPath, bool recursive, FileOpResult &result) {
-    // A link that resolves to a directory must never be recursed into.
-    // QDir::removeRecursively() would walk through it and delete the contents
-    // of the *target* - data living outside the folder the user is looking at -
-    // while leaving the link itself in place. Unlink the link instead. This is
-    // one of two guards for that rule, not the single chokepoint: it covers
-    // this function's own (non-trash) callers, but DirectoryModel::removeDir()
-    // branches to FileOperations::moveToTrash() before ever reaching here, so
-    // it carries the same isSymLink() check up front to cover the trash route.
+    // Unlink a link to a directory: removeRecursively() would delete the target's contents.
+    // DirectoryModel::removeDir() guards the trash route.
     if(QFileInfo(dirPath).isSymLink()) {
         removeSymLink(dirPath, result);
         return;
@@ -125,10 +117,8 @@ static FileOpResult checkDestinationDir(const QString &destDirPath) {
     return FileOpResult::SUCCESS;
 }
 
-// Shared by copyFileTo()/moveFileTo(): if destFile already exists, validates it can be
-// replaced and (when force is set) moves it aside to a hash-suffixed tmp path so a failed
-// copy/move can restore it. Returns SUCCESS to mean "proceed"; any other FileOpResult means
-// the caller should bail out with that result.
+// If destFile exists, check it may be replaced and (with force) move it aside so a failed copy/move
+// can restore it. SUCCESS means proceed.
 FileOpResult FileOperations::backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp) {
     backedUp = false;
     if(!destFile.exists())
@@ -148,9 +138,7 @@ FileOpResult FileOperations::backupExistingDestination(const QFileInfo &destFile
     return FileOpResult::SUCCESS;
 }
 
-// Shared by copyFileTo()/moveFileTo(): restores mtime/atime after a QFile::copy(), which
-// (unlike a rename) does not preserve them. Returns false (leaving the timestamps untouched)
-// if filePath could not be reopened.
+// QFile::copy() doesn't preserve mtime/atime; false if the file could not be reopened
 bool FileOperations::restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime) {
     QFile dstF(filePath);
     if(!dstF.open(QIODevice::ReadWrite))
@@ -257,9 +245,7 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
     return;
 }
 
-// Recreates a symbolic link at destDirPath pointing to the same target as srcLinkPath.
-// The link target is resolved to an absolute path so it keeps resolving from the new location.
-// We never follow the link to copy its target's contents - this preserves symlinks "as is".
+// Recreates the link with an absolute target; never copies the target's contents.
 void FileOperations::copySymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result) {
     QFileInfo srcLink(srcLinkPath);
     if(!srcLink.isSymLink()) {
@@ -323,12 +309,7 @@ void FileOperations::moveSymLinkTo(const QString &srcLinkPath, const QString &de
 bool FileOperations::isValidFileName(const QString &name) {
     if(name.isEmpty() || name == QStringLiteral(".") || name == QStringLiteral(".."))
         return false;
-    // '/' is a path separator everywhere this runs, so it always disqualifies
-    // a leaf name. '\' is only a path separator on Windows - on Linux/macOS it
-    // is an ordinary filename character, and rejecting it there breaks a
-    // legitimate rename for no traversal benefit: '/', ".", "..",
-    // isAbsolutePath() and the leaf-equality check below are what actually
-    // stop traversal, and none of them depend on '\'.
+    // '/' always disqualifies; '\' only on Windows (an ordinary character elsewhere)
     if(name.contains(QLatin1Char('/')))
         return false;
 #ifdef Q_OS_WIN
@@ -358,11 +339,7 @@ void FileOperations::rename(const QString &srcFilePath, const QString &newName, 
         result = FileOpResult::NOTHING_TO_DO;
         return;
     }
-    // A rename must stay inside the folder the user is looking at. newName is
-    // free-form text from the rename editors, and the destination below is
-    // built by concatenation, so "../elsewhere" would turn a rename into an
-    // out-of-folder move (and could reach the overwrite path). Enforced here,
-    // in the file-operation layer, so no UI route can skip the check.
+    // newName is free text and the path is concatenated: keep renames inside the folder, for every UI route
     if(!isValidFileName(newName)) {
         result = FileOpResult::INVALID_NAME;
         return;

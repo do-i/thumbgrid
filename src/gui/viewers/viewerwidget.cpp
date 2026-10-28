@@ -77,8 +77,7 @@ ViewerWidget::ViewerWidget(QWidget *parent)
     connect(videoPlayer.get(), &VideoPlayer::videoPaused, this, [this](bool paused) {
         mVideoPaused = paused;
     });
-    // Reflect the real audio-output volume (reported by the player) on the
-    // controls slider, so it matches the actual OS/per-app sound level.
+    // show the real audio-output volume on the slider
     connect(videoPlayer.get(), &VideoPlayer::volumeChanged, videoControls, &VideoControlsProxyWrapper::setVolume);
 
     connect(videoControls, &VideoControlsProxyWrapper::seekBackward,  this, &ViewerWidget::seekBackward);
@@ -199,11 +198,7 @@ void ViewerWidget::disableVideoPlayer() {
         videoPlayer->setPaused(true);
         videoClip.reset();
         applyVideoClip();
-        // Hide the player when leaving it. Otherwise its last decoded frame
-        // lingers and briefly flashes when we switch to an image.
-        // The old "do not hide, late GL frames corrupt the imageviewer" caveat
-        // applied to the OpenGL render-API backend; the default wid backend
-        // renders into its own native window, so hiding is clean.
+        // hide on leave so the last frame can't flash over the next image
         videoPlayer->hide();
         updateVideoControlsVisibility();
     }
@@ -283,20 +278,15 @@ bool ViewerWidget::showImage(std::unique_ptr<QPixmap> pixmap) {
     stopPlayback();
     videoControls->hide();
     if(currentWidget == VIDEOPLAYER) {
-        // Coming from a video. The mpv native window stacks above our Qt widgets,
-        // so paint the new image into the (still-occluded) image viewer FIRST and
-        // flush it, then hide the video window. That way the image is already in
-        // the framebuffer the instant the video window is unmapped -- otherwise
-        // there's a one-frame gap where the background shows through.
+        // from a video: paint the image under mpv's native window first, then hide the video,
+        // so no background frame shows between them
         imageViewer->show();
         imageViewer->showImage(std::move(pixmap));
         imageViewer->repaint();
         enableImageViewer();
     } else {
         enableImageViewer();
-        // enableImageViewer() only show()s on a widget switch; re-show explicitly
-        // in case prepareForLoad() hid the image viewer while we were already on
-        // it (e.g. a misdetected video that turned out to be an image).
+        // prepareForLoad() may have hidden it while already on it
         imageViewer->show();
         imageViewer->showImage(std::move(pixmap));
     }
@@ -327,9 +317,7 @@ bool ViewerWidget::showVideo(QString file) {
     applyVideoClip();
     videoPlayer->showVideo(std::move(file));
     updateVideoControlsVisibility();
-    // Restore the pointer on every switch; it auto-hides again after the idle
-    // timeout. Without this the cursor stays blanked from the previous item
-    // (the mpv window doesn't track our auto-hide on its own).
+    // restore the pointer on every switch; mpv's window doesn't track our autohide
     showCursor();
     hideCursorTimed(false);
     return true;
@@ -344,26 +332,14 @@ bool ViewerWidget::showText(const QString& file) {
     return ok;
 }
 
-// Called when navigating to another item, before the next one is loaded (the
-// load is usually async). Blanks the outgoing view so it doesn't linger on
-// screen during the load, but only across an image<->video change; plain
-// image -> image keeps its current frame so browsing stays flicker-free.
+// blank the outgoing view only across an image<->video change; image->image keeps its frame
 void ViewerWidget::prepareForLoad(bool nextIsVideo) {
     if(currentWidget == VIDEOPLAYER) {
-        // Leaving a video. Pause it so audio stops, but do NOT stop()/unload the
-        // file: unloading tears down mpv's video output, and re-creating it on
-        // the next load crashes on machines with broken GL acceleration. A plain
-        // reload (loadfile) reuses the existing output and is safe.
-        //
-        // We deliberately do NOT blank the video here. showImage()/showVideo()
-        // swap to the next item atomically, and Core loads a video -> image
-        // switch synchronously (see loadFileIndex), so the new image is on
-        // screen the instant the video is hidden -- no empty/background frame
-        // flashes in between, and no stale video frame lingers either.
+        // Pause, don't stop: re-creating mpv's video output crashes with broken GL acceleration.
+        // Not blanked here: showImage()/showVideo() swap atomically.
         videoPlayer->setPaused(true);
     } else if(currentWidget == IMAGEVIEWER && nextIsVideo) {
-        // image -> video: blank the image so it doesn't linger during the
-        // (async) video load; the plugin blanks the player until its first frame.
+        // the plugin blanks the player until its first frame
         imageViewer->hide();
     }
 }
@@ -413,8 +389,7 @@ bool ViewerWidget::isShowingVideo() const {
     return currentWidget == VIDEOPLAYER;
 }
 
-// With an active clip, play resumes inside it, and starts over from the clip's
-// start when stopped outside it or at its end.
+// with a clip, play resumes inside it or restarts at its start
 void ViewerWidget::pauseResumePlayback() {
     if(currentWidget == VIDEOPLAYER) {
         const int target = mVideoPaused ? videoClip.resumeTarget(mVideoPosition) : -1;
@@ -509,8 +484,7 @@ void ViewerWidget::setPlaybackSpeed(double speed) {
         videoPlayer->setPlaybackSpeed(speed);
 }
 
-// Showing the clip pauses the video; a start placed at the playhead is shown
-// on its exact frame.
+// showing the clip pauses; a start at the playhead shows that exact frame
 void ViewerWidget::toggleClip() {
     if(currentWidget != VIDEOPLAYER)
         return;
@@ -546,9 +520,7 @@ void ViewerWidget::toggleVideoLoop() {
         videoClip.toggleLoop();
 }
 
-// Shows the clip on the controls and hands it to the player: mpv repeats an
-// active clip that loops (A-B loop), and without a clip loop repeats the file.
-// A clip that doesn't loop is stopped at its end in onVideoPositionChanged().
+// mpv A-B loops a looping clip; a non-looping clip stops in onVideoPositionChanged()
 void ViewerWidget::applyVideoClip() {
     const VideoClip::State state = videoClip.state();
     videoControls->setClip(videoClip.isActive() ? videoClip.start() : -1, videoClip.end());
@@ -595,8 +567,7 @@ void ViewerWidget::onClipHandleMoved(int handle, int pos) {
     previewSeek((which == VideoClip::HANDLE_START) ? videoClip.start() : videoClip.end());
 }
 
-// Seeks to pos at most every PREVIEW_SEEK_MS while a handle is dragged; the
-// last position is always seeked to.
+// throttled to PREVIEW_SEEK_MS while dragging; the last position always seeks
 void ViewerWidget::previewSeek(int pos) {
     mPreviewSeekTarget = pos;
     if(mPreviewSeekTimer.isActive())
@@ -685,11 +656,7 @@ void ViewerWidget::hideCursor() {
     }
 }
 
-// click zone input crutch
-// --
-// we can't process mouse events in the overlay
-// cause they won't propagate to the ImageViewer, only to overlay's container (this widget)
-// so we just grab them before they reach ImageViewer and do the needful
+// overlay mouse events don't reach the ImageViewer, so click zones are handled here
 ActiveHighlightZone ViewerWidget::clickZoneAt(const QPoint &pos) {
     if(clickZoneOverlay->leftZone().contains(pos))
         return HIGHLIGHT_LEFT;
@@ -698,18 +665,14 @@ ActiveHighlightZone ViewerWidget::clickZoneAt(const QPoint &pos) {
     return HIGHLIGHT_NONE;
 }
 
-// the action bound to click (e.g. "LMB", "Ctrl+LMB") in zone: the bindings
-// LMB_LeftEdge / LMB_RightEdge, with any modifiers in front
+// the action bound to click in zone (LMB_LeftEdge / LMB_RightEdge with modifiers)
 QString ViewerWidget::clickZoneAction(ActiveHighlightZone zone, const QString &click) {
     const QString edge = (zone == HIGHLIGHT_LEFT) ? QStringLiteral("_LeftEdge") : QStringLiteral("_RightEdge");
     return actionManager->actionForShortcut(MODE_DOCUMENT, click + edge);
 }
 
 bool ViewerWidget::eventFilter(QObject *object, QEvent *event) {
-    // A left click in an edge zone runs its LMB_LeftEdge / LMB_RightEdge
-    // binding (previous / next file by default) instead of reaching the
-    // picture; a double-click counts as one more click, so quick clicks keep
-    // stepping. Unbound, it is an ordinary click on the picture.
+    // edge clicks run their binding; a double-click counts as another click; unbound passes through
     if(event->type() == QEvent::MouseButtonPress || event->type() == QEvent::MouseButtonDblClick) {
         // disable feature for very small windows
         if(width() <= 250)
@@ -736,8 +699,7 @@ bool ViewerWidget::eventFilter(QObject *object, QEvent *event) {
             return true; // do not pass the event to imageViewer
         }
     }
-    // right click produces QEvent::ContextMenu instead of QEvent::MouseButtonPress
-    // this is NOT a QMouseEvent
+    // right click arrives as QEvent::ContextMenu, not a QMouseEvent
     if(event->type() == QEvent::ContextMenu) {
         clickZoneOverlay->disableHighlight();
         return false;
@@ -784,9 +746,7 @@ void ViewerWidget::showCursor() {
     cursorTimer.stop();
     if(cursor().shape() == Qt::BlankCursor)
         setCursor(QCursor(Qt::ArrowCursor));
-    // The video player hosts its own (native) window which doesn't inherit our
-    // cursor changes, so set it explicitly too. Otherwise the pointer stays
-    // hidden over a playing video even after we mean to show it.
+    // the player's native window doesn't inherit our cursor
     if(videoPlayer->cursor().shape() == Qt::BlankCursor)
         videoPlayer->setCursor(QCursor(Qt::ArrowCursor));
 }
@@ -813,8 +773,6 @@ void ViewerWidget::showContextMenu(QPoint pos) {
 void ViewerWidget::onFullscreenModeChanged(bool mode) {
     imageViewer->onFullscreenModeChanged(mode);
     mIsFullscreen = mode;
-    // a pointer hidden only in full screen comes back on leaving it; entering
-    // it hides an idle one
     if(!mode && settings->cursorAutohide() == CURSOR_AUTOHIDE_FULLSCREEN)
         showCursor();
     else
@@ -836,8 +794,7 @@ void ViewerWidget::readSettings() {
     }
 }
 
-// The slideshow turns looping off so it can move on. A video's loop is its
-// own button's (off for every new file), so ending the slideshow leaves it be.
+// the slideshow turns looping off; a video's own loop button is left alone
 void ViewerWidget::setLoopPlayback(bool mode) {
     imageViewer->setLoopPlayback(mode);
     if(!mode)
@@ -873,12 +830,8 @@ void ViewerWidget::scrollDownFine()  { scrollView(0,  1, true); }
 void ViewerWidget::scrollLeftFine()  { scrollView(-1, 0, true); }
 void ViewerWidget::scrollRightFine() { scrollView( 1, 0, true); }
 
-// Text that can scroll scrolls vertically by wheel-lines (fine: one line),
-// stopping at its ends; an image pans only along an axis it overflows, stopping
-// at its edge, and up switches a window-fitted image to fit-width. When there
-// is nothing to scroll that way the action runs its fallback (Settings >
-// Shortcuts): by default left/right change file and fine left/right seek a
-// video. A video has its own fallbacks, by default seeking for both.
+// Scrolls text by lines and pans overflowing images, stopping at edges; otherwise runs the
+// action's fallback (Settings > Shortcuts), a video its video fallback.
 void ViewerWidget::scrollView(int dx, int dy, bool fine) {
     if(currentWidget == TEXTVIEWER && dy && textViewer->canScroll()) {
         textViewer->scrollLines(dy * (fine ? 1 : QApplication::wheelScrollLines()));
@@ -904,12 +857,8 @@ void ViewerWidget::scrollView(int dx, int dy, bool fine) {
 void ViewerWidget::scrollOrPrevImage() { scrollOrChangeFile(-1); }
 void ViewerWidget::scrollOrNextImage() { scrollOrChangeFile( 1); }
 
-// A text file that can scroll scrolls by wheel-lines and stops at its ends, so
-// the end of a long file doesn't open the next one; with image scrolling set to
-// trackpad and wheel, an image taller than the window pans the same way. A
-// video runs the action's video fallback (seek by default); anything else
-// changes file. Over the text or image itself the viewer does the
-// wheel scrolling (see TextViewer and ImageViewerV2::wheelEvent).
+// Text and (trackpad-mode) tall images scroll and stop at their ends; a video runs the video
+// fallback, anything else changes file.
 void ViewerWidget::scrollOrChangeFile(int dy) {
     if(currentWidget == TEXTVIEWER && textViewer->canScroll()) {
         textViewer->scrollLines(dy * QApplication::wheelScrollLines());

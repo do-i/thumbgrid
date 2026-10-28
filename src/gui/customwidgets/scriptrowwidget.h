@@ -3,12 +3,7 @@
 #include <QWidget>
 #include <QMouseEvent>
 
-// Row widget shown inside the Settings > Scripts list via
-// QListWidget::setItemWidget(). It hosts the script name label plus the per-row
-// edit/delete IconButtons. The container stays opaque to mouse events so its
-// child buttons receive their own clicks; single/double clicks on the rest of
-// the row are re-emitted so the owner can drive selection and edit, keeping the
-// native double-click-to-edit behaviour.
+// Settings > Scripts row: name plus edit/delete buttons; re-emits clicks on the rest of the row.
 class ScriptRowWidget : public QWidget {
     Q_OBJECT
 public:

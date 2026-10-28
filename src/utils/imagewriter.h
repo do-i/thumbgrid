@@ -23,9 +23,7 @@ namespace ImageWriter {
 // so it belongs to the GUI thread.
 int qualityFor(const QString &suffix);
 
-// Encodes job.image and attaches the source metadata in memory, then replaces
-// job.destPath atomically (QSaveFile: a temporary sibling, synced and renamed
-// over it). Any failure leaves an existing destination untouched. Thread-safe.
+// Encodes, attaches source metadata, then replaces destPath atomically (QSaveFile). Failure leaves it untouched. Thread-safe.
 bool write(const ImageWriteJob &job);
 
 }

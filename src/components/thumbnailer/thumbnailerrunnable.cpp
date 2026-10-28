@@ -186,9 +186,7 @@ std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createThumbnail(c
         originalSize = reader->size();
         result = std::make_unique<QImage>();
         if(!reader->read(result.get())) {
-            // If read() returns false there's no guarantee that size conversion worked properly.
-            // So we fallback to manual.
-            // Se far I've seen this happen only on some weird (corrupted?) jpeg saved from camera
+            // a failed read() may have skipped the size conversion (seen with corrupted camera jpegs)
             manualResize = true;
             result.reset();
             // Force reset reader because it is really finicky
@@ -325,9 +323,7 @@ void ThumbnailerRunnable::drawDirPreview(QImage &base, const QList<QImage> &imag
                       base.width() - gutter * 2,
                       base.height() - bodyTop - gutter * 2);
 
-    // false = "Cover" (mode A): crop each preview to fill its cell.
-    // true  = "Contain" (mode B): fit the whole image, no cropping, with a
-    //         layout that adapts to image orientation for the 1-2 image cases.
+    // false = cover (crop previews to fill), true = contain (fit whole image, orientation-aware for 1-2 images)
     bool fit = previewFit;
 
     int columns, rows;
@@ -399,10 +395,8 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateFileTypeIcon(const Docum
     return thumbnail;
 }
 
-// Generic "document page" icon with a folded corner. Text files get faux text
-// lines plus an extension badge (e.g. [TXT]); files thumbgrid cannot render get
-// a dimmed page with a big question mark instead. Uses only QImage + QPainter,
-// so it is safe to run on thumbnailer worker threads.
+// document page icon: text files get lines and an extension badge, unrenderable ones a "?".
+// QImage/QPainter only, so safe on worker threads.
 QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewable, int size) {
     const ColorScheme &scheme = settings->colorScheme();
     QImage icon(size, size, QImage::Format_ARGB32_Premultiplied);
@@ -512,11 +506,7 @@ QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewa
 
 std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbnail(const QString& path, int size, bool squared) {
     QImageReader reader;
-    // Private per-task directory. The output path used to be
-    // "<tmpDir>/<source basename>.png", so two videos sharing a basename - or
-    // two workers on the same file - raced for one predictable path, each able
-    // to read or delete the other's frame. It also made the output name
-    // guessable inside a cache root the user can point anywhere.
+    // private per-task dir: a shared predictable path let workers race on (and read) each other's frames
     QTemporaryDir tmpDir(settings->tmpDir() + QStringLiteral("videothumb-"));
     if(!tmpDir.isValid())
         return std::make_pair(std::make_unique<QImage>(), QSize());

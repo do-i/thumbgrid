@@ -80,10 +80,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     // thin divider between the file actions and the view toggles
     addSeparator(mainPage, mainLayout);
 
-    // Slideshow had no default shortcut and no menu entry anywhere, so there was
-    // no way to reach it from a stock install. It is a toggle, but entering the
-    // grid always stops it (Core::enableFolderView), so from here it can only
-    // ever start one - hence the unconditional "Start slideshow" label.
+    // entering the grid stops a slideshow, so from here it can only start one
     slideshowItem = makeItem(tr("Start slideshow"), ":/res/icons/common/menuitem/document-view16.png");
     slideshowItem->setObjectName("menuSlideshow");
     slideshowItem->setAction("toggleSlideshow");
@@ -139,9 +136,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     addConvertFormat(convertLayout, "WBMP", "wbmp");
     addConvertFormat(convertLayout, "CUR",  "cur");
 
-    // Safety net: if the page still ends up taller than its items (e.g. a
-    // future item count change), the surplus goes below the items instead
-    // of being distributed between them by the QVBoxLayout spacing.
+    // surplus height goes below the items
     convertLayout->addStretch(1);
 
     stack->addWidget(convertPage);
@@ -193,12 +188,7 @@ void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
     findDuplicatesItem->setEnabled(info.total() > 0);
 }
 
-// The stack holds pages of very different heights (11-row main page vs.
-// 4-row convert page). QStackedLayout's sizeHint() is the max over *all*
-// pages, except it zeroes out a page's contribution on axes where that
-// page's size policy is Ignored - so the trick to make the popup track
-// only the visible page is to mark every other page Ignored/Ignored and
-// the visible one Preferred/Preferred before asking for a new sizeHint.
+// QStackedLayout's sizeHint ignores Ignored-policy pages, so mark all but the visible page Ignored
 void GridContextMenu::setCurrentPage(int index) {
     for(int i = 0; i < stack->count(); ++i) {
         QWidget *page = stack->widget(i);
@@ -209,9 +199,7 @@ void GridContextMenu::setCurrentPage(int index) {
 
     stack->setCurrentIndex(index);
 
-    // setSizePolicy() already calls updateGeometry(), but activate the
-    // layouts explicitly so the new sizeHint is computed fresh rather than
-    // reused from a cached value further up the chain.
+    // activate explicitly so the size hint isn't reused from a cache
     if(QLayout *pageLayout = stack->currentWidget()->layout())
         pageLayout->activate();
     stack->updateGeometry();
@@ -219,9 +207,7 @@ void GridContextMenu::setCurrentPage(int index) {
     adjustSize();
 
     if(isVisible()) {
-        // adjustSize() keeps the top-left corner fixed and grows/shrinks
-        // toward bottom-right, so re-clamp in case switching to a taller
-        // page (e.g. "Back" to the main page) pushed it off-screen.
+        // adjustSize() grows toward bottom-right; re-clamp to the screen
         QRect geom = geometry();
         clampToScreen(geom);
         setGeometry(geom);

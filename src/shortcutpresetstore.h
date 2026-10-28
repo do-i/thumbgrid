@@ -5,9 +5,7 @@
 #include <QList>
 #include <QJsonObject>
 
-// Metadata describing a shortcut preset, read from each preset file's `_meta`
-// block. The mapping itself (global/document/grid/platform) is parsed by
-// ActionManager via ShortcutPresetStore::resolvePath().
+// a preset file's `_meta` block; ActionManager parses the mapping
 struct PresetInfo {
     QString id;
     QString name;
@@ -17,25 +15,19 @@ struct PresetInfo {
     bool valid = false;
 };
 
-// Owns the shortcut-preset catalog, mirroring ThemeStore's catalog role. Presets
-// are seed data: the active runtime mapping is the user's shortcuts.json, created
-// from the selected preset on first run.
+// Preset catalog (like ThemeStore). Presets seed shortcuts.json on first run.
 class ShortcutPresetStore {
 public:
     // "windows" | "macos" | "linux" (FreeBSD normalizes to "linux").
     static QString currentOsToken();
 
-    // Enumerate presets (XDG config dirs and PRESETS_PATH overlaid on embedded
-    // qrc), sorted by _meta.order then id. When currentOsOnly, keep only presets
-    // whose _meta.os contains currentOsToken().
+    // XDG and PRESETS_PATH over embedded qrc, sorted by _meta.order then id; optionally current OS only
     static QList<PresetInfo> available(bool currentOsOnly = true);
 
     // Metadata for one preset id (invalid PresetInfo if it resolves nowhere).
     static PresetInfo meta(const QString &id);
 
-    // Resolve a preset id to a file path, searching <id>.json across the XDG
-    // config dirs (~/.config/thumbgrid/presets first), then PRESETS_PATH, then
-    // the embedded :/res/presets/<id>.json. Empty if it resolves nowhere.
+    // <id>.json from XDG config dirs, PRESETS_PATH, then qrc; empty if nowhere
     static QString resolvePath(const QString &id);
 
     // Parsed root object of a preset file (empty object if it resolves nowhere).

@@ -8,10 +8,7 @@ class QPushButton;
 class QHBoxLayout;
 class QVBoxLayout;
 
-// Frameless, translucent, rounded confirmation / message dialog that is fully
-// styled by the active color scheme (see the CustomMessageBox rules in
-// style-template.qss). Replaces stock QMessageBox for in-app prompts so they
-// match the rest of the custom-drawn UI instead of showing a native OS dialog.
+// frameless, theme-styled replacement for QMessageBox (see style-template.qss)
 class CustomMessageBox : public QDialog {
     Q_OBJECT
 public:
@@ -23,16 +20,10 @@ public:
     // Adds a single-line text field to the body and returns it. Its content
     // is selected and focused so the user can type/replace immediately.
     QLineEdit* addInput(const QString& initialValue = QString());
-    // role == true accepts the dialog, false rejects it. The first button
-    // added with makeDefault triggers on Enter and receives initial focus.
-    // danger marks a destructive action (trash/delete/overwrite) so the
-    // button renders with the red danger palette instead of the normal one.
+    // makeDefault: Enter and initial focus; danger: red palette for destructive actions
     QPushButton* addButton(const QString& text, bool acceptRole, bool makeDefault = false, bool danger = false);
 
-    // Yes / No confirmation. Returns true when the accept button was chosen.
-    // danger marks the accept button as a destructive action (trash/delete/
-    // overwrite): it renders in the red danger palette, including while it
-    // is the default/focused button.
+    // true when accepted; danger renders the accept button red
     static bool confirm(QWidget *parent, const QString& title, const QString& text,
                         bool danger = false,
                         const QString& acceptText = QObject::tr("Yes"),

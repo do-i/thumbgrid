@@ -3,12 +3,8 @@
 #include <QObject>
 #include <cstdint>
 
-// The clip of the shown video: a start..end range (in ms) set with two handles
-// on the seek bar, and whether playback loops. The clip button shows the
-// handles, and playback then stays inside the clip; the handles can be dragged
-// whenever they are shown. Hiding them keeps the range, so showing them again
-// brings it back (its start at the playhead, if that moved meanwhile). Without a clip, loop repeats the whole file. Everything
-// resets when another file opens.
+// The shown video's clip: a start..end range (ms) and whether it loops. While shown, playback stays
+// inside it; hiding keeps the range until another file opens.
 class VideoClip : public QObject {
     Q_OBJECT
 public:
@@ -38,18 +34,12 @@ public:
     void setDuration(int duration);
     int duration() const;
 
-    // active -> hidden, hidden -> active, pos being the playhead. A new clip
-    // starts at pos and ends halfway from there to the end of the video, but
-    // at least NEW_CLIP_MIN_MS later; with less than that left after pos it
-    // spans the whole video. A hidden clip comes back as it was, unless the
-    // playhead moved meanwhile: then its start moves to pos (placed anew when
-    // its end is less than NEW_CLIP_MIN_MS after pos).
+    // Toggle at playhead pos. A new clip ends halfway to the end, at least NEW_CLIP_MIN_MS later (whole video
+    // if less remains). A hidden clip returns as it was unless the playhead moved: then its start moves there.
     void toggle(int pos);
     // forget the range
     void clear();
-    // move a handle to pos ("[" / "]"), showing a hidden clip; without a clip
-    // this makes one that runs from pos to the end of the file (or from the
-    // start to pos)
+    // move a handle to pos ("[" / "]"), showing a hidden clip or creating one to the end (or from the start)
     void markStart(int pos);
     void markEnd(int pos);
     // drag a shown handle; it stops short of the other one

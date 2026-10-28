@@ -66,11 +66,7 @@ FolderGridView::FolderGridView(QWidget *parent)
     mThumbColorSignature = settings->colorScheme().bakedThumbnailSignature();
     connect(settings, &Settings::settingsChanged, [this]() {
         this->scene.setBackgroundBrush(settings->colorScheme().folderview);
-        // Thumbnails bake the child-preview layout and the recolored folder/
-        // file-type icons into the pixmap, so a change to the preview fit mode or
-        // to any of those theme colors (e.g. a theme switch) requires regenerating
-        // them. The thumbnailer's mem cache is dropped on the same signal, so the
-        // reload below re-renders with the new colors instead of reusing stale ones.
+        // thumbnails bake the preview layout and recolored icons, so regenerate on fit or theme color changes
         QString colorSignature = settings->colorScheme().bakedThumbnailSignature();
         if(mPreviewFit != settings->folderViewPreviewFit() || mThumbColorSignature != colorSignature) {
             mPreviewFit = settings->folderViewPreviewFit();
@@ -441,11 +437,7 @@ void FolderGridView::keyPressEvent(QKeyEvent *event) {
         return;
     }
 
-    // The arrows, PgUp/PgDown and Home/End run the selection action their plain
-    // key is bound to. Shift, Alt and Meta don't change which one (Shift only
-    // makes it extend the selection), and the plain key wins over a binding on
-    // the modified combo - as when these moves were hard-coded. Matched by Qt
-    // key, so the numpad arrows count too.
+    // navigation keys run the selection action of their plain key; Shift extends; numpad counts
     const QString navigationKey = navigationKeyName(event->key());
     if(!navigationKey.isEmpty()) {
         const QString action = actionManager->actionForShortcut(MODE_FOLDERVIEW, navigationKey);
@@ -476,9 +468,7 @@ void FolderGridView::navigate(GridNavigation direction) {
     }
 }
 
-// The grid's mouse binding for name (e.g. "Ctrl+LMB_Drag"); a modified one
-// without a binding of its own uses the plain one (plainName), as when these
-// gestures were hard-coded.
+// a modified gesture without its own binding uses the plain one
 namespace {
 QString gridMouseAction(const QString &name, const QString &plainName) {
     const QString action = actionManager->actionForShortcut(MODE_FOLDERVIEW, name);
@@ -486,9 +476,7 @@ QString gridMouseAction(const QString &name, const QString &plainName) {
 }
 } // namespace
 
-// A double-click on a tile runs LMB_TileDoubleClick (openSelected by default,
-// which opens the clicked tile); it is its own name because a double-click on
-// empty space reaches the plain LMB_DoubleClick binding. Unbound, it does nothing.
+// tile double-click runs LMB_TileDoubleClick; empty space gets LMB_DoubleClick
 void FolderGridView::itemDoubleClicked(int index, QMouseEvent *event) {
     QString name = ShortcutBuilder::fromEvent(event);
     name.replace(QStringLiteral("_DoubleClick"), QStringLiteral("_TileDoubleClick"));
@@ -660,11 +648,8 @@ bool FolderGridView::handleSearchKey(QKeyEvent *event) {
         break;
     }
 
-    // Ctrl+Alt is AltGr on some layouts and does produce text; any other
-    // Ctrl/Alt/Meta combination, and the function keys, are shortcuts rather
-    // than query text. App-wide (global) ones still run, so Ctrl+Q or F11 work
-    // mid-search; grid ones stay inert so they can't fight the search over the
-    // selection.
+    // Ctrl+Alt may be AltGr text; other modifier combos and F-keys are shortcuts:
+    // global ones still run mid-search, grid ones don't
     bool ctrl = event->modifiers().testFlag(Qt::ControlModifier);
     bool alt  = event->modifiers().testFlag(Qt::AltModifier);
     bool functionKey = event->key() >= Qt::Key_F1 && event->key() <= Qt::Key_F35;

@@ -133,9 +133,7 @@ void DirectoryModel::removeFile(const QString &filePath, bool trash, FileOpResul
         FileOperations::removeFile(filePath, result);
     if(result != FileOpResult::SUCCESS)
         return;
-    // A link resolving to a directory is listed as a dir entry but removed
-    // through here, so drop whichever entry it occupies. Both calls are
-    // guarded no-ops, same as the watcher's own removal handler.
+    // a link to a directory is listed as a dir; drop whichever entry it occupies
     dirManager.removeFileEntry(filePath);
     dirManager.removeDirEntry(filePath);
     return;
@@ -144,10 +142,7 @@ void DirectoryModel::removeFile(const QString &filePath, bool trash, FileOpResul
 void DirectoryModel::renameEntry(const QString &oldPath, const QString &newName, bool force, FileOpResult &result) {
     bool isDir = dirManager.isDir(oldPath);
     FileOperations::rename(oldPath, newName, force, result);
-    // Apply the change eagerly. The fs watcher will report the same rename a
-    // moment later; DirectoryManager's mutators are idempotent, so the second
-    // application is absorbed. (Pumping the event loop here to "order" the two
-    // was a re-entrancy hazard and could not flush timer-delayed events anyway.)
+    // applied eagerly; the watcher's later report is absorbed (mutators are idempotent)
     if(result != FileOpResult::SUCCESS)
         return;
     if(isDir)
@@ -157,11 +152,7 @@ void DirectoryModel::renameEntry(const QString &oldPath, const QString &newName,
 }
 
 void DirectoryModel::removeDir(const QString &dirPath, bool trash, bool recursive, FileOpResult &result) {
-    // A link that resolves to a directory must never be recursed into or
-    // handed to the trash route as if it were the real directory - see
-    // FileOperations::removeDir()'s comment for why. That guard lives inside
-    // removeDir() itself, so it only covers the non-trash branch below; this
-    // check is the other guard, applied before the branch so it covers both.
+    // links to directories must never be recursed into or trashed as the directory (see FileOperations::removeDir)
     if(QFileInfo(dirPath).isSymLink()) {
         FileOperations::removeSymLink(dirPath, result);
     } else if(trash) {
@@ -275,9 +266,7 @@ bool DirectoryModel::saveFileAsync(const QString &filePath, const QString &destP
         return false;
     pendingSaves.insert(filePath, {img, *job});
     dirManager.beginSave(destPath);
-    // The worker gets its own copy of the job and nothing else; the result
-    // comes back as a queued call, and the destructor waits for the pool, so
-    // it never outlives this model.
+    // the worker gets its own copy of the job; the destructor waits for the pool
     savePool.start([this, filePath, job = *job]() {
         const bool success = ImageWriter::write(job);
         QMetaObject::invokeMethod(this, [this, filePath, success]() {
@@ -370,9 +359,7 @@ bool DirectoryModel::isLoaded(QString filePath) const {
     return cache.contains(std::move(filePath));
 }
 
-// returns cached image
-// if image is not cached, loads it in the main thread
-// for async access use loadAsync(), then catch onImageReady()
+// cached image, else loaded on this thread (use loadAsync() for async)
 std::shared_ptr<Image> DirectoryModel::getImage(const QString& filePath) {
     std::shared_ptr<Image> img = cache.get(filePath);
     if(!img)

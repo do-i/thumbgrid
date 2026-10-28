@@ -1,6 +1,4 @@
-// Right-click popup for the grid (folder) view.
-// Reuses the ContextMenuItem component so it matches the document-view menu:
-// each entry shows an icon, a short label and its primary key shortcut.
+// Grid right-click popup, styled like the document-view menu.
 
 #pragma once
 
@@ -15,10 +13,7 @@ class GridContextMenu : public QWidget {
 public:
     explicit GridContextMenu(QWidget *parent = nullptr);
 
-    // Gates each file-op entry on what's selected: Convert needs every item to
-    // be (or contain) a convertible image, Rename needs exactly one item,
-    // Move/Trash/Delete need at least one. View toggles and Settings are
-    // always enabled.
+    // Convert needs convertible images, Rename exactly one item, Move/Trash/Delete at least one
     void setSelectionInfo(const SelectionInfo &info);
 
 public slots:

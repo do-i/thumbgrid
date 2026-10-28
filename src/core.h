@@ -87,14 +87,9 @@ private:
 
     QDrag *mDrag;
     QMimeData *getMimeDataForImage(const std::shared_ptr<Image>& img, MimeDataTarget target);
-    // Lazily-created, session-lifetime directory for edited-image drag/clipboard
-    // exports. Owned by Core (not scope-bound) because the receiving app reads
-    // the file's URL asynchronously after getMimeDataForImage() returns.
+    // session-lifetime export dir: receivers read the file after getMimeDataForImage() returns
     std::unique_ptr<QTemporaryDir> mExportTmpDir;
-    // Marks mExportTmpDir as belonging to a live session, so the startup sweep
-    // in Settings::setupCache() leaves it alone while another instance is
-    // running. Declared after the dir it guards: members are destroyed in
-    // reverse order, so the lock is released before the directory goes away.
+    // Keeps other instances' startup sweep away. Declared after the dir so it is released first.
     std::unique_ptr<QLockFile> mExportTmpLock;
     int mExportFileCounter = 0;
     void copySelectionToClipboard(bool cut);
@@ -170,10 +165,7 @@ private slots:
     void stripMetadata();
     void stripMetadataAt(const QString &path);
     void saveMetadataTagAt(const QString &path, const QString &key, const QString &value);
-    // The File info window's scoped removals, one per metadata tab. Each
-    // mirrors stripMetadataAt(): same type gate, same confirmation, same
-    // reload-and-retarget refresh - but each removes only its own kind, which is
-    // what lets the three buttons live in three tabs.
+    // scoped removals, one per File info tab, each like stripMetadataAt() for its own kind
     void removeAllExifAt(const QString &path);
     void removeAllXmpAt(const QString &path);
     void removeIccProfileAt(const QString &path);

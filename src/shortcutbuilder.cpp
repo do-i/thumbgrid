@@ -33,9 +33,7 @@ QString ShortcutBuilder::processWheelEvent(QWheelEvent *event) {
     return sequence;
 }
 //------------------------------------------------------------------------------
-// Detects mouse button clicks only
-// DoubleClick works only for LMB
-// Otherwise treated as a regular click
+// double click is LMB only; others count as a click
 QString ShortcutBuilder::buttonName(Qt::MouseButton button) {
     if(button == Qt::LeftButton)
         return "LMB";
@@ -114,12 +112,7 @@ bool ShortcutBuilder::isModifier(Qt::Key key) {
 }
 //------------------------------------------------------------------------------
 QString ShortcutBuilder::fromEventNativeScanCode(QKeyEvent *event) {
-    // layout-independent method (mostly)
-    // -------------------------
-    // Still has some issues like when you use two layouts
-    // where on the same button you have a letter on one layout and some symbol on the other.
-    // I'm leaving this as-is because trying to fix all layouts will turn into a mess real quick.
-    // You can always just add the same keybind using your alt. layout if it doesnt work.
+    // layout-independent (mostly): a key with a letter on one layout and a symbol on another may not match
     QString sequence = inputMap->keys().value(event->nativeScanCode());
 
     if(sequence.isEmpty())
@@ -140,9 +133,7 @@ QString ShortcutBuilder::fromEventNativeScanCode(QKeyEvent *event) {
     return sequence;
 }
 //------------------------------------------------------------------------------
-// Names a key that arrived without a native scancode. Punctuation is named by
-// the character it types ("/", not "Slash"), as the keymaps name it; with Shift
-// the shifted character stands alone, same as fromEventNativeScanCode().
+// punctuation is named by its character; shifted characters stand alone
 QString ShortcutBuilder::fromEventWithoutScanCode(QKeyEvent *event) {
     const QString text = event->text();
     const QChar chr = text.size() == 1 ? text.at(0) : QChar();
@@ -152,10 +143,7 @@ QString ShortcutBuilder::fromEventWithoutScanCode(QKeyEvent *event) {
 }
 //------------------------------------------------------------------------------
 QString ShortcutBuilder::fromEventText(QKeyEvent *event) {
-    // layout-dependent method
-    // -------------------------
-    // Works on platforms for which there is no native scancode support from Qt.
-    // Keybinds will work only on the same layout they were added (except non-printables).
+    // layout-dependent fallback without native scancodes: binds work on the layout they were made on
     QString sequence = QVariant::fromValue(Qt::Key(event->key())).toString();
     if(!sequence.isEmpty()) {
         // remove "Key_" at the beginning

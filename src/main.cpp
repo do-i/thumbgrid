@@ -24,16 +24,12 @@
 
 //------------------------------------------------------------------------------
 void saveSettings() {
-    // Runs at exit, after Core has written its final session state (saved
-    // paths, geometry) - so an on-exit clear cannot be re-written by shutdown
-    // code. Must precede the Settings teardown that flushes the config.
+    // after Core saved its final state, before the Settings teardown flushes the config
     StoredData::clearStoresMarkedForExit();
     delete settings;
 
 #ifdef USE_EXIV2
-    // Pairs with Exiv2::XmpParser::initialize() in main(). By this point all
-    // worker threads that could touch XMP metadata are gone, so it's safe to
-    // tear the toolkit down here on the main thread.
+    // pairs with XmpParser::initialize(); all worker threads are gone by now
     Exiv2::XmpParser::terminate();
 #endif
 }
@@ -110,11 +106,7 @@ int main(int argc, char *argv[]) {
     shrRes = SharedResources::getInstance();
 
 #ifdef USE_EXIV2
-    // Exiv2::XmpParser::initialize() is documented as not thread-safe, but the
-    // toolkit self-initializes lazily on first use otherwise - and metadata
-    // (including XMP) is read from worker threads (thumbnail loader, file info
-    // panel). Do the one-time init here, on the main thread, before any of
-    // those threads can start, so the lazy path is never taken.
+    // XmpParser::initialize() is not thread-safe and otherwise runs lazily on a worker; init on the main thread first
     Exiv2::XmpParser::initialize();
 #endif
 
@@ -169,9 +161,6 @@ int main(int argc, char *argv[]) {
     else if(settings->defaultViewMode() == MODE_FOLDERVIEW)
         core.loadPath(QDir::homePath());
 
-    // No event pumping before the window is shown: this ran before exec(), so
-    // the queue it drained was startup work that exec() processes anyway. The
-    // flicker it claimed to avoid was already in doubt ("or not?").
     core.showGui();
     return a.exec();
 }

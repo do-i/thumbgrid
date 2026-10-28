@@ -167,9 +167,7 @@ void FolderView::onDroppedInByIndex(QStringList paths, QModelIndex index) {
 
 void FolderView::onOptionsPopupButtonToggled(bool mode) {
     if(mode) {
-        // Fixes popup being shown again right after dismissing it
-        // by clicking on this toggle button.
-        // This issue is only present on windows (different Qt::Popup behavior)
+        // on Windows the popup reopened right after dismissing it via this button
         if(popupTimerClutch.elapsed() < 10) {
             ui->optionsPopupButton->setChecked(false);
             return;
@@ -325,9 +323,7 @@ void FolderView::setDirectoryPath(QString path) {
     if(keepExpand)
         ui->dirTreeView->expand(targetIndex);
 
-    // ok, i'm done with this shit. none of the "solutions" work
-    // just do scrollTo after a delay and hope that model is loaded by then
-    // larger than ~150ms becomes too noticeable
+    // no reliable signal for the model being loaded; scroll after a delay (>150 ms is noticeable)
     QTimer::singleShot(150, this, &FolderView::fsTreeScrollToCurrent);
 }
 

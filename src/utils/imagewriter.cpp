@@ -17,9 +17,7 @@
 namespace {
 
 #ifdef USE_EXIV2
-// Qt's encoders write no metadata, so the source file's Exif/Iptc/Xmp is
-// copied onto the encoded bytes. Best-effort: a format exiv2 cannot write
-// (heic, avif, ...) or any other failure keeps the plain pixel data.
+// Qt's encoders write no metadata: copy the source's Exif/Iptc/Xmp, best-effort.
 void attachMetadata(QByteArray &bytes, const ImageWriteJob &job) {
     try {
         auto src = Exiv2::ImageFactory::open(toStdString(job.metadataSource));
@@ -33,9 +31,7 @@ void attachMetadata(QByteArray &bytes, const ImageWriteJob &job) {
                                              static_cast<size_t>(bytes.size()));
         if(!dst.get())
             return;
-        // thumbgrid bakes exif rotation into pixels on load, so the written
-        // pixels are always upright - normalize orientation/dimensions to
-        // avoid viewers rotating an already-upright image.
+        // pixels are already upright (rotation baked on load)
         exif["Exif.Image.Orientation"]     = uint16_t(1);
         exif["Exif.Photo.PixelXDimension"] = uint32_t(job.image.width());
         exif["Exif.Photo.PixelYDimension"] = uint32_t(job.image.height());
@@ -59,11 +55,8 @@ void attachMetadata(QByteArray &bytes, const ImageWriteJob &job) {
 } // namespace
 
 int ImageWriter::qualityFor(const QString &suffix) {
-    // png compression note from libpng
-    // Note that tests have shown that zlib compression levels 3-6 usually perform as well
-    // as level 9 for PNG images, and do considerably fewer caclulations
-    // Qt maps quality q to zlib level (100 - q) * 9 / 91, so 66 is level 3:
-    // on screenshots ~3.5x faster than level 6, for files 2-5% larger.
+    // zlib levels 3-6 compress PNG about as well as 9 for far less work; Qt maps quality 66 to level 3
+    // (~3.5x faster than 6 on screenshots, 2-5% larger)
     if(suffix.compare("png", Qt::CaseInsensitive) == 0)
         return 66;
     if(suffix.compare("jpg", Qt::CaseInsensitive) == 0 || suffix.compare("jpeg", Qt::CaseInsensitive) == 0)

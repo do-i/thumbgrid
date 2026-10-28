@@ -47,10 +47,7 @@ public:
     void resetDefaults(ViewMode context);
     void resetDefaults(const QString& action);
     QString actionForShortcut(ViewMode context, const QString &keys);
-    // Whether a viewer may scroll the picture view's wheel itself (keeping smooth
-    // and trackpad scrolling) rather than leave it to the binding: true while an
-    // unmodified wheel is bound to scrollOrPrevImage/scrollOrNextImage, or the
-    // wheel is unbound.
+    // true while the plain wheel is unbound or bound to scrollOr*, so viewers keep smooth/trackpad scrolling
     bool viewerHandlesWheel(QWheelEvent *event);
     const QString shortcutForAction(ViewMode context, const QString& action);
     // Returns every shortcut bound to action across all contexts (used for key filters).
@@ -68,18 +65,13 @@ public:
     static QList<PresetInfo> availablePresets();
     static QString selectedPreset();
     void applyPreset(const QString &id);
-    // A scroll action (scrollUp ... scrollRightFine) runs its fallback action
-    // when there is nothing to scroll that way: previous/next file for the
-    // arrows and video seek for the fine ones by default, editable per action
-    // in Settings > Shortcuts. Overrides map action -> fallback ("none": none).
+    // scroll actions run a fallback when there is nothing to scroll (prev/next, fine: seek); overrides map action -> fallback or "none"
     static bool hasScrollFallback(const QString &action);
     static QString defaultScrollFallback(const QString &action);
     QString scrollFallback(const QString &action) const;
     const QMap<QString, QString> &scrollFallbackOverrides() const;
     void setScrollFallbackOverrides(const QMap<QString, QString> &overrides);
-    // In a video there is nothing to scroll, and the scroll actions and the
-    // wheel's scrollOrPrevImage/scrollOrNextImage run their video fallback
-    // instead (seek by default; up/down: nothing), editable the same way.
+    // in a video scroll actions and scrollOr* run their video fallback (seek by default)
     static bool hasVideoScrollFallback(const QString &action);
     static QString defaultVideoScrollFallback(const QString &action);
     QString videoScrollFallback(const QString &action) const;

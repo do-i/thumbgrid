@@ -13,8 +13,6 @@ ContextMenu::ContextMenu(QWidget *parent) :
     setAttribute(Qt::WA_NoMousePropagation, true);
     this->hide();
 
-    // -------------------------------------------------------------------------
-    // setup actions
     // top zoom buttons
     ui->zoomIn->setAction("zoomIn");
     ui->zoomIn->setIconPath(":/res/icons/common/buttons/contextmenu/zoom-in18.png");
@@ -104,9 +102,7 @@ ContextMenu::ContextMenu(QWidget *parent) :
     ui->imageInfo->setText(tr("File info"));
     ui->imageInfo->setIconPath(":/res/icons/common/overlay/info16.png");
 
-    // Strip metadata deliberately lives in the File info window instead: it is
-    // destructive and irreversible, and it belongs next to the EXIF rows it
-    // deletes rather than one slip away from "File info" in a menu.
+    // strip metadata lives in the File info window, away from accidental menu clicks
     ui->findDuplicates->setAction("findDuplicates");
     ui->findDuplicates->setText(tr("Find duplicates..."));
     ui->findDuplicates->setIconPath(":/res/icons/common/menuitem/folderview16.png");

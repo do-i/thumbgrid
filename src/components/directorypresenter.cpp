@@ -101,9 +101,7 @@ void DirectoryPresenter::setModel(const std::shared_ptr<DirectoryModel>& newMode
 }
 
 void DirectoryPresenter::reloadModel() {
-    // The directory changed (or was refreshed): drop thumbnail jobs queued for the
-    // previous contents so they don't linger. Done here, once per load, rather than
-    // on every visible-thumbnail request (which would cancel jobs mid-flight).
+    // drop thumbnail jobs for the previous contents once per load, not per request
     thumbnailer.clearTasks();
     populateView();
 }
@@ -419,9 +417,7 @@ void DirectoryPresenter::onItemActivated(int absoluteIndex) {
         QString parentPath = parentDirPath();
         if(parentPath.isEmpty() || parentPath == model->directoryPath())
             return;
-        // Route through the dedicated "go up" path so the directory we are
-        // leaving gets selected/focused in the parent view, same as the
-        // keyboard/up-button navigation.
+        // the "go up" path selects the folder we came from
         emit parentDirActivated();
         return;
     }

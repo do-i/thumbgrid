@@ -13,11 +13,7 @@ ActionManager *actionManager = nullptr;
 
 namespace {
 
-// Resolve the selected preset to a file path (XDG config dirs, then
-// PRESETS_PATH, else the embedded qrc copy), falling back to qimgv (always
-// embedded) if the selected
-// preset resolves nowhere — e.g. a config naming a preset not compiled into this
-// build. The active mapping in shortcuts.json is never touched by this.
+// selected preset's file (XDG, PRESETS_PATH, qrc), else the always-embedded qimgv
 QString resolveSelectedPresetPath() {
     QString path = ShortcutPresetStore::resolvePath(settings->selectedPreset());
     if(path.isEmpty())
@@ -25,9 +21,7 @@ QString resolveSelectedPresetPath() {
     return path;
 }
 
-// Replace the platform-neutral $Ctrl/$Alt/$Shift tokens in a stored key
-// sequence with the actual platform modifier names (Ctrl/Alt/Shift, or the
-// Command/Option/Shift symbols on macOS).
+// $Ctrl/$Alt/$Shift -> platform modifier names (symbols on macOS)
 QString expandModifierTokens(QString keys) {
     keys.replace(QStringLiteral("$Ctrl"),  InputMap::keyNameCtrl());
     keys.replace(QStringLiteral("$Shift"), InputMap::keyNameShift());
@@ -45,10 +39,7 @@ const QMap<QString, QString> &scrollFallbackDefaults() {
     return defaults;
 }
 
-// in a video, where there is never anything to scroll, the scroll actions and
-// the wheel's scrollOrPrevImage/scrollOrNextImage run these instead: the arrows
-// and the wheel seek (wheel up: forward, as in mpv and a slider), the fine
-// arrows seek as they always did
+// in a video nothing scrolls: arrows and wheel seek instead (wheel up = forward, like mpv)
 const QMap<QString, QString> &videoScrollFallbackDefaults() {
     static const QMap<QString, QString> defaults{
         {"scrollUp", ""}, {"scrollDown", ""},
@@ -82,8 +73,7 @@ QStringList shortcutKeysFromJson(const QJsonValue &value) {
     return keys;
 }
 
-// Read either the new { action: [keySequence...] } default object or the
-// previous { keySequence: action } object, expanding modifier tokens as it goes.
+// accepts { action: [keys] } and the older { key: action } form
 void insertShortcutObject(const QJsonObject &obj, ActionManager::ContextMap &out) {
     for(auto it = obj.constBegin(); it != obj.constEnd(); ++it) {
         if(it.value().isString()) {
@@ -127,10 +117,7 @@ ActionManager *ActionManager::getInstance() {
 }
 //------------------------------------------------------------------------------
 void ActionManager::initDefaults() {
-    // Defaults are loaded from the selected preset (XDG config dirs,
-    // PRESETS_PATH or embedded qrc, resolved by ShortcutPresetStore). Shared
-    // bindings live in
-    // MODE_GLOBAL; document/grid entries are only context-specific differences.
+    // defaults come from the selected preset; global holds shared bindings, document/grid only differences
     const QString path = resolveSelectedPresetPath();
     QFile file(path);
     if(!file.open(QIODevice::ReadOnly)) {
@@ -153,8 +140,7 @@ void ActionManager::initDefaults() {
     insertShortcutObject(root.value("document").toObject(), document);
     insertShortcutObject(root.value("grid").toObject(), grid);
     insertShortcutObject(root.value("copyMove").toObject(), copyMove);
-    // Per-OS overrides: pick the current-OS block (windows/macos/linux), falling
-    // back to "default". (Legacy preset files used "apple"; treat it as macos.)
+    // per-OS block, else "default" ("apple" is legacy macos)
     const QJsonObject platform = root.value("platform").toObject();
     const QString osToken = ShortcutPresetStore::currentOsToken();
     QJsonObject platformSpecific = platform.value(osToken).toObject();
@@ -169,21 +155,15 @@ void ActionManager::initDefaults() {
     loaded.insert(MODE_DOCUMENT, document);
     loaded.insert(MODE_FOLDERVIEW, grid);
     loaded.insert(MODE_COPYMOVE, copyMove);
-    // Presets spell a binding out in every context it applies to (leftie, for one,
-    // repeats folderView/nextDirectory/prevDirectory/toggleImageInfo verbatim under
-    // both document and grid). shortcuts.json does not store that shape: reading it
-    // back hoists any document+grid duplicate into global. Run the defaults through
-    // the same pass so both sides speak one canonical form - otherwise every restart
-    // sees shortcuts != defaults, the preset combo falls back to "Custom", and the
-    // settings table lists those actions as unbound in the contexts the preset named.
+    // canonicalize like shortcuts.json (document+grid duplicates hoisted to global),
+    // or every restart sees shortcuts != defaults and shows "Custom"
     Settings::collapseShortcutContexts(loaded);
     actionManager->defaults = loaded;
 }
 
 //------------------------------------------------------------------------------
 void ActionManager::initShortcuts() {
-    // First run: no shortcuts.json yet. Materialize it from the selected preset
-    // (default qimgv) and record the preset pointer + clean modified flag.
+    // first run: materialize shortcuts.json from the selected preset
     const bool firstRun = !settings->shortcutsJsonExists();
     actionManager->readShortcuts();
     bool empty = true;
@@ -256,18 +236,12 @@ const ActionManager::ShortcutMap &ActionManager::allDefaultShortcuts() {
 //------------------------------------------------------------------------------
 void ActionManager::removeAllShortcuts() {
     shortcuts.clear();
-    // Re-seed all context keys (empty maps), not just the ones a caller happens to
-    // repopulate. A preset with an empty document/grid section (e.g. leftie.json,
-    // which only defines "global") would otherwise leave those keys missing from
-    // `shortcuts` while `defaults` always carries all three from initDefaults(),
-    // making shortcuts != defaults spuriously true and pinning the preset combo on
-    // "Custom" right after a clean preset switch + Apply/OK.
+    // seed every context, or an empty preset section makes shortcuts != defaults
     for(ViewMode ctx : shortcutContexts())
         shortcuts.insert(ctx, ContextMap());
     rebuildShortcutLookup();
 }
 //------------------------------------------------------------------------------
-// Removes all shortcuts for the specified action.
 void ActionManager::removeAllShortcuts(const QString& actionName) {
     if(validateAction(actionName) == ActionType::ACTION_INVALID)
         return;
@@ -337,9 +311,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             ctx.value() = swapped;
         }
     }
-    // drop the old MiddleButton=exit default: a single stray middle-click quit
-    // the whole app with no confirmation. Only strip it if still bound to exit,
-    // so anyone who deliberately rebound MiddleButton keeps their choice.
+    // drop the old MiddleButton=exit default (only if still bound to exit)
     if(lastVer < QVersionNumber(2026,7,3)) {
         for(ViewMode ctx : shortcutContexts()) {
             if(shortcuts[ctx].value("MiddleButton") == "exit") {
@@ -348,19 +320,9 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             }
         }
     }
-    // Backfill File info from the active preset. The generic pass below cannot do
-    // this: it only seeds actions *newer* than lastVer, and toggleImageInfo is
-    // ancient. Take the key from `defaults` rather than naming one here — the
-    // right key is preset-specific (qimgv/xnviewmp use I; leftie needs Alt+I
-    // because I is its zoomIn). Skips any context where the user already bound
-    // the action, or where the preset's key is spoken for, so customised setups
-    // and presets that deliberately omit File info are left alone.
+    // backfill File info with the preset's key (preset-specific); skip if bound or the key is taken
     if(lastVer < QVersionNumber(2026,7,25)) {
-        // Bail out on any existing binding, in any context, rather than per
-        // context: `defaults` is canonicalized, so a preset that names the action
-        // in both document and grid carries it in global instead. Seeding global
-        // reaches every context, which would hand a second key to a context the
-        // user had already bound (their choice, silently doubled).
+        // any existing binding counts: defaults are canonicalized, so seeding global could double a key
         bool alreadyBound = false;
         for(ViewMode ctx : shortcutContexts())
             alreadyBound = alreadyBound || !shortcuts[ctx].key("toggleImageInfo").isEmpty();
@@ -374,12 +336,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound" << key << "=toggleImageInfo in" << contextToString(ctx);
         }
     }
-    // Resize gained a grid flow (resized copies of the selection), and presets now
-    // bind it there with the same key as the picture view. Existing mappings only
-    // had it in document, and the generic pass below cannot add it: resize is an
-    // old action. Mirror the user's own document key rather than the preset's, so
-    // a rebound resize stays one key in both places. Skipped when the grid already
-    // reaches resize (grid or global) or the key means something else there.
+    // resize gained a grid flow: mirror the user's document key there unless it is taken
     if(lastVer < QVersionNumber(2026,10,1)) {
         const QString key = shortcuts[MODE_DOCUMENT].key("resize");
         const bool gridHasResize = !shortcuts[MODE_FOLDERVIEW].key("resize").isEmpty() ||
@@ -387,20 +344,12 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
         if(!key.isEmpty() && !gridHasResize &&
            !shortcuts[MODE_FOLDERVIEW].contains(key) && !shortcuts[MODE_GLOBAL].contains(key)) {
             shortcuts[MODE_FOLDERVIEW].insert(key, "resize");
-            // document+grid now share the binding; store it the way defaults
-            // do (hoisted to global) so an untouched preset still compares equal
+            // store hoisted to global like defaults, so an untouched preset compares equal
             Settings::collapseShortcutContexts(shortcuts);
             qCDebug(logSettings) << "[actionManager]: bound" << key << "=resize in grid";
         }
     }
-    // Arrows became scroll/pan actions (Ctrl+arrow: fine steps), replacing the
-    // old prev/next, zoom and video-seek defaults on those keys; the scroll
-    // actions fall back to prev/next and seeking when there is nothing to scroll.
-    // The wheel likewise became scrollOrPrevImage/scrollOrNextImage: the text
-    // view scrolled it in code, ahead of any binding, and prev/next stays their
-    // fallback. Follow the active preset: move a key over only when the preset
-    // now binds it to a scroll action and the user still has it unbound or on
-    // the old default.
+    // arrows became scroll actions and the wheel scrollOr*: follow the preset where the user kept the old default
     if(lastVer < QVersionNumber(2026,10,3)) {
         const QMap<QString, QString> oldDefaults{
             {"Left", "prevImage"}, {"Right", "nextImage"},
@@ -424,10 +373,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
                 qCDebug(logSettings) << "[actionManager]: bound" << i.key() << "=" << i.value() << "in document";
             }
         }
-        // The grid used to handle Enter, Backspace, Ctrl+A and "/" in code, ahead
-        // of any binding; they are now the actions below. Hand the preset's key to
-        // the action unless the user bound that key in the grid to something else
-        // (Enter's old documentView default never ran there, so it is replaced).
+        // grid Enter/Backspace/Ctrl+A/"/" are now actions; give them the preset's key unless rebound
         const QStringList gridActions{"openSelected", "goUp", "selectAll", "startSearch"};
         ContextMap &grid = shortcuts[MODE_FOLDERVIEW];
         QMapIterator<QString, QString> g(defaults[MODE_FOLDERVIEW]);
@@ -442,10 +388,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
                 qCDebug(logSettings) << "[actionManager]: bound" << g.key() << "=" << g.value() << "in grid";
             }
         }
-        // Space paused a shown video in code, ahead of any binding; it now runs its
-        // binding (qimgv's toggleFitMode and the others' pauseVideo both pause a
-        // video). Hand the preset's Space to a config that leaves Space unbound, or
-        // that still has gwenview/irfanview/xnviewmp's old Space = nextImage.
+        // Space now runs its binding: hand the preset's Space to configs that left it unbound or nextImage
         const bool oldNextImageDefault =
             QStringList{"gwenview", "irfanview", "xnviewmp"}.contains(settings->selectedPreset()) &&
             shortcuts[MODE_DOCUMENT].value("Space") == "nextImage";
@@ -461,14 +404,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound Space =" << action << "in" << contextToString(ctx);
             break;
         }
-        // Mouse gestures handled in code, ahead of any binding, are now bindings:
-        // right button held + wheel zooms the picture (RMB+WheelUp/Down),
-        // Ctrl+wheel resizes the grid's thumbnails, a click in a clickable edge
-        // changes file (LMB_LeftEdge/RightEdge), the picture's left/right drags
-        // pan/zoom (LMB_Drag/RMB_Drag), and a grid tile opens on double-click
-        // (LMB_TileDoubleClick) and drags the selection out (the grid's
-        // LMB_Drag). Bind the preset's action to each unless the user already
-        // bound that name there.
+        // mouse gestures that were hard-coded are now bindings: bind the preset's action unless the user bound the gesture
         const auto bindPresetKey = [this](ViewMode view, const QString &key) {
             if(shortcuts[MODE_GLOBAL].contains(key) || shortcuts[view].contains(key))
                 return;
@@ -491,9 +427,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
         bindPresetKey(MODE_DOCUMENT, "RMB_Drag");
         bindPresetKey(MODE_DOCUMENT, "LMB_LeftEdge");
         bindPresetKey(MODE_DOCUMENT, "LMB_RightEdge");
-        // The grid moved its selection with these keys in code, ahead of any
-        // binding; they are now the selection actions. A grid binding on one of
-        // them never ran, so replacing it keeps the grid behaving as before.
+        // grid selection keys are now actions; a grid binding on them never ran
         const QMap<QString, QString> gridMoves{
             {"Left", "selectPrevious"}, {"Right", "selectNext"}, {"Up", "selectAbove"},
             {"Down", "selectBelow"}, {"PgUp", "selectPageUp"}, {"PgDown", "selectPageDown"},
@@ -503,10 +437,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             qCDebug(logSettings) << "[actionManager]: bound" << move.key() << "=" << move.value() << "in grid";
         }
     }
-    // qimgv and leftie no longer toggle full screen on a double-click: a quick
-    // double-click on the picture or a video kept flipping the window. Drop it
-    // from a config still on that default; a preset that keeps it (gwenview)
-    // keeps it, and any other action bound to the double-click is left alone.
+    // qimgv/leftie dropped double-click full screen; remove it from configs still on that default
     if(lastVer < QVersionNumber(2026,10,4)) {
         for(ViewMode ctx : shortcutContexts()) {
             if(shortcuts[ctx].value("LMB_DoubleClick") == "toggleFullscreen" &&
@@ -538,17 +469,11 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
 //------------------------------------------------------------------------------
 void ActionManager::saveShortcuts() {
     settings->saveShortcuts(actionManager->shortcuts);
-    // Self-correcting dirty flag: modified iff the active mapping differs from the
-    // selected preset (defaults holds the loaded selected preset). Reverting to
-    // the preset scheme clears it; there is no sticky one-way bit.
+    // modified iff the mapping differs from the selected preset
     settings->setShortcutsModified(actionManager->shortcuts != actionManager->defaults);
 }
 
-// Overwrite the active mapping with a preset and persist. Destructive — the UI
-// gates this behind a confirm dialog. Also clears per-action _disabled/_primary
-// metadata: those are customizations layered on top of a mapping, same as the
-// bindings themselves, so a preset switch resets them too (otherwise a
-// previously-disabled action would silently stay disabled under the new preset).
+// Destructive (UI confirms). Also resets per-action disabled/primary metadata.
 void ActionManager::applyPreset(const QString &id) {
     settings->setSelectedPreset(id);
     initDefaults();                                   // reload defaults from `id`
@@ -559,10 +484,7 @@ void ActionManager::applyPreset(const QString &id) {
     actionManager->setScrollFallbackOverrides(QMap<QString, QString>());
     actionManager->setVideoScrollFallbackOverrides(QMap<QString, QString>());
     actionManager->saveShortcuts();
-    // Selecting a preset is never "modified", by definition — force it rather than
-    // leaning on saveShortcuts()'s derived shortcuts==defaults comparison, which is
-    // one JSON-roundtrip-quirk away from staying true and pinning the combo on
-    // "Custom" right after a clean preset switch.
+    // a preset selection is never modified; don't rely on the JSON round-trip comparison
     settings->setShortcutsModified(false);
 }
 
@@ -720,8 +642,7 @@ QString ActionManager::resolvedFallback(const QString &fallback) {
     return fallback;
 }
 
-// keeps the overrides of actions that have a fallback, set to "none" or to a
-// valid non-scroll action other than the default
+// keeps overrides of actions with a fallback: "none" or a valid non-scroll, non-default action
 QMap<QString, QString> ActionManager::validFallbackOverrides(const QMap<QString, QString> &overrides,
                                                              const QMap<QString, QString> &defaults) {
     QMap<QString, QString> valid;
@@ -748,8 +669,7 @@ void ActionManager::readShortcuts() {
     scrollFallbacks = validFallbackOverrides(fallbacks, scrollFallbackDefaults());
     settings->readShortcutVideoFallbacks(fallbacks);
     videoScrollFallbacks = validFallbackOverrides(fallbacks, videoScrollFallbackDefaults());
-    // a shortcuts.json from before a context existed has no section for it;
-    // seed it so an empty context still compares equal to the defaults
+    // seed contexts missing from an older shortcuts.json
     for(ViewMode ctx : shortcutContexts())
         shortcuts[ctx];
     QMap<ViewMode, QStringList> disabled;
@@ -768,9 +688,7 @@ void ActionManager::readShortcuts() {
 }
 //------------------------------------------------------------------------------
 bool ActionManager::processEvent(QInputEvent *event) {
-    // A wheel turned with the right button held is a gesture of its own; the
-    // release that ends it is not a right click (which opens the context menu),
-    // even when the gesture's binding has switched the view under the cursor.
+    // releasing the right button after RMB+wheel is not a right click
     if(auto wheel = dynamic_cast<QWheelEvent *>(event)) {
         if(wheel->buttons() & Qt::RightButton)
             actionManager->rightButtonWheel = true;

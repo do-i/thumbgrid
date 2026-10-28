@@ -8,12 +8,8 @@
 #include <QDebug>
 #include <cstdint>
 
-// The seek bar. It can also show a clip: two handles, a pentagon each - a
-// square with a triangle on its inner side, so the start handle points right
-// and the end handle left - with the bar outside the clip dimmed. The handles
-// can be dragged; they stop short of each other.
-// A dragged handle stands in for the playhead: the video shows its frame, so
-// the knob isn't drawn beside it.
+// Seek bar that can show a clip: two pentagon handles pointing inward, outside dimmed.
+// Handles stop short of each other; a dragged handle stands in for the playhead.
 class VideoSlider : public QSlider {
     Q_OBJECT
 public:

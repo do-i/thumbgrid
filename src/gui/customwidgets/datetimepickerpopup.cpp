@@ -69,12 +69,7 @@ DateTimePickerPopup::DateTimePickerPopup(QWidget *parent)
     setDateTime(QDateTime::currentDateTime());
 }
 
-// QCalendarWidget paints its day grid through an internal item view, and its
-// weekday/weekend header formats are QTextCharFormats - neither follows the
-// app's stylesheet, so the active color scheme is pushed in as a palette (the
-// same approach textviewer.cpp takes for QPlainTextEdit) with the header
-// formats set explicitly on top. Without this the calendar renders in the
-// native light palette inside a dark themed popup.
+// the calendar's day view and header formats ignore the stylesheet: push the scheme in as a palette
 void DateTimePickerPopup::applyThemeColors() {
     const ColorScheme &colors = settings->colorScheme();
 
@@ -91,9 +86,7 @@ void DateTimePickerPopup::applyThemeColors() {
     setPalette(pal);
     setAutoFillBackground(true);
 
-    // The weekday header row is drawn from a char format, not from the view's
-    // palette or the stylesheet - left alone it keeps a light native band across
-    // the top of an otherwise dark calendar.
+    // the weekday header uses a char format; set it or it stays a light native band
     QTextCharFormat headerFormat;
     headerFormat.setForeground(colors.text_lc);
     headerFormat.setBackground(colors.widget);

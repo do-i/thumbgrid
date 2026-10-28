@@ -40,9 +40,7 @@ private:
     int cachedIconSize = -1;
     QString cachedIconColor;
 
-    // In-memory LRU cache on top of the disk cache: repeated navigation must
-    // not re-read every visible thumbnail from disk. Entries are validated
-    // against the source mtime, so an entry never outlives a file change.
+    // LRU on top of the disk cache, validated against the source mtime
     struct MemCacheEntry {
         std::shared_ptr<Thumbnail> thumbnail;
         QDateTime lastModified;
@@ -53,9 +51,7 @@ private:
     std::shared_ptr<Thumbnail> memCacheLookup(const QString &key, const QString &path);
     void memCacheInsert(const QString &key, const std::shared_ptr<Thumbnail>& thumbnail, const QString &path);
     void applyMemCacheLimit();
-    // File-type icons bake theme colors into their pixmap but (unlike image
-    // thumbnails) are keyed only by path/size, so a theme change must drop them
-    // from the mem cache or the stale-colored icon keeps being served.
+    // file-type icons bake theme colors but are keyed by path/size: drop them on theme change
     void onSettingsChanged();
     QString mThumbColorSignature;
 

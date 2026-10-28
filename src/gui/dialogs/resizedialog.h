@@ -25,14 +25,9 @@ public:
     explicit ResizeDialog(QSize initialSize, QWidget *parent = nullptr);
     ~ResizeDialog() override;
     QSize newSize();
-    // The choice as a per-image rule: percentage stays a percentage, a W x H
-    // with aspect kept becomes "fit within" so other aspect ratios are not
-    // stretched when the same spec is applied to several images.
+    // W x H with aspect kept becomes "fit within" so other aspect ratios aren't stretched
     ResizeSpec spec() const;
-    // Switches to the grid flow, which writes new files instead of editing the
-    // open image: adds Long edge and Shrink only, and with more than one image
-    // turns W x H into a "fit within" box (an exact size would stretch images
-    // of other shapes). specSelected then fires on OK instead of sizeSelected.
+    // Grid flow (writes new files): adds Long edge and Shrink only; specSelected fires instead of sizeSelected.
     void setCopyMode(int imageCount);
 
 public slots:

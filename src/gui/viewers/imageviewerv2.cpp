@@ -105,8 +105,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
 ImageViewerV2::~ImageViewerV2() {
 }
 
-// devicePixelRatioF() does not provide correct value on wayland until the first paint event occurs
-// catch change event & do the needful
+// on wayland devicePixelRatioF() is wrong until the first paint; catch the change
 bool ImageViewerV2::eventFilter(QObject *o, QEvent *ev) {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
     if(ev->type() == QEvent::DevicePixelRatioChange) {
@@ -158,8 +157,7 @@ void ImageViewerV2::readSettings() {
     // set bg color
     onFullscreenModeChanged(mIsFullscreen);
     scene->update();
-    // Before updateMinScale(), which caches fitWindowScale/fitWindowStretchScale
-    // through the flag - see showImage().
+    // before updateMinScale(), which caches the fit scales from the flag
     explicitFit = false; // re-applying the configured default is not an explicit fit
     updateMinScale();
     setScalingFilter(settings->scalingFilter());
@@ -262,10 +260,7 @@ bool ImageViewerV2::showAnimationFrame(int frame) {
         return false;
     if(movie->currentFrameNumber() == frame)
         return true;
-    // at the first glance this may seem retarded
-    // because it is
-    // unfortunately i dont see a *better* way to do seeking with QMovie
-    // QMovie::CacheAll is buggy and memory inefficient
+    // QMovie has no better way to seek; CacheAll is buggy and memory hungry
     if(frame < movie->currentFrameNumber())
         movie->jumpToFrame(0);
     while(frame != movie->currentFrameNumber()) {
@@ -355,8 +350,7 @@ void ImageViewerV2::reset() {
     stopAnimation();
     movie = nullptr;
     centerOn(10000,10000);
-    // when this view is not in focus this it won't update the background
-    // so we force it here
+    // out of focus the view won't repaint its background by itself
     viewport()->update();
 }
 
@@ -364,11 +358,8 @@ void ImageViewerV2::closeImage() {
     reset();
 }
 
-// centerOnPixmap(), held back one event-loop turn on the very first call.
-// There's either a qt bug or we are misusing something: the first
-// scrollbar->setValue() lands on the wrong value unless it comes from the
-// eventloop. fitWindow() has always carried this workaround; it is shared here
-// so every centering path gets it exactly once.
+// First call is deferred one event-loop turn: the first scrollbar->setValue() lands wrong
+// unless it comes from the event loop.
 void ImageViewerV2::centerOnPixmapDeferred() {
     if(scrollBarWorkaround) {
         scrollBarWorkaround = false;
@@ -394,9 +385,7 @@ bool ImageViewerV2::isDisplaying() const {
     return (pixmap != nullptr);
 }
 
-// Pans by one step (or a fine step, unanimated) along an axis the image overflows.
-// snapToEdges() holds the view at the image edge, so panning stops there.
-// shift by 2px in case of img edge misalignment, same as wheelScroll()
+// pan one (fine: unanimated) step along an overflowing axis; snapToEdges() stops it at the edge
 bool ImageViewerV2::keyPan(int dx, int dy, bool fine) {
     if(!pixmap)
         return false;
@@ -486,8 +475,7 @@ void ImageViewerV2::requestScaling() {
         return;
     if(scaleTimer->isActive())
         scaleTimer->stop();
-    // request "real" scaling when graphicsscene scaling is insufficient
-    // (it uses a single pass bilinear which is sharp but produces artifacts on low zoom levels)
+    // scene scaling is single-pass bilinear, which artifacts at low zoom; request real scaling
     if(currentScale() < FAST_SCALE_THRESHOLD)
         emit scalingRequested(scaledSizeR() * dpr, mScalingFilter);
 }
@@ -519,18 +507,8 @@ bool ImageViewerV2::hasAnimation() const {
     return (movie != nullptr);
 }
 
-//  Right button zooming / dragging logic
-//  mouseMoveStartPos: stores the previous mouseMoveEvent() position,
-//                     used to calculate delta.
-//  mousePressPos: used to filter out accidental zoom events
-//  mouseInteraction: tracks which action we are performing since the last mousePressEvent()
-//
-// A drag runs the drag action bound to it - LMB_Drag, RMB_Drag,
-// MiddleButton_Drag, with modifiers in front (a modified drag with no binding of
-// its own uses the plain one): dragPan (left by default) pans the picture, or
-// drags the file out when it fits the window; dragZoom (right by default) zooms
-// around the press point; dragFileOut drags the file out. An unbound drag does
-// nothing, and its release is an ordinary click.
+// Press/move/release run the drag action bound to the drag (LMB_Drag, RMB_Drag, ...);
+// mousePressPos filters accidental zooms.
 void ImageViewerV2::mousePressEvent(QMouseEvent *event) {
     if(!pixmap) {
         QWidget::mousePressEvent(event);
@@ -576,8 +554,7 @@ void ImageViewerV2::mouseMoveEvent(QMouseEvent *event) {
             if(abs(mousePressPos.y() - event->pos().y()) > zoomThreshold / dpr) {
                 mouseInteraction = MouseInteractionState::MOUSE_ZOOM;
                 setCursor(Qt::SizeVerCursor);
-                // avoid visible lags by forcing fast scale for large viewport sizes
-                // this value possibly needs tweaking
+                // force fast scaling for large viewports to avoid lag
                 if(viewport()->width() * viewport()->height() > LARGE_VIEWPORT_SIZE)
                     forceFastScale = true;
             }
@@ -614,17 +591,14 @@ void ImageViewerV2::mouseReleaseEvent(QMouseEvent *event) {
     mouseInteraction = MouseInteractionState::MOUSE_NONE;
 }
 
-// warning for future me:
-// for some reason in qgraphicsview wheelEvent is followed by moveEvent (wtf?)
+// in QGraphicsView a wheelEvent is followed by a moveEvent
 void ImageViewerV2::wheelEvent(QWheelEvent *event) {
     if(PlatformDesktop::shouldIgnoreWheelEvent(event)) {
         event->accept();
         return;
     }
 
-    // RMB+WheelUp/RMB+WheelDown run their binding (zoom at the cursor by
-    // default); either way the right button's release then doesn't open the
-    // context menu
+    // RMB+wheel runs its binding; the right button's release then skips the context menu
     if(event->buttons() & Qt::RightButton) {
         event->accept();
         mouseInteraction = MOUSE_WHEEL_ZOOM;
@@ -696,8 +670,7 @@ void ImageViewerV2::trackpadScroll(QWheelEvent *event) {
     stopPosAnimation();
     QPoint pixelDelta = event->pixelDelta();
     QPoint angleDelta = event->angleDelta();
-    // one of these (pixel/angleDelta) may be multiplied by some scale value
-    // we'll use whichever is larger
+    // either delta may be scaled; use the larger
     int dx = abs(angleDelta.x()) > abs(pixelDelta.x()) ? angleDelta.x() : pixelDelta.x();
     int dy = abs(angleDelta.y()) > abs(pixelDelta.y()) ? angleDelta.y() : pixelDelta.y();
     hs->setValue(hs->value() - dx * TRACKPAD_SCROLL_MULTIPLIER);
@@ -706,9 +679,7 @@ void ImageViewerV2::trackpadScroll(QWheelEvent *event) {
     snapToEdges();
 }
 
-// Mouse-wheel scroll by interval. Once the image is taller than the view the
-// event is always consumed, so scrolling stops at the edge instead of jumping
-// to another file; it passes through only when there is nothing to scroll.
+// consumed once the image overflows, so scrolling stops at the edge instead of changing file
 void ImageViewerV2::wheelScroll(QWheelEvent *event) {
     QPoint angleDelta = event->angleDelta();
     // shift by 2px in case of img edge misalignment
@@ -722,9 +693,7 @@ void ImageViewerV2::wheelScroll(QWheelEvent *event) {
 
 void ImageViewerV2::showEvent(QShowEvent *event) {
     QGraphicsView::showEvent(event);
-    // Our final size only lands with the queued resize that follows the show,
-    // so reapply the fit mode after it rather than pumping the event loop
-    // here - the same deferral this class already uses for centerOnPixmap().
+    // the final size arrives with the queued resize after show; reapply the fit then
     if(imageFitMode == FIT_ORIGINAL)
         QTimer::singleShot(0, this, &ImageViewerV2::applyFitMode);
 }
@@ -747,10 +716,7 @@ void ImageViewerV2::mousePan(QMouseEvent *event) {
     saveViewportPos();
 }
 
-//  zooming while the right button is pressed
-//  note: on reaching min zoom level the fitMode is set to FIT_WINDOW;
-//        mid-zoom it is set to FIT_FREE.
-//        FIT_FREE mode does not persist when changing images.
+// right-button zoom: min zoom sets FIT_WINDOW, mid-zoom FIT_FREE (not kept across images)
 inline
 void ImageViewerV2::mouseMoveZoom(QMouseEvent *event) {
     float stepMultiplier = 0.003f; // this one feels ok
@@ -769,11 +735,7 @@ void ImageViewerV2::mouseMoveZoom(QMouseEvent *event) {
         imageFitMode = FIT_WINDOW_STRETCH;
 }
 
-// "Expand images, up to: Nx" governs the *automatic* fit - the one applied when
-// an image opens or the window is resized. An explicit fit action is a direct
-// instruction from the user, so it scales to the window whatever the setting
-// says: otherwise the fit buttons silently do nothing for any image already
-// smaller than the view, which is indistinguishable from them being broken.
+// "Expand images up to Nx" limits only the automatic fit; explicit fit actions always fit
 float ImageViewerV2::applyExpandPolicy(float scale) const {
     if(explicitFit)
         return scale;
@@ -804,11 +766,7 @@ void ImageViewerV2::updateFitWindowStretchScale() {
     float scaleFitX = (float) viewport()->width()  * dpr / pixmap->width();
     float scaleFitY = (float) viewport()->height() * dpr / pixmap->height();
 
-    // "Fit in window (stretch)" fills the window: take the *larger* of the two
-    // ratios so neither axis is left letterboxed, and let the other axis overflow
-    // (it stays scrollable). Height-only scaling used to be equal to
-    // fitWindowScale - which is min(x, y) - for every image narrower than the
-    // window, so the mode visibly did nothing in the common landscape-window case.
+    // stretch fills the window: larger ratio, the other axis overflows and scrolls
     fitWindowStretchScale = applyExpandPolicy(qMax(scaleFitX, scaleFitY));
 }
 
@@ -900,12 +858,7 @@ void ImageViewerV2::fitFree(float scale) {
             setZoomAnchor(viewport()->rect().center());
         else
             setZoomAnchor(mapFromGlobal(cursor().pos()));
-        // zoomAnchored() is a no-op when the scale already matches - which is
-        // exactly the case for a freshly loaded image at 1:1, since reset()
-        // leaves the scale at 1.0 parked on the pixmap's top-left corner. With
-        // nothing to anchor, centerIfNecessary() only handles axes the image
-        // fits inside and snapToEdges() leaves a full-bleed image alone, so an
-        // image larger than the viewport on both axes stayed in its corner.
+        // zoomAnchored() is a no-op at an unchanged scale, so center a fresh 1:1 image here
         const bool rescaled = currentScale() != scale;
         zoomAnchored(scale);
         if(!rescaled && focusIn1to1 == FOCUS_CENTER)
@@ -944,13 +897,7 @@ void ImageViewerV2::setFitMode(ImageFitMode newMode) {
     requestScaling();
 }
 
-// The four slots below are what a fit button / shortcut reaches. They are a
-// direct instruction, so they opt out of the "Expand images" policy - see
-// applyExpandPolicy(). The flag is sticky within one image, so a later resize
-// does not undo the choice, but it is scoped to that image: every load
-// (showImage()/showAnimation()) clears it, as does re-reading settings. It is
-// cleared on load even with "keep fit mode" on - that setting carries the fit
-// *mode* to the next image, not this exemption.
+// Explicit fit slots opt out of the expand policy until the next load or settings re-read.
 
 // public, sends scale request
 void ImageViewerV2::setFitOriginal() {
@@ -983,8 +930,7 @@ void ImageViewerV2::resizeEvent(QResizeEvent *event) {
     QGraphicsView::resizeEvent(event);
     // reset this so we won't generate unnecessary drag'n'drop event
     mousePressPos = mapFromGlobal(cursor().pos());
-    // Qt emits some unnecessary resizeEvents on startup
-    // so we try to ignore them
+    // ignore Qt's spurious startup resizeEvents
     if(parentWidget()->isVisible()) {
         stopPosAnimation();
         updateMinScale();
@@ -1040,8 +986,7 @@ void ImageViewerV2::scrollSmooth(int dx, int dy) {
             if(!redirect)
                 newEndFrame = oldEndFrame + static_cast<int>(dx);
         }
-        // don't animate past the image edge (snapToEdges() would hold the view
-        // there anyway, and held keys would pile up an invisible overshoot)
+        // don't animate past the edge; held keys would pile up invisible overshoot
         QRect imgRect = scaledRectR();
         if(imgRect.width() > width())
             newEndFrame = qBound(currentXPos + imgRect.left(), newEndFrame,
@@ -1064,8 +1009,7 @@ void ImageViewerV2::scrollSmooth(int dx, int dy) {
             if(!redirect)
                 newEndFrame = oldEndFrame + static_cast<int>(dy);
         }
-        // don't animate past the image edge (snapToEdges() would hold the view
-        // there anyway, and held keys would pile up an invisible overshoot)
+        // don't animate past the edge; held keys would pile up invisible overshoot
         QRect imgRect = scaledRectR();
         if(imgRect.height() > height())
             newEndFrame = qBound(currentYPos + imgRect.top(), newEndFrame,
@@ -1124,8 +1068,7 @@ void ImageViewerV2::zoomAnchored(float newScale) {
     if(currentScale() != newScale) {
         QPointF vportCenter = mapToScene(viewport()->geometry()).boundingRect().center();
         doZoom(newScale);
-        // calculate shift to adjust viewport center
-        // we do this in viewport coordinates to avoid any rounding errors
+        // shift in viewport coordinates to avoid rounding errors
         QPointF diff = zoomAnchor.second - mapFromScene(pixmapItem.mapToScene(zoomAnchor.first));
         centerOn(vportCenter - diff);
         requestScaling();
@@ -1249,8 +1192,7 @@ bool ImageViewerV2::lockViewEnabled() {
     return (mViewLock == LOCK_ALL);
 }
 
-// savedViewportPos is [0...1][0...1]
-// values are where viewport center is on the image
+// viewport center on the image, in [0..1] x [0..1]
 void ImageViewerV2::saveViewportPos() {
     if(mViewLock != LOCK_ALL)
         return;
@@ -1328,8 +1270,7 @@ QPointF ImageViewerV2::sceneRoundPos(QPointF scenePoint) const {
     return mapToScene(mapFromScene(scenePoint));
 }
 
-// rounds a rect in scene coordinates so it stays on the same spot on viewport
-// the result is what's actually drawn on screen (incl. size)
+// round a scene rect to what is actually drawn on the viewport
 QRectF ImageViewerV2::sceneRoundRect(QRectF sceneRect) const {
     QRectF rounded = QRectF(sceneRoundPos(sceneRect.topLeft()), sceneRect.size());
     return QRectF(sceneRoundPos(sceneRect.topLeft()), sceneRect.size());

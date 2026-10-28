@@ -27,16 +27,12 @@
 #include "utils/imagelib.h"
 
 namespace {
-// Marks the "Custom" entry in the shortcut-preset combobox so it can be told
-// apart from a real preset row that happens to carry the same preset id.
+// marks the "Custom" entry apart from a real preset row with the same id
 constexpr int kCustomPresetEntryRole = Qt::UserRole + 1;
 
-// Shortcuts table. The rows of all three contexts share one list, so each cell
-// carries its own context (as ViewMode) next to the action id in Qt::UserRole -
-// there is no filter above the table to ask any more.
+// all contexts share one table, so each cell carries its context next to the action id
 constexpr int kShortcutContextRole = Qt::UserRole + 1;
-// The context label, kept on the icon cell so the search box can match it even
-// though the cell shows no text.
+// context label on the icon cell, for the search box
 constexpr int kShortcutContextLabelRole = Qt::UserRole + 2;
 
 enum ShortcutColumn {
@@ -48,10 +44,7 @@ enum ShortcutColumn {
     ShortcutColumnTotal
 };
 
-// The context cell is icon-only, so QTableWidgetItem's text comparison would
-// call every row equal and sorting by context would shuffle rows arbitrarily.
-// Sort by context first, then by the row's action so each group stays in the
-// same order the Action column would give it.
+// icon-only cell: sort by context order, then by action
 class ShortcutContextItem : public QTableWidgetItem
 {
 public:
@@ -72,11 +65,8 @@ private:
     QString mActionLabel;
 };
 
-// QStyleSheetStyle ignores Qt::TextAlignmentRole set on the item once the
-// theme QSS styles ::item (padding/background), so alignment has to be forced
-// through the option the delegate hands to the style instead. Left-eliding
-// here too: a right-aligned path is only useful if the filename at its end
-// survives truncation rather than the drive/share prefix.
+// QSS-styled ::item ignores TextAlignmentRole, so force alignment via the option;
+// elide left so the filename survives
 class RightAlignedPathDelegate : public QStyledItemDelegate
 {
 public:
@@ -168,13 +158,9 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 //------------------------------------------------------------------------------
 void SettingsDialog::setupAboutPage() {
     ui->aboutAppTextBrowser->viewport()->setAutoFillBackground(false);
-    // Clean version on the label; on dev builds the full "git describe" string
-    // (commit count + hash) is revealed on hover. On a tagged release the two
-    // are identical, so skip the redundant tooltip there.
+    // dev builds reveal the full git describe string on hover
     ui->versionLabel->setText(appVersionShort);
-    // Small info button next to the version: click it to pop up the full
-    // "git describe" string (tag + commit count + hash) in a modal. On a
-    // tagged release the build string equals the version.
+    // info button pops up the full git describe string
     auto *versionInfoButton = new QToolButton(this);
     versionInfoButton->setIcon(style()->standardIcon(QStyle::SP_MessageBoxInformation));
     versionInfoButton->setAutoRaise(true);
@@ -195,12 +181,9 @@ void SettingsDialog::setupAboutPage() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::setupThemePage() {
-    // fake combobox that acts as a menu button
-    // less code than using pushbutton with menu
-    // will be replaced with something custom later
+    // combobox used as a menu button
     connect(ui->themeSelectorComboBox, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
-        // leaving the custom theme: stash the current palette so previewing a
-        // preset doesn't discard the user's custom colors
+        // leaving custom: stash the palette so previewing a preset keeps the custom colors
         if(mPrevThemeIndex == 5 && index != 5) {
             mCustomColors = collectColorScheme();
             mCustomColors.tid = COLORS_CUSTOM;
@@ -218,9 +201,7 @@ void SettingsDialog::setupThemePage() {
         mPrevThemeIndex = index;
     });
 
-    // "System" is the last dropdown entry; picking it derives the palette from
-    // the desktop and locks the colour editor. This link switches to an editable
-    // custom copy of the system colours.
+    // turns the locked System palette into an editable custom copy
     connect(ui->modifySystemSchemeLabel, &ClickableLabel::clicked, [this]() {
         ColorScheme custom = ThemeStore::colorScheme(COLORS_SYSTEM);
         custom.tid = COLORS_CUSTOM;
@@ -251,8 +232,7 @@ void SettingsDialog::setupThemePage() {
     ui->colorSelectorOverlay->setDescription(tr("Overlay background"));
     ui->colorSelectorOverlayText->setDescription(tr("Overlay text"));
 
-    // every ColorSelectorButton in the dialog is a theme color: OK marks the
-    // theme custom, Apply additionally re-themes the running app on the spot
+    // every color button is a theme color: OK marks the theme custom, Apply also re-themes live
     auto switchToCustom = [this](QColor) { markThemeCustom(); };
     auto previewColor = [this](QColor) {
         markThemeCustom();
@@ -264,8 +244,7 @@ void SettingsDialog::setupThemePage() {
     }
 }
 //------------------------------------------------------------------------------
-// Compile-time feature gates: disable or hide controls for features this
-// build was configured without.
+// disable or hide controls for features this build lacks
 void SettingsDialog::setupFeatureToggles() {
 #ifndef USE_KDE_BLUR
     ui->blurBackgroundCheckBox->setEnabled(false);
@@ -318,8 +297,7 @@ void SettingsDialog::setupMiscControls() {
     langs.insert("system", "System language");
     ui->langComboBox->insertItem(0, "System language");
 
-    // match CustomMessageBox's dialog buttons: OK is the accented default,
-    // all three get the pointing-hand cursor
+    // like CustomMessageBox: accented default OK, pointing-hand cursors
     ui->OK->setDefault(true);
     ui->OK->setCursor(Qt::PointingHandCursor);
     ui->Cancel->setCursor(Qt::PointingHandCursor);
@@ -417,8 +395,7 @@ void SettingsDialog::setupPreferencePages() {
     documentLayout->addWidget(ui->widget_12);
     documentLayout->addStretch();
 
-    // "Other window tweaks" (window opacity + background blur) belongs with the
-    // general window settings, not the theme page; move it onto the General page.
+    // window opacity/blur belong on the General page
     ui->verticalLayout_5->insertWidget(
         ui->verticalLayout_5->indexOf(ui->UIOptionsGroup) + 1, ui->windowTweaksGroup);
 
@@ -438,8 +415,7 @@ void SettingsDialog::setupPreferencePages() {
     stack->addWidget(setupStoredDataPage());
     stack->addWidget(ui->About);
 
-    // Store sizes can be expensive to compute (thumbnail dir walk), so they
-    // refresh when the page is opened rather than when the dialog is built.
+    // store sizes can be slow (thumbnail walk), so refresh when the page opens
     connect(stack, &QStackedWidget::currentChanged, this, [this](int) {
         if(ui->stackedWidget->currentWidget() == mStoredDataPage)
             refreshStoredDataDetails();
@@ -600,8 +576,7 @@ void SettingsDialog::updateStoredDataControls() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::setupShortcutsPage() {
-    // The pre-redesign Add/Edit/Remove trio stays hidden; "+ New shortcut"
-    // below is the single entry point into ShortcutCreatorDialog.
+    // "+ New shortcut" is the single entry point
     ui->pushButton_2->hide();
     ui->pushButton_8->hide();
     ui->pushButton_4->hide();
@@ -610,9 +585,7 @@ void SettingsDialog::setupShortcutsPage() {
     ui->newShortcutButton->setCursor(Qt::PointingHandCursor);
     connect(ui->newShortcutButton, &QPushButton::clicked, this, &SettingsDialog::addShortcut);
 
-    // Preset selector: switching presets replaces the whole active mapping, so
-    // it lives above the per-context toolbar, confirm-gated, and applies (and
-    // persists) immediately rather than going through the dialog's Apply/OK.
+    // switching presets replaces the whole mapping, so it is confirmed and applied immediately
     QLabel *presetLabel = new QLabel(tr("Shortcut preset:"), ui->Controls);
     mShortcutPresetComboBox = new QComboBox(ui->Controls);
     mShortcutPresetComboBox->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -623,10 +596,7 @@ void SettingsDialog::setupShortcutsPage() {
     ui->verticalLayout_33->insertLayout(0, presetRow);
 
     connect(mShortcutPresetComboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, [this](int index) {
-        // "Custom" is a status display, not a selectable action: it carries the
-        // active preset's id so re-picking it would otherwise look identical to
-        // re-picking that same preset's own row, which must NOT be a no-op (that
-        // case means "discard my edits and go back to the clean preset").
+        // re-picking the preset's own row (not "Custom") means discard edits, so it is not a no-op
         if(mShortcutPresetComboBox->itemData(index, kCustomPresetEntryRole).toBool())
             return;
         const QString id = mShortcutPresetComboBox->itemData(index).toString();
@@ -648,10 +618,7 @@ void SettingsDialog::setupShortcutsPage() {
     });
     refreshShortcutPresetCombo();
 
-    // No context filter above the table: every binding of every context is
-    // listed at once and the Context column's icon says which one a row is in.
-    // The search box therefore also matches the context label, so typing "grid"
-    // still narrows the list down to one context.
+    // search also matches the context label, so "grid" narrows to one context
     mShortcutSearchEdit = new QLineEdit(ui->Controls);
     mShortcutSearchEdit->setPlaceholderText(tr("Search actions, keys and contexts"));
     mShortcutSearchEdit->setClearButtonEnabled(true);
@@ -691,8 +658,7 @@ void SettingsDialog::setupShortcutsPage() {
         const ViewMode context = static_cast<ViewMode>(item->data(kShortcutContextRole).toInt());
         const int column = ui->shortcutsTableWidget->currentColumn();
         setShortcutEnabled(context, action, item->checkState() == Qt::Checked);
-        // the rebuild drops the current cell; keep the toggled row current so
-        // Space can switch it straight back
+        // keep the toggled row current so Space can switch it back
         updateShortcutsTable();
         setCurrentShortcutRow(context, action, column >= 0 ? column : ShortcutColumnEnabled);
     });
@@ -707,15 +673,12 @@ void SettingsDialog::setupShortcutsPage() {
         if(column == ShortcutColumnKey)
             openShortcutDetails(row);
     });
-    // A binding lives in exactly one context's map, so retargeting one is a
-    // row-level command rather than something the (now gone) filter could do.
+    // retargeting a binding to another context is a row command
     ui->shortcutsTableWidget->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->shortcutsTableWidget, &QWidget::customContextMenuRequested,
             this, &SettingsDialog::showShortcutRowMenu);
 
-    // The context icons are recolored to the theme's icon colour, and the theme
-    // page next door can change that while this table is already populated.
-    // Repainting the cells in place keeps sorting and selection untouched.
+    // repaint context icons in place when the theme's icon color changes
     connect(settings, &Settings::settingsChanged, this, [this]() {
         mShortcutContextIcons.clear();
         QSignalBlocker blocker(ui->shortcutsTableWidget);
@@ -743,20 +706,14 @@ void SettingsDialog::refreshShortcutPresetCombo() {
     }
 
     if(currentPresetIndex < 0) {
-        // The stored preset isn't offered on this platform/build (e.g. a config
-        // carried over from another OS, or a preset pruned from this build).
-        // Show it rather than silently switching; the active mapping is unaffected.
+        // the stored preset is unavailable here (other OS / pruned); show it, mapping unchanged
         mShortcutPresetComboBox->addItem(tr("%1 (unavailable)").arg(current), current);
         mShortcutPresetComboBox->setCurrentIndex(mShortcutPresetComboBox->count() - 1);
         return;
     }
 
     if(settings->shortcutsModified()) {
-        // Mirrors the Theme page combobox: editing away from a preset selects a
-        // dedicated "Custom" entry instead of decorating the preset's own label.
-        // Tagged with kCustomPresetEntryRole so the change handler can tell "you
-        // reselected the status display" apart from "you reselected the
-        // underlying preset row" (which should still offer to discard edits).
+        // editing away from a preset selects a dedicated "Custom" entry (see kCustomPresetEntryRole)
         mShortcutPresetComboBox->insertSeparator(mShortcutPresetComboBox->count());
         mShortcutPresetComboBox->addItem(tr("Custom"), current);
         mShortcutPresetComboBox->setItemData(mShortcutPresetComboBox->count() - 1, true, kCustomPresetEntryRole);
@@ -766,7 +723,7 @@ void SettingsDialog::refreshShortcutPresetCombo() {
     }
 }
 //------------------------------------------------------------------------------
-// an attempt to force minimum width to fit contents
+// force the minimum width to fit contents
 void SettingsDialog::adjustSizeToContents() {
     // general tab
     ui->gridLayout->activate();
@@ -890,9 +847,7 @@ void SettingsDialog::readSettings() {
     ui->expandLimitSlider->setValue(settings->expandLimit());
     onExpandLimitSliderChanged(ui->expandLimitSlider->value());
 
-    // thumbnailer threads
-    // thumbnailer + duplicate-search pools share a core budget: each
-    // slider's max is total cores minus the other's current allocation
+    // thumbnailer and duplicate finder share a core budget: each max is cores minus the other's share
     int cores = qMax(1, QThread::idealThreadCount());
     ui->thumbnailerThreadsSlider->setMaximum(qMax(1, cores - settings->duplicateSearchThreadCount()));
     ui->duplicateThreadsSlider->setMaximum(qMax(1, cores - settings->thumbnailerThreadCount()));
@@ -907,8 +862,7 @@ void SettingsDialog::readSettings() {
 
     // language
     QString langName = langs.value(settings->language());
-    // Fall back on the *display* name: the combo is not editable, so passing the
-    // locale code here silently left the previous entry selected.
+    // match on the display name: the combo is not editable
     if(langName.isEmpty() || ui->langComboBox->findText(langName) == -1)
         ui->langComboBox->setCurrentText(langs.value("en_US"));
     else
@@ -1047,17 +1001,14 @@ void SettingsDialog::saveSettings() {
     settings->setMouseScrollingSpeed(static_cast<qreal>(0.5f + (ui->mouseScrollingSpeedSlider->value() * 0.25f)));
     settings->setAutoResizeLimit(ui->autoResizeLimitSlider->value() * 5);
     settings->setExpandLimit(ui->expandLimitSlider->value());
-    // write finder count on both sides of the thumbnailer write: the setters
-    // clamp against the other pool's stored value, so this order guarantees
-    // both UI values land intact whichever direction the user rebalanced
+    // setters clamp against each other, so write the finder count on both sides of the thumbnailer write
     settings->setDuplicateSearchThreadCount(ui->duplicateThreadsSlider->value());
     settings->setThumbnailerThreadCount(ui->thumbnailerThreadsSlider->value());
     settings->setDuplicateSearchThreadCount(ui->duplicateThreadsSlider->value());
     settings->setMemoryAllocationLimit(ui->memoryLimitSpinBox->value());
     settings->setThumbnailerMemCacheLimit(ui->thumbMemCacheSpinBox->value());
 
-    // "System" (last dropdown entry) derives its palette from the desktop and is
-    // never written to the theme file; presets/custom go through saveColorScheme.
+    // System derives from the desktop and is never written to the theme file
     if(ui->themeSelectorComboBox->currentIndex() == 6) {
         settings->setColorScheme(ThemeStore::colorScheme(COLORS_SYSTEM));
         settings->saveTheme();
@@ -1082,8 +1033,7 @@ void SettingsDialog::saveSettingsAndClose() {
 //------------------------------------------------------------------------------
 void SettingsDialog::readColorScheme() {
     auto colors = settings->colorScheme();
-    // seed the custom cache: the active palette if it's custom, otherwise the
-    // separately-stored custom palette that presets don't overwrite
+    // seed from the active palette if custom, else the stored custom palette
     mCustomColors = (colors.tid == COLORS_CUSTOM) ? colors : settings->customColorScheme();
     mCustomColors.tid = COLORS_CUSTOM;
     setColorScheme(colors);
@@ -1150,8 +1100,7 @@ void SettingsDialog::saveColorScheme() {
     settings->saveTheme();
 }
 //------------------------------------------------------------------------------
-// Re-themes the running app from the current selector values without touching
-// disk; exec() reverts it unless the settings are saved before closing.
+// live re-theme without touching disk; exec() reverts it unless saved
 void SettingsDialog::applyColorSchemePreview() {
     settings->setColorScheme(collectColorScheme());
     mThemePreviewed = true;
@@ -1212,14 +1161,12 @@ QString shortcutActionLabel(const QString &action) {
 }    // namespace
 //------------------------------------------------------------------------------
 QString SettingsDialog::shortcutActionAtRow(int row) const {
-    // Every cell of the row carries the action id; read it off the context cell,
-    // which is the one column that is always there.
+    // read the action id from the context cell, the one column always present
     QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, ShortcutColumnContext);
     return item ? item->data(Qt::UserRole).toString() : QString();
 }
 //------------------------------------------------------------------------------
-// Rows are selected whole, so Space acts on the row's Enabled box whichever of
-// its cells is current.
+// Space toggles the row's Enabled box whichever cell is current
 bool SettingsDialog::eventFilter(QObject *watched, QEvent *event) {
     if(watched == ui->shortcutsTableWidget && event->type() == QEvent::KeyPress) {
         auto *keyEvent = static_cast<QKeyEvent *>(event);
@@ -1252,9 +1199,7 @@ ViewMode SettingsDialog::shortcutContextAtRow(int row) const {
     return static_cast<ViewMode>(item->data(kShortcutContextRole).toInt());
 }
 //------------------------------------------------------------------------------
-// Monochrome source art recolored to the theme, the same way every other
-// 16px icon in the app is drawn. Grid and Document reuse the icons their view
-// already has in the menus; Global gets the globe.
+// monochrome art recolored to the theme; Global uses the globe
 QIcon SettingsDialog::shortcutContextIcon(ViewMode context) const {
     auto cached = mShortcutContextIcons.constFind(context);
     if(cached != mShortcutContextIcons.constEnd())
@@ -1272,8 +1217,7 @@ QIcon SettingsDialog::shortcutContextIcon(ViewMode context) const {
 
     const QColor color = settings->colorScheme().icons;
     QIcon icon;
-    // Both scales go into the icon so a HiDPI screen gets the @2x art; Qt picks
-    // whichever matches the device pixels it is asked to paint.
+    // both scales so HiDPI gets the @2x art
     for(const QString &suffix : {QStringLiteral(""), QStringLiteral("@2x")}) {
         QPixmap pixmap(QStringLiteral(":/res/icons/common/menuitem/%1%2.png").arg(name, suffix));
         if(pixmap.isNull())
@@ -1327,9 +1271,7 @@ QString SettingsDialog::draftActionForShortcut(ViewMode context, const QString &
     return mShortcutDraftLookup.value(MODE_GLOBAL).value(key);
 }
 //------------------------------------------------------------------------------
-// The draft holds the authoritative set of keys currently bound to an action;
-// add/delete in the key editor writes here directly, so a removed default key
-// actually stays removed (defaults are only consulted for the badge and reset).
+// the draft is the authoritative key set, so a removed default key stays removed
 QStringList SettingsDialog::candidateShortcuts(ViewMode context, const QString &action) const {
     return actionShortcuts(mShortcutDraft.value(context), action);
 }
@@ -1345,10 +1287,7 @@ QString SettingsDialog::primaryShortcut(ViewMode context, const QString &action)
     const QString savedPrimary = mShortcutPrimary.value(context).value(action);
     if(candidates.contains(savedPrimary))
         return savedPrimary;
-    // No explicit choice yet: prefer a user override (a key that is not a system
-    // default) so custom bindings become primary; otherwise fall back to the
-    // first system default, a keyboard key ahead of a mouse input (PgUp rather
-    // than LMB_LeftEdge for prevImage).
+    // no explicit choice: prefer a user key, else the first default, keyboard before mouse
     const QStringList defaults = defaultShortcuts(context, action);
     for(const QString &key : candidates)
         if(!defaults.contains(key))
@@ -1381,8 +1320,7 @@ void SettingsDialog::setShortcutEnabled(ViewMode context, const QString &action,
     if(enabled) {
         disabled.removeAll(action);
         mShortcutDisabled[context] = disabled;
-        // Disabling clears the draft keys, so re-enabling restores the system
-        // defaults (plus a remembered primary override, if any).
+        // disabling clears the keys, so re-enabling restores defaults (plus a remembered primary)
         QStringList keys = candidateShortcuts(context, action);
         if(keys.isEmpty()) {
             keys = defaultShortcuts(context, action);
@@ -1411,8 +1349,7 @@ void SettingsDialog::updateShortcutsTable() {
     ui->shortcutsTableWidget->setRowCount(0);
 
     const QBrush disabledBrush = palette().brush(QPalette::Disabled, QPalette::Text);
-    // Contexts are listed in scope order - widest first - so the default sort by
-    // the Context column reads Global, Grid, Document, Copy / Move, Clip edit.
+    // widest scope first
     const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT, MODE_COPYMOVE};
     for(int order = 0; order < contexts.size(); order++) {
         const ViewMode context = contexts.at(order);
@@ -1424,16 +1361,11 @@ void SettingsDialog::updateShortcutsTable() {
             actions.insert(it.value());
         for(auto it = active.cbegin(); it != active.cend(); ++it)
             actions.insert(it.value());
-        // A disabled action has no keys in the draft, so nothing above would list
-        // it. Without this the Enabled checkbox would be a one-way door for any
-        // action that has no defaults here - notably a script moved into this
-        // context and then switched off.
+        // list disabled actions too, or Enabled would be a one-way switch
         const QStringList disabledHere = mShortcutDisabled.value(context);
         for(const QString &action : disabledHere)
             actions.insert(action);
-        // Scripts are Global-only actions and are usually unbound, so they would
-        // otherwise never get a row to click. Seed them so they are discoverable
-        // (and bindable) here rather than needing the creator dialog.
+        // seed script rows (Global-only, usually unbound) so they are bindable here
         if(context == MODE_GLOBAL && scriptManager) {
             const QStringList names = scriptManager->scriptNames();
             for(const QString &name : names)
@@ -1451,9 +1383,7 @@ void SettingsDialog::updateShortcutsTable() {
             const int row = ui->shortcutsTableWidget->rowCount();
             ui->shortcutsTableWidget->setRowCount(row + 1);
 
-            // Icon only: the label would repeat on every row of a group and eat
-            // the width the Action and Key columns need. The name is still
-            // reachable - as a tooltip, and to the search box below.
+            // icon only; the label is in the tooltip and searchable
             QTableWidgetItem *contextItem = new ShortcutContextItem(order, label);
             contextItem->setIcon(shortcutContextIcon(context));
             contextItem->setToolTip(contextLabel(context));
@@ -1461,8 +1391,7 @@ void SettingsDialog::updateShortcutsTable() {
             contextItem->setTextAlignment(Qt::AlignCenter);
             ui->shortcutsTableWidget->setItem(row, ShortcutColumnContext, contextItem);
 
-            // Script rows show shortcutActionLabel()'s "(script)"-tagged name;
-            // Qt::UserRole always keeps the real action id - every lookup uses it.
+            // script rows show a "(script)" label; Qt::UserRole keeps the real id
             const bool isScript = action.startsWith(QStringLiteral("s:"));
 
             QTableWidgetItem *actionItem = new QTableWidgetItem(label);
@@ -1489,9 +1418,7 @@ void SettingsDialog::updateShortcutsTable() {
             enabledItem->setTextAlignment(Qt::AlignCenter);
             ui->shortcutsTableWidget->setItem(row, ShortcutColumnEnabled, enabledItem);
 
-            // Sorting reorders the rows, so the row's identity has to live in
-            // the cells themselves - in every one of them, since a click can
-            // land on any column.
+            // sorting reorders rows, so every cell carries the row identity
             for(int column = 0; column < ShortcutColumnTotal; column++) {
                 QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, column);
                 item->setData(Qt::UserRole, action);
@@ -1502,8 +1429,7 @@ void SettingsDialog::updateShortcutsTable() {
     }
 
     ui->shortcutsTableWidget->setSortingEnabled(true);
-    // A column index from an older layout would otherwise sort by a column that
-    // no longer exists.
+    // clamp a column index from an older layout
     const int sortColumn = qBound(0, settings->shortcutsSortColumn(), ShortcutColumnTotal - 1);
     ui->shortcutsTableWidget->sortByColumn(sortColumn, settings->shortcutsSortOrder());
     mUpdatingShortcutsTable = false;
@@ -1521,9 +1447,7 @@ void SettingsDialog::updateShortcutsFilter() {
             QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, col);
             match = item && item->text().contains(needle, Qt::CaseInsensitive);
         }
-        // The context is an icon, so its name is only in the item data - but it
-        // is the one filter the removed context dropdown used to provide, and
-        // searching for "grid" has to keep working.
+        // the context name lives only in item data; match it too
         if(!match) {
             QTableWidgetItem *item = ui->shortcutsTableWidget->item(row, ShortcutColumnContext);
             match = item && item->data(kShortcutContextLabelRole).toString().contains(needle, Qt::CaseInsensitive);
@@ -1550,8 +1474,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     hint->setWordWrap(true);
     mainLayout->addWidget(hint);
 
-    // Keys the default set ships with — used both for the "default" badge and,
-    // in primaryShortcut(), to decide which key wins by default.
+    // default keys drive the badge and primaryShortcut()'s default
     const QStringList defaultKeys = defaultShortcuts(context, action);
     const QSet<QString> defaultSet(defaultKeys.cbegin(), defaultKeys.cend());
 
@@ -1565,8 +1488,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     rowsLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->addWidget(rowsWidget);
 
-    // Recursively empty the rows layout, deferring widget deletion so it is safe
-    // to call from inside a child button's own click handler.
+    // deferred deletion: safe from inside a child button's click handler
     std::function<void(QLayout *)> clearLayout = [&](QLayout *layout) {
         QLayoutItem *item;
         while((item = layout->takeAt(0)) != nullptr) {
@@ -1590,8 +1512,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
         for(const QString &key : keys) {
             QHBoxLayout *row = new QHBoxLayout();
             QRadioButton *radio = new QRadioButton(key, rowsWidget);
-            // Exclusivity is enforced by rebuild(), not Qt, so lingering
-            // deferred-deleted radios can't fight the current selection.
+            // exclusivity is enforced by rebuild(), so deferred-deleted radios can't interfere
             radio->setAutoExclusive(false);
             radio->setChecked(key == primary);
             connect(radio, &QRadioButton::clicked, &dialog, [&, key]() {
@@ -1632,9 +1553,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
     warning->setWordWrap(true);
     mainLayout->addWidget(warning);
 
-    // A scroll action's fallback: what runs when there is nothing to scroll
-    // that way (a fitting picture, a short text file), and its fallback in a
-    // video, which the wheel's scrollOr actions have too.
+    // what a scroll action does when there is nothing to scroll (and in a video)
     const auto addFallbackRow = [&](const QString &caption, const QString &objectName,
                                     const QString &defaultFallback, const QString &saved) {
         QHBoxLayout *fallbackRow = new QHBoxLayout();
@@ -1688,9 +1607,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
         rebuild();
     });
 
-    // Plain buttons instead of QDialogButtonBox: the box's visual order is
-    // style-driven and can't be forced via QSS, so wire OK/Cancel ourselves
-    // (accept-first order, matching ShortcutCreatorDialog).
+    // QDialogButtonBox order is style-driven; wire OK/Cancel ourselves (accept first)
     QHBoxLayout *buttonsLayout = new QHBoxLayout();
     buttonsLayout->addStretch();
     QPushButton *okButton = new QPushButton(tr("OK"), &dialog);
@@ -1746,8 +1663,7 @@ QMap<QString, QString> SettingsDialog::shortcutTransferClashes(const QString &ac
         return clashes;
     const QStringList keys = candidateShortcuts(src, action);
     for(const QString &key : keys) {
-        // draftActionForShortcut() resolves a non-global context against Global
-        // too, so this also catches "the destination would shadow a global key".
+        // also catches the destination shadowing a global key
         const QString taken = draftActionForShortcut(dst, key);
         if(!taken.isEmpty() && taken != action)
             clashes.insert(key, taken);
@@ -1763,10 +1679,7 @@ void SettingsDialog::applyShortcutTransfer(const QString &action, ViewMode src, 
         return;    // nothing bound here to relocate
     const QString primary = primaryShortcut(src, action);
 
-    // Union rather than replace: the destination may already hold its own keys
-    // for this action and a copy must not quietly drop them. Keys the
-    // destination gave to a different action are taken over by the insert -
-    // transferShortcut() has already had the user confirm that.
+    // union: keep the destination's own keys; keys taken from another action were confirmed
     QStringList target = candidateShortcuts(dst, action);
     for(const QString &key : keys)
         if(!target.contains(key))
@@ -1774,23 +1687,18 @@ void SettingsDialog::applyShortcutTransfer(const QString &action, ViewMode src, 
     target.sort(Qt::CaseInsensitive);
     setActionShortcuts(mShortcutDraft[dst], action, target);
 
-    // The chosen primary key travels with the binding; otherwise the
-    // destination falls back to "first default" and the key shown in the table
-    // silently changes under the user.
+    // the primary key travels with the binding
     if(!primary.isEmpty())
         setPrimaryShortcut(dst, action, primary);
 
-    // A transfer into a context where the action was switched off would arrive
-    // dead, so it implies "enabled" at the destination.
+    // a transfer implies enabled at the destination
     QStringList dstDisabled = mShortcutDisabled.value(dst);
     if(dstDisabled.removeAll(action) > 0)
         mShortcutDisabled[dst] = dstDisabled;
 
     if(move) {
         setActionShortcuts(mShortcutDraft[src], action, QStringList());
-        // Both parallel maps must follow the keys out. A left-behind primary is
-        // not cosmetic: setShortcutEnabled() re-adds the remembered primary when
-        // the action is switched back on, which would resurrect the moved key.
+        // move primary too: re-enabling re-adds a remembered primary and would resurrect the key
         mShortcutPrimary[src].remove(action);
         QStringList srcDisabled = mShortcutDisabled.value(src);
         if(srcDisabled.removeAll(action) > 0)
@@ -1809,9 +1717,7 @@ void SettingsDialog::transferShortcut(const QString &action, ViewMode src, ViewM
     lines << (move ? tr("Move \"%1\" from %2 to %3.") : tr("Copy \"%1\" from %2 to %3."))
                  .arg(shortcutActionLabel(action), contextLabel(src), contextLabel(dst));
 
-    // Global bindings run in every screen and a view-specific binding overrides
-    // the same key, so crossing the Global boundary changes where the shortcut
-    // reaches. Spell that out instead of changing behaviour silently.
+    // crossing the Global boundary changes where the shortcut reaches; say so
     if(dst == MODE_GLOBAL)
         lines << tr("This widens its reach: it will run in every screen, not only in the %1 view "
                     "(a view-specific binding for the same key still overrides it).")
@@ -1841,10 +1747,7 @@ void SettingsDialog::transferShortcut(const QString &action, ViewMode src, ViewM
     applyShortcutTransfer(action, src, dst, move);
 }
 //------------------------------------------------------------------------------
-// The position from the table's customContextMenuRequested is already in
-// viewport coordinates - QAbstractScrollArea subclasses hand the viewport's
-// context-menu event up untranslated. Remapping it again would shift the hit
-// point by the header height and target the wrong row.
+// already in viewport coordinates; remapping would shift by the header height
 QString SettingsDialog::shortcutActionAtMenuPos(const QPoint &viewportPos) const {
     const int row = ui->shortcutsTableWidget->rowAt(viewportPos.y());
     // Cells carry the real action id in UserRole (script rows show a label).
@@ -1871,18 +1774,13 @@ void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
     QMenu *moveMenu = menu.addMenu(tr("Move to"));
     QMenu *copyMenu = menu.addMenu(tr("Copy to"));
     if(candidateShortcuts(src, action).isEmpty() || ActionManager::isOverlayContext(src)) {
-        // Keep the entries on screen but disabled, so the reason is visible
-        // rather than the commands just being absent. Copy / Move keys only
-        // work while it is open, so they have nowhere to go.
+        // disabled with a reason rather than absent; Copy / Move keys only work in that overlay
         const QString reason = (src == MODE_COPYMOVE) ? tr("Only used in the Copy / Move overlay")
                                                       : tr("No keys bound in %1").arg(contextLabel(src));
         moveMenu->addAction(reason)->setEnabled(false);
         copyMenu->addAction(reason)->setEnabled(false);
     } else {
-        // Script actions ("s:<name>") are deliberately not excluded: dispatch
-        // treats them like any other action in any context, and the table lists
-        // every action the destination's draft map holds, so a moved script
-        // still gets a row there and stays undoable.
+        // scripts are allowed in any context
         const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT};
         for(ViewMode dst : contexts) {
             if(dst == src)
@@ -1908,25 +1806,19 @@ void SettingsDialog::readScripts() {
     }
 }
 //------------------------------------------------------------------------------
-// does not check if the shortcut already there
+// does not check for an existing entry
 void SettingsDialog::addScriptToList(const QString &name) {
     if(name.isEmpty())
         return;
 
     QListWidget *list = ui->scriptsListWidget;
-    // The item text is left empty so it doesn't render underneath the row
-    // widget's label (that caused ghosted/doubled text). The script name lives
-    // in Qt::UserRole and in the row widget's label; handlers read it from the
-    // data role or from the explicit-name lambdas below.
+    // empty item text avoids ghosted text under the row widget; the name is in Qt::UserRole
     QListWidgetItem *nameItem = new QListWidgetItem();
     nameItem->setData(Qt::UserRole, name);
     nameItem->setSizeHint(QSize(0, 26));
     list->insertItem(list->count(), nameItem);
 
-    // Row widget: name label + stretch + pencil (edit) + x (delete). The
-    // container stays opaque so its icon-button children receive their own
-    // clicks; its single/double clicks are re-emitted to drive selection and
-    // the edit path (keeping double-click-to-edit working).
+    // opaque container so the icon buttons get their clicks; it re-emits clicks for selection and edit
     ScriptRowWidget *row = new ScriptRowWidget();
     row->setObjectName(QStringLiteral("scriptRow"));
     connect(row, &ScriptRowWidget::clicked, this,
@@ -2000,10 +1892,7 @@ void SettingsDialog::editScript(const QString& name) {
 void SettingsDialog::removeScript(const QString& name) {
     if(name.isEmpty() || !scriptManager->scriptExists(name))
         return;
-    // Purge the action from every per-context draft structure before saving.
-    // A left-behind disabled entry is not inert: it persists in the config and
-    // the disabled-row seeding in updateShortcutsTable() would resurrect the
-    // deleted script as a ghost row.
+    // purge from every per-context structure, or the deleted script returns as a ghost row
     const QString action = QStringLiteral("s:") + name;
     const QList<ViewMode> contexts{MODE_GLOBAL, MODE_FOLDERVIEW, MODE_DOCUMENT};
     for(ViewMode context : contexts) {
@@ -2036,14 +1925,12 @@ void SettingsDialog::addShortcut() {
     rebuildShortcutDraftLookup();
     setPrimaryShortcut(context, action, key);
     setShortcutEnabled(context, action, true);
-    // A leftover search term could hide the row that was just created, which
-    // reads as "nothing happened".
+    // a leftover search could hide the new row
     if(mShortcutSearchEdit)
         mShortcutSearchEdit->clear();
     updateShortcutsTable();
 
-    // Bring the new binding into view: sorting decides where its row landed,
-    // and with every context listed the list is long enough to lose it in.
+    // scroll to the new row
     for(int row = 0; row < ui->shortcutsTableWidget->rowCount(); row++) {
         if(shortcutActionAtRow(row) != action || shortcutContextAtRow(row) != context)
             continue;
@@ -2144,8 +2031,7 @@ int SettingsDialog::exec() {
     mSchemeAtOpen = settings->colorScheme();
     mThemePreviewed = false;
     int res = QDialog::exec();
-    // OK and Cancel both funnel through close(), so the return value can't
-    // distinguish them; saveSettings() clears the flag when previews are kept
+    // OK and Cancel both go through close(); saveSettings() clears the flag when previews are kept
     if(mThemePreviewed) {
         mThemePreviewed = false;
         settings->setColorScheme(mSchemeAtOpen);

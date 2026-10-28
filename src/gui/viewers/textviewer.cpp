@@ -21,14 +21,8 @@
 
 namespace {
 
-// While the file can scroll, the wheel scrolls it here (keeping smooth,
-// high-resolution and trackpad scrolling) and stops at its ends instead of
-// passing on, so the end of a long file doesn't open the next one. This stands
-// in for the wheel's scrollOrPrevImage/scrollOrNextImage actions, so it only
-// happens while the wheel is bound to one of them or to nothing; any other
-// binding gets the wheel instead. A file that fits passes the wheel on.
-// A wheel with modifiers goes to its binding too (Ctrl+wheel: the zoom
-// actions, which resize the text); only an unbound one gets Qt's own handling.
+// Scrolls the wheel itself while the file can scroll, stopping at its ends (stands in for scrollOr*
+// while the wheel is bound to them or unbound).
 class TextEdit : public QPlainTextEdit {
 public:
     using QPlainTextEdit::QPlainTextEdit;

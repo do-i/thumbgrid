@@ -49,9 +49,7 @@ MW::MW(QWidget *parent)
 
     setMinimumSize(10,10);
 
-    // do not steal focus when clicked
-    // this is just a container. accept key events only
-    // via passthrough from child widgets
+    // a container: no focus on click, keys arrive via child passthrough
     setFocusPolicy(Qt::NoFocus);
 
     this->setLayout(&layout);
@@ -104,9 +102,7 @@ void MW::setupUi() {
     sidePanel = new SidePanel(this);
     sidePanel->setWindowTitle(tr("Crop"));
     connect(sidePanel, &SidePanel::closed, this, &MW::hideCropPanel);
-    // Parented to the window, not to viewerWidget: viewerWidget is hidden in
-    // folder view, so anything shown there - including copy/move errors raised
-    // from the grid - went to an invisible widget and was never seen.
+    // parented to the window: viewerWidget is hidden in folder view
     floatingMessage = new FloatingMessageProxy(this);
     connect(viewerWidget.get(), &ViewerWidget::scalingRequested, this, &MW::scalingRequested);
     connect(viewerWidget.get(), &ViewerWidget::draggedOut, this, qOverload<>(&MW::draggedOut));
@@ -201,10 +197,7 @@ void MW::enableFolderView() {
         renameOverlay->hide();
     docWidget->hideFloatingPanel();
     centralWidget->showFolderView();
-    // Put the grid back in the window it had, rather than in whatever size the
-    // last document was auto-resized to. Opening a small image shrinks the window
-    // to that image, and nothing else ever grew it back, so returning to the grid
-    // left it stuck at thumbnail size for the rest of the session.
+    // restore the grid's own window size; opening a small image shrank it
     if(settings->autoResizeWindow() && folderViewGeometry.isValid() &&
        windowState() == Qt::WindowNoState)
         setGeometry(folderViewGeometry);
@@ -220,8 +213,7 @@ ViewMode MW::currentViewMode() {
     return centralWidget->currentViewMode();
 }
 
-// A video has nothing to fit, so the fit actions pause/resume it instead. That
-// is what Space does on a video by default (it is bound to toggleFitMode).
+// a video has nothing to fit, so the fit actions pause/resume it (Space is toggleFitMode)
 bool MW::fitActionPausesVideo() {
     if(!viewerWidget->isShowingVideo())
         return false;
@@ -270,7 +262,6 @@ void MW::fitWindowStretch() {
 }
 
 // switch between 1:1 and Fit All
-// TODO: move to viewerWidget?
 void MW::switchFitMode() {
     if(fitActionPausesVideo())
         return;
@@ -290,13 +281,8 @@ void MW::prepareForLoad(bool nextIsVideo) {
     viewerWidget->prepareForLoad(nextIsVideo);
 }
 
-// The extent a layout would hand this widget along one axis, resolved the way
-// QLayout resolves it: size hints first, then the widget's own explicit
-// minimum/maximum clamps. Unlike geometry() this is answerable for a widget that
-// sits in a layout but has never been shown, which is what windowChromeSize()
-// needs. QWIDGETSIZE_MAX is Qt's "no constraint" marker rather than a real
-// extent, so a clamp set to it is ignored instead of taken literally - MainPanel
-// pins the axis it does not manage to exactly that value.
+// An axis extent the way QLayout resolves it (hints, then min/max clamps), answerable before
+// the widget was ever shown. QWIDGETSIZE_MAX means unconstrained.
 static int resolvedExtent(const QWidget *w, Qt::Orientation axis) {
     const bool horizontal = (axis == Qt::Horizontal);
     const int hint    = horizontal ? w->sizeHint().width()        : w->sizeHint().height();
@@ -311,39 +297,19 @@ static int resolvedExtent(const QWidget *w, Qt::Orientation axis) {
     return qMax(0, extent);
 }
 
-// How much of the window is *not* the viewer: the status footer below it, a
-// pinned thumbnail panel beside it.
-//
-// Once the window is up this is a plain measurement. Before the first show it
-// cannot be measured at all - the layout has not run, so every child still
-// carries a placeholder geometry - and that case is not academic: main.cpp calls
-// loadPath() for a command line argument *before* showGui(), so `thumbgrid
-// img.jpg` always resizes while hidden, and preShowResize() then writes the
-// result through setWindowGeometry(), which is both what the first show restores
-// and what the next launch starts from. Answering zero there would put the
-// chrome-less geometry on screen and in the config file, so fall back to what
-// the widgets themselves can still tell us.
+// Window size minus the viewer (footer, pinned panel). Estimated before the first show, since
+// main.cpp loads a command-line file before showGui().
 QSize MW::windowChromeSize() const {
     if(isVisible() && viewerWidget->size().isValid()) {
         QSize measured = size() - viewerWidget->size();
         return QSize(qMax(0, measured.width()), qMax(0, measured.height()));
     }
     QSize estimate(0, 0);
-    // Footer: same rule updateStatusFooters() applies. InfoBarProxy constrains
-    // its own height (minimum == maximum) in its constructor, so this is exact
-    // even before init() puts the real InfoBar inside it.
+    // InfoBarProxy fixes its own height, so this is exact before init()
     if(showInfoBarWindowed && !isFullScreen())
         estimate.rheight() += resolvedExtent(infoBarWindowed.get(), Qt::Vertical);
-    // Panel: pinned means it is in DocumentWidget's layout, on the axis given by
-    // panelPosition(). Only the axis it occupies is queried - the other one is
-    // deliberately unconstrained there.
-    //
-    // Honest limitation, not a silent zero: MainPanel::sizeHint() stays (0,0)
-    // until its thumbnail strip is initialized, and that happens in
-    // setupFullUi(), 50ms *after* the window is shown. So on the startup path
-    // this contributes only the panel's own minimum, which is smaller than the
-    // strip it will end up holding. Nothing reachable from here knows the real
-    // number yet; every later auto-resize measures it for real.
+    // Pinned panel on its axis. Its sizeHint() is (0,0) until setupFullUi() runs (50 ms after show),
+    // so at startup only the minimum counts.
     if(settings->panelEnabled() && settings->panelPinned()) {
         if(auto panel = docWidget->findChild<MainPanel *>()) {
             const auto pos = settings->panelPosition();
@@ -356,18 +322,13 @@ QSize MW::windowChromeSize() const {
     return estimate;
 }
 
-// todo: fix flicker somehow
-// ideally it should change img & resize in one go
+// todo: fix flicker; ideally change image and resize in one go
 void MW::preShowResize(QSize sz) {
     auto screens = qApp->screens();
     if(this->windowState() != Qt::WindowNoState || !screens.count() || screens.count() <= currentDisplay)
         return;
-    // The grid's size only exists until the line below overwrites it, so grab it
-    // here rather than in enableDocumentView(): Core::loadPath() loads the image
-    // *before* switching views (deliberately - that ordering is what stops a stale
-    // video frame flashing), so by the time the view switch runs the window has
-    // already been shrunk. Being still in folder view is exactly what marks this
-    // call as the grid -> document transition.
+    // Save the grid size now: loadPath() loads the image before switching views, so the window
+    // is already shrunk by the time the view switch runs.
     if(isVisible() && currentViewMode() == MODE_FOLDERVIEW)
         folderViewGeometry = geometry();
     int decorationSize = frameGeometry().height() - height();
@@ -376,12 +337,7 @@ void MW::preShowResize(QSize sz) {
     QSize maxSz = availableGeom.size() * maxSzMulti;
     maxSz.setHeight(maxSz.height() - decorationSize);
 
-    // The window is more than the image: the status footer sits below the viewer
-    // and a pinned panel sits beside it. Sizing the *window* to the image left
-    // the viewport smaller than the image, so the fit mode scaled it down and the
-    // slack showed up as empty bars either side. Size the viewport to the image
-    // and add the chrome back on top. Estimated rather than measured while the
-    // window is still hidden - see windowChromeSize().
+    // size the viewport (not the window) to the image, then add the chrome back
     const QSize chrome = windowChromeSize();
     QSize maxContentSz = maxSz - chrome;
     maxContentSz.setWidth(qMax(1, maxContentSz.width()));
@@ -597,17 +553,12 @@ void MW::saveCurrentDisplay() {
     settings->setLastDisplay(qApp->screens().indexOf(this->window()->screen()));
 }
 
-//#############################################################
-//######################### EVENTS ############################
-//#############################################################
-
 void MW::mouseMoveEvent(QMouseEvent *event) {
     event->ignore();
 }
 
 bool MW::event(QEvent *event) {
-    // only save maximized state if we are already visible
-    // this filter out out events while the window is still being set up
+    // only save maximized state once visible
     if(event->type() == QEvent::WindowStateChange && this->isVisible() && !this->isFullScreen())
         maximized = isMaximized();
     if(event->type() == QEvent::Move || event->type() == QEvent::Resize)
@@ -655,8 +606,7 @@ void MW::mouseDoubleClickEvent(QMouseEvent *event) {
 void MW::close() {
     saveWindowGeometry();
     saveCurrentDisplay();
-    // try to close window sooner
-    // since qt6.3 QWidget::close() no longer works on hidden windows (bug?)
+    // QWidget::close() no longer works on hidden windows since Qt 6.3
 #if QT_VERSION < QT_VERSION_CHECK(6, 3, 0)
     this->hide();
 #endif
@@ -707,8 +657,7 @@ void MW::showSaveDialog(QString filePath) {
 QString MW::getSaveFileName(QString filePath) {
     docWidget->hideFloatingPanel();
     QStringList filters;
-    // generate filter for writable images
-    // todo: some may need to be blacklisted
+    // writable image formats; todo: some may need to be blacklisted
     auto writerFormats = QImageWriter::supportedImageFormats();
     if(writerFormats.contains("jpg"))  filters.append("JPEG (*.jpg *.jpeg *jpe *jfif)");
     if(writerFormats.contains("png"))  filters.append("PNG (*.png)");
@@ -845,11 +794,7 @@ void MW::updateCropPanelData() {
         cropOverlay->setImageDrawRect(viewerWidget->imageRect());
         cropOverlay->setImageScale(viewerWidget->currentScale());
         cropOverlay->setImageRealSize(viewerWidget->sourceSize());
-        // Start framing the whole image: setImageRealSize() just cleared the
-        // selection, and an empty one leaves no visible handle to grab now that
-        // crop mode no longer dims anything. A full-image rect is also inert -
-        // doCrop() routes size == realSize to cancel, so accepting the default
-        // does nothing rather than silently trimming the image.
+        // start with the whole image: a visible handle, and accepting it is a no-op (doCrop cancels)
         cropOverlay->selectAll();
     }
 }
@@ -902,9 +847,7 @@ void MW::showCropPanel() {
     }
 }
 
-// Park the floating crop panel just outside the right edge of the main window,
-// bottom-aligned with its frame. If the screen has no room to the right, the
-// panel is pushed flush against the screen edge and may overlap us.
+// park the crop panel outside the window's right edge, clamped to the screen
 void MW::positionCropPanel() {
     if(!sidePanel || sidePanel->isHidden())
         return;

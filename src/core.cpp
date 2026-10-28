@@ -52,8 +52,7 @@ void Core::readSettings() {
     bool showOther = settings->showOtherFileTypes();
     if(showOther != mShowOtherFileTypes) {
         mShowOtherFileTypes = showOther;
-        // rescan so the new filter takes effect; deferred because the model's own
-        // settingsChanged slot (which updates the filter) may not have run yet
+        // deferred: the model's own settingsChanged slot may not have updated the filter yet
         if(model && !model->directoryPath().isEmpty()) {
             QTimer::singleShot(0, this, [this]() {
                 model->setDirectory(model->directoryPath());
@@ -67,10 +66,6 @@ void Core::readSettings() {
 void Core::showGui() {
     if(mw && !mw->isVisible())
         mw->showDefault();
-    // The show is queued; the timer below already defers setupFullUi() past it,
-    // so pumping the event loop here bought nothing. It also ran before
-    // QApplication::exec() had started, where draining the queue by hand is
-    // exactly the re-entrancy the FIXME warned about.
     QTimer::singleShot(50, mw, &MW::setupFullUi);
 }
 
@@ -123,9 +118,7 @@ void Core::connectComponents() {
             fileOps, &FileOperationsController::movePathsTo);
     connect(&folderViewPresenter, &DirectoryPresenter::statusTextChanged,
             mw, &MW::setFolderStatusText);
-    // Grid-view live-follow: statusTextChanged is the one signal Core already
-    // receives on every grid selection change (and on file add/remove/rename),
-    // so it doubles as the retarget trigger for the File info popup.
+    // statusTextChanged fires on every grid selection change, so it retargets the File info popup
     connect(&folderViewPresenter, &DirectoryPresenter::statusTextChanged,
             this, &Core::retargetFileInfoDialog);
 
@@ -303,9 +296,7 @@ void Core::loadTranslation() {
         QApplication::removeTranslator(translator);
         return;
     }
-    // XDG data dirs (~/.local/share/thumbgrid/translations first, then the
-    // system ones), then the compiled-in TRANSLATIONS_PATH, then the build-tree
-    // copy next to the binary so an uninstalled run still finds its .qm files.
+    // XDG data dirs, then the compiled-in path, then the build tree for uninstalled runs
 #ifdef TRANSLATIONS_PATH
     QStringList trDirs = AppPaths::dataDirs(QStringLiteral("translations"), QStringLiteral(TRANSLATIONS_PATH));
 #else
@@ -372,15 +363,8 @@ void Core::toggleSlideshow() {
     }
 }
 
-// Reachable from the grid's context menu now, not just from a key binding, so
-// it has to survive being invoked with an empty folder or with no document
-// open at all - startSlideshowTimer() dereferences the model unconditionally.
-//
-// Starting from the grid begins at the highlighted file. enableDocumentView()
-// only picks a path when nothing is open *at all*, so without this the
-// slideshow would resume at whatever was last viewed rather than at the file
-// the user just right-clicked. The path is read before the view switch, while
-// the grid selection is still the meaningful one.
+// Also reachable from the grid menu, so it must cope with an empty folder or nothing open.
+// From the grid it starts at the highlighted file, read before the view switch.
 void Core::startSlideshow() {
     if(slideshow)
         return;
@@ -397,8 +381,7 @@ void Core::startSlideshow() {
     slideshow = true;
     mw->setLoopPlayback(false);
     enableDocumentView();
-    // skipped when enableDocumentView() already landed on it, which is the
-    // common case of opening the grid selection with nothing loaded yet
+    // enableDocumentView() usually lands on it already
     if(!startAt.isEmpty() && startAt != state.currentFilePath)
         loadPath(startAt);
     startSlideshowTimer();
@@ -438,9 +421,7 @@ void Core::onModelLoaded() {
 }
 
 void Core::onDirectoryViewFileActivated(const QString& filePath) {
-    // with showOtherFileTypes the grid can contain files thumbgrid cannot
-    // render; keep the user in the folder view with a clear message instead of
-    // switching to an empty document view
+    // unrenderable "other" files stay in the folder view with a message
     if(settings->showOtherFileTypes()) {
         DocumentInfo info(filePath);
         if(info.type() == DocumentType::NONE) {
@@ -487,27 +468,20 @@ void Core::stripMetadata() {
     stripMetadataAt(selectedPath());
 }
 
-// Rewrites the file in place and cannot be undone, so every route confirms -
-// the File info window's red button and any shortcut bound to the action alike.
-// The path is a parameter rather than re-derived from the selection because the
-// File info window targets one specific file.
+// Rewrites the file irreversibly, so every route confirms. Takes a path because the File info window targets one file.
 void Core::stripMetadataAt(const QString &path) {
     if(!model || model->isEmpty() || path.isEmpty())
         return;
     auto img = model->getImage(path);
     if(!img)
         return;
-    // The type gate alone is not enough: a heif is a perfectly ordinary STATIC
-    // image that exiv2 simply cannot rewrite, and without this the user would
-    // get the "cannot be undone" confirmation below for an operation that can
-    // only fail.
+    // heif is STATIC but exiv2 cannot rewrite it; don't confirm an operation that can only fail
     if((img->type() != STATIC && img->type() != ANIMATED) ||
        !DocumentInfo::supportsMetadataWriting(path)) {
         mw->showMessage(tr("Cannot strip metadata from this file type"));
         return;
     }
-    // Titled like the button that raised it ("Clear metadata"); the action it
-    // runs keeps its original name (stripMetadata) for shortcut compatibility.
+    // titled like the button; the action keeps its old name for shortcut compatibility
     if(!mw->showConfirmation(tr("Clear metadata"),
                              tr("Permanently remove all metadata from \"%1\"?\n"
                                 "This rewrites the file and cannot be undone.")
@@ -516,10 +490,7 @@ void Core::stripMetadataAt(const QString &path) {
         return;
     if(img->stripMetadata()) {
         reloadImage(path);
-        // The window that raised this is still open on the rows just deleted,
-        // and nothing else retargets it: the selection did not change, so the
-        // grid's statusTextChanged never fires. Without this the EXIF tab keeps
-        // showing metadata the file no longer has until it is reopened.
+        // the selection did not change, so nothing else refreshes the open File info window
         retargetFileInfoDialog();
         mw->showMessageSuccess(tr("Metadata removed"));
     } else {
@@ -527,11 +498,7 @@ void Core::stripMetadataAt(const QString &path) {
     }
 }
 
-// The three scoped removals. Each is stripMetadataAt() with a narrower verb:
-// same type gate, same confirmation weight (all three rewrite the file and none
-// is individually recoverable), same reload-and-retarget refresh. The scope is
-// named in the prompt rather than left to the button label, because "remove all"
-// on its own reads as "remove everything" whichever tab it was pressed on.
+// Scoped removals: same gate, confirmation and refresh as stripMetadataAt(); the prompt names the scope.
 void Core::removeAllExifAt(const QString &path) {
     runScopedMetadataRemoval(
         path, tr("Remove all Exif"),
@@ -561,10 +528,6 @@ void Core::removeIccProfileAt(const QString &path) {
         tr("Could not remove the colour profile"));
 }
 
-// The part all three share. A member function pointer rather than three copies:
-// they differ in one call and three strings, and keeping them identical is the
-// point - a removal that skipped the confirmation or the refresh would be a bug
-// nobody would notice until it shipped.
 void Core::runScopedMetadataRemoval(const QString &path, const QString &title,
                                     const QString &prompt, MetadataRemoval removal,
                                     const QString &okMessage, const QString &failMessage) {
@@ -583,8 +546,7 @@ void Core::runScopedMetadataRemoval(const QString &path, const QString &title,
     DocumentInfo docInfo(path);
     if((docInfo.*removal)()) {
         reloadImage(path);
-        // The window that raised this is still open on the rows just deleted,
-        // and nothing else retargets it: the selection did not change.
+        // the selection did not change, so nothing else refreshes the open File info window
         retargetFileInfoDialog();
         mw->showMessageSuccess(okMessage);
     } else {
@@ -592,9 +554,7 @@ void Core::runScopedMetadataRemoval(const QString &path, const QString &title,
     }
 }
 
-// One curated XMP field, committed from the File info window. No confirmation,
-// for the same reason saveMetadataTagAt() has none: the user typed into a field
-// that showed the old value, and retyping it puts it back.
+// No confirmation: the user typed over a field showing the old value and can retype it.
 void Core::saveXmpTagAt(const QString &path, const QString &key, const QStringList &values) {
     if(path.isEmpty() || !DocumentInfo::supportsXmpEditing(path))
         return;
@@ -609,9 +569,7 @@ void Core::saveXmpTagAt(const QString &path, const QString &key, const QStringLi
     mw->showMessageSuccess(tr("XMP saved"));
 }
 
-// One custom-property grid row. A renamed key is an erase plus an add, because
-// exiv2 has no rename - so the old property goes first, and only then is the new
-// one written.
+// exiv2 has no rename: erase the old key, then write the new one
 void Core::saveCustomXmpAt(const QString &path, const QString &oldKey, const QString &newKey,
                            const QString &value, const QString &namespaceUri) {
     if(path.isEmpty() || !DocumentInfo::supportsXmpEditing(path) || newKey.isEmpty())
@@ -621,8 +579,7 @@ void Core::saveCustomXmpAt(const QString &path, const QString &oldKey, const QSt
     if(!oldKey.isEmpty() && oldKey != newKey)
         ok = docInfo.eraseXmpKey(oldKey);
     if(ok) {
-        // An existing prefix takes the plain write; a new one has to register
-        // its namespace first, which is what addCustomXmpProperty() is for.
+        // a new prefix must register its namespace first (addCustomXmpProperty)
         const QStringList parts = newKey.split(QLatin1Char('.'));
         const bool known = parts.size() == 3 && DocumentInfo::isKnownXmpPrefix(parts.at(1));
         if(known && namespaceUri.isEmpty())
@@ -642,8 +599,7 @@ void Core::saveCustomXmpAt(const QString &path, const QString &oldKey, const QSt
     mw->showMessageSuccess(tr("Property saved"));
 }
 
-// No confirmation: the remove toggle the user switched on is the deliberate act,
-// and a key and value can be retyped. Same line saveMetadataTagAt() draws.
+// No confirmation: switching the remove toggle on is the deliberate act.
 void Core::removeCustomXmpAt(const QString &path, const QString &key) {
     if(path.isEmpty() || !DocumentInfo::supportsXmpEditing(path) || key.isEmpty())
         return;
@@ -658,24 +614,18 @@ void Core::removeCustomXmpAt(const QString &path, const QString &key) {
     mw->showMessageSuccess(tr("Property removed"));
 }
 
-// Writes one tag committed in the File info window's EXIF tab. No confirmation
-// prompt, unlike stripMetadata(): a single text field is individually
-// recoverable by retyping it, and the user typed it deliberately into a field
-// that showed the old value.
+// No confirmation: a single field is recoverable by retyping it.
 void Core::saveMetadataTagAt(const QString &path, const QString &key, const QString &value) {
     if(path.isEmpty() || !DocumentInfo::supportsMetadataEditing(path))
         return;
     DocumentInfo docInfo(path);
     if(!docInfo.setEditableTags({{key, value}})) {
         mw->showMessage(tr("Could not save metadata"));
-        // Puts the rejected field back to what is actually on disk, so the row
-        // never keeps a value the file does not have.
+        // restore the rejected field to what is on disk
         retargetFileInfoDialog();
         return;
     }
-    // Same refresh stripMetadata() does: the image and its cached tag maps both
-    // have to be re-read before the File info window is retargeted, or it shows
-    // the pre-edit values back at the user.
+    // reload image and tag maps before retargeting, or the window shows pre-edit values
     reloadImage(path);
     retargetFileInfoDialog();
     mw->showMessageSuccess(tr("Metadata saved"));
@@ -744,9 +694,7 @@ void Core::togglePlacesPanel() {
 }
 
 void Core::copyFileClipboard() {
-    // In folder view copy the whole selection (files and/or directories) as a file
-    // list, like a file manager. In image view keep copying the image's pixel data
-    // too, so it can be pasted into image editors.
+    // folder view copies the selection as a file list; image view also copies the pixels
     if(mw->currentViewMode() == MODE_FOLDERVIEW) {
         copySelectionToClipboard(false);
         return;
@@ -769,9 +717,7 @@ void Core::cutFileClipboard() {
     copySelectionToClipboard(true);
 }
 
-// Puts the current selection (files and/or directories) onto the clipboard as a
-// file list, using the cross-desktop "x-special/gnome-copied-files" + KDE markers
-// so the operation interoperates with file managers (and our own pasteFile()).
+// file list plus gnome/KDE markers, so file managers (and pasteFile()) understand it
 void Core::copySelectionToClipboard(bool cut) {
     QStringList paths = currentSelection();
     if(paths.isEmpty())
@@ -798,19 +744,14 @@ void Core::copySelectionToClipboard(bool cut) {
         mw->showMessage(paths.count() > 1 ? tr("%1 items copied").arg(paths.count()) : tr("Item copied"));
 }
 
-// Paste files/dirs from the clipboard into the currently open directory.
-// Copy vs move (cut) is decided from the clipboard markers. Falls back to the
-// old image-buffer / url open behaviour when there are no local files to paste.
+// Copy or move (cut) per the clipboard markers; falls back to opening the clipboard content.
 void Core::pasteFile() {
     auto cb = QApplication::clipboard();
     auto mimeData = cb->mimeData();
     if(!mimeData)
         return;
 
-    // The paste destination is the currently open folder, whether or not it
-    // contains any image files. model->isEmpty() only counts image files, so
-    // gating on it made pasting into an image-less folder fall back to
-    // openFromClipboard() (which opens the source file in image view instead).
+    // paste into the open folder even when it has no images (isEmpty() counts images only)
     QString destDirectory = model ? model->directoryPath() : "";
 
     // gather local file paths from the clipboard
@@ -823,8 +764,7 @@ void Core::pasteFile() {
         }
     }
 
-    // No real files to paste, or no folder to paste into: keep the legacy behaviour
-    // (open a url / save a clipboard image).
+    // nothing to paste, or no folder: open a url / save a clipboard image instead
     if(paths.isEmpty() || destDirectory.isEmpty()) {
         openFromClipboard();
         return;
@@ -856,31 +796,22 @@ void Core::pasteFile() {
     }
 
     if(cut) {
-        // A cut+paste moves the files, deleting them from the source folder, so
-        // confirm it first like the other move path (movePathsTo) does. Returning
-        // early keeps the clipboard intact so the cut selection survives a decline.
+        // a cut deletes from the source, so confirm like movePathsTo; declining keeps the clipboard
         if(!fileOps->movePathsTo(toPaste, destDirectory))
             return;
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
     } else {
-        // interactiveCopy() rather than copyPathsTo() so a plain paste does not
-        // raise a confirmation prompt. It still enforces the containment rule,
-        // and returns false when it refuses - do not claim success then, and
-        // leave the clipboard alone so the paste can be retried elsewhere.
+        // no prompt for a plain paste; on refusal keep the clipboard so it can be retried
         if(!fileOps->interactiveCopy(toPaste, destDirectory))
             return;
         mw->showMessage(toPaste.count() > 1 ? tr("%1 items pasted").arg(toPaste.count()) : tr("Item pasted"));
     }
-    // Clear the clipboard once the paste is done. For a move this stops a second
-    // paste from failing on already-moved files; for a copy it gives the same
-    // one-shot paste behaviour, so the same files aren't accidentally re-pasted.
+    // one-shot paste: a second paste of moved (or copied) files would fail or duplicate
     QApplication::clipboard()->clear();
 }
 
 void Core::copyPathClipboard() {
-    // isEmpty() only counts image files, so it wrongly blocks copying a folder's
-    // path when the open directory has no images (see Core::showRenameDialog).
-    // copy every selected path (one per line) so it covers a multi-selection in folder view
+    // guard on the selection, not isEmpty() (images only); one path per line
     QStringList paths = currentSelection();
     if(paths.isEmpty())
         return;
@@ -888,8 +819,6 @@ void Core::copyPathClipboard() {
     mw->showMessage(paths.count() > 1 ? tr("%1 paths copied").arg(paths.count()) : tr("Path copied"));
 }
 
-// open from clipboard
-// todo: actual file paste into folderview (like filemanager)
 void Core::openFromClipboard() {
     auto cb = QApplication::clipboard();
     auto mimeData = cb->mimeData();
@@ -955,8 +884,7 @@ void Core::onDropIn(const QMimeData *mimeData, QObject* source) {
     }
 }
 
-// drag'n'drop
-// drag image out of the program
+// drag the image out of the program
 void Core::onDraggedOut() {
     onDraggedOut(currentSelection());
 }
@@ -987,23 +915,15 @@ QMimeData *Core::getMimeDataForImage(const std::shared_ptr<Image>& img, MimeData
     QString path = img->filePath();
     if(img->type() == STATIC) {
         if(img->isEdited()) {
-            // Private, session-lifetime directory for exported edited-image
-            // payloads. Created lazily on first use. Not scope-bound and never
-            // deleted here: the receiving app (drop target or paste consumer)
-            // reads the file's URL asynchronously, after this function has
-            // already returned, so the file must outlive the call. It is
-            // cleaned up when mExportTmpDir is destroyed (end of the Core's
-            // lifetime), and Settings::setupCache() sweeps any leftovers from
-            // a previous abnormal exit at startup.
+            // Session-lifetime export dir: receivers read the file after we return, so it lives until Core dies.
+            // Settings::setupCache() sweeps leftovers from a crash.
             if(!mExportTmpDir) {
                 mExportTmpDir = std::make_unique<QTemporaryDir>(settings->tmpDir() + QStringLiteral("export-"));
                 if(mExportTmpDir->isValid()) {
                     // owner-only, so nothing else can reach the exported image while it is on disk
                     QFile::setPermissions(mExportTmpDir->path(),
                                            QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
-                    // Claim the dir for this session. Held until Core dies, so
-                    // another instance starting up sweeps every other leftover
-                    // but skips this one while we may still export into it.
+                    // held until Core dies so other instances' startup sweep skips this dir
                     mExportTmpLock = std::make_unique<QLockFile>(mExportTmpDir->filePath(QStringLiteral(".tg-lock")));
                     mExportTmpLock->setStaleLockTime(0);
                     if(!mExportTmpLock->tryLock(0)) {
@@ -1016,16 +936,14 @@ QMimeData *Core::getMimeDataForImage(const std::shared_ptr<Image>& img, MimeData
                 }
             }
             if(mExportTmpDir) {
-                // Unique name per export: two overlapping exports (drag then
-                // copy, or two selections) must never collide on one path.
+                // unique per export so overlapping exports never collide
                 QString exportPath = mExportTmpDir->filePath(QStringLiteral("export-%1.png").arg(mExportFileCounter++));
                 // use faster compression for drag'n'drop
                 int pngQuality = (target == TARGET_DROP) ? 80 : ImageWriter::qualityFor(QStringLiteral("png"));
                 if(img->getImage()->save(exportPath, nullptr, pngQuality))
                     path = exportPath;
                 else
-                    // Never silently: falling through here hands the consumer the
-                    // original file, i.e. the image without the user's edits.
+                    // never fall through silently: the consumer would get the file without the edits
                     qCWarning(logCore) << "Could not write edited-image export to" << exportPath
                                        << "- handing over the unedited original instead";
             }
@@ -1048,16 +966,13 @@ void Core::setFoldersDisplay(bool mode) {
         folderViewPresenter.setShowDirs(mode);
 }
 
-// Type-ahead search in the folder grid: the view owns the typed prefix, we
-// resolve it against the model and report back whether it matched.
+// type-ahead: the view owns the prefix; resolve it against the model
 void Core::searchFolderView(const QString& prefix) {
     mw->setFolderViewSearchMatched(folderViewPresenter.selectByNamePrefix(prefix));
 }
 
 void Core::renameCurrentSelection(const QString& newName) {
-    // Guard on the actual selection rather than the image file count: in folder
-    // view the selection may be a directory, and the open directory can hold
-    // zero images (fileCount()==0) while still containing folders to rename.
+    // the selection may be a folder in a folder with no images
     if(selectedPath().isEmpty() || newName.isEmpty())
         return;
     FileOpResult result;
@@ -1152,9 +1067,7 @@ void Core::showInDirectory() {
     PlatformDesktop::showInDirectory(selectedPath(), model->directoryPath());
 }
 
-// Converts the currently selected file(s) to another image format.
-// The converted copy is written next to the original (same base name, new extension).
-// Only static images are supported; animated images and video are skipped.
+// Writes a converted copy next to each selected static image; others are skipped.
 void Core::convertSelectionToFormat(QString format) {
     if(!model || model->isEmpty())
         return;
@@ -1179,8 +1092,7 @@ void Core::moveCurrentFile(const QString& destDirectory) {
     mw->repaint();
 }
 
-// In folder view there is no move overlay; ask for a destination directly.
-// Document view keeps the overlay flow.
+// folder view asks for a destination directly; document view uses the overlay
 void Core::moveSelection() {
     if(mw->currentViewMode() == MODE_FOLDERVIEW) {
         if(!model)
@@ -1191,8 +1103,7 @@ void Core::moveSelection() {
         QString destDir = QFileDialog::getExistingDirectory(mw, tr("Move to..."), model->directoryPath());
         if(destDir.isEmpty())
             return;
-        // containment is enforced centrally in FileOperationsController, which
-        // also canonicalizes paths, so every route gets the same guard
+        // FileOperationsController canonicalizes and enforces containment for every route
         fileOps->movePathsTo(selection, destDir);
     } else {
         mw->triggerMoveOverlay();
@@ -1233,8 +1144,7 @@ void Core::showResizeDialog() {
     if(model->isEmpty())
         return;
     if(mw->currentViewMode() == MODE_FOLDERVIEW) {
-        // The grid writes resized copies of the whole selection. An in-place
-        // edit here would never be shown or saved, so it is not offered.
+        // the grid writes resized copies; an in-place edit would never be shown or saved
         QStringList images = FileOperationsController::expandSelectedFolders(currentSelection());
         QSize seed;
         // seed from the most recently selected image; header only, no decode
@@ -1282,9 +1192,7 @@ void Core::edit_template(const std::function<std::unique_ptr<QImage>(std::shared
     updateInfoString();
 }
 
-// Flip and rotate are picture-view edits, like crop: the result is shown and
-// saved deliberately. From the grid they used to overwrite every selected
-// original straight after a confirmation, unseen - so the grid ignores them.
+// Flip/rotate are picture-view edits saved deliberately; the grid ignores them.
 void Core::flipH() {
     if(mw->currentViewMode() == MODE_FOLDERVIEW)
         return;
@@ -1326,8 +1234,7 @@ void Core::saveCurrentFile() {
     saveCurrentFileAs(selectedPath());
 }
 
-// Encoding can take seconds (heic, avif, large png), so a still image is
-// written on a worker and the save overlay waits in a busy state meanwhile.
+// encoding can take seconds, so still images are written on a worker (overlay shows busy)
 void Core::saveCurrentFileAs(const QString& destPath) {
     if(model->isEmpty())
         return;
@@ -1377,8 +1284,7 @@ void Core::discardEdits() {
     mw->hideSaveOverlay();
 }
 
-// The save overlay follows the shown image: visible while it has unsaved
-// edits, busy while it is being written.
+// visible while the shown image has unsaved edits, busy while it is being written
 void Core::syncSaveOverlay() {
     const QString &path = state.currentFilePath;
     syncSaveOverlay(model->isLoaded(path) ? model->getImage(path) : nullptr);
@@ -1437,8 +1343,7 @@ void Core::sortBySize() {
 }
 
 void Core::showRenameDialog() {
-    // isEmpty() only counts image files, so it wrongly blocks renaming a folder
-    // when the open directory has no images. Gate on the selection instead.
+    // gate on the selection, not isEmpty() (counts images only)
     if(selectedPath().isEmpty())
         return;
     QFileInfo fi(selectedPath());
@@ -1471,10 +1376,7 @@ void Core::showFileInfoDialog() {
                 this, &Core::removeAllXmpAt);
         connect(fileInfoDialog.get(), &FileInfoDialog::removeIccProfileRequested,
                 this, &Core::removeIccProfileAt);
-        // Queued: the signal originates in a row's line edit, and the write ends
-        // in retargetFileInfoDialog(), which deletes and rebuilds that very row.
-        // Returning to the event loop first keeps the sender alive for the rest
-        // of its own event handler.
+        // Queued: the write rebuilds the row whose line edit sent the signal.
         connect(fileInfoDialog.get(), &FileInfoDialog::metadataEditRequested,
                 this, &Core::saveMetadataTagAt, Qt::QueuedConnection);
         connect(fileInfoDialog.get(), &FileInfoDialog::xmpEditRequested,
@@ -1624,8 +1526,7 @@ bool Core::loadPath(QString path) {
     // load file / folderview
     if(fileInfo.isFile()) {
         int index = model->indexOfFile(fileInfo.absoluteFilePath());
-        // DirectoryManager only checks file extensions via regex (performance reasons)
-        // But in this case we force check mimetype
+        // DirectoryManager matches extensions only; check the mimetype here
         if(index == -1) {
             QStringList types = settings->supportedMimeTypes();
             QMimeDatabase db;
@@ -1662,9 +1563,7 @@ bool Core::setDirectory(const QString& path) {
     return true;
 }
 
-// Cheap, extension-based "is this a video?" check. Used at navigation time
-// (before the file is loaded), so it must not touch file contents the way
-// DocumentInfo's mime detection does.
+// Extension-only video check, used before the file is loaded.
 static bool isVideoFile(const QString &path) {
     const QString suffix = QFileInfo(path).suffix().toLower();
     if(suffix.isEmpty())
@@ -1682,14 +1581,10 @@ bool Core::loadFileIndex(int index, bool async, bool preload) {
     auto entry = model->fileEntryAt(index);
     if(entry.path.isEmpty())
         return false;
-    // We're navigating to another item. Let the viewer pause/blank the outgoing
-    // item as needed for the upcoming type (determined cheaply from the
-    // extension, since the file isn't loaded yet).
+    // let the viewer prepare the outgoing item for the next type
     bool nextIsVideo = isVideoFile(entry.path);
     bool currentIsVideo = state.currentImg && state.currentImg->type() == DocumentType::VIDEO;
-    // Switching from a video to an image: load synchronously so the decoded
-    // image is shown the instant the video is hidden. With an async load there
-    // is a gap where neither is ready and the window background flashes through.
+    // video -> image: load synchronously so no blank frame shows between them
     if(currentIsVideo && !nextIsVideo)
         async = false;
     mw->prepareForLoad(nextIsVideo);
@@ -1716,19 +1611,14 @@ void Core::loadParentDir() {
         return;
     }
     QFileInfo parentDir(currentDir.absolutePath());
-    // With root browsing disabled, the parent of e.g. /home is the unviewable
-    // root - treat it as the ceiling and no-op instead of routing into
-    // loadPath() and flashing a misleading "Cannot view root folder" toast.
+    // without root browsing, the root's children are the ceiling
     if(!settings->allowBrowseRoot() &&
        QDir::cleanPath(parentDir.absoluteFilePath()) == QDir::cleanPath(QDir::rootPath()))
         return;
     if(parentDir.exists() && parentDir.isReadable()) {
         QString childPath = currentDir.absoluteFilePath();
         loadPath(parentDir.absoluteFilePath());
-        // Loading the parent repopulates the folder view, which resets the
-        // selection to the first item (populate() -> selectAndFocus(0)) and
-        // queues layout events. Defer selecting the subdir we came from until
-        // those settle, otherwise our selection is immediately overwritten.
+        // populate() selects item 0 and queues layout; select the child dir after that settles
         QTimer::singleShot(0, this, [this, childPath]() {
             if(mw->currentViewMode() == MODE_FOLDERVIEW)
                 folderViewPresenter.selectAndFocus(childPath);
@@ -1785,15 +1675,12 @@ void Core::prevDirectory() {
     prevDirectory(false);
 }
 
-// With showOtherFileTypes the file list can contain entries thumbgrid cannot
-// render; everything else in the model already matches the supported-formats
-// filter, so the DocumentInfo probe is only needed when that setting is on.
+// only "other" files need the DocumentInfo probe; the rest already passed the format filter
 bool Core::canDisplayFile(const QString &path) const {
     return !settings->showOtherFileTypes() || DocumentInfo(path).type() != DocumentType::NONE;
 }
 
-// Nearest model index at/after (step = 1) or at/before (step = -1) `from`
-// whose file can be displayed. Returns -1 if there is none in that direction.
+// nearest displayable index at/after (step 1) or at/before (step -1) `from`, or -1
 int Core::nearestViewableIndex(int from, int step) const {
     for(int i = from; i >= 0 && i < model->fileCount(); i += step) {
         if(canDisplayFile(model->filePathAt(i)))
@@ -1802,8 +1689,7 @@ int Core::nearestViewableIndex(int from, int step) const {
     return -1;
 }
 
-// Advances the randomizer past unviewable entries. Bounded so a folder with
-// no viewable files left cannot spin forever.
+// bounded so a folder with nothing viewable left cannot spin forever
 int Core::nextShuffledViewable(bool forward) {
     int index = forward ? randomizer.next() : randomizer.prev();
     for(int tries = 0; tries < model->fileCount() && !canDisplayFile(model->filePathAt(index)); tries++)
@@ -1880,8 +1766,7 @@ void Core::nextImageSlideshow() {
 }
 
 void Core::startSlideshowTimer() {
-    // start timer only for static images or single frame gifs
-    // for proper gifs and video we get a playbackFinished() signal
+    // only static images and single-frame gifs; animations and video emit playbackFinished()
     auto img = model->getImage(state.currentFilePath);
     if(!img) // unviewable file (e.g. with showOtherFileTypes enabled)
         return;
@@ -1915,8 +1800,7 @@ void Core::jumpToLast() {
 }
 
 void Core::onLoadFailed(const QString &path) {
-    // background preloads of unviewable neighbors also fail; only report
-    // failures for the file the user is actually looking at
+    // only report failures for the file being viewed, not background preloads
     if(path != state.currentFilePath)
         return;
     mw->showMessage(tr("Cannot display file: ") + path);
@@ -1973,8 +1857,7 @@ void Core::guiSetImage(const std::shared_ptr<Image>& img) {
         mw->showAnimation(animated->getMovie());
     } else if(type == VIDEO) {
         auto video = dynamic_cast<Video *>(img.get());
-        // workaround for mpv. If we play video while mainwindow is hidden we get black screen.
-        // affects only initial startup (e.g. we open webm from file manager)
+        // mpv shows black when playback starts with the window hidden (opening a video from a file manager)
         showGui();
         mw->showVideo(video->filePath());
     } else if(type == TEXT) {
@@ -2009,8 +1892,6 @@ void Core::updateInfoString() {
                        slideshow,
                        shuffle,
                        edited);
-    // Document-view live-follow: updateInfoString() is the chokepoint for
-    // every current-image change (and for the current file being removed),
-    // so retargeting here keeps the popup in sync in document mode.
+    // every current-image change passes here, so retarget the popup
     retargetFileInfoDialog();
 }

@@ -20,42 +20,14 @@ class QDateTime;
 class EntryInfoItem;
 class DateTimePickerPopup;
 
-// Non-modal inspector window showing metadata for the current selection.
-// Core owns a single instance and retargets it live as the document-view
-// image or the grid selection changes (docs/009 §B1). Each metadata tab is
-// shown for a format that can carry its own kind of metadata, tags or no tags,
-// and hidden entirely for anything else (docs/009 §B2). The gate differs per
-// tab because the kinds are not writable in the same containers: EXIF is shown
-// where exiv2 can write Exif (jpeg/webp), while XMP and ICC are shown wherever
-// the format can hold them (jpeg/png/webp/tiff). A png therefore opens with XMP
-// and ICC tabs and no EXIF tab at all.
-//
-// Every metadata tab now writes, and each writes only its own kind: the EXIF
-// tab has its four editable text tags, the XMP tab has a curated typed set plus
-// a grid for custom properties, and the ICC tab can discard the profile. Each
-// tab carries exactly one removal button, scoped to that tab - so clearing
-// everything is three deliberate acts in three places rather than one button
-// that reaches across the file. The
-// whole-file strip is deliberately *not* here any more; it remains an
-// ActionManager action reachable by shortcut and menu, which is also the only
-// route that removes Iptc, since Iptc has no tab of its own.
-//
-// Buttons follow one visibility rule: hidden when they do
-// not belong on the current tab *or* when there is nothing for them to remove,
-// and merely disabled when there is something to remove but the file cannot be
-// written. Greying therefore means exactly one thing - "there is something
-// here, but I cannot write to this file".
+// Non-modal metadata inspector; Core owns one instance and retargets it as the selection changes.
+// Each metadata tab shows for formats that can carry its kind, tags or not.
 class FileInfoDialog : public QDialog {
     Q_OBJECT
 public:
     explicit FileInfoDialog(QWidget *parent = nullptr);
 
-    // Repopulates the General, EXIF, XMP and ICC tabs for path. An empty or
-    // missing path drops to a "No selection" placeholder and hides all three
-    // metadata tabs, as does a folder or a non-image. An image keeps whichever
-    // of them its format can carry open whether or not it holds anything today
-    // - having none is a state worth seeing, and on a writable file worth
-    // typing into.
+    // Empty/missing path, folders and non-images show "No selection" and hide the metadata tabs.
     void setTarget(const QString &path);
     void clearTarget();
 
@@ -86,18 +58,12 @@ public:
     QLabel *xmpNotice() const { return mXmpNotice; }
 
 signals:
-    // One signal per committed field. The EXIF tab has no Save button, so each
-    // row is its own write. The path is carried rather than re-derived because
-    // this window targets one file while Core::selectedPath() takes the last of
-    // a multi-selection.
+    // One signal per committed field (no Save button). Carries the path: Core::selectedPath() is the last of a multi-selection.
     void metadataEditRequested(const QString &path, const QString &key, const QString &value);
     // A curated XMP key. QStringList rather than QString because Seq and Bag
     // values are lists, and the displayed joined form cannot be re-split.
     void xmpEditRequested(const QString &path, const QString &key, const QStringList &values);
-    // One custom grid row committed. oldKey is empty when the row is new; when
-    // it differs from newKey the row was renamed, which in exiv2 is an erase
-    // plus an add rather than a rename. namespaceUri is filled in only when the
-    // prefix is one the file does not already declare.
+    // oldKey empty for a new row; differs from newKey on rename (erase + add). namespaceUri only for undeclared prefixes.
     void customXmpEditRequested(const QString &path, const QString &oldKey,
                                 const QString &newKey, const QString &value,
                                 const QString &namespaceUri);
@@ -130,9 +96,7 @@ private:
     // An editable tag: same row shape, but the value is an input field wired
     // back to commitEditableTag().
     void addEditableExifRow(const QString &key, const QString &value);
-    // A curated XMP key, with the widget its declared type calls for: a plain
-    // field for Text and LangAlt, a short one-item-per-line editor for Seq and
-    // Bag.
+    // plain field for Text/LangAlt, one-item-per-line editor for Seq/Bag
     void addEditableXmpRow(const QString &key, const QStringList &values);
     // One custom-property grid row. An empty key and value make the trailing
     // affordance row, which is never written.

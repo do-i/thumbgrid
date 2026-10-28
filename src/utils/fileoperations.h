@@ -47,14 +47,9 @@ public:
 
 private:
     static QString generateHash(const QString &str);
-    // shared "back up an existing destination file" step for copyFileTo()/moveFileTo():
-    // validates destFile can be replaced and, if force is set, moves it aside to a
-    // hash-suffixed tmp path so a failed copy/move can restore it. Returns SUCCESS to
-    // mean "proceed" (with tmpPath/backedUp set only when destFile existed); any other
-    // FileOpResult means bail out with that result.
+    // If destFile exists, check it may be replaced and (with force) move it aside so a failed copy/move
+    // can restore it. SUCCESS means proceed.
     static FileOpResult backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp);
-    // shared "restore mtime/atime after a QFile::copy()" step for copyFileTo()/moveFileTo();
-    // returns false if filePath could not be reopened, in which case the timestamps were
-    // left untouched
+    // restore mtime/atime after QFile::copy(); false if the file could not be reopened
     static bool restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime);
 };

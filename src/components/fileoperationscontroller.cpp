@@ -13,8 +13,7 @@ FileOperationsController::FileOperationsController(MW *mw, QObject *parent)
 }
 
 FileOperationsController::~FileOperationsController() {
-    // the worker only touches its own files, but its completion report targets
-    // this object - stop after the current file and let it drain first
+    // the worker's completion report targets this object: stop after the current file and drain
     if(resizeThread) {
         cancelResize = true;
         resizeThread->wait();
@@ -36,14 +35,8 @@ void FileOperationsController::outputError(const FileOpResult &error) const {
     qCWarning(logCore) << FileOperations::decodeResult(error);
 }
 
-// QFileInfo::canonicalFilePath() returns an empty string for a path that
-// does not exist (or has a non-existent tail), so a straight
-// QDir::cleanPath() fallback would leave any symlink in the existing part of
-// that path un-resolved. Walk up to the deepest existing ancestor,
-// canonicalize just that ancestor, and re-append the non-existent tail
-// verbatim - a route to a source that goes through a symlinked existing
-// ancestor is still caught, and once the whole path exists this reduces to
-// plain canonicalFilePath(), unchanged from before.
+// canonicalFilePath() is empty for a nonexistent path: canonicalize the deepest existing
+// ancestor and re-append the tail, so symlinks in the existing part still resolve
 static QString canonicalizeAsFarAsPossible(const QString &path) {
     QFileInfo direct(path);
     QString canonical = direct.canonicalFilePath();
@@ -58,38 +51,22 @@ static QString canonicalizeAsFarAsPossible(const QString &path) {
         QString ancestor = QLatin1Char('/') + parts.join(QLatin1Char('/'));
         canonical = QFileInfo(ancestor).canonicalFilePath();
         if(!canonical.isEmpty()) {
-            // Root canonicalizes to "/", so join without doubling the
-            // separator rather than relying on cleanPath() to collapse it
-            // (a leading "//" is meaningful on Windows and is preserved).
+            // root is "/": avoid doubling the separator ("//" is meaningful on Windows)
             if(!canonical.endsWith(QLatin1Char('/')))
                 canonical += QLatin1Char('/');
             return QDir::cleanPath(canonical + tail.join(QLatin1Char('/')));
         }
     }
-    // Root itself (or nothing at all) could not be canonicalized - give up
-    // and fall back to the cleaned, non-canonical path.
     return clean;
 }
 
-// A destination that is one of the sources, or lives beneath one, makes a
-// recursive copy/move consume its own output and reproduce the tree until the
-// filesystem stops it - in practice the app freezes first.
-//
-// Enforced in interactiveCopy()/interactiveMove() rather than only here.
-// Checking it in copyPathsTo()/movePathsTo() alone was not enough: those are the
-// confirm-then-execute wrappers, and Core::pasteFile() deliberately skips them
-// for a plain paste, so the paste route ran unguarded. Keeping the check in the
-// wrappers as well means a doomed operation is refused before the user is asked
-// to confirm it, rather than after.
-//
-// Paths are canonicalized first so a symlinked route to the same directory is
-// caught too, including a destination that does not exist yet.
+// A destination inside a source makes a recursive copy/move consume its own output.
+// Checked in the interactive executors too, which pasteFile() calls directly.
 bool FileOperationsController::destinationIsInsideSource(const QStringList& paths, const QString& destDirectory) {
     QString dest = canonicalizeAsFarAsPossible(destDirectory);
     for(const auto& path : paths) {
         QFileInfo fi(path);
-        // Only a real directory can contain the destination. A link is
-        // recreated as a link, so it never recurses.
+        // only a real directory can contain the destination; links are recreated as links
         if(fi.isSymLink() || !fi.isDir())
             continue;
         QString src = fi.canonicalFilePath();
@@ -142,14 +119,7 @@ bool FileOperationsController::confirmFileOperation(const QString& action, QStri
     return mw->showConfirmation(action, msg);
 }
 
-// The containment check is repeated here, in the executors, and not left to
-// copyPathsTo()/movePathsTo() alone. Those two are not the only way in:
-// Core::pasteFile() calls interactiveCopy() directly, on purpose, so that a
-// plain paste does not raise a confirmation prompt the way a cut+paste does. A
-// guard living only in copyPathsTo() therefore missed the paste route
-// completely, and pasting a folder into one of its own subfolders recursed
-// until the app froze. Guarding the executor makes the rule unbypassable: every
-// route to a recursive copy or move now passes through one of these two.
+// repeated here: pasteFile() calls this directly, bypassing copyPathsTo()'s check
 bool FileOperationsController::interactiveCopy(const QStringList& paths, const QString& destDirectory) {
     if(destinationIsInsideSource(paths, destDirectory)) {
         outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
@@ -178,8 +148,7 @@ bool FileOperationsController::interactiveMove(const QStringList& paths, const Q
     return true;
 }
 
-// Single copy/move attempt; on DESTINATION_FILE_EXISTS asks via the replace
-// dialog (unless an "all" answer is active) and retries with force.
+// on DESTINATION_FILE_EXISTS ask (unless an "all" answer is active) and retry with force
 void FileOperationsController::doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
                                                const QString &srcPath, const QString &dstPath,
                                                DialogResult &overwriteFiles) {
@@ -315,9 +284,7 @@ void FileOperationsController::removePaths(const QStringList& paths, bool trash)
     int successCount = 0;
     for(const auto& path : paths) {
         QFileInfo fi(path);
-        // isDir() resolves links, so a link pointing at a directory would be
-        // sent down the recursive-directory route and take its target's
-        // contents with it. Classify the link first and remove just the link.
+        // isDir() resolves links: remove just the link, never its target's contents
         if(!fi.isSymLink() && fi.isDir())
             model->removeDir(path, trash, true, result);
         else
@@ -342,8 +309,7 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
     if(!model || paths.isEmpty())
         return;
 
-    // normalize alternate spellings so "jpeg" and "jpg" (or "tiff"/"tif")
-    // count as the same format for both the target and the skip check below
+    // "jpeg"/"jpg" and "tiff"/"tif" count as the same format
     auto normalizeExt = [](const QString &e) {
         if(e == "jpeg") return QStringLiteral("jpg");
         if(e == "tiff") return QStringLiteral("tif");
@@ -356,9 +322,7 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
         QString dest;
         std::shared_ptr<Image> img;
     };
-    // Expand any selected directory to its directly contained convertible
-    // images (non-recursive); a folder with nothing convertible contributes
-    // nothing and falls through to the "Nothing to convert" message below.
+    // selected folders expand to their direct convertible images
     QStringList expandedPaths = expandSelectedFolders(paths);
 
     QList<ConvertJob> jobs;
@@ -378,10 +342,7 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
             skipped++;
             continue;
         }
-        // Counted as skipped rather than left to fail: the save path refuses
-        // these too, but reaching it would report them as conversion errors
-        // when the file is fine and the target format is simply not usable
-        // at this size.
+        // skipped, not failed: the file is fine, the format just can't encode this size
         if(!DocumentInfo::canEncodeToFormat(ext, QSize(img->width(), img->height()))) {
             skipped++;
             continue;
@@ -408,9 +369,7 @@ void FileOperationsController::convertToFormat(const QStringList& paths, const Q
             model->updateImage(job.src, job.img);
             ok = model->saveFile(job.src, job.dest);
         } else {
-            // files expanded from a selected subfolder are not entries of the
-            // open directory, so saveFile would reject them; save directly,
-            // bypassing model bookkeeping (nothing in the model to update)
+            // files from a subfolder aren't model entries: save directly
             ok = job.img->save(job.dest);
         }
         if(ok)
@@ -448,9 +407,7 @@ bool FileOperationsController::isResizeRunning() const {
     return resizeThread != nullptr;
 }
 
-// Copies only: the originals and the model's cached images are never written,
-// so the worker needs no access to the model and cannot clobber a user's
-// unsaved edit. New files reach the grid through the directory watcher.
+// Copies only: originals and cached images are never written; new files arrive via the watcher.
 void FileOperationsController::resizeToCopies(const QStringList& paths, const ResizeSpec& spec) {
     if(isResizeRunning()) {
         mw->showMessage(tr("A resize is already running"));

@@ -226,10 +226,7 @@ void ThumbnailView::showEvent(QShowEvent *event) {
 }
 
 void ThumbnailView::populate(int newCount) {
-    // No event pumping here on purpose: rebuilding the item list must stay
-    // atomic with respect to the event loop, or a queued handler could run
-    // against half-destroyed widgets. Queued events now observe the finished
-    // list instead of the old one, which is what they want anyway.
+    // no event pumping: queued handlers must never see half-destroyed widgets
     clearSelection();
     // reset
     lastScrollDirection = SCROLL_FORWARDS;
@@ -258,9 +255,7 @@ void ThumbnailView::populate(int newCount) {
     updateLayout();
     fitSceneToContents();
     resetViewport();
-    // Painting stays off until the queued layout settles, otherwise the scene
-    // is seen shifting as the scrollbar appears. Re-armed rather than stacked,
-    // so repeated populate() calls collapse into one re-enable.
+    // painting resumes once the queued layout settles (re-armed, so repeated calls collapse)
     layoutSettleTimer.start();
 }
 

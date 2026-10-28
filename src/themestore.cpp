@@ -21,9 +21,7 @@ QString themeFileName(ColorSchemes name) {
     }
 }
 
-// Search the XDG config dirs (user's ~/.config/thumbgrid/themes first, then the
-// system ones), then the compiled-in THEMES_PATH, and fall back to the copy
-// embedded in the binary via resources.qrc so dev/non-XDG builds still work.
+// XDG config dirs, then THEMES_PATH, then the copy embedded in resources.qrc
 QString resolveThemePath(const QString &fileName) {
 #ifdef THEMES_PATH
     const QStringList dirs = AppPaths::configDirs(QStringLiteral("themes"), QStringLiteral(THEMES_PATH));
@@ -36,9 +34,7 @@ QString resolveThemePath(const QString &fileName) {
     return QStringLiteral(":/res/themes/") + fileName;
 }
 
-// Offset a color's HSV value by delta (clamped), preserving hue/saturation.
-// Used to derive table surface colors from the widget background when a preset
-// omits the explicit table_* keys.
+// offset HSV value by delta (clamped); derives table colors when a preset omits table_*
 QColor valueOffset(const QColor &c, int delta) {
     QColor r;
     r.setHsv(c.hue(), c.saturation(), qBound(0, c.value() + delta, 255));
@@ -85,9 +81,7 @@ BaseColorScheme ThemeStore::parseColors(QSettings &settings, int tid) {
 }
 
 BaseColorScheme ThemeStore::loadTheme(const QString &path, int tid) {
-    // QSettings cannot reliably open a read-only qrc resource directly, so copy
-    // the embedded bytes to a temp file before parsing. Real filesystem paths
-    // (the installed /etc copy) are read in place.
+    // QSettings can't reliably open a qrc resource; parse a temp copy
     if(path.startsWith(':')) {
         QFile resource(path);
         if(resource.open(QIODevice::ReadOnly)) {
@@ -165,11 +159,7 @@ void ColorScheme::setBaseColors(BaseColorScheme base) {
     folderview_selected_label_bg = base.folderview_selected_label_bg.isValid() ? base.folderview_selected_label_bg : folderview_label_bg;
     folderview_cell_bg           = base.folderview_cell_bg.isValid() ? base.folderview_cell_bg : folderview;
 
-    // Settings dialog shortcuts table. Presets/custom configs that omit these
-    // keys must still render a themed table (not native white), so derive the
-    // surface from the widget background: dark themes get a slightly-lighter
-    // surface with a lighter header/gridline; light themes keep the native-ish
-    // white look with a light-gray header and grid.
+    // derive table surfaces from the widget background when the theme omits them
     if(widget.valueF() <= 0.45f) { // dark
         table_bg     = base.table_bg.isValid()     ? base.table_bg     : valueOffset(widget, 8);
         table_bg_alt = base.table_bg_alt.isValid() ? base.table_bg_alt : valueOffset(table_bg, 6);
@@ -185,9 +175,7 @@ void ColorScheme::setBaseColors(BaseColorScheme base) {
 }
 
 QString ColorScheme::bakedThumbnailSignature() const {
-    // folderview_parent_icon recolors the folder icon; widget/widget_border/
-    // text/text_lc2 are used by the rendered file-type icons. Keep this in sync
-    // with ThumbnailerRunnable::renderFileTypeIcon / dirIconBase.
+    // colors baked into thumbnails; keep in sync with ThumbnailerRunnable::renderFileTypeIcon / dirIconBase
     return folderview_parent_icon.name(QColor::HexArgb) +
            widget.name(QColor::HexArgb) +
            widget_border.name(QColor::HexArgb) +

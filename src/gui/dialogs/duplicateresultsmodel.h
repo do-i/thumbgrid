@@ -8,10 +8,7 @@
 #include <cstdint>
 #include "components/duplicatefinder/duplicatematch.h"
 
-// Two-level tree of duplicate search results: parent rows are reference
-// (source) images, children are their matches (docs/003 §3.3). With a
-// single group it reads as a flat table. Every row's checkbox marks that
-// row's own file, so a reference can be removed instead of its matches.
+// Two-level tree: references with their matches as children. Each checkbox marks its own row's file.
 class DuplicateResultsModel : public QAbstractItemModel {
     Q_OBJECT
 public:
@@ -36,10 +33,7 @@ public:
     void clear();
     void addMatch(const DuplicateMatch &match);
     void setThumbnail(const QString &path, const QPixmap &pixmap);
-    // SELECT_ALL checks every match, SELECT_ALL_REFERENCES every reference;
-    // the KEEP_* modes check all matches per group except the "best" one by
-    // the given criterion, and the group's source image also competes for
-    // "best". Every mode leaves at least one copy per group unchecked.
+    // KEEP_* check all but the best per group (the reference competes too); every mode leaves one copy
     void smartSelect(SmartSelectMode mode);
     void removeMatchesForPaths(const QStringList &paths);
     QStringList checkedPaths() const;

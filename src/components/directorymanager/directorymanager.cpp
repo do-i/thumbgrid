@@ -9,9 +9,7 @@
 namespace fs = std::filesystem;
 
 namespace {
-// Stats a scanned directory_entry as a non-directory file and fills out `out`.
-// Returns false (leaving `out` untouched) if the entry vanished mid-scan.
-// Shared by addEntriesFromDirectory() and addEntriesFromDirectoryRecursive().
+// false (out untouched) if the entry vanished mid-scan
 bool tryMakeFileEntry(const fs::directory_entry &entry, const QString &name, const QString &path, FSEntry &out) {
     std::error_code ec;
     std::uintmax_t size = entry.file_size(ec);
@@ -132,10 +130,6 @@ void DirectoryManager::stopFileWatcher() {
     disconnect(watcher, &DirectoryWatcher::fileModified, this, &DirectoryManager::onFileModifiedExternal);
     disconnect(watcher, &DirectoryWatcher::fileRenamed,  this, &DirectoryManager::onFileRenamedExternal);
 }
-
-// ##############################################################
-// ####################### PUBLIC METHODS #######################
-// ##############################################################
 
 void DirectoryManager::readSettings() {
     regex.setPattern(settings->supportedFormatsRegex());
@@ -358,9 +352,6 @@ bool DirectoryManager::containsDir(const QString& dirPath) const {
     return dirIndexCache.contains(dirPath);
 }
 
-// ##############################################################
-// ###################### PRIVATE METHODS #######################
-// ##############################################################
 void DirectoryManager::loadEntryList(const QString& directoryPath, bool recursive) {
     dirEntryVec.clear();
     fileEntryVec.clear();
@@ -478,9 +469,7 @@ bool DirectoryManager::insertFileEntry(const QString &filePath) {
     return forceInsertFileEntry(filePath);
 }
 
-// stat()s filePath and builds the resulting FSEntry; the file can vanish
-// between the caller's isFile() check and these stat calls (fs watcher races),
-// so failures are tolerated and just fall back to a size/time of 0.
+// tolerates the file vanishing before the stat (watcher races): size/time fall back to 0
 FSEntry DirectoryManager::statFileEntry(const QString &filePath, const QString &fileName) const {
     std::error_code ec;
     std::uintmax_t size = fs::file_size(toStdString(filePath), ec);
@@ -525,20 +514,8 @@ void DirectoryManager::updateFileEntry(const QString &filePath) {
     if(index < 0)
         return;
     FSEntry newEntry(filePath);
-    // Only announce an actual change. Callers re-stat speculatively (the fs
-    // watcher, and renameFileEntry() when the rename was already applied
-    // eagerly), and an unconditional signal there means a spurious reload.
-    //
-    // Size is compared as well as mtime, not instead of it. Running several
-    // instances at once is supported, and a mutation made in one must reach
-    // the others immediately - onFileModifiedExternal() lands here, so this
-    // is that path. mtime alone misses any content change that preserves the
-    // timestamp (`cp --preserve=timestamps`, a restore-from-backup, two writes
-    // inside Qt's millisecond resolution), which would leave the other
-    // instance showing a stale image and a stale size. FSEntry has already
-    // stat'ed size, so this costs nothing, and it does not bring back the
-    // spurious rename-reload the early return exists for: a rename changes
-    // neither field.
+    // Only signal a real change (callers re-stat speculatively). Size is compared too: another
+    // instance's edit within the mtime granularity must still be seen.
     if(fileEntryVec.at(index).modifyTime == newEntry.modifyTime &&
        fileEntryVec.at(index).size == newEntry.size)
         return;
@@ -622,7 +599,6 @@ void DirectoryManager::renameDirEntry(const QString &oldDirPath, const QString &
     emit dirRenamed(oldDirPath, oldIndex, newDirPath, indexOfDir(newDirPath));
 }
 
-
 FileListSource DirectoryManager::source() const {
     return mListSource;
 }
@@ -663,8 +639,7 @@ bool DirectoryManager::isSaveTempFile(const QString &path) const {
 }
 
 //----------------------------------------------------------------------------
-// fs watcher events  ( onFile___External() )
-// these take file NAMES, not paths
+// fs watcher events take file NAMES, not paths
 void DirectoryManager::onFileRemovedExternal(const QString& fileName) {
     QString fullPath = watcher->watchPath() + "/" + fileName;
     removeDirEntry(fullPath);

@@ -39,9 +39,7 @@ EntryInfoItem::EntryInfoItem(QWidget *parent) : QWidget(parent) {
     valueEdit.setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     valueEdit.setFrame(false);
     valueEdit.hide();
-    // editingFinished, not textChanged: a write per keystroke would rewrite the
-    // file on disk while the user is still typing. It fires again on focus-out
-    // after Enter, which commitEdit()'s value comparison absorbs.
+    // editingFinished, not per keystroke; the repeat on focus-out is absorbed by commitEdit()
     connect(&valueEdit, &QLineEdit::editingFinished, this, [this]() { commitEdit(); });
 
     // The name cell of a grid row. Same slot and width as the label it replaces,
@@ -202,16 +200,12 @@ bool EntryInfoItem::isBlank() const {
     return currentName().trimmed().isEmpty() && currentValue().trimmed().isEmpty();
 }
 
-// Callable from outside so an owner can end an edit on its own terms - Qt only
-// reports one when focus moves, and several ways of leaving a field (clicking
-// something unfocusable, switching windows) do not move it in time.
+// public: Qt only reports an edit when focus moves, which some exits don't do in time
 void EntryInfoItem::commitEdit() {
     if(!editable)
         return;
     const QString newValue = editorText();
-    // A grid row commits both cells at once. Committing per field would write a
-    // key-only property the moment focus left the key cell, then rewrite it when
-    // the value arrived - two writes for one entry.
+    // grid rows commit both cells at once, avoiding a key-only write
     if(nameEditable) {
         const QString newName = nameEdit.text();
         const QString newExtra = currentExtra();

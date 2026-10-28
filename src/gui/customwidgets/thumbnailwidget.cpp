@@ -483,9 +483,7 @@ int ThumbnailWidget::labelBlockHeight() const {
 }
 
 QRectF ThumbnailWidget::labelGeometry() const {
-    // labelBackgroundRect() spans the cell width along the bottom for every
-    // labeled style, and stays valid (a bottom strip derived from the cell
-    // bounds) even when labels are hidden, so it works as the editor anchor.
+    // valid even with labels hidden, so it anchors the editor
     return labelBackgroundRect();
 }
 
@@ -540,11 +538,7 @@ void ThumbnailWidget::drawDropHover(QPainter *painter) {
     painter->setRenderHints(hints);
 }
 
-// The badge belongs to the cell, not to the picture inside it: it sits at the
-// bottom-right of the picture area, above the file name, so it stays put
-// whatever the thumbnail's size or aspect ratio is (and shows up on the error
-// icon of a dangling link too) without ever sitting on the label. The inset
-// keeps it off the cell border and off the name below it.
+// bottom-right of the picture area, above the name, independent of the thumbnail's size
 QRect ThumbnailWidget::symlinkBadgeAnchorRect() const {
     constexpr int badgeMargin = 4;
     QRectF anchor = bgRect;

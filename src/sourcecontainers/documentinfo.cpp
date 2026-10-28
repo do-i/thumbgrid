@@ -25,10 +25,6 @@ DocumentInfo::DocumentInfo(const QString& path)
 DocumentInfo::~DocumentInfo() {
 }
 
-// ##############################################################
-// ####################### PUBLIC METHODS #######################
-// ##############################################################
-
 QString DocumentInfo::directoryPath() const {
     return fileInfo.absolutePath();
 }
@@ -66,8 +62,7 @@ QDateTime DocumentInfo::lastModified() const {
     return fileInfo.lastModified();
 }
 
-// For cases like orientation / even mimetype change we just reload
-// Image from scratch, so don`t bother handling it here
+// orientation or mimetype changes reload the Image from scratch
 void DocumentInfo::refresh() {
     fileInfo.refresh();
 }
@@ -76,9 +71,6 @@ int DocumentInfo::exifOrientation() const {
     return mOrientation;
 }
 
-// ##############################################################
-// ####################### PRIVATE METHODS ######################
-// ##############################################################
 void DocumentInfo::detectFormat() {
     if(mDocumentType != DocumentType::NONE)
         return;
@@ -114,17 +106,10 @@ void DocumentInfo::detectFormat() {
         mFormat = "avif";
         mDocumentType = detectAnimatedAvif() ? DocumentType::ANIMATED : DocumentType::STATIC;
     } else if(mimeName == "image/heif" || mimeName == "image/heic") {
-        // One container, several extensions: heic/heif/hif for hevc-coded files,
-        // avci for avc-coded ones. The decoder plugin registers a separate key
-        // per extension, and QImageReader given an explicit format does not fall
-        // back to sniffing, so hand it the file's own suffix when that is a key
-        // it knows and the generic one otherwise.
+        // one container, several extensions; the plugin needs the file's own key (no sniffing with an explicit format)
         static const QSet<QByteArray> heifKeys = {"heic", "heif", "hif", "avci", "hej2"};
         mFormat = QString::fromUtf8(heifKeys.contains(suffix) ? suffix : QByteArrayLiteral("heif"));
-        // Unlike the formats above, heif decoding is never built into Qt itself -
-        // it always comes from an optional plugin. Without one the read yields a
-        // blank image, so mark the file unviewable instead and let the grid show
-        // it as a file-type icon with a clear message on activation.
+        // heif always needs an optional plugin; without one mark the file unviewable instead of showing blank
         mDocumentType = QImageReader::supportedImageFormats().contains(mFormat.toUtf8())
                             ? DocumentType::STATIC : DocumentType::NONE;
     } else if(mimeName == "image/bmp") {
@@ -150,9 +135,7 @@ void DocumentInfo::detectFormat() {
     loadExifOrientation();
 }
 
-// Anything we are willing to open in the text viewer. Content-based mime detection
-// covers most cases (anything derived from text/plain); the suffix and file name
-// sets catch text-like files that ship with unregistered or generic mime types.
+// text/plain-derived mime types, plus suffixes and names that ship with generic mime types
 bool DocumentInfo::isTextDocument(const QMimeType &mimeType, const QString &suffix, const QString &fileName) {
     if(mimeType.inherits("text/plain"))
         return true;
@@ -175,10 +158,7 @@ bool DocumentInfo::isTextDocument(const QMimeType &mimeType, const QString &suff
     return textFileNames.contains(fileName.toLower());
 }
 
-// Extension-based best-effort predictor used to gate "Convert to...". gif and
-// apng are practically always animated (conversion only accepts STATIC images),
-// and pdf is excluded app-wide, so they are rejected here even though Qt may
-// list them. The authoritative STATIC check stays in convertToFormat.
+// Menu gate: gif/apng are practically always animated and pdf is excluded app-wide.
 bool DocumentInfo::isConvertibleImageFile(const QString &filePath) {
     QString suffix = QFileInfo(filePath).suffix().toLower();
     if(suffix.isEmpty())
@@ -190,9 +170,7 @@ bool DocumentInfo::isConvertibleImageFile(const QString &filePath) {
     return QImageReader::supportedImageFormats().contains(suffix.toUtf8());
 }
 
-// Shallow (non-recursive) scan for the menu gate; the app's directory scan
-// includes hidden files, so we match that. Capped at maxEntries files so
-// opening a context menu on a huge directory never stalls.
+// shallow scan including hidden files, capped so a huge folder never stalls the menu
 bool DocumentInfo::dirContainsConvertibleImage(const QString &dirPath, int maxEntries) {
     QDirIterator it(dirPath, QDir::Files | QDir::Hidden);
     int examined = 0;
@@ -368,9 +346,7 @@ QMap<QString, QString> DocumentInfo::getExifTags() {
     return exifTags;
 }
 
-// Dumps every Exif/Iptc/Xmp tag exiv2 can read, keyed by its full family.key
-// name (e.g. "Exif.Image.Make"). Values are the human-readable interpreted
-// strings (same as `exiv2 -pa`). Keys sort into Exif/Iptc/Xmp groups for free.
+// every Exif/Iptc/Xmp tag keyed "Family.Group.Tag", interpreted values (like `exiv2 -pa`)
 void DocumentInfo::loadAllTags() {
     if(allTagsLoaded)
         return;
@@ -413,9 +389,7 @@ QMap<QString, QString> DocumentInfo::getAllTags() {
     return allTags;
 }
 
-// The Xmp half of loadAllTags(), on its own: same keys ("Xmp.dc.title"), same
-// interpreted stream values, cached under its own flag so opening the Xmp tab
-// does not pay for a full Exif+Iptc dump it will not show.
+// the Xmp part of loadAllTags(), cached separately so the Xmp tab skips the full dump
 void DocumentInfo::loadXmpTags() {
     if(xmpLoaded)
         return;
@@ -464,8 +438,7 @@ QString transferFunctionName(const QColorSpace &space) {
     switch(space.transferFunction()) {
     case QColorSpace::TransferFunction::Linear: return QStringLiteral("Linear");
     case QColorSpace::TransferFunction::Gamma:
-        // The name alone says nothing useful here - gamma 1.8 and gamma 2.2 are
-        // both "Gamma", and the number is the part someone is looking for.
+        // the gamma value is what distinguishes them
         return QStringLiteral("Gamma (%1)").arg(space.gamma(), 0, 'g', 3);
     case QColorSpace::TransferFunction::SRgb:   return QStringLiteral("SRgb");
     case QColorSpace::TransferFunction::St2084: return QStringLiteral("St2084");
@@ -479,9 +452,7 @@ QString transferFunctionName(const QColorSpace &space) {
 } // namespace
 #endif
 
-// Summarises the embedded profile instead of dumping it: the blob is binary and
-// several hundred bytes even for plain sRGB, so what is worth showing is what Qt
-// managed to make of it.
+// summarizes what Qt parsed from the binary profile
 QList<QPair<QString, QString>> DocumentInfo::getIccProfileInfo() {
     QList<QPair<QString, QString>> info;
 #ifdef USE_EXIV2
@@ -498,8 +469,7 @@ QList<QPair<QString, QString>> DocumentInfo::getIccProfileInfo() {
         const QByteArray raw(reinterpret_cast<const char *>(profile.c_data()),
                              static_cast<qsizetype>(profile.size()));
         const QColorSpace space = QColorSpace::fromIccProfile(raw);
-        // A profile Qt cannot parse is reported as "none" rather than as four
-        // empty rows: there is nothing truthful to put in them.
+        // an unparseable profile is reported as none
         if(!space.isValid())
             return info;
         info.append({QObject::tr("Profile"), space.description()});
@@ -562,9 +532,7 @@ QString DocumentInfo::editableTagLabel(const QString &key) {
     return key;
 }
 
-// Deliberately a allow-list of two rather than "anything exiv2 might open".
-// exiv2 can read metadata from far more formats than it can safely rewrite, and
-// offering an editor that fails on save is worse than not offering one.
+// allowlist: offering an editor that fails on save is worse than none
 bool DocumentInfo::supportsMetadataEditing(const QString &filePath) {
 #ifdef USE_EXIV2
     const QString suffix = QFileInfo(filePath).suffix().toLower();
@@ -587,13 +555,8 @@ bool DocumentInfo::supportsExif(const QString &filePath) {
 #endif
 }
 
-// libheif hands the picture to x265, whose default 64x64 coding tree unit
-// cannot describe a smaller frame. It does not report this: the encode
-// "succeeds" and the file reads back transposed (64x48 -> 48x64) or plainly
-// garbled (100x50 -> 86x64). Measured 2026-08-31 against libheif 1.23.1 with
-// kimageformats 6.29; sizes at or above the floor round-tripped exactly.
-// Refused up front rather than left to fail, because a silently wrong image on
-// disk is worse than a conversion that declines to run.
+// libheif/x265 silently transposes or garbles frames below the 64x64 CTU (measured with libheif 1.23.1),
+// so refuse up front.
 bool DocumentInfo::canEncodeToFormat(const QString &format, const QSize &size) {
     static const int heifMinDimension = 64;
     static const QSet<QString> heifFormats = {QStringLiteral("heic"), QStringLiteral("heif"),
@@ -604,14 +567,8 @@ bool DocumentInfo::canEncodeToFormat(const QString &format, const QSize &size) {
     return size.width() >= heifMinDimension && size.height() >= heifMinDimension;
 }
 
-// exiv2 reads metadata out of every container thumbgrid opens, but it writes
-// back into only a subset. Probed with exiv2 0.28 on 2026-08-31: BMFF-based
-// files (heic/heif/avif/cr3) are refused outright with "Writing to BMFF images
-// is not supported", and jxl is not recognised as a writable type at all. An
-// allowlist rather than a BMFF denylist, so a format nobody probed cannot reach
-// a rewrite path by default - the cost of a wrong "no" is a greyed-out action,
-// the cost of a wrong "yes" is an irreversible-sounding confirmation for an
-// operation that always fails.
+// Allowlist of containers exiv2 0.28 rewrites (BMFF refused, jxl unsupported), so unprobed formats
+// never reach a rewrite path.
 bool DocumentInfo::supportsMetadataWriting(const QString &filePath) {
 #ifdef USE_EXIV2
     const QString suffix = QFileInfo(filePath).suffix().toLower();
@@ -625,14 +582,11 @@ bool DocumentInfo::supportsMetadataWriting(const QString &filePath) {
 #endif
 }
 
-// Wider than supportsMetadataEditing() on purpose: the Xmp tab only reads, so
-// the gate is "can this container hold an XMP packet at all", which png and tiff
-// can even though exiv2 will not rewrite Exif into them.
+// read-only tab: can the container hold an XMP packet (png, tiff can)
 bool DocumentInfo::supportsXmp(const QString &filePath) {
 #ifdef USE_EXIV2
     const QString suffix = QFileInfo(filePath).suffix().toLower();
-    // heif is read-only here for the same reason it is absent from the editing
-    // gates - exiv2 parses its XMP packet fine but cannot write one back.
+    // exiv2 reads heif XMP but cannot write it
     return suffix == QLatin1String("jpg")  || suffix == QLatin1String("jpeg") ||
            suffix == QLatin1String("png")  || suffix == QLatin1String("webp") ||
            suffix == QLatin1String("tif")  || suffix == QLatin1String("tiff") ||
@@ -644,8 +598,7 @@ bool DocumentInfo::supportsXmp(const QString &filePath) {
 #endif
 }
 
-// Same set, and for the same reason: these are the formats with a defined place
-// to embed an ICC profile that exiv2 will hand back via iccProfile().
+// formats with a defined ICC slot that exiv2 returns via iccProfile()
 bool DocumentInfo::supportsIccProfile(const QString &filePath) {
 #ifdef USE_EXIV2
     const QString suffix = QFileInfo(filePath).suffix().toLower();
@@ -660,10 +613,7 @@ bool DocumentInfo::supportsIccProfile(const QString &filePath) {
 
 // --- XMP / ICC writing -------------------------------------------------------
 
-// Wider than supportsMetadataEditing(): probed 2026-08-01 that exiv2 writes XMP
-// into png as cleanly as into jpeg, which it will not do for Exif. tiff is left
-// out on purpose - exiv2 rewrites a tiff's whole structure, and its Exif and ICC
-// scopes overlap, so no removal there could be scoped to one kind.
+// exiv2 writes XMP into png cleanly; tiff excluded because its Exif and ICC scopes overlap
 bool DocumentInfo::supportsXmpEditing(const QString &filePath) {
 #ifdef USE_EXIV2
     const QString suffix = QFileInfo(filePath).suffix().toLower();
@@ -675,8 +625,7 @@ bool DocumentInfo::supportsXmpEditing(const QString &filePath) {
 #endif
 }
 
-// Same set, same reason. In a tiff the profile is stored as an Exif tag, so
-// clearing it there is not a scoped operation at all.
+// in a tiff the profile is an Exif tag, so clearing it is not scoped
 bool DocumentInfo::supportsIccEditing(const QString &filePath) {
     return supportsXmpEditing(filePath);
 }
@@ -718,9 +667,7 @@ namespace {
 
 const char *kDefaultLang = "x-default";
 
-// A LangAlt value's x-default entry, or empty. Read through LangAltValue rather
-// than the stream form, which prefixes every entry with its lang and joins them
-// with commas - unusable as an edit-box value.
+// x-default entry via LangAltValue; the stream form prefixes langs and joins with commas
 QString langAltDefault(const Exiv2::Xmpdatum &datum) {
     const auto *la = dynamic_cast<const Exiv2::LangAltValue *>(&datum.value());
     if(!la)
@@ -732,8 +679,7 @@ QString langAltDefault(const Exiv2::Xmpdatum &datum) {
     return QString();
 }
 
-// Array items, in order. count() is the item count for XmpArrayValue; toString(n)
-// gives one item, which is the whole point of not using the joined stream form.
+// items in order (toString(n)), not the joined stream form
 QStringList arrayItems(const Exiv2::Xmpdatum &datum) {
     QStringList items;
     const long n = static_cast<long>(datum.count());
@@ -742,8 +688,7 @@ QStringList arrayItems(const Exiv2::Xmpdatum &datum) {
     return items;
 }
 
-// Erases every datum under key - an array can hold more than one, and assignment
-// appends rather than replaces, so a rewrite has to start from nothing.
+// arrays can hold several datums and assignment appends, so erase all first
 void eraseAll(Exiv2::XmpData &xmp, const std::string &key) {
     for(;;) {
         auto it = xmp.findKey(Exiv2::XmpKey(key));
@@ -767,8 +712,6 @@ bool DocumentInfo::isRegisteredXmpKey(const QString &key) {
     try {
         return Exiv2::XmpProperties::propertyInfo(Exiv2::XmpKey(key.toStdString())) != nullptr;
     } catch(...) {
-        // An unparseable key is not a schema exiv2 knows, which is the question
-        // being asked.
         return false;
     }
 #else
@@ -828,8 +771,7 @@ QMap<QString, QStringList> DocumentInfo::getEditableXmpTags() {
 
 bool DocumentInfo::setEditableXmpTags(const QMap<QString, QStringList> &values) {
 #ifdef USE_EXIV2
-    // Validate before opening the file: a half-applied edit is worse than a
-    // rejected one, the same rule setEditableTags() follows.
+    // validate before opening: a half-applied edit is worse than a rejected one
     const QStringList allowed = editableXmpKeys();
     for(auto it = values.cbegin(); it != values.cend(); ++it) {
         if(!allowed.contains(it.key()))
@@ -861,9 +803,7 @@ bool DocumentInfo::setEditableXmpTags(const QMap<QString, QStringList> &values) 
             const bool empty = items.isEmpty() || (items.size() == 1 && items.first().isEmpty());
             switch(xmpValueKind(it.key())) {
             case XmpValueKind::LangAlt:
-                // Assigning an empty x-default drops exactly that entry and
-                // leaves translations in other languages alone - clearing a
-                // title must not destroy a de-DE one.
+                // empty x-default drops only that entry, keeping other languages
                 xmp[key] = empty ? std::string("lang=x-default ")
                                  : ("lang=x-default " + items.first().toStdString());
                 break;
@@ -883,9 +823,7 @@ bool DocumentInfo::setEditableXmpTags(const QMap<QString, QStringList> &values) 
                 break;
             }
             case XmpValueKind::Text:
-                // Assignment would leave a present-but-blank property, which
-                // shows up as an empty row everywhere else; a curated row has
-                // only its value to delete by, so empty means erase.
+                // empty means erase: a blank property would show as an empty row
                 if(empty)
                     eraseAll(xmp, key);
                 else
@@ -939,10 +877,7 @@ bool DocumentInfo::setCustomXmpTags(const QMap<QString, QString> &values) {
             return false;
         image->readMetadata();
         Exiv2::XmpData &xmp = image->xmpData();
-        // A custom property is always XmpText, so plain assignment replaces it.
-        // An empty value is kept rather than erased: in the grid the key is the
-        // row's identity, so an empty value is a legal state and erasing is what
-        // eraseXmpKey() is for.
+        // plain assignment replaces XmpText; empty values are kept (eraseXmpKey() removes)
         for(auto it = values.cbegin(); it != values.cend(); ++it)
             xmp[it.key().toStdString()] = it.value().toStdString();
         image->writeMetadata();
@@ -998,8 +933,7 @@ bool DocumentInfo::addCustomXmpProperty(const QString &prefix, const QString &na
     if(getCustomXmpTags().size() >= kMaxCustomXmpProperties)
         return false;
     try {
-        // Only for a genuinely new prefix: writing one the file does not already
-        // declare throws "No namespace info available for XMP prefix".
+        // writing an undeclared prefix throws "No namespace info available"
         if(!isKnownXmpPrefix(prefix)) {
             if(namespaceUri.isEmpty())
                 return false;
@@ -1028,9 +962,7 @@ bool DocumentInfo::addCustomXmpProperty(const QString &prefix, const QString &na
 }
 
 #ifdef USE_EXIV2
-// The three scoped removals share everything but one line, and each was probed
-// to leave the other two kinds intact - that isolation is what lets the three
-// buttons live in three tabs.
+// each scoped removal leaves the other two kinds intact
 bool DocumentInfo::clearExifMetadata() {
     try {
         auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
@@ -1131,9 +1063,7 @@ bool DocumentInfo::isValidExifDateTime(const QString &value) {
 #ifdef USE_EXIV2
 namespace {
 
-// UserComment is an Undefined-typed value carrying an 8-byte charset header.
-// exiv2's string form keeps that header ("charset=Ascii hello"), which is an
-// encoding detail rather than something to show in an edit box.
+// UserComment's string form keeps the 8-byte charset header; hide it in the edit box
 QString stripCharsetPrefix(const QString &raw) {
     if(!raw.startsWith(QLatin1String("charset=")))
         return raw;
@@ -1141,9 +1071,7 @@ QString stripCharsetPrefix(const QString &raw) {
     return space < 0 ? QString() : raw.mid(space + 1);
 }
 
-// ...and put it back on the way in. Non-ASCII text must be labelled Unicode:
-// exiv2 will happily store UTF-8 bytes under charset=Ascii, but other readers
-// then mangle them.
+// label non-ASCII as Unicode: other readers mangle UTF-8 stored as Ascii
 std::string withCharsetPrefix(const QString &text) {
     const bool ascii = std::all_of(text.cbegin(), text.cend(),
                                    [](QChar c) { return c.unicode() < 128; });
@@ -1168,8 +1096,7 @@ QMap<QString, QString> DocumentInfo::getEditableTags() {
             auto it = exifData.findKey(Exiv2::ExifKey(key.toStdString()));
             if(it == exifData.end())
                 continue;
-            // value().toString(), not the stream operator: the stream form is
-            // the interpreted one, which is exactly what must not round-trip.
+            // raw value, not the interpreted stream form
             QString raw = QString::fromStdString(it->value().toString());
             if(key == QLatin1String("Exif.Photo.UserComment"))
                 raw = stripCharsetPrefix(raw);
@@ -1185,8 +1112,7 @@ QMap<QString, QString> DocumentInfo::getEditableTags() {
 
 bool DocumentInfo::setEditableTags(const QMap<QString, QString> &values) {
 #ifdef USE_EXIV2
-    // Validate everything before opening the file: a half-applied edit is worse
-    // than a rejected one.
+    // validate before opening: a half-applied edit is worse than a rejected one
     const QStringList allowed = editableTagKeys();
     for(auto it = values.cbegin(); it != values.cend(); ++it) {
         if(!allowed.contains(it.key()))
@@ -1205,8 +1131,7 @@ bool DocumentInfo::setEditableTags(const QMap<QString, QString> &values) {
             if(!allowed.contains(it.key()))
                 continue;
             const std::string key = it.key().toStdString();
-            // Empty means "remove": leaving an empty Ascii tag behind would show
-            // up as a present-but-blank row everywhere else.
+            // empty removes the tag rather than leaving a blank one
             if(it.value().isEmpty()) {
                 auto existing = exifData.findKey(Exiv2::ExifKey(key));
                 if(existing != exifData.end())
@@ -1219,8 +1144,7 @@ bool DocumentInfo::setEditableTags(const QMap<QString, QString> &values) {
                 exifData[key] = it.value().toStdString();
         }
         image->writeMetadata();
-        // Same cache invalidation stripMetadata() does - both tag maps are lazy
-        // and would otherwise keep serving pre-edit values.
+        // both tag maps are lazy caches
         exifLoaded = false;
         allTagsLoaded = false;
         exifTags.clear();
@@ -1253,11 +1177,7 @@ bool DocumentInfo::loadExifOrientationExiv2() {
         int exifOri = QString::fromStdString(it->value().toString()).toInt();
         if(exifOri < 1 || exifOri > 8)
             return false;
-        // Map standard EXIF orientation (1-8) onto the QImageIOHandler
-        // transformation values consumed by ImageLib::exifRotated(). This is
-        // exactly Qt's exif2Qt() mapping, so behaviour matches QImageReader for
-        // formats Qt handles, and now also covers formats exiv2 reads but Qt
-        // does not expose orientation for.
+        // EXIF orientation (1-8) -> QImageIOHandler transform values, Qt's exif2Qt() mapping
         static const int exif2qt[9] = {0, 0, 1, 3, 2, 6, 4, 5, 7};
         mOrientation = exif2qt[exifOri];
         return true;

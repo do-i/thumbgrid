@@ -6,17 +6,7 @@
 class QCalendarWidget;
 class QTimeEdit;
 
-// Calendar + clock drop-down for a date/time field. A Qt::Popup window rather
-// than a dialog: it is an accessory to the field that opened it, so it closes on
-// the first click outside and never takes a place in the window stack.
-//
-// It only picks a value - the field it was opened from decides what to do with
-// it, which is what keeps typing into that field the primary way to set a date
-// (the picker is the convenience, not the gate).
-//
-// Qt's own QDateTimeEdit(calendarPopup) was the alternative and was not used:
-// it cannot represent "no value", and an absent Exif.Image.DateTime has to stay
-// expressible - clearing the field is how the tag gets removed.
+// Calendar + clock popup for a date/time field; closes on an outside click. The field decides what to do with the pick.
 class DateTimePickerPopup : public QWidget {
     Q_OBJECT
 public:

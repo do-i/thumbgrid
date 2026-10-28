@@ -24,9 +24,7 @@ QColor ColorSelectorButton::color() {
 }
 
 void ColorSelectorButton::showColorSelector() {
-    // QColorDialog::getColor() only reports the final pick, so to support a
-    // live Apply we embed a buttonless QColorDialog in our own dialog and add
-    // an Apply / OK / Cancel box. Apply previews without closing.
+    // getColor() only reports the final pick; embed a buttonless QColorDialog to support live Apply
     const QColor initialColor = mColor;
     QDialog dialog(this);
     dialog.setObjectName(QStringLiteral("ColorPickerDialog"));
@@ -43,9 +41,7 @@ void ColorSelectorButton::showColorSelector() {
     // forward that to the wrapper instead of it just hiding inside the layout
     connect(picker, &QDialog::finished, &dialog, &QDialog::done);
 
-    // Plain buttons instead of QDialogButtonBox: the box's visual order is
-    // style-driven and can't be forced via QSS, so lay out OK, Cancel, Apply
-    // ourselves (accept-first, Apply last/optional to match the rest of the app).
+    // QDialogButtonBox order is style-driven; lay out OK, Cancel, Apply ourselves
     auto *okButton = new QPushButton(tr("OK"), &dialog);
     auto *cancelButton = new QPushButton(tr("Cancel"), &dialog);
     auto *applyButton = new QPushButton(tr("Apply"), &dialog);
