@@ -148,7 +148,8 @@ void VideoClipPlaysInsideItsRangeTest::theClipPlaysStopsAndLoopsInsideItsRange()
 
     // showing the clip while playing pauses on the frame its start is set to;
     // grabbing a handle pauses on its frame and dragging shows the frame it
-    // is moved to; hiding the clip and showing it again keeps the range
+    // is moved to; hiding the clip and showing it again keeps the range, its
+    // start at the playhead if that moved meanwhile
     QVERIFY(!paused);
     actionManager->invokeAction("toggleClip");
     const int shownAt = seekBar->clipStart();
@@ -166,13 +167,19 @@ void VideoClipPlaysInsideItsRangeTest::theClipPlaysStopsAndLoopsInsideItsRange()
     QTRY_VERIFY2(qAbs(position - dragged) < 150, qPrintable(QString("showing %1, handle at %2").arg(position).arg(dragged)));
     actionManager->invokeAction("toggleClip");
     QCOMPARE(seekBar->clipStart(), -1);
-    viewerWidget->seek(duration - 300);
-    QTRY_VERIFY2(position > draggedEnd, qPrintable(QString("hidden, a seek past the clip landed at %1").arg(position)));
     actionManager->invokeAction("toggleClip");
     QCOMPARE(seekBar->clipStart(), dragged);
     QCOMPARE(seekBar->clipEnd(), draggedEnd);
-    // shown around a playhead outside it: back to its start
-    QTRY_VERIFY2(qAbs(position - dragged) < 150, qPrintable(QString("at %1, clip starts at %2").arg(position).arg(dragged)));
+    actionManager->invokeAction("toggleClip");
+    viewerWidget->seek(duration - 300);
+    QTRY_VERIFY2(position > draggedEnd, qPrintable(QString("hidden, a seek past the clip landed at %1").arg(position)));
+    viewerWidget->seek(0);
+    QTRY_VERIFY2(position < 150, qPrintable(QString("seek to 0 landed at %1").arg(position)));
+    actionManager->invokeAction("toggleClip");
+    QVERIFY2(seekBar->clipStart() < 150, qPrintable(QString("shown again from 0, clip starts at %1").arg(seekBar->clipStart())));
+    QCOMPARE(seekBar->clipEnd(), draggedEnd);
+    QTRY_VERIFY2(qAbs(position - seekBar->clipStart()) < 150,
+                 qPrintable(QString("at %1, clip starts at %2").arg(position).arg(seekBar->clipStart())));
 }
 
 TG_BEHAVIOR_TEST_MAIN(VideoClipPlaysInsideItsRangeTest)

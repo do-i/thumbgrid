@@ -32,23 +32,34 @@ int VideoClip::duration() const {
 void VideoClip::toggle(int pos) {
     if(mState == CLIP_ACTIVE) {
         mState = CLIP_HIDDEN;
+        mHiddenAt = pos;
         emit changed();
         return;
     }
+    if(mState == CLIP_NONE && mDuration <= gap())
+        return;
+    pos = qBound(0, pos, mDuration);
     if(mState == CLIP_NONE) {
-        if(mDuration <= gap())
-            return;
-        pos = qBound(0, pos, mDuration);
-        if(pos >= mDuration - NEW_CLIP_MIN_MS) {
-            mStart = 0;
-            mEnd = mDuration;
-        } else {
+        placeAt(pos);
+    } else if(qAbs(pos - mHiddenAt) > PLAYHEAD_MOVED_MS) {
+        // hidden, then the playhead moved: the start comes to it
+        if(mEnd - pos >= NEW_CLIP_MIN_MS)
             mStart = pos;
-            mEnd = pos + qMax(NEW_CLIP_MIN_MS, (mDuration - pos) / 2);
-        }
+        else
+            placeAt(pos);
     }
     mState = CLIP_ACTIVE;
     emit changed();
+}
+
+void VideoClip::placeAt(int pos) {
+    if(pos >= mDuration - NEW_CLIP_MIN_MS) {
+        mStart = 0;
+        mEnd = mDuration;
+    } else {
+        mStart = pos;
+        mEnd = pos + qMax(NEW_CLIP_MIN_MS, (mDuration - pos) / 2);
+    }
 }
 
 void VideoClip::clear() {

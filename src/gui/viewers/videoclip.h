@@ -7,7 +7,7 @@
 // on the seek bar, and whether playback loops. The clip button shows the
 // handles, and playback then stays inside the clip; the handles can be dragged
 // whenever they are shown. Hiding them keeps the range, so showing them again
-// brings it back. Without a clip, loop repeats the whole file. Everything
+// brings it back (its start at the playhead, if that moved meanwhile). Without a clip, loop repeats the whole file. Everything
 // resets when another file opens.
 class VideoClip : public QObject {
     Q_OBJECT
@@ -28,6 +28,8 @@ public:
     static constexpr int END_TOLERANCE_MS = 50;
     // the shortest clip a new one starts with
     static constexpr int NEW_CLIP_MIN_MS = 1000;
+    // a playhead this far from where the clip was hidden has moved
+    static constexpr int PLAYHEAD_MOVED_MS = 50;
 
     explicit VideoClip(QObject *parent = nullptr);
 
@@ -36,10 +38,12 @@ public:
     void setDuration(int duration);
     int duration() const;
 
-    // active -> hidden, hidden -> active. A new clip starts at pos (the
-    // playhead) and ends halfway from there to the end of the video, but at
-    // least NEW_CLIP_MIN_MS later; with less than that left after pos it
-    // spans the whole video.
+    // active -> hidden, hidden -> active, pos being the playhead. A new clip
+    // starts at pos and ends halfway from there to the end of the video, but
+    // at least NEW_CLIP_MIN_MS later; with less than that left after pos it
+    // spans the whole video. A hidden clip comes back as it was, unless the
+    // playhead moved meanwhile: then its start moves to pos (placed anew when
+    // its end is less than NEW_CLIP_MIN_MS after pos).
     void toggle(int pos);
     // forget the range
     void clear();
@@ -73,6 +77,8 @@ signals:
     void changed();
 
 private:
+    // a new clip around pos
+    void placeAt(int pos);
     int gap() const;
     int boundedStart(int pos) const;
     int boundedEnd(int pos) const;
@@ -82,4 +88,6 @@ private:
     int mStart = 0;
     int mEnd = 0;
     bool mLoop = false;
+    // the playhead when the clip was hidden
+    int mHiddenAt = 0;
 };

@@ -509,18 +509,20 @@ void ViewerWidget::setPlaybackSpeed(double speed) {
         videoPlayer->setPlaybackSpeed(speed);
 }
 
-// Showing the clip pauses the video; a new clip starts on the paused frame.
+// Showing the clip pauses the video; a start placed at the playhead is shown
+// on its exact frame.
 void ViewerWidget::toggleClip() {
     if(currentWidget != VIDEOPLAYER)
         return;
     const bool showing = !videoClip.isActive();
     const bool fresh = !videoClip.hasRange();
+    const int oldStart = videoClip.start();
     if(showing && !mVideoPaused) {
         videoPlayer->setPaused(true);
         mVideoPaused = true;
     }
     videoClip.toggle(mVideoPosition);
-    if(showing && fresh && videoClip.isActive())
+    if(showing && videoClip.isActive() && (fresh || videoClip.start() != oldStart))
         seekVideoTo(videoClip.start());
 }
 

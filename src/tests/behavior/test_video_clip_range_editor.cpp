@@ -13,9 +13,9 @@
 // playhead, the end halfway from there to the end of the video, at least 1 s
 // later) and playback stays between them; they can be dragged whenever they
 // are shown. Pressing it again hides them and plays the whole video, keeping
-// the range for when they are shown again. The loop button repeats the clip
-// (or, with no clip, the whole file). The handles never cross, and a dragged
-// handle stands in for the playhead.
+// the range for when they are shown again (its start at the playhead, if that
+// moved). The loop button repeats the clip (or, with no clip, the whole file).
+// The handles never cross, and a dragged handle stands in for the playhead.
 
 class VideoClipRangeEditorTest : public QObject {
     Q_OBJECT
@@ -141,7 +141,7 @@ void VideoClipRangeEditorTest::hidingTheClipKeepsItsRange() {
     clip.moveHandle(VideoClip::HANDLE_END, 5000);
 
     // hidden: the whole video plays, the range waits
-    clip.toggle(PLAYHEAD + 60000);
+    clip.toggle(3000);
     QVERIFY(!clip.isActive());
     QVERIFY(clip.hasRange());
     QCOMPARE(clip.seekTarget(TEN_MINUTES), TEN_MINUTES);
@@ -151,18 +151,40 @@ void VideoClipRangeEditorTest::hidingTheClipKeepsItsRange() {
     clip.moveHandle(VideoClip::HANDLE_START, 2000);
     QCOMPARE(clip.start(), 1000);
 
-    // shown again wherever the playhead is now: the same range
-    clip.toggle(PLAYHEAD + 120000);
+    // shown again with the playhead where it was hidden: the same range
+    clip.toggle(3000 + VideoClip::PLAYHEAD_MOVED_MS);
     QVERIFY(clip.isActive());
     QCOMPARE(clip.start(), 1000);
     QCOMPARE(clip.end(), 5000);
 
-    // a marking key shows a hidden clip, keeping its other end
-    clip.toggle(0);
-    clip.markStart(2000);
-    QVERIFY(clip.isActive());
+    // the playhead moved meanwhile: the start comes to it, the end stays
+    clip.toggle(3000);
+    clip.toggle(2000);
     QCOMPARE(clip.start(), 2000);
     QCOMPARE(clip.end(), 5000);
+    // also before the clip
+    clip.toggle(2000);
+    clip.toggle(500);
+    QCOMPARE(clip.start(), 500);
+    QCOMPARE(clip.end(), 5000);
+    // less than NEW_CLIP_MIN_MS before the end, or past it: a new clip there
+    clip.toggle(500);
+    clip.toggle(4500);
+    QCOMPARE(clip.start(), 4500);
+    QCOMPARE(clip.end(), 4500 + (TEN_MINUTES - 4500) / 2);
+    const int end = clip.end();
+    clip.toggle(4500);
+    clip.toggle(end + 1000);
+    QCOMPARE(clip.start(), end + 1000);
+    QCOMPARE(clip.end(), end + 1000 + (TEN_MINUTES - end - 1000) / 2);
+
+    // a marking key shows a hidden clip, keeping its other end
+    const int markedEnd = clip.end();
+    clip.toggle(0);
+    clip.markStart(5000);
+    QVERIFY(clip.isActive());
+    QCOMPARE(clip.start(), 5000);
+    QCOMPARE(clip.end(), markedEnd);
 
     // clearing forgets it: the next clip starts at the playhead
     clip.toggle(0);
