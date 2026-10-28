@@ -42,9 +42,7 @@ public:
     // "best". Every mode leaves at least one copy per group unchecked.
     void smartSelect(SmartSelectMode mode);
     void removeMatchesForPaths(const QStringList &paths);
-    qint64 checkedBytes() const;
     QStringList checkedPaths() const;
-    QStringList allMatchPaths() const;
     // groups whose reference and every match are all checked
     int groupsWithEveryCopyChecked() const;
     int matchCount() const;

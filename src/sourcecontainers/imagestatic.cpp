@@ -129,10 +129,6 @@ std::unique_ptr<QPixmap> ImageStatic::getPixmap() {
     return pix;
 }
 
-std::shared_ptr<const QImage> ImageStatic::getSourceImage() {
-    return image;
-}
-
 std::shared_ptr<const QImage> ImageStatic::getImage() {
     return isEdited()?imageEdited:image;
 }

@@ -1114,10 +1114,6 @@ void Settings::setColorScheme(ColorScheme scheme) {
     loadStylesheet();
 }
 //------------------------------------------------------------------------------
-void Settings::setColorTid(int tid) {
-    mColorScheme.tid = tid;
-}
-//------------------------------------------------------------------------------
 void Settings::fillVideoFormats() {
     mVideoFormatsMap.insert("video/webm",       "webm");
     mVideoFormatsMap.insert("video/mp4",        "mp4");
@@ -1872,56 +1868,21 @@ void Settings::setFolderViewFontPointSize(int value) {
 QColor Settings::folderViewLabelBackgroundColor() {
     return settings->mColorScheme.folderview_label_bg;
 }
-
-void Settings::setFolderViewLabelBackgroundColor(QColor color) {
-    if(color.isValid()) {
-        settings->mColorScheme.folderview_label_bg = color;
-        settings->themeConf->setValue("Colors/fv_label_bg", color.name());
-    }
-}
 //------------------------------------------------------------------------------
 QColor Settings::folderViewSelectionColor() {
     return settings->mColorScheme.folderview_selection;
-}
-
-void Settings::setFolderViewSelectionColor(QColor color) {
-    if(color.isValid()) {
-        settings->mColorScheme.folderview_selection = color;
-        settings->themeConf->setValue("Colors/fv_selection", color.name());
-    }
 }
 //------------------------------------------------------------------------------
 QColor Settings::folderViewParentIconColor() {
     return settings->mColorScheme.folderview_parent_icon;
 }
-
-void Settings::setFolderViewParentIconColor(QColor color) {
-    if(color.isValid()) {
-        settings->mColorScheme.folderview_parent_icon = color;
-        settings->themeConf->setValue("Colors/fv_parent_icon", color.name());
-    }
-}
 //------------------------------------------------------------------------------
 QColor Settings::folderViewSelectedLabelBackgroundColor() {
     return settings->mColorScheme.folderview_selected_label_bg;
 }
-
-void Settings::setFolderViewSelectedLabelBackgroundColor(QColor color) {
-    if(color.isValid()) {
-        settings->mColorScheme.folderview_selected_label_bg = color;
-        settings->themeConf->setValue("Colors/fv_sel_label_bg", color.name());
-    }
-}
 //------------------------------------------------------------------------------
 QColor Settings::folderViewCellBackgroundColor() {
     return settings->mColorScheme.folderview_cell_bg;
-}
-
-void Settings::setFolderViewCellBackgroundColor(QColor color) {
-    if(color.isValid()) {
-        settings->mColorScheme.folderview_cell_bg = color;
-        settings->themeConf->setValue("Colors/fv_cell_bg", color.name());
-    }
 }
 //------------------------------------------------------------------------------
 bool Settings::expandImage() {

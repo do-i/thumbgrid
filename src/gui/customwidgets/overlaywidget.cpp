@@ -43,14 +43,6 @@ void OverlayWidget::setVerticalMargin(int margin) {
     recalculateGeometry();
 }
 
-int OverlayWidget::horizontalMargin() {
-    return mHorizontalMargin;
-}
-
-int OverlayWidget::verticalMargin() {
-    return mVerticalMargin;
-}
-
 void OverlayWidget::setPosition(FloatingWidgetPosition pos) {
     position = pos;
     recalculateGeometry();

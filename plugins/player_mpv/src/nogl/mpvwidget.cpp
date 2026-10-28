@@ -31,8 +31,6 @@ MpvWidget::MpvWidget(QWidget *parent, Qt::WindowFlags f)
     setMouseTracking(true);
     mpv_set_option_string(mpv, "input-cursor", "no");   // no mouse handling
     mpv_set_option_string(mpv, "cursor-autohide", "no");// no cursor-autohide, we handle that
-    //mpv_set_option_string(mpv, "terminal", "yes");
-    //mpv_set_option_string(mpv, "msg-level", "all=v");
 
     mpv::qt::set_property(mpv, "hwdec", "auto-safe");
 

@@ -12,8 +12,6 @@ void ScalerRunnable::setRequest(ScalerRequest r) {
 
 void ScalerRunnable::run() {
     emit started(req);
-    //QElapsedTimer t;
-    //t.start();
     std::unique_ptr<QImage> scaled;
     if(req.filter == 0 || (req.size.width() > req.image->width() && !settings->smoothUpscaling())) {
         scaled = ImageLib::scaled(req.image->getImage(), req.size, QI_FILTER_NEAREST);

@@ -53,9 +53,6 @@ int main(int argc, char *argv[]) {
 
     PlatformDesktop::prepareApplicationEnvironment();
 
-    // for hidpi testing
-    //qputenv("QT_SCALE_FACTOR","1.5");
-    //qputenv("QT_SCREEN_SCALE_FACTORS", "1;1.7");
 
     // do we still need this?
     qputenv("QT_AUTO_SCREEN_SCALE_FACTOR","0");

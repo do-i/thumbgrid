@@ -16,7 +16,6 @@ public:
     ActionButton(QString _actionName, QString _iconPath, int _size, QWidget *parent = nullptr);
     void setAction(QString _actionName);
     void setTriggerMode(TriggerMode mode);
-    TriggerMode triggerMode();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

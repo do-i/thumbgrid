@@ -55,7 +55,6 @@ signals:
     void statusTextChanged(const QString& text);
 
 public slots:
-    void disconnectView();
     void reloadModel();
 
 private slots:

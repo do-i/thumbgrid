@@ -38,10 +38,6 @@ public:
     // Copy / Move: keys that only work while it is open, and that global
     // bindings don't reach
     static bool isOverlayContext(ViewMode context);
-    // While set, processEvent() tries this context's bindings first and falls
-    // back to the active context's
-    void setOverlayContext(ViewMode context);
-    void clearOverlayContext();
     static QString contextToString(ViewMode context);
     static ViewMode contextFromString(const QString &name);
 
@@ -96,8 +92,6 @@ private:
     ShortcutMap defaults, shortcuts;
     QMap<ViewMode, QHash<QString, QString>> shortcutLookup;
     ViewMode context = MODE_DOCUMENT;
-    ViewMode overlayContext = MODE_COPYMOVE;
-    bool hasOverlayContext = false;
     // set by a wheel turned with the right button held (RMB+WheelUp/Down)
     bool rightButtonWheel = false;
     QMap<QString, QString> scrollFallbacks, videoScrollFallbacks;

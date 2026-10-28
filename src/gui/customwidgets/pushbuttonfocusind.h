@@ -12,10 +12,6 @@ public:
     void setHighlighted(bool);
     bool isHighlighted();
 
-signals:
-    void rightPressed();
-    void rightClicked();
-
 protected:
     void mousePressEvent(QMouseEvent *event) override;
     bool mIsHighlighted;

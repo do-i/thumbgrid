@@ -34,7 +34,6 @@ public slots:
 signals:
     void crop(QRect);
     void cancel();
-    void cropClicked();
     void selectionChanged(QRect);
     void selectAll();
     void aspectRatioChanged(QPointF);

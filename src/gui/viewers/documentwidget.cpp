@@ -177,6 +177,5 @@ void DocumentWidget::leaveEvent(QEvent *event) {
     QWidget::leaveEvent(event);
     // this misfires on hidpi.
     //instead do the panel hiding in MW::leaveEvent  (it works properly in root window)
-    //mainPanel->hide();
     avoidPanelFlag = false;
 }

@@ -21,8 +21,6 @@ public:
     explicit ClickZoneOverlay(FloatingWidgetContainer *parent);
     QRect leftZone();
     QRect rightZone();
-    void highlightLeft();
-    void highlightRight();
     void disableHighlight();
     void setHighlightedZone(ActiveHighlightZone zone);
     bool isHighlighted();

@@ -16,7 +16,6 @@ bool PushButtonFocusInd::isHighlighted() {
 void PushButtonFocusInd::mousePressEvent(QMouseEvent *event) {
     if(event->button() == Qt::RightButton) {
         event->accept();
-        emit rightPressed();
     } else {
         QPushButton::mousePressEvent(event);
     }
@@ -25,7 +24,6 @@ void PushButtonFocusInd::mousePressEvent(QMouseEvent *event) {
 void PushButtonFocusInd::mouseReleaseEvent(QMouseEvent *event) {
     if(event->button() == Qt::RightButton) {
         event->accept();
-        emit rightClicked();
     } else {
         QPushButton::mouseReleaseEvent(event);
     }
@@ -44,8 +42,3 @@ void PushButtonFocusInd::paintEvent(QPaintEvent *event) {
         painter.fillPath(path, settings->colorScheme().widget);
     }
 }
-
-
-
-
-

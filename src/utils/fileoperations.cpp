@@ -146,7 +146,6 @@ bool FileOperations::restoreFileTimestamps(const QString &filePath, const QDateT
     QFile dstF(filePath);
     if(!dstF.open(QIODevice::ReadWrite))
         return false;
-    // dstF.setFileTime(srcBirthTime, QFileDevice::FileBirthTime); // TODO: does not work (linux)
     dstF.setFileTime(modTime, QFileDevice::FileModificationTime);
     dstF.setFileTime(readTime, QFileDevice::FileAccessTime);
     dstF.close();

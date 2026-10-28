@@ -216,11 +216,9 @@ void VideoSlider::mouseMoveEvent(QMouseEvent *event) {
 
 void VideoSlider::mouseReleaseEvent(QMouseEvent *event) {
     if(mDragHandle >= 0 && event->button() == Qt::LeftButton) {
-        const int handle = mDragHandle;
         mDragHandle = -1;
         update();
         QToolTip::hideText();
-        emit clipHandleReleased(handle);
         return;
     }
     QSlider::mouseReleaseEvent(event);

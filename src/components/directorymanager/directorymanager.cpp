@@ -55,14 +55,6 @@ bool DirectoryManager::path_entry_compare_reverse(const FSEntry &e1, const FSEnt
     return collator.compare(e1.path, e2.path) > 0;
 };
 
-bool DirectoryManager::name_entry_compare(const FSEntry &e1, const FSEntry &e2) const {
-    return collator.compare(e1.name, e2.name) < 0;
-};
-
-bool DirectoryManager::name_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const {
-    return collator.compare(e1.name, e2.name) > 0;
-};
-
 bool DirectoryManager::date_entry_compare(const FSEntry& e1, const FSEntry& e2) const {
     return e1.modifyTime < e2.modifyTime;
 }

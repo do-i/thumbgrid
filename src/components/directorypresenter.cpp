@@ -116,10 +116,6 @@ void DirectoryPresenter::populateView() {
     emitStatusText();
 }
 
-void DirectoryPresenter::disconnectView() {
-   // todo
-}
-
 //------------------------------------------------------------------------------
 
 void DirectoryPresenter::onFileRemoved(const QString& filePath, int index) {

@@ -129,8 +129,6 @@ private:
 
     bool path_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
     bool path_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
-    bool name_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
-    bool name_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
     bool date_entry_compare(const FSEntry &e1, const FSEntry &e2) const;
     bool date_entry_compare_reverse(const FSEntry &e1, const FSEntry &e2) const;
     using CompareFn = std::function<bool(const FSEntry&, const FSEntry&)>;

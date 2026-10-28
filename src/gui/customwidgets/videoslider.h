@@ -45,7 +45,6 @@ signals:
     void sliderMovedX(int);
     void clipHandlePressed(int handle);
     void clipHandleMoved(int handle, int value);
-    void clipHandleReleased(int handle);
 
 private:
     void setValueAtCursor(QPoint pos);

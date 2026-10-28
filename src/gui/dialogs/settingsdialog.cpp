@@ -790,11 +790,6 @@ void SettingsDialog::adjustSizeToContents() {
     this->setMinimumWidth(sizeHint().width() + 22);
 }
 //------------------------------------------------------------------------------
-void SettingsDialog::resetToDesktopTheme() {
-    settings->setColorScheme(ThemeStore::colorScheme(ColorSchemes::COLORS_SYSTEM));
-    this->readColorScheme();
-}
-//------------------------------------------------------------------------------
 void SettingsDialog::setupSidebar() {
 
 }

@@ -52,7 +52,6 @@ public:
 
     bool loaderBusy() const;
 
-    std::shared_ptr<Image> getImageAt(int index);
     std::shared_ptr<Image> getImage(const QString& filePath);
 
     void updateImage(const QString& filePath, const std::shared_ptr<Image>& img);
@@ -73,7 +72,6 @@ public:
     QString dirNameAt(int index) const;
     QString dirPathAt(int index) const;
 
-    bool autoRefresh();
 
     bool saveFile(const QString &filePath);
     bool saveFile(const QString &filePath, const QString &destPath);
@@ -96,7 +94,6 @@ signals:
     void loaded(const QString& filePath);
     void loadFailed(const QString &path);
     void sortingChanged(SortingMode);
-    void indexChanged(int oldIndex, int index);
     void imageReady(const std::shared_ptr<Image>& img, const QString&);
     void imageUpdated(const QString& filePath);
     void saveFinished(const QString& filePath, const QString& destPath, bool success);

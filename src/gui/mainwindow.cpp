@@ -447,7 +447,6 @@ void MW::onSortingChanged(SortingMode mode) {
 }
 
 void MW::setDirectoryPath(QString path) {
-    //closeImage();
     info.directoryPath = path;
     info.directoryName = path.split("/").last();
     folderView->setDirectoryPath(path);
@@ -1118,31 +1117,8 @@ std::shared_ptr<ThumbnailStripProxy> MW::getThumbnailPanel() {
     return docWidget->thumbPanel();
 }
 
-// todo: this is crap
 void MW::showMessageDirectory(QString dirName) {
     floatingMessage->showMessage(std::move(dirName), FloatingMessageIcon::ICON_DIRECTORY, 1700);
-}
-
-void MW::showMessageDirectoryEnd() {
-    // TODO replace with something nicer (integrate with click overlay?)
-    //floatingMessage->showMessage("", FloatingWidgetPosition::RIGHT, FloatingMessageIcon::ICON_RIGHT_EDGE, 400);
-}
-
-void MW::showMessageDirectoryStart() {
-    // TODO replace with something nicer (integrate with click overlay?)
-    //floatingMessage->showMessage("", FloatingWidgetPosition::LEFT, FloatingMessageIcon::ICON_LEFT_EDGE, 400);
-}
-
-void MW::showMessageFitWindow() {
-    floatingMessage->showMessage(tr("Fit Window"), FloatingMessageIcon::NO_ICON, 350);
-}
-
-void MW::showMessageFitWidth() {
-    floatingMessage->showMessage(tr("Fit Width"), FloatingMessageIcon::NO_ICON, 350);
-}
-
-void MW::showMessageFitOriginal() {
-    floatingMessage->showMessage(tr("Fit 1:1"), FloatingMessageIcon::NO_ICON, 350);
 }
 
 void MW::showMessage(QString text) {
@@ -1240,7 +1216,3 @@ void MW::leaveEvent(QEvent *event) {
     docWidget->hideFloatingPanel(true);
 }
 
-// block native tab-switching so we can use it in shortcuts
-//bool MW::focusNextPrevChild(bool) {
-//    return false;
-//}

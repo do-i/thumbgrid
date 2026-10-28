@@ -245,7 +245,6 @@ void ThumbnailView::populate(int newCount) {
         if(currentCount > newCount) {
             qCDebug(logGui) << this << "removing";
             for(auto i = currentCount - 1; i >= newCount; i--) {
-                //removeItemFromLayout(i); // slow. is this needed?
                 delete thumbnails.takeLast();
             }
             // reset existing

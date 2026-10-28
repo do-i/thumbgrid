@@ -793,7 +793,6 @@ void FolderGridView::resizeEvent(QResizeEvent *event) {
     if(this->isVisible()) {
         ThumbnailView::resizeEvent(event);
         fitSceneToContents();
-        //focusOn(selectedIndex());
         loadVisibleThumbnailsDelayed();
         if(renameIndex >= 0)
             positionRenameEditor();

@@ -9,7 +9,6 @@ public:
     ~LinuxFsEvent() override;
 
     uint dataSize() const;
-    void setDataSize(uint dataSize);
 
     char *data() const;
     void setData(char *data);

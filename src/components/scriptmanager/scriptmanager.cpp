@@ -84,10 +84,6 @@ QStringList ScriptManager::splitCommandLine(const QString &cmdLine) {
     bool escape = false;
     enum : std::uint8_t { Idle, Arg, QuotedArg } state = Idle;
     for (const auto &c : cmdLine) {
-        //if(!escape && c == '\\') {
-        //    escape = true;
-        //    continue;
-        //}
         switch (state) {
         case Idle:
             if(!escape && c == '"')

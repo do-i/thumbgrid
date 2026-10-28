@@ -36,7 +36,6 @@ ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
 
     if(parent)
         setContainerSize(parent->size());
-    //this->show();
 }
 
 void ControlsOverlay::show() {

@@ -575,7 +575,6 @@ void CropOverlay::onSelectionOutsideChange(QRect selection) {
         if(selectionRect != selection)
             emit selectionChanged(selectionRect);
     } else {
-        //selectAll();
     }
 }
 

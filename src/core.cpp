@@ -1210,11 +1210,8 @@ void Core::copyCurrentFile(const QString& destDirectory) {
 void Core::toggleCropPanel() {
     if(model->isEmpty())
         return;
-    if(mw->isCropPanelActive()) {
+    if(mw->isCropPanelActive() || state.hasActiveImage)
         mw->triggerCropPanel();
-    } else if(state.hasActiveImage) {
-        mw->triggerCropPanel();
-    }
 }
 
 void Core::toggleFullscreenInfoBar() {
@@ -1279,7 +1276,7 @@ void Core::edit_template(const std::function<std::unique_ptr<QImage>(std::shared
         auto img = getEditableImage(path);
         if(!img)
             continue;
-        img->setEditedImage(std::unique_ptr<const QImage>( editFunc(img->getImage(), std::forward<Args>(as)...).release() ));
+        img->setEditedImage(std::unique_ptr<const QImage>( editFunc(img->getImage(), as...).release() ));
         model->updateImage(path, std::static_pointer_cast<Image>(img));
     }
     updateInfoString();
@@ -1758,8 +1755,6 @@ void Core::nextDirectory() {
             int index = nearestViewableIndex(0, 1);
             if(index >= 0)
                 loadFileIndex(index, false, true);
-        } else {
-            mw->showMessageDirectoryEnd();
         }
     }
 }
@@ -1782,8 +1777,6 @@ void Core::prevDirectory(bool selectLast) {
                                    : nearestViewableIndex(0, 1);
             if(index >= 0)
                 loadFileIndex(index, false, true);
-        } else {
-            mw->showMessageDirectoryStart();
         }
     }
 }
@@ -1836,8 +1829,6 @@ void Core::nextImage() {
             nextDirectory();
             return;
         } else {
-            if(!model->loaderBusy())
-                mw->showMessageDirectoryEnd();
             return;
         }
     }
@@ -1863,8 +1854,6 @@ void Core::prevImage() {
             prevDirectory(true);
             return;
         } else {
-            if(!model->loaderBusy())
-                mw->showMessageDirectoryStart();
             return;
         }
     }
@@ -1913,7 +1902,6 @@ void Core::jumpToFirst() {
     if(index < 0)
         return;
     loadFileIndex(index, true, settings->usePreloader());
-    mw->showMessageDirectoryStart();
 }
 
 void Core::jumpToLast() {
@@ -1924,7 +1912,6 @@ void Core::jumpToLast() {
     if(index < 0)
         return;
     loadFileIndex(index, true, settings->usePreloader());
-    mw->showMessageDirectoryEnd();
 }
 
 void Core::onLoadFailed(const QString &path) {

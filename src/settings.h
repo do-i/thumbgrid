@@ -242,15 +242,10 @@ public:
     int folderViewFontPointSize();
     void setFolderViewFontPointSize(int value);
     QColor folderViewLabelBackgroundColor();
-    void setFolderViewLabelBackgroundColor(QColor color);
     QColor folderViewSelectionColor();
-    void setFolderViewSelectionColor(QColor color);
     QColor folderViewParentIconColor();
-    void setFolderViewParentIconColor(QColor color);
     QColor folderViewSelectedLabelBackgroundColor();
-    void setFolderViewSelectedLabelBackgroundColor(QColor color);
     QColor folderViewCellBackgroundColor();
-    void setFolderViewCellBackgroundColor(QColor color);
 
     bool firstRun();
     void setFirstRun(bool mode);
@@ -314,7 +309,6 @@ public:
     const ColorScheme& colorScheme();
     ColorScheme customColorScheme();
     void setColorScheme(ColorScheme scheme);
-    void setColorTid(int tid);
     void saveTheme();
 
     bool videoPlayback();
@@ -367,8 +361,6 @@ public:
     void setJxlAnimation(bool mode);
     bool showFullMetadata();
     void setShowFullMetadata(bool mode);
-    bool absoluteZoomStep();
-    void setAbsoluteZoomStep(bool mode);
     bool autoResizeWindow();
     void setAutoResizeWindow(bool mode);
     int autoResizeLimit();

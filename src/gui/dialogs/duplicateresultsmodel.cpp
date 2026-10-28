@@ -90,14 +90,6 @@ int DuplicateResultsModel::groupsWithEveryCopyChecked() const {
     return count;
 }
 
-QStringList DuplicateResultsModel::allMatchPaths() const {
-    QStringList paths;
-    for(const Group &group : mGroups)
-        for(const MatchRow &row : group.rows)
-            paths << row.match.matchPath;
-    return paths;
-}
-
 void DuplicateResultsModel::smartSelect(SmartSelectMode mode) {
     for(int g = 0; g < mGroups.count(); g++) {
         Group &group = mGroups[g];
@@ -167,18 +159,6 @@ void DuplicateResultsModel::removeMatchesForPaths(const QStringList &paths) {
         mGroupIndexByPath.insert(mGroups[g].sourcePath, g);
     endResetModel();
     emitCheckedCount();
-}
-
-qint64 DuplicateResultsModel::checkedBytes() const {
-    qint64 total = 0;
-    for(const Group &group : mGroups) {
-        if(group.checked == Qt::Checked)
-            total += group.fileSize;
-        for(const MatchRow &row : group.rows)
-            if(row.checked == Qt::Checked)
-                total += row.match.matchFileSize;
-    }
-    return total;
 }
 
 QModelIndex DuplicateResultsModel::groupIndex(const QString &sourcePath) const {

@@ -119,10 +119,6 @@ void Thumbnailer::keepOnlyQueuedTasks(const QList<QPair<QString, int>> &tasks) {
     }
 }
 
-std::shared_ptr<Thumbnail> Thumbnailer::getThumbnail(QString filePath, int size) {
-    return ThumbnailerRunnable::generate(nullptr, std::move(filePath), size, false, false);
-}
-
 void Thumbnailer::getThumbnailAsync(const QString& path, int size, bool crop, bool force) {
     if(!force) {
         if(auto thumbnail = memCacheLookup(memKey(path, size, crop), path)) {

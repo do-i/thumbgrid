@@ -207,7 +207,6 @@ std::unique_ptr<QImage> ImageLib::scaled_CV(const std::shared_ptr<const QImage>&
     auto dest = std::make_unique<QImage>();
     if(destSize == source->size()) {
         // TODO: should this return a copy?
-        //result.reset(new StaticImageContainer(std::make_shared<cv::Mat>(srcMat)));
     } else if(destSize.width() > source.get()->width()) { // upscale
         cv::Mat dstMat(destSizeCv, srcMat.type());
         cv::resize(srcMat, dstMat, destSizeCv, 0, 0, filter);

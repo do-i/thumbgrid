@@ -17,7 +17,6 @@ public:
     int width() override;
     QSize size() override;
 
-    bool isEditable();
     bool isEdited();
 
     int frameCount();

@@ -86,10 +86,6 @@ void ShortcutCreatorDialog::setAction(QString action) {
        cbox->setCurrentIndex(index);
 }
 
-void ShortcutCreatorDialog::setShortcut(const QString& shortcut) {
-    ui->sequenceEdit->setText(shortcut);
-}
-
 void ShortcutCreatorDialog::setContext(ViewMode context) {
     int index = ui->contextComboBox->findData(ActionManager::contextToString(context));
     if(index != -1)

@@ -219,15 +219,6 @@ bool ActionManager::isOverlayContext(ViewMode context) {
     return context == MODE_COPYMOVE;
 }
 //------------------------------------------------------------------------------
-void ActionManager::setOverlayContext(ViewMode context) {
-    actionManager->overlayContext = context;
-    actionManager->hasOverlayContext = true;
-}
-//------------------------------------------------------------------------------
-void ActionManager::clearOverlayContext() {
-    actionManager->hasOverlayContext = false;
-}
-//------------------------------------------------------------------------------
 ViewMode ActionManager::currentContext() const {
     return context;
 }
@@ -789,10 +780,6 @@ bool ActionManager::processEvent(QInputEvent *event) {
         else if(mouse->type() == QEvent::MouseButtonRelease && std::exchange(actionManager->rightButtonWheel, false))
             return false;
     }
-    const QString shortcut = ShortcutBuilder::fromEvent(event);
-    if(actionManager->hasOverlayContext &&
-       actionManager->invokeActionForShortcut(actionManager->overlayContext, shortcut))
-        return true;
-    return actionManager->invokeActionForShortcut(actionManager->context, shortcut);
+    return actionManager->invokeActionForShortcut(actionManager->context, ShortcutBuilder::fromEvent(event));
 }
 //------------------------------------------------------------------------------

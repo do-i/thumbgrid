@@ -57,14 +57,6 @@ QRect ClickZoneOverlay::rightZone() {
     return mRightZone;
 }
 
-void ClickZoneOverlay::highlightLeft() {
-    setHighlightedZone(HIGHLIGHT_LEFT);
-}
-
-void ClickZoneOverlay::highlightRight() {
-    setHighlightedZone(HIGHLIGHT_RIGHT);
-}
-
 void ClickZoneOverlay::disableHighlight() {
     setHighlightedZone(HIGHLIGHT_NONE);
 }

@@ -67,7 +67,6 @@ signals:
     void itemActivated(int) override;
     void thumbnailsRequested(QList<int>, int, bool, bool) override;
     void draggedOut() override;
-    void draggedToBookmarks(QList<int>) override;
     void sortingSelected(SortingMode);
     void directorySelected(const QString& path);
     void showFoldersChanged(bool mode);
@@ -101,7 +100,6 @@ private slots:
     void onSplitterMoved();
     void onHomeBtn();
     void onRootBtn();
-    void onTreeViewTabOut();
 
 private:
     Ui::FolderView *ui;
