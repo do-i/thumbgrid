@@ -54,6 +54,7 @@ private slots:
     void reencodedAndRescaledCopiesMatch();
     void distinctScenesDiffer();
     void rotatedAndMirroredCopiesMatchViaVariants();
+    void variantsAreTheExactDihedralTransforms();
     void thresholdMapping();
     void contentHashDetectsExactCopies();
 };
@@ -125,6 +126,24 @@ void DuplicateImageHashingTest::rotatedAndMirroredCopiesMatchViaVariants() {
     QVERIFY2(found, "mirror variants should match a mirrored copy");
 
     QCOMPARE(ImageHasher::phashVariants(scene, true, true).size(), 8);
+}
+
+// Sides divisible by 32 make the 32x32 area sample commute with exact 90-degree
+// turns and mirrors, so each variant must equal the hash of the transformed image
+// - in the documented order, not just "somewhere in the list".
+void DuplicateImageHashingTest::variantsAreTheExactDihedralTransforms() {
+    const QImage scene = makeScene(3, 256, 192);
+    const auto turned = [](const QImage &img, int degrees) {
+        return degrees ? img.transformed(QTransform().rotate(degrees)) : img;
+    };
+    const QImage mirror = scene.flipped(Qt::Horizontal);
+    const QList<QImage> expected{scene, turned(scene, 90), turned(scene, 180), turned(scene, 270),
+                                 mirror, turned(mirror, 90), turned(mirror, 180), turned(mirror, 270)};
+    const QList<quint64> variants = ImageHasher::phashVariants(scene, true, true);
+    QCOMPARE(variants.size(), expected.size());
+    for(int i = 0; i < expected.size(); i++)
+        QVERIFY2(variants.at(i) == ImageHasher::phash(expected.at(i)),
+                 qPrintable(QString("variant %1 is not its dihedral transform").arg(i)));
 }
 
 void DuplicateImageHashingTest::thresholdMapping() {

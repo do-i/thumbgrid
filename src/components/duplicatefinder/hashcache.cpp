@@ -6,7 +6,7 @@
 
 namespace {
 const quint32 CACHE_MAGIC = 0x54474448; // "TGDH"
-const quint32 CACHE_VERSION = 1;
+const quint32 CACHE_VERSION = 2; // 2: hash computed without OpenCV
 }
 
 HashCache::HashCache(const QString &filePath) : mFilePath(filePath) {
