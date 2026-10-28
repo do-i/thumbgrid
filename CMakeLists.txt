@@ -68,9 +68,16 @@ endif()
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
 message(STATUS "Qt Version: " ${QT_VERSION})
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Svg PrintSupport OpenGLWidgets)
+# SVGs in browsed folders are thumbnailed: refuse QtSvg still open to CVE-2026-8168
+# (fixed in 6.8.9, 6.11.2 and 6.12.0)
+if(Qt6Svg_VERSION VERSION_LESS 6.8.9 OR
+   (Qt6Svg_VERSION VERSION_GREATER_EQUAL 6.9.0 AND Qt6Svg_VERSION VERSION_LESS 6.11.2))
+    message(FATAL_ERROR "QtSvg ${Qt6Svg_VERSION} is affected by CVE-2026-8168; use 6.8.9, 6.11.2, 6.12.0 or later")
+endif()
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(Exiv2 REQUIRED IMPORTED_TARGET exiv2)
+# 0.28.8 fixes CVE-2026-25884/27596/27631; exiv2 parses every browsed file
+pkg_check_modules(Exiv2 REQUIRED IMPORTED_TARGET exiv2>=0.28.8)
 
 if(KDE_SUPPORT)
     find_package(KF6WindowSystem REQUIRED)

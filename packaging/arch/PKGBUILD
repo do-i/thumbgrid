@@ -22,15 +22,15 @@ url="https://github.com/do-i/thumbgrid"
 license=('GPL-3.0-only')
 depends=(
   'qt6-base'
-  'qt6-svg'
+  'qt6-svg>=6.12.0'  # CVE-2026-8168 (SVG recursion DoS)
   'qt6-imageformats'
   # kimageformats supplies the Qt plugin that decodes heif/heic (and avif, jxl,
   # raw). Its codec backends are dlopened, so Arch lists them as optdepends of
   # kimageformats - libheif has to be named here or heic silently stays
   # unreadable on a clean install.
   'kimageformats'
-  'libheif'
-  'exiv2'
+  'libheif>=1.23.2'  # CVE-2026-84383 (heap overflow)
+  'exiv2>=0.28.8'    # CVE-2026-25884, -27596, -27631
   'opencv'
   'mpv'
 )
