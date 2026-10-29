@@ -6,7 +6,8 @@
 // against another version (CreatePlayerWidget alone can't tell them apart).
 // 2: positions, durations, seek() and setLoopAB() are in milliseconds;
 //    frameRate() added.
-constexpr int VIDEO_PLAYER_INTERFACE_VERSION = 2;
+// 3: setHardwareDecoding() added.
+constexpr int VIDEO_PLAYER_INTERFACE_VERSION = 3;
 
 class VideoPlayer : public QWidget {
     Q_OBJECT
@@ -35,6 +36,7 @@ public:
     virtual void setLoopAB(int startPosition, int endPosition) = 0;
     // frames per second, 0 when unknown
     virtual double frameRate() = 0;
+    virtual void setHardwareDecoding(bool mode) = 0;
 
 signals:
     // ms

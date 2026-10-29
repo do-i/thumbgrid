@@ -93,6 +93,7 @@ QString settingGroupFor(const QString &key) {
         {"folderViewShowInfo", "Grid"}, {"folderViewPreviewFit", "Grid"}, {"folderViewIconSize", "Grid"},
         // Document
         {"videoPlayback", "Document"}, {"playVideoSounds", "Document"}, {"showVideoControls", "Document"},
+        {"videoHardwareDecoding", "Document"},
         {"panelEnabled", "Document"}, {"panelFullscreenOnly", "Document"}, {"squareThumbnails", "Document"},
         {"drawTransparencyGrid", "Document"}, {"smoothUpscaling", "Document"}, {"expandImage", "Document"},
         {"expandLimit", "Document"}, {"smoothAnimatedImages", "Document"}, {"loopSlideshow", "Document"},
@@ -1193,6 +1194,16 @@ bool Settings::playVideoSounds() {
 
 void Settings::setPlayVideoSounds(bool mode) {
     settings->writeSetting("playVideoSounds", mode);
+}
+//------------------------------------------------------------------------------
+// off by default: some GPU drivers claim VP9/AV1 support and then hang the
+// decoder, and no install-time check can tell those apart from working ones
+bool Settings::videoHardwareDecoding() {
+    return settings->readSetting("videoHardwareDecoding", false).toBool();
+}
+
+void Settings::setVideoHardwareDecoding(bool mode) {
+    settings->writeSetting("videoHardwareDecoding", mode);
 }
 //------------------------------------------------------------------------------
 bool Settings::showVideoControls() {

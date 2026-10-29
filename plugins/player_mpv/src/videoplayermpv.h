@@ -19,6 +19,7 @@ public:
     void setVideoUnscaled(bool mode) override;
     int volume() override;
     double frameRate() override;
+    void setHardwareDecoding(bool mode) override;
 
 public slots:
     void seek(int pos) override;

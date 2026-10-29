@@ -240,6 +240,15 @@ void MpvWidget::setLoopAB(int startPosition, int endPosition) {
     mpv::qt::set_property_variant(mpv, "ab-loop-b", endPosition / 1000.0);
 }
 
+void MpvWidget::setHardwareDecoding(bool mode) {
+#ifdef PLAYER_MPV_USE_WID
+    mpv::qt::set_property(mpv, "hwdec", mode ? "auto-safe" : "no");
+#else
+    // the render API path stays on software decoding (see constructor)
+    Q_UNUSED(mode)
+#endif
+}
+
 void MpvWidget::setRepeat(bool mode) {
     mpv::qt::set_property(mpv, "loop-file", mode ? "inf" : "no");
 }

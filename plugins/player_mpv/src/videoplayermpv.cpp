@@ -135,6 +135,10 @@ double VideoPlayerMpv::frameRate() {
     return (fps > 0) ? fps : m_mpv->getProperty("estimated-vf-fps").toDouble();
 }
 
+void VideoPlayerMpv::setHardwareDecoding(bool mode) {
+    m_mpv->setHardwareDecoding(mode);
+}
+
 void VideoPlayerMpv::setVideoUnscaled(bool mode) {
     m_mpv->setOption("video-unscaled", mode ? "downscale-big" : "no");
 }

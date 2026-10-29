@@ -1803,6 +1803,16 @@
                        </property>
                       </widget>
                      </item>
+                     <item>
+                      <widget class="QCheckBox" name="hardwareDecodingCheckBox">
+                       <property name="toolTip">
+                        <string>Uses the GPU to decode video, which lowers CPU use. Turn it off again if videos (e.g. WebM) freeze the app or show no picture</string>
+                       </property>
+                       <property name="text">
+                        <string>Hardware decoding</string>
+                       </property>
+                      </widget>
+                     </item>
                     </layout>
                    </widget>
                   </item>

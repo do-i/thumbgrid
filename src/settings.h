@@ -130,6 +130,8 @@ public:
     void setWindowGeometry(QRect geometry);
     bool playVideoSounds();
     void setPlayVideoSounds(bool mode);
+    bool videoHardwareDecoding();
+    void setVideoHardwareDecoding(bool mode);
     bool showVideoControls();
     void setShowVideoControls(bool mode);
     void setVolume(int vol);

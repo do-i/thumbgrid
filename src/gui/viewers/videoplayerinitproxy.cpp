@@ -29,6 +29,7 @@ void VideoPlayerInitProxy::onSettingsChanged() {
         return;
     player->setMuted(!settings->playVideoSounds());
     player->setVideoUnscaled(!settings->expandImage());
+    player->setHardwareDecoding(settings->videoHardwareDecoding());
 }
 
 std::shared_ptr<VideoPlayer> VideoPlayerInitProxy::getPlayer() {
@@ -83,6 +84,8 @@ inline bool VideoPlayerInitProxy::initPlayer() {
 
     player->setMuted(!settings->playVideoSounds());
     player->setVideoUnscaled(!settings->expandImage());
+    // before the first loadfile: a hanging hw decoder would freeze the app
+    player->setHardwareDecoding(settings->videoHardwareDecoding());
     player->setVolume(settings->volume());
 
     player->setParent(this);
@@ -214,6 +217,12 @@ void VideoPlayerInitProxy::setLoopAB(int startPosition, int endPosition) {
 
 double VideoPlayerInitProxy::frameRate() {
     return player ? player->frameRate() : 0;
+}
+
+void VideoPlayerInitProxy::setHardwareDecoding(bool mode) {
+    if(!player)
+        return;
+    player->setHardwareDecoding(mode);
 }
 
 void VideoPlayerInitProxy::show() {

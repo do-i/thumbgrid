@@ -771,6 +771,7 @@ void SettingsDialog::readSettings() {
     ui->videoPlaybackGroupContents->setEnabled(settings->videoPlayback());
     ui->playSoundsCheckBox->setChecked(settings->playVideoSounds());
     ui->showControlsCheckBox->setChecked(settings->showVideoControls());
+    ui->hardwareDecodingCheckBox->setChecked(settings->videoHardwareDecoding());
     ui->enablePanelCheckBox->setChecked(settings->panelEnabled());
     ui->thumbnailPanelGroupContents->setEnabled(settings->panelEnabled());
     ui->panelFullscreenOnlyCheckBox->setChecked(settings->panelFullscreenOnly());
@@ -930,6 +931,7 @@ void SettingsDialog::saveSettings() {
     settings->setVideoPlayback(ui->videoPlaybackCheckBox->isChecked());
     settings->setPlayVideoSounds(ui->playSoundsCheckBox->isChecked());
     settings->setShowVideoControls(ui->showControlsCheckBox->isChecked());
+    settings->setVideoHardwareDecoding(ui->hardwareDecodingCheckBox->isChecked());
     settings->setPanelEnabled(ui->enablePanelCheckBox->isChecked());
     settings->setPanelFullscreenOnly(ui->panelFullscreenOnlyCheckBox->isChecked());
     settings->setSquareThumbnails(ui->squareThumbnailsCheckBox->isChecked());

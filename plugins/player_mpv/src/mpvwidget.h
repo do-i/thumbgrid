@@ -40,6 +40,7 @@ public:
     void setVolume(int vol);
     void setPlaybackSpeed(double speed);
     void setLoopAB(int startPosition, int endPosition);
+    void setHardwareDecoding(bool mode);
 
 signals:
     void durationChanged(int value);
