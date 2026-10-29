@@ -18,7 +18,7 @@ struct PresetInfo {
 // Preset catalog (like ThemeStore). Presets seed shortcuts.json on first run.
 class ShortcutPresetStore {
 public:
-    // "windows" | "macos" | "linux" (FreeBSD normalizes to "linux").
+    // "macos" | "linux" (FreeBSD normalizes to "linux").
     static QString currentOsToken();
 
     // XDG and PRESETS_PATH over embedded qrc, sorted by _meta.order then id; optionally current OS only

@@ -22,10 +22,6 @@
 #include "watchers/directorywatcher.h"
 #include "sourcecontainers/fsentry.h"
 
-#ifdef Q_OS_WIN32
-#include "windows.h"
-#endif
-
 enum FileListSource : std::uint8_t { // rename? wip
     SOURCE_DIRECTORY,
     SOURCE_DIRECTORY_RECURSIVE,

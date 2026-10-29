@@ -4,7 +4,6 @@
 
 #include <utility>
 #include "utils/logging.h"
-#include "utils/pathstring.h"
 
 namespace fs = std::filesystem;
 
@@ -140,11 +139,11 @@ bool DirectoryManager::validateDirectory(const QString& dirPath) const {
     if(dirPath.isEmpty()) {
         return false;
     }
-    if(!std::filesystem::exists(toStdString(dirPath))) {
+    if(!std::filesystem::exists(dirPath.toStdString())) {
         qCWarning(logDirManager) << "[DirectoryManager] Error - path does not exist.";
         return false;
     }
-    if(!std::filesystem::is_directory(toStdString(dirPath))) {
+    if(!std::filesystem::is_directory(dirPath.toStdString())) {
         qCWarning(logDirManager) << "[DirectoryManager] Error - path is not a directory.";
         return false;
     }
@@ -328,13 +327,13 @@ bool DirectoryManager::isSupportedFile(const QString& path) const {
 
 bool DirectoryManager::isFile(const QString& path) const {
     std::error_code ec;
-    auto st = fs::status(toStdString(path), ec);
+    auto st = fs::status(path.toStdString(), ec);
     return !ec && fs::is_regular_file(st);
 }
 
 bool DirectoryManager::isDir(const QString& path) const {
     std::error_code ec;
-    auto st = fs::status(toStdString(path), ec);
+    auto st = fs::status(path.toStdString(), ec);
     return !ec && fs::is_directory(st);
 }
 
@@ -368,7 +367,7 @@ void DirectoryManager::loadEntryList(const QString& directoryPath, bool recursiv
 void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, const QString& directoryPath) {
     QRegularExpressionMatch match;
     std::error_code ec;
-    fs::directory_iterator it(toStdString(directoryPath), fs::directory_options::skip_permission_denied, ec);
+    fs::directory_iterator it(directoryPath.toStdString(), fs::directory_options::skip_permission_denied, ec);
     if(ec) {
         qCWarning(logDirManager) << "[DirectoryManager]" << directoryPath << QString::fromStdString(ec.message());
         return;
@@ -380,15 +379,9 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, c
         }
         const auto &entry = *it;
         QString name = QString::fromStdString(entry.path().filename().generic_string());
-#ifndef Q_OS_WIN32
         // ignore hidden files
         if(!settings->showHiddenFiles() && name.startsWith("."))
             continue;
-#else
-        DWORD attributes = GetFileAttributes(entry.path().generic_string().c_str());
-        if(!settings->showHiddenFiles() && attributes & FILE_ATTRIBUTE_HIDDEN)
-            continue;
-#endif
         QString path = QString::fromStdString(entry.path().generic_string());
         match = regex.match(name);
         std::error_code entryEc;
@@ -410,7 +403,7 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, c
 void DirectoryManager::addEntriesFromDirectoryRecursive(std::vector<FSEntry> &entryVec, const QString& directoryPath) {
     QRegularExpressionMatch match;
     std::error_code ec;
-    fs::recursive_directory_iterator it(toStdString(directoryPath), fs::directory_options::skip_permission_denied, ec);
+    fs::recursive_directory_iterator it(directoryPath.toStdString(), fs::directory_options::skip_permission_denied, ec);
     if(ec) {
         qCWarning(logDirManager) << "[DirectoryManager]" << directoryPath << QString::fromStdString(ec.message());
         return;
@@ -472,10 +465,10 @@ bool DirectoryManager::insertFileEntry(const QString &filePath) {
 // tolerates the file vanishing before the stat (watcher races): size/time fall back to 0
 FSEntry DirectoryManager::statFileEntry(const QString &filePath, const QString &fileName) const {
     std::error_code ec;
-    std::uintmax_t size = fs::file_size(toStdString(filePath), ec);
+    std::uintmax_t size = fs::file_size(filePath.toStdString(), ec);
     if(ec)
         size = 0;
-    auto modifyTime = fs::last_write_time(toStdString(filePath), ec);
+    auto modifyTime = fs::last_write_time(filePath.toStdString(), ec);
     if(ec)
         modifyTime = fs::file_time_type();
     return FSEntry(filePath, fileName, size, modifyTime, false);

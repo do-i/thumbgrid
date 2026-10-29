@@ -79,9 +79,7 @@ int main(int argc, char *argv[]) {
     QApplication::setWindowIcon(QIcon::fromTheme(QCoreApplication::applicationName()));
 
     // needed for mpv
-#ifndef _MSC_VER
     setlocale(LC_NUMERIC, "C");
-#endif
 
 #ifdef __GLIBC__
     // default value of 128k causes memory fragmentation issues

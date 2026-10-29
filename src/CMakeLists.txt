@@ -56,12 +56,9 @@ set(THUMBGRID_APP_TARGET thumbgrid_app_objects)
 set(PLATFORM_DESKTOP_IMPLEMENTATIONS
     ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_unix.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_macos.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_windows.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/platform/platformdesktop_fallback.cpp
 )
-if(WIN32)
-    set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_windows.cpp)
-elseif(APPLE)
+if(APPLE)
     set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_macos.cpp)
 elseif(UNIX)
     set(PLATFORM_DESKTOP_SOURCE platform/platformdesktop_unix.cpp)
@@ -82,7 +79,6 @@ add_library(${THUMBGRID_APP_TARGET} OBJECT
     proxystyle.cpp
     macosapplication.cpp
     resources.qrc
-    thumbgrid.rc
     ${QM_FILES}
 )
 target_include_directories(${THUMBGRID_APP_TARGET} PUBLIC
@@ -137,13 +133,8 @@ if(KDE_SUPPORT)
     target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_KDE_BLUR)
 endif()
 target_compile_definitions(${THUMBGRID_APP_TARGET} PUBLIC USE_MPV)
-if(WIN32)
-    ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="plugins")
-    ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.dll")
-else()
-    ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="${QIMGV_PLUGIN_DIR}")
-    ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.so")
-endif()
+ADD_DEFINITIONS(-D_QIMGV_PLUGIN_DIR="${QIMGV_PLUGIN_DIR}")
+ADD_DEFINITIONS(-D_QIMGV_PLAYER_PLUGIN="player_mpv.so")
 # optional: KDE KSyntaxHighlighting for the text viewer; without it the
 # built-in fallback highlighter (textsyntaxhighlighter.cpp) is used
 find_package(KF6SyntaxHighlighting QUIET)
@@ -156,20 +147,7 @@ else()
 endif()
 
 # generate proper GUI program on specified platform
-if(WIN32) # Check if we are on Windows
-    if(MSVC) # Check if we are using the Visual Studio compiler
-        set_target_properties(thumbgrid PROPERTIES WIN32_EXECUTABLE ON)
-        target_link_options(thumbgrid PRIVATE "/ENTRY:mainCRTStartup")
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        target_link_options(thumbgrid PRIVATE "-mwindows")
-    elseif(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-        set(CMAKE_CXX_FLAGS "$ENV{CMAKE_CXX_FLAGS} -Wno-shift-negative-value")
-        set(CMAKE_EXE_LINKER_FLAGS "$ENV{CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
-        target_link_options(thumbgrid PRIVATE "-mwindows")
-    else()
-        message(SEND_ERROR "You are using an unsupported Windows compiler! (Not MSVC or GCC)")
-    endif(MSVC)
-elseif(APPLE)
+if(APPLE)
     set_target_properties(thumbgrid PROPERTIES
         MACOSX_BUNDLE YES
         MACOSX_BUNDLE_BUNDLE_NAME "thumbgrid"
@@ -181,7 +159,7 @@ elseif(APPLE)
     )
     set_source_files_properties(${APPLE_ICON_PATH} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 elseif(NOT UNIX)
-    message(SEND_ERROR "You are on an unsupported platform! (Not Win32, Mac OS X or Unix)")
+    message(SEND_ERROR "You are on an unsupported platform! (Not Linux, macOS or another Unix)")
 endif()
 
 ## INSTALLATION
@@ -205,11 +183,9 @@ install(FILES distrib/thumbgrid.appdata.xml DESTINATION ${CMAKE_INSTALL_FULL_DAT
 # Preset color themes. Installed to the system config dir (FHS convention for
 # editable config) so admins/packagers can adjust or add presets. The same
 # files are embedded via resources.qrc as a fallback when this dir is absent
-# (dev tree, Windows/macOS); THEMES_PATH tells the app where to look first.
-if(NOT WIN32)
-    ADD_DEFINITIONS(-DTHEMES_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid/themes")
-    install(DIRECTORY res/themes DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid)
-endif()
+# (dev tree, macOS); THEMES_PATH tells the app where to look first.
+ADD_DEFINITIONS(-DTHEMES_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid/themes")
+install(DIRECTORY res/themes DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid)
 
 # Shortcut presets are seed catalogs (the active mapping is the user's
 # shortcuts.json). Which presets get embedded is inferred per-target-OS from each
@@ -217,9 +193,7 @@ endif()
 # embedded because it is the default and first-run seed. Override the set with
 # -DTHUMBGRID_PRESETS="qimgv;xnviewmp". PRESETS_PATH lets admins/packagers add
 # presets at runtime (mirrors THEMES_PATH).
-if(WIN32)
-    set(THUMBGRID_TARGET_OS "windows")
-elseif(APPLE)
+if(APPLE)
     set(THUMBGRID_TARGET_OS "macos")
 else()
     set(THUMBGRID_TARGET_OS "linux")  # incl. *BSD (shares keymap_linux)
@@ -264,19 +238,13 @@ qt_add_resources(${THUMBGRID_APP_TARGET} "shortcut_presets"
     BASE "${CMAKE_CURRENT_SOURCE_DIR}"
     FILES ${THUMBGRID_PRESET_FILES})
 
-if(NOT WIN32)
-    ADD_DEFINITIONS(-DPRESETS_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid/presets")
-    install(DIRECTORY res/presets DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid
-            FILES_MATCHING PATTERN "*.json")
-endif()
+ADD_DEFINITIONS(-DPRESETS_PATH="${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid/presets")
+install(DIRECTORY res/presets DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/thumbgrid
+        FILES_MATCHING PATTERN "*.json")
 
 # Install internationalization language files
-if(WIN32)
-    install(DIRECTORY "${PROJECT_BINARY_DIR}/src/translations" DESTINATION "${CMAKE_INSTALL_BINDIR}")
-else()
-    ADD_DEFINITIONS(-DTRANSLATIONS_PATH="${CMAKE_INSTALL_FULL_DATAROOTDIR}/thumbgrid/translations")
-    install(DIRECTORY "${PROJECT_BINARY_DIR}/src/translations" DESTINATION "${CMAKE_INSTALL_FULL_DATAROOTDIR}/thumbgrid")
-endif()
+ADD_DEFINITIONS(-DTRANSLATIONS_PATH="${CMAKE_INSTALL_FULL_DATAROOTDIR}/thumbgrid/translations")
+install(DIRECTORY "${PROJECT_BINARY_DIR}/src/translations" DESTINATION "${CMAKE_INSTALL_FULL_DATAROOTDIR}/thumbgrid")
 
 # uninstall target
 if(NOT TARGET uninstall)

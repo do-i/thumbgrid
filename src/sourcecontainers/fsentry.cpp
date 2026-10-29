@@ -1,7 +1,5 @@
 #include "fsentry.h"
 
-#include "utils/pathstring.h"
-
 #include <utility>
 
 FSEntry::FSEntry() {
@@ -12,13 +10,13 @@ FSEntry::FSEntry(const QString &path) {
     namespace fs = std::filesystem;
     std::error_code ec;
     this->path = path;
-    this->name = QString::fromStdString(fs::path(toStdString(path)).filename().generic_string());
-    this->isDirectory = fs::is_directory(toStdString(path), ec) && !ec;
+    this->name = QString::fromStdString(fs::path(path.toStdString()).filename().generic_string());
+    this->isDirectory = fs::is_directory(path.toStdString(), ec) && !ec;
     if(!isDirectory) {
-        this->size = fs::file_size(toStdString(path), ec);
+        this->size = fs::file_size(path.toStdString(), ec);
         if(ec)
             this->size = 0;
-        this->modifyTime = fs::last_write_time(toStdString(path), ec);
+        this->modifyTime = fs::last_write_time(path.toStdString(), ec);
         if(ec)
             this->modifyTime = fs::file_time_type();
     }

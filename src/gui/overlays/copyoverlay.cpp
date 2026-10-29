@@ -146,13 +146,6 @@ void CopyOverlay::createDefaultPaths() {
                 || mfi.fileName() ==  ".."
                 // hide directory
                 || mfi.fileName()[0] ==  '.' 
-                // windows system directory
-                || mfi.fileName() ==  "3D Objects"
-                || mfi.fileName() ==  "Contacts"
-                || mfi.fileName() ==  "Favorites"
-                || mfi.fileName() ==  "Links"
-                || mfi.fileName() ==  "Saved Games"
-                || mfi.fileName() ==  "Searches"
                 ) {
                     continue;
                 }

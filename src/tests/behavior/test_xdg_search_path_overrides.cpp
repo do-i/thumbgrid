@@ -67,7 +67,7 @@ void XdgSearchPathOverridesTest::userPresetIsDiscoveredAndResolved() {
                           "  \"_meta\": {\n"
                           "    \"id\": \"" << id << "\",\n"
                           "    \"name\": \"XDG Test\",\n"
-                          "    \"os\": [\"linux\", \"windows\", \"macos\"],\n"
+                          "    \"os\": [\"linux\", \"macos\"],\n"
                           "    \"order\": 900\n"
                           "  },\n"
                           "  \"global\": { \"exit\": [\"$Ctrl+Q\"] }\n"

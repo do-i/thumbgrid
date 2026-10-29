@@ -5,7 +5,6 @@
         "description": "thumbgrid's ancestor scheme; default and first-run seed",
         "os": [
             "linux",
-            "windows",
             "macos"
         ],
         "order": 0,

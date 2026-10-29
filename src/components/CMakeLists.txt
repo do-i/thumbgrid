@@ -37,12 +37,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
 
 )
 
-if(WIN32)
-    target_sources(${THUMBGRID_APP_TARGET} PRIVATE
-        directorymanager/watchers/directorywatcher_factory_windows.cpp
-        directorymanager/watchers/windows/windowswatcher.cpp
-        directorymanager/watchers/windows/windowsworker.cpp)
-elseif(APPLE)
+if(APPLE)
     target_sources(${THUMBGRID_APP_TARGET} PRIVATE
         directorymanager/watchers/directorywatcher_factory_macos.cpp)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux" OR CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")

@@ -51,7 +51,7 @@ static QString canonicalizeAsFarAsPossible(const QString &path) {
         QString ancestor = QLatin1Char('/') + parts.join(QLatin1Char('/'));
         canonical = QFileInfo(ancestor).canonicalFilePath();
         if(!canonical.isEmpty()) {
-            // root is "/": avoid doubling the separator ("//" is meaningful on Windows)
+            // root is "/": avoid doubling the separator
             if(!canonical.endsWith(QLatin1Char('/')))
                 canonical += QLatin1Char('/');
             return QDir::cleanPath(canonical + tail.join(QLatin1Char('/')));

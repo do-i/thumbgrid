@@ -309,13 +309,9 @@ void FileOperations::moveSymLinkTo(const QString &srcLinkPath, const QString &de
 bool FileOperations::isValidFileName(const QString &name) {
     if(name.isEmpty() || name == QStringLiteral(".") || name == QStringLiteral(".."))
         return false;
-    // '/' always disqualifies; '\' only on Windows (an ordinary character elsewhere)
+    // '/' disqualifies; '\' is an ordinary filename character
     if(name.contains(QLatin1Char('/')))
         return false;
-#ifdef Q_OS_WIN
-    if(name.contains(QLatin1Char('\\')))
-        return false;
-#endif
     if(QDir::isAbsolutePath(name))
         return false;
     // Belt and braces: whatever the platform considers the leaf must be the

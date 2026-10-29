@@ -57,8 +57,6 @@ void ShortcutPresetsAndKeymapsPocTest::availablePresetsAreOsFiltered() {
     QVERIFY2(ids.contains("qimgv"), "qimgv is cross-platform and always present.");
     QVERIFY2(ids.contains("gwenview"), "gwenview targets linux and should be offered here.");
     QVERIFY2(ids.contains("xnviewmp"), "xnviewmp is cross-platform and should be offered here.");
-    QVERIFY2(!ids.contains("irfanview"),
-             "irfanview targets windows only; excluded on this (linux) build.");
 }
 
 // (4) Applying a preset replaces the mapping; modified tracks divergence and
@@ -94,7 +92,7 @@ void ShortcutPresetsAndKeymapsPocTest::xnviewmpPresetLoadsRepresentativeBindings
 // when the Controls tab was untouched. The rebuild loop never touches a
 // context whose draft is empty, so removeAllShortcuts() must re-seed every
 // context key itself; otherwise a preset with an empty or missing section
-// (e.g. the windows-only irfanview.json has no "grid") comes back with fewer
+// (e.g. one with no "grid") comes back with fewer
 // context keys than `defaults`, the shortcuts != defaults comparison in
 // saveShortcuts() turns spuriously true, and the preset combo shows "Custom"
 // right after a clean preset switch.

@@ -41,9 +41,7 @@ QJsonObject readObject(const QString &path) {
 } // namespace
 
 QString ShortcutPresetStore::currentOsToken() {
-#if defined(_WIN32)
-    return QStringLiteral("windows");
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
     return QStringLiteral("macos");
 #else
     // linux and *BSD share the linux keymap/scheme

@@ -9,7 +9,6 @@ compatibility only:
 
 - **Gwenview** is a trademark of the KDE community.
 - **XnView MP** is a trademark of Pierre-e Gougelet / XnSoft.
-- **IrfanView** is a trademark of Irfan Skiljan.
 
 None of these projects endorse or are affiliated with thumbgrid. The mappings
 here are **independent reconstructions** from each application's documented or

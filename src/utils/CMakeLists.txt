@@ -15,9 +15,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     resizecopy.cpp
 )
 
-if(WIN32)
-    set(FILEOPERATIONS_PLATFORM_SOURCE fileoperations_windows.cpp)
-elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(FILEOPERATIONS_PLATFORM_SOURCE fileoperations_linux.cpp)
 else()
     set(FILEOPERATIONS_PLATFORM_SOURCE fileoperations_fallback.cpp)

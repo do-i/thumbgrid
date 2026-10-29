@@ -3,7 +3,7 @@
         "id": "xnviewmp",
         "name": "XnView MP-style",
         "description": "Shortcuts modeled on XnView MP conventions",
-        "os": ["linux", "windows", "macos"],
+        "os": ["linux", "macos"],
         "order": 20,
         "source": "Illustrative partial reconstruction of XnView MP documented defaults",
         "notice": "Independent reconstruction; 'XnView MP' is a trademark of its owner; not affiliated or endorsed."

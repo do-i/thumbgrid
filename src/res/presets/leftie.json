@@ -5,7 +5,6 @@
         "description": "Southpaw-friendly key selection - turns out keys pick their own friends, and this bunch all huddled on the right hand",
         "os": [
             "linux",
-            "windows",
             "macos"
         ],
         "order": 50,

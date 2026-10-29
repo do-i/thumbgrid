@@ -253,7 +253,6 @@ find_executable() {
     local candidate
     for candidate in \
         "$BUILD_DIR/src/thumbgrid" \
-        "$BUILD_DIR/src/thumbgrid.exe" \
         "$BUILD_DIR/src/thumbgrid.app/Contents/MacOS/thumbgrid"; do
         if [[ -x "$candidate" ]]; then
             printf '%s\n' "$candidate"

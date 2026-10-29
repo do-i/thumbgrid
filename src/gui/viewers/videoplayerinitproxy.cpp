@@ -17,12 +17,8 @@ VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
     setLayout(&layout);
     connect(settings, &Settings::settingsChanged, this, &VideoPlayerInitProxy::onSettingsChanged);
     libFile = QIMGV_PLAYER_PLUGIN;
-#ifdef _WIN32
-    libDirs << QApplication::applicationDirPath() + "/plugins";
-#else
     libDirs << QDir::cleanPath(QApplication::applicationDirPath() + "/../lib/thumbgrid")
             << "/usr/lib/thumbgrid" << "/usr/lib64/thumbgrid";
-#endif
 }
 
 VideoPlayerInitProxy::~VideoPlayerInitProxy() {

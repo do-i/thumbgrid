@@ -390,7 +390,7 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
         }
         // Space now runs its binding: hand the preset's Space to configs that left it unbound or nextImage
         const bool oldNextImageDefault =
-            QStringList{"gwenview", "irfanview", "xnviewmp"}.contains(settings->selectedPreset()) &&
+            QStringList{"gwenview", "xnviewmp"}.contains(settings->selectedPreset()) &&
             shortcuts[MODE_DOCUMENT].value("Space") == "nextImage";
         if(oldNextImageDefault)
             shortcuts[MODE_DOCUMENT].remove("Space");

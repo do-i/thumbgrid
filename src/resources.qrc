@@ -130,7 +130,6 @@
         <file>res/themes/darkblue.ini</file>
         <file>res/themes/light_blue.ini</file>
         <file>res/keymaps/keymap_linux.json</file>
-        <file>res/keymaps/keymap_windows.json</file>
         <file>res/keymaps/keymap_macos.json</file>
         <file>res/keymaps/keymap_fallback.json</file>
         <file>res/icons/common/buttons/panel/settings20.png</file>

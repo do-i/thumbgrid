@@ -95,11 +95,7 @@ void ScriptEditorDialog::onNameChanged(const QString& name) {
 void ScriptEditorDialog::selectScriptPath() {
     QFileDialog dialog;
     QString file;
-#ifdef _WIN32
-    file = dialog.getOpenFileName(this, tr("Select an executable/script"), "", "Executable/script (*.exe *.bat)");
-#else
     file = dialog.getOpenFileName(this, tr("Select a script file"), "", "Shell script (*.sh)");
-#endif
     if(!file.isEmpty()) {
         ui->pathLineEdit->setText("\"" + file + "\"" + " %file%");
     }

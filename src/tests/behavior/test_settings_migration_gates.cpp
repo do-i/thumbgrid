@@ -546,7 +546,7 @@ bool spaceMigrationKeepsCustomBinding() {
                    "A customised Space must survive the upgrade.");
 }
 
-// gwenview, irfanview and xnviewmp used to bind Space to nextImage; a config
+// gwenview and xnviewmp used to bind Space to nextImage; a config
 // still on that default moves Space to pauseVideo, keeping its other keys.
 bool spaceMovesOffTheOldNextImageDefault() {
     QSettings conf;

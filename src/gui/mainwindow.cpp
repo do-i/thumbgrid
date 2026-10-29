@@ -17,16 +17,12 @@ QString appTitle() {
 
 // A path under the home directory with the home part shown as "~".
 QString tildePath(const QString &path) {
-#ifdef Q_OS_WIN
-    return path;
-#else
     const QString home = QDir::homePath();
     if(path == home)
         return QStringLiteral("~");
     if(home != "/" && path.startsWith(home + "/"))
         return "~" + path.mid(home.length());
     return path;
-#endif
 }
 }
 

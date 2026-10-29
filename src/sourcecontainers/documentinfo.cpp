@@ -1,6 +1,5 @@
 #include "documentinfo.h"
 #include "utils/logging.h"
-#include "utils/pathstring.h"
 #include <QByteArray>
 #include <QColorSpace>
 #include <QDirIterator>
@@ -242,7 +241,7 @@ void DocumentInfo::loadExifTags() {
     try {
         std::unique_ptr<Exiv2::Image> image;
 
-        image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
 
         assert(image.get() != 0);
         image->readMetadata();
@@ -320,17 +319,10 @@ void DocumentInfo::loadExifTags() {
 
 // this should work with both 0.28 and <0.28
 #if not EXIV2_TEST_VERSION(0, 28, 0)
-#ifdef __WIN32
-    catch (Exiv2::BasicError<wchar_t>& e) {
-        qCWarning(logLoader) << "Caught Exiv2::BasicError exception:\n" << e.what() << "\n";
-        return;
-    }
-#else
     catch (Exiv2::BasicError<char>& e) {
         qCWarning(logLoader) << "Caught Exiv2::BasicError exception:\n" << e.what() << "\n";
         return;
     }
-#endif
 #endif
 
     catch (Exiv2::Error& e) {
@@ -354,7 +346,7 @@ void DocumentInfo::loadAllTags() {
     allTags.clear();
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return;
         image->readMetadata();
@@ -397,7 +389,7 @@ void DocumentInfo::loadXmpTags() {
     xmpTags.clear();
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return;
         image->readMetadata();
@@ -457,7 +449,7 @@ QList<QPair<QString, QString>> DocumentInfo::getIccProfileInfo() {
     QList<QPair<QString, QString>> info;
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return info;
         image->readMetadata();
@@ -488,7 +480,7 @@ QList<QPair<QString, QString>> DocumentInfo::getIccProfileInfo() {
 bool DocumentInfo::stripMetadata() {
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -737,7 +729,7 @@ QMap<QString, QStringList> DocumentInfo::getEditableXmpTags() {
     QMap<QString, QStringList> values;
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return values;
         image->readMetadata();
@@ -790,7 +782,7 @@ bool DocumentInfo::setEditableXmpTags(const QMap<QString, QStringList> &values) 
         }
     }
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -872,7 +864,7 @@ bool DocumentInfo::setCustomXmpTags(const QMap<QString, QString> &values) {
             return false;
     }
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -900,7 +892,7 @@ bool DocumentInfo::setCustomXmpTags(const QMap<QString, QString> &values) {
 bool DocumentInfo::eraseXmpKey(const QString &key) {
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -939,7 +931,7 @@ bool DocumentInfo::addCustomXmpProperty(const QString &prefix, const QString &na
                 return false;
             Exiv2::XmpProperties::registerNs(namespaceUri.toStdString(), prefix.toStdString());
         }
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -965,7 +957,7 @@ bool DocumentInfo::addCustomXmpProperty(const QString &prefix, const QString &na
 // each scoped removal leaves the other two kinds intact
 bool DocumentInfo::clearExifMetadata() {
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -985,7 +977,7 @@ bool DocumentInfo::clearExifMetadata() {
 
 bool DocumentInfo::clearXmpMetadata() {
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -1005,7 +997,7 @@ bool DocumentInfo::clearXmpMetadata() {
 
 bool DocumentInfo::clearIccProfile() {
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -1021,7 +1013,7 @@ bool DocumentInfo::clearIccProfile() {
 
 bool DocumentInfo::hasExifMetadata() {
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -1037,7 +1029,7 @@ bool DocumentInfo::hasXmpMetadata() {
 
 bool DocumentInfo::hasIccProfile() {
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -1087,7 +1079,7 @@ QMap<QString, QString> DocumentInfo::getEditableTags() {
     QMap<QString, QString> values;
 #ifdef USE_EXIV2
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return values;
         image->readMetadata();
@@ -1122,7 +1114,7 @@ bool DocumentInfo::setEditableTags(const QMap<QString, QString> &values) {
             return false;
     }
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();
@@ -1164,7 +1156,7 @@ bool DocumentInfo::setEditableTags(const QMap<QString, QString> &values) {
 #ifdef USE_EXIV2
 bool DocumentInfo::loadExifOrientationExiv2() {
     try {
-        auto image = Exiv2::ImageFactory::open(toStdString(fileInfo.filePath()));
+        auto image = Exiv2::ImageFactory::open(fileInfo.filePath().toStdString());
         if(!image.get())
             return false;
         image->readMetadata();

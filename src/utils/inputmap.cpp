@@ -12,9 +12,7 @@ namespace {
 // (it uses the text-event path, not native scan codes); unknown platforms use an
 // empty fallback so ShortcutBuilder::fromEventText() handles them.
 QString keymapResourcePath() {
-#if defined(_WIN32)
-    return QStringLiteral(":/res/keymaps/keymap_windows.json");
-#elif defined(__linux__) || defined(__FreeBSD__)
+#if defined(__linux__) || defined(__FreeBSD__)
     return QStringLiteral(":/res/keymaps/keymap_linux.json");
 #elif defined(__APPLE__)
     return QStringLiteral(":/res/keymaps/keymap_macos.json");

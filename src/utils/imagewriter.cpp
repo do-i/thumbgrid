@@ -8,7 +8,6 @@
 #include <QSaveFile>
 #include "settings.h"
 #include "utils/logging.h"
-#include "utils/pathstring.h"
 
 #ifdef USE_EXIV2
 #include <exiv2/exiv2.hpp>
@@ -20,7 +19,7 @@ namespace {
 // Qt's encoders write no metadata: copy the source's Exif/Iptc/Xmp, best-effort.
 void attachMetadata(QByteArray &bytes, const ImageWriteJob &job) {
     try {
-        auto src = Exiv2::ImageFactory::open(toStdString(job.metadataSource));
+        auto src = Exiv2::ImageFactory::open(job.metadataSource.toStdString());
         if(!src.get())
             return;
         src->readMetadata();
