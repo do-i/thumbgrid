@@ -150,6 +150,13 @@ private:
     QLineEdit *mShortcutSearchEdit = nullptr;
     QComboBox *mShortcutPresetComboBox = nullptr;
     QCheckBox *mScalingSharpenCheckBox = nullptr;
+    // checker colors behind transparent images; not theme colors
+    void setupTransparencyGridControls();
+    void previewTransparencyGridColors();
+    ColorSelectorButton *mTransparencyGridColor1Selector = nullptr;
+    ColorSelectorButton *mTransparencyGridColor2Selector = nullptr;
+    QColor mTransparencyGridColorsAtOpen[2];
+    bool mTransparencyGridPreviewed = false;
     // Cleared on a theme change so the icons pick up the new icon colour.
     mutable QMap<ViewMode, QIcon> mShortcutContextIcons;
     bool mUpdatingShortcutsTable = false;

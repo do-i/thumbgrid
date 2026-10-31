@@ -150,6 +150,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     setupThemePage();
     setupFeatureToggles();
     setupScalingControls();
+    setupTransparencyGridControls();
     setupSidebar();
     setupMiscControls();
 
@@ -242,6 +243,8 @@ void SettingsDialog::setupThemePage() {
         applyColorSchemePreview();
     };
     for(auto *selector : findChildren<ColorSelectorButton *>()) {
+        if(selector->objectName().startsWith(QLatin1String("transparencyGrid")))
+            continue; // checker colors are a viewer setting, not part of the theme
         connect(selector, &ColorSelectorButton::colorChanged, this, switchToCustom);
         connect(selector, &ColorSelectorButton::colorApplied, this, previewColor);
     }
@@ -262,6 +265,62 @@ void SettingsDialog::setupScalingControls() {
     connect(filter, &QComboBox::currentIndexChanged, this, [this, filter]() {
         mScalingSharpenCheckBox->setEnabled(filter->currentData().toInt() == QI_FILTER_HIGH_QUALITY);
     });
+}
+
+// two color swatches under the grid checkbox; they also tint grid thumbnails
+void SettingsDialog::setupTransparencyGridControls() {
+    auto *row = new QHBoxLayout();
+    row->setContentsMargins(0, 0, 0, 0);
+    auto *label = new QLabel(tr("Checker colors:"));
+    label->setToolTip(tr("Pattern behind transparent images, in the viewer and in grid thumbnails"));
+    row->addWidget(label);
+
+    auto makeSelector = [this](const QString &name, const QString &description) {
+        auto *selector = new ColorSelectorButton(this);
+        selector->setObjectName(name);
+        selector->setDescription(description);
+        selector->setFixedSize(40, 22);
+        selector->setCursor(Qt::PointingHandCursor);
+        selector->setAutoFillBackground(true);
+        selector->setFrameShape(QFrame::Box);
+        // the picker's Apply previews live; exec() reverts it unless saved
+        connect(selector, &ColorSelectorButton::colorApplied, this, [this](QColor) {
+            previewTransparencyGridColors();
+        });
+        return selector;
+    };
+    mTransparencyGridColor1Selector = makeSelector(QStringLiteral("transparencyGridColor1Selector"),
+                                                   tr("Checker color 1"));
+    mTransparencyGridColor2Selector = makeSelector(QStringLiteral("transparencyGridColor2Selector"),
+                                                   tr("Checker color 2"));
+    row->addWidget(mTransparencyGridColor1Selector);
+    row->addWidget(mTransparencyGridColor2Selector);
+
+    auto *resetButton = new QPushButton(tr("Load defaults"));
+    resetButton->setObjectName(QStringLiteral("transparencyGridColorsResetButton"));
+    resetButton->setCursor(Qt::PointingHandCursor);
+    connect(resetButton, &QPushButton::clicked, this, [this]() {
+        QColor color1 = Settings::defaultTransparencyGridColor1();
+        QColor color2 = Settings::defaultTransparencyGridColor2();
+        mTransparencyGridColor1Selector->setColor(color1);
+        mTransparencyGridColor2Selector->setColor(color2);
+        previewTransparencyGridColors();
+    });
+    row->addWidget(resetButton);
+    row->addStretch(1);
+
+    QVBoxLayout *group = ui->verticalLayout_13;
+    group->insertLayout(group->indexOf(ui->transparencyGridCheckBox) + 1, row);
+}
+
+void SettingsDialog::previewTransparencyGridColors() {
+    const QColor color1 = mTransparencyGridColor1Selector->color();
+    const QColor color2 = mTransparencyGridColor2Selector->color();
+    if(color1 == settings->transparencyGridColor1() && color2 == settings->transparencyGridColor2())
+        return;
+    settings->setTransparencyGridColors(color1, color2, false);
+    mTransparencyGridPreviewed = true;
+    emit settingsChanged();
 }
 
 void SettingsDialog::setupFeatureToggles() {
@@ -777,6 +836,10 @@ void SettingsDialog::readSettings() {
     ui->panelFullscreenOnlyCheckBox->setChecked(settings->panelFullscreenOnly());
     ui->squareThumbnailsCheckBox->setChecked(settings->squareThumbnails());
     ui->transparencyGridCheckBox->setChecked(settings->transparencyGrid());
+    QColor gridColor1 = settings->transparencyGridColor1();
+    QColor gridColor2 = settings->transparencyGridColor2();
+    mTransparencyGridColor1Selector->setColor(gridColor1);
+    mTransparencyGridColor2Selector->setColor(gridColor2);
     ui->enableSmoothScrollCheckBox->setChecked(settings->enableSmoothScroll());
     ui->usePreloaderCheckBox->setChecked(settings->usePreloader());
     ui->useThumbnailCacheCheckBox->setChecked(settings->useThumbnailCache());
@@ -936,6 +999,12 @@ void SettingsDialog::saveSettings() {
     settings->setPanelFullscreenOnly(ui->panelFullscreenOnlyCheckBox->isChecked());
     settings->setSquareThumbnails(ui->squareThumbnailsCheckBox->isChecked());
     settings->setTransparencyGrid(ui->transparencyGridCheckBox->isChecked());
+    settings->setTransparencyGridColors(mTransparencyGridColor1Selector->color(),
+                                        mTransparencyGridColor2Selector->color());
+    // the saved colors become the new revert baseline for later previews
+    mTransparencyGridColorsAtOpen[0] = settings->transparencyGridColor1();
+    mTransparencyGridColorsAtOpen[1] = settings->transparencyGridColor2();
+    mTransparencyGridPreviewed = false;
     settings->setShowHiddenFiles(ui->showHiddenFilesCheckBox->isChecked());
     settings->setShowOtherFileTypes(ui->showOtherFileTypesCheckBox->isChecked());
     settings->setEnableSmoothScroll(ui->enableSmoothScrollCheckBox->isChecked());
@@ -2048,13 +2117,23 @@ void SettingsDialog::onAutoResizeLimitSliderChanged(int value) {
 int SettingsDialog::exec() {
     mSchemeAtOpen = settings->colorScheme();
     mThemePreviewed = false;
+    mTransparencyGridColorsAtOpen[0] = settings->transparencyGridColor1();
+    mTransparencyGridColorsAtOpen[1] = settings->transparencyGridColor2();
+    mTransparencyGridPreviewed = false;
     int res = QDialog::exec();
-    // OK and Cancel both go through close(); saveSettings() clears the flag when previews are kept
+    // OK and Cancel both go through close(); saveSettings() clears the flags when previews are kept
+    const bool revert = mThemePreviewed || mTransparencyGridPreviewed;
     if(mThemePreviewed) {
         mThemePreviewed = false;
         settings->setColorScheme(mSchemeAtOpen);
-        emit settingsChanged();
     }
+    if(mTransparencyGridPreviewed) {
+        mTransparencyGridPreviewed = false;
+        settings->setTransparencyGridColors(mTransparencyGridColorsAtOpen[0],
+                                            mTransparencyGridColorsAtOpen[1], false);
+    }
+    if(revert)
+        emit settingsChanged();
     return res;
 }
 

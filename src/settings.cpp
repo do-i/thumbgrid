@@ -95,7 +95,8 @@ QString settingGroupFor(const QString &key) {
         {"videoPlayback", "Document"}, {"playVideoSounds", "Document"}, {"showVideoControls", "Document"},
         {"videoHardwareDecoding", "Document"},
         {"panelEnabled", "Document"}, {"panelFullscreenOnly", "Document"}, {"squareThumbnails", "Document"},
-        {"drawTransparencyGrid", "Document"}, {"smoothUpscaling", "Document"}, {"expandImage", "Document"},
+        {"drawTransparencyGrid", "Document"}, {"transparencyGridColor1", "Document"},
+        {"transparencyGridColor2", "Document"}, {"smoothUpscaling", "Document"}, {"expandImage", "Document"},
         {"expandLimit", "Document"}, {"smoothAnimatedImages", "Document"}, {"loopSlideshow", "Document"},
         {"slideshowInterval", "Document"}, {"defaultFitMode", "Document"}, {"keepFitMode", "Document"},
         {"focusPointIn1to1Mode", "Document"}, {"unlockMinZoom", "Document"}, {"zoomStep", "Document"},
@@ -563,6 +564,7 @@ Settings::Settings(QObject *parent)
     if((!isFirstRun || hasExistingSettings) && lastVer < appVersion)
         runVersionedSettingsMigrations(lastVer);
     fillVideoFormats();
+    loadTransparencyGridColors();
 }
 //------------------------------------------------------------------------------
 Settings::~Settings() {
@@ -1543,6 +1545,45 @@ bool Settings::transparencyGrid() {
 
 void Settings::setTransparencyGrid(bool mode) {
     settings->writeSetting("drawTransparencyGrid", mode);
+}
+
+QColor Settings::defaultTransparencyGridColor1() {
+    return QColor(242, 242, 242);
+}
+
+QColor Settings::defaultTransparencyGridColor2() {
+    return QColor(218, 218, 218);
+}
+
+void Settings::loadTransparencyGridColors() {
+    auto read = [this](const char *key, const QColor &fallback) {
+        QColor color = QColor::fromString(readSetting(QLatin1String(key), QVariant()).toString());
+        if(!color.isValid())
+            return fallback;
+        color.setAlpha(255); // a translucent checker would just blend into the window
+        return color;
+    };
+    mTransparencyGridColors[0] = read("transparencyGridColor1", defaultTransparencyGridColor1());
+    mTransparencyGridColors[1] = read("transparencyGridColor2", defaultTransparencyGridColor2());
+}
+
+QColor Settings::transparencyGridColor1() {
+    return settings->mTransparencyGridColors[0];
+}
+
+QColor Settings::transparencyGridColor2() {
+    return settings->mTransparencyGridColors[1];
+}
+
+void Settings::setTransparencyGridColors(const QColor &color1, const QColor &color2, bool persist) {
+    settings->mTransparencyGridColors[0] = color1.isValid() ? color1.toRgb() : defaultTransparencyGridColor1();
+    settings->mTransparencyGridColors[1] = color2.isValid() ? color2.toRgb() : defaultTransparencyGridColor2();
+    settings->mTransparencyGridColors[0].setAlpha(255);
+    settings->mTransparencyGridColors[1].setAlpha(255);
+    if(!persist)
+        return;
+    settings->writeSetting("transparencyGridColor1", settings->mTransparencyGridColors[0].name(QColor::HexRgb));
+    settings->writeSetting("transparencyGridColor2", settings->mTransparencyGridColors[1].name(QColor::HexRgb));
 }
 //------------------------------------------------------------------------------
 bool Settings::enableSmoothScroll() {

@@ -64,8 +64,19 @@ FolderGridView::FolderGridView(QWidget *parent)
 
     mPreviewFit = settings->folderViewPreviewFit();
     mThumbColorSignature = settings->colorScheme().bakedThumbnailSignature();
+    mTransparencyGridColors[0] = settings->transparencyGridColor1().rgba();
+    mTransparencyGridColors[1] = settings->transparencyGridColor2().rgba();
     connect(settings, &Settings::settingsChanged, [this]() {
         this->scene.setBackgroundBrush(settings->colorScheme().folderview);
+        // the checker is painted live under each thumbnail, but the item cache holds the old one
+        const QRgb grid1 = settings->transparencyGridColor1().rgba();
+        const QRgb grid2 = settings->transparencyGridColor2().rgba();
+        if(grid1 != mTransparencyGridColors[0] || grid2 != mTransparencyGridColors[1]) {
+            mTransparencyGridColors[0] = grid1;
+            mTransparencyGridColors[1] = grid2;
+            for(int i = 0; i < thumbnails.count(); i++)
+                thumbnails.at(i)->update();
+        }
         // thumbnails bake the preview layout and recolored icons, so regenerate on fit or theme color changes
         QString colorSignature = settings->colorScheme().bakedThumbnailSignature();
         if(mPreviewFit != settings->folderViewPreviewFit() || mThumbColorSignature != colorSignature) {

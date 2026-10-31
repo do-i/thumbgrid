@@ -76,6 +76,7 @@ private:
     int lastDragTarget = -1;
     bool mPreviewFit = false;
     QString mThumbColorSignature;
+    QRgb mTransparencyGridColors[2] = {0, 0};
 
     QLineEdit *renameEditor = nullptr;
     int renameIndex = -1;

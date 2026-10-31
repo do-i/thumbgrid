@@ -174,6 +174,13 @@ public:
     void setSquareThumbnails(bool mode);
     bool transparencyGrid();
     void setTransparencyGrid(bool mode);
+    // the two alternating checker colors behind transparent images (viewer and grid)
+    QColor transparencyGridColor1();
+    QColor transparencyGridColor2();
+    static QColor defaultTransparencyGridColor1();
+    static QColor defaultTransparencyGridColor2();
+    // persist=false only swaps the in-memory colors, for a live preview
+    void setTransparencyGridColors(const QColor &color1, const QColor &color2, bool persist = true);
     bool enableSmoothScroll();
     void setEnableSmoothScroll(bool mode);
     bool useThumbnailCache();
@@ -406,6 +413,9 @@ private:
     QString mShortcutsJsonPath;
     QDir *mTmpDir, *mThumbCacheDir;
     ColorScheme mColorScheme;
+    // read once: the grid paints these on every transparent thumbnail
+    QColor mTransparencyGridColors[2];
+    void loadTransparencyGridColors();
     QMultiMap<QByteArray, QByteArray> mVideoFormatsMap; // [mimetype, format]
     void loadTheme();
     void createColorVariants();

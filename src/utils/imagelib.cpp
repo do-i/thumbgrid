@@ -113,14 +113,22 @@ void ImageLib::sharpen(QImage &image) {
 }
 
 void ImageLib::drawTransparencyGrid(QPainter *painter, const QRectF &rect) {
-    static const QPixmap pattern = []() {
+    // GUI thread only; rebuilt when the configured colors change
+    static QPixmap pattern;
+    static QRgb patternColors[2] = {0, 0};
+    const QColor color1 = settings->transparencyGridColor1();
+    const QColor color2 = settings->transparencyGridColor2();
+    if(pattern.isNull() || patternColors[0] != color1.rgba() || patternColors[1] != color2.rgba()) {
         QPixmap pixmap(16, 16);
-        pixmap.fill(QColor(242, 242, 242));
+        pixmap.fill(color1);
         QPainter patternPainter(&pixmap);
-        patternPainter.fillRect(0, 0, 8, 8, QColor(218, 218, 218));
-        patternPainter.fillRect(8, 8, 8, 8, QColor(218, 218, 218));
-        return pixmap;
-    }();
+        patternPainter.fillRect(0, 0, 8, 8, color2);
+        patternPainter.fillRect(8, 8, 8, 8, color2);
+        patternPainter.end();
+        pattern = pixmap;
+        patternColors[0] = color1.rgba();
+        patternColors[1] = color2.rgba();
+    }
     painter->drawTiledPixmap(rect, pattern);
 }
 
