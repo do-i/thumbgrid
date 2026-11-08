@@ -146,6 +146,14 @@ add_test(
     COMMAND thumbgrid_parent_nav_thumb_cache_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_go_up_removed_ancestors_test
+    behavior/test_going_up_skips_removed_ancestors.cpp
+)
+add_test(
+    NAME "Going up skips folders removed outside the app"
+    COMMAND thumbgrid_go_up_removed_ancestors_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_thumbnail_mem_cache_test
     behavior/test_thumbnail_mem_cache.cpp
 )

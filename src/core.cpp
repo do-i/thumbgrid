@@ -1608,20 +1608,40 @@ void Core::loadParentDir() {
         mw->showMessage(tr("Already at root folder."), 2200);
         return;
     }
-    QFileInfo parentDir(currentDir.absolutePath());
-    // without root browsing, the root's children are the ceiling
-    if(!settings->allowBrowseRoot() &&
-       QDir::cleanPath(parentDir.absoluteFilePath()) == QDir::cleanPath(QDir::rootPath()))
-        return;
-    if(parentDir.exists() && parentDir.isReadable()) {
-        QString childPath = currentDir.absoluteFilePath();
-        loadPath(parentDir.absoluteFilePath());
-        // populate() selects item 0 and queues layout; select the child dir after that settles
-        QTimer::singleShot(0, this, [this, childPath]() {
-            if(mw->currentViewMode() == MODE_FOLDERVIEW)
-                folderViewPresenter.selectAndFocus(childPath);
-        });
+    const QString rootPath = QDir::cleanPath(QDir::rootPath());
+    const bool allowRoot = settings->allowBrowseRoot();
+    // The parent (and further ancestors) may have been removed outside the app:
+    // keep climbing until an existing, readable folder is found.
+    QString childPath = QDir::cleanPath(currentDir.absoluteFilePath());
+    QString target;
+    for(QString candidate = QDir::cleanPath(currentDir.absolutePath());;) {
+        // without root browsing, the root's children are the ceiling
+        if(candidate == rootPath && !allowRoot)
+            break;
+        QFileInfo fi(candidate);
+        if(fi.isDir() && fi.isReadable()) {
+            target = candidate;
+            break;
+        }
+        if(candidate == rootPath)
+            break;
+        childPath = candidate;
+        candidate = QDir::cleanPath(QFileInfo(candidate).absolutePath());
     }
+    if(target.isEmpty()) {
+        // nothing on the path survived: only fall back when the current folder is gone too
+        if(QFileInfo(currentDir.absoluteFilePath()).isDir())
+            return;
+        target = QDir::cleanPath(QDir::homePath());
+        if(target == QDir::cleanPath(currentDir.absoluteFilePath()) || !QFileInfo(target).isDir())
+            return;
+    }
+    loadPath(target);
+    // populate() selects item 0 and queues layout; select the child dir after that settles
+    QTimer::singleShot(0, this, [this, childPath]() {
+        if(mw->currentViewMode() == MODE_FOLDERVIEW)
+            folderViewPresenter.selectAndFocus(childPath);
+    });
 }
 
 void Core::nextDirectory() {
