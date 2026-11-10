@@ -75,6 +75,14 @@ frees an object.
   **Rename only opportunistically** — when already editing the class for another
   reason — never in bulk renaming sweeps.
 
+### Constants
+
+- All `constexpr` (zero runtime cost), `kCamelCase`, unit in the name (`kFadeMs`, `kMarginPx`).
+- Used in exactly one `.cpp` → `constexpr` in an anonymous namespace in that file.
+- Used in 2+ files, or the min / max / default of a user setting →
+  `inline constexpr` in [`src/constants.h`](src/constants.h), in its `tg::` group.
+- Existing names stay; rename only when the value is being moved anyway.
+
 ## Releasing
 
 The git tag is the single source of truth for the version.
