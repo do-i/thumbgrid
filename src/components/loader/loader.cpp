@@ -2,9 +2,13 @@
 
 #include <utility>
 
+namespace {
+constexpr int kLoaderThreads = 2;
+}
+
 Loader::Loader() {
     pool = new QThreadPool(this);
-    pool->setMaxThreadCount(2);
+    pool->setMaxThreadCount(kLoaderThreads);
 }
 
 void Loader::clearTasks() {

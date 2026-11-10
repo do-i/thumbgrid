@@ -1,6 +1,10 @@
 #include "directorymodel.h"
 
 #include <utility>
+
+namespace {
+constexpr int kSaveThreads = 1; // one write at a time
+}
 #include "sourcecontainers/imagestatic.h"
 
 DirectoryModel::DirectoryModel(QObject *parent) :
@@ -22,7 +26,7 @@ DirectoryModel::DirectoryModel(QObject *parent) :
     connect(&loader, &Loader::loadFinished, this, &DirectoryModel::onImageReady);
     connect(&loader, &Loader::loadFailed, this, &DirectoryModel::loadFailed);
     // one write at a time; the encoders thread internally where they can
-    savePool.setMaxThreadCount(1);
+    savePool.setMaxThreadCount(kSaveThreads);
 }
 
 DirectoryModel::~DirectoryModel() {

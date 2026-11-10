@@ -23,10 +23,20 @@ inline constexpr int kMessageLongMs = 4000;    // errors, startup notices
 } // namespace tg::timing
 
 // Pixel sizes, margins and scale factors (…Px).
-namespace tg::size {}
+namespace tg::size {
+
+// Image hash decode target: larger files are decoded reduced to this edge.
+inline constexpr int kHashDecodeSizePx = 256;
+
+} // namespace tg::size
 
 // Counts, thread pools and other non-setting caps.
-namespace tg::limit {}
+namespace tg::limit {
+
+// Entries examined when checking a folder for convertible images.
+inline constexpr int kConvertibleScanMaxEntries = 1000;
+
+} // namespace tg::limit
 
 // Colors as constexpr QRgb (…Rgb); build a QColor at the use site.
 namespace tg::color {}

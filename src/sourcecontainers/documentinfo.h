@@ -15,6 +15,7 @@
 #include <cstring>
 #include <cstdint>
 #include "settings.h"
+#include "constants.h"
 
 #ifdef USE_EXIV2
 
@@ -138,7 +139,7 @@ public:
 
     // Extension-based menu gate; the conversion flow checks img->type() == STATIC.
     static bool isConvertibleImageFile(const QString &filePath);
-    static bool dirContainsConvertibleImage(const QString &dirPath, int maxEntries = 1000);
+    static bool dirContainsConvertibleImage(const QString &dirPath, int maxEntries = tg::limit::kConvertibleScanMaxEntries);
 
 private:
     QFileInfo fileInfo;

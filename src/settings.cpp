@@ -13,6 +13,8 @@ Settings *settings = nullptr;
 namespace {
 // scratch dirs younger than this may belong to a live session
 constexpr int kStaleScratchAgeSecs = 300;
+// default thread count per pool is half the cores, capped here
+constexpr int kDefaultThreadsPerPoolMax = 2;
 
 QColor colorFromVariant(const QVariant &value, const QColor &fallback) {
     QColor color = value.value<QColor>();
@@ -1716,7 +1718,7 @@ static int totalCoreBudget() {
 }
 
 static int defaultThreadsPerPool() {
-    return qMax(1, qMin(2, totalCoreBudget() / 2));
+    return qMax(1, qMin(kDefaultThreadsPerPoolMax, totalCoreBudget() / 2));
 }
 
 int Settings::thumbnailerThreadCount() {

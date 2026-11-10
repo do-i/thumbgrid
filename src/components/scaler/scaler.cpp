@@ -3,6 +3,10 @@
 #include <memory>
 #include <utility>
 
+namespace {
+constexpr int kScalerThreads = 1;
+}
+
 /* What this should do in theory:
  * 1 request comes
  * 2 we run it
@@ -20,7 +24,7 @@ Scaler::Scaler(Cache *_cache, QObject *parent)
 {
     sem = new QSemaphore(1);
     pool = new QThreadPool(this);
-    pool->setMaxThreadCount(1);
+    pool->setMaxThreadCount(kScalerThreads);
     runnable = new ScalerRunnable();
     runnable->setAutoDelete(false);
     connect(this, &Scaler::startBufferedRequest, this, &Scaler::slotStartBufferedRequest, Qt::DirectConnection);

@@ -13,6 +13,9 @@ namespace {
 constexpr int kMpvStartWaitMs = 3000;
 constexpr int kMpvFrameGrabTimeoutMs = 8000;
 constexpr int kMpvKillWaitMs = 1000;
+// folder preview tile: entries examined, images used
+constexpr int kPreviewScanMaxEntries = 80;
+constexpr int kPreviewMaxImages = 4;
     const QString directoryThumbnailIconVersion = "folder-icon-v2";
 
     QSet<QString> supportedPreviewImageSuffixes() {
@@ -277,11 +280,10 @@ QList<QImage> ThumbnailerRunnable::dirPreviewImages(ThumbnailCache *cache, const
     if(showHidden)
         filters |= QDir::Hidden;
 
-    const int maxScannedEntries = 80;
     int scanned = 0;
     QFileInfoList entries = dir.entryInfoList(filters, QDir::Name | QDir::IgnoreCase);
     for(const QFileInfo &entry : entries) {
-        if(scanned++ >= maxScannedEntries || images.count() >= 4)
+        if(scanned++ >= kPreviewScanMaxEntries || images.count() >= kPreviewMaxImages)
             break;
         if(!hasSupportedPreviewImageSuffix(entry))
             continue;

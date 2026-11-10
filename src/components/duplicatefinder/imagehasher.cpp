@@ -1,4 +1,5 @@
 #include "imagehasher.h"
+#include "constants.h"
 
 #include <QCryptographicHash>
 #include <QFile>
@@ -12,7 +13,6 @@ namespace {
 
 constexpr int SAMPLE_SIZE = 32;   // DCT input
 constexpr int BLOCK_SIZE = 8;     // low-frequency block
-constexpr int DECODE_SIZE = 256;  // reduced decode target for large files
 
 using Sample = std::array<float, SAMPLE_SIZE * SAMPLE_SIZE>;
 
@@ -129,8 +129,8 @@ std::optional<quint64> ImageHasher::phashFromFile(const QString &path) {
     if(!reader.canRead())
         return std::nullopt;
     QSize size = reader.size();
-    if(size.isValid() && (size.width() > DECODE_SIZE || size.height() > DECODE_SIZE))
-        reader.setScaledSize(QSize(DECODE_SIZE, DECODE_SIZE));
+    if(size.isValid() && (size.width() > tg::size::kHashDecodeSizePx || size.height() > tg::size::kHashDecodeSizePx))
+        reader.setScaledSize(QSize(tg::size::kHashDecodeSizePx, tg::size::kHashDecodeSizePx));
     QImage image = reader.read();
     if(image.isNull())
         return std::nullopt;

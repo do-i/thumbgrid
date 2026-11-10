@@ -9,10 +9,9 @@
 #include <QSet>
 #include "imagehasher.h"
 #include "settings.h"
+#include "constants.h"
 
 namespace {
-
-constexpr int DECODE_SIZE = 256;
 
 QStringList imageNameFilters() {
     QStringList filters;
@@ -201,8 +200,8 @@ void DuplicateFinder::hashFiles(const QStringList &paths, bool sourceSet,
                     QImageReader reader(path);
                     reader.setAutoTransform(true);
                     QSize size = reader.size();
-                    if(size.isValid() && (size.width() > DECODE_SIZE || size.height() > DECODE_SIZE))
-                        reader.setScaledSize(QSize(DECODE_SIZE, DECODE_SIZE));
+                    if(size.isValid() && (size.width() > tg::size::kHashDecodeSizePx || size.height() > tg::size::kHashDecodeSizePx))
+                        reader.setScaledSize(QSize(tg::size::kHashDecodeSizePx, tg::size::kHashDecodeSizePx));
                     QImage image = reader.read();
                     if(!image.isNull()) {
                         if(!size.isValid())
