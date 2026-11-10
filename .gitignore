@@ -19,3 +19,4 @@ ui_settingsdialog.h
 Makefile
 /worktrees/
 temp/
+build-perf/

@@ -743,3 +743,9 @@ add_test(
     NAME "High quality scaling is bicubic, sharpened below half size, without OpenCV"
     COMMAND thumbgrid_scaling_quality_test
 )
+
+# Scroll-cost driver for scripts/perf-baseline.sh. Not a ctest test and not part
+# of "all": build it explicitly with --target thumbgrid_perf_scroll_driver.
+add_executable(thumbgrid_perf_scroll_driver EXCLUDE_FROM_ALL perf/scroll_pass_driver.cpp)
+target_include_directories(thumbgrid_perf_scroll_driver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(thumbgrid_perf_scroll_driver PRIVATE thumbgrid_app_objects Qt6::Test)
