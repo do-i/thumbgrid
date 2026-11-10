@@ -41,6 +41,10 @@ public:
     void moveFileTo(const QString &srcFile, const QString &destDirPath, bool force, FileOpResult &result);
     void copySymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result);
     void moveSymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result);
+    // one-rename directory move; see FileOperations::moveDirTo()
+    void moveDirTo(const QString &srcDir, const QString &destDirPath, FileOpResult &result);
+    // drop a listed file/dir that something else already moved or removed on disk
+    void forgetEntry(const QString &path);
     void renameEntry(const QString &oldFilePath, const QString &newName, bool force, FileOpResult &result);
     void removeFile(const QString &filePath, bool trash, FileOpResult &result);
     void removeDir(const QString &dirPath, bool trash, bool recursive, FileOpResult &result);

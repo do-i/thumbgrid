@@ -32,6 +32,15 @@ public:
     // symlink-aware copy/move: recreates the link itself instead of dereferencing its target
     static void copySymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
     static void moveSymLinkTo(const QString &srcLinkPath, const QString &destDirPath, bool force, FileOpResult &result);
+    // true when path (the entry itself, links not followed) can be renamed into dirPath: same filesystem
+    // *and* same mount, since rename(2) fails with EXDEV across bind mounts of one filesystem too. Also
+    // true when either cannot be stat'ed - then the caller's normal path reports the error.
+    static bool onSameFilesystem(const QString &path, const QString &dirPath);
+    // Moves a whole directory with one rename(2) - instant on the same filesystem. Never merges into or
+    // replaces an existing destination (DESTINATION_DIR_EXISTS / DESTINATION_FILE_EXISTS); any other
+    // failure (e.g. a different filesystem) leaves everything untouched, so the caller can fall back to
+    // the recursive per-entry move.
+    static void moveDirTo(const QString &srcDirPath, const QString &destDirPath, FileOpResult &result);
     static void rename(const QString &srcFilePath, const QString &newName, bool force, FileOpResult &result);
     // true only for a single leaf filename component (no separators, no traversal)
     static bool isValidFileName(const QString &name);
@@ -47,6 +56,8 @@ public:
 
 private:
     static QString generateHash(const QString &str);
+    // rename(2) that refuses to replace an existing destination; false on any failure (EXDEV, EEXIST, ...)
+    static bool renameNoReplace(const QString &srcPath, const QString &dstPath);
     // If destFile exists, check it may be replaced and (with force) move it aside so a failed copy/move
     // can restore it. SUCCESS means proceed.
     static FileOpResult backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp);

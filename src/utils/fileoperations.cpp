@@ -1,5 +1,8 @@
 #include "fileoperations.h"
 #include "fileoperations_platform.h"
+#include <cstdio>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 QString FileOperations::generateHash(const QString &str) {
     return QString(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
@@ -117,6 +120,13 @@ static FileOpResult checkDestinationDir(const QString &destDirPath) {
     return FileOpResult::SUCCESS;
 }
 
+// RENAME_NOREPLACE makes the no-clobber check atomic: a plain rename() silently replaces a file or an
+// empty directory that appeared at the destination after our exists() check.
+bool FileOperations::renameNoReplace(const QString &srcPath, const QString &dstPath) {
+    return ::renameat2(AT_FDCWD, QFile::encodeName(srcPath).constData(),
+                       AT_FDCWD, QFile::encodeName(dstPath).constData(), RENAME_NOREPLACE) == 0;
+}
+
 // If destFile exists, check it may be replaced and (with force) move it aside so a failed copy/move
 // can restore it. SUCCESS means proceed.
 FileOpResult FileOperations::backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp) {
@@ -213,7 +223,14 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
     result = backupExistingDestination(destFile, force, tmpPath, exists);
     if(result != FileOpResult::SUCCESS)
         return;
-    // move
+    // same filesystem: a rename moves no data and keeps the inode, timestamps and hard links
+    if(renameNoReplace(srcFile.absoluteFilePath(), destFile.absoluteFilePath())) {
+        result = FileOpResult::SUCCESS;
+        if(exists)
+            QFile::remove(tmpPath);
+        return;
+    }
+    // otherwise (e.g. EXDEV) copy, then remove the original
     auto srcModTime = srcFile.lastModified();
     auto srcReadTime = srcFile.lastRead();
     if(QFile::copy(srcFile.absoluteFilePath(), destFile.absoluteFilePath())) {
@@ -304,6 +321,40 @@ void FileOperations::moveSymLinkTo(const QString &srcLinkPath, const QString &de
         if(removeResult != FileOpResult::SUCCESS)
             result = removeResult;
     }
+}
+
+bool FileOperations::onSameFilesystem(const QString &path, const QString &dirPath) {
+    struct statx src {}, dst {};
+    if(::statx(AT_FDCWD, QFile::encodeName(path).constData(), AT_SYMLINK_NOFOLLOW, STATX_MNT_ID, &src) != 0 ||
+       ::statx(AT_FDCWD, QFile::encodeName(dirPath).constData(), 0, STATX_MNT_ID, &dst) != 0)
+        return true;
+    if(src.stx_dev_major != dst.stx_dev_major || src.stx_dev_minor != dst.stx_dev_minor)
+        return false;
+    // a bind mount keeps the device but is a different mount: rename(2) refuses it (EXDEV)
+    if((src.stx_mask & STATX_MNT_ID) && (dst.stx_mask & STATX_MNT_ID))
+        return src.stx_mnt_id == dst.stx_mnt_id;
+    return true;
+}
+
+void FileOperations::moveDirTo(const QString &srcDirPath, const QString &destDirPath, FileOpResult &result) {
+    QFileInfo srcDir(srcDirPath);
+    if(QFileInfo(destDirPath).absoluteFilePath() == srcDir.absolutePath()) {
+        result = FileOpResult::NOTHING_TO_DO;
+        return;
+    }
+    checkCanRemove(srcDir.absoluteFilePath(), result);
+    if(result != FileOpResult::SUCCESS)
+        return;
+    result = checkDestinationDir(destDirPath);
+    if(result != FileOpResult::SUCCESS)
+        return;
+    QFileInfo destDir(destDirPath + "/" + srcDir.fileName());
+    if(destDir.exists() || destDir.isSymLink()) {
+        result = destDir.isDir() ? FileOpResult::DESTINATION_DIR_EXISTS : FileOpResult::DESTINATION_FILE_EXISTS;
+        return;
+    }
+    result = renameNoReplace(srcDir.absoluteFilePath(), destDir.absoluteFilePath()) ? FileOpResult::SUCCESS
+                                                                                       : FileOpResult::OTHER_ERROR;
 }
 
 bool FileOperations::isValidFileName(const QString &name) {

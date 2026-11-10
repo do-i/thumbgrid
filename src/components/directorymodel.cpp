@@ -189,6 +189,20 @@ void DirectoryModel::moveFileTo(const QString &srcFile, const QString &destDirPa
     }
 }
 
+void DirectoryModel::moveDirTo(const QString &srcDir, const QString &destDirPath, FileOpResult &result) {
+    FileOperations::moveDirTo(srcDir, destDirPath, result);
+    // as in moveFileTo(): the watcher's removal event is idempotent with this
+    if(result == FileOpResult::SUCCESS && destDirPath != this->directoryPath())
+        dirManager.removeDirEntry(srcDir);
+}
+
+void DirectoryModel::forgetEntry(const QString &path) {
+    if(dirManager.containsDir(path))
+        dirManager.removeDirEntry(path);
+    else
+        dirManager.removeFileEntry(path);
+}
+
 void DirectoryModel::copySymLinkTo(const QString &srcLink, const QString &destDirPath, bool force, FileOpResult &result) {
     FileOperations::copySymLinkTo(srcLink, destDirPath, force, result);
 }
