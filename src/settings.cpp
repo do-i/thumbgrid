@@ -126,7 +126,7 @@ QString settingGroupFor(const QString &key) {
         {"volume", "State"}, {"maximizedWindow", "State"}, {"lastDisplay", "State"},
         {"windowGeometry", "State"}, {"savedPaths", "State"}, {"bookmarks", "State"},
         {"placesPanel", "State"}, {"placesPanelBookmarksExpanded", "State"},
-        {"placesPanelTreeExpanded", "State"}, {"placesPanelWidth", "State"},
+        {"placesPanelTreeExpanded", "State"}, {"placesPanelWidth", "State"}, {"treeExpandedPaths", "State"},
         {"duplicateFinderGeometry", "State"}, {"duplicateFinderHeader", "State"},
         {"fileInfoDialogGeometry", "State"},
         {"duplicateFinderSimilarity", "State"}, {"duplicateFinderRecursive", "State"},
@@ -1698,6 +1698,17 @@ bool Settings::placesPanelTreeExpanded() {
 
 void Settings::setPlacesPanelTreeExpanded(bool mode) {
     settings->writeSetting("placesPanelTreeExpanded", mode);
+}
+//------------------------------------------------------------------------------
+QStringList Settings::treeExpandedPaths() {
+    return settings->readSetting("treeExpandedPaths").toStringList();
+}
+
+void Settings::setTreeExpandedPaths(const QStringList &paths) {
+    if(paths.isEmpty())
+        settings->settingsConf->remove(groupedKey("treeExpandedPaths"));
+    else
+        settings->writeSetting("treeExpandedPaths", paths);
 }
 //------------------------------------------------------------------------------
 int Settings::placesPanelWidth() {

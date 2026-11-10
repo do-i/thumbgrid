@@ -877,3 +877,11 @@ add_test(
     NAME "The folder tree creates, renames and removes folders through the shared file operations"
     COMMAND thumbgrid_folder_tree_folder_operations_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_remembers_expanded_test
+    behavior/test_folder_tree_remembers_expanded_folders.cpp
+)
+add_test(
+    NAME "The folder tree remembers expanded folders and restores them as they are listed"
+    COMMAND thumbgrid_folder_tree_remembers_expanded_test
+)

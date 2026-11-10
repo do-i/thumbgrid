@@ -303,6 +303,9 @@ public:
     void setPlacesPanelBookmarksExpanded(bool mode);
     bool placesPanelTreeExpanded();
     void setPlacesPanelTreeExpanded(bool mode);
+    // folder tree rows expanded when the app last closed
+    QStringList treeExpandedPaths();
+    void setTreeExpandedPaths(const QStringList &paths);
 
     void setSlideshowInterval(int ms);
     int slideshowInterval();

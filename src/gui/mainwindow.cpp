@@ -608,6 +608,7 @@ void MW::close() {
 #endif
     if(copyOverlay)
         copyOverlay->saveSettings();
+    folderView->saveState();
     QWidget::close();
 }
 

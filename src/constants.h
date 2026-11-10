@@ -38,6 +38,9 @@ namespace tg::limit {
 // Entries examined when checking a folder for convertible images.
 inline constexpr int kConvertibleScanMaxEntries = 1000;
 
+// Expanded folder tree rows remembered between sessions (shallowest kept).
+inline constexpr int kTreeExpandedMax = 100;
+
 } // namespace tg::limit
 
 // Colors as constexpr QRgb (…Rgb); build a QColor at the use site.

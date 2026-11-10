@@ -43,6 +43,8 @@ public slots:
     void navigate(GridNavigation direction);
     void zoomThumbnails(int steps);
     void setSearchMatched(bool matched);
+    // stores the panel state that is only saved on close
+    void saveState();
 
 protected:
     void showEvent(QShowEvent *event) override;

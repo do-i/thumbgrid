@@ -6,6 +6,8 @@
 #include <QFileSystemModel>
 #include <QFileDialog>
 #include <QElapsedTimer>
+#include <QHash>
+#include <QSet>
 #include "gui/customwidgets/floatingwidgetcontainer.h"
 #include "gui/idirectoryview.h"
 #include "gui/folderview/foldergridview.h"
@@ -53,7 +55,8 @@ public slots:
     // bigger (steps > 0) or smaller thumbnails
     void zoomThumbnails(int steps);
     void setSearchMatched(bool matched);
-
+    // stores the expanded tree folders for the next session
+    void saveTreeState();
 
 protected:
     void wheelEvent(QWheelEvent *event) override;
@@ -104,6 +107,8 @@ private slots:
     void newBookmark();
     void fsTreeScrollToCurrent();
     void onTreeDirectoryLoaded(const QString &dirPath);
+    void onTreeExpanded(const QModelIndex &index);
+    void onTreeCollapsed(const QModelIndex &index);
 
     void onOptionsPopupButtonToggled(bool mode);
     void onOptionsPopupDismissed();
@@ -114,6 +119,9 @@ private slots:
     void onRootBtn();
 
 private:
+    // expands the saved children of dir that are listed; once dir is fully listed the rest are dropped
+    void restoreExpandedIn(const QString &dir, bool listed);
+
     Ui::FolderView *ui;
     FileSystemModelCustom *dirModel;
     FVOptionsPopup *optionsPopup;
@@ -125,6 +133,10 @@ private:
     QElapsedTimer popupTimerClutch;
     QPersistentModelIndex mTreeScrollTarget;
     QStringList mTreeScrollWaits;
+    // folders expanded in the tree, saved on close
+    QSet<QString> mExpandedFolders;
+    // last session's expanded folders not restored yet: parent path -> child names
+    QHash<QString, QStringList> mRestoreFolders;
     // places panel state last applied from the settings
     // tree filter state last applied from the settings
     bool mShowHidden = false;

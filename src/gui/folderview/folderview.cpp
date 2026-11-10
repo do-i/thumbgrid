@@ -3,12 +3,20 @@
 #include <utility>
 #include "ui_folderview.h"
 
+#include "constants.h"
 #include "platform/platformdesktop.h"
 #include "utils/newwindow.h"
 
 namespace {
 QDir::Filters treeFilter(bool showHidden) {
     return QDir::NoDotAndDotDot | QDir::AllDirs | (showHidden ? QDir::Hidden : QDir::Filters());
+}
+
+// string only, never the disk: "/a/b" -> "/a", "/a" -> "/", "C:/a" -> "C:/"
+QString parentFolder(const QString &path) {
+    const int slash = path.lastIndexOf(QLatin1Char('/'));
+    const bool topLevel = slash <= 0 || (slash == 2 && path.at(1) == QLatin1Char(':'));
+    return topLevel ? path.left(slash + 1) : path.left(slash);
 }
 }
 
@@ -37,6 +45,13 @@ FolderView::FolderView(QWidget *parent) :
     header->hideSection(2); // type
     header->hideSection(3); // mod date
 
+    // restored as the model lists each parent, see onTreeDirectoryLoaded()
+    for(const QString &saved : settings->treeExpandedPaths()) {
+        const QString path = QDir::cleanPath(saved);
+        if(!QDir::isAbsolutePath(path) || path.endsWith(QLatin1Char('/')))
+            continue; // relative, or a root
+        mRestoreFolders[parentFolder(path)] << path.mid(path.lastIndexOf(QLatin1Char('/')) + 1);
+    }
     dirModel->setRootPath(PlatformDesktop::folderViewInitialRootPath());
     if(!dirModel->rootPath().isEmpty()) {
         QModelIndex idx = dirModel->index(dirModel->rootPath());
@@ -122,6 +137,8 @@ FolderView::FolderView(QWidget *parent) :
     connect(ui->dirTreeView, &TreeViewCustom::middleClicked, this, &FolderView::onTreeMiddleClicked);
     connect(ui->dirTreeView, &TreeViewCustom::contextMenuRequestedAt, this, &FolderView::onTreeContextMenuRequested);
     connect(dirModel, &QFileSystemModel::directoryLoaded, this, &FolderView::onTreeDirectoryLoaded);
+    connect(ui->dirTreeView, &QTreeView::expanded, this, &FolderView::onTreeExpanded);
+    connect(ui->dirTreeView, &QTreeView::collapsed, this, &FolderView::onTreeCollapsed);
     connect(dirModel, &FileSystemModelCustom::folderIconChanged, ui->dirTreeView->viewport(),
             qOverload<>(&QWidget::update));
     connect(ui->bookmarksWidget, &BookmarksWidget::droppedIn, this, &FolderView::moveUrlsRequested); // ask what to do via popup? copy or move
@@ -255,6 +272,9 @@ void FolderView::onTreeMiddleClicked(const QModelIndex &index) {
 
 // everything folds except the path down to the current folder, which scrollTo() re-expands
 void FolderView::collapseTree() {
+    // nothing from the last session comes back after this
+    mRestoreFolders.clear();
+    mExpandedFolders.clear();
     ui->dirTreeView->collapseAll();
     const QModelIndex current = ui->dirTreeView->currentIndex();
     if(current.isValid())
@@ -466,11 +486,85 @@ void FolderView::setDirectoryPath(QString path) {
 }
 
 void FolderView::onTreeDirectoryLoaded(const QString &dirPath) {
-    if(!mTreeScrollWaits.removeOne(dirPath))
+    if(mTreeScrollWaits.removeOne(dirPath)) {
+        // the model would sort the new rows on its next timer tick; sort now so the row is final
+        dirModel->sort(0);
+        fsTreeScrollToCurrent();
+    }
+    if(!mRestoreFolders.isEmpty())
+        restoreExpandedIn(dirPath, true);
+}
+
+// looks only among the rows the model already lists; expanding lists the child in the gatherer thread
+void FolderView::restoreExpandedIn(const QString &dir, bool listed) {
+    auto it = mRestoreFolders.find(dir);
+    if(it == mRestoreFolders.end())
         return;
-    // the model would sort the new rows on its next timer tick; sort now so the row is final
-    dirModel->sort(0);
-    fsTreeScrollToCurrent();
+    const QModelIndex parent = dirModel->index(dir);
+    QStringList names = it.value();
+    QList<QPersistentModelIndex> found;
+    const int rows = parent.isValid() ? dirModel->rowCount(parent) : 0;
+    for(int row = 0; row < rows && !names.isEmpty(); ++row) {
+        const QModelIndex child = dirModel->index(row, 0, parent);
+        if(names.removeOne(dirModel->fileName(child)))
+            found << child;
+    }
+    // a fully listed folder lacks the rest: they were deleted or are filtered out
+    if(listed || names.isEmpty())
+        mRestoreFolders.erase(it);
+    else
+        it.value() = names;
+    // the current row must not slide out of view when a folder above it fills
+    TreeViewCustom *tree = ui->dirTreeView;
+    const bool keepCurrent = !found.isEmpty() && mTreeScrollTarget.isValid() &&
+                             tree->visualRect(mTreeScrollTarget).intersects(tree->viewport()->rect());
+    for(const QPersistentModelIndex &child : std::as_const(found)) {
+        if(!child.isValid())
+            continue;
+        tree->expand(child);
+        const QString childPath = dirModel->filePath(child);
+        if(keepCurrent && !mTreeScrollWaits.contains(childPath))
+            mTreeScrollWaits << childPath;
+        // may be listed already (e.g. by navigation), then no directoryLoaded comes for it
+        if(!dirModel->canFetchMore(child))
+            restoreExpandedIn(childPath, false);
+    }
+    if(keepCurrent)
+        fsTreeScrollToCurrent();
+}
+
+void FolderView::onTreeExpanded(const QModelIndex &index) {
+    mExpandedFolders.insert(dirModel->filePath(index));
+}
+
+void FolderView::onTreeCollapsed(const QModelIndex &index) {
+    mExpandedFolders.remove(dirModel->filePath(index));
+}
+
+// shallowest first, then by path, so the cap keeps the folders nearest the root
+void FolderView::saveTreeState() {
+    QSet<QString> all = mExpandedFolders;
+    for(auto it = mRestoreFolders.cbegin(); it != mRestoreFolders.cend(); ++it) {
+        for(const QString &name : it.value())
+            all.insert(it.key().endsWith(QLatin1Char('/')) ? it.key() + name : it.key() + QLatin1Char('/') + name);
+    }
+    // scrollTo() expands the folders above the root too; they are not rows of this tree
+    const QString root = dirModel->rootPath();
+    QList<std::pair<qsizetype, QString>> byDepth;
+    byDepth.reserve(all.size());
+    for(const QString &path : std::as_const(all)) {
+        if(path == root || path.endsWith(QLatin1Char('/')) || root.startsWith(path + QLatin1Char('/')))
+            continue;
+        byDepth.append({path.count(QLatin1Char('/')), path});
+    }
+    std::sort(byDepth.begin(), byDepth.end());
+    QStringList paths;
+    for(const auto &entry : std::as_const(byDepth)) {
+        if(paths.size() == tg::limit::kTreeExpandedMax)
+            break;
+        paths << entry.second;
+    }
+    settings->setTreeExpandedPaths(paths);
 }
 
 void FolderView::fsTreeScrollToCurrent() {

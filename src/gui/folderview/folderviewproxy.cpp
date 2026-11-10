@@ -221,6 +221,12 @@ void FolderViewProxy::zoomThumbnails(int steps) {
         folderView->zoomThumbnails(steps);
 }
 
+void FolderViewProxy::saveState() {
+    // never built this session: the stored state stays as it was
+    if(folderView)
+        folderView->saveTreeState();
+}
+
 void FolderViewProxy::setSearchMatched(bool matched) {
     if(folderView)
         folderView->setSearchMatched(matched);
