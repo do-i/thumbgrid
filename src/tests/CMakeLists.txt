@@ -837,3 +837,11 @@ add_test(
     NAME "The folder tree and the app follow each other's current folder"
     COMMAND thumbgrid_folder_tree_navigation_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_expansions_test
+    behavior/test_folder_tree_keeps_expansions_and_shows_current.cpp
+)
+add_test(
+    NAME "The folder tree keeps expanded folders and shows the current folder once it is listed"
+    COMMAND thumbgrid_folder_tree_expansions_test
+)

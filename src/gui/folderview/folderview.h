@@ -92,6 +92,7 @@ private slots:
     void onBookmarkClicked(QString dirPath);
     void newBookmark();
     void fsTreeScrollToCurrent();
+    void onTreeDirectoryLoaded(const QString &dirPath);
 
     void onOptionsPopupButtonToggled(bool mode);
     void onOptionsPopupDismissed();
@@ -106,4 +107,6 @@ private:
     FileSystemModelCustom *dirModel;
     FVOptionsPopup *optionsPopup;
     QElapsedTimer popupTimerClutch;
+    QPersistentModelIndex mTreeScrollTarget;
+    QStringList mTreeScrollWaits;
 };

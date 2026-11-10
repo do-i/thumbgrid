@@ -5,11 +5,6 @@
 
 #include "platform/platformdesktop.h"
 
-namespace {
-// no signal for the model being loaded; scroll after a delay (>150 ms is noticeable)
-constexpr int kTreeScrollDelayMs = 150;
-}
-
 FolderView::FolderView(QWidget *parent) :
     FloatingWidgetContainer(parent),
     ui(new Ui::FolderView)
@@ -113,6 +108,7 @@ FolderView::FolderView(QWidget *parent) :
     connect(optionsPopup, &FVOptionsPopup::viewModeSelected, this, &FolderView::onViewModeSelected);
 
     connect(ui->dirTreeView, &TreeViewCustom::droppedIn, this, &FolderView::onDroppedInByIndex);
+    connect(dirModel, &QFileSystemModel::directoryLoaded, this, &FolderView::onTreeDirectoryLoaded);
     connect(ui->bookmarksWidget, &BookmarksWidget::droppedIn, this, &FolderView::moveUrlsRequested); // ask what to do via popup? copy or move
 
     ui->sortingComboBox->setItemDelegate(new QStyledItemDelegate(ui->sortingComboBox));
@@ -325,29 +321,43 @@ void FolderView::setDirectoryPath(QString path) {
         ui->dirTreeView->setRootIndex(idx);
     }
     ui->pathLabel->setText(path);
-
-    if(ui->dirTreeView->currentIndex().data() == path)
-        return;
-
     ui->bookmarksWidget->onPathChanged(path);
 
-    QModelIndex targetIndex = dirModel->index(path);
-    bool keepExpand = ui->dirTreeView->isExpanded(targetIndex);
-    bool collapse = !ui->dirTreeView->isExpanded(ui->dirTreeView->currentIndex().parent());
+    // a tree click already made the row current
+    const QString cleanPath = QDir::cleanPath(path);
+    if(dirModel->filePath(ui->dirTreeView->currentIndex()) == cleanPath)
+        return;
 
-    if(collapse)
-        ui->dirTreeView->collapseAll();
+    const QModelIndex targetIndex = dirModel->index(cleanPath);
+    // ancestors not listed yet: rows they add shift the target, so scroll again once each loads
+    mTreeScrollWaits.clear();
+    const QModelIndex rootIndex = ui->dirTreeView->rootIndex();
+    QModelIndex parent = targetIndex.parent();
+    for(; parent.isValid() && parent != rootIndex; parent = parent.parent()) {
+        if(dirModel->canFetchMore(parent))
+            mTreeScrollWaits << dirModel->filePath(parent);
+    }
+    if(parent != rootIndex)
+        mTreeScrollWaits.clear(); // not shown in the tree
+    else if(dirModel->canFetchMore(rootIndex))
+        mTreeScrollWaits << dirModel->filePath(rootIndex);
+    mTreeScrollTarget = targetIndex;
     ui->dirTreeView->setCurrentIndex(targetIndex);
+    // expands the ancestors; other expanded folders stay as the user left them
+    ui->dirTreeView->scrollTo(targetIndex);
+}
 
-    if(keepExpand)
-        ui->dirTreeView->expand(targetIndex);
-
-    // no reliable signal for the model being loaded; scroll after a delay (>150 ms is noticeable)
-    QTimer::singleShot(kTreeScrollDelayMs, this, &FolderView::fsTreeScrollToCurrent);
+void FolderView::onTreeDirectoryLoaded(const QString &dirPath) {
+    if(!mTreeScrollWaits.removeOne(dirPath))
+        return;
+    // the model would sort the new rows on its next timer tick; sort now so the row is final
+    dirModel->sort(0);
+    fsTreeScrollToCurrent();
 }
 
 void FolderView::fsTreeScrollToCurrent() {
-    ui->dirTreeView->scrollTo(ui->dirTreeView->currentIndex());
+    if(mTreeScrollTarget.isValid())
+        ui->dirTreeView->scrollTo(mTreeScrollTarget);
 }
 
 void FolderView::onTreeViewClicked(QModelIndex index) {
