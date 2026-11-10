@@ -1,4 +1,5 @@
 #include "textviewer.h"
+#include "utils/colorutil.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -126,10 +127,7 @@ bool TextViewer::showFile(const QString &filePath) {
 
 void TextViewer::applyHighlighter(const QString &filePath) {
     const ColorScheme &scheme = settings->colorScheme();
-    qreal lum = 0.299 * scheme.background.redF() +
-                0.587 * scheme.background.greenF() +
-                0.114 * scheme.background.blueF();
-    bool darkTheme = (lum < 0.5);
+    bool darkTheme = (tg::colorutil::luma(scheme.background) < 0.5);
 #ifdef USE_KSYNTAXHIGHLIGHTING
     static KSyntaxHighlighting::Repository repository;
     auto *hl = new KSyntaxHighlighting::SyntaxHighlighter(textEdit->document());

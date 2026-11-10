@@ -1,4 +1,5 @@
 #include "ssidebar.h"
+#include "utils/colorutil.h"
 
 #include <utility>
 
@@ -75,7 +76,7 @@ void SSideBar::paintEvent(QPaintEvent *event) {
 
 SSideBarItem::SSideBarItem(QString icon, const QString& name, QWidget *parent) : QWidget{parent} {
     QPalette p;
-    if(p.base().color().valueF() <= 0.45f)
+    if(tg::colorutil::isDark(p.base().color()))
         iconWidget.setColor(QColor(184,184,185));
     else
         iconWidget.setColor(QColor(70,70,70));

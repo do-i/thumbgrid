@@ -1,4 +1,5 @@
 #include "thumbnailerrunnable.h"
+#include "utils/colorutil.h"
 #include "utils/logging.h"
 #include <QDir>
 #include <QFileInfo>
@@ -420,7 +421,7 @@ QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewa
     // nudge the page away from the grid background so the glyph reads clearly
     // on both dark (lighten) and light (darken) themes
     QColor pageFill = scheme.widget;
-    qreal pageLum = 0.299 * pageFill.redF() + 0.587 * pageFill.greenF() + 0.114 * pageFill.blueF();
+    qreal pageLum = tg::colorutil::luma(pageFill);
     pageFill = (pageLum < 0.5) ? pageFill.lighter(160) : pageFill.darker(108);
     QColor pageOutline = scheme.widget_border;
     QColor lineColor = scheme.text_lc2.isValid() ? scheme.text_lc2 : scheme.text;
@@ -501,8 +502,7 @@ QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewa
         p.setBrush(badgeBg);
         p.drawRoundedRect(badge, badgeH / 2.0, badgeH / 2.0);
         // pick badge text color by background luminance
-        qreal lum = 0.299 * badgeBg.redF() + 0.587 * badgeBg.greenF() + 0.114 * badgeBg.blueF();
-        p.setPen(lum > 0.55 ? QColor(25, 25, 25) : QColor(245, 245, 245));
+        p.setPen(tg::colorutil::contrastGlyph(badgeBg));
         p.drawText(badge, Qt::AlignCenter, ext);
     }
     p.end();

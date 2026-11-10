@@ -1,4 +1,5 @@
 #include "themestore.h"
+#include "utils/colorutil.h"
 
 #include "utils/apppaths.h"
 
@@ -160,7 +161,7 @@ void ColorScheme::setBaseColors(BaseColorScheme base) {
     folderview_cell_bg           = base.folderview_cell_bg.isValid() ? base.folderview_cell_bg : folderview;
 
     // derive table surfaces from the widget background when the theme omits them
-    if(widget.valueF() <= 0.45f) { // dark
+    if(tg::colorutil::isDark(widget)) { // dark
         table_bg     = base.table_bg.isValid()     ? base.table_bg     : valueOffset(widget, 8);
         table_bg_alt = base.table_bg_alt.isValid() ? base.table_bg_alt : valueOffset(table_bg, 6);
         table_header = base.table_header.isValid() ? base.table_header : valueOffset(widget, 18);
@@ -184,7 +185,7 @@ QString ColorScheme::bakedThumbnailSignature() const {
 }
 
 void ColorScheme::createColorVariants() {
-    if(widget.valueF() <= 0.45f) { // dark theme
+    if(tg::colorutil::isDark(widget)) { // dark theme
         // top bar buttons
         panel_button.setHsv(folderview_topbar.hue(), folderview_topbar.saturation(), qMin(folderview_topbar.value() + 20, 255));
         panel_button_hover.setHsv(folderview_topbar.hue(), folderview_topbar.saturation(), qMin(folderview_topbar.value() + 26, 255));

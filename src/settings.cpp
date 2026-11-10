@@ -1,4 +1,5 @@
 #include "settings.h"
+#include "utils/colorutil.h"
 #include "constants.h"
 #include "platform/platformdesktop.h"
 
@@ -844,7 +845,7 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
     QColor sys_text = colors.text;
     QColor sys_window = colors.widget;
     QColor sys_window_tinted, sys_window_tinted_lc, sys_window_tinted_lc2, sys_window_tinted_hc, sys_window_tinted_hc2;
-    if(sys_window.valueF() <= 0.45f) {
+    if(tg::colorutil::isDark(sys_window)) {
         // dark system theme
         sys_window_tinted_lc2.setHsv(sys_window.hue(), sys_window.saturation(), sys_window.value() + 6);
         sys_window_tinted_lc.setHsv(sys_window.hue(),  sys_window.saturation(), sys_window.value() + 14);
@@ -861,7 +862,7 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
     }
 
     // icon variant follows the app theme's background, not the OS palette
-    styleSheet.replace("%icontheme%",  colors.background.valueF() <= 0.45f ? "dark" : "light");
+    styleSheet.replace("%icontheme%",  tg::colorutil::isDark(colors.background) ? "dark" : "light");
     styleSheet.replace("%sys_window%",    sys_window.name());
     styleSheet.replace("%sys_window_tinted%",    sys_window_tinted.name());
     styleSheet.replace("%sys_window_tinted_lc%", sys_window_tinted_lc.name());
@@ -874,7 +875,7 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
 
     // danger red: fixed hue, value per theme lightness for contrast
     QColor danger, danger_hover, danger_pressed, danger_text;
-    if(colors.background.valueF() <= 0.45f) {
+    if(tg::colorutil::isDark(colors.background)) {
         danger.setHsv(357, 148, 132);
         danger_hover.setHsv(357, 152, 158);
         danger_pressed.setHsv(357, 158, 112);

@@ -1,4 +1,5 @@
 #include "thumbnailwidget.h"
+#include "utils/colorutil.h"
 
 ThumbnailWidget::ThumbnailWidget(int labelFontPointSize, const QColor &labelBackgroundColor, QGraphicsItem *parent) :
     QGraphicsWidget(parent),
@@ -561,8 +562,7 @@ void ThumbnailWidget::drawSymlinkBadge(QPainter *painter) {
     painter->drawRoundedRect(badge, side * 0.28, side * 0.28);
 
     // arrow color follows the chip's luminance, same rule as the file-type badge
-    qreal lum = 0.299 * chip.redF() + 0.587 * chip.greenF() + 0.114 * chip.blueF();
-    QColor glyph = (lum > 0.55) ? QColor(25, 25, 25) : QColor(245, 245, 245);
+    QColor glyph = tg::colorutil::contrastGlyph(chip);
 
     QRectF inner = badge.adjusted(side * 0.28, side * 0.28, -side * 0.26, -side * 0.26);
     QPen shaft(glyph, qMax(1.0, side * 0.13));

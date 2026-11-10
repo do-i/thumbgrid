@@ -1,4 +1,5 @@
 #include "printdialog.h"
+#include "utils/colorutil.h"
 
 #include <utility>
 #include "ui_printdialog.h"
@@ -100,7 +101,7 @@ void PrintDialog::updatePreview() {
     // page border for white window bg
     QPalette palette;
     QColor sys_window = palette.window().color();
-    if(sys_window.valueF() > 0.45f) {
+    if(!tg::colorutil::isDark(sys_window)) {
         p.setOpacity(0.25f);
         p.setPen(Qt::black);
         p.drawRect(QRectF(QPointF(0.5f, 0.5f), QSizeF(pagePixmap.size() / qApp->devicePixelRatio() - QSizeF(1.0f, 1.0f))));
