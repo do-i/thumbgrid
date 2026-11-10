@@ -2,6 +2,8 @@
 
 #include <utility>
 #include <QDirIterator>
+#include <QElapsedTimer>
+#include <QSemaphore>
 #include "utils/fileoperations.h"
 #include "utils/logging.h"
 #include "sourcecontainers/documentinfo.h"
@@ -10,6 +12,8 @@ FileOperationsController::FileOperationsController(MW *mw, QObject *parent)
     : QObject(parent),
       mw(mw)
 {
+    if(mw)
+        connect(mw, &MW::moveCancelRequested, this, &FileOperationsController::cancelMove);
 }
 
 FileOperationsController::~FileOperationsController() {
@@ -17,6 +21,11 @@ FileOperationsController::~FileOperationsController() {
     if(resizeThread) {
         cancelResize = true;
         resizeThread->wait();
+    }
+    // a background move stops after the file it is on; nothing is lost, the rest stays in the source
+    if(moveThread) {
+        cancelMoveRequested = true;
+        moveThread->wait();
     }
 }
 
@@ -94,6 +103,11 @@ bool FileOperationsController::movePathsTo(const QStringList& paths, const QStri
         outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
         return false;
     }
+    // before the confirmation: confirming and then being refused is worse than not being asked
+    if(isMoveRunning()) {
+        mw->showMessage(tr("A move is already running"));
+        return false;
+    }
     if(!confirmFileOperation(tr("Move"), paths, destDirectory))
         return false;
     interactiveMove(paths, destDirectory);
@@ -119,86 +133,85 @@ bool FileOperationsController::confirmFileOperation(const QString& action, QStri
     return mw->showConfirmation(action, msg);
 }
 
-// repeated here: pasteFile() calls this directly, bypassing copyPathsTo()'s check
-bool FileOperationsController::interactiveCopy(const QStringList& paths, const QString& destDirectory) {
-    if(destinationIsInsideSource(paths, destDirectory)) {
-        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
-        return false;
-    }
-    DialogResult overwriteFiles;
-    for(const auto& path : paths) {
-        doInteractiveCopyMove(path, destDirectory, false, overwriteFiles);
-        if(overwriteFiles.cancel)
-            return true;
-    }
-    return true;
-}
+// What one recursive copy/move walk needs from its caller. The GUI-thread walk talks to the dialogs
+// and the directory model directly; the background move only touches the filesystem and marshals
+// prompts and errors to the GUI thread.
+struct CopyMoveEnv {
+    bool move = false;
+    std::function<void(const QString &, const QString &, bool, FileOpResult &)> fileOp;
+    std::function<void(const QString &, const QString &, bool, FileOpResult &)> symLinkOp;
+    std::function<void(const QString &, const QString &, FileOpResult &)> dirRename;  // move only
+    std::function<void(const QString &, FileOpResult &)> removeEmptyDir;              // move only
+    std::function<DialogResult(const QString &, const QString &, FileReplaceMode)> askReplace;
+    std::function<void(FileOpResult)> reportError;
+    std::function<void(const QString &)> reportMkdirFailure;
+    std::function<bool()> cancelled = [] { return false; };
+    std::function<void()> entryDone = [] {};
+};
 
-bool FileOperationsController::interactiveMove(const QStringList& paths, const QString& destDirectory) {
-    if(destinationIsInsideSource(paths, destDirectory)) {
-        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
-        return false;
-    }
-    DialogResult overwriteFiles;
-    for(const auto& path : paths) {
-        doInteractiveCopyMove(path, destDirectory, true, overwriteFiles);
-        if(overwriteFiles.cancel)
-            return true;
-    }
-    return true;
-}
+namespace {
 
 // on DESTINATION_FILE_EXISTS ask (unless an "all" answer is active) and retry with force
-void FileOperationsController::doInteractiveOp(const std::function<void(bool, FileOpResult &)> &op,
-                                               const QString &srcPath, const QString &dstPath,
-                                               DialogResult &overwriteFiles) {
+void runWithReplacePrompt(const CopyMoveEnv &env, const std::function<void(bool, FileOpResult &)> &op,
+                          const QString &srcPath, const QString &dstPath, DialogResult &overwriteFiles) {
     FileOpResult result;
     op(overwriteFiles, result);
     if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
         if(overwriteFiles.all) // skipping all
             return;
-        overwriteFiles = mw->fileReplaceDialog(srcPath, dstPath, FILE_TO_FILE, true);
+        overwriteFiles = env.askReplace(srcPath, dstPath, FILE_TO_FILE);
         if(!overwriteFiles || overwriteFiles.cancel)
             return;
         op(true, result);
     }
     if(!(result == FileOpResult::DESTINATION_FILE_EXISTS && !overwriteFiles))
-        outputError(result);
+        env.reportError(result);
     if(!overwriteFiles.all) // attempt done; reset temporary flag
         overwriteFiles.yes = false;
 }
 
-// todo: replacing DIR with a FILE?
-void FileOperationsController::doInteractiveCopyMove(QString path, QString destDirectory, bool move, DialogResult &overwriteFiles) {
+void copyMoveEntry(const CopyMoveEnv &env, const QString &path, const QString &destDirectory, DialogResult &overwriteFiles) {
+    if(env.cancelled()) {
+        overwriteFiles.cancel = true;
+        return;
+    }
     QFileInfo srcFi(path);
     QString dstPath = destDirectory + "/" + srcFi.fileName();
 // SYMLINK (operate on the link itself, never dereference into the target) =====================
     if(srcFi.isSymLink()) {
-        doInteractiveOp([&](bool force, FileOpResult &result) {
-            if(move)
-                model->moveSymLinkTo(path, destDirectory, force, result);
-            else
-                FileOperations::copySymLinkTo(path, destDirectory, force, result);
+        runWithReplacePrompt(env, [&](bool force, FileOpResult &result) {
+            env.symLinkOp(path, destDirectory, force, result);
         }, srcFi.absoluteFilePath(), dstPath, overwriteFiles);
+        env.entryDone();
         return;
     }
 // SINGLE FILE ================================================================================
     if(!srcFi.isDir()) {
-        doInteractiveOp([&](bool force, FileOpResult &result) {
-            if(move)
-                model->moveFileTo(path, destDirectory, force, result);
-            else
-                FileOperations::copyFileTo(path, destDirectory, force, result);
+        runWithReplacePrompt(env, [&](bool force, FileOpResult &result) {
+            env.fileOp(path, destDirectory, force, result);
         }, srcFi.absoluteFilePath(), dstPath, overwriteFiles);
+        env.entryDone();
         return;
     }
 // DIR (RECURSIVE) ============================================================================
     QDir srcDir(srcFi.absoluteFilePath());
-    QFileInfo dstFi(destDirectory + "/" + srcFi.fileName());
+    QFileInfo dstFi(dstPath);
     QDir dstDir(dstFi.absoluteFilePath());
+    // a move to a free name is one rename on the same filesystem; walking the tree below instead copies
+    // every byte (a ~100-folder, 12 GB move froze the app for minutes). Any failure (different
+    // filesystem, permissions) falls through to the walk, which reports errors per entry.
+    if(env.move && !dstFi.exists() && !dstFi.isSymLink()) {
+        FileOpResult renameRes;
+        env.dirRename(srcFi.absoluteFilePath(), destDirectory, renameRes);
+        if(renameRes == FileOpResult::SUCCESS)
+            return;
+    }
     if(dstFi.exists() && !dstFi.isDir()) { // overwriting file with a folder
-        if(!overwriteFiles && !overwriteFiles.all) {
-            overwriteFiles = mw->fileReplaceDialog(srcFi.absoluteFilePath(), dstFi.absoluteFilePath(), DIR_TO_FILE, true);
+        if(overwriteFiles.all) {
+            if(!overwriteFiles.yes) // "No to all": keep the file, leave the folder in the source
+                return;
+        } else {
+            overwriteFiles = env.askReplace(srcFi.absoluteFilePath(), dstFi.absoluteFilePath(), DIR_TO_FILE);
             if(!overwriteFiles || overwriteFiles.cancel)
                 return;
             if(!overwriteFiles.all) // reset temp flag right away
@@ -208,25 +221,239 @@ void FileOperationsController::doInteractiveCopyMove(QString path, QString destD
         FileOpResult result;
         FileOperations::removeFile(dstFi.absoluteFilePath(), result);
         if(result != FileOpResult::SUCCESS) {
-            outputError(result);
+            env.reportError(result);
             return;
         }
-    } else if(!dstDir.mkpath(".")) {
-        mw->showError(tr("Could not create directory ") + dstDir.absolutePath());
-        qCWarning(logCore) << "Could not create directory " << dstDir.absolutePath();
+    }
+    // also after replacing a file: the folder must exist before its contents go in
+    if(!dstDir.mkpath(".")) {
+        env.reportMkdirFailure(dstDir.absolutePath());
         return;
     }
     // copy / move all contents
     QStringList entryList = srcDir.entryList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System);
     for(const auto& entry : entryList) {
-        doInteractiveCopyMove(srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), move, overwriteFiles);
+        copyMoveEntry(env, srcDir.absolutePath() + "/" + entry, dstDir.absolutePath(), overwriteFiles);
         if(overwriteFiles.cancel)
             return;
     }
-    if(move) {
+    if(env.move) {
         FileOpResult dirRmRes;
-        model->removeDir(srcDir.absolutePath(), false, false, dirRmRes);
+        env.removeEmptyDir(srcDir.absolutePath(), dirRmRes);
     }
+}
+
+// files and links below (and including) path - what the walk calls entryDone() for
+qint64 countWalkEntries(const QString &path, const std::atomic_bool &cancelled) {
+    QFileInfo fi(path);
+    if(fi.isSymLink() || !fi.isDir())
+        return 1;
+    qint64 count = 0;
+    QDirIterator it(path, QDir::AllEntries | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System,
+                    QDirIterator::Subdirectories);
+    while(it.hasNext() && !cancelled) {
+        it.next();
+        if(it.fileInfo().isSymLink() || !it.fileInfo().isDir())
+            count++;
+    }
+    return count;
+}
+
+} // namespace
+
+CopyMoveEnv FileOperationsController::guiEnv(bool move) const {
+    CopyMoveEnv env;
+    env.move = move;
+    if(move) {
+        DirectoryModel *m = model.get();
+        env.fileOp = [m](const QString &s, const QString &d, bool f, FileOpResult &r) { m->moveFileTo(s, d, f, r); };
+        env.symLinkOp = [m](const QString &s, const QString &d, bool f, FileOpResult &r) { m->moveSymLinkTo(s, d, f, r); };
+        env.dirRename = [m](const QString &s, const QString &d, FileOpResult &r) { m->moveDirTo(s, d, r); };
+        env.removeEmptyDir = [m](const QString &p, FileOpResult &r) { m->removeDir(p, false, false, r); };
+    } else {
+        env.fileOp = &FileOperations::copyFileTo;
+        env.symLinkOp = &FileOperations::copySymLinkTo;
+    }
+    env.askReplace = [this](const QString &s, const QString &d, FileReplaceMode mode) {
+        return mw->fileReplaceDialog(s, d, mode, true);
+    };
+    env.reportError = [this](FileOpResult r) { outputError(r); };
+    env.reportMkdirFailure = [this](const QString &dir) {
+        mw->showError(tr("Could not create directory ") + dir);
+        qCWarning(logCore) << "Could not create directory " << dir;
+    };
+    return env;
+}
+
+// repeated here: pasteFile() calls this directly, bypassing copyPathsTo()'s check
+bool FileOperationsController::interactiveCopy(const QStringList& paths, const QString& destDirectory) {
+    if(destinationIsInsideSource(paths, destDirectory)) {
+        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
+        return false;
+    }
+    CopyMoveEnv env = guiEnv(false);
+    DialogResult overwriteFiles;
+    for(const auto& path : paths) {
+        copyMoveEntry(env, path, destDirectory, overwriteFiles);
+        if(overwriteFiles.cancel)
+            return true;
+    }
+    return true;
+}
+
+// Same-filesystem entries are renamed right here (instant). Entries on another filesystem have to be
+// copied and deleted byte by byte, so they go to one background worker instead of freezing the GUI.
+bool FileOperationsController::interactiveMove(const QStringList& paths, const QString& destDirectory) {
+    if(destinationIsInsideSource(paths, destDirectory)) {
+        outputError(FileOpResult::DESTINATION_INSIDE_SOURCE);
+        return false;
+    }
+    if(isMoveRunning()) {
+        mw->showMessage(tr("A move is already running"));
+        return false;
+    }
+    CopyMoveEnv env = guiEnv(true);
+    DialogResult overwriteFiles;
+    QStringList crossFilesystem;
+    int movedHere = 0;
+    for(const auto& path : paths) {
+        if(!FileOperations::onSameFilesystem(path, destDirectory)) {
+            crossFilesystem << path;
+            continue;
+        }
+        copyMoveEntry(env, path, destDirectory, overwriteFiles);
+        if(!QFileInfo::exists(path) && !QFileInfo(path).isSymLink())
+            movedHere++;
+        if(overwriteFiles.cancel)
+            return true;
+    }
+    if(!crossFilesystem.isEmpty())
+        startBackgroundMove(crossFilesystem, destDirectory, overwriteFiles, movedHere, paths.size());
+    return true;
+}
+
+bool FileOperationsController::isMoveRunning() const {
+    return moveThread != nullptr;
+}
+
+void FileOperationsController::cancelMove() {
+    cancelMoveRequested = true;
+}
+
+// Runs on the worker: shows the replace dialog on the GUI thread and waits for the answer, polling the
+// cancel flag so a quit (the destructor waits for the worker) can never deadlock on an open dialog.
+DialogResult FileOperationsController::askReplaceFromWorker(const QString &src, const QString &dst, FileReplaceMode mode) {
+    struct Pending {
+        QSemaphore answered;
+        DialogResult result;
+    };
+    auto pending = std::make_shared<Pending>();
+    QMetaObject::invokeMethod(this, [this, pending, src, dst, mode]() {
+        if(cancelMoveRequested)
+            pending->result.cancel = true;
+        else
+            pending->result = mw->fileReplaceDialog(src, dst, mode, true);
+        pending->answered.release();
+    }, Qt::QueuedConnection);
+    while(!pending->answered.tryAcquire(1, 100)) {
+        if(cancelMoveRequested) {
+            DialogResult cancelled;
+            cancelled.cancel = true;
+            return cancelled;
+        }
+    }
+    return pending->result;
+}
+
+void FileOperationsController::startBackgroundMove(const QStringList& paths, const QString& destDirectory,
+                                                   DialogResult overwriteFiles, int movedHere, int selected) {
+    cancelMoveRequested = false;
+    mw->beginMoveProgress();
+    moveThread = QThread::create([this, paths, destDirectory, overwriteFiles, movedHere, selected]() mutable {
+        qint64 total = 0;
+        for(const auto &path : paths)
+            total += countWalkEntries(path, cancelMoveRequested);
+        QMetaObject::invokeMethod(this, [this, total]() {
+            if(moveThread)
+                mw->showMoveProgress(0, total);
+        }, Qt::QueuedConnection);
+        qint64 done = 0;
+        int failures = 0;
+        QElapsedTimer sinceProgress;
+        sinceProgress.start();
+
+        CopyMoveEnv env;
+        env.move = true;
+        env.fileOp = &FileOperations::moveFileTo;
+        env.symLinkOp = &FileOperations::moveSymLinkTo;
+        env.dirRename = &FileOperations::moveDirTo; // a folder that lives on dest's filesystem after all
+        env.removeEmptyDir = [](const QString &p, FileOpResult &r) { FileOperations::removeDir(p, false, r); };
+        env.askReplace = [this](const QString &s, const QString &d, FileReplaceMode mode) {
+            return askReplaceFromWorker(s, d, mode);
+        };
+        env.reportError = [this, &failures](FileOpResult r) {
+            if(r == FileOpResult::SUCCESS || r == FileOpResult::NOTHING_TO_DO)
+                return;
+            failures++;
+            QMetaObject::invokeMethod(this, [this, r]() { outputError(r); }, Qt::QueuedConnection);
+        };
+        env.reportMkdirFailure = [this, &failures](const QString &dir) {
+            failures++;
+            QMetaObject::invokeMethod(this, [this, dir]() {
+                mw->showError(tr("Could not create directory ") + dir);
+                qCWarning(logCore) << "Could not create directory " << dir;
+            }, Qt::QueuedConnection);
+        };
+        env.cancelled = [this]() { return cancelMoveRequested.load(); };
+        env.entryDone = [this, &done, total, &sinceProgress]() {
+            done++;
+            if(sinceProgress.elapsed() < 250)
+                return;
+            sinceProgress.restart();
+            QMetaObject::invokeMethod(this, [this, done, total]() {
+                if(moveThread) // a late update must not reopen the overlay after the finish
+                    mw->showMoveProgress(done, total);
+            }, Qt::QueuedConnection);
+        };
+
+        for(const auto &path : paths) {
+            copyMoveEntry(env, path, destDirectory, overwriteFiles);
+            if(overwriteFiles.cancel)
+                break;
+        }
+        const bool cancelled = overwriteFiles.cancel;
+        QMetaObject::invokeMethod(this, [this, paths, failures, cancelled, movedHere, selected]() {
+            finishBackgroundMove(paths, failures, cancelled, movedHere, selected);
+        }, Qt::QueuedConnection);
+    });
+    connect(moveThread, &QThread::finished, moveThread, &QObject::deleteLater);
+    moveThread->start();
+}
+
+void FileOperationsController::finishBackgroundMove(const QStringList& paths, int failures, bool cancelled,
+                                                    int movedHere, int selected) {
+    moveThread = nullptr;
+    mw->hideMoveProgress();
+    // the worker never touches the model; drop what left the listing (the watcher may already have)
+    int moved = 0;
+    for(const auto &path : paths) {
+        QFileInfo fi(path);
+        if(fi.exists() || fi.isSymLink())
+            continue;
+        moved++;
+        if(model)
+            model->forgetEntry(path);
+    }
+    const int movedTotal = movedHere + moved;
+    if(cancelled)
+        mw->showWarning(tr("Move cancelled - what was not moved yet is still in the source"));
+    else if(failures)
+        mw->showWarning(tr("Moved %1 of %2 item(s), %3 error(s)").arg(movedTotal).arg(selected).arg(failures));
+    else if(movedTotal < selected) // replace prompts answered No
+        mw->showWarning(tr("Moved %1 of %2 item(s), skipped files left in place").arg(movedTotal).arg(selected));
+    else
+        mw->showMessageSuccess(tr("Moved %n item(s)", "", movedTotal));
+    emit moveFinished(moved, failures, cancelled);
 }
 
 // Copies or moves a single file, asking about an existing destination.

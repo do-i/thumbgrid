@@ -602,6 +602,14 @@ add_test(
     COMMAND thumbgrid_copy_folder_keeps_dotted_name_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_moving_a_folder_renames_it_test
+    behavior/test_moving_a_folder_renames_it.cpp
+)
+add_test(
+    NAME "Moving a folder within one filesystem renames it instead of copying"
+    COMMAND thumbgrid_moving_a_folder_renames_it_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_document_view_fit_modes_test
     behavior/test_document_view_fit_modes.cpp
 )

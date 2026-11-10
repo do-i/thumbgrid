@@ -52,6 +52,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     overlays/fullscreeninfooverlay.cpp
     overlays/fullscreeninfooverlayproxy.cpp
     overlays/renameoverlay.cpp
+    overlays/moveprogressoverlay.cpp
     overlays/saveconfirmoverlay.cpp
     overlays/videocontrols.cpp
     overlays/videocontrolsproxy.cpp

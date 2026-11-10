@@ -22,6 +22,7 @@
 #include "gui/overlays/cropoverlay.h"
 #include "gui/overlays/copyoverlay.h"
 #include "gui/overlays/renameoverlay.h"
+#include "gui/overlays/moveprogressoverlay.h"
 #include "gui/dialogs/resizedialog.h"
 #include "gui/centralwidget.h"
 #include "gui/dialogs/filereplacedialog.h"
@@ -101,6 +102,7 @@ private:
     CopyOverlay *copyOverlay;
 
     RenameOverlay *renameOverlay;
+    MoveProgressOverlay *moveProgressOverlay = nullptr;
 
     ControlsOverlay *controlsOverlay;
     FullscreenInfoOverlayProxy *infoBarFullscreen;
@@ -175,6 +177,8 @@ signals:
     void resizeRequested(QSize);
     void resizeCopiesRequested(ResizeSpec);
     void renameRequested(QString);
+    // Cancel on the background-move progress overlay
+    void moveCancelRequested();
     // folder view type-ahead search: the typed prefix, resolved by Core
     void searchQueryChanged(QString);
     void cropRequested(QRect);
@@ -247,6 +251,10 @@ public slots:
     void showMessageSuccess(QString text);
     void showWarning(QString text);
     void showError(QString text);
+    // background move across filesystems: begin shows a fresh overlay; total < 0 while still counting
+    void beginMoveProgress();
+    void showMoveProgress(qint64 done, qint64 total);
+    void hideMoveProgress();
     void triggerMoveOverlay();
     // copies/moves to the open Copy / Move overlay's folder at slot (0-based)
     void sendToCopyFolder(int slot);

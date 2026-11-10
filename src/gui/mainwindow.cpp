@@ -1074,6 +1074,28 @@ void MW::showError(QString text) {
     floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_ERROR, 2800);
 }
 
+// isHidden() is false while the previous move's overlay fades out, so a new move must not rely on it:
+// show() stops the fade, reset() re-arms a Cancel the previous move greyed out
+void MW::beginMoveProgress() {
+    if(!moveProgressOverlay) {
+        // parented to the window like floatingMessage: visible in folder and document view
+        moveProgressOverlay = new MoveProgressOverlay(this);
+        connect(moveProgressOverlay, &MoveProgressOverlay::cancelClicked, this, &MW::moveCancelRequested);
+    }
+    moveProgressOverlay->reset();
+    moveProgressOverlay->show();
+}
+
+void MW::showMoveProgress(qint64 done, qint64 total) {
+    if(moveProgressOverlay)
+        moveProgressOverlay->setProgress(done, total);
+}
+
+void MW::hideMoveProgress() {
+    if(moveProgressOverlay)
+        moveProgressOverlay->hideAnimated();
+}
+
 bool MW::showConfirmation(const QString& title, const QString& msg, bool danger) {
     return CustomMessageBox::confirm(this, title, msg, danger);
 }

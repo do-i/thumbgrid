@@ -345,6 +345,50 @@ FloatingMessage QLabel {
     font: bold;
 }
 
+/* Background move across filesystems: progress pill with Cancel, bottom-right */
+
+MoveProgressOverlay {
+    background-color: %overlay_rgba%;
+    border: 1px solid %widget_border%;
+    border-radius: 6px;
+}
+
+[accessibleName="MoveProgressLabel"] {
+    color: %text_hc%;
+}
+
+[accessibleName="MoveProgressBar"] {
+    background-color: %button%;
+    border: none;
+    border-radius: 2px;
+}
+
+[accessibleName="MoveProgressBar"]::chunk {
+    background-color: %accent%;
+    border-radius: 2px;
+}
+
+[accessibleName="MoveProgressCancel"] {
+    color: %text_hc2%;
+    background-color: %button%;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 9px 4px 9px;
+}
+
+[accessibleName="MoveProgressCancel"]:hover {
+    background-color: %button_hover%;
+}
+
+[accessibleName="MoveProgressCancel"]:pressed {
+    background-color: %button_pressed%;
+}
+
+[accessibleName="MoveProgressCancel"]:disabled {
+    color: %text_lc2%;
+    background-color: transparent;
+}
+
 /*----------------------------------------------------------------------------*/
 /* Crop panel */
 /*----------------------------------------------------------------------------*/

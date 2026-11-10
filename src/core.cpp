@@ -797,7 +797,9 @@ void Core::pasteFile() {
         // a cut deletes from the source, so confirm like movePathsTo; declining keeps the clipboard
         if(!fileOps->movePathsTo(toPaste, destDirectory))
             return;
-        mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
+        // a move across filesystems continues in the background and reports when it is done
+        if(!fileOps->isMoveRunning())
+            mw->showMessage(toPaste.count() > 1 ? tr("%1 items moved").arg(toPaste.count()) : tr("Item moved"));
     } else {
         // no prompt for a plain paste; on refusal keep the clipboard so it can be retried
         if(!fileOps->interactiveCopy(toPaste, destDirectory))
