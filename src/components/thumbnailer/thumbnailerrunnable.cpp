@@ -393,7 +393,7 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generateFileTypeIcon(const Docum
     pixmap->setDevicePixelRatio(qApp->devicePixelRatio());
     QString label;
     if(viewable)
-        label = suffix.isEmpty() ? QObject::tr("Text file") : suffix.toUpper() + QObject::tr(" file");
+        label = suffix.isEmpty() ? QObject::tr("Text file") : QObject::tr("%1 file").arg(suffix.toUpper());
     else
         label = QObject::tr("Unknown format");
     auto thumbnail = std::shared_ptr<Thumbnail>(

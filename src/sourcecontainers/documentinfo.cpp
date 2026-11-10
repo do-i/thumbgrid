@@ -279,10 +279,10 @@ void DocumentInfo::loadExifTags() {
             Exiv2::Rational r = it->toRational();
             if(r.first < r.second) {
                 qreal exp = round(static_cast<qreal>(r.second) / r.first);
-                exifTags.insert(QObject::tr("ExposureTime"), "1/" + QString::number(exp) + QObject::tr(" sec"));
+                exifTags.insert(QObject::tr("ExposureTime"), QObject::tr("1/%1 sec").arg(QString::number(exp)));
             } else {
                 qreal exp = round(static_cast<qreal>(r.first) / r.second);
-                exifTags.insert(QObject::tr("ExposureTime"), QString::number(exp) + QObject::tr(" sec"));
+                exifTags.insert(QObject::tr("ExposureTime"), QObject::tr("%1 sec").arg(QString::number(exp)));
             }
         }
 
@@ -305,7 +305,7 @@ void DocumentInfo::loadExifTags() {
         if(it != exifData.end()) {
             Exiv2::Rational r = it->toRational();
             qreal fn = static_cast<qreal>(r.first) / r.second;
-            exifTags.insert(QObject::tr("Focal Length"), QString::number(fn, 'g', 3) + QObject::tr(" mm"));
+            exifTags.insert(QObject::tr("Focal Length"), QObject::tr("%1 mm").arg(QString::number(fn, 'g', 3)));
         }
 
         it = exifData.findKey(userComment);

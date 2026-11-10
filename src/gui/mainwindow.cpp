@@ -228,7 +228,7 @@ void MW::fitWindow() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWindow();
     } else {
-        showMessage("Zoom temporarily disabled");
+        showMessage(tr("Zoom temporarily disabled"));
     }
 }
 
@@ -238,7 +238,7 @@ void MW::fitWidth() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWidth();
     } else {
-        showMessage("Zoom temporarily disabled");
+        showMessage(tr("Zoom temporarily disabled"));
     }
 }
 
@@ -248,7 +248,7 @@ void MW::fitOriginal() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitOriginal();
     } else {
-        showMessage("Zoom temporarily disabled");
+        showMessage(tr("Zoom temporarily disabled"));
     }
 }
 
@@ -258,7 +258,7 @@ void MW::fitWindowStretch() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWindowStretch();
     } else {
-        showMessage("Zoom temporarily disabled");
+        showMessage(tr("Zoom temporarily disabled"));
     }
 }
 
@@ -393,12 +393,12 @@ void MW::onSortingChanged(SortingMode mode) {
     folderView.get()->onSortingChanged(mode);
     if(centralWidget.get()->currentViewMode() == ViewMode::MODE_DOCUMENT) {
         switch(mode) {
-            case SortingMode::SORT_NAME:      showMessage("Sorting: Name A–Z"); break;
-            case SortingMode::SORT_NAME_DESC: showMessage("Sorting: Name Z–A"); break;
-            case SortingMode::SORT_TIME:      showMessage("Sorting: Oldest first"); break;
-            case SortingMode::SORT_TIME_DESC: showMessage("Sorting: Newest first"); break;
-            case SortingMode::SORT_SIZE:      showMessage("Sorting: Smallest first"); break;
-            case SortingMode::SORT_SIZE_DESC: showMessage("Sorting: Largest first"); break;
+            case SortingMode::SORT_NAME:      showMessage(tr("Sorting: Name A–Z")); break;
+            case SortingMode::SORT_NAME_DESC: showMessage(tr("Sorting: Name Z–A")); break;
+            case SortingMode::SORT_TIME:      showMessage(tr("Sorting: Oldest first")); break;
+            case SortingMode::SORT_TIME_DESC: showMessage(tr("Sorting: Newest first")); break;
+            case SortingMode::SORT_SIZE:      showMessage(tr("Sorting: Smallest first")); break;
+            case SortingMode::SORT_SIZE_DESC: showMessage(tr("Sorting: Largest first")); break;
         }
     }
 }
@@ -413,18 +413,18 @@ void MW::setDirectoryPath(QString path) {
 void MW::toggleLockZoom() {
     viewerWidget->toggleLockZoom();
     if(viewerWidget->lockZoomEnabled())
-        showMessage("Zoom lock: on");
+        showMessage(tr("Zoom lock: on"));
     else
-        showMessage("Zoom lock: off");
+        showMessage(tr("Zoom lock: off"));
     onInfoUpdated();
 }
 
 void MW::toggleLockView() {
     viewerWidget->toggleLockView();
     if(viewerWidget->lockViewEnabled())
-        showMessage("View lock: on");
+        showMessage(tr("View lock: on"));
     else
-        showMessage("View lock: off");
+        showMessage(tr("View lock: off"));
     onInfoUpdated();
 }
 
@@ -483,12 +483,12 @@ void MW::toggleScalingFilter() {
 }
 
 void MW::setFilterNearest() {
-    showMessage("Filter: nearest", tg::timing::kMessageShortMs);
+    showMessage(tr("Filter: nearest"), tg::timing::kMessageShortMs);
     viewerWidget->setFilterNearest();
 }
 
 void MW::setFilterBilinear() {
-    showMessage("Filter: bilinear", tg::timing::kMessageShortMs);
+    showMessage(tr("Filter: bilinear"), tg::timing::kMessageShortMs);
     viewerWidget->setFilterBilinear();
 }
 
@@ -496,19 +496,19 @@ void MW::setFilter(ScalingFilter filter) {
     QString filterName;
     switch (filter) {
         case QI_FILTER_NEAREST:
-            filterName = "nearest";
+            filterName = tr("nearest");
             break;
         case ScalingFilter::QI_FILTER_BILINEAR:
-            filterName = "smooth";
+            filterName = tr("smooth");
             break;
         case QI_FILTER_HIGH_QUALITY:
-            filterName = "high quality";
+            filterName = tr("high quality");
             break;
         default:
-            filterName = "configured " + QString::number(static_cast<int>(filter));
+            filterName = tr("configured %1").arg(static_cast<int>(filter));
             break;
     }
-    showMessage("Filter: " + filterName, tg::timing::kMessageShortMs);
+    showMessage(tr("Filter: %1").arg(filterName), tg::timing::kMessageShortMs);
     viewerWidget->setScalingFilter(filter);
 }
 
@@ -697,10 +697,10 @@ void MW::showOpenDialog(QString path) {
     QFileDialog dialog(this);
     QStringList imageFilter;
     imageFilter.append(settings->supportedFormatsFilter());
-    imageFilter.append("All Files (*)");
+    imageFilter.append(tr("All files (*)"));
     dialog.setDirectory(path);
     dialog.setNameFilters(imageFilter);
-    dialog.setWindowTitle("Open image");
+    dialog.setWindowTitle(tr("Open image"));
     dialog.setWindowModality(Qt::ApplicationModal);
     connect(&dialog, &QFileDialog::fileSelected, this, &MW::opened);
     dialog.exec();

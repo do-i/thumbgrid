@@ -16,10 +16,7 @@ ResizeDialog::ResizeDialog(QSize originalSize,  QWidget *parent) :
     ui->width->setValue(originalSize.width());
     ui->height->setValue(originalSize.height());
 
-    ui->resetButton->setText(tr("Reset:") + " " +
-                             QString::number(originalSize.width()) +
-                             " x " +
-                             QString::number(originalSize.height()));
+    ui->resetButton->setText(tr("Reset: %1 x %2").arg(originalSize.width()).arg(originalSize.height()));
 
     // Copy-mode controls. Parented to the frame that holds the other two radio
     // buttons so all three stay mutually exclusive; hidden until setCopyMode().

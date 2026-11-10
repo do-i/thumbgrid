@@ -352,7 +352,7 @@ void Core::onUpdate() {
     actionManager->adjustFromVersion(lastVer);
 
     qCDebug(logCore) << "Updated: " << settings->lastVersion().toString() << ">" << appVersion.toString();
-    mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + " > " + appVersion.toString(), tg::timing::kMessageLongMs);
+    mw->showMessage(tr("Updated: %1 > %2").arg(settings->lastVersion().toString(), appVersion.toString()), tg::timing::kMessageLongMs);
     settings->setLastVersion(appVersion);
 }
 
@@ -1466,7 +1466,7 @@ void Core::setWallpaper() {
         return;
     auto img = model->getImage(selectedPath());
     if(img->type() != DocumentType::STATIC) {
-        mw->showMessage("Set wallpaper: file not supported");
+        mw->showMessage(tr("Set wallpaper: file not supported"));
         return;
     }
 
@@ -1541,7 +1541,7 @@ bool Core::loadPath(QString path) {
         if(model->directoryPath() != state.directoryPath)
             state.delayModel = true;
     } else {
-        mw->showError(tr("Could not open path: ") + path);
+        mw->showError(tr("Could not open path: %1").arg(path));
         qCWarning(logCore) << "Could not open path: " << path;
         return false;
     }
@@ -1580,7 +1580,7 @@ bool Core::setDirectory(const QString& path) {
     if(model->directoryPath() != path) {
         this->reset();
         if(!model->setDirectory(path)) {
-            mw->showError(tr("Could not load folder: ") + path);
+            mw->showError(tr("Could not load folder: %1").arg(path));
             return false;
         }
         mw->setDirectoryPath(path);
@@ -1848,7 +1848,7 @@ void Core::onLoadFailed(const QString &path) {
     // only report failures for the file being viewed, not background preloads
     if(path != state.currentFilePath)
         return;
-    mw->showMessage(tr("Cannot display file: ") + path);
+    mw->showMessage(tr("Cannot display file: %1").arg(path));
     mw->closeImage();
 }
 

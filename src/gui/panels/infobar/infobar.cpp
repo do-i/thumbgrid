@@ -9,7 +9,7 @@ InfoBar::InfoBar(QWidget *parent) :
     ui->setupUi(this);
     setAttribute(Qt::WA_StyledBackground, true);
     setAutoFillBackground(true);
-    ui->path->setText("No file opened.");
+    ui->path->setText(tr("No file opened."));
     connect(settings, &Settings::settingsChanged, this, &InfoBar::readSettings);
     readSettings();
 }

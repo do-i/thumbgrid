@@ -68,7 +68,7 @@ void ShortcutCreatorDialog::onShortcutEdited() {
     // A shortcut only conflicts within the same context, so scope the check.
     QString action = actionManager->actionForShortcut(selectedContext(), ui->sequenceEdit->sequence());
     if(!action.isEmpty())
-        ui->warningLabel->setText("This shortcut is used for action: " + action + ". Replace?");
+        ui->warningLabel->setText(tr("This shortcut is used for action: %1. Replace?").arg(action));
     else
         ui->warningLabel->setText("");
 }

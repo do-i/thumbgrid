@@ -38,21 +38,21 @@ void FileReplaceDialog::setDestination(const QString& dst) {
 
 void FileReplaceDialog::setMode(FileReplaceMode mode) {
     if(mode == FILE_TO_FILE) {
-        setWindowTitle("File already exists");
-        ui->titleLabel->setText("Replace destination file?");
-        ui->yesButton->setText("Replace");
+        setWindowTitle(tr("File already exists"));
+        ui->titleLabel->setText(tr("Replace destination file?"));
+        ui->yesButton->setText(tr("Replace"));
     } else if(mode == DIR_TO_DIR) {
-        setWindowTitle("Folder already exists");
-        ui->titleLabel->setText("Merge folders?");
-        ui->yesButton->setText("Merge");
+        setWindowTitle(tr("Folder already exists"));
+        ui->titleLabel->setText(tr("Merge folders?"));
+        ui->yesButton->setText(tr("Merge"));
     } else if(mode == DIR_TO_FILE) {
-        setWindowTitle("Destination already exists");
-        ui->titleLabel->setText("There is a file with that name. Replace?");
-        ui->yesButton->setText("Replace");
+        setWindowTitle(tr("Destination already exists"));
+        ui->titleLabel->setText(tr("There is a file with that name. Replace?"));
+        ui->yesButton->setText(tr("Replace"));
     } else { // FILE_TO_DIR
-        setWindowTitle("Destination already exists");
-        ui->titleLabel->setText("There is a folder with that name. Replace?");
-        ui->yesButton->setText("Replace");
+        setWindowTitle(tr("Destination already exists"));
+        ui->titleLabel->setText(tr("There is a folder with that name. Replace?"));
+        ui->yesButton->setText(tr("Replace"));
     }
 }
 
