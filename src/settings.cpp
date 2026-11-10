@@ -87,7 +87,7 @@ QString settingGroupFor(const QString &key) {
         // General
         {"theme", "General"}, {"backgroundOpacity", "General"}, {"blurBackground", "General"},
         {"autoResizeWindow", "General"}, {"autoResizeLimit", "General"}, {"cursorAutohiding", "General"}, {"cursorAutohideMode", "General"},
-        {"cursorHideDelay", "General"},
+        {"cursorHideDelay", "General"}, {"messageDurationScale", "General"},
         {"defaultViewMode", "General"}, {"enableSmoothScroll", "General"}, {"infoBarFullscreen", "General"},
         {"infoBarWindowed", "General"}, {"language", "General"}, {"openInFullscreen", "General"},
         {"showFullMetadata", "General"}, {"windowTitleExtendedInfo", "General"}, {"zoomIndicatorMode", "General"},
@@ -2001,6 +2001,19 @@ int Settings::cursorHideDelay() {
 void Settings::setCursorHideDelay(int ms) {
     using namespace tg::bounds;
     settings->writeSetting("cursorHideDelay", qBound(kCursorHideDelayMinMs, ms, kCursorHideDelayMaxMs));
+}
+
+int Settings::messageDurationScale() {
+    using namespace tg::bounds;
+    return qBound(kMessageDurationScaleMinPct,
+                  settings->readSetting("messageDurationScale", kMessageDurationScaleDefaultPct).toInt(),
+                  kMessageDurationScaleMaxPct);
+}
+
+void Settings::setMessageDurationScale(int percent) {
+    using namespace tg::bounds;
+    settings->writeSetting("messageDurationScale",
+                           qBound(kMessageDurationScaleMinPct, percent, kMessageDurationScaleMaxPct));
 }
 //------------------------------------------------------------------------------
 bool Settings::firstRun() {

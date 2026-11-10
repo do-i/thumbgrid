@@ -262,6 +262,8 @@ public:
     void setCursorAutohide(CursorAutohideMode mode);
     int cursorHideDelay();
     void setCursorHideDelay(int ms);
+    int messageDurationScale();
+    void setMessageDurationScale(int percent);
 
     bool infoBarFullscreen();
     void setInfoBarFullscreen(bool mode);

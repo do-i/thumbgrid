@@ -35,6 +35,7 @@ public slots:
 private:
     QTimer visibilityTimer;
     int hideDelay;
+    int mDurationScalePct = 100;
     FloatingWidgetPosition preferredPosition;
     Ui::FloatingMessage *ui;
     void doShowMessage(QString text, FloatingMessageIcon icon, int duration);

@@ -36,6 +36,7 @@ FloatingMessage::~FloatingMessage() {
 }
 
 void FloatingMessage::readSettings() {
+    mDurationScalePct = settings->messageDurationScale();
 }
 
 void FloatingMessage::showMessage(QString text, FloatingWidgetPosition position, FloatingMessageIcon icon, int duration) {
@@ -98,6 +99,7 @@ void FloatingMessage::show() {
     visibilityTimer.stop();
     OverlayWidget::show();
     // fade out after delay
-    visibilityTimer.setInterval(hideDelay);
+    // the one place every message duration is scaled
+    visibilityTimer.setInterval(hideDelay * mDurationScalePct / 100);
     visibilityTimer.start();
 }

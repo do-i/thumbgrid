@@ -107,4 +107,9 @@ inline constexpr int kCursorHideDelayMinMs = 300;
 inline constexpr int kCursorHideDelayMaxMs = 10000;
 inline constexpr int kCursorHideDelayDefaultMs = 1000;
 
+// Scale applied to every on-screen message duration (see tg::timing tiers).
+inline constexpr int kMessageDurationScaleMinPct = 50;
+inline constexpr int kMessageDurationScaleMaxPct = 300;
+inline constexpr int kMessageDurationScaleDefaultPct = 100;
+
 } // namespace tg::bounds

@@ -314,6 +314,14 @@ add_test(
     COMMAND thumbgrid_cursor_hide_delay_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_message_duration_scale_test
+    behavior/test_message_duration_scale.cpp
+)
+add_test(
+    NAME "On-screen messages last as long as the duration scale in Settings allows"
+    COMMAND thumbgrid_message_duration_scale_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )
