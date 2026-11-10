@@ -1,6 +1,6 @@
 #include "colorselectorbutton.h"
+#include "gui/dialogs/dialogbuttonrow.h"
 
-#include <QHBoxLayout>
 #include <QPushButton>
 #include <QTimer>
 #include <QVBoxLayout>
@@ -41,29 +41,9 @@ void ColorSelectorButton::showColorSelector() {
     // forward that to the wrapper instead of it just hiding inside the layout
     connect(picker, &QDialog::finished, &dialog, &QDialog::done);
 
-    // QDialogButtonBox order is style-driven; lay out OK, Cancel, Apply ourselves
-    auto *okButton = new QPushButton(tr("OK"), &dialog);
-    auto *cancelButton = new QPushButton(tr("Cancel"), &dialog);
-    auto *applyButton = new QPushButton(tr("Apply"), &dialog);
-    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-
-    // match CustomMessageBox buttons: no stock icons, hand cursor, accent on OK
-    for(auto *b : {okButton, cancelButton, applyButton}) {
-        b->setCursor(Qt::PointingHandCursor);
-        b->setIcon(QIcon());
-    }
-    okButton->setDefault(true);
-
-    auto *buttonRow = new QHBoxLayout();
-    buttonRow->addStretch(1);
-    buttonRow->addWidget(okButton);
-    buttonRow->addWidget(cancelButton);
-    buttonRow->addWidget(applyButton);
-
     auto *layout = new QVBoxLayout(&dialog);
     layout->addWidget(picker);
-    layout->addLayout(buttonRow);
+    auto *applyButton = DialogButtonRow::add(&dialog, layout, true).apply;
 
     QColor appliedColor; // invalid until the first Apply
     connect(applyButton, &QPushButton::clicked, this, [&]() {

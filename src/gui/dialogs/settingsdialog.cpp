@@ -1,4 +1,5 @@
 #include "settingsdialog.h"
+#include "dialogbuttonrow.h"
 #include "ui_settingsdialog.h"
 #include "appversion.h"
 #include "constants.h"
@@ -1709,21 +1710,7 @@ void SettingsDialog::openShortcutDetails(const QString &action, ViewMode context
         rebuild();
     });
 
-    // QDialogButtonBox order is style-driven; wire OK/Cancel ourselves (accept first)
-    QHBoxLayout *buttonsLayout = new QHBoxLayout();
-    buttonsLayout->addStretch();
-    QPushButton *okButton = new QPushButton(tr("OK"), &dialog);
-    QPushButton *cancelButton = new QPushButton(tr("Cancel"), &dialog);
-    okButton->setDefault(true);
-    for(QPushButton *b : {okButton, cancelButton}) {
-        b->setCursor(Qt::PointingHandCursor);
-        b->setIcon(QIcon());
-    }
-    connect(okButton, &QPushButton::clicked, &dialog, &QDialog::accept);
-    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
-    buttonsLayout->addWidget(okButton);
-    buttonsLayout->addWidget(cancelButton);
-    mainLayout->addLayout(buttonsLayout);
+    DialogButtonRow::add(&dialog, mainLayout);
 
     if(dialog.exec() != QDialog::Accepted)
         return;

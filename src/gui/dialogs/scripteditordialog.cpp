@@ -1,8 +1,8 @@
 #include "scripteditordialog.h"
 #include "ui_scripteditordialog.h"
+#include "dialogbuttonrow.h"
 
 #include <QPushButton>
-#include <QIcon>
 
 ScriptEditorDialog::ScriptEditorDialog(QWidget *parent) :
     QDialog(parent),
@@ -14,11 +14,7 @@ ScriptEditorDialog::ScriptEditorDialog(QWidget *parent) :
 
     // match the standard dialog buttons: accept is the accented default,
     // hand cursor on both, no stock icons
-    ui->acceptButton->setDefault(true);
-    for(auto *b : {ui->acceptButton, ui->cancelButton}) {
-        b->setCursor(Qt::PointingHandCursor);
-        b->setIcon(QIcon());
-    }
+    DialogButtonRow::styleButtons(ui->acceptButton, ui->cancelButton);
 
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
     this->onNameChanged(ui->nameLineEdit->text());
@@ -36,11 +32,7 @@ ScriptEditorDialog::ScriptEditorDialog(const QString& name, const Script& script
 
     // match the standard dialog buttons: accept is the accented default,
     // hand cursor on both, no stock icons
-    ui->acceptButton->setDefault(true);
-    for(auto *b : {ui->acceptButton, ui->cancelButton}) {
-        b->setCursor(Qt::PointingHandCursor);
-        b->setIcon(QIcon());
-    }
+    DialogButtonRow::styleButtons(ui->acceptButton, ui->cancelButton);
 
     connect(ui->nameLineEdit, &QLineEdit::textChanged, this, &ScriptEditorDialog::onNameChanged);
     ui->nameLineEdit->setText(name);

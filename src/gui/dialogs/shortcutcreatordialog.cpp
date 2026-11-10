@@ -3,7 +3,7 @@
 
 #include <QBoxLayout>
 #include <QPushButton>
-#include <QIcon>
+#include "dialogbuttonrow.h"
 
 ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     QDialog(parent),
@@ -33,14 +33,8 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     ui->scriptsComboBox->addItems(scriptList);
     ui->scriptsComboBox->setCurrentIndex(0);
 
-    // Plain buttons instead of QDialogButtonBox: the box's visual order is
-    // style-driven and can't be forced via QSS, so wire OK/Cancel ourselves
-    // (accept-first order is laid out in the .ui).
-    ui->okButton->setDefault(true);
-    for(auto *b : {ui->okButton, ui->cancelButton}) {
-        b->setCursor(Qt::PointingHandCursor);
-        b->setIcon(QIcon());
-    }
+    // accept-first order is laid out in the .ui
+    DialogButtonRow::styleButtons(ui->okButton, ui->cancelButton);
     connect(ui->okButton, &QPushButton::clicked, this, &QDialog::accept);
     connect(ui->cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
