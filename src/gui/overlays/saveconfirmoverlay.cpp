@@ -27,7 +27,7 @@ SaveConfirmOverlay::SaveConfirmOverlay(FloatingWidgetContainer *parent) :
     dimTimer.setInterval(kDimDelayMs);
     connect(&dimTimer, &QTimer::timeout, this, &SaveConfirmOverlay::dim);
     dimAnimation = new QPropertyAnimation(this, "opacity", this);
-    dimAnimation->setDuration(tg::timing::kConfirmFadeMs);
+    dimAnimation->setDuration(tg::timing::kOverlayFadeMs);
     dimAnimation->setEasingCurve(QEasingCurve::OutQuad);
 
     // hug the corner: as little of the image under it as possible

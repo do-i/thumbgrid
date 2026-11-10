@@ -12,9 +12,9 @@
 // Durations, delays, debounces and timeouts (…Ms).
 namespace tg::timing {
 
-// Fade / slide durations per role (values differ today; unified later).
-inline constexpr int kPanelSlideMs = 230;      // slide panels, controls overlay fade
-inline constexpr int kConfirmFadeMs = 200;     // save-confirm dim, move-progress fade
+// Two fade tiers (overlays/popups fast, transient messages slow) plus the panel slide.
+inline constexpr int kPanelSlideMs = 230;      // slide panels (movement)
+inline constexpr int kOverlayFadeMs = 150;     // overlays, popups, confirm dim, controls overlay
 inline constexpr int kMessageFadeMs = 300;     // floating message, zoom indicator fade
 
 // On-screen message lengths; call sites pick a tier instead of a number.

@@ -1,5 +1,4 @@
 #include "moveprogressoverlay.h"
-#include "constants.h"
 
 #include <QHBoxLayout>
 #include <QLocale>
@@ -36,7 +35,6 @@ MoveProgressOverlay::MoveProgressOverlay(FloatingWidgetContainer *parent)
     // default margins, like FloatingMessage: clear of the window's status footer
     setPosition(FloatingWidgetPosition::BOTTOMRIGHT);
     setFadeEnabled(true);
-    setFadeDuration(tg::timing::kConfirmFadeMs);
     reset();
     hide();
     if(parent)

@@ -1,8 +1,6 @@
 #include "overlaywidget.h"
 
-namespace {
-constexpr int kFadeDefaultMs = 120;
-}
+#include "constants.h"
 
 OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent)
     : FloatingWidget(parent),
@@ -14,7 +12,7 @@ OverlayWidget::OverlayWidget(FloatingWidgetContainer *parent)
     opacityEffect->setOpacity(1.0);
     this->setGraphicsEffect(opacityEffect);
     fadeAnimation = new QPropertyAnimation(this, "opacity");
-    fadeAnimation->setDuration(kFadeDefaultMs);
+    fadeAnimation->setDuration(tg::timing::kOverlayFadeMs);
     fadeAnimation->setStartValue(1.0f);
     fadeAnimation->setEndValue(0.0f);
     fadeAnimation->setEasingCurve(QEasingCurve::OutQuad);

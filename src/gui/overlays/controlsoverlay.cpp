@@ -34,7 +34,7 @@ ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
     fadeEffect = new QGraphicsOpacityEffect(this);
     this->setGraphicsEffect(fadeEffect);
     fadeAnimation = new QPropertyAnimation(fadeEffect, "opacity");
-    fadeAnimation->setDuration(tg::timing::kPanelSlideMs);
+    fadeAnimation->setDuration(tg::timing::kOverlayFadeMs);
     fadeAnimation->setStartValue(1.0f);
     fadeAnimation->setEndValue(0);
     fadeAnimation->setEasingCurve(QEasingCurve::OutQuart);

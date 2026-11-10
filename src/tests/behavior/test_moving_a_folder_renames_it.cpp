@@ -396,7 +396,7 @@ void MovingAFolderRenamesItTest::noToAllNeverReplacesAFileWithAFolder() {
     QVERIFY2(QFileInfo(root.filePath("src/folder/inner.txt")).isFile(), "the skipped folder stays in the source");
 }
 
-// The overlay fades out for 200 ms after a move; a move started in that window must still show it,
+// The overlay fades out briefly after a move; a move started in that window must still show it,
 // with a working Cancel even if the previous move was cancelled. Driven through MW directly: a real
 // second move can finish inside the wait and hide the overlay legitimately.
 void MovingAFolderRenamesItTest::aMoveStartedWhileTheOverlayFadesStillShowsIt() {
