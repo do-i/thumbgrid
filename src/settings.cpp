@@ -150,7 +150,7 @@ QString groupedKey(const QString &key) {
 // one-time theme.conf -> theme.ini migration, only when theme.ini is absent
 void migrateLegacyThemeConf(const QString &confDir, QSettings *themeConf) {
     const QString legacyPath = confDir + "/theme.conf";
-    if(!QFile::exists(legacyPath) || QFile::exists(confDir + "/theme.ini"))
+    if(!QFile::exists(legacyPath) || QFile::exists(confDir + u'/' + tg::fmt::kThemeFileName))
         return;
     QSettings legacy(legacyPath, QSettings::IniFormat);
     legacy.beginGroup("Colors");
@@ -612,14 +612,14 @@ void Settings::setupCache() {
     // skip dirs younger than 5 minutes (frame grabs) or whose lock a live session holds (exports).
     QDir cacheRootDir(mTmpDir->absolutePath());
     const QStringList scratchDirs = cacheRootDir.entryList(
-        {QStringLiteral("videothumb-*"), QStringLiteral("export-*")},
+        {tg::fmt::kVideoThumbDirPrefix + u'*', tg::fmt::kExportDirPrefix + u'*'},
         QDir::Dirs | QDir::NoDotAndDotDot);
     const QDateTime staleBefore = QDateTime::currentDateTime().addSecs(-kStaleScratchAgeSecs);
     for(const QString& name : scratchDirs) {
         const QString dirPath = cacheRootDir.filePath(name);
         if(QFileInfo(dirPath).lastModified() > staleBefore)
             continue; // may still be in flight
-        QLockFile lock(dirPath + QStringLiteral("/.tg-lock"));
+        QLockFile lock(dirPath + u'/' + tg::fmt::kScratchLockName);
         lock.setStaleLockTime(0);
         if(!lock.tryLock(0))
             continue; // a live session owns this one
@@ -682,7 +682,7 @@ void Settings::runConfigRecoveryMigrations(const QString &confDir) {
 
     const QString presetKey = groupedKey(QStringLiteral("preset"));
     if(!settingsConf->contains(presetKey))
-        settingsConf->setValue(presetKey, QStringLiteral("qimgv"));
+        settingsConf->setValue(presetKey, QString(tg::fmt::kDefaultPresetId));
 
     // import the old savedState file into [State]; existing keys win
     QSettings *legacyState = PlatformDesktop::createLegacyStateConfig();
@@ -1446,7 +1446,7 @@ bool Settings::collapseShortcutContexts(QMap<ViewMode, QMap<QString, QString>> &
 }
 //------------------------------------------------------------------------------
 QString Settings::selectedPreset() {
-    return settings->readSetting("preset", QStringLiteral("qimgv")).toString();
+    return settings->readSetting("preset", QString(tg::fmt::kDefaultPresetId)).toString();
 }
 
 void Settings::setSelectedPreset(const QString &id) {

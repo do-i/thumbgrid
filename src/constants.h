@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <QLatin1StringView>
+
 // Durations, delays, debounces and timeouts (…Ms).
 namespace tg::timing {
 
@@ -46,6 +48,16 @@ namespace tg::fmt {
 
 // Qt reads PDF as an image format; it is never listed or scanned as an image.
 inline constexpr const char *kPdfFormat = "pdf";
+
+// Scratch dir prefixes under the cache root and the lock file inside them; the
+// startup sweep in Settings::setupCache() matches what Core and the thumbnailer create.
+inline constexpr QLatin1StringView kVideoThumbDirPrefix{"videothumb-"};
+inline constexpr QLatin1StringView kExportDirPrefix{"export-"};
+inline constexpr QLatin1StringView kScratchLockName{".tg-lock"};
+
+// Theme palette file in the config dir, and the always-embedded default shortcut preset.
+inline constexpr QLatin1StringView kThemeFileName{"theme.ini"};
+inline constexpr QLatin1StringView kDefaultPresetId{"qimgv"};
 
 // One HEIF-family container, several suffixes (the plugin wants the file's own key).
 inline constexpr const char *kHeifSuffixes[] = {"heic", "heif", "hif", "avci", "hej2"};

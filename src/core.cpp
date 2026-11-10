@@ -943,13 +943,13 @@ QMimeData *Core::getMimeDataForImage(const std::shared_ptr<Image>& img, MimeData
             // Session-lifetime export dir: receivers read the file after we return, so it lives until Core dies.
             // Settings::setupCache() sweeps leftovers from a crash.
             if(!mExportTmpDir) {
-                mExportTmpDir = std::make_unique<QTemporaryDir>(settings->tmpDir() + QStringLiteral("export-"));
+                mExportTmpDir = std::make_unique<QTemporaryDir>(settings->tmpDir() + tg::fmt::kExportDirPrefix);
                 if(mExportTmpDir->isValid()) {
                     // owner-only, so nothing else can reach the exported image while it is on disk
                     QFile::setPermissions(mExportTmpDir->path(),
                                            QFileDevice::ReadOwner | QFileDevice::WriteOwner | QFileDevice::ExeOwner);
                     // held until Core dies so other instances' startup sweep skips this dir
-                    mExportTmpLock = std::make_unique<QLockFile>(mExportTmpDir->filePath(QStringLiteral(".tg-lock")));
+                    mExportTmpLock = std::make_unique<QLockFile>(mExportTmpDir->filePath(QString(tg::fmt::kScratchLockName)));
                     mExportTmpLock->setStaleLockTime(0);
                     if(!mExportTmpLock->tryLock(0)) {
                         qCWarning(logCore) << "Could not lock edited-image export dir" << mExportTmpDir->path();

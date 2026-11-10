@@ -513,7 +513,7 @@ QImage ThumbnailerRunnable::renderFileTypeIcon(const QString &suffix, bool viewa
 std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbnail(const QString& path, int size, bool squared) {
     QImageReader reader;
     // private per-task dir: a shared predictable path let workers race on (and read) each other's frames
-    QTemporaryDir tmpDir(settings->tmpDir() + QStringLiteral("videothumb-"));
+    QTemporaryDir tmpDir(settings->tmpDir() + tg::fmt::kVideoThumbDirPrefix);
     if(!tmpDir.isValid())
         return std::make_pair(std::make_unique<QImage>(), QSize());
     // owner-only, so nothing else can reach the frame while it is on disk

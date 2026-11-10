@@ -1,4 +1,5 @@
 #include "actionmanager.h"
+#include "constants.h"
 
 #include <utility>
 
@@ -17,7 +18,7 @@ namespace {
 QString resolveSelectedPresetPath() {
     QString path = ShortcutPresetStore::resolvePath(settings->selectedPreset());
     if(path.isEmpty())
-        path = ShortcutPresetStore::resolvePath(QStringLiteral("qimgv"));
+        path = ShortcutPresetStore::resolvePath(QString(tg::fmt::kDefaultPresetId));
     return path;
 }
 

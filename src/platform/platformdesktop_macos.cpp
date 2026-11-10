@@ -1,4 +1,5 @@
 #include "platformdesktop.h"
+#include "constants.h"
 
 #include <QApplication>
 #include <QCoreApplication>
@@ -36,7 +37,7 @@ QSettings *PlatformDesktop::createLegacyStateConfig() {
 }
 
 QSettings *PlatformDesktop::createThemeConfig(const QString &configDir) {
-    return new QSettings(configDir + "/theme.ini", QSettings::IniFormat);
+    return new QSettings(configDir + u'/' + tg::fmt::kThemeFileName, QSettings::IniFormat);
 }
 
 QString PlatformDesktop::defaultCacheDirectory() {
