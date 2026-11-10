@@ -32,5 +32,5 @@ private:
     QLabel *noticeLabel; // "truncated" banner for very large files
     QObject *highlighter = nullptr;
 
-    static const qint64 maxDisplayBytes = 1024 * 1024; // 1 MiB is plenty for a preview
+    qint64 mMaxDisplayBytes = 1024 * 1024; // cached from settings
 };

@@ -112,4 +112,9 @@ inline constexpr int kMessageDurationScaleMinPct = 50;
 inline constexpr int kMessageDurationScaleMaxPct = 300;
 inline constexpr int kMessageDurationScaleDefaultPct = 100;
 
+// Largest part of a text file the viewer reads and shows (KiB).
+inline constexpr int kTextPreviewLimitMinKiB = 64;
+inline constexpr int kTextPreviewLimitMaxKiB = 16384;
+inline constexpr int kTextPreviewLimitDefaultKiB = 1024;
+
 } // namespace tg::bounds

@@ -322,6 +322,14 @@ add_test(
     COMMAND thumbgrid_message_duration_scale_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_text_preview_size_limit_test
+    behavior/test_text_preview_size_limit.cpp
+)
+add_test(
+    NAME "The text viewer cuts a file at the size limit set in Settings"
+    COMMAND thumbgrid_text_preview_size_limit_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

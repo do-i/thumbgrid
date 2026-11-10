@@ -5313,6 +5313,73 @@
                    </layout>
                   </item>
                   <item>
+                   <layout class="QHBoxLayout" name="textPreviewLimitLayout">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="textPreviewLimitLabel">
+                      <property name="text">
+                       <string>Text preview size limit, KiB:</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QSpinBox" name="textPreviewLimitSpinBox">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>110</width>
+                        <height>24</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Larger text files are cut off after this many KiB in the viewer.</string>
+                      </property>
+                      <property name="minimum">
+                       <number>64</number>
+                      </property>
+                      <property name="maximum">
+                       <number>16384</number>
+                      </property>
+                      <property name="singleStep">
+                       <number>64</number>
+                      </property>
+                      <property name="value">
+                       <number>1024</number>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="textPreviewLimitSpacer">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>40</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </item>
+                  <item>
                    <layout class="QHBoxLayout" name="horizontalLayout_7">
                     <item>
                      <widget class="QLabel" name="mpvLabel">

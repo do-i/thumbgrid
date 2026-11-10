@@ -359,6 +359,7 @@ void SettingsDialog::setupMiscControls() {
     // ranges come from the setting bounds, not from the .ui numbers
     using namespace tg::bounds;
     ui->zoomStepSlider->setRange(kZoomStepMinPct, kZoomStepMaxPct);
+    ui->textPreviewLimitSpinBox->setRange(kTextPreviewLimitMinKiB, kTextPreviewLimitMaxKiB);
     ui->cursorHideDelaySpinBox->setRange(kCursorHideDelayMinMs, kCursorHideDelayMaxMs);
     ui->messageDurationScaleSpinBox->setRange(kMessageDurationScaleMinPct, kMessageDurationScaleMaxPct);
     ui->panelSizeSlider->setRange(kPanelThumbSizeMinPx / kPanelThumbSizeSliderScale,
@@ -946,6 +947,7 @@ void SettingsDialog::readSettings() {
     onDuplicateThreadsSliderChanged(ui->duplicateThreadsSlider->value());
 
     ui->memoryLimitSpinBox->setValue(settings->memoryAllocationLimit());
+    ui->textPreviewLimitSpinBox->setValue(settings->textPreviewLimitKiB());
 
     ui->thumbMemCacheSpinBox->setValue(settings->thumbnailerMemCacheLimit());
 
@@ -1105,6 +1107,7 @@ void SettingsDialog::saveSettings() {
     settings->setThumbnailerThreadCount(ui->thumbnailerThreadsSlider->value());
     settings->setDuplicateSearchThreadCount(ui->duplicateThreadsSlider->value());
     settings->setMemoryAllocationLimit(ui->memoryLimitSpinBox->value());
+    settings->setTextPreviewLimitKiB(ui->textPreviewLimitSpinBox->value());
     settings->setThumbnailerMemCacheLimit(ui->thumbMemCacheSpinBox->value());
 
     // System derives from the desktop and is never written to the theme file

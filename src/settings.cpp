@@ -119,7 +119,7 @@ QString settingGroupFor(const QString &key) {
         {"jxlAnimation", "Advanced"}, {"mpvBinary", "Advanced"}, {"JPEGSaveQuality", "Advanced"},
         {"thumbnailerThreads", "Advanced"}, {"thumbnailerMemCacheLimit", "Advanced"},
         {"duplicateSearchThreads", "Advanced"},
-        {"memoryAllocationLimit", "Advanced"}, {"cacheDir", "Advanced"},
+        {"memoryAllocationLimit", "Advanced"}, {"textPreviewLimitKiB", "Advanced"}, {"cacheDir", "Advanced"},
         // Shortcuts (preset pointer + dirty flag; the mapping lives in shortcuts.json)
         {"preset", "Shortcuts"}, {"modified", "Shortcuts"},
         // State (runtime state persisted between sessions; not part of the settings dialog)
@@ -2014,6 +2014,18 @@ void Settings::setMessageDurationScale(int percent) {
     using namespace tg::bounds;
     settings->writeSetting("messageDurationScale",
                            qBound(kMessageDurationScaleMinPct, percent, kMessageDurationScaleMaxPct));
+}
+
+int Settings::textPreviewLimitKiB() {
+    using namespace tg::bounds;
+    return qBound(kTextPreviewLimitMinKiB,
+                  settings->readSetting("textPreviewLimitKiB", kTextPreviewLimitDefaultKiB).toInt(),
+                  kTextPreviewLimitMaxKiB);
+}
+
+void Settings::setTextPreviewLimitKiB(int kib) {
+    using namespace tg::bounds;
+    settings->writeSetting("textPreviewLimitKiB", qBound(kTextPreviewLimitMinKiB, kib, kTextPreviewLimitMaxKiB));
 }
 //------------------------------------------------------------------------------
 bool Settings::firstRun() {

@@ -264,6 +264,8 @@ public:
     void setCursorHideDelay(int ms);
     int messageDurationScale();
     void setMessageDurationScale(int percent);
+    int textPreviewLimitKiB();
+    void setTextPreviewLimitKiB(int kib);
 
     bool infoBarFullscreen();
     void setInfoBarFullscreen(bool mode);

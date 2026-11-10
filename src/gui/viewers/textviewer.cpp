@@ -69,6 +69,7 @@ TextViewer::TextViewer(QWidget *parent) : QWidget(parent) {
 }
 
 void TextViewer::readSettings() {
+    mMaxDisplayBytes = qint64(settings->textPreviewLimitKiB()) * 1024;
     const ColorScheme &scheme = settings->colorScheme();
     QFont mono = QFontDatabase::systemFont(QFontDatabase::FixedFont);
     mono.setPointSizeF(qMax(9.0, QFont().pointSizeF()));
@@ -92,7 +93,7 @@ bool TextViewer::showFile(const QString &filePath) {
         return false;
     }
     const qint64 fileSize = file.size();
-    QByteArray raw = file.read(maxDisplayBytes);
+    QByteArray raw = file.read(mMaxDisplayBytes);
     file.close();
 
     // decode as utf-8 (replacement chars for invalid sequences keep this safe
@@ -115,9 +116,9 @@ bool TextViewer::showFile(const QString &filePath) {
     textEdit->verticalScrollBar()->setValue(0);
     textEdit->horizontalScrollBar()->setValue(0);
 
-    if(fileSize > maxDisplayBytes) {
+    if(fileSize > mMaxDisplayBytes) {
         noticeLabel->setText(tr("Preview of the first %1 KiB (file is %2 KiB)")
-                             .arg(maxDisplayBytes / 1024).arg(fileSize / 1024));
+                             .arg(mMaxDisplayBytes / 1024).arg(fileSize / 1024));
         noticeLabel->show();
     } else {
         noticeLabel->hide();
