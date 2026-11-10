@@ -11,6 +11,10 @@ public:
     ContextMenuItem(QWidget *parent = nullptr);
     ~ContextMenuItem() override;
     void setAction(QString mAction);
+    // re-reads the bound shortcut for the active input context; true if the text changed
+    bool refreshShortcut();
+    // keeps the shortcut hint empty, also across refreshes
+    void hideShortcut();
     // runs the item as a press would (keyboard activation)
     void trigger();
 
@@ -22,4 +26,5 @@ protected:
 
 private:
     QString mAction;
+    bool mShortcutHidden = false;
 };

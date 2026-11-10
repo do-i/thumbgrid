@@ -1,4 +1,4 @@
-// Unit tests for ResizeCopy, the GUI-free core of "Resize..." in the grid:
+// Unit tests for ResizeCopy, the GUI-free core of "Resize…" in the grid:
 // how one spec maps onto images of different sizes, how copies are named, and
 // that a resize writes a new file and never the original.
 #include "support/thumbgrid_test_support.h"

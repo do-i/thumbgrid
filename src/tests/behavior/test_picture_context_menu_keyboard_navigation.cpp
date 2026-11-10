@@ -63,7 +63,7 @@ void PictureContextMenuKeyboardNavigationTest::arrowsMoveTheHighlightAndEnterRun
     QTest::keyClick(menu, Qt::Key_Down);
     QCOMPARE(highlightedText(menu), QStringLiteral("Print"));
     QTest::keyClick(menu, Qt::Key_Up);
-    QCOMPARE(highlightedText(menu), QStringLiteral("Find duplicates..."));
+    QCOMPARE(highlightedText(menu), QStringLiteral("Find duplicates…"));
     QTest::keyClick(menu, Qt::Key_Up);
     QCOMPARE(highlightedText(menu), QStringLiteral("File info"));
 
@@ -77,12 +77,12 @@ void PictureContextMenuKeyboardNavigationTest::arrowsMoveTheHighlightAndEnterRun
     QTRY_VERIFY(menu->isVisible());
     QCOMPARE(highlightedText(menu), QString());
 
-    // "Open with..." switches page and keeps the menu open, like a click.
-    for(int i = 0; i < 20 && highlightedText(menu) != QStringLiteral("Open with..."); i++)
+    // "Open with" switches page and keeps the menu open, like a click.
+    for(int i = 0; i < 20 && highlightedText(menu) != QStringLiteral("Open with"); i++)
         QTest::keyClick(menu, Qt::Key_Down);
-    QCOMPARE(highlightedText(menu), QStringLiteral("Open with..."));
+    QCOMPARE(highlightedText(menu), QStringLiteral("Open with"));
     QTest::keyClick(menu, Qt::Key_Return);
-    QVERIFY2(menu->isVisible(), "Open with... should keep the menu open.");
+    QVERIFY2(menu->isVisible(), "Open with should keep the menu open.");
     QTest::keyClick(menu, Qt::Key_Down);
     QCOMPARE(highlightedText(menu), QStringLiteral("Back"));
     QTest::keyClick(menu, Qt::Key_Return);

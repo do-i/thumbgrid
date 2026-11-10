@@ -16,6 +16,21 @@ void ContextMenuItem::setAction(QString text) {
     setShortcutText(actionManager->shortcutForAction(actionManager->currentContext(), mAction));
 }
 
+bool ContextMenuItem::refreshShortcut() {
+    if(mAction.isEmpty() || mShortcutHidden)
+        return false;
+    const QString text = actionManager->shortcutForAction(actionManager->currentContext(), mAction);
+    if(text == shortcut())
+        return false;
+    setShortcutText(text);
+    return true;
+}
+
+void ContextMenuItem::hideShortcut() {
+    mShortcutHidden = true;
+    setShortcutText("");
+}
+
 void ContextMenuItem::trigger() {
     onPress();
 }

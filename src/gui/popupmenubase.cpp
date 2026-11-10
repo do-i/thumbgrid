@@ -46,7 +46,13 @@ void PopupMenuBase::addSeparator(QVBoxLayout *layout) {
 }
 
 void PopupMenuBase::showAt(QPoint pos) {
+    // a handful of lookups per open; a longer hint may widen the menu
+    bool hintsChanged = false;
+    for(ContextMenuItem *item : findChildren<ContextMenuItem*>())
+        hintsChanged |= item->refreshShortcut();
     prepareShow();
+    if(hintsChanged)
+        adjustSize();
     QRect geom = geometry();
     geom.moveTopLeft(pos);
     clampToScreen(geom);

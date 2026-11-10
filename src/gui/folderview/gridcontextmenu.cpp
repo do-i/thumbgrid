@@ -16,19 +16,19 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     auto *mainPage = new QWidget(stack);
     auto *mainLayout = makeItemLayout(mainPage);
 
-    convertItem = makeItem(tr("Convert to..."), ":/res/icons/common/menuitem/convert16.png");
+    convertItem = makeItem(tr("Convert to"), ":/res/icons/common/menuitem/convert16.png");
     convertItem->setObjectName("menuConvert");
     convertItem->setPassthroughClicks(false); // keep the menu open, just switch page
     connect(convertItem, &ContextMenuItem::pressed, this, &GridContextMenu::switchToConvertPage);
     mainLayout->addWidget(convertItem);
 
     // writes resized copies of the selection; the originals are never touched
-    resizeItem = makeItem(tr("Resize..."), ":/res/icons/common/menuitem/resize16.png");
+    resizeItem = makeItem(tr("Resize…"), ":/res/icons/common/menuitem/resize16.png");
     resizeItem->setObjectName("menuResize");
     resizeItem->setAction("resize");
     mainLayout->addWidget(resizeItem);
 
-    renameItem = makeItem(tr("Rename..."), ":/res/icons/common/overlay/edit16.png");
+    renameItem = makeItem(tr("Rename…"), ":/res/icons/common/overlay/edit16.png");
     renameItem->setObjectName("menuRename");
     renameItem->setAction("renameFile");
     mainLayout->addWidget(renameItem);
@@ -43,7 +43,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     fileInfoItem->setAction("toggleImageInfo");
     mainLayout->addWidget(fileInfoItem);
 
-    moveItem = makeItem(tr("Move to..."), ":/res/icons/common/menuitem/move16.png");
+    moveItem = makeItem(tr("Move to…"), ":/res/icons/common/menuitem/move16.png");
     moveItem->setObjectName("menuMove");
     moveItem->setAction("moveFile");
     mainLayout->addWidget(moveItem);
@@ -53,7 +53,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     trashItem->setAction("moveToTrash");
     mainLayout->addWidget(trashItem);
 
-    findDuplicatesItem = makeItem(tr("Find duplicates..."), ":/res/icons/common/menuitem/folderview16.png");
+    findDuplicatesItem = makeItem(tr("Find duplicates…"), ":/res/icons/common/menuitem/folderview16.png");
     findDuplicatesItem->setObjectName("menuFindDuplicates");
     findDuplicatesItem->setAction("findDuplicates");
     mainLayout->addWidget(findDuplicatesItem);
@@ -61,7 +61,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     addSeparator(mainLayout);
 
     // destructive and not undoable; relies on the confirmation dialog downstream
-    deleteItem = makeItem(tr("Delete permanently"), ":/res/icons/common/menuitem/trash16.png");
+    deleteItem = makeItem(tr("Delete permanently"), ":/res/icons/common/overlay/close16.png");
     deleteItem->setObjectName("menuDelete");
     deleteItem->setAction("removeFile");
     mainLayout->addWidget(deleteItem);

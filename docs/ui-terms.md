@@ -49,16 +49,6 @@ Worklist for T-032, T-039, T-042 (line numbers as of 419823f4; locate by text). 
 
 | File:line | Current | New |
 |---|---|---|
-| gui/contextmenu.cpp:62 | "Quick copy" | "Copy to…" |
-| gui/contextmenu.cpp:66 | "Quick move" | "Move to…" |
-| gui/contextmenu.cpp:80 | "Folder View" | "Grid" |
-| gui/contextmenu.cpp:88 | "Open with..." | "Open with" |
-| gui/contextmenu.cpp:107 | "Find duplicates..." | "Find duplicates…" |
-| gui/contextmenu.cpp:233 | "Resize..." (tooltip) | "Resize…" |
-| gui/folderview/gridcontextmenu.cpp:30 | "Convert to..." | "Convert to" |
-| gui/folderview/gridcontextmenu.cpp:37, 42 | "Resize..." / "Rename..." | "Resize…" / "Rename…" |
-| gui/folderview/gridcontextmenu.cpp:57 | "Move to..." | "Move to…" |
-| gui/folderview/gridcontextmenu.cpp:67 | "Find duplicates..." | "Find duplicates…" |
 | gui/dialogs/filereplacedialog.cpp:44-45 | "Directory already exists" / "Merge directories?" | "Folder already exists" / "Merge folders?" |
 | gui/dialogs/filereplacedialog.ui:118, 125 | "Yes" / "No" | "Replace" (folder mode: "Merge") / "Skip" |
 | gui/dialogs/duplicatefinderdialog.cpp:98, 534 | "Find Duplicates" | "Find duplicates" |

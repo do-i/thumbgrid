@@ -378,6 +378,14 @@ add_test(
     COMMAND thumbgrid_grid_context_menu_gating_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_context_menu_shortcut_hints_test
+    behavior/test_context_menu_shortcut_hints_follow_rebinding.cpp
+)
+add_test(
+    NAME "Context menu shortcut hints follow a rebound key on the next open"
+    COMMAND thumbgrid_context_menu_shortcut_hints_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_resize_copy_rules_test
     behavior/test_resize_copy_rules.cpp
 )

@@ -1,4 +1,4 @@
-// "Resize..." in the grid context menu opens the resize dialog for the whole
+// "Resize…" in the grid context menu opens the resize dialog for the whole
 // selection and writes a resized copy of every image next to its original,
 // in the background when more than one image is selected.
 #include "support/thumbgrid_test_support.h"

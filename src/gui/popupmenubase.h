@@ -8,7 +8,7 @@
 //     items->setContentsMargins(0, 4, 0, 4);
 //     items->addWidget(makeItem(tr("Copy path"), ":/res/icons/common/menuitem/copy16.png", "copyPathClipboard"));
 //     addSeparator(items);
-// and call showAt(globalPos) on right-click. The QSS styles every PopupMenuBase.
+// and call showAt(globalPos) on right-click (it re-reads every row's shortcut hint). The QSS styles every PopupMenuBase.
 
 #pragma once
 
