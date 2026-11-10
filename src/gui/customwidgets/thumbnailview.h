@@ -109,6 +109,9 @@ protected:
     // cached from Settings in readSettings(); read in wheel/scroll paths
     bool mTrackpadDetection = true, mSmoothScroll = true;
     float mMouseScrollingSpeed = 1.0f;
+    bool mUnloadThumbs = true;
+    int mLabelFontPointSize = 9;
+    QColor mLabelBackgroundColor;
     void readSettings();
     int offscreenPreloadArea = 3000;
 

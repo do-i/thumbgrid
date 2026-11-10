@@ -25,7 +25,7 @@ class ThumbnailWidget : public QGraphicsWidget {
     Q_OBJECT
 
 public:
-    ThumbnailWidget(QGraphicsItem *parent = nullptr);
+    ThumbnailWidget(int labelFontPointSize, const QColor &labelBackgroundColor, QGraphicsItem *parent = nullptr);
 
     enum { Type = UserType + 1 };
     int type() const override { return Type; }

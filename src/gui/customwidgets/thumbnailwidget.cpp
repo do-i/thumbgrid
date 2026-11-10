@@ -1,6 +1,6 @@
 #include "thumbnailwidget.h"
 
-ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
+ThumbnailWidget::ThumbnailWidget(int labelFontPointSize, const QColor &labelBackgroundColor, QGraphicsItem *parent) :
     QGraphicsWidget(parent),
     isLoaded(false),
     thumbnail(nullptr),
@@ -20,7 +20,7 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
     marginY(2),
     labelSpacing(9),
     textHeight(5),
-    mLabelBackgroundColor(settings->folderViewLabelBackgroundColor()),
+    mLabelBackgroundColor(labelBackgroundColor),
     thumbStyle(THUMB_SIMPLE)
 {
     setAttribute(Qt::WA_OpaquePaintEvent, true);
@@ -29,7 +29,7 @@ ThumbnailWidget::ThumbnailWidget(QGraphicsItem *parent) :
         setCacheMode(QGraphicsItem::DeviceCoordinateCache);
     setAcceptHoverEvents(true);
     font.setBold(false);
-    font.setPointSize(settings->folderViewFontPointSize());
+    font.setPointSize(labelFontPointSize);
     QFontMetrics fm(font);
     textHeight = fm.height();
 }

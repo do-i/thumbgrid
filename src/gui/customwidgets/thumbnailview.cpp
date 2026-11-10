@@ -402,7 +402,7 @@ void ThumbnailView::loadVisibleThumbnails() {
         if(loadList.count())
             emit thumbnailsRequested(loadList, static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize), mCropThumbnails, false);
         // unload offscreen
-        if(settings->unloadThumbs()) {
+        if(mUnloadThumbs) {
             QSet<const QGraphicsItem*> visibleSet;
             visibleSet.reserve(visibleItems.count());
             for(const QGraphicsItem *item : visibleItems)
@@ -480,6 +480,9 @@ void ThumbnailView::readSettings() {
     mTrackpadDetection = settings->trackpadDetection();
     mMouseScrollingSpeed = settings->mouseScrollingSpeed();
     mSmoothScroll = settings->enableSmoothScroll();
+    mUnloadThumbs = settings->unloadThumbs();
+    mLabelFontPointSize = settings->folderViewFontPointSize();
+    mLabelBackgroundColor = settings->folderViewLabelBackgroundColor();
 }
 
 //################### scrolling ######################

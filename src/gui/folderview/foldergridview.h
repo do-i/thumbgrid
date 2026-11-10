@@ -75,6 +75,11 @@ private:
     void scrollToCurrent();
     int lastDragTarget = -1;
     bool mPreviewFit = false;
+    // cached per-widget settings, refreshed on settingsChanged
+    int mFolderViewMode = 0;
+    bool mShowInfo = true;
+    QColor mCellBackgroundColor;
+    void readWidgetSettings();
     QString mThumbColorSignature;
     QRgb mTransparencyGridColors[2] = {0, 0};
 

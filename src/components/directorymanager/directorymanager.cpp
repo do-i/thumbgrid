@@ -374,6 +374,7 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, c
         qCWarning(logDirManager) << "[DirectoryManager]" << directoryPath << QString::fromStdString(ec.message());
         return;
     }
+    const bool showHidden = settings->showHiddenFiles();
     for(fs::directory_iterator end; it != end; it.increment(ec)) {
         if(ec) { // increment failure invalidates the iterator; nothing more to read
             qCWarning(logDirManager) << "[DirectoryManager]" << QString::fromStdString(ec.message());
@@ -382,7 +383,7 @@ void DirectoryManager::addEntriesFromDirectory(std::vector<FSEntry> &entryVec, c
         const auto &entry = *it;
         QString name = QString::fromStdString(entry.path().filename().generic_string());
         // ignore hidden files
-        if(!settings->showHiddenFiles() && name.startsWith("."))
+        if(!showHidden && name.startsWith("."))
             continue;
         QString path = QString::fromStdString(entry.path().generic_string());
         match = regex.match(name);

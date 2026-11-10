@@ -54,6 +54,7 @@ private:
     // file-type icons bake theme colors but are keyed by path/size: drop them on theme change
     void onSettingsChanged();
     QString mThumbColorSignature;
+    bool mUseThumbnailCache = true, mShowHiddenFiles = false;
 
 private slots:
     void onTaskEnd(const std::shared_ptr<Thumbnail>& thumbnail, const QString& filePath);

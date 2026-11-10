@@ -26,7 +26,7 @@ void ThumbnailStrip::setupLayout() {
 }
 
 ThumbnailWidget* ThumbnailStrip::createThumbnailWidget() {
-    ThumbnailWidget *widget = new ThumbnailWidget();
+    ThumbnailWidget *widget = new ThumbnailWidget(mLabelFontPointSize, mLabelBackgroundColor);
     widget->setPadding(thumbPadding);
     widget->setMargins(thumbMarginX, thumbMarginY);
     widget->setThumbStyle(mCurrentStyle);
@@ -145,7 +145,7 @@ void ThumbnailStrip::readSettings() {
 
 QSize ThumbnailStrip::itemSize() {
     if(!thumbnails.count()) {
-        ThumbnailWidget w;
+        ThumbnailWidget w(mLabelFontPointSize, mLabelBackgroundColor);
         w.setPadding(thumbPadding);
         w.setMargins(thumbMarginX, thumbMarginY);
         w.setThumbStyle(mCurrentStyle);

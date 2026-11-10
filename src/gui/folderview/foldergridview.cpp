@@ -62,11 +62,13 @@ FolderGridView::FolderGridView(QWidget *parent)
     setDrawScrollbarIndicator(false);
     setSelectMode(ACTIVATE_BY_DOUBLECLICK);
 
+    readWidgetSettings();
     mPreviewFit = settings->folderViewPreviewFit();
     mThumbColorSignature = settings->colorScheme().bakedThumbnailSignature();
     mTransparencyGridColors[0] = settings->transparencyGridColor1().rgba();
     mTransparencyGridColors[1] = settings->transparencyGridColor2().rgba();
     connect(settings, &Settings::settingsChanged, [this]() {
+        readWidgetSettings();
         this->scene.setBackgroundBrush(settings->colorScheme().folderview);
         // the checker is painted live under each thumbnail, but the item cache holds the old one
         const QRgb grid1 = settings->transparencyGridColor1().rgba();
@@ -383,8 +385,14 @@ void FolderGridView::setupLayout() {
     holderWidget.setContentsMargins(0,0,0,0);
 }
 
+void FolderGridView::readWidgetSettings() {
+    mFolderViewMode = settings->folderViewMode();
+    mShowInfo = settings->folderViewShowInfo();
+    mCellBackgroundColor = settings->folderViewCellBackgroundColor();
+}
+
 ThumbnailWidget* FolderGridView::createThumbnailWidget() {
-    ThumbnailWidget *widget = new ThumbnailWidget();
+    ThumbnailWidget *widget = new ThumbnailWidget(mLabelFontPointSize, mLabelBackgroundColor);
     widget->setPadding(3);
     widget->setMargins(1,1);
     widget->setLabelSpacing(5);
@@ -394,12 +402,12 @@ ThumbnailWidget* FolderGridView::createThumbnailWidget() {
     widget->setSymlinkBadgeVisible(true);
     widget->setThumbnailTopMargin(4);
     widget->setCellHeightRatio(0.93);
-    ThumbnailStyle style = (settings->folderViewMode() == FV_SIMPLE) ? THUMB_SIMPLE : THUMB_NORMAL_CENTERED;
+    ThumbnailStyle style = (mFolderViewMode == FV_SIMPLE) ? THUMB_SIMPLE : THUMB_NORMAL_CENTERED;
     widget->setThumbStyle(style);
-    widget->setShowInfo(settings->folderViewShowInfo());
-    widget->setLabelFontPointSize(settings->folderViewFontPointSize());
-    widget->setLabelBackgroundColor(settings->folderViewLabelBackgroundColor());
-    widget->setCellBackgroundColor(settings->folderViewCellBackgroundColor());
+    widget->setShowInfo(mShowInfo);
+    widget->setLabelFontPointSize(mLabelFontPointSize);
+    widget->setLabelBackgroundColor(mLabelBackgroundColor);
+    widget->setCellBackgroundColor(mCellBackgroundColor);
     widget->setThumbnailSize(this->mThumbnailSize); // TODO: constructor
     widget->setThumbnailAreaSize(folderGridThumbnailWidth(this->mThumbnailSize), this->mThumbnailSize);
     return widget;

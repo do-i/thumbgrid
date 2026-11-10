@@ -382,10 +382,11 @@ void DirectoryPresenter::generateThumbnails(const QList<int>& indexes, int size,
             requestedTasks.append(qMakePair(model->filePathAt(i - model->dirCount()), size));
     }
     thumbnailer.keepOnlyQueuedTasks(requestedTasks);
+    const bool previewFit = settings->folderViewPreviewFit();
     for(const auto &task : requestedTasks) {
         int dirIndex = model->indexOfDir(task.first);
         if(dirIndex != -1)
-            thumbnailer.getDirThumbnailAsync(task.first, size, settings->folderViewPreviewFit(), crop, force);
+            thumbnailer.getDirThumbnailAsync(task.first, size, previewFit, crop, force);
         else
             thumbnailer.getThumbnailAsync(task.first, size, crop, force);
     }
