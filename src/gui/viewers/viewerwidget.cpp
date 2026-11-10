@@ -210,9 +210,9 @@ void ViewerWidget::onScaleChanged(qreal scale) {
         return;
     if(scale != 1.0f) {
         zoomIndicator->setScale(scale);
-        if(settings->zoomIndicatorMode() == ZoomIndicatorMode::INDICATOR_ENABLED)
+        if(mZoomIndicatorMode == ZoomIndicatorMode::INDICATOR_ENABLED)
             zoomIndicator->show();
-        else if((settings->zoomIndicatorMode() == ZoomIndicatorMode::INDICATOR_AUTO))
+        else if(mZoomIndicatorMode == ZoomIndicatorMode::INDICATOR_AUTO)
             zoomIndicator->show(1500);
     } else {
         zoomIndicator->hide();
@@ -780,6 +780,8 @@ void ViewerWidget::onFullscreenModeChanged(bool mode) {
 }
 
 void ViewerWidget::readSettings() {
+    mZoomIndicatorMode = settings->zoomIndicatorMode();
+    mImageScrolling = settings->imageScrolling();
     videoControls->onVideoMuted(!settings->playVideoSounds());
     updateVideoControlsVisibility();
     if(settings->clickableEdges()) {
@@ -865,7 +867,7 @@ void ViewerWidget::scrollOrChangeFile(int dy) {
         return;
     }
     if(currentWidget == IMAGEVIEWER && mInteractionEnabled && imageViewer->isDisplaying() &&
-       settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL && imageViewer->keyPan(0, dy, false))
+       mImageScrolling == SCROLL_BY_TRACKPAD_AND_WHEEL && imageViewer->keyPan(0, dy, false))
         return;
     if(currentWidget == VIDEOPLAYER) {
         const QString fallback = actionManager->videoScrollFallback((dy < 0) ? "scrollOrPrevImage" : "scrollOrNextImage");

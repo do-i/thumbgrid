@@ -749,3 +749,11 @@ add_test(
 add_executable(thumbgrid_perf_scroll_driver EXCLUDE_FROM_ALL perf/scroll_pass_driver.cpp)
 target_include_directories(thumbgrid_perf_scroll_driver PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(thumbgrid_perf_scroll_driver PRIVATE thumbgrid_app_objects Qt6::Test)
+
+thumbgrid_add_behavior_test(thumbgrid_wheel_scroll_setting_change_test
+    behavior/test_wheel_scroll_setting_change_applies_without_restart.cpp
+)
+add_test(
+    NAME "A wheel scroll setting changed at runtime applies without a restart"
+    COMMAND thumbgrid_wheel_scroll_setting_change_test
+)

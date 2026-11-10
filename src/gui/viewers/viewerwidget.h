@@ -59,6 +59,8 @@ private:
 
     CurrentWidget currentWidget;
     bool mInteractionEnabled, mWaylandCursorWorkaround;
+    ZoomIndicatorMode mZoomIndicatorMode = ZoomIndicatorMode::INDICATOR_AUTO;
+    ImageScrolling mImageScrolling = SCROLL_BY_TRACKPAD_AND_WHEEL;
     QTimer cursorTimer;
     const int CURSOR_HIDE_TIMEOUT_MS = 1000;
     bool mIsFullscreen;

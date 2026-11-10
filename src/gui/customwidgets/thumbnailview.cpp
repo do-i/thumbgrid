@@ -28,6 +28,9 @@ ThumbnailView::ThumbnailView(Qt::Orientation _orientation, QWidget *parent)
 
     lastTouchpadScroll.start();
 
+    readSettings();
+    connect(settings, &Settings::settingsChanged, this, &ThumbnailView::readSettings);
+
     connect(&loadTimer, &QTimer::timeout, this, &ThumbnailView::loadVisibleThumbnails);
     loadTimer.setInterval(static_cast<const int>(LOAD_DELAY));
     loadTimer.setSingleShot(true);
@@ -473,6 +476,12 @@ void ThumbnailView::fitSceneToContents() {
     }
 }
 
+void ThumbnailView::readSettings() {
+    mTrackpadDetection = settings->trackpadDetection();
+    mMouseScrollingSpeed = settings->mouseScrollingSpeed();
+    mSmoothScroll = settings->enableSmoothScroll();
+}
+
 //################### scrolling ######################
 void ThumbnailView::wheelEvent(QWheelEvent *event) {
     event->accept();
@@ -480,7 +489,7 @@ void ThumbnailView::wheelEvent(QWheelEvent *event) {
     int pixelDelta = event->pixelDelta().y();
     int angleDelta = event->angleDelta().y();
     bool isWheel = true;
-    if(settings->trackpadDetection()) {
+    if(mTrackpadDetection) {
         if(wayland) // we should have scroll phase support
             isWheel = (event->phase() == Qt::NoScrollPhase);
         else // fallback to guesswork
@@ -488,8 +497,8 @@ void ThumbnailView::wheelEvent(QWheelEvent *event) {
     }
 
     if(isWheel) {
-        angleDelta *= settings->mouseScrollingSpeed();
-        if(!settings->enableSmoothScroll()) {
+        angleDelta *= mMouseScrollingSpeed;
+        if(!mSmoothScroll) {
             if(pixelDelta)
                 scrollByItem(pixelDelta);
             else if(angleDelta)
@@ -576,7 +585,7 @@ void ThumbnailView::scrollToItem(int index) {
             else // RIGHT
                 delta = sceneRect.left() - itemRect.left();
         }
-        if(settings->enableSmoothScroll())
+        if(mSmoothScroll)
             scrollSmooth(delta);
         else
             scrollPrecise(delta);

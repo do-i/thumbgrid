@@ -146,6 +146,9 @@ void ImageViewerV2::readSettings() {
     zoomStep = settings->zoomStep();
     focusIn1to1 = settings->focusPointIn1to1Mode();
     trackpadDetection = settings->trackpadDetection();
+    mImageScrolling = settings->imageScrolling();
+    mMouseScrollingSpeed = settings->mouseScrollingSpeed();
+    mUnlockMinZoom = settings->unlockMinZoom();
     if( (useFixedZoomLevels = settings->useFixedZoomLevels()) ) {
         // zoomlevels are stored as a string, parse into list
         zoomLevels.clear();
@@ -616,7 +619,7 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event) {
     } else if(event->modifiers() == Qt::NoModifier) {
         if(!isWheelScroll(event)) {
             trackpadScroll(event);
-        } else if(settings->imageScrolling() == SCROLL_BY_TRACKPAD_AND_WHEEL &&
+        } else if(mImageScrolling == SCROLL_BY_TRACKPAD_AND_WHEEL &&
                   actionManager->viewerHandlesWheel(event)) {
             // stands in for the wheel's scrollOrPrevImage/scrollOrNextImage
             wheelScroll(event);
@@ -675,7 +678,7 @@ bool ImageViewerV2::isWheelScroll(QWheelEvent *event) {
 void ImageViewerV2::trackpadScroll(QWheelEvent *event) {
     lastTouchpadScroll.restart();
     event->accept();
-    if(settings->imageScrolling() == ImageScrolling::SCROLL_NONE)
+    if(mImageScrolling == ImageScrolling::SCROLL_NONE)
         return;
     stopPosAnimation();
     QPoint pixelDelta = event->pixelDelta();
@@ -695,7 +698,7 @@ void ImageViewerV2::wheelScroll(QWheelEvent *event) {
     // shift by 2px in case of img edge misalignment
     if(angleDelta.y() && scaledSizeR().height() > viewport()->height() + 2) {
         event->accept();
-        scroll(0, -angleDelta.y() * WHEEL_SCROLL_MULTIPLIER * settings->mouseScrollingSpeed(), true);
+        scroll(0, -angleDelta.y() * WHEEL_SCROLL_MULTIPLIER * mMouseScrollingSpeed, true);
     } else {
         event->ignore(); // not scrollable; passthrough event
     }
@@ -785,7 +788,7 @@ void ImageViewerV2::updateMinScale() {
         return;
     updateFitWindowScale();
     updateFitWindowStretchScale();
-    if(settings->unlockMinZoom()) {
+    if(mUnlockMinZoom) {
         if(!pixmap->isNull())
             minScale = qMax(10./pixmap->width(), 10./pixmap->height());
         else

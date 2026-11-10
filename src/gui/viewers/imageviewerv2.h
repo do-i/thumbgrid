@@ -176,6 +176,9 @@ private:
     ImageFocusPoint focusIn1to1;
     ScalingFilter mScalingFilter;
     bool mScalingSharpen = true;
+    bool mUnlockMinZoom = false;
+    float mMouseScrollingSpeed = 1.0f;
+    ImageScrolling mImageScrolling = SCROLL_BY_TRACKPAD_AND_WHEEL;
     ScalingFilter effectiveScalingFilter() const;
 
     void zoomAnchored(float newScale);

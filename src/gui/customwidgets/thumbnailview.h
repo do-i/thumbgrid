@@ -106,6 +106,10 @@ protected:
     QTimeLine *scrollTimeLine;
     QPointF viewportCenter;
     int mThumbnailSize;
+    // cached from Settings in readSettings(); read in wheel/scroll paths
+    bool mTrackpadDetection = true, mSmoothScroll = true;
+    float mMouseScrollingSpeed = 1.0f;
+    void readSettings();
     int offscreenPreloadArea = 3000;
 
     QList<int> rangeSelectionSnapshot;

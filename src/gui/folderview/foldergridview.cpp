@@ -518,7 +518,7 @@ void FolderGridView::wheelEvent(QWheelEvent *event) {
         int angleDelta = event->angleDelta().y();
         if(!angleDelta)
             return;
-        if(settings->enableSmoothScroll())
+        if(mSmoothScroll)
             scrollSmooth(angleDelta, 0.85, 1.15, true);
         else
             scrollPrecise(angleDelta);
