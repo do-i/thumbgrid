@@ -158,6 +158,7 @@ bool DirectoryManager::setDirectory(const QString& dirPath) {
         qCWarning(logDirManager) << "[DirectoryManager] Error - cannot read directory.";
         return false;
     }
+    const qint64 perfT0 = perfStart();
     mListSource = SOURCE_DIRECTORY;
     mDirectoryPath = dirPath;
 
@@ -165,6 +166,7 @@ bool DirectoryManager::setDirectory(const QString& dirPath) {
     sortEntryLists();
     emit loaded(dirPath);
     startFileWatcher(dirPath);
+    perfEnd("dir_load", perfT0, qsizetype(fileEntryVec.size() + dirEntryVec.size()));
     return true;
 }
 

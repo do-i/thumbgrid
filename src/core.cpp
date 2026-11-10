@@ -18,6 +18,22 @@
 #include <QImageReader>
 #include <utility>
 
+namespace {
+// logs the main window's first paint once, then removes itself; only installed when perf logging is on
+class PerfFirstPaintProbe : public QObject {
+public:
+    using QObject::QObject;
+    bool eventFilter(QObject *watched, QEvent *event) override {
+        if(event->type() == QEvent::Paint) {
+            perfMark("startup_paint");
+            watched->removeEventFilter(this);
+            deleteLater();
+        }
+        return false;
+    }
+};
+}
+
 Core::Core()
     : QObject(),
       folderEndAction(FOLDER_END_NO_ACTION),
@@ -64,8 +80,10 @@ void Core::readSettings() {
 }
 
 void Core::showGui() {
-    if(mw && !mw->isVisible())
+    if(mw && !mw->isVisible()) {
         mw->showDefault();
+        perfMark("startup_show");
+    }
     QTimer::singleShot(50, mw, &MW::setupFullUi);
 }
 
@@ -73,6 +91,8 @@ void Core::showGui() {
 void Core::initGui() {
     mw = new MW();
     mw->hide();
+    if(logPerf().isDebugEnabled())
+        mw->installEventFilter(new PerfFirstPaintProbe(mw));
 }
 
 void Core::attachModel(DirectoryModel *_model) {

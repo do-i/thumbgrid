@@ -17,6 +17,7 @@
 #include "sharedresources.h"
 #include "components/storeddata/storeddataregistry.h"
 #include "core.h"
+#include "utils/logging.h"
 
 #ifdef __APPLE__
 #include "macosapplication.h"
@@ -46,6 +47,7 @@ QDataStream& operator>>(QDataStream& in, Script& v) {
 }
 //------------------------------------------------------------------------------
 int main(int argc, char *argv[]) {
+    gPerfClock.start();
 
     PlatformDesktop::prepareApplicationEnvironment();
 

@@ -233,8 +233,7 @@ void ThumbnailView::populate(int newCount) {
     // pause updates until the layout is calculated
     // without this you will see scene moving when scrollbar appears
     this->setUpdatesEnabled(false);
-    QElapsedTimer t;
-    t.start();
+    const qint64 perfT0 = perfStart();
     if(newCount >= 0) {
         // reuse the existing widgets; only the difference is created or destroyed
         for(int i = thumbnails.count() - 1; i >= newCount; i--) {
@@ -255,6 +254,7 @@ void ThumbnailView::populate(int newCount) {
     resetViewport();
     // painting resumes once the queued layout settles (re-armed, so repeated calls collapse)
     layoutSettleTimer.start();
+    perfEnd("populate", perfT0, thumbnails.count());
 }
 
 void ThumbnailView::onLayoutSettled() {
@@ -354,6 +354,7 @@ void ThumbnailView::unloadAllThumbnails() {
 void ThumbnailView::loadVisibleThumbnails() {
     loadTimer.stop();
     if(isVisible() && !blockThumbnailLoading) {
+        const qint64 perfT0 = perfStart();
         QRectF visRect = mapToScene(viewport()->geometry()).boundingRect();
         QRectF offRectBack;
         QRectF offRectFront;
@@ -407,6 +408,7 @@ void ThumbnailView::loadVisibleThumbnails() {
                 if(!visibleSet.contains(thumbnails.at(i)))
                     thumbnails.at(i)->unsetThumbnail();
         }
+        perfEnd("load_visible", perfT0, loadList.count());
     }
 }
 

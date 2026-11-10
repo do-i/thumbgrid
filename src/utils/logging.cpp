@@ -8,3 +8,6 @@ Q_LOGGING_CATEGORY(logThumbnailer, "thumbgrid.thumbnailer")
 Q_LOGGING_CATEGORY(logVideo, "thumbgrid.video")
 Q_LOGGING_CATEGORY(logGui, "thumbgrid.gui")
 Q_LOGGING_CATEGORY(logSettings, "thumbgrid.settings")
+Q_LOGGING_CATEGORY(logPerf, "thumbgrid.perf", QtInfoMsg)
+
+QElapsedTimer gPerfClock;

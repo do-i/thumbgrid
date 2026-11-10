@@ -52,8 +52,6 @@ public slots:
     bool loadPath(QString);
 
 private:
-    QElapsedTimer t;
-
     void initGui();
     void initComponents();
     void connectComponents();
