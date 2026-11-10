@@ -18,3 +18,4 @@ release/
 ui_settingsdialog.h
 Makefile
 /worktrees/
+temp/
