@@ -166,6 +166,7 @@ void GridContextMenu::setCurrentPage(int index) {
                              current ? QSizePolicy::Preferred : QSizePolicy::Ignored);
     }
 
+    setHighlighted(nullptr);
     stack->setCurrentIndex(index);
 
     // activate explicitly so the size hint isn't reused from a cache

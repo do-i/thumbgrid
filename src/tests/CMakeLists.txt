@@ -805,3 +805,11 @@ add_test(
     NAME "Esc closes every popup menu and overlay"
     COMMAND thumbgrid_esc_closes_every_popup_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_grid_context_menu_keyboard_test
+    behavior/test_grid_context_menu_keyboard_navigation.cpp
+)
+add_test(
+    NAME "The grid context menu can be used with the keyboard"
+    COMMAND thumbgrid_grid_context_menu_keyboard_test
+)

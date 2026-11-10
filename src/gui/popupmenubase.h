@@ -2,7 +2,7 @@
 // Copyright (C) 2026 do-i and thumbgrid contributors
 // Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
 //
-// Shared base of the right-click menus: placement, drawing, dismissal, items.
+// Shared base of the right-click menus: placement, drawing, keys, items.
 // A new menu: derive, then in its constructor
 //     auto *items = makeItemLayout(this);
 //     items->setContentsMargins(0, 4, 0, 4);
@@ -12,6 +12,7 @@
 
 #pragma once
 
+#include <QPointer>
 #include <QWidget>
 #include <QVBoxLayout>
 #include "gui/customwidgets/contextmenuitem.h"
@@ -34,8 +35,16 @@ protected:
     void clampToScreen(QRect &geom) const;
     // runs before every showAt(): reset page, refresh hints
     virtual void prepareShow() {}
+    // keyboard highlight over the visible, enabled rows; clear it on page switches
+    void setHighlighted(ContextMenuItem *item);
 
     void mousePressEvent(QMouseEvent *event) override;
     void paintEvent(QPaintEvent *event) override;
     void keyPressEvent(QKeyEvent *event) override;
+
+private:
+    QPointer<ContextMenuItem> mHighlighted;
+    QList<ContextMenuItem*> navigableItems();
+    void moveHighlight(int step);
+    void activateHighlighted();
 };

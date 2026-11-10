@@ -4,6 +4,7 @@
 
 #include "popupmenubase.h"
 
+#include <algorithm>
 #include <QGuiApplication>
 #include <QKeyEvent>
 #include <QPainter>
@@ -80,7 +81,66 @@ void PopupMenuBase::paintEvent(QPaintEvent *event) {
     style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
+// rows the keyboard can reach, top to bottom; rows of hidden pages are not visible
+QList<ContextMenuItem*> PopupMenuBase::navigableItems() {
+    QList<ContextMenuItem*> items;
+    for(ContextMenuItem *item : findChildren<ContextMenuItem*>())
+        if(item->isVisible() && item->isEnabled())
+            items << item;
+    std::sort(items.begin(), items.end(), [this](ContextMenuItem *a, ContextMenuItem *b) {
+        return a->mapTo(this, QPoint(0, 0)).y() < b->mapTo(this, QPoint(0, 0)).y();
+    });
+    return items;
+}
+
+void PopupMenuBase::setHighlighted(ContextMenuItem *item) {
+    for(ContextMenuItem *each : findChildren<ContextMenuItem*>())
+        each->setHighlighted(each == item);
+    mHighlighted = item;
+}
+
+// first press highlights the first (Down) or last (Up) row; then wraps around
+void PopupMenuBase::moveHighlight(int step) {
+    const QList<ContextMenuItem*> items = navigableItems();
+    if(items.isEmpty())
+        return;
+    const int current = items.indexOf(mHighlighted.data());
+    int next;
+    if(current < 0)
+        next = (step > 0) ? 0 : items.count() - 1;
+    else
+        next = (current + step + items.count()) % items.count();
+    setHighlighted(items.at(next));
+}
+
+void PopupMenuBase::activateHighlighted() {
+    ContextMenuItem *item = mHighlighted.data();
+    if(!item || !navigableItems().contains(item))
+        return;
+    // rows that open another page (Open with, Convert to, Back) keep the menu
+    // open, the way a click on them does; everything else closes it first
+    if(item->passesClicksThrough()) {
+        hide();
+        setHighlighted(nullptr);
+    }
+    item->trigger();
+}
+
 void PopupMenuBase::keyPressEvent(QKeyEvent *event) {
-    if(!handleDismissKey(this, event))
+    if(handleDismissKey(this, event))
+        return;
+    switch(event->key()) {
+    case Qt::Key_Up:
+        moveHighlight(-1);
+        break;
+    case Qt::Key_Down:
+        moveHighlight(1);
+        break;
+    case Qt::Key_Return:
+    case Qt::Key_Enter:
+        activateHighlighted();
+        break;
+    default:
         actionManager->processEvent(event);
+    }
 }
