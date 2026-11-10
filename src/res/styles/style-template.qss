@@ -304,8 +304,8 @@ FloatingWidget QLineEdit {
     margin-bottom: 5px;
 }
 
-FloatingWidget QLineEdit::hover,
-FloatingWidget QLineEdit::focus {
+FloatingWidget QLineEdit:hover,
+FloatingWidget QLineEdit:focus {
     background-color: %button_hover%;
     border-color: %button_hover%;
 }
@@ -981,38 +981,38 @@ FolderView QTreeView::item:selected:active {
     border-color: %folderview_hc2%;
 }
 
-QTreeView::branch {
+FolderView QTreeView::branch {
     padding-left: 6px;
 }
 
-QTreeView::branch:selected {
+FolderView QTreeView::branch:selected {
     background-color: %folderview_hc2%;
 }
 
-QTreeView::branch:hover:!selected {
+FolderView QTreeView::branch:hover:!selected {
     background-color: %folderview_hc%;
 }
 
-QTreeView::branch:has-siblings:!adjoins-item:!selected {
+FolderView QTreeView::branch:has-siblings:!adjoins-item:!selected {
     background: transparent;
 }
 
-QTreeView::branch:has-siblings:hover:!adjoins-item:!selected {
+FolderView QTreeView::branch:has-siblings:hover:!adjoins-item:!selected {
     background-color: %folderview_hc%;
 }
 
-QTreeView::branch:!has-children:!hover:adjoins-item:!selected {
+FolderView QTreeView::branch:!has-children:!hover:adjoins-item:!selected {
     background: transparent;
 }
 
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
+FolderView QTreeView::branch:has-children:!has-siblings:closed,
+FolderView QTreeView::branch:closed:has-children:has-siblings {
         border-image: none;
         image: url(:/res/icons/%icontheme%/other/collapsed.png)
 }
 
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings {
+FolderView QTreeView::branch:open:has-children:!has-siblings,
+FolderView QTreeView::branch:open:has-children:has-siblings {
         border-image: none;
         image: url(:/res/icons/%icontheme%/other/expanded.png)
 }
