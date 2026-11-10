@@ -829,3 +829,11 @@ add_test(
     NAME "Toolbar tooltips show the shortcut and follow a rebind"
     COMMAND thumbgrid_toolbar_tooltips_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_navigation_test
+    behavior/test_folder_tree_follows_navigation.cpp
+)
+add_test(
+    NAME "The folder tree and the app follow each other's current folder"
+    COMMAND thumbgrid_folder_tree_navigation_test
+)
