@@ -42,7 +42,15 @@ inline constexpr int kConvertibleScanMaxEntries = 1000;
 namespace tg::color {}
 
 // Format strings and fixed literals.
-namespace tg::fmt {}
+namespace tg::fmt {
+
+// Qt reads PDF as an image format; it is never listed or scanned as an image.
+inline constexpr const char *kPdfFormat = "pdf";
+
+// One HEIF-family container, several suffixes (the plugin wants the file's own key).
+inline constexpr const char *kHeifSuffixes[] = {"heic", "heif", "hif", "avci", "hej2"};
+
+} // namespace tg::fmt
 
 // Min / max / default (and slider scale or step) of user settings. Settings
 // getters and setters clamp with these; dialogs set widget ranges from them.

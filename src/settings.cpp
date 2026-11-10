@@ -1090,7 +1090,7 @@ QList<QByteArray> Settings::supportedFormats() {
     formats << "jfif";
     if(videoPlayback())
         formats << mVideoFormatsMap.values();
-    formats.removeAll("pdf");
+    formats.removeAll(tg::fmt::kPdfFormat);
     return formats;
 }
 //------------------------------------------------------------------------------

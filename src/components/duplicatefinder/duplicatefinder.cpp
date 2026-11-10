@@ -1,4 +1,5 @@
 #include "duplicatefinder.h"
+#include "constants.h"
 
 #include <QDateTime>
 #include <QDirIterator>
@@ -16,7 +17,7 @@ namespace {
 QStringList imageNameFilters() {
     QStringList filters;
     for(const QByteArray &fmt : QImageReader::supportedImageFormats()) {
-        if(fmt == "pdf")
+        if(fmt == tg::fmt::kPdfFormat)
             continue;
         filters << "*." + QString::fromLatin1(fmt);
     }

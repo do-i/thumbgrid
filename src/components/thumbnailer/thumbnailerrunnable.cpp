@@ -1,5 +1,6 @@
 #include "thumbnailerrunnable.h"
 #include "utils/colorutil.h"
+#include "constants.h"
 #include "utils/logging.h"
 #include <QDir>
 #include <QFileInfo>
@@ -24,7 +25,7 @@ constexpr int kPreviewMaxImages = 4;
         for(const QByteArray &format : QImageReader::supportedImageFormats())
             suffixes.insert(QString::fromLatin1(format).toLower());
         suffixes.insert("jfif");
-        suffixes.remove("pdf");
+        suffixes.remove(QString::fromLatin1(tg::fmt::kPdfFormat));
         return suffixes;
     }
 

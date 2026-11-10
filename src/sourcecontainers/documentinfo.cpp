@@ -1,5 +1,6 @@
 #include "documentinfo.h"
 #include "utils/logging.h"
+#include "constants.h"
 #include <QByteArray>
 #include <QColorSpace>
 #include <QDirIterator>
@@ -106,7 +107,7 @@ void DocumentInfo::detectFormat() {
         mDocumentType = detectAnimatedAvif() ? DocumentType::ANIMATED : DocumentType::STATIC;
     } else if(mimeName == "image/heif" || mimeName == "image/heic") {
         // one container, several extensions; the plugin needs the file's own key (no sniffing with an explicit format)
-        static const QSet<QByteArray> heifKeys = {"heic", "heif", "hif", "avci", "hej2"};
+        static const QSet<QByteArray> heifKeys(std::begin(tg::fmt::kHeifSuffixes), std::end(tg::fmt::kHeifSuffixes));
         mFormat = QString::fromUtf8(heifKeys.contains(suffix) ? suffix : QByteArrayLiteral("heif"));
         // heif always needs an optional plugin; without one mark the file unviewable instead of showing blank
         mDocumentType = QImageReader::supportedImageFormats().contains(mFormat.toUtf8())
@@ -551,9 +552,12 @@ bool DocumentInfo::supportsExif(const QString &filePath) {
 // so refuse up front.
 bool DocumentInfo::canEncodeToFormat(const QString &format, const QSize &size) {
     static const int heifMinDimension = 64;
-    static const QSet<QString> heifFormats = {QStringLiteral("heic"), QStringLiteral("heif"),
-                                              QStringLiteral("hif"),  QStringLiteral("avci"),
-                                              QStringLiteral("hej2")};
+    static const QSet<QString> heifFormats = [] {
+        QSet<QString> set;
+        for(const char *suffix : tg::fmt::kHeifSuffixes)
+            set.insert(QString::fromLatin1(suffix));
+        return set;
+    }();
     if(!heifFormats.contains(format.toLower()))
         return true;
     return size.width() >= heifMinDimension && size.height() >= heifMinDimension;
