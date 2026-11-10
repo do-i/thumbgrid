@@ -6,6 +6,7 @@
 
 #include "platform/platformdesktop.h"
 #include "gui/dialogs/custommessagebox.h"
+#include "constants.h"
 
 // TODO: nuke this and rewrite
 
@@ -481,12 +482,12 @@ void MW::toggleScalingFilter() {
 }
 
 void MW::setFilterNearest() {
-    showMessage("Filter: nearest", 600);
+    showMessage("Filter: nearest", tg::timing::kMessageShortMs);
     viewerWidget->setFilterNearest();
 }
 
 void MW::setFilterBilinear() {
-    showMessage("Filter: bilinear", 600);
+    showMessage("Filter: bilinear", tg::timing::kMessageShortMs);
     viewerWidget->setFilterBilinear();
 }
 
@@ -506,7 +507,7 @@ void MW::setFilter(ScalingFilter filter) {
             filterName = "configured " + QString::number(static_cast<int>(filter));
             break;
     }
-    showMessage("Filter " + filterName, 600);
+    showMessage("Filter " + filterName, tg::timing::kMessageShortMs);
     viewerWidget->setScalingFilter(filter);
 }
 
@@ -1054,11 +1055,11 @@ std::shared_ptr<ThumbnailStripProxy> MW::getThumbnailPanel() {
 }
 
 void MW::showMessageDirectory(QString dirName) {
-    floatingMessage->showMessage(std::move(dirName), FloatingMessageIcon::ICON_DIRECTORY, 1700);
+    floatingMessage->showMessage(std::move(dirName), FloatingMessageIcon::ICON_DIRECTORY, tg::timing::kMessageNormalMs);
 }
 
 void MW::showMessage(QString text) {
-    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::NO_ICON, 1500);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::NO_ICON, tg::timing::kMessageNormalMs);
 }
 
 void MW::showMessage(QString text, int duration) {
@@ -1066,15 +1067,15 @@ void MW::showMessage(QString text, int duration) {
 }
 
 void MW::showMessageSuccess(QString text) {
-    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_SUCCESS, 1500);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_SUCCESS, tg::timing::kMessageNormalMs);
 }
 
 void MW::showWarning(QString text) {
-    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_WARNING, 1500);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_WARNING, tg::timing::kMessageNormalMs);
 }
 
 void MW::showError(QString text) {
-    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_ERROR, 2800);
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_ERROR, tg::timing::kMessageLongMs);
 }
 
 // isHidden() is false while the previous move's overlay fades out, so a new move must not rely on it:

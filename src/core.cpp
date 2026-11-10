@@ -6,6 +6,7 @@
  */
 
 #include "core.h"
+#include "constants.h"
 
 #include "platform/platformdesktop.h"
 #include "utils/imagewriter.h"
@@ -351,12 +352,12 @@ void Core::onUpdate() {
     actionManager->adjustFromVersion(lastVer);
 
     qCDebug(logCore) << "Updated: " << settings->lastVersion().toString() << ">" << appVersion.toString();
-    mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + " > " + appVersion.toString(), 4000);
+    mw->showMessage(tr("Updated: ") + settings->lastVersion().toString() + " > " + appVersion.toString(), tg::timing::kMessageLongMs);
     settings->setLastVersion(appVersion);
 }
 
 void Core::onFirstRun() {
-    mw->showMessage(tr("Welcome to ") + qApp->applicationName() + tr(" version ") + appVersion.toString() + "!", 4000);
+    mw->showMessage(tr("Welcome to ") + qApp->applicationName() + tr(" version ") + appVersion.toString() + "!", tg::timing::kMessageLongMs);
     settings->setFirstRun(false);
     settings->setLastVersion(appVersion);
 }
@@ -1471,7 +1472,7 @@ void Core::setWallpaper() {
 
     QString errorMessage;
     if(!PlatformDesktop::setWallpaper(selectedPath(), &errorMessage))
-        mw->showMessage(errorMessage.isEmpty() ? "Action is not supported on this platform" : errorMessage, 3000);
+        mw->showMessage(errorMessage.isEmpty() ? "Action is not supported on this platform" : errorMessage, tg::timing::kMessageLongMs);
 }
 
 void Core::print() {
@@ -1532,7 +1533,7 @@ bool Core::loadPath(QString path) {
         state.directoryPath = QDir(path).absolutePath();
         if(!settings->allowBrowseRoot() &&
            QDir::cleanPath(state.directoryPath) == QDir::cleanPath(QDir::rootPath())) {
-            mw->showMessage(tr("Cannot view root folder."), 2200);
+            mw->showMessage(tr("Cannot view root folder."), tg::timing::kMessageNormalMs);
             return false;
         }
     } else if(fileInfo.isFile()) {
@@ -1631,7 +1632,7 @@ void Core::loadParentDir() {
     stopSlideshow();
     QFileInfo currentDir(model->directoryPath());
     if(QDir::cleanPath(currentDir.absoluteFilePath()) == QDir::cleanPath(QDir::rootPath())) {
-        mw->showMessage(tr("Already at root folder."), 2200);
+        mw->showMessage(tr("Already at root folder."), tg::timing::kMessageNormalMs);
         return;
     }
     const QString rootPath = QDir::cleanPath(QDir::rootPath());

@@ -15,6 +15,11 @@ inline constexpr int kPanelSlideMs = 230;      // slide panels, controls overlay
 inline constexpr int kConfirmFadeMs = 200;     // save-confirm dim, move-progress fade
 inline constexpr int kMessageFadeMs = 300;     // floating message, zoom indicator fade
 
+// On-screen message lengths; call sites pick a tier instead of a number.
+inline constexpr int kMessageShortMs = 600;    // transient state echo
+inline constexpr int kMessageNormalMs = 1500;  // ordinary notice
+inline constexpr int kMessageLongMs = 4000;    // errors, startup notices
+
 } // namespace tg::timing
 
 // Pixel sizes, margins and scale factors (…Px).
