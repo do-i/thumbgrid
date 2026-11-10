@@ -117,7 +117,6 @@ private:
     void restoreWindowGeometry();
     void saveCurrentDisplay();
     void setupUi();
-    QString statusDataSize(qint64 bytes) const;
     QString documentStatusText() const;
 
     void applyWindowedBackground();

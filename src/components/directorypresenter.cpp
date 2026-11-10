@@ -1,25 +1,12 @@
 ﻿#include "directorypresenter.h"
 #include "sourcecontainers/documentinfo.h"
+#include "utils/bytesize.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QImageReader>
 #include <utility>
 
 namespace {
-    QString formattedSize(qint64 bytes) {
-        if(bytes < 1024)
-            return QString::number(bytes) + " Bytes";
-
-        static const QStringList units = {"KiB", "MiB", "GiB", "TiB"};
-        double value = bytes / 1024.0;
-        int unit = 0;
-        while(value >= 1024.0 && unit < units.count() - 1) {
-            value /= 1024.0;
-            unit++;
-        }
-        return QString::number(value, 'f', 2) + " " + units.at(unit);
-    }
-
     QRect visibleAlphaBounds(const QImage &image) {
         if(image.isNull())
             return QRect();
@@ -329,13 +316,13 @@ QString DirectoryPresenter::statusText() const {
         QFileInfo info(path);
         selectedBytes += info.size();
         selectedNames << info.fileName();
-        selectedDetails << info.fileName() + " " + formattedSize(info.size());
+        selectedDetails << info.fileName() + " " + tg::bytesize::format(info.size());
     }
 
     QString text = QString::number(realObjectCount()) + " object(s) / " +
                    QString::number(paths.count()) + " object(s) selected";
     if(paths.count())
-        text += " [" + formattedSize(selectedBytes) + "]";
+        text += " [" + tg::bytesize::format(selectedBytes) + "]";
 
     if(paths.count() == 1)
         text += "  " + selectedDetails.first();

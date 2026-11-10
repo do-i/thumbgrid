@@ -7,6 +7,7 @@
 #include "platform/platformdesktop.h"
 #include "gui/dialogs/custommessagebox.h"
 #include "constants.h"
+#include "utils/bytesize.h"
 
 // TODO: nuke this and rewrite
 
@@ -948,20 +949,6 @@ void MW::setFolderStatusText(QString text) {
     updateStatusFooters();
 }
 
-QString MW::statusDataSize(qint64 bytes) const {
-    if(bytes < 1024)
-        return QString::number(bytes) + " Bytes";
-
-    static const QStringList units = {"KiB", "MiB", "GiB", "TiB"};
-    double value = bytes / 1024.0;
-    int unit = 0;
-    while(value >= 1024.0 && unit < units.count() - 1) {
-        value /= 1024.0;
-        unit++;
-    }
-    return QString::number(value, 'f', 2) + " " + units.at(unit);
-}
-
 QString MW::documentStatusText() const {
     if(info.fileName.isEmpty())
         return tr("No file opened.");
@@ -969,7 +956,7 @@ QString MW::documentStatusText() const {
     // Only the current image: name, file size, dimensions, zoom (1.00x == 100%).
     QString text = info.fileName;
     if(info.fileSize)
-        text += "  " + statusDataSize(info.fileSize);
+        text += "  " + tg::bytesize::format(info.fileSize);
     if(info.imageSize.width())
         text += "  " + QString::number(info.imageSize.width()) + "x" + QString::number(info.imageSize.height());
     if(info.imageSize.width())
