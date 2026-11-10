@@ -354,21 +354,10 @@ void ThumbnailWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *o
         drawHighlight(painter);
 
     if(!thumbnail) { // not loaded
-        // todo: recolor once in shrRes
-        QPixmap loadingIcon(*shrRes->getPixmap(ShrIcon::SHR_ICON_LOADING, dpr));
-        if(isHighlighted())
-            ImageLib::recolor(loadingIcon, settings->folderViewSelectionColor());
-        else
-            ImageLib::recolor(loadingIcon, settings->colorScheme().folderview_hc2);
-        drawIcon(painter, &loadingIcon);
+        drawIcon(painter, &shrRes->getTintedPixmap(ShrIcon::SHR_ICON_LOADING, dpr, stateIconColor()));
     } else {
         if(!thumbnail->pixmap() || thumbnail->pixmap().get()->width() == 0) { // invalid thumb
-            QPixmap errorIcon(*shrRes->getPixmap(ShrIcon::SHR_ICON_ERROR, dpr));
-            if(isHighlighted())
-                ImageLib::recolor(errorIcon, settings->folderViewSelectionColor());
-            else
-                ImageLib::recolor(errorIcon, settings->colorScheme().folderview_hc2);
-            drawIcon(painter, &errorIcon);
+            drawIcon(painter, &shrRes->getTintedPixmap(ShrIcon::SHR_ICON_ERROR, dpr, stateIconColor()));
         } else {
             drawThumbnail(painter, thumbnail->pixmap().get());
             if(isHovered())
@@ -621,6 +610,10 @@ void ThumbnailWidget::drawThumbnailShadow(QPainter *painter, const QPixmap *pixm
         painter->fillRect(drawRectCentered.translated(0, 1), QColor(0, 0, 0, 90));
     }
     painter->setOpacity(op);
+}
+
+QColor ThumbnailWidget::stateIconColor() {
+    return isHighlighted() ? settings->folderViewSelectionColor() : settings->colorScheme().folderview_hc2;
 }
 
 void ThumbnailWidget::drawIcon(QPainter* painter, const QPixmap *pixmap) {

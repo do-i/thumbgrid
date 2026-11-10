@@ -1,4 +1,5 @@
 #include "sharedresources.h"
+#include "utils/imagelib.h"
 
 // TODO: is there a point in doing this? qt does implicit sharing for pixmaps? test
 
@@ -42,6 +43,19 @@ QPixmap *SharedResources::getPixmap(ShrIcon icon, qreal dpr) {
     else
         mLoadingIcon72 = pixmap;
     return pixmap;
+}
+
+// getPixmap() fixes the icon's resolution on first use, so icon and color give the whole key.
+const QPixmap &SharedResources::getTintedPixmap(ShrIcon icon, qreal dpr, const QColor &color) {
+    const quint64 key = (static_cast<quint64>(color.rgba()) << 8) | static_cast<quint64>(icon);
+    auto it = mTinted.constFind(key);
+    if(it != mTinted.constEnd())
+        return *it;
+    if(mTinted.size() >= 8) // colors only change with the theme
+        mTinted.clear();
+    QPixmap tinted(*getPixmap(icon, dpr));
+    ImageLib::recolor(tinted, color);
+    return *mTinted.insert(key, tinted);
 }
 
 SharedResources *SharedResources::getInstance() {

@@ -74,6 +74,7 @@ protected:
     void setupTextLayout();
     void drawThumbnail(QPainter* painter, const QPixmap *pixmap);
     void drawIcon(QPainter *painter, const QPixmap *pixmap);
+    QColor stateIconColor();
     void drawHighlight(QPainter *painter);
     void drawHighlightBorder(QPainter *painter);
     void drawHoverBg(QPainter *painter);
