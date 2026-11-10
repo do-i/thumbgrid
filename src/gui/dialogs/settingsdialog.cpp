@@ -1,6 +1,7 @@
 #include "settingsdialog.h"
 #include "ui_settingsdialog.h"
 #include "appversion.h"
+#include "constants.h"
 #include <QSignalBlocker>
 #include <QToolButton>
 #include <QDir>
@@ -354,6 +355,12 @@ void SettingsDialog::setupMiscControls() {
     zoomIndGrp.addButton(ui->zoomIndicatorAuto);
     zoomIndGrp.addButton(ui->zoomIndicatorOff);
     zoomIndGrp.addButton(ui->zoomIndicatorOn);
+
+    // ranges come from the setting bounds, not from the .ui numbers
+    using namespace tg::bounds;
+    ui->zoomStepSlider->setRange(kZoomStepMinPct, kZoomStepMaxPct);
+    ui->panelSizeSlider->setRange(kPanelThumbSizeMinPx / kPanelThumbSizeSliderScale,
+                                  kPanelThumbSizeMaxPx / kPanelThumbSizeSliderScale);
 
     // readable language names
     langs.insert("de_DE", "Deutsch");
@@ -963,8 +970,7 @@ void SettingsDialog::readSettings() {
     ui->pinPanelCheckBox->setChecked(settings->panelPinned());
     ui->panelPositionComboBox->setCurrentIndex(settings->panelPosition());
 
-    // reduce by 10x to have nice granular control in qslider
-    ui->panelSizeSlider->setValue(settings->panelPreviewsSize() / 10);
+    ui->panelSizeSlider->setValue(settings->panelPreviewsSize() / tg::bounds::kPanelThumbSizeSliderScale);
 
     readColorScheme();
     updateThemeControls(ui->themeSelectorComboBox->currentIndex());
@@ -1081,7 +1087,7 @@ void SettingsDialog::saveSettings() {
     int panelPos = ui->panelPositionComboBox->currentIndex();
     settings->setPanelPosition(static_cast<PanelPosition>(panelPos));
 
-    settings->setPanelPreviewsSize(ui->panelSizeSlider->value() * 10);
+    settings->setPanelPreviewsSize(ui->panelSizeSlider->value() * tg::bounds::kPanelThumbSizeSliderScale);
 
     settings->setJPEGSaveQuality(ui->JPEGQualitySlider->value());
     settings->setZoomStep(static_cast<qreal>(ui->zoomStepSlider->value() / 100.f));

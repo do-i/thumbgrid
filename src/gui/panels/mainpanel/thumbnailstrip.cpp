@@ -118,7 +118,7 @@ void ThumbnailStrip::readSettings() {
     else
         mCurrentStyle = THUMB_NORMAL_CENTERED;
 
-    mThumbnailSize = qBound(20, settings->panelPreviewsSize(), 300);
+    mThumbnailSize = settings->panelPreviewsSize();    // clamped by the getter
 
     if(settings->panelPosition() == PANEL_TOP || settings->panelPosition() == PANEL_BOTTOM) {
         ThumbnailView::setOrientation(Qt::Horizontal);

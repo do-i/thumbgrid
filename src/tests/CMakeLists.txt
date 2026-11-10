@@ -757,3 +757,11 @@ add_test(
     NAME "A wheel scroll setting changed at runtime applies without a restart"
     COMMAND thumbgrid_wheel_scroll_setting_change_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_setting_bounds_test
+    behavior/test_setting_bounds_are_shared.cpp
+)
+add_test(
+    NAME "Setting sliders and stored values share one set of bounds"
+    COMMAND thumbgrid_setting_bounds_test
+)

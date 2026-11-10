@@ -1,4 +1,5 @@
 #include "duplicatefinderdialog.h"
+#include "constants.h"
 
 #include <QActionGroup>
 #include <QButtonGroup>
@@ -211,14 +212,14 @@ void DuplicateFinderDialog::setupSetupZone() {
     optionsRow->addSpacing(12);
     optionsRow->addWidget(new QLabel(tr("Similarity:"), this));
     mSimilaritySlider = new QSlider(Qt::Horizontal, this);
-    // below ~70% a 64-bit pHash distance is mostly noise, don't offer it
-    mSimilaritySlider->setRange(70, 100);
-    mSimilaritySlider->setValue(87);
+    using namespace tg::bounds;
+    mSimilaritySlider->setRange(kDuplicateSimilarityMinPct, kDuplicateSimilarityMaxPct);
+    mSimilaritySlider->setValue(kDuplicateSimilarityDefaultPct);
     mSimilaritySlider->setMinimumWidth(120);
     optionsRow->addWidget(mSimilaritySlider);
     mSimilaritySpin = new QSpinBox(this);
-    mSimilaritySpin->setRange(70, 100);
-    mSimilaritySpin->setValue(87);
+    mSimilaritySpin->setRange(kDuplicateSimilarityMinPct, kDuplicateSimilarityMaxPct);
+    mSimilaritySpin->setValue(kDuplicateSimilarityDefaultPct);
     mSimilaritySpin->setSuffix("%");
     optionsRow->addWidget(mSimilaritySpin);
     connect(mSimilaritySlider, &QSlider::valueChanged, mSimilaritySpin, &QSpinBox::setValue);

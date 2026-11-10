@@ -10,6 +10,7 @@
 #include "gui/flowlayout.h"
 #include "gui/folderview/gridcontextmenu.h"
 #include "components/actionmanager/actionmanager.h"
+#include "constants.h"
 
 // selection moves in the folder grid, one per action (selectPrevious ...)
 enum class GridNavigation { Previous, Next, Above, Below, PageUp, PageDown, First, Last };
@@ -19,9 +20,9 @@ class FolderGridView : public ThumbnailView {
 public:
     explicit FolderGridView(QWidget *parent = nullptr);
 
-    const int THUMBNAIL_SIZE_MIN = 80;  // px
-    const int THUMBNAIL_SIZE_MAX = 400;  // these should be divisible by ZOOM_STEP
-    const int ZOOM_STEP = 20;
+    static constexpr int THUMBNAIL_SIZE_MIN = tg::bounds::kGridThumbSizeMinPx;
+    static constexpr int THUMBNAIL_SIZE_MAX = tg::bounds::kGridThumbSizeMaxPx;
+    static constexpr int ZOOM_STEP = tg::bounds::kGridThumbSizeStepPx;
 
     // begins editing the current selection's name in place, over its cell
     void startRename(const QString& name);

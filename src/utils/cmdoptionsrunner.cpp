@@ -1,10 +1,13 @@
 #include "cmdoptionsrunner.h"
 #include "utils/logging.h"
+#include "constants.h"
 
 void CmdOptionsRunner::generateThumbs(const QString& dirPath, int size) {
-    if(size <= 50 || size > 400) {
+    using namespace tg::bounds;
+    if(size < kGenThumbsSizeMinPx || size > kGenThumbsSizeMaxPx) {
         qCWarning(logCore) << "Error: Invalid thumbnail size.";
-        qCWarning(logCore) << "Please specify a value between [50, 400].";
+        qCWarning(logCore).nospace() << "Please specify a value between ["
+                                     << kGenThumbsSizeMinPx << ", " << kGenThumbsSizeMaxPx << "].";
         qCWarning(logCore) << "Example:  thumbgrid --gen-thumbs=/home/user/Pictures/ --gen-thumbs-size=120";
         QCoreApplication::exit(1);
         return;

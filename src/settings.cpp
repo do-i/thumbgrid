@@ -1,4 +1,5 @@
 #include "settings.h"
+#include "constants.h"
 #include "platform/platformdesktop.h"
 
 #include "appversion.h"
@@ -1268,16 +1269,17 @@ const QMultiMap<QByteArray, QByteArray> Settings::videoFormats() const {
 }
 //------------------------------------------------------------------------------
 int Settings::panelPreviewsSize() {
+    using namespace tg::bounds;
     bool ok = true;
-    int size = settings->readSetting("panelPreviewsSize", 140).toInt(&ok);
+    int size = settings->readSetting("panelPreviewsSize", kPanelThumbSizeDefaultPx).toInt(&ok);
     if(!ok)
-        size = 140;
-    size = qBound(100, size, 250);
-    return size;
+        size = kPanelThumbSizeDefaultPx;
+    return qBound(kPanelThumbSizeMinPx, size, kPanelThumbSizeMaxPx);
 }
 
 void Settings::setPanelPreviewsSize(int size) {
-    settings->writeSetting("panelPreviewsSize", size);
+    using namespace tg::bounds;
+    settings->writeSetting("panelPreviewsSize", qBound(kPanelThumbSizeMinPx, size, kPanelThumbSizeMaxPx));
 }
 //------------------------------------------------------------------------------
 bool Settings::usePreloader() {
@@ -1761,11 +1763,18 @@ void Settings::setDuplicateFinderHeader(const QByteArray &header) {
 }
 
 int Settings::duplicateFinderSimilarity() {
-    return settings->readSetting("duplicateFinderSimilarity", 87).toInt();
+    using namespace tg::bounds;
+    bool ok = true;
+    int value = settings->readSetting("duplicateFinderSimilarity", kDuplicateSimilarityDefaultPct).toInt(&ok);
+    if(!ok)
+        value = kDuplicateSimilarityDefaultPct;
+    return qBound(kDuplicateSimilarityMinPct, value, kDuplicateSimilarityMaxPct);
 }
 
 void Settings::setDuplicateFinderSimilarity(int value) {
-    settings->writeSetting("duplicateFinderSimilarity", value);
+    using namespace tg::bounds;
+    settings->writeSetting("duplicateFinderSimilarity",
+                           qBound(kDuplicateSimilarityMinPct, value, kDuplicateSimilarityMaxPct));
 }
 
 bool Settings::duplicateFinderRecursive() {
@@ -1821,11 +1830,17 @@ void Settings::setSmoothUpscaling(bool mode) {
 }
 //------------------------------------------------------------------------------
 int Settings::folderViewIconSize() {
-    return settings->readSetting("folderViewIconSize", 120).toInt();
+    using namespace tg::bounds;
+    bool ok = true;
+    int value = settings->readSetting("folderViewIconSize", kGridThumbSizeDefaultPx).toInt(&ok);
+    if(!ok)
+        value = kGridThumbSizeDefaultPx;
+    return qBound(kGridThumbSizeMinPx, value, kGridThumbSizeMaxPx);
 }
 
 void Settings::setFolderViewIconSize(int value) {
-    settings->writeSetting("folderViewIconSize", value);
+    using namespace tg::bounds;
+    settings->writeSetting("folderViewIconSize", qBound(kGridThumbSizeMinPx, value, kGridThumbSizeMaxPx));
 }
 
 int Settings::folderViewFontPointSize() {
@@ -2012,16 +2027,17 @@ void Settings::setUnloadThumbs(bool mode) {
 }
 //------------------------------------------------------------------------------
 float Settings::zoomStep() {
+    using namespace tg::bounds;
     bool ok = false;
-    float value = settings->readSetting("zoomStep", 0.26f).toFloat(&ok);
+    float value = settings->readSetting("zoomStep", kZoomStepDefault).toFloat(&ok);
     if(!ok)
-        return 0.2f;
-    value = qBound(0.01f, value, 0.5f);
-    return value;
+        return kZoomStepDefault;
+    return qBound(kZoomStepMin, value, kZoomStepMax);
 }
 
 void Settings::setZoomStep(float value) {
-    value = qBound(0.01f, value, 0.5f);
+    using namespace tg::bounds;
+    value = qBound(kZoomStepMin, value, kZoomStepMax);
     settings->writeSetting("zoomStep", value);
 }
 //------------------------------------------------------------------------------
