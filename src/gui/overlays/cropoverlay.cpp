@@ -2,6 +2,19 @@
 
 // TODO: this is pretty old. Clean up
 
+namespace {
+constexpr int kShadeAlpha = 160;
+constexpr QRgb kDarkGrayRgb = 0x787878;
+constexpr QRgb kGrayRgb = 0x969696;
+constexpr QRgb kLightGrayRgb = 0xdcdcdc;
+
+QColor shade(QRgb rgb) {
+    QColor c(rgb);
+    c.setAlpha(kShadeAlpha);
+    return c;
+}
+}
+
 CropOverlay::CropOverlay(FloatingWidgetContainer *parent) : FloatingWidget(parent),
     startPos(QPoint(0, 0)),
     endPos(QPoint(0, 0)),
@@ -15,11 +28,11 @@ CropOverlay::CropOverlay(FloatingWidgetContainer *parent) : FloatingWidget(paren
     dpr = devicePixelRatioF();
     handleSize = static_cast<int>(8 * dpr);
     prepareDrawElements();
-    brushDarkGray.setColor(QColor(120, 120, 120, 160));
+    brushDarkGray.setColor(shade(kDarkGrayRgb));
     brushDarkGray.setStyle(Qt::SolidPattern);
-    brushGray.setColor(QColor(150, 150, 150, 160));
+    brushGray.setColor(shade(kGrayRgb));
     brushGray.setStyle(Qt::SolidPattern);
-    brushLightGray.setColor(QColor(220, 220, 220, 160));
+    brushLightGray.setColor(shade(kLightGrayRgb));
     brushLightGray.setStyle(Qt::SolidPattern);
     selectionOutlinePen.setColor(Qt::white);
     selectionOutlinePen.setStyle(Qt::SolidLine);

@@ -1,5 +1,9 @@
 #include "clickzoneoverlay.h"
 
+namespace {
+constexpr QRgb kZoneFillRgb = 0xc8c8c8;
+}
+
 ClickZoneOverlay::ClickZoneOverlay(FloatingWidgetContainer *parent) :
     FloatingWidget(parent)
 {
@@ -97,7 +101,7 @@ void ClickZoneOverlay::paintEvent(QPaintEvent *event) {
     else
         p.setOpacity(0.10f);
     QBrush brush;
-    brush.setColor(QColor(200, 200, 200));
+    brush.setColor(QColor(kZoneFillRgb));
     brush.setStyle(Qt::SolidPattern);
 
     if(activeZone == HIGHLIGHT_LEFT) {

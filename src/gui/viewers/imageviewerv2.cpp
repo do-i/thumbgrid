@@ -93,7 +93,6 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
 
     scene = new QGraphicsScene();
     scene->setSceneRect(0,0,200000,200000);
-    scene->setBackgroundBrush(QColor(60,60,103));
     scene->addItem(&pixmapItem);
     scene->addItem(&pixmapItemScaled);
     pixmapItemScaled.hide();

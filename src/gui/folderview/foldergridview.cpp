@@ -5,6 +5,9 @@
 
 namespace {
 
+// Search prefix that matches nothing: dim red text on any theme.
+constexpr QRgb kSearchNoMatchRgb = 0xe05252;
+
 bool isNavigationAction(const QString &action) {
     static const QStringList actions{"selectPrevious", "selectNext", "selectAbove", "selectBelow",
                                      "selectPageUp", "selectPageDown", "selectFirst", "selectLast"};
@@ -699,7 +702,7 @@ void FolderGridView::updateSearchIndicator() {
     const auto &cs = settings->colorScheme();
     // dim red marks a prefix that matches nothing; the query is kept either way
     // so the next backspace gets back to a matching one
-    QString textColor = mSearchMatched ? cs.text.name() : QStringLiteral("#e05252");
+    QString textColor = mSearchMatched ? cs.text.name() : QColor(kSearchNoMatchRgb).name();
     searchIndicator->setStyleSheet(QStringLiteral(
         "QLabel { background: %1; color: %2; border: 1px solid %3;"
         " border-radius: 2px; padding: 2px 6px; }")

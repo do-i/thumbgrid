@@ -1,6 +1,11 @@
 #include "thumbnailwidget.h"
 #include "utils/colorutil.h"
 
+namespace {
+// Black drop shadow under thumbnails and badges, fixed on every theme.
+constexpr int kShadowAlpha = 90;
+}
+
 ThumbnailWidget::ThumbnailWidget(int labelFontPointSize, const QColor &labelBackgroundColor, QGraphicsItem *parent) :
     QGraphicsWidget(parent),
     isLoaded(false),
@@ -557,7 +562,7 @@ void ThumbnailWidget::drawSymlinkBadge(QPainter *painter) {
     QRectF badge(anchor.right() - side, anchor.bottom() - side, side, side);
 
     QColor chip = settings->colorScheme().accent;
-    painter->setPen(QPen(QColor(0, 0, 0, 90), qMax(1.0, side * 0.07)));
+    painter->setPen(QPen(QColor(0, 0, 0, kShadowAlpha), qMax(1.0, side * 0.07)));
     painter->setBrush(chip);
     painter->drawRoundedRect(badge, side * 0.28, side * 0.28);
 
@@ -596,7 +601,7 @@ void ThumbnailWidget::drawThumbnailShadow(QPainter *painter, const QPixmap *pixm
         QPixmap shadow(*pixmap);
         QPainter shadowPainter(&shadow);
         shadowPainter.setCompositionMode(QPainter::CompositionMode_SourceIn);
-        shadowPainter.fillRect(shadow.rect(), QColor(0, 0, 0, 90));
+        shadowPainter.fillRect(shadow.rect(), QColor(0, 0, 0, kShadowAlpha));
         shadowPainter.end();
 
         painter->setOpacity(op * 0.32f);
@@ -605,9 +610,9 @@ void ThumbnailWidget::drawThumbnailShadow(QPainter *painter, const QPixmap *pixm
         painter->drawPixmap(drawRectCentered.translated(0, 1), shadow);
     } else {
         painter->setOpacity(op * 0.34f);
-        painter->fillRect(drawRectCentered.translated(2, 3), QColor(0, 0, 0, 90));
+        painter->fillRect(drawRectCentered.translated(2, 3), QColor(0, 0, 0, kShadowAlpha));
         painter->setOpacity(op * 0.16f);
-        painter->fillRect(drawRectCentered.translated(0, 1), QColor(0, 0, 0, 90));
+        painter->fillRect(drawRectCentered.translated(0, 1), QColor(0, 0, 0, kShadowAlpha));
     }
     painter->setOpacity(op);
 }

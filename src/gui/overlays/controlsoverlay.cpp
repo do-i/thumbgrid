@@ -1,6 +1,10 @@
 #include "controlsoverlay.h"
 #include "constants.h"
 
+namespace {
+constexpr QRgb kSeparatorRgb = 0x707070;
+}
+
 ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
     FloatingWidget(parent)
 {
@@ -13,7 +17,7 @@ ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
 
     QWidget *horizontalLineWidget = new QWidget;
     horizontalLineWidget->setFixedSize(5, 22);
-    horizontalLineWidget->setStyleSheet(QString("background-color: #707070; margin-left: 2px; margin-right: 2px"));
+    horizontalLineWidget->setStyleSheet(QString("background-color: %1; margin-left: 2px; margin-right: 2px").arg(QColor(kSeparatorRgb).name()));
 
     layout.setContentsMargins(0,0,0,0);
     this->setContentsMargins(0,0,0,0);

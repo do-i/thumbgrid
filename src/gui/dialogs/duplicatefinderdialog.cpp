@@ -38,6 +38,10 @@ namespace {
 
 const int THUMB_SIZE = 64;
 
+// Larger / smaller file marker colors in the comparison text.
+constexpr QRgb kBiggerRgb = 0x3c9a46;
+constexpr QRgb kSmallerRgb = 0xc05050;
+
 // Folder list that accepts directory drops from the OS / folder view.
 class FolderListWidget : public QListWidget {
 public:
@@ -722,9 +726,9 @@ QString DuplicateFinderDialog::previewInfoHtml(const QString &path, const QSize 
     QSize dims = reader.size();
     auto colored = [](const QString &text, qint64 self, qint64 other) {
         if(self > other)
-            return QString("<span style='color:#3c9a46;'>%1</span>").arg(text);
+            return QString("<span style='color:%1;'>%2</span>").arg(QColor(kBiggerRgb).name(), text);
         if(self < other)
-            return QString("<span style='color:#c05050;'>%1</span>").arg(text);
+            return QString("<span style='color:%1;'>%2</span>").arg(QColor(kSmallerRgb).name(), text);
         return text;
     };
     QString dimsText = colored(QString("%1 x %2").arg(dims.width()).arg(dims.height()),
