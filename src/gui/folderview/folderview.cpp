@@ -43,7 +43,7 @@ FolderView::FolderView(QWidget *parent) :
     ui->upButton->setIconPath(":res/icons/common/buttons/panel/up16.png");
     ui->upButton->setTriggerMode(TriggerMode::ClickTrigger);
     ui->settingsButton->setAction("openSettings");
-    ui->settingsButton->setIconPath(":res/icons/common/buttons/panel/settings16.png");
+    ui->settingsButton->setIconPath(":res/icons/common/buttons/panel/settings20.png");
     ui->exitButton->setAction("exit");
     ui->exitButton->setIconPath(":res/icons/common/buttons/panel/close16.png");
     ui->exitButton->setIconOffset(-1, 0);
