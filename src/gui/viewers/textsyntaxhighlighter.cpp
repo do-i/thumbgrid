@@ -62,23 +62,15 @@ QStringList cmakeKeywords() {
 
 } // namespace
 
-TextSyntaxHighlighter::TextSyntaxHighlighter(QTextDocument *doc, const QString &fileName, bool darkTheme)
+TextSyntaxHighlighter::TextSyntaxHighlighter(QTextDocument *doc, const QString &fileName, const ColorScheme &scheme)
     : QSyntaxHighlighter(doc)
 {
-    // fixed palettes tuned separately for dark & light backgrounds
-    if(darkTheme) {
-        commentFormat.setForeground(QColor(106, 130, 106));
-        keywordFormat.setForeground(QColor(130, 170, 255));
-        stringFormat.setForeground(QColor(195, 165, 105));
-        numberFormat.setForeground(QColor(210, 140, 210));
-        metaFormat.setForeground(QColor(120, 200, 200));
-    } else {
-        commentFormat.setForeground(QColor(90, 125, 90));
-        keywordFormat.setForeground(QColor(30, 80, 180));
-        stringFormat.setForeground(QColor(140, 100, 30));
-        numberFormat.setForeground(QColor(150, 50, 150));
-        metaFormat.setForeground(QColor(20, 130, 130));
-    }
+    // colors come from the cached color scheme (theme keys, else the built-in palette)
+    commentFormat.setForeground(scheme.syntax_comment);
+    keywordFormat.setForeground(scheme.syntax_keyword);
+    stringFormat.setForeground(scheme.syntax_string);
+    numberFormat.setForeground(scheme.syntax_number);
+    metaFormat.setForeground(scheme.syntax_meta);
     commentFormat.setFontItalic(true);
     keywordFormat.setFontWeight(QFont::Bold);
 

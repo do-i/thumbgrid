@@ -330,6 +330,14 @@ add_test(
     COMMAND thumbgrid_text_preview_size_limit_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_theme_syntax_colors_test
+    behavior/test_theme_syntax_colors.cpp
+)
+add_test(
+    NAME "A theme can set the text viewer syntax colors and falls back to the built-in ones"
+    COMMAND thumbgrid_theme_syntax_colors_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

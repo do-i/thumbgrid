@@ -77,6 +77,11 @@ BaseColorScheme ThemeStore::parseColors(QSettings &settings, int tid) {
     read("table_header",          base.table_header);
     read("table_text",            base.table_text);
     read("table_border",          base.table_border);
+    read("syntax_comment",        base.syntax_comment);
+    read("syntax_keyword",        base.syntax_keyword);
+    read("syntax_string",         base.syntax_string);
+    read("syntax_number",         base.syntax_number);
+    read("syntax_meta",           base.syntax_meta);
     settings.endGroup();
     return base;
 }
@@ -173,6 +178,17 @@ void ColorScheme::setBaseColors(BaseColorScheme base) {
         table_border = base.table_border.isValid() ? base.table_border : valueOffset(widget, -22);
     }
     table_text = base.table_text.isValid() ? base.table_text : text;
+
+    // syntax colors: the theme's key, else the fixed palette for dark / light backgrounds
+    const bool darkBg = tg::colorutil::luma(background) < 0.5;
+    auto syntax = [darkBg](const QColor &set, QRgb dark, QRgb light) {
+        return set.isValid() ? set : QColor(darkBg ? dark : light);
+    };
+    syntax_comment = syntax(base.syntax_comment, qRgb(106, 130, 106), qRgb(90, 125, 90));
+    syntax_keyword = syntax(base.syntax_keyword, qRgb(130, 170, 255), qRgb(30, 80, 180));
+    syntax_string  = syntax(base.syntax_string,  qRgb(195, 165, 105), qRgb(140, 100, 30));
+    syntax_number  = syntax(base.syntax_number,  qRgb(210, 140, 210), qRgb(150, 50, 150));
+    syntax_meta    = syntax(base.syntax_meta,    qRgb(120, 200, 200), qRgb(20, 130, 130));
 }
 
 QString ColorScheme::bakedThumbnailSignature() const {

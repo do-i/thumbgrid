@@ -4,6 +4,8 @@
 #include <QRegularExpression>
 #include <QTextCharFormat>
 
+#include "themestore.h"
+
 // Built-in fallback highlighter used when KSyntaxHighlighting is not available.
 // Generic rule-based highlighting: comments, strings, numbers and a per-language
 // keyword set chosen from the file suffix. Intentionally approximate - it aims
@@ -11,7 +13,7 @@
 class TextSyntaxHighlighter : public QSyntaxHighlighter {
     Q_OBJECT
 public:
-    TextSyntaxHighlighter(QTextDocument *doc, const QString &fileName, bool darkTheme);
+    TextSyntaxHighlighter(QTextDocument *doc, const QString &fileName, const ColorScheme &scheme);
 
 protected:
     void highlightBlock(const QString &text) override;

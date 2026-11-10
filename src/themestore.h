@@ -44,6 +44,12 @@ struct BaseColorScheme {
     QColor table_header;
     QColor table_text;
     QColor table_border;
+    // Text viewer syntax colors (optional; the built-in dark/light palette when absent)
+    QColor syntax_comment;
+    QColor syntax_keyword;
+    QColor syntax_string;
+    QColor syntax_number;
+    QColor syntax_meta;
 };
 
 class ColorScheme {
@@ -98,7 +104,12 @@ public:
     QColor table_header;
     QColor table_text;
     QColor table_border;
-
+    // Text viewer syntax colors, always valid
+    QColor syntax_comment;
+    QColor syntax_keyword;
+    QColor syntax_string;
+    QColor syntax_number;
+    QColor syntax_meta;
 
 private:
     void createColorVariants();

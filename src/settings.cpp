@@ -996,6 +996,12 @@ ColorScheme Settings::customColorScheme() {
         base.scrollbar             = QColor(themeConf->value("scrollbar",             "#5a5a5a").toString());
         base.overlay_text          = QColor(themeConf->value("overlay_text",          "#d2d2d2").toString());
         base.overlay               = QColor(themeConf->value("overlay",               "#1a1a1a").toString());
+        // optional hand-edited syntax colors; absent keys stay invalid (built-in palette)
+        base.syntax_comment        = QColor(themeConf->value("syntax_comment").toString());
+        base.syntax_keyword        = QColor(themeConf->value("syntax_keyword").toString());
+        base.syntax_string         = QColor(themeConf->value("syntax_string").toString());
+        base.syntax_number         = QColor(themeConf->value("syntax_number").toString());
+        base.syntax_meta           = QColor(themeConf->value("syntax_meta").toString());
         base.tid                   = tid;
         ColorScheme defaults(base);
         base.folderview_label_bg = colorFromSettings(themeConf, "fv_label_bg",

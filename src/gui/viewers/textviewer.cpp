@@ -128,8 +128,8 @@ bool TextViewer::showFile(const QString &filePath) {
 
 void TextViewer::applyHighlighter(const QString &filePath) {
     const ColorScheme &scheme = settings->colorScheme();
-    bool darkTheme = (tg::colorutil::luma(scheme.background) < 0.5);
 #ifdef USE_KSYNTAXHIGHLIGHTING
+    bool darkTheme = (tg::colorutil::luma(scheme.background) < 0.5);
     static KSyntaxHighlighting::Repository repository;
     auto *hl = new KSyntaxHighlighting::SyntaxHighlighter(textEdit->document());
     hl->setTheme(repository.defaultTheme(darkTheme ? KSyntaxHighlighting::Repository::DarkTheme
@@ -137,7 +137,7 @@ void TextViewer::applyHighlighter(const QString &filePath) {
     hl->setDefinition(repository.definitionForFileName(filePath));
     highlighter = hl;
 #else
-    highlighter = new TextSyntaxHighlighter(textEdit->document(), filePath, darkTheme);
+    highlighter = new TextSyntaxHighlighter(textEdit->document(), filePath, scheme);
 #endif
 }
 
