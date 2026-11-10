@@ -2,7 +2,7 @@
 #include "constants.h"
 
 ZoomIndicatorOverlay::ZoomIndicatorOverlay(FloatingWidgetContainer *parent) : OverlayWidget(parent) {
-    hideDelay = 2000;
+    hideDelay = tg::timing::kMessageNormalMs;
     visibilityTimer.setSingleShot(true);
     visibilityTimer.setInterval(hideDelay);
 

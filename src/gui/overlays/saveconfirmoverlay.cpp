@@ -4,7 +4,7 @@
 #include "components/actionmanager/actionmanager.h"
 
 namespace {
-constexpr int kDimDelayMs = 2500;
+constexpr int kIdleDimDelayMs = 2500; // idle time before the control dims
 constexpr qreal kDimmedOpacity = 0.45;
 }
 
@@ -24,7 +24,7 @@ SaveConfirmOverlay::SaveConfirmOverlay(FloatingWidgetContainer *parent) :
     ui->collapseButton->setToolTip(tr("Fold back to the icon"));
 
     dimTimer.setSingleShot(true);
-    dimTimer.setInterval(kDimDelayMs);
+    dimTimer.setInterval(kIdleDimDelayMs);
     connect(&dimTimer, &QTimer::timeout, this, &SaveConfirmOverlay::dim);
     dimAnimation = new QPropertyAnimation(this, "opacity", this);
     dimAnimation->setDuration(tg::timing::kOverlayFadeMs);

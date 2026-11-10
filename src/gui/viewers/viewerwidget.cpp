@@ -4,6 +4,7 @@
  */
 
 #include "viewerwidget.h"
+#include "constants.h"
 
 #include <QApplication>
 
@@ -213,7 +214,7 @@ void ViewerWidget::onScaleChanged(qreal scale) {
         if(mZoomIndicatorMode == ZoomIndicatorMode::INDICATOR_ENABLED)
             zoomIndicator->show();
         else if(mZoomIndicatorMode == ZoomIndicatorMode::INDICATOR_AUTO)
-            zoomIndicator->show(1500);
+            zoomIndicator->show(tg::timing::kMessageNormalMs);
     } else {
         zoomIndicator->hide();
     }

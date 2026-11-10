@@ -10,7 +10,7 @@ FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent) :
     ui(new Ui::FloatingMessage)
 {
     ui->setupUi(this);
-    hideDelay = 700;
+    hideDelay = tg::timing::kMessageShortMs;
 
     visibilityTimer.setSingleShot(true);
     visibilityTimer.setInterval(hideDelay);
