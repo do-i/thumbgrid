@@ -12,6 +12,7 @@ class FolderTreeHiddenAndTooltipsTest : public QObject {
 private slots:
     void initTestCase();
     void hiddenFoldersFollowTheShowHiddenSetting();
+    void aRowTooltipIsItsFullPath();
 
 private:
     void setShowHidden(bool on);
@@ -52,6 +53,14 @@ void FolderTreeHiddenAndTooltipsTest::hiddenFoldersFollowTheShowHiddenSetting() 
     setShowHidden(false);
     QTRY_COMPARE(mFixture.model()->rowCount(mFixture.index("c")), 0);
     QVERIFY(!hiddenRowListed());
+}
+
+void FolderTreeHiddenAndTooltipsTest::aRowTooltipIsItsFullPath() {
+    for(const char *rel : {"a", "b", "a/a1"}) {
+        QVERIFY2(mFixture.index(rel).isValid(), rel);
+        QCOMPARE(mFixture.index(rel).data(Qt::ToolTipRole).toString(),
+                 QDir::toNativeSeparators(mFixture.path(rel)));
+    }
 }
 
 TG_BEHAVIOR_TEST_MAIN(FolderTreeHiddenAndTooltipsTest)

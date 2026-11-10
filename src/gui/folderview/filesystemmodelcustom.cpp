@@ -38,6 +38,8 @@ void FileSystemModelCustom::readSettings() {
 QVariant FileSystemModelCustom::data( const QModelIndex& index, int role ) const {
     if(role == Qt::DecorationRole)
         return folderIcon;
+    if(role == Qt::ToolTipRole) // the model's cached path string, no disk access
+        return QDir::toNativeSeparators(filePath(index));
     return QFileSystemModel::data(index, role);
 }
 
