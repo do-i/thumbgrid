@@ -4,6 +4,7 @@
 #include "ui_folderview.h"
 
 #include "platform/platformdesktop.h"
+#include "utils/newwindow.h"
 
 namespace {
 QDir::Filters treeFilter(bool showHidden) {
@@ -221,8 +222,14 @@ void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoi
     if(!mTreeMenu) {
         mTreeMenu = new TreeContextMenu(this);
         connect(mTreeMenu, &TreeContextMenu::openRequested, this, &FolderView::directorySelected);
+        connect(mTreeMenu, &TreeContextMenu::newWindowRequested, this, &NewWindow::open);
+        connect(mTreeMenu, &TreeContextMenu::copyPathRequested, this, [this](const QString &path) {
+            emit folderOperationRequested(TreeFolderOp::CopyPath, QDir::toNativeSeparators(path), QString());
+        });
+        connect(mTreeMenu, &TreeContextMenu::addBookmarkRequested, ui->bookmarksWidget, &BookmarksWidget::addBookmark);
     }
-    mTreeMenu->openFor(dirModel->filePath(index), globalPos);
+    const QString path = dirModel->filePath(index);
+    mTreeMenu->openFor({path, ui->bookmarksWidget->hasBookmark(path)}, globalPos);
 }
 
 void FolderView::onOptionsPopupButtonToggled(bool mode) {

@@ -94,6 +94,7 @@ void MW::setupUi() {
     connect(folderView.get(), &FolderViewProxy::convertFormatRequested, this, &MW::convertFormatRequested);
     connect(folderView.get(), &FolderViewProxy::renameRequested, this, &MW::renameRequested);
     connect(folderView.get(), &FolderViewProxy::searchQueryChanged, this, &MW::searchQueryChanged);
+    connect(folderView.get(), &FolderViewProxy::folderOperationRequested, this, &MW::folderOperationRequested);
     connect(folderView.get(), &FolderViewProxy::showFoldersChanged, this, &MW::showFoldersChanged);
 
     centralWidget.reset(new CentralWidget(docWidget, folderView, this));

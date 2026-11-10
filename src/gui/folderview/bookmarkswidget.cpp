@@ -38,6 +38,10 @@ void BookmarksWidget::addBookmark(const QString& dirPath) {
     saveBookmarks();
 }
 
+bool BookmarksWidget::hasBookmark(const QString& dirPath) const {
+    return paths.contains(dirPath) || paths.contains(QDir::cleanPath(dirPath));
+}
+
 void BookmarksWidget::removeBookmark(const QString& dirPath) {
     for(int i = 0; i < layout.count(); i++) {
         auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(i)->widget());

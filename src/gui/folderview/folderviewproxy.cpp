@@ -42,6 +42,7 @@ void FolderViewProxy::init() {
     connect(folderView.get(), &FolderView::convertFormatRequested, this, &FolderViewProxy::convertFormatRequested);
     connect(folderView.get(), &FolderView::renameRequested, this, &FolderViewProxy::renameRequested);
     connect(folderView.get(), &FolderView::searchQueryChanged, this, &FolderViewProxy::searchQueryChanged);
+    connect(folderView.get(), &FolderView::folderOperationRequested, this, &FolderViewProxy::folderOperationRequested);
 
     folderView->show();
 

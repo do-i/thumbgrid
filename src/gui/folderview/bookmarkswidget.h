@@ -19,6 +19,7 @@ public slots:
     void addBookmark(const QString& directoryPath);
 
     void removeBookmark(const QString& dirPath);
+    bool hasBookmark(const QString& dirPath) const;
     void onPathChanged(const QString& path);
 private slots:
     void readSettings();

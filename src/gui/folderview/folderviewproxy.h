@@ -62,6 +62,7 @@ signals:
     void convertFormatRequested(const QString& format);
     void renameRequested(const QString& name);
     void searchQueryChanged(const QString& prefix);
+    void folderOperationRequested(TreeFolderOp op, const QString& path, const QString& arg);
 
 private:
     std::shared_ptr<FolderView> folderView;

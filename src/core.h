@@ -184,6 +184,8 @@ public slots:
     void cutFileClipboard();
     void pasteFile();
     void copyPathClipboard();
+    void copyPathsToClipboard(const QStringList& paths);
+    void onFolderOperation(TreeFolderOp op, const QString& path, const QString& arg);
     void openFromClipboard();
     void renameCurrentSelection(const QString& newName);
     void searchFolderView(const QString& prefix);

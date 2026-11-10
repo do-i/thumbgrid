@@ -163,6 +163,7 @@ void Core::connectComponents() {
     connect(mw, &MW::resizeRequested,       this, &Core::resize);
     connect(mw, &MW::resizeCopiesRequested, this, &Core::resizeSelectionToCopies);
     connect(mw, &MW::renameRequested,       this, &Core::renameCurrentSelection);
+    connect(mw, &MW::folderOperationRequested, this, &Core::onFolderOperation);
     connect(mw, &MW::searchQueryChanged,    this, &Core::searchFolderView);
     connect(mw, &MW::sortingSelected,       this, &Core::sortBy);
     connect(mw, &MW::showFoldersChanged,    this, &Core::setFoldersDisplay);
@@ -837,11 +838,24 @@ void Core::pasteFile() {
 
 void Core::copyPathClipboard() {
     // guard on the selection, not isEmpty() (images only); one path per line
-    QStringList paths = currentSelection();
+    copyPathsToClipboard(currentSelection());
+}
+
+void Core::copyPathsToClipboard(const QStringList& paths) {
     if(paths.isEmpty())
         return;
     QApplication::clipboard()->setText(paths.join("\n"));
     mw->showMessage(paths.count() > 1 ? tr("%1 paths copied").arg(paths.count()) : tr("Path copied"));
+}
+
+// a tree menu item: acts on the folder it was opened for, not on the grid selection
+void Core::onFolderOperation(TreeFolderOp op, const QString& path, const QString& arg) {
+    Q_UNUSED(arg)
+    switch(op) {
+    case TreeFolderOp::CopyPath:
+        copyPathsToClipboard({path});
+        break;
+    }
 }
 
 void Core::openFromClipboard() {

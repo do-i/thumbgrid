@@ -8,22 +8,32 @@
 
 #include "gui/popupmenubase.h"
 
+// what the menu needs to know about the row it opens for
+struct TreeMenuTarget {
+    QString path;
+    bool bookmarked = false;
+};
+
 class TreeContextMenu : public PopupMenuBase {
     Q_OBJECT
 public:
     explicit TreeContextMenu(QWidget *parent = nullptr);
 
-    // opens at globalPos for the folder at path
-    void openFor(const QString &path, QPoint globalPos);
+    // opens at globalPos for the folder in target
+    void openFor(const TreeMenuTarget &target, QPoint globalPos);
     QString targetPath() const { return mTarget; }
 
 signals:
     // every signal carries the target path, sent after the menu has closed
     void openRequested(const QString &path);
+    void newWindowRequested(const QString &path);
+    void copyPathRequested(const QString &path);
+    void addBookmarkRequested(const QString &path);
 
 private:
-    ContextMenuItem *addEntry(QVBoxLayout *layout, const QString &text, const QString &iconPath,
-                              void (TreeContextMenu::*signal)(const QString &));
+    ContextMenuItem *addEntry(QVBoxLayout *layout, const QString &name, const QString &text,
+                              const QString &iconPath, void (TreeContextMenu::*signal)(const QString &));
 
     QString mTarget;
+    ContextMenuItem *mBookmarkItem = nullptr;
 };

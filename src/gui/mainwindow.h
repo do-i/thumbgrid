@@ -176,6 +176,7 @@ signals:
     void resizeRequested(QSize);
     void resizeCopiesRequested(ResizeSpec);
     void renameRequested(QString);
+    void folderOperationRequested(TreeFolderOp op, QString path, QString arg);
     // Cancel on the background-move progress overlay
     void moveCancelRequested();
     // folder view type-ahead search: the typed prefix, resolved by Core

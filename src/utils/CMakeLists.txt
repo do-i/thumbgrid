@@ -7,6 +7,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     imagefactory.cpp
     imagelib.cpp
     inputmap.cpp
+    newwindow.cpp
     randomizer.cpp
     imagewriter.cpp
     script.cpp

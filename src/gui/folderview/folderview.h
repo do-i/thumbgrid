@@ -15,6 +15,7 @@
 #include "gui/customwidgets/styledcombobox.h"
 #include "gui/folderview/fvoptionspopup.h"
 #include "gui/folderview/treecontextmenu.h"
+#include "gui/folderview/treefolderop.h"
 
 namespace Ui {
     class FolderView;
@@ -79,6 +80,8 @@ signals:
     void convertFormatRequested(const QString& format);
     void renameRequested(const QString& name);
     void searchQueryChanged(const QString& prefix);
+    // a tree menu item that Core carries out; arg is e.g. a new name
+    void folderOperationRequested(TreeFolderOp op, const QString& path, const QString& arg);
 
 private slots:
     void onSortingSelected(int);
