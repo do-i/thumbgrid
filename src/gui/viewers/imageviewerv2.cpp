@@ -6,6 +6,7 @@
 
 #include "utils/imagelib.h"
 #include "utils/logging.h"
+#include "utils/wheeldetect.h"
 
 namespace {
 constexpr float kInitialMinScale = 0.01f;
@@ -647,42 +648,7 @@ void ImageViewerV2::wheelEvent(QWheelEvent *event) {
 
 // Distinguishes mouse-wheel events from trackpad scrolling.
 bool ImageViewerV2::isWheelScroll(QWheelEvent *event) {
-    /* for reference
-     * linux
-     *   trackpad/xorg:
-     *     pixelDelta = (x,y) OR (0,0)
-     *     angleDelta = (x*scale,y*scale) OR (x,y)
-     *   trackpad/wayland:
-     *     pixelDelta = (x,y)
-     *     angleDelta = (x*scale,y*scale)
-     *   wheel:
-     *     pixelDelta = (0,0)     - libinput <= 1.18
-     *     pixelDelta = (0,120*m) - libinput 1.19
-     *     angleDelta = (0,120*m)
-     * -----------------------------------------
-     * macOS
-     *   trackpad:
-     *     pixelDelta = (x,y)
-     *     angleDelta = (x*scale,y*scale)
-     *   wheel:
-     *     pixelDelta = (0,y*scrollAccel)
-     *     angleDelta = (0,120*m)
-     * -----------------------------------------
-     * windows
-     *   trackpad:
-     *     pixelDelta = (0,0)
-     *     angleDelta = (x,y)
-     *   wheel:
-     *     pixelDelta = (0,0)
-     *     AngleDelta = (0,120*m)
-     */
-    if(!trackpadDetection)
-        return true;
-    if(wayland) // we should have scroll phase support
-        return event->phase() == Qt::NoScrollPhase;
-    // fallback to guesswork
-    QPoint angleDelta = event->angleDelta();
-    return angleDelta.y() && (abs(angleDelta.y())>=120 && !(angleDelta.y() % 60)) && lastTouchpadScroll.elapsed() > 250;
+    return tg::wheel::isWheelEvent(event, trackpadDetection, wayland, lastTouchpadScroll);
 }
 
 // High-precision trackpad scroll.

@@ -1,5 +1,6 @@
 #include "thumbnailview.h"
 #include "utils/logging.h"
+#include "utils/wheeldetect.h"
 
 ThumbnailView::ThumbnailView(Qt::Orientation _orientation, QWidget *parent)
     : QGraphicsView(parent),
@@ -491,13 +492,7 @@ void ThumbnailView::wheelEvent(QWheelEvent *event) {
 
     int pixelDelta = event->pixelDelta().y();
     int angleDelta = event->angleDelta().y();
-    bool isWheel = true;
-    if(mTrackpadDetection) {
-        if(wayland) // we should have scroll phase support
-            isWheel = (event->phase() == Qt::NoScrollPhase);
-        else // fallback to guesswork
-            isWheel = angleDelta && (abs(angleDelta)>=120 && !(angleDelta % 60)) && lastTouchpadScroll.elapsed() > 250;
-    }
+    bool isWheel = tg::wheel::isWheelEvent(event, mTrackpadDetection, wayland, lastTouchpadScroll);
 
     if(isWheel) {
         angleDelta *= mMouseScrollingSpeed;
