@@ -966,9 +966,9 @@ void Core::setFoldersDisplay(bool mode) {
         folderViewPresenter.setShowDirs(mode);
 }
 
-// type-ahead: the view owns the prefix; resolve it against the model
-void Core::searchFolderView(const QString& prefix) {
-    mw->setFolderViewSearchMatched(folderViewPresenter.selectByNamePrefix(prefix));
+// type-ahead: the view owns the query; resolve it against the model
+void Core::searchFolderView(const QString& query) {
+    mw->setFolderViewSearchMatched(folderViewPresenter.selectByNameContaining(query));
 }
 
 void Core::renameCurrentSelection(const QString& newName) {

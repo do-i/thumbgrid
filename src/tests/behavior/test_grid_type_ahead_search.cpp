@@ -98,7 +98,21 @@ void GridTypeAheadSearchTest::slashSearchMovesTheCursorAndSuppressesShortcuts() 
     QVERIFY2(!grid->searchMode(), "Escape should cancel the search.");
     QCOMPARE(grid->searchQuery(), QString());
 
-    // --- a prefix that matches nothing keeps the cursor where it is ---
+    // --- matching is a case-insensitive substring, not a prefix ---
+    // "EST" is in the middle of test.png and typed in upper case.
+    QTest::keyClick(grid, Qt::Key_Slash);
+    QTest::keyClicks(grid, "EST");
+    QCOMPARE(grid->searchQuery(), QString("EST"));
+    QCOMPARE(grid->selection(), QList<int>{3});
+    // "pha" only occurs inside alpha.png.
+    QTest::keyClick(grid, Qt::Key_Escape);
+    QTest::keyClick(grid, Qt::Key_Slash);
+    QTest::keyClicks(grid, "pha");
+    QCOMPARE(grid->selection(), QList<int>{2});
+    QTest::keyClick(grid, Qt::Key_Escape);
+    grid->select(1);
+
+    // --- a query that matches nothing keeps the cursor where it is ---
     QTest::keyClick(grid, Qt::Key_Slash);
     QTest::keyClick(grid, Qt::Key_Z);
     QCOMPARE(grid->searchQuery(), QString("z"));

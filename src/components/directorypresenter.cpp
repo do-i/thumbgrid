@@ -293,22 +293,22 @@ void DirectoryPresenter::selectAll() {
     view->select(list);
 }
 
-bool DirectoryPresenter::selectByNamePrefix(const QString& prefix) {
-    if(!model || !view || prefix.isEmpty())
+bool DirectoryPresenter::selectByNameContaining(const QString& query) {
+    if(!model || !view || query.isEmpty())
         return false;
     // The parent ".." tile is not a directory entry and is not searchable, so
     // matching runs over the model in view order: dirs first, then files.
     int offset = parentOffset();
     if(mShowDirs) {
         for(int i = 0; i < model->dirCount(); i++) {
-            if(model->dirNameAt(i).startsWith(prefix, Qt::CaseInsensitive)) {
+            if(model->dirNameAt(i).contains(query, Qt::CaseInsensitive)) {
                 selectAndFocus(offset + i);
                 return true;
             }
         }
     }
     for(int i = 0; i < model->fileCount(); i++) {
-        if(model->fileNameAt(i).startsWith(prefix, Qt::CaseInsensitive)) {
+        if(model->fileNameAt(i).contains(query, Qt::CaseInsensitive)) {
             selectAndFocus(offset + (mShowDirs ? model->dirCount() + i : i));
             return true;
         }

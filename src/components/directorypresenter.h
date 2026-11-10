@@ -36,10 +36,10 @@ public:
     QStringList selectedPaths() const;
     SelectionInfo selectionInfo() const;
 
-    // Moves the cursor to the first entry (in view order) whose name starts
-    // with prefix, case-insensitively. Returns false when nothing matches, in
+    // Moves the cursor to the first entry (in view order) whose name contains
+    // query, case-insensitively. Returns false when nothing matches, in
     // which case the current selection is left alone.
-    bool selectByNamePrefix(const QString& prefix);
+    bool selectByNameContaining(const QString& query);
     // opens the most recently selected entry (folder, file or the ".." tile)
     void openSelected();
     // selects every directory entry; the ".." tile is not one
