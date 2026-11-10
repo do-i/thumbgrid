@@ -1,5 +1,10 @@
 /* Base class for floating widgets.
  * It will automatically reposition itself according to FloatingWidgetPosition.
+ *
+ * Placement rule: status overlays sit in a corner or bottom-centre; only input overlays (rename) are centred.
+ * Corner overlays (copy: left, save-confirm: right) flip from bottom to top while the
+ * main panel is at the bottom, so they stay clear of the panel and video controls.
+ * Messages (bottom) and the move progress (bottom-right) keep the footer clearance margin.
  */
 
 #pragma once
