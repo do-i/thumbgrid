@@ -18,6 +18,7 @@ public:
 signals:
     void droppedIn(QStringList, QModelIndex);
     // right-click on a row, or the menu key on the current row; the row is not selected
+    void middleClicked(const QModelIndex &index);
     void contextMenuRequestedAt(const QModelIndex &index, const QPoint &globalPos);
 
 protected:

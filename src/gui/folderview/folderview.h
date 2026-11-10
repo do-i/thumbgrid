@@ -89,6 +89,8 @@ private slots:
 
     void onTreeViewClicked(QModelIndex index);
     void onDroppedInByIndex(QStringList, QModelIndex index);
+    void onTreeMiddleClicked(const QModelIndex &index);
+    void collapseTree();
     void onTreeContextMenuRequested(const QModelIndex &index, const QPoint &globalPos);
     void toggleBookmarks();
     void toggleFilesystemView();

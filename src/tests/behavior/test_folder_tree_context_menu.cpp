@@ -26,6 +26,8 @@ private slots:
     void copyPathPutsTheTargetPathOnTheClipboard();
     void addToBookmarksStoresTheTargetAndUpdatesThePanel();
     void openInNewWindowLaunchesTheTargetFolder();
+    void collapseAllKeepsOnlyThePathToTheCurrentFolder();
+    void middleClickingARowOpensItInANewWindow();
 
 private:
     TreeContextMenu *menu() const { return mFixture.folderView()->findChild<TreeContextMenu *>(); }
@@ -154,6 +156,39 @@ void FolderTreeContextMenuTest::openInNewWindowLaunchesTheTargetFolder() {
     triggerOn("a", "menuNewWindow");
     NewWindow::setLauncher({});
     QCOMPARE(launched, QStringList{mFixture.path("a")});
+}
+
+void FolderTreeContextMenuTest::collapseAllKeepsOnlyThePathToTheCurrentFolder() {
+    TreeViewCustom *tree = mFixture.tree();
+    QVERIFY(mFixture.navigate("a/a1"));
+    QVERIFY(mFixture.waitForTreeLoaded(mFixture.path("a")));
+    QTRY_VERIFY(tree->isExpanded(mFixture.index("a")));
+    QVERIFY(mFixture.waitForTreeLoaded(mFixture.path("a")));
+    tree->expand(mFixture.index("c"));
+    QVERIFY(tree->isExpanded(mFixture.index("c")));
+    QTRY_COMPARE(mFixture.currentTreePath(), mFixture.path("a/a1"));
+
+    triggerOn("b", "menuCollapseAll");
+
+    QVERIFY2(!tree->isExpanded(mFixture.index("c")), "An unrelated folder should fold.");
+    QVERIFY2(tree->isExpanded(mFixture.index("a")), "The parent of the current folder stays open.");
+    QCOMPARE(mFixture.currentTreePath(), mFixture.path("a/a1"));
+    QTRY_VERIFY2(mFixture.isRowVisible("a/a1"), "The current folder stays visible.");
+}
+
+void FolderTreeContextMenuTest::middleClickingARowOpensItInANewWindow() {
+    TreeViewCustom *tree = mFixture.tree();
+    QStringList launched;
+    NewWindow::setLauncher([&](const QString &path) { launched << path; });
+    QSignalSpy selected(mFixture.folderView(), &FolderView::directorySelected);
+    const QString before = pathLabelText();
+
+    QTest::mouseClick(tree->viewport(), Qt::MiddleButton, {}, tree->visualRect(mFixture.index("b")).center());
+    NewWindow::setLauncher({});
+
+    QCOMPARE(launched, QStringList{mFixture.path("b")});
+    QCOMPARE(selected.count(), 0);
+    QCOMPARE(pathLabelText(), before);
 }
 
 TG_BEHAVIOR_TEST_MAIN(FolderTreeContextMenuTest)

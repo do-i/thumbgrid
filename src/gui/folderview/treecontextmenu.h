@@ -29,6 +29,7 @@ signals:
     void newWindowRequested(const QString &path);
     void copyPathRequested(const QString &path);
     void addBookmarkRequested(const QString &path);
+    void collapseAllRequested(const QString &path);
 
 private:
     ContextMenuItem *addEntry(QVBoxLayout *layout, const QString &name, const QString &text,

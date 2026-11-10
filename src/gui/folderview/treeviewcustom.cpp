@@ -127,6 +127,11 @@ void TreeViewCustom::mousePressEvent(QMouseEvent *event) {
 void TreeViewCustom::mouseReleaseEvent(QMouseEvent *event) {
     if(event->button() != Qt::LeftButton) {
         event->accept();
+        if(event->button() == Qt::MiddleButton) {
+            const QModelIndex index = indexAt(event->position().toPoint());
+            if(index.isValid())
+                emit middleClicked(index);
+        }
         return;
     }
     QTreeView::mouseReleaseEvent(event);

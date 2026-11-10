@@ -15,6 +15,8 @@ TreeContextMenu::TreeContextMenu(QWidget *parent) : PopupMenuBase(parent) {
              &TreeContextMenu::copyPathRequested);
     mBookmarkItem = addEntry(items, "menuAddBookmark", tr("Add to bookmarks"), QString(),
                              &TreeContextMenu::addBookmarkRequested);
+    addSeparator(items);
+    addEntry(items, "menuCollapseAll", tr("Collapse all"), QString(), &TreeContextMenu::collapseAllRequested);
     adjustSize();
     hide();
 }

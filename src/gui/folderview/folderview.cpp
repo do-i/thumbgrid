@@ -117,6 +117,7 @@ FolderView::FolderView(QWidget *parent) :
     connect(optionsPopup, &FVOptionsPopup::viewModeSelected, this, &FolderView::onViewModeSelected);
 
     connect(ui->dirTreeView, &TreeViewCustom::droppedIn, this, &FolderView::onDroppedInByIndex);
+    connect(ui->dirTreeView, &TreeViewCustom::middleClicked, this, &FolderView::onTreeMiddleClicked);
     connect(ui->dirTreeView, &TreeViewCustom::contextMenuRequestedAt, this, &FolderView::onTreeContextMenuRequested);
     connect(dirModel, &QFileSystemModel::directoryLoaded, this, &FolderView::onTreeDirectoryLoaded);
     connect(dirModel, &FileSystemModelCustom::folderIconChanged, ui->dirTreeView->viewport(),
@@ -226,10 +227,23 @@ void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoi
         connect(mTreeMenu, &TreeContextMenu::copyPathRequested, this, [this](const QString &path) {
             emit folderOperationRequested(TreeFolderOp::CopyPath, QDir::toNativeSeparators(path), QString());
         });
+        connect(mTreeMenu, &TreeContextMenu::collapseAllRequested, this, &FolderView::collapseTree);
         connect(mTreeMenu, &TreeContextMenu::addBookmarkRequested, ui->bookmarksWidget, &BookmarksWidget::addBookmark);
     }
     const QString path = dirModel->filePath(index);
     mTreeMenu->openFor({path, ui->bookmarksWidget->hasBookmark(path)}, globalPos);
+}
+
+void FolderView::onTreeMiddleClicked(const QModelIndex &index) {
+    NewWindow::open(dirModel->filePath(index));
+}
+
+// everything folds except the path down to the current folder, which scrollTo() re-expands
+void FolderView::collapseTree() {
+    ui->dirTreeView->collapseAll();
+    const QModelIndex current = ui->dirTreeView->currentIndex();
+    if(current.isValid())
+        ui->dirTreeView->scrollTo(current);
 }
 
 void FolderView::onOptionsPopupButtonToggled(bool mode) {
