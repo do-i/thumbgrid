@@ -10,7 +10,6 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     ui(new Ui::ShortcutCreatorDialog)
 {
     ui->setupUi(this);
-    setWindowTitle("Add shortcut");
     if(auto box = qobject_cast<QBoxLayout *>(ui->sequenceEdit->parentWidget()->layout())) {
         const int at = box->indexOf(ui->sequenceEdit);
         if(at >= 0)

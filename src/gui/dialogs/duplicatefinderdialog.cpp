@@ -95,7 +95,7 @@ QWidget *makeFolderListBox(QListWidget *&list, QWidget *parent) {
 } // namespace
 
 DuplicateFinderDialog::DuplicateFinderDialog(QWidget *parent) : QDialog(parent) {
-    setWindowTitle(tr("Find Duplicates"));
+    setWindowTitle(tr("Find duplicates"));
     setModal(false);
     resize(860, 640);
 
@@ -390,10 +390,10 @@ void DuplicateFinderDialog::setupPreviewAndActions() {
     mSelectionLabel = new QLabel(tr("0 selected"), this);
     bottomRow->addWidget(mSelectionLabel);
     bottomRow->addStretch();
-    mMoveButton = new QPushButton(tr("Move selected..."), this);
+    mMoveButton = new QPushButton(tr("Move selected…"), this);
     mMoveButton->setEnabled(false);
     bottomRow->addWidget(mMoveButton);
-    mDeleteButton = new QPushButton(tr("Delete selected..."), this);
+    mDeleteButton = new QPushButton(tr("Move selected to trash"), this);
     mDeleteButton->setObjectName("duplicateFinderDeleteButton");
     mDeleteButton->setEnabled(false);
     bottomRow->addWidget(mDeleteButton);
@@ -531,7 +531,7 @@ void DuplicateFinderDialog::onStartClicked() {
     DuplicateSearchRequest request = buildRequest();
     QString error;
     if(!validateRequest(request, error)) {
-        QMessageBox::warning(this, tr("Find Duplicates"), error);
+        QMessageBox::warning(this, tr("Find duplicates"), error);
         return;
     }
     mModel->clear();

@@ -49,11 +49,3 @@ Worklist for T-032, T-039, T-042 (line numbers as of 419823f4; locate by text). 
 
 | File:line | Current | New |
 |---|---|---|
-| gui/dialogs/filereplacedialog.cpp:44-45 | "Directory already exists" / "Merge directories?" | "Folder already exists" / "Merge folders?" |
-| gui/dialogs/filereplacedialog.ui:118, 125 | "Yes" / "No" | "Replace" (folder mode: "Merge") / "Skip" |
-| gui/dialogs/duplicatefinderdialog.cpp:98, 534 | "Find Duplicates" | "Find duplicates" |
-| gui/dialogs/duplicatefinderdialog.cpp:393 | "Move selected..." | "Move selected…" |
-| gui/dialogs/duplicatefinderdialog.cpp:396 | "Delete selected..." (it trashes) | "Move selected to trash" |
-| gui/dialogs/shortcutcreatordialog.cpp:13 | "Add shortcut" | "New shortcut" (matches the .ui and the "+ New shortcut" button) |
-| gui/dialogs/scripteditordialog.cpp:13 / .ui:14 | "New application/script" / "Add Script" | "New script" |
-| gui/dialogs/scripteditordialog.cpp:34 | "Edit" | "Edit script" |

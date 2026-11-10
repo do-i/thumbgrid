@@ -115,14 +115,14 @@
      <item>
       <widget class="QPushButton" name="yesButton">
        <property name="text">
-        <string>Yes</string>
+        <string>Replace</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QPushButton" name="noButton">
        <property name="text">
-        <string>No</string>
+        <string>Skip</string>
        </property>
       </widget>
      </item>

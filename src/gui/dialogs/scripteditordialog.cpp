@@ -10,7 +10,6 @@ ScriptEditorDialog::ScriptEditorDialog(QWidget *parent) :
     editMode(false)
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("New application/script"));
     ui->keywordsLabel->setText(tr("Keywords:") + " %file%");
 
     // match the standard dialog buttons: accept is the accented default,
@@ -31,7 +30,7 @@ ScriptEditorDialog::ScriptEditorDialog(const QString& name, const Script& script
       editMode(true)
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("Edit"));
+    this->setWindowTitle(tr("Edit script"));
     this->onNameChanged(ui->nameLineEdit->text());
     editTarget = name;
 
