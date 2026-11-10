@@ -1,5 +1,6 @@
 #include "contextmenu.h"
 #include "ui_contextmenu.h"
+#include "gui/customwidgets/dismisskey.h"
 
 #include <algorithm>
 
@@ -275,12 +276,9 @@ void ContextMenu::paintEvent(QPaintEvent *event) {
 }
 
 void ContextMenu::keyPressEvent(QKeyEvent *event) {
+    if(handleDismissKey(this, event))
+        return;
     switch(event->key()) {
-    case Qt::Key_Escape:
-        // only closes the menu; passing it on too would also run the global
-        // Esc binding (leave fullscreen / exit)
-        hide();
-        break;
     case Qt::Key_Up:
         moveHighlight(-1);
         break;

@@ -797,3 +797,11 @@ add_test(
     NAME "Setting sliders and stored values share one set of bounds"
     COMMAND thumbgrid_setting_bounds_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_esc_closes_every_popup_test
+    behavior/test_esc_closes_every_popup.cpp
+)
+add_test(
+    NAME "Esc closes every popup menu and overlay"
+    COMMAND thumbgrid_esc_closes_every_popup_test
+)

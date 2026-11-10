@@ -1,5 +1,6 @@
 #include "renameoverlay.h"
 #include "ui_renameoverlay.h"
+#include "gui/customwidgets/dismisskey.h"
 
 RenameOverlay::RenameOverlay(FloatingWidgetContainer *parent) :
     OverlayWidget(parent),
@@ -74,9 +75,8 @@ void RenameOverlay::onCancel() {
 }
 
 void RenameOverlay::keyPressEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Escape) {
-        event->accept();
-        onCancel();
+    if(handleDismissKey(this, event)) {
+        ui->fileName->setText(origName); // the rest of onCancel()
     } else if(event->key() == Qt::Key_Return || event->key() == Qt::Key_Enter) {
         event->accept();
         rename();

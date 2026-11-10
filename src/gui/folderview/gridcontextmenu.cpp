@@ -1,4 +1,5 @@
 #include "gridcontextmenu.h"
+#include "gui/customwidgets/dismisskey.h"
 
 #include <QScreen>
 #include <QPainter>
@@ -257,10 +258,6 @@ void GridContextMenu::paintEvent(QPaintEvent *event) {
 }
 
 void GridContextMenu::keyPressEvent(QKeyEvent *event) {
-    quint32 nativeScanCode = event->nativeScanCode();
-    QString key = actionManager->keyForNativeScancode(nativeScanCode);
-    if(key == "Esc")
-        hide();
-    else
+    if(!handleDismissKey(this, event))
         actionManager->processEvent(event);
 }

@@ -1,5 +1,6 @@
 #include "fvoptionspopup.h"
 #include "ui_fvoptionspopup.h"
+#include "gui/customwidgets/dismisskey.h"
 
 FVOptionsPopup::FVOptionsPopup(QWidget *parent) :
     QWidget(parent),
@@ -107,9 +108,7 @@ void FVOptionsPopup::paintEvent(QPaintEvent *event) {
 }
 
 void FVOptionsPopup::keyPressEvent(QKeyEvent *event) {
-    if(event->key() == Qt::Key_Escape)
-        hide();
-    else
+    if(!handleDismissKey(this, event))
         actionManager->processEvent(event);
 }
 

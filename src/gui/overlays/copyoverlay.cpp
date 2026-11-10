@@ -1,5 +1,6 @@
 #include "copyoverlay.h"
 #include "ui_copyoverlay.h"
+#include "gui/customwidgets/dismisskey.h"
 
 CopyOverlay::CopyOverlay(FloatingWidgetContainer *parent) :
     OverlayWidget(parent),
@@ -169,6 +170,8 @@ bool CopyOverlay::focusNextPrevChild(bool mode) {
 // modified key without a binding of its own there uses its plain key's, as
 // when the digits were hard-coded (Shift+1 picks the first folder too).
 void CopyOverlay::keyPressEvent(QKeyEvent *event) {
+    if(handleDismissKey(this, event))
+        return;
     event->accept();
     QString action = actionManager->actionForShortcut(MODE_COPYMOVE, ShortcutBuilder::fromEvent(event));
     if(action.isEmpty())
