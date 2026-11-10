@@ -10,6 +10,9 @@
 // TODO: nuke this and rewrite
 
 namespace {
+// coalesces move/resize events into one geometry update
+constexpr int kGeometryChangeDebounceMs = 30;
+
 // "thumbgrid 2026.10.3": ends every window title.
 QString appTitle() {
     return QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion();
@@ -56,7 +59,7 @@ MW::MW(QWidget *parent)
     this->setAcceptDrops(true);
     this->setAccessibleName("mainwindow");
     windowGeometryChangeTimer.setSingleShot(true);
-    windowGeometryChangeTimer.setInterval(30);
+    windowGeometryChangeTimer.setInterval(kGeometryChangeDebounceMs);
     setupUi();
 
     connect(settings, &Settings::settingsChanged, this, &MW::readSettings);

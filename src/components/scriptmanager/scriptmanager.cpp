@@ -4,6 +4,11 @@
 #include <utility>
 #include "utils/logging.h"
 
+namespace {
+constexpr int kBlockingScriptTimeoutMs = 10000;
+constexpr int kScriptOutputTimeoutMs = 2000;
+}
+
 ScriptManager *scriptManager = nullptr;
 
 ScriptManager::ScriptManager(QObject *parent)
@@ -40,7 +45,7 @@ void ScriptManager::runScript(const QString &scriptName, std::shared_ptr<Image> 
             if(!exec.waitForStarted()) {
                 qCWarning(logCore) << "Unable not run application/script." << program << " Make sure it is an executable.";
             }
-            exec.waitForFinished(10000);
+            exec.waitForFinished(kBlockingScriptTimeoutMs);
         } else {
             if(!exec.startDetached(program, arguments)) {
                 QFileInfo fi(program);
@@ -61,7 +66,7 @@ void ScriptManager::runScript(const QString &scriptName, std::shared_ptr<Image> 
 QString ScriptManager::runCommand(const QString &program, const QStringList &arguments) {
     QProcess exec;
     exec.start(program, arguments);
-    exec.waitForFinished(2000);
+    exec.waitForFinished(kScriptOutputTimeoutMs);
     return exec.readAllStandardOutput();
 }
 

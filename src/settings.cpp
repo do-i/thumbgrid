@@ -11,6 +11,8 @@
 Settings *settings = nullptr;
 
 namespace {
+// scratch dirs younger than this may belong to a live session
+constexpr int kStaleScratchAgeSecs = 300;
 
 QColor colorFromVariant(const QVariant &value, const QColor &fallback) {
     QColor color = value.value<QColor>();
@@ -609,7 +611,7 @@ void Settings::setupCache() {
     const QStringList scratchDirs = cacheRootDir.entryList(
         {QStringLiteral("videothumb-*"), QStringLiteral("export-*")},
         QDir::Dirs | QDir::NoDotAndDotDot);
-    const QDateTime staleBefore = QDateTime::currentDateTime().addSecs(-300);
+    const QDateTime staleBefore = QDateTime::currentDateTime().addSecs(-kStaleScratchAgeSecs);
     for(const QString& name : scratchDirs) {
         const QString dirPath = cacheRootDir.filePath(name);
         if(QFileInfo(dirPath).lastModified() > staleBefore)

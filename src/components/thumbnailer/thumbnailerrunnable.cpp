@@ -10,6 +10,9 @@
 #include <utility>
 
 namespace {
+constexpr int kMpvStartWaitMs = 3000;
+constexpr int kMpvFrameGrabTimeoutMs = 8000;
+constexpr int kMpvKillWaitMs = 1000;
     const QString directoryThumbnailIconVersion = "folder-icon-v2";
 
     QSet<QString> supportedPreviewImageSuffixes() {
@@ -534,14 +537,14 @@ std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbn
                   );
     // Check start, timeout and exit status explicitly; on any of them the
     // QTemporaryDir below still takes the partial output with it.
-    if(!process.waitForStarted(3000)) {
+    if(!process.waitForStarted(kMpvStartWaitMs)) {
         qCWarning(logThumbnailer) << "could not start" << settings->mpvBinary() << "for" << path;
         return std::make_pair(std::make_unique<QImage>(), QSize());
     }
-    if(!process.waitForFinished(8000)) {
+    if(!process.waitForFinished(kMpvFrameGrabTimeoutMs)) {
         qCWarning(logThumbnailer) << "video thumbnail timed out for" << path;
         process.kill();
-        process.waitForFinished(1000);
+        process.waitForFinished(kMpvKillWaitMs);
         return std::make_pair(std::make_unique<QImage>(), QSize());
     }
     bool ok = (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0);

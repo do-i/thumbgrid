@@ -16,8 +16,8 @@
 
 // TODO: this may break event order.
 // Implement a proper queue.
-#define EVENT_MOVE_TIMEOUT      150 // ms
-#define EVENT_MODIFY_TIMEOUT    150 // ms
+constexpr int EVENT_MOVE_TIMEOUT = 150;   // ms
+constexpr int EVENT_MODIFY_TIMEOUT = 150; // ms
 
 LinuxWatcherPrivate::LinuxWatcherPrivate(LinuxWatcher* qq) :
     DirectoryWatcherPrivate(qq, new LinuxWorker()),

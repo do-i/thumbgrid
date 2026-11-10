@@ -7,6 +7,11 @@
 #include "utils/imagelib.h"
 #include "utils/logging.h"
 
+namespace {
+// idle time after the last zoom step before the smooth rescale runs
+constexpr int kScaleSettleMs = 80;
+}
+
 ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
     pixmap(nullptr),
     pixmapScaled(nullptr),
@@ -62,7 +67,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
 
     scaleTimer = new QTimer(this);
     scaleTimer->setSingleShot(true);
-    scaleTimer->setInterval(80);
+    scaleTimer->setInterval(kScaleSettleMs);
 
     lastTouchpadScroll.start();
 

@@ -19,6 +19,10 @@
 #include <utility>
 
 namespace {
+// full UI is built after the first window shows; model load follows the GUI
+constexpr int kSetupFullUiDelayMs = 50;
+constexpr int kModelDelayLoadMs = 40;
+
 // logs the main window's first paint once, then removes itself; only installed when perf logging is on
 class PerfFirstPaintProbe : public QObject {
 public:
@@ -84,7 +88,7 @@ void Core::showGui() {
         mw->showDefault();
         perfMark("startup_show");
     }
-    QTimer::singleShot(50, mw, &MW::setupFullUi);
+    QTimer::singleShot(kSetupFullUiDelayMs, mw, &MW::setupFullUi);
 }
 
 // create MainWindow and all widgets
@@ -1855,7 +1859,7 @@ void Core::onModelItemReady(const std::shared_ptr<Image>& img, const QString &pa
         if(state.delayModel) {
             this->showGui();
             state.delayModel = false;
-            QTimer::singleShot(40, this, &Core::modelDelayLoad);
+            QTimer::singleShot(kModelDelayLoadMs, this, &Core::modelDelayLoad);
         }
         model->unloadExcept(state.currentFilePath, settings->usePreloader());
     }

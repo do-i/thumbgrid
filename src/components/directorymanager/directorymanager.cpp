@@ -8,6 +8,9 @@
 namespace fs = std::filesystem;
 
 namespace {
+// watcher events for a saved file can arrive this long after the save
+constexpr int kSaveEventGraceMs = 2000;
+
 // false (out untouched) if the entry vanished mid-scan
 bool tryMakeFileEntry(const fs::directory_entry &entry, const QString &name, const QString &path, FSEntry &out) {
     std::error_code ec;
@@ -618,7 +621,7 @@ void DirectoryManager::beginSave(const QString &filePath) {
 
 void DirectoryManager::endSave(const QString &filePath) {
     // the watcher thread may still be delivering the save's events
-    QTimer::singleShot(2000, this, [this, filePath]() {
+    QTimer::singleShot(kSaveEventGraceMs, this, [this, filePath]() {
         auto it = savingFiles.find(filePath);
         if(it != savingFiles.end() && --it.value() <= 0)
             savingFiles.erase(it);

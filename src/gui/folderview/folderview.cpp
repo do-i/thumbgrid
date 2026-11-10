@@ -5,6 +5,11 @@
 
 #include "platform/platformdesktop.h"
 
+namespace {
+// no signal for the model being loaded; scroll after a delay (>150 ms is noticeable)
+constexpr int kTreeScrollDelayMs = 150;
+}
+
 FolderView::FolderView(QWidget *parent) :
     FloatingWidgetContainer(parent),
     ui(new Ui::FolderView)
@@ -324,7 +329,7 @@ void FolderView::setDirectoryPath(QString path) {
         ui->dirTreeView->expand(targetIndex);
 
     // no reliable signal for the model being loaded; scroll after a delay (>150 ms is noticeable)
-    QTimer::singleShot(150, this, &FolderView::fsTreeScrollToCurrent);
+    QTimer::singleShot(kTreeScrollDelayMs, this, &FolderView::fsTreeScrollToCurrent);
 }
 
 void FolderView::fsTreeScrollToCurrent() {

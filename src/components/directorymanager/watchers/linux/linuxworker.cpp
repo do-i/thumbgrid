@@ -9,7 +9,7 @@
 #include "utils/logging.h"
 
 #define TAG         "[LinuxWatcherWorker]"
-#define TIMEOUT     300 // ms
+constexpr int TIMEOUT = 300; // ms
 
 LinuxWorker::LinuxWorker() :
     fd(-1)
