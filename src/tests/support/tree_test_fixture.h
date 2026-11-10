@@ -87,7 +87,10 @@ public:
     // start() connected are detected by comparing the row count with the disk.
     bool waitForTreeLoaded(const QString &dirPath, int timeoutMs = 5000) {
         const QString clean = QDir::cleanPath(dirPath);
-        const int expected = QDir(clean).entryList(QDir::AllDirs | QDir::NoDotAndDotDot).count();
+        QDir::Filters filter = QDir::AllDirs | QDir::NoDotAndDotDot; // as the tree lists them
+        if(settings->showHiddenFiles())
+            filter |= QDir::Hidden;
+        const int expected = QDir(clean).entryList(filter).count();
         auto loaded = [&]() {
             if(mLoaded.contains(clean))
                 return true;

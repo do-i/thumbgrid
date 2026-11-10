@@ -5,6 +5,12 @@
 
 #include "platform/platformdesktop.h"
 
+namespace {
+QDir::Filters treeFilter(bool showHidden) {
+    return QDir::NoDotAndDotDot | QDir::AllDirs | (showHidden ? QDir::Hidden : QDir::Filters());
+}
+}
+
 FolderView::FolderView(QWidget *parent) :
     FloatingWidgetContainer(parent),
     ui(new Ui::FolderView)
@@ -20,7 +26,9 @@ FolderView::FolderView(QWidget *parent) :
     popupTimerClutch.start();
 
     dirModel = new FileSystemModelCustom(this);
-    dirModel->setFilter(QDir::NoDotAndDotDot | QDir::AllDirs);
+    // before the root path is set, so the first listing already honours the setting
+    mShowHidden = settings->showHiddenFiles();
+    dirModel->setFilter(treeFilter(mShowHidden));
     ui->dirTreeView->setModel(dirModel);
 
     QHeaderView* header = ui->dirTreeView->header();
@@ -136,6 +144,13 @@ void FolderView::readSettings() {
     ui->thumbnailGrid->setLabelBackgroundColor(settings->folderViewLabelBackgroundColor());
     ui->thumbnailGrid->setCellBackgroundColor(settings->folderViewCellBackgroundColor());
     ui->topBar->setVisible(settings->folderViewTopBar());
+
+    // setFilter re-lists every loaded folder, so only a changed value may reach it
+    const bool showHidden = settings->showHiddenFiles();
+    if(showHidden != mShowHidden) {
+        mShowHidden = showHidden;
+        dirModel->setFilter(treeFilter(showHidden));
+    }
 
     // only stored values that changed: an unrelated setting must not reset the panel
     const bool placesPanel = settings->placesPanel();

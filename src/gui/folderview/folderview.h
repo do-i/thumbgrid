@@ -110,6 +110,8 @@ private:
     QPersistentModelIndex mTreeScrollTarget;
     QStringList mTreeScrollWaits;
     // places panel state last applied from the settings
+    // tree filter state last applied from the settings
+    bool mShowHidden = false;
     bool mPanelApplied = false;
     bool mPlacesPanel = false, mBookmarksExpanded = false, mTreeExpanded = false;
     int mPanelWidth = 0;

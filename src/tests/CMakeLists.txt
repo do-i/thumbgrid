@@ -853,3 +853,11 @@ add_test(
     NAME "The places panel ignores unrelated settings and the tree shows folders created on disk"
     COMMAND thumbgrid_folder_tree_panel_settings_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_hidden_tooltips_test
+    behavior/test_folder_tree_hidden_folders_and_path_tooltips.cpp
+)
+add_test(
+    NAME "The folder tree lists hidden folders only when the setting is on and tooltips show the full path"
+    COMMAND thumbgrid_folder_tree_hidden_tooltips_test
+)
