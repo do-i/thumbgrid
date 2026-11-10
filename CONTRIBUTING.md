@@ -210,6 +210,19 @@ The script tracks both forms; pass it the git tag.
 valid package metadata without stale release values. Run it locally after
 touching either packaging recipe.
 
+## Performance gate
+
+Run `scripts/perf-baseline.sh --compare` before merging (`--record` refreshes
+the baseline in git-ignored `temp/perf/`). It measures a Release build on a
+fixed fixture and fails if any metric is worse than baseline by more than:
+startup 5%, peak RSS 3%, folder open 5%, scroll pass 5%.
+
+- No settings getter calls in paint, wheel, scroll, per-thumbnail or
+  per-entry code; cache values in a `readSettings()` slot.
+- No disk access on the GUI thread in new code.
+- No new work on the startup path.
+- Log timings through the `thumbgrid.perf` category.
+
 ## Attribution
 
 Please retain credit to easymodo and the qimgv contributors in any
