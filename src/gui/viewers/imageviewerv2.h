@@ -148,14 +148,14 @@ private:
          explicitFit;
     QList<float> zoomLevels;
     MouseInteractionState mouseInteraction;
-    const int SCROLL_UPDATE_RATE = 7;
-    const int DEFAULT_SCROLL_DISTANCE = 240;
-    const int FINE_SCROLL_DISTANCE = 24;
-    const qreal TRACKPAD_SCROLL_MULTIPLIER = 0.7;
-    const qreal WHEEL_SCROLL_MULTIPLIER = 2.0f;
-    const int ANIMATION_SPEED = 150;
-    const float FAST_SCALE_THRESHOLD = 1.0f;
-    const int LARGE_VIEWPORT_SIZE = 2073600;
+    static constexpr int SCROLL_UPDATE_RATE = 7;
+    static constexpr int DEFAULT_SCROLL_DISTANCE = 240;
+    static constexpr int FINE_SCROLL_DISTANCE = 24;
+    static constexpr qreal TRACKPAD_SCROLL_MULTIPLIER = 0.7;
+    static constexpr qreal WHEEL_SCROLL_MULTIPLIER = 2.0f;
+    static constexpr int ANIMATION_SPEED = 150;
+    static constexpr float FAST_SCALE_THRESHOLD = 1.0f;
+    static constexpr int LARGE_VIEWPORT_SIZE = 2073600;
     // how many px you can move while holding RMB until it counts as a zoom attempt
     int zoomThreshold = 4;
     int dragThreshold = 10;

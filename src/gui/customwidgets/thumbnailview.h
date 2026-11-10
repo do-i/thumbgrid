@@ -123,12 +123,12 @@ protected:
     const int indicatorSize = 2;
 
     int scrollRefreshRate = 16;
-    const int SCROLL_DURATION = 120;
-    const float WHEEL_SCROLL_MULTIPLIER = 2.5f;
-    const float SCROLL_ACCELERATION = 1.4f;
-    const int SCROLL_ACCELERATION_THRESHOLD = 50;
+    static constexpr int SCROLL_DURATION = 120;
+    static constexpr float WHEEL_SCROLL_MULTIPLIER = 2.5f;
+    static constexpr float SCROLL_ACCELERATION = 1.4f;
+    static constexpr int SCROLL_ACCELERATION_THRESHOLD = 50;
 
-    const uint LOAD_DELAY = 150;
+    static constexpr uint LOAD_DELAY = 150;
     ScrollDirection lastScrollDirection = SCROLL_FORWARDS;
 
     bool atSceneStart();

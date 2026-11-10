@@ -53,7 +53,7 @@ protected:
     QTimer timer;
     QTimeLine timeline;
     QEasingCurve outCurve;
-    const int ANIMATION_DURATION = tg::timing::kPanelSlideMs;
+    static constexpr int ANIMATION_DURATION = tg::timing::kPanelSlideMs;
     PanelPosition mPosition;
     void recalculateGeometry() override;
     virtual void updateTriggerRect();
