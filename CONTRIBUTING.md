@@ -212,10 +212,11 @@ touching either packaging recipe.
 
 ## Performance gate
 
-Run `scripts/perf-baseline.sh --compare` before merging (`--record` refreshes
-the baseline in git-ignored `temp/perf/`). It measures a Release build on a
-fixed fixture and fails if any metric is worse than baseline by more than:
-startup 5%, peak RSS 3%, folder open 5%, scroll pass 5%.
+Run `scripts/perf-baseline.sh --compare` before merging. It builds fixed
+reference `25b03553` once in git-ignored `temp/perf/ref/` (`--ref` changes it)
+and measures reference and current Release builds interleaved, so machine
+drift hits both. It fails if current is worse than the reference by more than:
+startup 5%, peak RSS 3%, folder open 5%, scroll pass 5% (cumulative bound).
 
 - No settings getter calls in paint, wheel, scroll, per-thumbnail or
   per-entry code; cache values in a `readSettings()` slot.
