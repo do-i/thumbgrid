@@ -32,6 +32,21 @@ void ActionButton::setTriggerMode(TriggerMode mode) {
     mTriggerMode = mode;
 }
 
+void ActionButton::setToolTipLabel(const QString &label, const QString &shortcutAction, ViewMode context) {
+    const bool first = mToolTipLabel.isEmpty();
+    mToolTipLabel = label;
+    mToolTipAction = shortcutAction;
+    mToolTipContext = context;
+    if(first)
+        connect(actionManager, &ActionManager::shortcutsChanged, this, &ActionButton::refreshToolTip);
+    refreshToolTip();
+}
+
+void ActionButton::refreshToolTip() {
+    const QString shortcut = actionManager->shortcutForAction(mToolTipContext, mToolTipAction);
+    setToolTip(shortcut.isEmpty() ? mToolTipLabel : mToolTipLabel + " (" + shortcut + ")");
+}
+
 void ActionButton::mousePressEvent(QMouseEvent *event) {
     IconButton::mousePressEvent(event);
     if(mTriggerMode == TriggerMode::PressTrigger && event->button() == Qt::LeftButton)

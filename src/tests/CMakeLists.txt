@@ -821,3 +821,11 @@ add_test(
     NAME "The grid context menu can be used with the keyboard"
     COMMAND thumbgrid_grid_context_menu_keyboard_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_toolbar_tooltips_test
+    behavior/test_toolbar_tooltips_show_shortcuts.cpp
+)
+add_test(
+    NAME "Toolbar tooltips show the shortcut and follow a rebind"
+    COMMAND thumbgrid_toolbar_tooltips_test
+)

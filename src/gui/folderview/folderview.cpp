@@ -62,6 +62,20 @@ FolderView::FolderView(QWidget *parent) :
     ui->homeButton->setIconPath(":res/icons/common/buttons/panel-small/home12.png");
     ui->rootButton->setIconPath(":res/icons/common/buttons/panel-small/root12.png");
 
+    ui->upButton->setToolTipLabel(tr("Go to parent folder"), "goUp", MODE_FOLDERVIEW);
+    ui->settingsButton->setToolTipLabel(tr("Settings"), "openSettings", MODE_FOLDERVIEW);
+    ui->exitButton->setToolTipLabel(tr("Exit"), "exit", MODE_FOLDERVIEW);
+    ui->docViewButton->setToolTipLabel(tr("Show document view"), "documentView", MODE_FOLDERVIEW);
+    ui->togglePlacesPanelButton->setToolTipLabel(tr("Show / hide places panel"), "togglePlacesPanel", MODE_FOLDERVIEW);
+    ui->optionsPopupButton->setToolTip(tr("Change view options"));
+    ui->sortingComboBox->setToolTip(tr("Change sort order"));
+    ui->zoomSlider->setToolTip(tr("Change thumbnail size"));
+    ui->newBookmarkButton->setToolTip(tr("Add bookmark"));
+    ui->homeButton->setToolTip(tr("Go to home folder"));
+    ui->rootButton->setToolTip(tr("Go to root folder"));
+    ui->bookmarksLabel->setToolTip(tr("Show / hide bookmarks"));
+    ui->directoriesLabel->setToolTip(tr("Show / hide folder tree"));
+
     int min = ui->thumbnailGrid->THUMBNAIL_SIZE_MIN;
     int max = ui->thumbnailGrid->THUMBNAIL_SIZE_MAX;
     int step = ui->thumbnailGrid->ZOOM_STEP;

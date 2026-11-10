@@ -20,6 +20,11 @@ MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent) {
     pinButton->setTriggerMode(TriggerMode::PressTrigger);
     pinButton->setCheckable(true);
     connect(pinButton, &ActionButton::toggled, this, &MainPanel::onPinClicked);
+    openButton->setToolTipLabel(tr("Open file…"), "open", MODE_DOCUMENT);
+    settingsButton->setToolTipLabel(tr("Settings"), "openSettings", MODE_DOCUMENT);
+    exitButton->setToolTipLabel(tr("Exit"), "exit", MODE_DOCUMENT);
+    folderViewButton->setToolTipLabel(tr("Show grid"), "folderView", MODE_DOCUMENT);
+    pinButton->setToolTip(tr("Pin panel"));
 
     buttonsLayout.setDirection(QBoxLayout::BottomToTop);
     buttonsLayout.setSpacing(0);

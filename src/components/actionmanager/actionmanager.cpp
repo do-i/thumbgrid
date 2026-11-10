@@ -557,6 +557,7 @@ void ActionManager::rebuildShortcutLookup() {
             lookup.insert(it.key(), it.value());
         shortcutLookup.insert(ctx.key(), lookup);
     }
+    emit shortcutsChanged();
 }
 //------------------------------------------------------------------------------
 QString ActionManager::lookupActionForShortcut(ViewMode context, const QString &shortcut) const {

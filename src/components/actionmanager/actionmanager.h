@@ -103,6 +103,8 @@ private:
     ActionType validateAction(const QString &actionName);
 
 signals:
+    // the key bindings changed (rebind, preset, reset); widgets showing a shortcut refresh
+    void shortcutsChanged();
     void open();
     void save();
     void saveAs();
