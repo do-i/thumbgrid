@@ -18,7 +18,6 @@
 #include <QDateTime>
 #include <QDir>
 #include <QMenu>
-#include <QMessageBox>
 #include <QMimeData>
 #include <QTextStream>
 #include <QProgressBar>
@@ -531,7 +530,7 @@ void DuplicateFinderDialog::onStartClicked() {
     DuplicateSearchRequest request = buildRequest();
     QString error;
     if(!validateRequest(request, error)) {
-        QMessageBox::warning(this, tr("Find duplicates"), error);
+        CustomMessageBox::message(this, tr("Find duplicates"), error);
         return;
     }
     mModel->clear();
@@ -631,9 +630,9 @@ void DuplicateFinderDialog::deletePaths(const QStringList &paths, const QString 
     mTreeView->expandAll();
     mStatsLabel->setText(tr("Moved %n file(s) to trash", nullptr, removed.count()));
     if(!failed.isEmpty())
-        QMessageBox::warning(this, tr("Move to trash"),
-                             tr("Could not move %n file(s) to trash:", nullptr, failed.count())
-                             + "\n" + failed.join("\n"));
+        CustomMessageBox::message(this, tr("Move to trash"),
+                                  tr("Could not move %n file(s) to trash:", nullptr, failed.count())
+                                  + "\n" + failed.join("\n"));
 }
 
 QString DuplicateFinderDialog::searchRootFor(const QString &path) const {
@@ -648,8 +647,8 @@ void DuplicateFinderDialog::moveChecked() {
         return;
     QString warning = everyCopyCheckedWarning();
     if(!warning.isEmpty()
-       && QMessageBox::warning(this, tr("Move duplicates"), warning,
-                               QMessageBox::Ok | QMessageBox::Cancel) != QMessageBox::Ok)
+       && !CustomMessageBox::confirm(this, tr("Move duplicates"), warning, false,
+                                     tr("Move…"), tr("Cancel")))
         return;
     QString dest = QFileDialog::getExistingDirectory(this, tr("Move duplicates to"));
     if(!dest.isEmpty())
@@ -665,13 +664,13 @@ void DuplicateFinderDialog::moveCheckedTo(const QString &dest) {
     QString session = "dedupe-" + QDateTime::currentDateTime().toString("yyyyMMdd-HHmmss");
     QDir destDir(dest);
     if(!destDir.mkpath(session)) {
-        QMessageBox::warning(this, tr("Move duplicates"), tr("Could not create %1").arg(session));
+        CustomMessageBox::message(this, tr("Move duplicates"), tr("Could not create %1").arg(session));
         return;
     }
     QString sessionPath = destDir.filePath(session);
     QFile manifest(sessionPath + "/manifest.txt");
     if(!manifest.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
-        QMessageBox::warning(this, tr("Move duplicates"), tr("Could not create %1").arg(manifest.fileName()));
+        CustomMessageBox::message(this, tr("Move duplicates"), tr("Could not create %1").arg(manifest.fileName()));
         return;
     }
     QTextStream manifestOut(&manifest);
@@ -702,9 +701,9 @@ void DuplicateFinderDialog::moveCheckedTo(const QString &dest) {
     mTreeView->expandAll();
     mStatsLabel->setText(tr("Moved %n file(s) to %1", nullptr, moved.count()).arg(session));
     if(!failed.isEmpty())
-        QMessageBox::warning(this, tr("Move duplicates"),
-                             tr("Could not move %n file(s):", nullptr, failed.count())
-                             + "\n" + failed.join("\n"));
+        CustomMessageBox::message(this, tr("Move duplicates"),
+                                  tr("Could not move %n file(s):", nullptr, failed.count())
+                                  + "\n" + failed.join("\n"));
 }
 
 void DuplicateFinderDialog::onResultsContextMenu(const QPoint &pos) {
