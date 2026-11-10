@@ -1,4 +1,5 @@
 #include "saveconfirmoverlay.h"
+#include "constants.h"
 #include "ui_saveconfirmoverlay.h"
 #include "components/actionmanager/actionmanager.h"
 
@@ -26,7 +27,7 @@ SaveConfirmOverlay::SaveConfirmOverlay(FloatingWidgetContainer *parent) :
     dimTimer.setInterval(kDimDelayMs);
     connect(&dimTimer, &QTimer::timeout, this, &SaveConfirmOverlay::dim);
     dimAnimation = new QPropertyAnimation(this, "opacity", this);
-    dimAnimation->setDuration(200);
+    dimAnimation->setDuration(tg::timing::kConfirmFadeMs);
     dimAnimation->setEasingCurve(QEasingCurve::OutQuad);
 
     // hug the corner: as little of the image under it as possible

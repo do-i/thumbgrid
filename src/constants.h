@@ -8,7 +8,14 @@
 #pragma once
 
 // Durations, delays, debounces and timeouts (…Ms).
-namespace tg::timing {}
+namespace tg::timing {
+
+// Fade / slide durations per role (values differ today; unified later).
+inline constexpr int kPanelSlideMs = 230;      // slide panels, controls overlay fade
+inline constexpr int kConfirmFadeMs = 200;     // save-confirm dim, move-progress fade
+inline constexpr int kMessageFadeMs = 300;     // floating message, zoom indicator fade
+
+} // namespace tg::timing
 
 // Pixel sizes, margins and scale factors (…Px).
 namespace tg::size {}

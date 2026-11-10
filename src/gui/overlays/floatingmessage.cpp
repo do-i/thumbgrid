@@ -1,4 +1,5 @@
 #include "floatingmessage.h"
+#include "constants.h"
 
 #include <utility>
 #include "ui_floatingmessage.h"
@@ -15,7 +16,7 @@ FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent) :
     visibilityTimer.setInterval(hideDelay);
 
     setFadeEnabled(true);
-    setFadeDuration(300);
+    setFadeDuration(tg::timing::kMessageFadeMs);
 
     setIcon(FloatingMessageIcon::NO_ICON);
 

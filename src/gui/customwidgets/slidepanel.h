@@ -9,6 +9,7 @@
 #include <QTimeLine>
 #include "floatingwidget.h"
 #include "settings.h"
+#include "constants.h"
 #include <memory>
 #include <QDebug>
 #include <ctime>
@@ -52,7 +53,7 @@ protected:
     QTimer timer;
     QTimeLine timeline;
     QEasingCurve outCurve;
-    const int ANIMATION_DURATION = 230;
+    const int ANIMATION_DURATION = tg::timing::kPanelSlideMs;
     PanelPosition mPosition;
     void recalculateGeometry() override;
     virtual void updateTriggerRect();

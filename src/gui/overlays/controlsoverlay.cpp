@@ -1,4 +1,5 @@
 #include "controlsoverlay.h"
+#include "constants.h"
 
 ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
     FloatingWidget(parent)
@@ -29,7 +30,7 @@ ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
     fadeEffect = new QGraphicsOpacityEffect(this);
     this->setGraphicsEffect(fadeEffect);
     fadeAnimation = new QPropertyAnimation(fadeEffect, "opacity");
-    fadeAnimation->setDuration(230);
+    fadeAnimation->setDuration(tg::timing::kPanelSlideMs);
     fadeAnimation->setStartValue(1.0f);
     fadeAnimation->setEndValue(0);
     fadeAnimation->setEasingCurve(QEasingCurve::OutQuart);

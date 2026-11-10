@@ -1,4 +1,5 @@
 #include "zoomindicatoroverlay.h"
+#include "constants.h"
 
 ZoomIndicatorOverlay::ZoomIndicatorOverlay(FloatingWidgetContainer *parent) : OverlayWidget(parent) {
     hideDelay = 2000;
@@ -16,7 +17,7 @@ ZoomIndicatorOverlay::ZoomIndicatorOverlay(FloatingWidgetContainer *parent) : Ov
     setVerticalMargin(16);
 
     setFadeEnabled(true);
-    setFadeDuration(300);
+    setFadeDuration(tg::timing::kMessageFadeMs);
 
     connect(&visibilityTimer, &QTimer::timeout, this, &ZoomIndicatorOverlay::hideAnimated);
 
