@@ -47,7 +47,7 @@ private:
     bool fadeEnabled;
     QPropertyAnimation *fadeAnimation;
 
-private slots:
+protected slots:
     void setOpacity(qreal opacity);
     qreal opacity() const;
 

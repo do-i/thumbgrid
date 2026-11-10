@@ -23,6 +23,7 @@
 #include "core.h"
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
+#include "gui/customwidgets/iconbutton.h"
 #include "gui/overlays/saveconfirmoverlay.h"
 
 class SavingAnEditWritesOffTheGuiThreadTest : public QObject {
@@ -33,6 +34,8 @@ private slots:
     void anEditMadeWhileSavingStaysUnsaved();
     void savingWithOtherFileTypesShownKeepsTheListIntact();
     void closingWhileSavingStillWritesTheFile();
+    void theOverlayDimsWhenIdleAndWakesOnHoverOrANewEdit();
+    void thePencilTogglesTheSaveOptions();
 };
 
 namespace {
@@ -80,15 +83,26 @@ SaveConfirmOverlay *saveOverlay(MW *window) {
     return window->findChild<SaveConfirmOverlay *>();
 }
 
-QPushButton *overlayButton(MW *window, const char *name) {
-    auto overlay = saveOverlay(window);
-    return overlay ? overlay->findChild<QPushButton *>(name) : nullptr;
+// clicks the pencil, the way a user gets from the icon to the save options
+void expandOverlay(SaveConfirmOverlay *overlay) {
+    if(overlay->isExpanded())
+        return;
+    auto toggle = overlay->findChild<IconButton *>("toggleButton");
+    QTest::mouseClick(toggle, Qt::LeftButton, {}, toggle->rect().center());
 }
 
-QString overlayTitle(MW *window) {
+QPushButton *overlayButton(MW *window, const char *name) {
+    auto overlay = saveOverlay(window);
+    if(!overlay)
+        return nullptr;
+    expandOverlay(overlay);
+    return overlay->findChild<QPushButton *>(name);
+}
+
+bool savingShown(MW *window) {
     auto overlay = saveOverlay(window);
     auto label = overlay ? overlay->findChild<QLabel *>("label") : nullptr;
-    return label ? label->text() : QString();
+    return label && label->isVisible() && label->text() == QStringLiteral("Saving…");
 }
 
 bool overlayShown(MW *window) {
@@ -126,7 +140,7 @@ void SavingAnEditWritesOffTheGuiThreadTest::savedFileKeepsMetadataAndPermissions
     save->click();
 
     // in flight: the overlay says so and takes no choice
-    QCOMPARE(overlayTitle(window), QStringLiteral("Saving…"));
+    QVERIFY2(savingShown(window), "The overlay should say it is saving.");
     QVERIFY2(!save->isEnabled(), "Save should be disabled while saving.");
     QVERIFY2(!overlayButton(window, "discardButton")->isEnabled(), "Discard should be disabled while saving.");
     // Discard reaching Core by another route (a shortcut) is ignored too
@@ -165,7 +179,7 @@ void SavingAnEditWritesOffTheGuiThreadTest::anEditMadeWhileSavingStaysUnsaved() 
     // a second turn before the first one has been written
     QVERIFY(actionManager->invokeAction("rotateRight"));
 
-    QTRY_COMPARE(overlayTitle(window), QStringLiteral("Unsaved edits"));
+    QTRY_VERIFY2(!savingShown(window), "The saving caption should go once the write is done.");
     QVERIFY2(overlayShown(window), "The newer edit should still be unsaved.");
     QVERIFY(overlayButton(window, "saveButton")->isEnabled());
     QCOMPARE(QImage(path).size(), QSize(20, 40));
@@ -239,6 +253,97 @@ void SavingAnEditWritesOffTheGuiThreadTest::closingWhileSavingStillWritesTheFile
     const QImage written(path);
     QVERIFY2(!written.isNull(), "The file should be complete, not cut off mid-write.");
     QCOMPARE(written.size(), QSize(1200, 1600));
+}
+
+void SavingAnEditWritesOffTheGuiThreadTest::theOverlayDimsWhenIdleAndWakesOnHoverOrANewEdit() {
+    QTemporaryDir fixture;
+    QVERIFY(fixture.isValid());
+    const QString path = QDir(fixture.path()).filePath("a.png");
+    QVERIFY(markedImage().save(path, "PNG"));
+
+    Viewer viewer;
+    QVERIFY2(openPicture(viewer, path), "The picture should open.");
+    MW *window = viewer.window;
+    QTRY_COMPARE(window->currentViewMode(), MODE_DOCUMENT);
+
+    QVERIFY(actionManager->invokeAction("rotateRight"));
+    QTRY_VERIFY(overlayShown(window));
+    SaveConfirmOverlay *overlay = saveOverlay(window);
+    QVERIFY2(!overlay->isDimmed(), "A fresh edit should show the overlay at full strength.");
+    QVERIFY2(overlay->height() <= 40 && overlay->width() <= 40, "The overlay should start as a single icon.");
+
+    // left alone, it fades back so the image shows through
+    QTRY_VERIFY_WITH_TIMEOUT(overlay->isDimmed(), 5000);
+
+    // hovering brings it back
+    QEnterEvent enter(QPointF(5, 5), QPointF(5, 5), overlay->mapToGlobal(QPointF(5, 5)));
+    QApplication::sendEvent(overlay, &enter);
+    QVERIFY2(!overlay->isDimmed(), "Hovering should bring the overlay back.");
+    QEvent leave(QEvent::Leave);
+    QApplication::sendEvent(overlay, &leave);
+    QTRY_VERIFY_WITH_TIMEOUT(overlay->isDimmed(), 5000);
+
+    // so does another edit
+    QVERIFY(actionManager->invokeAction("rotateRight"));
+    QTRY_VERIFY2(!overlay->isDimmed(), "A new edit should bring the overlay back.");
+    QVERIFY(overlayShown(window));
+}
+
+void SavingAnEditWritesOffTheGuiThreadTest::thePencilTogglesTheSaveOptions() {
+    QTemporaryDir fixture;
+    QVERIFY(fixture.isValid());
+    const QString path = QDir(fixture.path()).filePath("a.png");
+    QVERIFY(markedImage().save(path, "PNG"));
+
+    Viewer viewer;
+    QVERIFY2(openPicture(viewer, path), "The picture should open.");
+    MW *window = viewer.window;
+    QTRY_COMPARE(window->currentViewMode(), MODE_DOCUMENT);
+
+    QVERIFY(actionManager->invokeAction("rotateRight"));
+    QTRY_VERIFY(overlayShown(window));
+    SaveConfirmOverlay *overlay = saveOverlay(window);
+    auto toggle = overlay->findChild<IconButton *>("toggleButton");
+    auto collapse = overlay->findChild<IconButton *>("collapseButton");
+    auto saveAs = overlay->findChild<QPushButton *>("saveAsButton");
+    auto undo = overlay->findChild<QPushButton *>("discardButton");
+    auto caption = overlay->findChild<QLabel *>("label");
+    QVERIFY(toggle && collapse && saveAs && undo && caption);
+
+    // an edit shows only the pencil: no caption, no buttons
+    QVERIFY2(!overlay->isExpanded(), "An edit should show just the pencil.");
+    QVERIFY(toggle->isVisible());
+    QVERIFY2(!caption->isVisible(), "No caption while idle.");
+    QVERIFY(!saveAs->isVisible() && !undo->isVisible() && !collapse->isVisible());
+    const QRect iconRect = overlay->geometry();
+    QVERIFY2(iconRect.width() <= 40, "Collapsed, the overlay should be about one icon wide.");
+
+    // the pencil opens the options, anchored to the same corner
+    QTest::mouseClick(toggle, Qt::LeftButton, {}, toggle->rect().center());
+    QVERIFY(overlay->isExpanded());
+    QVERIFY(saveAs->isVisible() && undo->isVisible() && collapse->isVisible());
+    QCOMPARE(undo->text(), QStringLiteral("Undo all"));
+    QCOMPARE(saveAs->accessibleName(), QStringLiteral("SaveOverlayPrimary"));
+    QVERIFY2(overlay->width() > iconRect.width(), "Expanded should be wider than the icon.");
+    QCOMPARE(overlay->geometry().right(), iconRect.right());
+    QCOMPARE(overlay->geometry().bottom(), iconRect.bottom());
+
+    // the chevron folds it back
+    QTest::mouseClick(collapse, Qt::LeftButton, {}, collapse->rect().center());
+    QVERIFY(!overlay->isExpanded());
+    QCOMPARE(overlay->geometry(), iconRect);
+
+    // and so does the pencil, as a toggle
+    QTest::mouseClick(toggle, Qt::LeftButton, {}, toggle->rect().center());
+    QVERIFY(overlay->isExpanded());
+    QTest::mouseClick(toggle, Qt::LeftButton, {}, toggle->rect().center());
+    QVERIFY(!overlay->isExpanded());
+
+    // Undo all drops the edit and the overlay
+    QTest::mouseClick(toggle, Qt::LeftButton, {}, toggle->rect().center());
+    undo->click();
+    QTRY_VERIFY2(!overlayShown(window), "Undoing the edits should hide the overlay.");
+    QVERIFY2(!overlay->isExpanded(), "It should start folded next time.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(SavingAnEditWritesOffTheGuiThreadTest)

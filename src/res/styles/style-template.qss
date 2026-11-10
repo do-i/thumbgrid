@@ -322,6 +322,66 @@ RenameOverlay {
 }
 
 /*----------------------------------------------------------------------------*/
+/* Save overlay: a slim pill that stays out of the way of the image */
+
+SaveConfirmOverlay {
+    background-color: %overlay_rgba%;
+    border: 1px solid %widget_border%;
+    border-radius: 6px;
+}
+
+[accessibleName="SaveOverlayLabel"] {
+    color: %text_lc%;
+    padding-left: 4px;
+    padding-right: 6px;
+}
+
+[accessibleName="SaveOverlayPrimary"],
+[accessibleName="SaveOverlayButton"] {
+    color: %text_hc%;
+    background-color: transparent;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 9px 4px 9px;
+}
+
+[accessibleName="SaveOverlayPrimary"] {
+    color: %text_hc2%;
+    background-color: %button%;
+}
+
+[accessibleName="SaveOverlayPrimary"]:hover,
+[accessibleName="SaveOverlayButton"]:hover {
+    background-color: %button_hover%;
+    color: %text_hc2%;
+}
+
+[accessibleName="SaveOverlayPrimary"]:pressed,
+[accessibleName="SaveOverlayButton"]:pressed {
+    background-color: %button_pressed%;
+}
+
+[accessibleName="SaveOverlayPrimary"]:disabled,
+[accessibleName="SaveOverlayButton"]:disabled {
+    color: %text_lc2%;
+    background-color: transparent;
+}
+
+[accessibleName="SaveOverlayToggle"] {
+    min-width: 24px;
+    min-height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    background-color: transparent;
+    border-radius: 4px;
+}
+
+[accessibleName="SaveOverlayToggle"]:hover,
+[accessibleName="SaveOverlayToggle"][pressed="true"] {
+    background-color: %button_hover%;
+}
+
+/*----------------------------------------------------------------------------*/
 
 FullscreenInfoOverlay {
     border: 0px solid transparent;

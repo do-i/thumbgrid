@@ -103,6 +103,8 @@
         <file>res/icons/common/other/sorting-mode16@2x.png</file>
         <file>res/icons/common/overlay/close-dim16.png</file>
         <file>res/icons/common/overlay/close-dim16@2x.png</file>
+        <file>res/icons/common/overlay/collapse16.png</file>
+        <file>res/icons/common/overlay/collapse16@2x.png</file>
         <file>res/icons/common/overlay/close16.png</file>
         <file>res/icons/common/overlay/close16@2x.png</file>
         <file>res/icons/common/overlay/copy16.png</file>
