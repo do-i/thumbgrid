@@ -861,3 +861,11 @@ add_test(
     NAME "The folder tree lists hidden folders only when the setting is on and tooltips show the full path"
     COMMAND thumbgrid_folder_tree_hidden_tooltips_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_context_menu_test
+    behavior/test_folder_tree_context_menu.cpp
+)
+add_test(
+    NAME "The folder tree context menu opens for the row under the pointer and acts on that folder"
+    COMMAND thumbgrid_folder_tree_context_menu_test
+)

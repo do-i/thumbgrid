@@ -116,6 +116,7 @@ FolderView::FolderView(QWidget *parent) :
     connect(optionsPopup, &FVOptionsPopup::viewModeSelected, this, &FolderView::onViewModeSelected);
 
     connect(ui->dirTreeView, &TreeViewCustom::droppedIn, this, &FolderView::onDroppedInByIndex);
+    connect(ui->dirTreeView, &TreeViewCustom::contextMenuRequestedAt, this, &FolderView::onTreeContextMenuRequested);
     connect(dirModel, &QFileSystemModel::directoryLoaded, this, &FolderView::onTreeDirectoryLoaded);
     connect(dirModel, &FileSystemModelCustom::folderIconChanged, ui->dirTreeView->viewport(),
             qOverload<>(&QWidget::update));
@@ -214,6 +215,14 @@ void FolderView::toggleFilesystemView() {
 // TODO: ask what to do
 void FolderView::onDroppedInByIndex(QStringList paths, QModelIndex index) {
     emit moveUrlsRequested(std::move(paths), dirModel->filePath(index));
+}
+
+void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoint &globalPos) {
+    if(!mTreeMenu) {
+        mTreeMenu = new TreeContextMenu(this);
+        connect(mTreeMenu, &TreeContextMenu::openRequested, this, &FolderView::directorySelected);
+    }
+    mTreeMenu->openFor(dirModel->filePath(index), globalPos);
 }
 
 void FolderView::onOptionsPopupButtonToggled(bool mode) {

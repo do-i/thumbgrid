@@ -14,6 +14,7 @@
 #include "gui/customwidgets/actionbutton.h"
 #include "gui/customwidgets/styledcombobox.h"
 #include "gui/folderview/fvoptionspopup.h"
+#include "gui/folderview/treecontextmenu.h"
 
 namespace Ui {
     class FolderView;
@@ -85,6 +86,7 @@ private slots:
 
     void onTreeViewClicked(QModelIndex index);
     void onDroppedInByIndex(QStringList, QModelIndex index);
+    void onTreeContextMenuRequested(const QModelIndex &index, const QPoint &globalPos);
     void toggleBookmarks();
     void toggleFilesystemView();
     void setPlacesPanel(bool mode);
@@ -106,6 +108,8 @@ private:
     Ui::FolderView *ui;
     FileSystemModelCustom *dirModel;
     FVOptionsPopup *optionsPopup;
+    // built on the first right-click in the tree
+    TreeContextMenu *mTreeMenu = nullptr;
     QElapsedTimer popupTimerClutch;
     QPersistentModelIndex mTreeScrollTarget;
     QStringList mTreeScrollWaits;

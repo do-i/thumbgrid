@@ -82,10 +82,52 @@ void TreeViewCustom::updateScrollbarStyle(bool hovered) {
 }
 
 void TreeViewCustom::keyPressEvent(QKeyEvent* event) {
+    if(event->key() == Qt::Key_Menu || (event->key() == Qt::Key_F10 && event->modifiers() == Qt::ShiftModifier)) {
+        requestMenuForCurrent();
+        event->accept();
+        return;
+    }
     QModelIndex currentIndex = this->currentIndex();
     if( (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return ) && currentIndex.isValid() ) {
         emit clicked(currentIndex);
     } else {
         QTreeView::keyPressEvent(event);
     }
+}
+
+void TreeViewCustom::requestMenuForCurrent() {
+    const QModelIndex index = currentIndex();
+    if(!index.isValid())
+        return;
+    scrollTo(index);
+    emit contextMenuRequestedAt(index, viewport()->mapToGlobal(visualRect(index).bottomLeft()));
+}
+
+// the row under the pointer; empty space opens nothing
+void TreeViewCustom::contextMenuEvent(QContextMenuEvent *event) {
+    event->accept();
+    if(event->reason() == QContextMenuEvent::Keyboard) {
+        requestMenuForCurrent();
+        return;
+    }
+    const QModelIndex index = indexAt(event->pos());
+    if(index.isValid())
+        emit contextMenuRequestedAt(index, event->globalPos());
+}
+
+// only the left button selects and opens; a right or middle click must not change the current folder
+void TreeViewCustom::mousePressEvent(QMouseEvent *event) {
+    if(event->button() != Qt::LeftButton) {
+        event->accept();
+        return;
+    }
+    QTreeView::mousePressEvent(event);
+}
+
+void TreeViewCustom::mouseReleaseEvent(QMouseEvent *event) {
+    if(event->button() != Qt::LeftButton) {
+        event->accept();
+        return;
+    }
+    QTreeView::mouseReleaseEvent(event);
 }
