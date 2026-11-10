@@ -279,7 +279,7 @@ CopyMoveEnv FileOperationsController::guiEnv(bool move) const {
     };
     env.reportError = [this](FileOpResult r) { outputError(r); };
     env.reportMkdirFailure = [this](const QString &dir) {
-        mw->showError(tr("Could not create directory ") + dir);
+        mw->showError(tr("Could not create folder %1").arg(dir));
         qCWarning(logCore) << "Could not create directory " << dir;
     };
     return env;
@@ -400,7 +400,7 @@ void FileOperationsController::startBackgroundMove(const QStringList& paths, con
         env.reportMkdirFailure = [this, &failures](const QString &dir) {
             failures++;
             QMetaObject::invokeMethod(this, [this, dir]() {
-                mw->showError(tr("Could not create directory ") + dir);
+                mw->showError(tr("Could not create folder %1").arg(dir));
                 qCWarning(logCore) << "Could not create directory " << dir;
             }, Qt::QueuedConnection);
         };
@@ -467,7 +467,7 @@ FileOpResult FileOperationsController::copyOrMoveFile(const QString &path, const
     };
     op(false);
     if(result == FileOpResult::SUCCESS) {
-        mw->showMessageSuccess(move ? tr("File moved.") : tr("File copied."));
+        mw->showMessageSuccess(move ? tr("File moved") : tr("File copied"));
     } else if(result == FileOpResult::DESTINATION_FILE_EXISTS) {
         if(mw->showConfirmation(tr("File exists"), tr("Destination file exists. Overwrite?"), true))
             op(true);
@@ -499,11 +499,9 @@ void FileOperationsController::removePaths(const QStringList& paths, bool trash)
     if(trash ? settings->confirmTrash() : settings->confirmDelete()) {
         QString msg;
         if(trash)
-            msg = (paths.count() > 1) ? tr("Move ") + QString::number(paths.count()) + tr(" items to trash?")
-                                      : tr("Move item to trash?");
+            msg = tr("Move %n item(s) to trash?", "", paths.count());
         else
-            msg = (paths.count() > 1) ? tr("Delete ") + QString::number(paths.count()) + tr(" items permanently?")
-                                      : tr("Delete item permanently?");
+            msg = tr("Delete %n item(s) permanently?", "", paths.count());
         if(!mw->showConfirmation(trash ? tr("Move to trash") : tr("Delete permanently"), msg, true))
             return;
     }
@@ -521,14 +519,14 @@ void FileOperationsController::removePaths(const QStringList& paths, bool trash)
     }
     if(paths.count() == 1) {
         if(result == FileOpResult::SUCCESS)
-            mw->showMessageSuccess(trash ? tr("Moved to trash") : tr("File removed"));
+            mw->showMessageSuccess(trash ? tr("Moved to trash") : tr("Deleted"));
         else
             outputError(result);
     } else if(paths.count() > 1) {
         if(trash)
-            mw->showMessageSuccess(tr("Moved to trash: ") + QString::number(successCount) + tr(" files"));
+            mw->showMessageSuccess(tr("Moved %n file(s) to trash", "", successCount));
         else
-            mw->showMessageSuccess(tr("Removed: ") + QString::number(successCount) + tr(" files"));
+            mw->showMessageSuccess(tr("Deleted %n file(s)", "", successCount));
     }
 }
 
@@ -659,7 +657,7 @@ void FileOperationsController::resizeToCopies(const QStringList& paths, const Re
         return;
     }
 
-    mw->showMessage(tr("Resizing %1 images...").arg(files.size()));
+    mw->showMessage(tr("Resizing %1 images…").arg(files.size()));
     cancelResize = false;
     resizeThread = QThread::create([this, files, spec, tally]() {
         int resized = 0, skipped = 0, failed = 0;

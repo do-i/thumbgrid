@@ -82,31 +82,31 @@ void FileOperations::removeDir(const QString &dirPath, bool recursive, FileOpRes
 QString FileOperations::decodeResult(const FileOpResult &result) {
     switch(result) {
     case FileOpResult::SUCCESS:
-        return QObject::tr("Operation completed succesfully.");
+        return QObject::tr("Done");
     case FileOpResult::DESTINATION_FILE_EXISTS:
-        return QObject::tr("Destination file exists.");
+        return QObject::tr("Destination file exists");
     case FileOpResult::DESTINATION_DIR_EXISTS:
-        return QObject::tr("Destination directory exists.");
+        return QObject::tr("Destination folder exists");
     case FileOpResult::SOURCE_NOT_WRITABLE:
-        return QObject::tr("Source file is not writable.");
+        return QObject::tr("Source file is not writable");
     case FileOpResult::DESTINATION_NOT_WRITABLE:
-        return QObject::tr("Destination is not writable.");
+        return QObject::tr("Destination is not writable");
     case FileOpResult::SOURCE_DOES_NOT_EXIST:
-        return QObject::tr("Source file does not exist.");
+        return QObject::tr("Source file does not exist");
     case FileOpResult::DESTINATION_DOES_NOT_EXIST:
-        return QObject::tr("Destination does not exist.");
+        return QObject::tr("Destination does not exist");
     case FileOpResult::DIRECTORY_NOT_EMPTY:
-        return QObject::tr("Directory is not empty.");
+        return QObject::tr("Folder is not empty");
     case FileOpResult::PARENT_DIRECTORY_NOT_WRITABLE:
-        return QObject::tr("Containing directory is not writable.");
+        return QObject::tr("Containing folder is not writable");
     case FileOpResult::NOTHING_TO_DO:
-        return QObject::tr("Nothing to do.");
+        return QObject::tr("Nothing to do");
     case FileOpResult::INVALID_NAME:
-        return QObject::tr("Invalid name. Enter a file name without slashes, and not \".\" or \"..\".");
+        return QObject::tr("Invalid name. Enter a file name without slashes, and not \".\" or \"..\"");
     case FileOpResult::DESTINATION_INSIDE_SOURCE:
-        return QObject::tr("Cannot copy or move a folder into itself.");
+        return QObject::tr("Cannot copy or move a folder into itself");
     case FileOpResult::OTHER_ERROR:
-        return QObject::tr("Other error.");
+        return QObject::tr("Other error");
     }
     return nullptr;
 }

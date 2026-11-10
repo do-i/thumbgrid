@@ -143,7 +143,7 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
     ui(new Ui::SettingsDialog)
 {
     ui->setupUi(this);
-    this->setWindowTitle(tr("Preferences — ") + qApp->applicationName());
+    this->setWindowTitle(tr("Settings — ThumbGrid"));
 
     setupPreferencePages();
     setupShortcutsPage();
@@ -177,7 +177,7 @@ void SettingsDialog::setupAboutPage() {
         ui->horizontalLayout_41->indexOf(ui->versionLabel) + 1, versionInfoButton);
     connect(versionInfoButton, &QToolButton::clicked, this, [this]() {
         CustomMessageBox::message(this, tr("Version"),
-            tr("<b>thumbgrid %1</b><br><br>Build: %2")
+            tr("<b>ThumbGrid %1</b><br><br>Build: %2")
                 .arg(appVersionShort, appVersionFull));
     });
     ui->qtVersionLabel->setText(qVersion());
@@ -256,7 +256,7 @@ void SettingsDialog::setupThemePage() {
 void SettingsDialog::setupScalingControls() {
     auto *filter = ui->scalingQualityComboBox;
     filter->clear();
-    filter->addItem(tr("Nearest neighbor"), QI_FILTER_NEAREST);
+    filter->addItem(tr("Nearest neighbour"), QI_FILTER_NEAREST);
     filter->addItem(tr("Smooth"), QI_FILTER_BILINEAR);
     filter->addItem(tr("High quality"), QI_FILTER_HIGH_QUALITY);
     filter->setToolTip(tr("High quality: bicubic, and sharpened when an image is shrunk below half size."));
@@ -272,7 +272,7 @@ void SettingsDialog::setupScalingControls() {
 void SettingsDialog::setupTransparencyGridControls() {
     auto *row = new QHBoxLayout();
     row->setContentsMargins(0, 0, 0, 0);
-    auto *label = new QLabel(tr("Checker colors:"));
+    auto *label = new QLabel(tr("Checkerboard colours:"));
     label->setToolTip(tr("Pattern behind transparent images, in the viewer and in grid thumbnails"));
     row->addWidget(label);
 
@@ -291,9 +291,9 @@ void SettingsDialog::setupTransparencyGridControls() {
         return selector;
     };
     mTransparencyGridColor1Selector = makeSelector(QStringLiteral("transparencyGridColor1Selector"),
-                                                   tr("Checker color 1"));
+                                                   tr("Checkerboard colour 1"));
     mTransparencyGridColor2Selector = makeSelector(QStringLiteral("transparencyGridColor2Selector"),
-                                                   tr("Checker color 2"));
+                                                   tr("Checkerboard colour 2"));
     row->addWidget(mTransparencyGridColor1Selector);
     row->addWidget(mTransparencyGridColor2Selector);
 
@@ -1868,7 +1868,7 @@ void SettingsDialog::showShortcutRowMenu(const QPoint &pos) {
     const ViewMode src = shortcutContextAtMenuPos(pos);
 
     QMenu menu(this);
-    menu.addAction(tr("Edit keys..."), this, [this, action, src]() {
+    menu.addAction(tr("Edit keys…"), this, [this, action, src]() {
         openShortcutDetails(action, src);
     });
     menu.addSeparator();

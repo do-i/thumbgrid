@@ -134,7 +134,7 @@ FileInfoDialog::FileInfoDialog(QWidget *parent) : QDialog(parent) {
         updateActionButtons();
     });
     exifLayout->addWidget(mShowAllTagsCheckBox);
-    mTabs->addTab(mExifTab, tr("EXIF"));
+    mTabs->addTab(mExifTab, tr("Exif"));
     mTabs->setTabVisible(mTabs->indexOf(mExifTab), false);
 
     // XMP tab: read-only shape of the EXIF tab, shown for any format that can hold an XMP packet

@@ -357,17 +357,17 @@ void Core::onUpdate() {
 }
 
 void Core::onFirstRun() {
-    mw->showMessage(tr("Welcome to ") + qApp->applicationName() + tr(" version ") + appVersion.toString() + "!", tg::timing::kMessageLongMs);
+    mw->showMessage(tr("Welcome to ThumbGrid %1!").arg(appVersion.toString()), tg::timing::kMessageLongMs);
     settings->setFirstRun(false);
     settings->setLastVersion(appVersion);
 }
 
 void Core::toggleShuffle() {
     if(shuffle) {
-        mw->showMessage(tr("Shuffle mode: OFF"));
+        mw->showMessage(tr("Shuffle mode: off"));
     } else {
         syncRandomizer();
-        mw->showMessage(tr("Shuffle mode: ON"));
+        mw->showMessage(tr("Shuffle mode: on"));
     }
     shuffle = !shuffle;
     updateInfoString();
@@ -376,13 +376,13 @@ void Core::toggleShuffle() {
 void Core::toggleSlideshow() {
     if(slideshow) {
         stopSlideshow();
-        mw->showMessage(tr("Slideshow: OFF"));
+        mw->showMessage(tr("Slideshow: off"));
 
     } else {
         startSlideshow();
         // startSlideshow() can refuse (empty folder) and posts its own message
         if(slideshow)
-            mw->showMessage(tr("Slideshow: ON"));
+            mw->showMessage(tr("Slideshow: on"));
     }
 }
 
@@ -392,7 +392,7 @@ void Core::startSlideshow() {
     if(slideshow)
         return;
     if(!model || model->isEmpty()) {
-        mw->showMessage(tr("Directory is empty."));
+        mw->showMessage(tr("Folder is empty"));
         return;
     }
     QString startAt;
@@ -1125,7 +1125,7 @@ void Core::moveSelection() {
         QStringList selection = currentSelection();
         if(selection.isEmpty())
             return;
-        QString destDir = QFileDialog::getExistingDirectory(mw, tr("Move to..."), model->directoryPath());
+        QString destDir = QFileDialog::getExistingDirectory(mw, tr("Move to"), model->directoryPath());
         if(destDir.isEmpty())
             return;
         // FileOperationsController canonicalizes and enforces containment for every route
@@ -1439,15 +1439,15 @@ void Core::createDirectory() {
     if(parentDir.isEmpty())
         return;
     bool ok = false;
-    QString name = CustomMessageBox::getText(mw, tr("New Folder"), tr("Folder name:"),
-                                             tr("New Folder"), &ok);
+    QString name = CustomMessageBox::getText(mw, tr("New folder"), tr("Folder name:"),
+                                             tr("New folder"), &ok);
     if(!ok)
         return;
     name = name.trimmed();
     if(name.isEmpty())
         return;
     if(name.contains('/') || name.contains('\\')) {
-        mw->showError(tr("Folder name cannot contain path separators."));
+        mw->showError(tr("Folder name cannot contain path separators"));
         return;
     }
     FileOpResult result;
@@ -1533,7 +1533,7 @@ bool Core::loadPath(QString path) {
         state.directoryPath = QDir(path).absolutePath();
         if(!settings->allowBrowseRoot() &&
            QDir::cleanPath(state.directoryPath) == QDir::cleanPath(QDir::rootPath())) {
-            mw->showMessage(tr("Cannot view root folder."), tg::timing::kMessageNormalMs);
+            mw->showMessage(tr("Cannot view root folder"), tg::timing::kMessageNormalMs);
             return false;
         }
     } else if(fileInfo.isFile()) {
@@ -1632,7 +1632,7 @@ void Core::loadParentDir() {
     stopSlideshow();
     QFileInfo currentDir(model->directoryPath());
     if(QDir::cleanPath(currentDir.absoluteFilePath()) == QDir::cleanPath(QDir::rootPath())) {
-        mw->showMessage(tr("Already at root folder."), tg::timing::kMessageNormalMs);
+        mw->showMessage(tr("Already at root folder"), tg::timing::kMessageNormalMs);
         return;
     }
     const QString rootPath = QDir::cleanPath(QDir::rootPath());
@@ -1802,7 +1802,7 @@ void Core::nextImageSlideshow() {
             newIndex = nearestViewableIndex(0, 1);
         if(newIndex < 0) {
             stopSlideshow();
-            mw->showMessage(tr("End of directory."));
+            mw->showMessage(tr("End of folder"));
             return;
         }
         loadFileIndex(newIndex, false, true);
@@ -1891,7 +1891,7 @@ void Core::onModelSortingChanged(SortingMode mode) {
 void Core::guiSetImage(const std::shared_ptr<Image>& img) {
     state.hasActiveImage = true;
     if(!img) {
-        mw->showMessage(tr("Error: could not load image."));
+        mw->showMessage(tr("Could not load image"));
         return;
     }
     DocumentType type = img->type();

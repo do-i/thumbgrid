@@ -278,32 +278,32 @@
         </property>
         <item>
          <property name="text">
-          <string>A - Z</string>
+          <string>Name A–Z</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Z - A</string>
+          <string>Name Z–A</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Size</string>
+          <string>Smallest first</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Size (desc)</string>
+          <string>Largest first</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Oldest</string>
+          <string>Oldest first</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>Newest</string>
+          <string>Newest first</string>
          </property>
         </item>
        </widget>

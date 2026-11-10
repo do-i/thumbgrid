@@ -13,7 +13,7 @@ FVOptionsPopup::FVOptionsPopup(QWidget *parent) :
 
     ui->viewSimpleButton->setText(QObject::tr("Simple"));
     ui->viewExtendedButton->setText(QObject::tr("Extended"));
-    ui->viewFoldersButton->setText(QObject::tr("Extended + Folders"));
+    ui->viewFoldersButton->setText(QObject::tr("Extended + folders"));
     ui->showInfoButton->setText(QObject::tr("Show descriptions"));
     ui->fitPreviewButton->setText(QObject::tr("Fit folder previews"));
     ui->showOtherFilesButton->setText(QObject::tr("Show other file types"));

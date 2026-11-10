@@ -75,7 +75,7 @@ QWidget *makeFolderListBox(QListWidget *&list, QWidget *parent) {
     list->setMaximumHeight(88);
     layout->addWidget(list, 1);
     auto *buttons = new QVBoxLayout();
-    auto *addButton = new QPushButton(QObject::tr("Add..."), box);
+    auto *addButton = new QPushButton(QObject::tr("Add…"), box);
     auto *removeButton = new QPushButton(QObject::tr("Remove"), box);
     buttons->addWidget(addButton);
     buttons->addWidget(removeButton);
@@ -185,7 +185,7 @@ void DuplicateFinderDialog::setupSetupZone() {
     singleLayout->addWidget(new QLabel(tr("Image:"), singlePage));
     mSourceEdit = new QLineEdit(singlePage);
     singleLayout->addWidget(mSourceEdit, 1);
-    auto *browse = new QPushButton(tr("Browse..."), singlePage);
+    auto *browse = new QPushButton(tr("Browse…"), singlePage);
     singleLayout->addWidget(browse);
     connect(browse, &QPushButton::clicked, this, [this] {
         QString file = QFileDialog::getOpenFileName(this, tr("Select image"), QString(),
@@ -275,7 +275,7 @@ void DuplicateFinderDialog::setupResultsZone() {
     filterRow->addWidget(new QLabel(tr("Filter:"), this));
     mFilterEdit = new QLineEdit(this);
     mFilterEdit->setObjectName("duplicateFinderFilterEdit");
-    mFilterEdit->setPlaceholderText(tr("name or path..."));
+    mFilterEdit->setPlaceholderText(tr("Name or path"));
     filterRow->addWidget(mFilterEdit, 1);
     filterRow->addWidget(new QLabel(tr("Min similarity:"), this));
     mMinSimilaritySpin = new QSpinBox(this);
@@ -538,7 +538,7 @@ void DuplicateFinderDialog::onStartClicked() {
     mThumbsRequested.clear();
     mSearchRoots = request.targetFolders + request.sourceFolders;
     mProgressBar->setRange(0, 0);
-    mStatsLabel->setText(tr("Scanning..."));
+    mStatsLabel->setText(tr("Scanning…"));
     mStartButton->setText(tr("Cancel"));
     mClearButton->setEnabled(false);
     mFinder.start(request);
@@ -632,7 +632,7 @@ void DuplicateFinderDialog::deletePaths(const QStringList &paths, const QString 
     mStatsLabel->setText(tr("Moved %n file(s) to trash", nullptr, removed.count()));
     if(!failed.isEmpty())
         QMessageBox::warning(this, tr("Move to trash"),
-                             tr("Could not trash %n file(s):", nullptr, failed.count())
+                             tr("Could not move %n file(s) to trash:", nullptr, failed.count())
                              + "\n" + failed.join("\n"));
 }
 
@@ -651,7 +651,7 @@ void DuplicateFinderDialog::moveChecked() {
        && QMessageBox::warning(this, tr("Move duplicates"), warning,
                                QMessageBox::Ok | QMessageBox::Cancel) != QMessageBox::Ok)
         return;
-    QString dest = QFileDialog::getExistingDirectory(this, tr("Move duplicates to..."));
+    QString dest = QFileDialog::getExistingDirectory(this, tr("Move duplicates to"));
     if(!dest.isEmpty())
         moveCheckedTo(dest);
 }

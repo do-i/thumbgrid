@@ -23,7 +23,7 @@ ResizeDialog::ResizeDialog(QSize originalSize,  QWidget *parent) :
 
     // Copy-mode controls. Parented to the frame that holds the other two radio
     // buttons so all three stay mutually exclusive; hidden until setCopyMode().
-    byLongEdge = new QRadioButton(tr("By Long Edge:"), ui->resFrame);
+    byLongEdge = new QRadioButton(tr("By long edge:"), ui->resFrame);
     byLongEdge->setObjectName("byLongEdge");
     ui->verticalLayout_6->addWidget(byLongEdge);
     longEdgeLabel = new QLabel(tr("Long edge:"), ui->resFrame);
@@ -154,7 +154,7 @@ void ResizeDialog::setCopyMode(int imageCount) {
     shrinkOnly->show();
     if(multiImage) {
         setWindowTitle(tr("Resize %1 images (saves copies)").arg(imageCount));
-        ui->byAbsoluteSize->setText(tr("Fit Within:"));
+        ui->byAbsoluteSize->setText(tr("Fit within:"));
         // W and H become the two independent sides of the box
         ui->keepAspectRatio->blockSignals(true);
         ui->keepAspectRatio->setChecked(false);

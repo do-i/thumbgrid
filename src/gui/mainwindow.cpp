@@ -15,9 +15,9 @@ namespace {
 // coalesces move/resize events into one geometry update
 constexpr int kGeometryChangeDebounceMs = 30;
 
-// "thumbgrid 2026.10.3": ends every window title.
+// "ThumbGrid 2026.10.3": ends every window title.
 QString appTitle() {
-    return QCoreApplication::applicationName() + " " + QCoreApplication::applicationVersion();
+    return "ThumbGrid " + QCoreApplication::applicationVersion();
 }
 
 // A path under the home directory with the home part shown as "~".
@@ -228,7 +228,7 @@ void MW::fitWindow() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWindow();
     } else {
-        showMessage("Zoom temporary disabled");
+        showMessage("Zoom temporarily disabled");
     }
 }
 
@@ -238,7 +238,7 @@ void MW::fitWidth() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWidth();
     } else {
-        showMessage("Zoom temporary disabled");
+        showMessage("Zoom temporarily disabled");
     }
 }
 
@@ -248,7 +248,7 @@ void MW::fitOriginal() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitOriginal();
     } else {
-        showMessage("Zoom temporary disabled");
+        showMessage("Zoom temporarily disabled");
     }
 }
 
@@ -258,7 +258,7 @@ void MW::fitWindowStretch() {
     if(viewerWidget->interactionEnabled()) {
         viewerWidget->fitWindowStretch();
     } else {
-        showMessage("Zoom temporary disabled");
+        showMessage("Zoom temporarily disabled");
     }
 }
 
@@ -393,12 +393,12 @@ void MW::onSortingChanged(SortingMode mode) {
     folderView.get()->onSortingChanged(mode);
     if(centralWidget.get()->currentViewMode() == ViewMode::MODE_DOCUMENT) {
         switch(mode) {
-            case SortingMode::SORT_NAME:      showMessage("Sorting: By Name");              break;
-            case SortingMode::SORT_NAME_DESC: showMessage("Sorting: By Name (desc.)");      break;
-            case SortingMode::SORT_TIME:      showMessage("Sorting: By Time");              break;
-            case SortingMode::SORT_TIME_DESC: showMessage("Sorting: By Time (desc.)");      break;
-            case SortingMode::SORT_SIZE:      showMessage("Sorting: By File Size");         break;
-            case SortingMode::SORT_SIZE_DESC: showMessage("Sorting: By File Size (desc.)"); break;
+            case SortingMode::SORT_NAME:      showMessage("Sorting: Name A–Z"); break;
+            case SortingMode::SORT_NAME_DESC: showMessage("Sorting: Name Z–A"); break;
+            case SortingMode::SORT_TIME:      showMessage("Sorting: Oldest first"); break;
+            case SortingMode::SORT_TIME_DESC: showMessage("Sorting: Newest first"); break;
+            case SortingMode::SORT_SIZE:      showMessage("Sorting: Smallest first"); break;
+            case SortingMode::SORT_SIZE_DESC: showMessage("Sorting: Largest first"); break;
         }
     }
 }
@@ -413,18 +413,18 @@ void MW::setDirectoryPath(QString path) {
 void MW::toggleLockZoom() {
     viewerWidget->toggleLockZoom();
     if(viewerWidget->lockZoomEnabled())
-        showMessage("Zoom lock: ON");
+        showMessage("Zoom lock: on");
     else
-        showMessage("Zoom lock: OFF");
+        showMessage("Zoom lock: off");
     onInfoUpdated();
 }
 
 void MW::toggleLockView() {
     viewerWidget->toggleLockView();
     if(viewerWidget->lockViewEnabled())
-        showMessage("View lock: ON");
+        showMessage("View lock: on");
     else
-        showMessage("View lock: OFF");
+        showMessage("View lock: off");
     onInfoUpdated();
 }
 
@@ -508,7 +508,7 @@ void MW::setFilter(ScalingFilter filter) {
             filterName = "configured " + QString::number(static_cast<int>(filter));
             break;
     }
-    showMessage("Filter " + filterName, tg::timing::kMessageShortMs);
+    showMessage("Filter: " + filterName, tg::timing::kMessageShortMs);
     viewerWidget->setScalingFilter(filter);
 }
 
@@ -687,7 +687,7 @@ QString MW::getSaveFileName(QString filePath) {
             break;
         }
     }
-    QString newFilePath = QFileDialog::getSaveFileName(this, tr("Save File as..."), filePath, filterString, &selectedFilter);
+    QString newFilePath = QFileDialog::getSaveFileName(this, tr("Save as"), filePath, filterString, &selectedFilter);
     return newFilePath;
 }
 
@@ -994,7 +994,7 @@ void MW::onInfoUpdated() {
 
     QString windowTitle;
     if(centralWidget->currentViewMode() == MODE_FOLDERVIEW) {
-        windowTitle = info.directoryPath.isEmpty() ? tr("Folder view") : tildePath(info.directoryPath);
+        windowTitle = info.directoryPath.isEmpty() ? tr("Grid") : tildePath(info.directoryPath);
         infoBarFullscreen->setInfo("", tr("No file opened."), "");
         folderView->setStatusText(folderStatusText);
     } else if(info.fileName.isEmpty()) {

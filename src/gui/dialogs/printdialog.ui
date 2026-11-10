@@ -345,7 +345,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Color mode:</string>
+             <string>Colour mode:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -371,7 +371,7 @@
           <item>
            <widget class="QRadioButton" name="grayscale">
             <property name="text">
-             <string>Grayscale</string>
+             <string>Greyscale</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -381,7 +381,7 @@
           <item>
            <widget class="QRadioButton" name="color">
             <property name="text">
-             <string>Color</string>
+             <string>Colour</string>
             </property>
            </widget>
           </item>

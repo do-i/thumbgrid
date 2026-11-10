@@ -60,7 +60,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>By Percent:</string>
+             <string>By percent:</string>
             </property>
             <property name="checked">
              <bool>true</bool>
@@ -76,7 +76,7 @@
              </sizepolicy>
             </property>
             <property name="text">
-             <string>By Absolute Size:</string>
+             <string>By absolute size:</string>
             </property>
             <property name="checked">
              <bool>false</bool>

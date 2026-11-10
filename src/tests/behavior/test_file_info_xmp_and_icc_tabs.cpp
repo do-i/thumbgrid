@@ -163,7 +163,7 @@ void FileInfoXmpAndIccTabsTest::xmpAndIccTabsFollowWhatTheFormatCanCarry() {
     QTRY_VERIFY2(dialog->isVisible(), "The File info popup should be visible.");
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(xmpIccPngPath).absoluteFilePath());
 
-    const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
+    const int exifIndex = tabIndexByText(dialog->tabs(), "Exif");
     const int xmpIndex = tabIndexByText(dialog->tabs(), "XMP");
     const int iccIndex = tabIndexByText(dialog->tabs(), "ICC");
     const int generalIndex = tabIndexByText(dialog->tabs(), "General");

@@ -130,7 +130,7 @@ void FileInfoFolderAndExifStatesTest::folderShowsCountsAndExifTabTracksTheSelect
     QTRY_COMPARE(rowValueByName(dialog, "Path"), QFileInfo(subPath).absoluteFilePath());
     QTRY_COMPARE(rowValueByName(dialog, "Contains"), QStringLiteral("2 file(s), 1 folder(s)"));
 
-    const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
+    const int exifIndex = tabIndexByText(dialog->tabs(), "Exif");
     const int generalIndex = tabIndexByText(dialog->tabs(), "General");
     QVERIFY2(exifIndex >= 0 && generalIndex >= 0, "Both tabs should exist.");
     QVERIFY2(!dialog->tabs()->isTabVisible(exifIndex), "EXIF tab should be hidden for a folder target.");

@@ -86,7 +86,7 @@ void FileInfoClickAwaySavesTest::clickingOutsideAFieldSavesItAndDropsFocus() {
     QTRY_VERIFY2(dialog != nullptr, "The File info popup should exist.");
     QTRY_VERIFY2(dialog->isVisible(), "The File info popup should be visible.");
 
-    const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
+    const int exifIndex = tabIndexByText(dialog->tabs(), "Exif");
     QVERIFY(exifIndex >= 0);
     QTRY_VERIFY(dialog->tabs()->isTabVisible(exifIndex));
     dialog->tabs()->setCurrentIndex(exifIndex);

@@ -120,11 +120,11 @@ int main(int argc, char *argv[]) {
     parser.setApplicationDescription(appDescription);
     parser.addHelpOption();
     parser.addVersionOption();
-    parser.addPositionalArgument("path", QCoreApplication::translate("main", "File or directory path."));
+    parser.addPositionalArgument("path", QCoreApplication::translate("main", "File or folder path."));
     parser.addOptions({
         {"gen-thumbs",
-            QCoreApplication::translate("main", "Generate all thumbnails for directory."),
-            QCoreApplication::translate("main", "directory-path")},
+            QCoreApplication::translate("main", "Generate all thumbnails for a folder."),
+            QCoreApplication::translate("main", "folder-path")},
         {"gen-thumbs-size",
             QCoreApplication::translate("main", "Thumbnail size. Current size is used if not specified."),
             QCoreApplication::translate("main", "thumbnail-size")},

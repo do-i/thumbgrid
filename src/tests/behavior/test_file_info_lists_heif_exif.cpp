@@ -103,7 +103,7 @@ void FileInfoListsHeifExifTest::aHeifListsItsExifReadOnly() {
 
     auto *dialog = window->findChild<FileInfoDialog *>();
     QTRY_VERIFY2(dialog != nullptr && dialog->isVisible(), "The File info popup should be visible.");
-    const int exifIndex = tabIndexByText(dialog->tabs(), "EXIF");
+    const int exifIndex = tabIndexByText(dialog->tabs(), "Exif");
     QVERIFY2(exifIndex >= 0, "The EXIF tab should exist.");
     QTRY_VERIFY2(dialog->tabs()->isTabVisible(exifIndex), "A heic should get the EXIF tab.");
     dialog->tabs()->setCurrentIndex(exifIndex);

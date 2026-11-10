@@ -331,7 +331,7 @@
       <item>
        <widget class="QLabel" name="label_5">
         <property name="text">
-         <string>Aspect Ratio</string>
+         <string>Aspect ratio</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -355,12 +355,12 @@
         </item>
         <item>
          <property name="text">
-          <string>Current Image</string>
+          <string>Current image</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>This Screen</string>
+          <string>This screen</string>
          </property>
         </item>
         <item>

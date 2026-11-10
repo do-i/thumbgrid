@@ -48,11 +48,11 @@ void MoveProgressOverlay::reset() {
 }
 
 void MoveProgressOverlay::setProgress(qint64 done, qint64 total) {
-    if(!cancelButton->isEnabled()) // keep "Cancelling..." until the worker stops
+    if(!cancelButton->isEnabled()) // keep "Cancelling…" until the worker stops
         return;
     QLocale locale;
     if(total < 0) {
-        label->setText(tr("Moving..."));
+        label->setText(tr("Moving…"));
         bar->setRange(0, 0); // busy indicator
     } else {
         label->setText(tr("Moving %1 / %2 files").arg(locale.toString(done), locale.toString(total)));
@@ -65,6 +65,6 @@ void MoveProgressOverlay::setProgress(qint64 done, qint64 total) {
 
 void MoveProgressOverlay::setCancelling() {
     cancelButton->setEnabled(false);
-    label->setText(tr("Cancelling after the current file..."));
+    label->setText(tr("Cancelling after the current file…"));
     recalculateGeometry();
 }
