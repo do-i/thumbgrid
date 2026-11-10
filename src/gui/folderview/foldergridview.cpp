@@ -41,8 +41,11 @@ QString plainKeyName(const QKeyEvent *event) {
 // TODO: create a base class for this and the one on panel
 
 namespace {
+    // grid cell width relative to the thumbnail size
+    constexpr float kCellAspect = 1.28f;
+
     int folderGridThumbnailWidth(int size) {
-        return qRound(size * 1.28f);
+        return qRound(size * kCellAspect);
     }
 }
 

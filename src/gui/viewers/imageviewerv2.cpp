@@ -8,6 +8,12 @@
 #include "utils/logging.h"
 
 namespace {
+constexpr float kInitialMinScale = 0.01f;
+constexpr float kMaxScale = 500.0f;
+// with "unlock min zoom" an image can shrink to this many px on its short side
+constexpr double kMinUnlockedZoomPx = 10.0;
+// px of RMB drag (per device pixel ratio) before it counts as a zoom attempt
+constexpr double kZoomDragThresholdPx = 4.0;
 // idle time after the last zoom step before the smooth rescale runs
 constexpr int kScaleSettleMs = 80;
 }
@@ -29,8 +35,8 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
     trackpadDetection(true),
     explicitFit(false),
     mouseInteraction(MouseInteractionState::MOUSE_NONE),
-    minScale(0.01f),
-    maxScale(500.0f),
+    minScale(kInitialMinScale),
+    maxScale(kMaxScale),
     fitWindowScale(0.125f),
     fitWindowStretchScale(0.125f),
     mViewLock(LOCK_NONE),
@@ -71,7 +77,7 @@ ImageViewerV2::ImageViewerV2(QWidget *parent) : QGraphicsView(parent),
 
     lastTouchpadScroll.start();
 
-    zoomThreshold = static_cast<int>(dpr * 4.);
+    zoomThreshold = static_cast<int>(dpr * kZoomDragThresholdPx);
 
     pixmapItem.setTransformationMode(Qt::SmoothTransformation);
     pixmapItem.setScale(1.0f);
@@ -125,7 +131,7 @@ void ImageViewerV2::onDPRChanged() {
         return;
     qCDebug(logGui) << "DPR CHANGED " << dpr << " >> " << this->devicePixelRatioF();
     dpr = this->devicePixelRatioF();
-    zoomThreshold = static_cast<int>(dpr * 4.);
+    zoomThreshold = static_cast<int>(dpr * kZoomDragThresholdPx);
     if(pixmap) {
         pixmap->setDevicePixelRatio(dpr);
         pixmapItem.setPixmap(*pixmap);
@@ -795,7 +801,7 @@ void ImageViewerV2::updateMinScale() {
     updateFitWindowStretchScale();
     if(mUnlockMinZoom) {
         if(!pixmap->isNull())
-            minScale = qMax(10./pixmap->width(), 10./pixmap->height());
+            minScale = qMax(kMinUnlockedZoomPx / pixmap->width(), kMinUnlockedZoomPx / pixmap->height());
         else
             minScale = 1.0f;
     } else {
@@ -1268,7 +1274,7 @@ void ImageViewerV2::snapToEdges() {
 void ImageViewerV2::doZoom(float newScale) {
     if(!pixmap)
         return;
-    newScale = qBound(minScale, newScale, 500.0f);
+    newScale = qBound(minScale, newScale, kMaxScale);
     // fix scene position to integer values
     auto tl = pixmapItem.sceneBoundingRect().topLeft().toPoint();
     pixmapItem.setOffset(tl);
