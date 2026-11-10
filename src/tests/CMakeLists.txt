@@ -845,3 +845,11 @@ add_test(
     NAME "The folder tree keeps expanded folders and shows the current folder once it is listed"
     COMMAND thumbgrid_folder_tree_expansions_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_panel_settings_test
+    behavior/test_folder_tree_panel_follows_settings_and_disk.cpp
+)
+add_test(
+    NAME "The places panel ignores unrelated settings and the tree shows folders created on disk"
+    COMMAND thumbgrid_folder_tree_panel_settings_test
+)

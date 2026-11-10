@@ -109,6 +109,8 @@ FolderView::FolderView(QWidget *parent) :
 
     connect(ui->dirTreeView, &TreeViewCustom::droppedIn, this, &FolderView::onDroppedInByIndex);
     connect(dirModel, &QFileSystemModel::directoryLoaded, this, &FolderView::onTreeDirectoryLoaded);
+    connect(dirModel, &FileSystemModelCustom::folderIconChanged, ui->dirTreeView->viewport(),
+            qOverload<>(&QWidget::update));
     connect(ui->bookmarksWidget, &BookmarksWidget::droppedIn, this, &FolderView::moveUrlsRequested); // ask what to do via popup? copy or move
 
     ui->sortingComboBox->setItemDelegate(new QStyledItemDelegate(ui->sortingComboBox));
@@ -134,23 +136,40 @@ void FolderView::readSettings() {
     ui->thumbnailGrid->setLabelBackgroundColor(settings->folderViewLabelBackgroundColor());
     ui->thumbnailGrid->setCellBackgroundColor(settings->folderViewCellBackgroundColor());
     ui->topBar->setVisible(settings->folderViewTopBar());
-    ui->togglePlacesPanelButton->setChecked(settings->placesPanel());
 
-    setPlacesPanel(settings->placesPanel());
-    ui->bookmarksWidget->setVisible(settings->placesPanelBookmarksExpanded());
-    ui->dirTreeView->setVisible(settings->placesPanelTreeExpanded());
-
-    QList<int> sizes;
-    sizes << settings->placesPanelWidth() << 1;
-    ui->splitter->setSizes(sizes);
+    // only stored values that changed: an unrelated setting must not reset the panel
+    const bool placesPanel = settings->placesPanel();
+    if(!mPanelApplied || placesPanel != mPlacesPanel) {
+        mPlacesPanel = placesPanel;
+        ui->togglePlacesPanelButton->setChecked(placesPanel);
+        setPlacesPanel(placesPanel);
+    }
+    const bool bookmarksExpanded = settings->placesPanelBookmarksExpanded();
+    if(!mPanelApplied || bookmarksExpanded != mBookmarksExpanded) {
+        mBookmarksExpanded = bookmarksExpanded;
+        ui->bookmarksWidget->setVisible(bookmarksExpanded);
+    }
+    const bool treeExpanded = settings->placesPanelTreeExpanded();
+    if(!mPanelApplied || treeExpanded != mTreeExpanded) {
+        mTreeExpanded = treeExpanded;
+        ui->dirTreeView->setVisible(treeExpanded);
+    }
+    const int panelWidth = settings->placesPanelWidth();
+    if(!mPanelApplied || panelWidth != mPanelWidth) {
+        mPanelWidth = panelWidth;
+        ui->splitter->setSizes({panelWidth, 1});
+    }
+    mPanelApplied = true;
 }
 
 void FolderView::onSplitterMoved() {
-    settings->setPlacesPanelWidth(ui->placesPanel->width());
+    mPanelWidth = ui->placesPanel->width();
+    settings->setPlacesPanelWidth(mPanelWidth);
 }
 
 void FolderView::onPlacesPanelButtonChecked(bool mode) {
     setPlacesPanel(mode);
+    mPlacesPanel = mode;
     settings->setPlacesPanel(mode);
 }
 
@@ -164,7 +183,8 @@ void FolderView::toggleBookmarks() {
         ui->bookmarksWidget->hide();
     else
         ui->bookmarksWidget->show();
-    settings->setPlacesPanelBookmarksExpanded(ui->bookmarksWidget->isVisible());
+    mBookmarksExpanded = ui->bookmarksWidget->isVisible();
+    settings->setPlacesPanelBookmarksExpanded(mBookmarksExpanded);
 }
 
 void FolderView::toggleFilesystemView() {
@@ -172,7 +192,8 @@ void FolderView::toggleFilesystemView() {
         ui->dirTreeView->hide();
     else
         ui->dirTreeView->show();
-    settings->setPlacesPanelTreeExpanded(ui->dirTreeView->isVisible());
+    mTreeExpanded = ui->dirTreeView->isVisible();
+    settings->setPlacesPanelTreeExpanded(mTreeExpanded);
 }
 
 // TODO: ask what to do

@@ -109,4 +109,8 @@ private:
     QElapsedTimer popupTimerClutch;
     QPersistentModelIndex mTreeScrollTarget;
     QStringList mTreeScrollWaits;
+    // places panel state last applied from the settings
+    bool mPanelApplied = false;
+    bool mPlacesPanel = false, mBookmarksExpanded = false, mTreeExpanded = false;
+    int mPanelWidth = 0;
 };

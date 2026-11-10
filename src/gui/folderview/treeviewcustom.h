@@ -29,9 +29,14 @@ protected:
     void keyPressEvent(QKeyEvent *event) override;
 
 private slots:
-    void updateScrollbarStyle();
+    void readSettings();
 private:
+    void updateScrollbarStyle(bool hovered);
+
     QScrollBar overlayScrollbar;
+    QColor mHandleColor, mHandleHoverColor, mHandleIdleColor;
+    // handle colour the overlay stylesheet was last built with
+    QColor mAppliedHandleColor;
 
     const int SCROLLBAR_WIDTH = 12;
 };
