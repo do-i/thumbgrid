@@ -3,6 +3,7 @@
 target_sources(${THUMBGRID_APP_TARGET} PRIVATE
     centralwidget.cpp
     contextmenu.cpp
+    popupmenubase.cpp
     flowlayout.cpp
     idirectoryview.cpp
     mainwindow.cpp

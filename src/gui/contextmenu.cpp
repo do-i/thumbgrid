@@ -1,17 +1,13 @@
 #include "contextmenu.h"
 #include "ui_contextmenu.h"
-#include "gui/customwidgets/dismisskey.h"
 
 #include <algorithm>
 
 ContextMenu::ContextMenu(QWidget *parent) :
-    QWidget(parent),
+    PopupMenuBase(parent),
     ui(new Ui::ContextMenu)
 {
     ui->setupUi(this);
-    setWindowFlags(Qt::Popup);
-    setAttribute(Qt::WA_TranslucentBackground, true);
-    setAttribute(Qt::WA_NoMousePropagation, true);
     this->hide();
 
     // top zoom buttons
@@ -239,45 +235,12 @@ void ContextMenu::updateToolTips() {
     }
 }
 
-void ContextMenu::showAt(QPoint pos) {
+void ContextMenu::prepareShow() {
     switchToMainPage(); // also clears the keyboard highlight
     updateToolTips();
-    QRect geom = geometry();
-    geom.moveTopLeft(pos);
-    setGeometry(geom);
-    show();
-}
-
-void ContextMenu::setGeometry(QRect geom) {
-    auto screen = QGuiApplication::screenAt(cursor().pos());
-    if(!screen) // fallback
-        screen = QGuiApplication::primaryScreen();
-    if(screen) {
-        // fit inside the current screen
-        if(geom.bottom() > screen->geometry().bottom())
-            geom.moveBottom(cursor().pos().y());
-        if(geom.right() > screen->geometry().right())
-            geom.moveRight(screen->geometry().right());
-    }
-    QWidget::setGeometry(geom);
-}
-
-void ContextMenu::mousePressEvent(QMouseEvent *event) {
-    QWidget::mousePressEvent(event);
-    hide();
-}
-
-void ContextMenu::paintEvent(QPaintEvent *event) {
-    Q_UNUSED(event)
-    QStyleOption opt;
-    opt.initFrom(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 
 void ContextMenu::keyPressEvent(QKeyEvent *event) {
-    if(handleDismissKey(this, event))
-        return;
     switch(event->key()) {
     case Qt::Key_Up:
         moveHighlight(-1);
@@ -290,6 +253,6 @@ void ContextMenu::keyPressEvent(QKeyEvent *event) {
         activateHighlighted();
         break;
     default:
-        actionManager->processEvent(event);
+        PopupMenuBase::keyPressEvent(event); // Esc dismisses, the rest reaches the shortcuts
     }
 }

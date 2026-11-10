@@ -1,20 +1,10 @@
 #include "gridcontextmenu.h"
-#include "gui/customwidgets/dismisskey.h"
 
-#include <QScreen>
-#include <QPainter>
 #include <QImageWriter>
-#include <QStyleOption>
-#include <QMouseEvent>
-#include <QKeyEvent>
 
 GridContextMenu::GridContextMenu(QWidget *parent) :
-    QWidget(parent)
+    PopupMenuBase(parent)
 {
-    setWindowFlags(Qt::Popup);
-    setAttribute(Qt::WA_TranslucentBackground, true);
-    setAttribute(Qt::WA_NoMousePropagation, true);
-
     auto *rootLayout = new QVBoxLayout(this);
     rootLayout->setContentsMargins(0, 4, 0, 4);
     rootLayout->setSpacing(0);
@@ -24,9 +14,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
 
     // ------------------------------------------------------------------ main
     auto *mainPage = new QWidget(stack);
-    auto *mainLayout = new QVBoxLayout(mainPage);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
-    mainLayout->setSpacing(2);
+    auto *mainLayout = makeItemLayout(mainPage);
 
     convertItem = makeItem(tr("Convert to..."), ":/res/icons/common/menuitem/convert16.png");
     convertItem->setObjectName("menuConvert");
@@ -70,7 +58,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     findDuplicatesItem->setAction("findDuplicates");
     mainLayout->addWidget(findDuplicatesItem);
 
-    addSeparator(mainPage, mainLayout);
+    addSeparator(mainLayout);
 
     // destructive and not undoable; relies on the confirmation dialog downstream
     deleteItem = makeItem(tr("Delete permanently"), ":/res/icons/common/menuitem/trash16.png");
@@ -79,7 +67,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     mainLayout->addWidget(deleteItem);
 
     // thin divider between the file actions and the view toggles
-    addSeparator(mainPage, mainLayout);
+    addSeparator(mainLayout);
 
     // entering the grid stops a slideshow, so from here it can only start one
     slideshowItem = makeItem(tr("Start slideshow"), ":/res/icons/common/menuitem/document-view16.png");
@@ -101,7 +89,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     mainLayout->addWidget(statusBar);
 
     // thin divider between the view toggles and app-level actions
-    addSeparator(mainPage, mainLayout);
+    addSeparator(mainLayout);
 
     auto *settingsItem = makeItem(tr("Settings"), ":/res/icons/common/menuitem/settings16.png");
     settingsItem->setAction("openSettings");
@@ -111,9 +99,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
 
     // --------------------------------------------------------------- convert
     auto *convertPage = new QWidget(stack);
-    auto *convertLayout = new QVBoxLayout(convertPage);
-    convertLayout->setContentsMargins(0, 0, 0, 0);
-    convertLayout->setSpacing(2);
+    auto *convertLayout = makeItemLayout(convertPage);
 
     auto *backItem = makeItem(tr("Back"), ":/res/icons/common/menuitem/back16.png");
     backItem->setPassthroughClicks(false);
@@ -127,7 +113,7 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     addConvertFormat(convertLayout, "BMP",  "bmp");
     addConvertFormat(convertLayout, "ICO",  "ico");
     addConvertFormat(convertLayout, "JPEG 2000", "jp2");
-    addSeparator(convertPage, convertLayout);
+    addSeparator(convertLayout);
     addConvertFormat(convertLayout, "ICNS", "icns");
     addConvertFormat(convertLayout, "PPM",  "ppm");
     addConvertFormat(convertLayout, "PGM",  "pgm");
@@ -147,13 +133,6 @@ GridContextMenu::GridContextMenu(QWidget *parent) :
     hide();
 }
 
-ContextMenuItem *GridContextMenu::makeItem(const QString &text, const QString &iconPath) {
-    auto *item = new ContextMenuItem(this);
-    item->setText(text);
-    item->setIconPath(iconPath);
-    return item;
-}
-
 void GridContextMenu::addConvertFormat(QVBoxLayout *layout, const QString &label, const QString &format) {
     // Formats depend on which Qt imageformats plugins are installed, so gate
     // each entry on actual encoder availability instead of trusting the list.
@@ -164,17 +143,6 @@ void GridContextMenu::addConvertFormat(QVBoxLayout *layout, const QString &label
         emit convertFormatRequested(format);
     });
     layout->addWidget(item);
-}
-
-void GridContextMenu::addSeparator(QWidget *page, QVBoxLayout *layout) {
-    auto *separator = new QWidget(page);
-    separator->setAccessibleName("HLineSeparator");
-    separator->setFixedHeight(1);
-    separator->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
-    auto *sepLayout = new QVBoxLayout();
-    sepLayout->setContentsMargins(11, 4, 11, 4);
-    sepLayout->addWidget(separator);
-    layout->addLayout(sepLayout);
 }
 
 void GridContextMenu::setSelectionInfo(const SelectionInfo &info) {
@@ -223,41 +191,6 @@ void GridContextMenu::switchToConvertPage() {
     setCurrentPage(1);
 }
 
-void GridContextMenu::showAt(QPoint pos) {
+void GridContextMenu::prepareShow() {
     switchToMainPage();
-    QRect geom = geometry();
-    geom.moveTopLeft(pos);
-    clampToScreen(geom);
-    setGeometry(geom);
-    show();
-}
-
-void GridContextMenu::clampToScreen(QRect &geom) {
-    auto screen = QGuiApplication::screenAt(cursor().pos());
-    if(!screen)
-        screen = QGuiApplication::primaryScreen();
-    if(screen) {
-        if(geom.bottom() > screen->geometry().bottom())
-            geom.moveBottom(cursor().pos().y());
-        if(geom.right() > screen->geometry().right())
-            geom.moveRight(screen->geometry().right());
-    }
-}
-
-void GridContextMenu::mousePressEvent(QMouseEvent *event) {
-    QWidget::mousePressEvent(event);
-    hide();
-}
-
-void GridContextMenu::paintEvent(QPaintEvent *event) {
-    Q_UNUSED(event)
-    QStyleOption opt;
-    opt.initFrom(this);
-    QPainter p(this);
-    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
-}
-
-void GridContextMenu::keyPressEvent(QKeyEvent *event) {
-    if(!handleDismissKey(this, event))
-        actionManager->processEvent(event);
 }

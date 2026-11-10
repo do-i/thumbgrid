@@ -2,13 +2,11 @@
 
 #pragma once
 
-#include <QWidget>
 #include <QStackedWidget>
-#include <QVBoxLayout>
-#include "gui/customwidgets/contextmenuitem.h"
+#include "gui/popupmenubase.h"
 #include "gui/idirectoryview.h"
 
-class GridContextMenu : public QWidget {
+class GridContextMenu : public PopupMenuBase {
     Q_OBJECT
 public:
     explicit GridContextMenu(QWidget *parent = nullptr);
@@ -16,16 +14,11 @@ public:
     // Convert needs convertible images, Rename exactly one item, Move/Trash/Delete at least one
     void setSelectionInfo(const SelectionInfo &info);
 
-public slots:
-    void showAt(QPoint pos);
-
 signals:
     void convertFormatRequested(QString format);
 
 protected:
-    void mousePressEvent(QMouseEvent *event) override;
-    void paintEvent(QPaintEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
+    void prepareShow() override;
 
 private:
     QStackedWidget *stack;
@@ -40,11 +33,8 @@ private:
     ContextMenuItem *findDuplicatesItem;
     ContextMenuItem *slideshowItem;
 
-    ContextMenuItem *makeItem(const QString &text, const QString &iconPath);
     void addConvertFormat(QVBoxLayout *layout, const QString &label, const QString &format);
-    void addSeparator(QWidget *page, QVBoxLayout *layout);
     void setCurrentPage(int index);
     void switchToMainPage();
     void switchToConvertPage();
-    void clampToScreen(QRect &geom);
 };

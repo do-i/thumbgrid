@@ -1,28 +1,20 @@
 #pragma once
 
-#include <QScreen>
-#include <QStyleOption>
 #include <QTimer>
-#include <QPainter>
 #include <QPointer>
-#include "components/actionmanager/actionmanager.h"
 #include "components/scriptmanager/scriptmanager.h"
-#include "gui/customwidgets/contextmenuitem.h"
+#include "gui/popupmenubase.h"
 
 namespace Ui {
 class ContextMenu;
 }
 
-class ContextMenu : public QWidget {
+class ContextMenu : public PopupMenuBase {
     Q_OBJECT
 public:
     explicit ContextMenu(QWidget *parent = nullptr);
     ~ContextMenu() override;
     void setImageEntriesEnabled(bool mode);
-
-public slots:
-    void showAt(QPoint pos);
-    void setGeometry(QRect geom);
 
 private:
     Ui::ContextMenu *ui;
@@ -42,8 +34,7 @@ signals:
     void showScriptSettings();
 
 protected:
-    void mousePressEvent(QMouseEvent*) override;
-    void paintEvent(QPaintEvent *) override;
+    void prepareShow() override;
     void keyPressEvent(QKeyEvent *event) override;
 private slots:
     void switchToMainPage();
