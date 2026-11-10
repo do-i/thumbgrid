@@ -306,6 +306,14 @@ add_test(
     COMMAND thumbgrid_cursor_autohide_mode_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_cursor_hide_delay_test
+    behavior/test_cursor_hide_delay.cpp
+)
+add_test(
+    NAME "The idle mouse pointer hides after the delay set in Settings"
+    COMMAND thumbgrid_cursor_hide_delay_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_nav_skips_unviewable_test
     behavior/test_view_mode_navigation_skips_unviewable_files.cpp
 )

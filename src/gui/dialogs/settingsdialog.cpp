@@ -359,6 +359,7 @@ void SettingsDialog::setupMiscControls() {
     // ranges come from the setting bounds, not from the .ui numbers
     using namespace tg::bounds;
     ui->zoomStepSlider->setRange(kZoomStepMinPct, kZoomStepMaxPct);
+    ui->cursorHideDelaySpinBox->setRange(kCursorHideDelayMinMs, kCursorHideDelayMaxMs);
     ui->panelSizeSlider->setRange(kPanelThumbSizeMinPx / kPanelThumbSizeSliderScale,
                                   kPanelThumbSizeMaxPx / kPanelThumbSizeSliderScale);
 
@@ -880,6 +881,7 @@ void SettingsDialog::readSettings() {
     ui->showExtendedInfoTitle->setChecked(settings->windowTitleExtendedInfo());
     ui->showFullMetadataCheckBox->setChecked(settings->showFullMetadata());
     ui->cursorAutohideComboBox->setCurrentIndex(settings->cursorAutohide());
+    ui->cursorHideDelaySpinBox->setValue(settings->cursorHideDelay());
     ui->keepFitModeCheckBox->setChecked(settings->keepFitMode());
     if(settings->focusPointIn1to1Mode() == FOCUS_TOP)
         ui->focus1to1Top->setChecked(true);
@@ -1043,6 +1045,7 @@ void SettingsDialog::saveSettings() {
     settings->setWindowTitleExtendedInfo(ui->showExtendedInfoTitle->isChecked());
     settings->setShowFullMetadata(ui->showFullMetadataCheckBox->isChecked());
     settings->setCursorAutohide(static_cast<CursorAutohideMode>(ui->cursorAutohideComboBox->currentIndex()));
+    settings->setCursorHideDelay(ui->cursorHideDelaySpinBox->value());
     settings->setKeepFitMode(ui->keepFitModeCheckBox->isChecked());
     if(ui->focus1to1Top->isChecked())
         settings->setFocusPointIn1to1Mode(FOCUS_TOP);

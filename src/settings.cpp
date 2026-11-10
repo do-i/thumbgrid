@@ -87,6 +87,7 @@ QString settingGroupFor(const QString &key) {
         // General
         {"theme", "General"}, {"backgroundOpacity", "General"}, {"blurBackground", "General"},
         {"autoResizeWindow", "General"}, {"autoResizeLimit", "General"}, {"cursorAutohiding", "General"}, {"cursorAutohideMode", "General"},
+        {"cursorHideDelay", "General"},
         {"defaultViewMode", "General"}, {"enableSmoothScroll", "General"}, {"infoBarFullscreen", "General"},
         {"infoBarWindowed", "General"}, {"language", "General"}, {"openInFullscreen", "General"},
         {"showFullMetadata", "General"}, {"windowTitleExtendedInfo", "General"}, {"zoomIndicatorMode", "General"},
@@ -1989,6 +1990,17 @@ CursorAutohideMode Settings::cursorAutohide() {
 
 void Settings::setCursorAutohide(CursorAutohideMode mode) {
     settings->writeSetting("cursorAutohideMode", mode);
+}
+
+int Settings::cursorHideDelay() {
+    using namespace tg::bounds;
+    return qBound(kCursorHideDelayMinMs, settings->readSetting("cursorHideDelay", kCursorHideDelayDefaultMs).toInt(),
+                  kCursorHideDelayMaxMs);
+}
+
+void Settings::setCursorHideDelay(int ms) {
+    using namespace tg::bounds;
+    settings->writeSetting("cursorHideDelay", qBound(kCursorHideDelayMinMs, ms, kCursorHideDelayMaxMs));
 }
 //------------------------------------------------------------------------------
 bool Settings::firstRun() {

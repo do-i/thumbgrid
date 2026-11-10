@@ -620,7 +620,7 @@ void ViewerWidget::mouseMoveEvent(QMouseEvent *event) {
 
 void ViewerWidget::hideCursorTimed(bool restartTimer) {
     if(restartTimer || !cursorTimer.isActive())
-        cursorTimer.start(CURSOR_HIDE_TIMEOUT_MS);
+        cursorTimer.start(mCursorHideDelayMs);
 }
 
 void ViewerWidget::hideCursor() {
@@ -782,6 +782,7 @@ void ViewerWidget::onFullscreenModeChanged(bool mode) {
 void ViewerWidget::readSettings() {
     mZoomIndicatorMode = settings->zoomIndicatorMode();
     mImageScrolling = settings->imageScrolling();
+    mCursorHideDelayMs = settings->cursorHideDelay();
     videoControls->onVideoMuted(!settings->playVideoSounds());
     updateVideoControlsVisibility();
     if(settings->clickableEdges()) {

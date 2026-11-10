@@ -102,4 +102,9 @@ inline constexpr int kDuplicateSimilarityMinPct = 70;
 inline constexpr int kDuplicateSimilarityMaxPct = 100;
 inline constexpr int kDuplicateSimilarityDefaultPct = 87;
 
+// Idle time before the mouse pointer hides over the image or video.
+inline constexpr int kCursorHideDelayMinMs = 300;
+inline constexpr int kCursorHideDelayMaxMs = 10000;
+inline constexpr int kCursorHideDelayDefaultMs = 1000;
+
 } // namespace tg::bounds

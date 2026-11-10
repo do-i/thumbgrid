@@ -704,7 +704,7 @@
                         <item>
                          <widget class="QComboBox" name="cursorAutohideComboBox">
                           <property name="toolTip">
-                           <string>Hide the mouse pointer over the image or video after a second without moving it.</string>
+                           <string>Hide the mouse pointer over the image or video after a short delay without moving it.</string>
                           </property>
                           <item>
                            <property name="text">
@@ -721,6 +721,56 @@
                             <string>Always</string>
                            </property>
                           </item>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLabel" name="cursorHideDelayLabel">
+                          <property name="text">
+                           <string>after</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QSpinBox" name="cursorHideDelaySpinBox">
+                          <property name="sizePolicy">
+                           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                            <horstretch>0</horstretch>
+                            <verstretch>0</verstretch>
+                           </sizepolicy>
+                          </property>
+                          <property name="minimumSize">
+                           <size>
+                            <width>100</width>
+                            <height>24</height>
+                           </size>
+                          </property>
+                          <property name="toolTip">
+                           <string>How long the pointer must stay still before it is hidden.</string>
+                          </property>
+                          <property name="alignment">
+                           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                          </property>
+                          <property name="buttonSymbols">
+                           <enum>QAbstractSpinBox::UpDownArrows</enum>
+                          </property>
+                          <property name="hiddenButtons" stdset="0">
+                           <bool>true</bool>
+                          </property>
+                          <property name="suffix">
+                           <string>ms</string>
+                          </property>
+                          <property name="singleStep">
+                           <number>100</number>
+                          </property>
+                          <property name="minimum">
+                           <number>300</number>
+                          </property>
+                          <property name="maximum">
+                           <number>10000</number>
+                          </property>
+                          <property name="value">
+                           <number>1000</number>
+                          </property>
                          </widget>
                         </item>
                        </layout>

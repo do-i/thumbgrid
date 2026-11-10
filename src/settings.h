@@ -260,6 +260,8 @@ public:
     void sync();
     CursorAutohideMode cursorAutohide();
     void setCursorAutohide(CursorAutohideMode mode);
+    int cursorHideDelay();
+    void setCursorHideDelay(int ms);
 
     bool infoBarFullscreen();
     void setInfoBarFullscreen(bool mode);
