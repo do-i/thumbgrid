@@ -11,6 +11,16 @@ TreeContextMenu::TreeContextMenu(QWidget *parent) : PopupMenuBase(parent) {
              &TreeContextMenu::openRequested);
     addEntry(items, "menuNewWindow", tr("Open in new window"), QString(), &TreeContextMenu::newWindowRequested);
     addSeparator(items);
+    addEntry(items, "menuNewFolder", tr("New folder…"), QString(), &TreeContextMenu::newFolderRequested);
+    mRenameItem = addEntry(items, "menuRename", tr("Rename…"), ":/res/icons/common/overlay/edit16.png",
+                           &TreeContextMenu::renameRequested);
+    mTrashItem = addEntry(items, "menuTrash", tr("Move to trash"), ":/res/icons/common/menuitem/trash16.png",
+                          &TreeContextMenu::trashRequested);
+    // destructive and not undoable, set apart as in the grid menu; the confirmation prompt follows
+    addSeparator(items);
+    mDeleteItem = addEntry(items, "menuDelete", tr("Delete permanently"), ":/res/icons/common/overlay/close16.png",
+                           &TreeContextMenu::deleteRequested);
+    addSeparator(items);
     addEntry(items, "menuCopyPath", tr("Copy path"), ":/res/icons/common/menuitem/copy16.png",
              &TreeContextMenu::copyPathRequested);
     mBookmarkItem = addEntry(items, "menuAddBookmark", tr("Add to bookmarks"), QString(),
@@ -38,5 +48,8 @@ ContextMenuItem *TreeContextMenu::addEntry(QVBoxLayout *layout, const QString &n
 void TreeContextMenu::openFor(const TreeMenuTarget &target, QPoint globalPos) {
     mTarget = target.path;
     mBookmarkItem->setEnabled(!target.bookmarked);
+    mRenameItem->setEnabled(!target.protectedFolder);
+    mTrashItem->setEnabled(!target.protectedFolder);
+    mDeleteItem->setEnabled(!target.protectedFolder);
     showAt(globalPos);
 }

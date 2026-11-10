@@ -91,6 +91,10 @@ private slots:
     void onDroppedInByIndex(QStringList, QModelIndex index);
     void onTreeMiddleClicked(const QModelIndex &index);
     void collapseTree();
+    void onTreeRenameCommitted(const QModelIndex &index, const QString &name);
+    void onTreeNewFolderCommitted(const QModelIndex &parent, const QString &name);
+    void onTreeRowsInserted(const QModelIndex &parent, int first, int last);
+    void showNewFolder();
     void onTreeContextMenuRequested(const QModelIndex &index, const QPoint &globalPos);
     void toggleBookmarks();
     void toggleFilesystemView();
@@ -115,6 +119,9 @@ private:
     FVOptionsPopup *optionsPopup;
     // built on the first right-click in the tree
     TreeContextMenu *mTreeMenu = nullptr;
+    // a folder just asked for: its row is selected once the model lists it
+    QString mPendingNewFolder;
+    QMetaObject::Connection mPendingConnection;
     QElapsedTimer popupTimerClutch;
     QPersistentModelIndex mTreeScrollTarget;
     QStringList mTreeScrollWaits;

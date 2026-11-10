@@ -869,3 +869,11 @@ add_test(
     NAME "The folder tree context menu opens for the row under the pointer and acts on that folder"
     COMMAND thumbgrid_folder_tree_context_menu_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_folder_operations_test
+    behavior/test_folder_tree_creates_renames_and_removes_folders.cpp
+)
+add_test(
+    NAME "The folder tree creates, renames and removes folders through the shared file operations"
+    COMMAND thumbgrid_folder_tree_folder_operations_test
+)

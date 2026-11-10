@@ -66,6 +66,7 @@ QSize TreeViewCustom::minimumSizeHint() const {
 
 void TreeViewCustom::resizeEvent(QResizeEvent *event) {
     QTreeView::resizeEvent(event);
+    positionEditor();
     updateScrollbarStyle(underMouse());
 }
 
@@ -135,4 +136,113 @@ void TreeViewCustom::mouseReleaseEvent(QMouseEvent *event) {
         return;
     }
     QTreeView::mouseReleaseEvent(event);
+}
+
+void TreeViewCustom::startRename(const QModelIndex &index, const QString &name) {
+    beginEdit(EditMode::Rename, index, name);
+}
+
+void TreeViewCustom::startNewFolder(const QModelIndex &parent, const QString &name) {
+    beginEdit(EditMode::NewFolder, parent, name);
+}
+
+void TreeViewCustom::beginEdit(EditMode mode, const QModelIndex &index, const QString &name) {
+    if(!index.isValid())
+        return;
+    cancelEdit();
+    if(!mEditor) {
+        mEditor = new QLineEdit(viewport());
+        mEditor->setContextMenuPolicy(Qt::NoContextMenu);
+        const auto &cs = settings->colorScheme();
+        mEditor->setStyleSheet(QStringLiteral(
+            "QLineEdit { background: %1; color: %2; border: 1px solid %3;"
+            " border-radius: 2px; padding: 1px 3px; }")
+            .arg(cs.widget.name(), cs.text.name(), cs.accent.name()));
+        mEditor->installEventFilter(this);
+    }
+    mEditMode = mode;
+    mEditIndex = index;
+    if(mode == EditMode::NewFolder)
+        expand(index);
+    mEditor->setText(name);
+    mEditor->selectAll();
+    scrollTo(index);
+    positionEditor();
+    mEditor->show();
+    mEditor->raise();
+    mEditor->setFocus(Qt::OtherFocusReason);
+}
+
+// over the renamed row, or over the row below the parent for a new folder
+void TreeViewCustom::positionEditor() {
+    if(mEditMode == EditMode::None)
+        return;
+    if(!mEditIndex.isValid()) {
+        cancelEdit();
+        return;
+    }
+    QRect rect = visualRect(mEditIndex);
+    const int rowHeight = qMax(rect.height(), mEditor->minimumSizeHint().height());
+    if(mEditMode == EditMode::NewFolder) {
+        rect.translate(indentation(), rect.height());
+        // the row below must show: bring the parent up when it is the last one in view
+        if(rect.bottom() > viewport()->height() - 1)
+            verticalScrollBar()->setValue(verticalScrollBar()->value() + rect.bottom() - viewport()->height() + 2);
+        if(rect.bottom() > viewport()->height() - 1) {
+            rect = visualRect(mEditIndex);
+            rect.translate(indentation(), rect.height());
+        }
+    }
+    rect.setRight(viewport()->width() - 1);
+    rect.setHeight(rowHeight);
+    mEditor->setGeometry(rect);
+}
+
+void TreeViewCustom::scrollContentsBy(int dx, int dy) {
+    QTreeView::scrollContentsBy(dx, dy);
+    positionEditor();
+}
+
+void TreeViewCustom::commitEdit() {
+    if(mEditMode == EditMode::None)
+        return;
+    const EditMode mode = mEditMode;
+    const QModelIndex index = mEditIndex;
+    const QString name = mEditor->text().trimmed();
+    mEditMode = EditMode::None; // before hide(), so the focus-out filter does nothing
+    mEditor->hide();
+    setFocus();
+    if(name.isEmpty() || !index.isValid())
+        return;
+    if(mode == EditMode::Rename)
+        emit renameCommitted(index, name);
+    else
+        emit newFolderCommitted(index, name);
+}
+
+void TreeViewCustom::cancelEdit() {
+    if(mEditMode == EditMode::None)
+        return;
+    mEditMode = EditMode::None;
+    mEditor->hide();
+    setFocus();
+}
+
+bool TreeViewCustom::eventFilter(QObject *watched, QEvent *event) {
+    if(mEditor && watched == mEditor) {
+        if(event->type() == QEvent::KeyPress) {
+            const int key = static_cast<QKeyEvent *>(event)->key();
+            if(key == Qt::Key_Escape) {
+                cancelEdit();
+                return true;
+            }
+            if(key == Qt::Key_Return || key == Qt::Key_Enter) {
+                commitEdit();
+                return true;
+            }
+        } else if(event->type() == QEvent::FocusOut) {
+            cancelEdit();
+        }
+    }
+    return QTreeView::eventFilter(watched, event);
 }

@@ -6,4 +6,16 @@
 
 #pragma once
 
-enum class TreeFolderOp { CopyPath };
+#include <QDir>
+#include <QString>
+
+// CopyPath, Trash, Delete: path is the folder. Rename: arg is the new name.
+// NewFolder: path is the parent folder, arg the new folder's name.
+enum class TreeFolderOp { CopyPath, NewFolder, Rename, Trash, Delete };
+
+// Home, the file system root and the folders above home are never renamed or removed from the tree.
+inline bool isProtectedTreeFolder(const QString &path) {
+    const QString clean = QDir::cleanPath(path);
+    const QString home = QDir::cleanPath(QDir::homePath());
+    return clean == QDir::cleanPath(QDir::rootPath()) || clean == home || home.startsWith(clean + QLatin1Char('/'));
+}

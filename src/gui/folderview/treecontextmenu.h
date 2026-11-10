@@ -12,6 +12,8 @@
 struct TreeMenuTarget {
     QString path;
     bool bookmarked = false;
+    // home and the root: no rename, no removal
+    bool protectedFolder = false;
 };
 
 class TreeContextMenu : public PopupMenuBase {
@@ -29,6 +31,10 @@ signals:
     void newWindowRequested(const QString &path);
     void copyPathRequested(const QString &path);
     void addBookmarkRequested(const QString &path);
+    void newFolderRequested(const QString &path);
+    void renameRequested(const QString &path);
+    void trashRequested(const QString &path);
+    void deleteRequested(const QString &path);
     void collapseAllRequested(const QString &path);
 
 private:
@@ -37,4 +43,7 @@ private:
 
     QString mTarget;
     ContextMenuItem *mBookmarkItem = nullptr;
+    ContextMenuItem *mRenameItem = nullptr;
+    ContextMenuItem *mTrashItem = nullptr;
+    ContextMenuItem *mDeleteItem = nullptr;
 };

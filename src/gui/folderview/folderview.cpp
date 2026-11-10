@@ -117,6 +117,8 @@ FolderView::FolderView(QWidget *parent) :
     connect(optionsPopup, &FVOptionsPopup::viewModeSelected, this, &FolderView::onViewModeSelected);
 
     connect(ui->dirTreeView, &TreeViewCustom::droppedIn, this, &FolderView::onDroppedInByIndex);
+    connect(ui->dirTreeView, &TreeViewCustom::renameCommitted, this, &FolderView::onTreeRenameCommitted);
+    connect(ui->dirTreeView, &TreeViewCustom::newFolderCommitted, this, &FolderView::onTreeNewFolderCommitted);
     connect(ui->dirTreeView, &TreeViewCustom::middleClicked, this, &FolderView::onTreeMiddleClicked);
     connect(ui->dirTreeView, &TreeViewCustom::contextMenuRequestedAt, this, &FolderView::onTreeContextMenuRequested);
     connect(dirModel, &QFileSystemModel::directoryLoaded, this, &FolderView::onTreeDirectoryLoaded);
@@ -228,10 +230,23 @@ void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoi
             emit folderOperationRequested(TreeFolderOp::CopyPath, QDir::toNativeSeparators(path), QString());
         });
         connect(mTreeMenu, &TreeContextMenu::collapseAllRequested, this, &FolderView::collapseTree);
+        connect(mTreeMenu, &TreeContextMenu::newFolderRequested, this, [this](const QString &path) {
+            ui->dirTreeView->startNewFolder(dirModel->index(path), tr("New folder"));
+        });
+        connect(mTreeMenu, &TreeContextMenu::renameRequested, this, [this](const QString &path) {
+            const QModelIndex index = dirModel->index(path);
+            ui->dirTreeView->startRename(index, dirModel->fileName(index));
+        });
+        connect(mTreeMenu, &TreeContextMenu::trashRequested, this, [this](const QString &path) {
+            emit folderOperationRequested(TreeFolderOp::Trash, path, QString());
+        });
+        connect(mTreeMenu, &TreeContextMenu::deleteRequested, this, [this](const QString &path) {
+            emit folderOperationRequested(TreeFolderOp::Delete, path, QString());
+        });
         connect(mTreeMenu, &TreeContextMenu::addBookmarkRequested, ui->bookmarksWidget, &BookmarksWidget::addBookmark);
     }
     const QString path = dirModel->filePath(index);
-    mTreeMenu->openFor({path, ui->bookmarksWidget->hasBookmark(path)}, globalPos);
+    mTreeMenu->openFor({path, ui->bookmarksWidget->hasBookmark(path), isProtectedTreeFolder(path)}, globalPos);
 }
 
 void FolderView::onTreeMiddleClicked(const QModelIndex &index) {
@@ -244,6 +259,43 @@ void FolderView::collapseTree() {
     const QModelIndex current = ui->dirTreeView->currentIndex();
     if(current.isValid())
         ui->dirTreeView->scrollTo(current);
+}
+
+void FolderView::onTreeRenameCommitted(const QModelIndex &index, const QString &name) {
+    emit folderOperationRequested(TreeFolderOp::Rename, dirModel->filePath(index), name);
+}
+
+// Core creates the folder; the row is picked once the watcher has made the model list it
+void FolderView::onTreeNewFolderCommitted(const QModelIndex &parent, const QString &name) {
+    const QString parentPath = dirModel->filePath(parent);
+    mPendingNewFolder = QDir::cleanPath(parentPath + QLatin1Char('/') + name);
+    if(!mPendingConnection)
+        mPendingConnection = connect(dirModel, &QAbstractItemModel::rowsInserted, this, &FolderView::onTreeRowsInserted);
+    emit folderOperationRequested(TreeFolderOp::NewFolder, parentPath, name);
+}
+
+void FolderView::onTreeRowsInserted(const QModelIndex &parent, int first, int last) {
+    if(mPendingNewFolder.isEmpty()) {
+        disconnect(mPendingConnection);
+        return;
+    }
+    for(int row = first; row <= last; ++row) {
+        if(dirModel->filePath(dirModel->index(row, 0, parent)) != mPendingNewFolder)
+            continue;
+        disconnect(mPendingConnection);
+        // the model sorts its new rows on a queued call: pick the row after that
+        QMetaObject::invokeMethod(this, &FolderView::showNewFolder, Qt::QueuedConnection);
+        return;
+    }
+}
+
+void FolderView::showNewFolder() {
+    const QModelIndex index = dirModel->index(mPendingNewFolder);
+    mPendingNewFolder.clear();
+    if(!index.isValid())
+        return;
+    ui->dirTreeView->setCurrentIndex(index);
+    ui->dirTreeView->scrollTo(index);
 }
 
 void FolderView::onOptionsPopupButtonToggled(bool mode) {

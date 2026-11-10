@@ -185,6 +185,10 @@ public slots:
     void pasteFile();
     void copyPathClipboard();
     void copyPathsToClipboard(const QStringList& paths);
+    void createFolderIn(const QString& parentDir, QString name);
+    void renameFolder(const QString& path, const QString& newName);
+    void removeFolder(const QString& path, bool trash);
+    bool currentFolderIsWithin(const QString& path) const;
     void onFolderOperation(TreeFolderOp op, const QString& path, const QString& arg);
     void openFromClipboard();
     void renameCurrentSelection(const QString& newName);

@@ -850,12 +850,54 @@ void Core::copyPathsToClipboard(const QStringList& paths) {
 
 // a tree menu item: acts on the folder it was opened for, not on the grid selection
 void Core::onFolderOperation(TreeFolderOp op, const QString& path, const QString& arg) {
-    Q_UNUSED(arg)
     switch(op) {
     case TreeFolderOp::CopyPath:
         copyPathsToClipboard({path});
         break;
+    case TreeFolderOp::NewFolder:
+        createFolderIn(path, arg);
+        break;
+    case TreeFolderOp::Rename:
+        renameFolder(path, arg);
+        break;
+    case TreeFolderOp::Trash:
+    case TreeFolderOp::Delete:
+        removeFolder(path, op == TreeFolderOp::Trash);
+        break;
     }
+}
+
+// the folder shown in the grid is path or lies below it
+bool Core::currentFolderIsWithin(const QString& path) const {
+    if(!model || model->directoryPath().isEmpty())
+        return false;
+    const QString current = QDir::cleanPath(model->directoryPath());
+    const QString folder = QDir::cleanPath(path);
+    return current == folder || current.startsWith(folder + QLatin1Char('/'));
+}
+
+// the folder keeps its place in the grid's listing when it is shown there; the app follows a renamed current folder
+void Core::renameFolder(const QString& path, const QString& newName) {
+    if(!model || isProtectedTreeFolder(path))
+        return;
+    FileOpResult result;
+    model->renameEntry(path, newName, false, result);
+    outputError(result);
+    if(result != FileOpResult::SUCCESS || !currentFolderIsWithin(path))
+        return;
+    const QString oldPath = QDir::cleanPath(path);
+    const QString newPath = QFileInfo(oldPath).absolutePath() + "/" + newName;
+    loadPath(newPath + QDir::cleanPath(model->directoryPath()).mid(oldPath.length()));
+}
+
+// the grid's confirmation, error and removal paths; if that took the current folder away, go up to one that exists
+void Core::removeFolder(const QString& path, bool trash) {
+    if(!model || isProtectedTreeFolder(path))
+        return;
+    const bool wasCurrent = currentFolderIsWithin(path);
+    fileOps->removePaths({path}, trash);
+    if(wasCurrent && !QFileInfo::exists(model->directoryPath()))
+        loadParentDir();
 }
 
 void Core::openFromClipboard() {
@@ -1457,15 +1499,27 @@ void Core::createDirectory() {
                                              tr("New folder"), &ok);
     if(!ok)
         return;
+    createFolderIn(parentDir, name);
+}
+
+// the folder view's current folder or any other; an empty name does nothing
+void Core::createFolderIn(const QString& parentDir, QString name) {
     name = name.trimmed();
-    if(name.isEmpty())
+    if(!model || name.isEmpty())
         return;
     if(name.contains('/') || name.contains('\\')) {
         mw->showError(tr("Folder name cannot contain path separators"));
         return;
     }
     FileOpResult result;
-    model->createDirectory(parentDir + "/" + name, result);
+    if(!FileOperations::isValidFileName(name)) {
+        result = FileOpResult::INVALID_NAME;
+    } else if(QDir::cleanPath(parentDir) == QDir::cleanPath(model->directoryPath())) {
+        model->createDirectory(parentDir + "/" + name, result);
+    } else {
+        // not the listed folder: the grid must not gain an entry for it
+        FileOperations::createDirectory(parentDir + "/" + name, result);
+    }
     outputError(result);
 }
 
