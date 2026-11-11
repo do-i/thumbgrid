@@ -32,6 +32,7 @@ class DirectoryManager : public QObject {
     Q_OBJECT
 public:
     DirectoryManager();
+    ~DirectoryManager() override;
     // ignored if the same dir is already opened
     bool setDirectory(const QString&);
     bool setDirectoryRecursive(const QString&);

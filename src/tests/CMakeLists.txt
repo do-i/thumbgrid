@@ -690,6 +690,14 @@ add_test(
     COMMAND thumbgrid_external_content_change_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_directory_watcher_lifecycle_test
+    behavior/test_directory_watcher_stops_and_restarts.cpp
+)
+add_test(
+    NAME "The directory watcher stops cleanly and can be restarted"
+    COMMAND thumbgrid_directory_watcher_lifecycle_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_grid_symlink_badge_test
     behavior/test_grid_symlink_badge.cpp
 )

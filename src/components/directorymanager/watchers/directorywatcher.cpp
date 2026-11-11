@@ -10,6 +10,7 @@ DirectoryWatcherPrivate::DirectoryWatcherPrivate(DirectoryWatcher* qq, WatcherWo
 }
 
 DirectoryWatcher::~DirectoryWatcher() {
+    stopWorker();
     delete d_ptr;
     d_ptr = nullptr;
 }
@@ -36,8 +37,20 @@ void DirectoryWatcher::observe()
 
 void DirectoryWatcher::stopObserving()
 {
+    stopWorker();
+}
+
+// Joins the worker thread: one left running emits into a watcher that is going away, or into a process
+// that is already exiting.
+void DirectoryWatcher::stopWorker()
+{
     Q_D(DirectoryWatcher);
+    if(!d->worker || !d->workerThread->isRunning())
+        return;
     d->worker->setRunning(false);
+    d->worker->wake();
+    d->workerThread->quit();
+    d->workerThread->wait();
 }
 
 bool DirectoryWatcher::isObserving()

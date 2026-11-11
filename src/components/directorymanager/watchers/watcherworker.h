@@ -8,6 +8,8 @@ class WatcherWorker : public QObject
 public:
     WatcherWorker();
     virtual void run() = 0;
+    // interrupts a blocking wait in run() so a cleared running flag is seen at once
+    virtual void wake() {}
 
 public Q_SLOTS:
     void setRunning(bool running);

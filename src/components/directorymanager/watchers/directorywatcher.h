@@ -30,6 +30,7 @@ signals:
 
 protected:
     DirectoryWatcher(DirectoryWatcherPrivate *ptr);
+    void stopWorker();
     DirectoryWatcherPrivate* d_ptr;
 
 private:

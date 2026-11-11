@@ -1,6 +1,7 @@
 #include <QTimer>
 
 #include <sys/inotify.h>
+#include <unistd.h>
 
 #include "linuxwatcher_p.h"
 #include "linuxworker.h"
@@ -175,10 +176,11 @@ LinuxWatcher::LinuxWatcher() : DirectoryWatcher(new LinuxWatcherPrivate(this)) {
 
 LinuxWatcher::~LinuxWatcher() {
     Q_D(LinuxWatcher);
-    int removeStatusCode = inotify_rm_watch(d->watcher, d->watchObject);
-    if (removeStatusCode != 0) {
+    stopWorker();
+    if(d->watchObject != -1 && inotify_rm_watch(d->watcher, d->watchObject) != 0)
         qCWarning(logDirManager) << TAG << "Cannot remove inotify watcher instance:" << strerror(errno);
-    }
+    if(d->watcher != -1)
+        close(d->watcher);
 }
 
 void LinuxWatcher::setWatchPath(const QString& path) {

@@ -41,6 +41,10 @@ DirectoryManager::DirectoryManager() :
     connect(settings, &Settings::settingsChanged, this, &DirectoryManager::readSettings);
 }
 
+DirectoryManager::~DirectoryManager() {
+    delete watcher;
+}
+
 // Natural name sort via one collation key per entry: comparing keys is a byte
 // compare, much cheaper than a full QCollator::compare per std::sort comparison.
 static void sortByName(std::vector<FSEntry> &vec, const QCollator &collator, bool reverse) {
