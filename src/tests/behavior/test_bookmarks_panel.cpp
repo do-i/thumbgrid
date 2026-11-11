@@ -200,7 +200,7 @@ void BookmarksPanelTest::droppingABookmarkBetweenRowsReordersThePanelAndTheStore
     QVERIFY(enter.isAccepted());
     QWidget *indicator = nullptr;
     for(auto *child : panel()->findChildren<QWidget *>())
-        if(child->accessibleName() == "BookmarkDropIndicator")
+        if(child->property("styleClass").toString() == "BookmarkDropIndicator")
             indicator = child;
     QVERIFY(indicator && !indicator->isHidden());
     QCOMPARE(indicator->geometry().top(), qMax(0, row("a")->geometry().top() - 1));

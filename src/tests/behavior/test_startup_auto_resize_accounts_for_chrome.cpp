@@ -25,11 +25,11 @@ QSize imageSizeForThisScreen() {
 }
 
 // The windowed status footer. FolderViewProxy owns a second InfoBarProxy for the
-// grid's own footer, so pick by the accessible name InfoBarProxy sets on itself;
+// grid's own footer, so pick by the styleClass InfoBarProxy sets on itself;
 // the folder one renames itself to "FolderViewStatusFooter".
 InfoBarProxy *documentStatusFooter(MW *window) {
     for(InfoBarProxy *bar : window->findChildren<InfoBarProxy *>())
-        if(bar->accessibleName() == QStringLiteral("InfoBarProxy"))
+        if(bar->property("styleClass").toString() == QStringLiteral("InfoBarProxy"))
             return bar;
     return nullptr;
 }

@@ -6,7 +6,7 @@ FolderViewProxy::FolderViewProxy(QWidget *parent)
 {
     stateBuf.sortingMode = settings->sortingMode();
     statusFooter.reset(new InfoBarProxy(this));
-    statusFooter->setAccessibleName("FolderViewStatusFooter");
+    statusFooter->setProperty("styleClass", QStringLiteral("FolderViewStatusFooter"));
     layout.setContentsMargins(0,0,0,0);
     layout.setSpacing(0);
 }

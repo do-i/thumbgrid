@@ -123,7 +123,7 @@ SSideBarItem[checked="true"] {
 }
 
 /*----------------------------------------------------------------------------*/
-[accessibleName="CheckableButton"] {
+[styleClass="CheckableButton"] {
     border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
@@ -132,7 +132,7 @@ SSideBarItem[checked="true"] {
 }
 
 /* extra 2px left margin for fitt's law */
-[accessibleName="CheckableButtonLE"] {
+[styleClass="CheckableButtonLE"] {
     border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
@@ -140,24 +140,24 @@ SSideBarItem[checked="true"] {
     margin-right:  2px;
 }
 
-[accessibleName="CheckableButton"]:hover,
-[accessibleName="CheckableButtonLE"]:hover {
+[styleClass="CheckableButton"]:hover,
+[styleClass="CheckableButtonLE"]:hover {
     background-color: %panel_button_hover%;
     border: 1px solid %panel_button_hover%;
 }
 
-[accessibleName="CheckableButton"]:pressed,
-[accessibleName="CheckableButtonLE"]:pressed,
-[accessibleName="CheckableButton"][pressed="true"],
-[accessibleName="CheckableButtonLE"][pressed="true"],
-[accessibleName="CheckableButton"][checked="true"],
-[accessibleName="CheckableButtonLE"][checked="true"] {
+[styleClass="CheckableButton"]:pressed,
+[styleClass="CheckableButtonLE"]:pressed,
+[styleClass="CheckableButton"][pressed="true"],
+[styleClass="CheckableButtonLE"][pressed="true"],
+[styleClass="CheckableButton"][checked="true"],
+[styleClass="CheckableButtonLE"][checked="true"] {
     background-color: %panel_button%;
     border: 1px solid %panel_button%;
 }
 
 /*----------------------------------------------------------------------------*/
-[accessibleName="PanelButton"] {
+[styleClass="PanelButton"] {
     border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
@@ -165,7 +165,7 @@ SSideBarItem[checked="true"] {
     margin-right:  2px;
 }
 
-[accessibleName="PanelButtonRE"] {
+[styleClass="PanelButtonRE"] {
     border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
@@ -173,16 +173,16 @@ SSideBarItem[checked="true"] {
     margin-right:  4px;
 }
 
-[accessibleName="PanelButton"]:hover,
-[accessibleName="PanelButtonRE"]:hover {
+[styleClass="PanelButton"]:hover,
+[styleClass="PanelButtonRE"]:hover {
     background-color: %panel_button_hover%;
     border: 1px solid %panel_button_hover%;
 }
 
-[accessibleName="PanelButton"]:pressed,
-[accessibleName="PanelButtonRE"]:pressed,
-[accessibleName="PanelButton"][pressed="true"],
-[accessibleName="PanelButtonRE"][pressed="true"] {
+[styleClass="PanelButton"]:pressed,
+[styleClass="PanelButtonRE"]:pressed,
+[styleClass="PanelButton"][pressed="true"],
+[styleClass="PanelButtonRE"][pressed="true"] {
     background-color: %panel_button%;
     border: 1px solid %panel_button%;
 }
@@ -209,7 +209,7 @@ QComboBox QAbstractItemView {
     outline: 0px;
 }
 
-[accessibleName="PanelComboBox"] {
+[styleClass="PanelComboBox"] {
     background-color: %panel_button%;
     color: %text_hc%;
     border: 2px solid %panel_button%;
@@ -221,29 +221,29 @@ QComboBox QAbstractItemView {
     margin-right: 2px;
 }
 
-[accessibleName="PanelComboBox"]:hover {
+[styleClass="PanelComboBox"]:hover {
     background-color: %panel_button_hover%;
     border-color: %panel_button_hover%;
 }
 
-[accessibleName="PanelComboBox"]::drop-down {
+[styleClass="PanelComboBox"]::drop-down {
     border: 0px;
 }
 
-[accessibleName="PanelComboBox"] QAbstractItemView {
+[styleClass="PanelComboBox"] QAbstractItemView {
     padding: 5px 5px 5px 5px;
     background-color: %widget%;
     border: 1px solid %accent%;
 }
 
-[accessibleName="PanelComboBox"] QAbstractItemView::item {
+[styleClass="PanelComboBox"] QAbstractItemView::item {
     border-radius: 1px;
     padding: 4px 5px;
     color: %text_hc%;
     min-height: 22px;
 }
 
-[accessibleName="PanelComboBox"] QAbstractItemView::item:selected {
+[styleClass="PanelComboBox"] QAbstractItemView::item:selected {
     background-color: %accent_hover_rgba%;
 }
 
@@ -717,70 +717,70 @@ QLabel#gridSearchIndicator {
 QLabel#gridSearchIndicator[noMatch="true"] {
     color: %search_nomatch%;
 }
-[accessibleName="FolderViewContents"] {
+[styleClass="FolderViewContents"] {
     border-top: 1px solid %topbar_border_rgba%;
 }
 /*----------------------------------------------------------------------------*/
-[accessibleName="FolderViewTopBar"] {
+[styleClass="FolderViewTopBar"] {
     background-color: %folderview_topbar%;
     min-height: %top_panel_height%;
     max-height: %top_panel_height%;
 }
 
-[accessibleName="PathBar"] {
+[styleClass="PathBar"] {
     background-color: %panel_button%;
     border-radius: %radius%;
     margin: 4px 2px;
 }
 
-[accessibleName="PathBar"] QLabel {
+[styleClass="PathBar"] QLabel {
     color: %text%;
     padding-right: 9px;
 }
 
-[accessibleName="PathBarButton"] {
+[styleClass="PathBarButton"] {
     border: 1px solid transparent;
     border-top-left-radius: %radius%;
     border-bottom-left-radius: %radius%;
     margin: 4px 2px;
 }
 
-[accessibleName="PathBarButton"]:hover {
+[styleClass="PathBarButton"]:hover {
     background-color: %panel_button_hover%;
     border-color: %panel_button_hover%;
 }
 
-[accessibleName="PathBarButton"]:pressed,
-[accessibleName="PathBarButton"][pressed="true"] {
+[styleClass="PathBarButton"]:pressed,
+[styleClass="PathBarButton"][pressed="true"] {
     background-color: %panel_button_pressed%;
     border-color: %panel_button_pressed%;
 }
 
 /*----------------------------------------------------------------------------*/
-[accessibleName="FolderViewSlider"] {
+[styleClass="FolderViewSlider"] {
     margin-top: 1px;
 }
 
-[accessibleName="FolderViewSlider"]::groove:horizontal {
+[styleClass="FolderViewSlider"]::groove:horizontal {
     border-top: 1px solid %panel_button_pressed%;
     border-bottom: 1px solid %panel_button_pressed%;
     height: 6px;
     margin: 0 12px;
 }
 
-[accessibleName="FolderViewSlider"]::sub-page:horizontal { /* left */
+[styleClass="FolderViewSlider"]::sub-page:horizontal { /* left */
     background: %panel_button_pressed%;
     border: 1px solid %panel_button_pressed%;
     height: 6px;
 }
 
-[accessibleName="FolderViewSlider"]::add-page:horizontal { /* right */
+[styleClass="FolderViewSlider"]::add-page:horizontal { /* right */
     background: %panel_button_pressed%;
     border: 1px solid %panel_button_pressed%;
     height: 6px;
 }
 
-[accessibleName="FolderViewSlider"]::handle:horizontal {
+[styleClass="FolderViewSlider"]::handle:horizontal {
     background: %text_lc2%;
     border: 1px solid %text_lc2%;
     width: 12px;
@@ -789,7 +789,7 @@ QLabel#gridSearchIndicator[noMatch="true"] {
     margin: -4px -12px;
 }
 
-[accessibleName="FolderViewSlider"]::handle:horizontal:hover {
+[styleClass="FolderViewSlider"]::handle:horizontal:hover {
     background: %text%;
     border-color: %text%;
 }
@@ -915,13 +915,13 @@ ControlsOverlay {
 /*----------------------------------------------------------------------------*/
 
 InfoBar, InfoBarProxy,
-[accessibleName="InfoBar"], [accessibleName="InfoBarProxy"],
+[styleClass="InfoBar"], [styleClass="InfoBarProxy"],
 QStatusBar {
     background-color: %widget%;
 }
 
 InfoBar QLabel,
-[accessibleName="InfoBar"] QLabel,
+[styleClass="InfoBar"] QLabel,
 QStatusBar QLabel {
     color: %text_hc%;
 }
@@ -932,7 +932,7 @@ QLabel#textViewerNotice {
 }
 
 /* folder view footer status bar */
-[accessibleName="FolderViewStatusFooter"] InfoBar {
+[styleClass="FolderViewStatusFooter"] InfoBar {
     border-top: 1px solid %text_lc2%;
 }
 
@@ -1079,7 +1079,7 @@ BookmarksItem[highlighted="true"] {
 }
 
 /* where a dragged bookmark will land */
-[accessibleName="BookmarkDropIndicator"] {
+[styleClass="BookmarkDropIndicator"] {
     background-color: %accent%;
 }
 
@@ -1087,18 +1087,18 @@ BookmarksItem[highlighted="true"] {
 /* places panel (bg) */
 /*----------------------------------------------------------------------------*/
 
-[accessibleName="PlacesPanel"] {
+[styleClass="PlacesPanel"] {
     background-color: %folderview%;
     border-right: 1px solid %folderview_hc%;
     margin-right: 6px;
 }
 
-[accessibleName="PanelSectionHeader"] {
+[styleClass="PanelSectionHeader"] {
     color: %text_hc%;
     font: bold;
 }
 
-[accessibleName="PanelSectionHeader"]:hover {
+[styleClass="PanelSectionHeader"]:hover {
     color: %text_hc2%;
 }
 
@@ -1106,21 +1106,21 @@ BookmarksItem[highlighted="true"] {
 /* places panel buttons */
 /*----------------------------------------------------------------------------*/
 
-[accessibleName="PlacesPanelButton"] {
+[styleClass="PlacesPanelButton"] {
     border-radius: %radius%;
 }
 
-[accessibleName="PlacesPanelButton"]:hover {
+[styleClass="PlacesPanelButton"]:hover {
     background-color: %folderview_button_hover%;
 }
 
-[accessibleName="PlacesPanelButton"]:pressed,
-[accessibleName="PlacesPanelButton"][pressed="true"] {
+[styleClass="PlacesPanelButton"]:pressed,
+[styleClass="PlacesPanelButton"][pressed="true"] {
     background-color: %folderview_button_pressed%;
 }
 
 /*----------------------------------------------------------------------------*/
-[accessibleName="FolderViewSplitter"]::handle {
+[styleClass="FolderViewSplitter"]::handle {
     background-color: %folderview%;
 }
 /*----------------------------------------------------------------------------*/
@@ -1563,7 +1563,7 @@ ResizeDialog QComboBox:focus,
 ShortcutCreatorDialog QComboBox:focus,
 SettingsDialog QComboBox:focus,
 SidePanel QComboBox:focus,
-[accessibleName="PanelComboBox"]:focus {
+[styleClass="PanelComboBox"]:focus {
     border-color: %accent%;
 }
 

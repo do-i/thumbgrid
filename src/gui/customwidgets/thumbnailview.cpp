@@ -14,7 +14,6 @@ ThumbnailView::ThumbnailView(Qt::Orientation _orientation, QWidget *parent)
       lastScrollFrameTime(0),
       scrollTimeLine(nullptr)
 {
-    setAccessibleName("thumbnailView");
     this->setMouseTracking(true);
     this->setAcceptDrops(false);
     this->setScene(&scene);

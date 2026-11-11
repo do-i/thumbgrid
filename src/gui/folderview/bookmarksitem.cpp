@@ -27,8 +27,6 @@ BookmarksItem::BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent
     removeItemButton.setMinimumSize(16, 16);
     removeItemButton.installEventFilter(this);
 
-    removeItemButton.setAccessibleName("BookmarksItemRemoveLabel");
-
     connect(&removeItemButton, &IconButton::clicked, this, &BookmarksItem::onRemoveClicked);
 
     layout.addWidget(&folderIconWidget);

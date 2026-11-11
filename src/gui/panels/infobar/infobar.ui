@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string notr="true"/>
   </property>
-  <property name="accessibleName">
+  <property name="styleClass" stdset="0">
    <string notr="true">InfoBar</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">

@@ -2,7 +2,7 @@
 #include "settings.h"
 
 InfoBarProxy::InfoBarProxy(QWidget *parent) : QWidget(parent), infoBar(nullptr) {
-    setAccessibleName("InfoBarProxy");
+    setProperty("styleClass", QStringLiteral("InfoBarProxy"));
     setAttribute(Qt::WA_StyledBackground, true);
     setAutoFillBackground(true);
     this->setMinimumHeight(23);

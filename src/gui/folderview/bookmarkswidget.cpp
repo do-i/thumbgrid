@@ -178,7 +178,7 @@ void BookmarksWidget::beginReorderDrag(const QString& dirPath) {
 void BookmarksWidget::showDropIndicator(const QPoint& pos) {
     if(!mDropIndicator) {
         mDropIndicator = new QWidget(this);
-        mDropIndicator->setAccessibleName("BookmarkDropIndicator");
+        mDropIndicator->setProperty("styleClass", QStringLiteral("BookmarkDropIndicator"));
         mDropIndicator->setAttribute(Qt::WA_TransparentForMouseEvents);
         mDropIndicator->setFixedHeight(2);
     }
