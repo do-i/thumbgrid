@@ -9,11 +9,11 @@ ControlsOverlay::ControlsOverlay(FloatingWidgetContainer *parent) :
     FloatingWidget(parent)
 {
     folderViewButton = new ActionButton("folderView", ":/res/icons/common/buttons/panel/folderview20.png", 30);
-    folderViewButton->setAccessibleName("ButtonSmall");
+    folderViewButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
     settingsButton = new ActionButton("openSettings", ":/res/icons/common/buttons/panel/settings20.png", 30);
-    settingsButton->setAccessibleName("ButtonSmall");
+    settingsButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
     closeButton = new ActionButton("exit", ":/res/icons/common/buttons/panel/close16.png", 30);
-    closeButton->setAccessibleName("ButtonSmall");
+    closeButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
 
     QWidget *horizontalLineWidget = new QWidget;
     horizontalLineWidget->setFixedSize(5, 22);

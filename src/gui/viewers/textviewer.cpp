@@ -43,7 +43,6 @@ protected:
 } // namespace
 
 TextViewer::TextViewer(QWidget *parent) : QWidget(parent) {
-    setAccessibleName("textViewer");
     layout.setContentsMargins(0, 0, 0, 0);
     layout.setSpacing(0);
     setLayout(&layout);

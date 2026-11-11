@@ -57,7 +57,6 @@ MW::MW(QWidget *parent)
 
     this->setMouseTracking(true);
     this->setAcceptDrops(true);
-    this->setAccessibleName("mainwindow");
     windowGeometryChangeTimer.setSingleShot(true);
     windowGeometryChangeTimer.setInterval(kGeometryChangeDebounceMs);
     setupUi();

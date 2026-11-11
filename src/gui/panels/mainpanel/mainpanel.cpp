@@ -2,21 +2,21 @@
 
 MainPanel::MainPanel(FloatingWidgetContainer *parent) : SlidePanel(parent) {
     // buttons stuff
-    buttonsWidget.setAccessibleName("panelButtonsWidget");
+    buttonsWidget.setProperty("styleClass", QStringLiteral("panelButtonsWidget"));
     openButton       = new ActionButton("open", ":res/icons/common/buttons/panel/open20.png", 30, this);
-    openButton->setAccessibleName("ButtonSmall");
+    openButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
     openButton->setTriggerMode(TriggerMode::PressTrigger);
     settingsButton   = new ActionButton("openSettings", ":res/icons/common/buttons/panel/settings20.png", 30, this);
-    settingsButton->setAccessibleName("ButtonSmall");
+    settingsButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
     settingsButton->setTriggerMode(TriggerMode::PressTrigger);
     exitButton       = new ActionButton("exit", ":res/icons/common/buttons/panel/close16.png", 30, this);
-    exitButton->setAccessibleName("ButtonSmall");
+    exitButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
     exitButton->setTriggerMode(TriggerMode::PressTrigger);
     folderViewButton = new ActionButton("folderView", ":res/icons/common/buttons/panel/folderview20.png", 30, this);
-    folderViewButton->setAccessibleName("ButtonSmall");
+    folderViewButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
     folderViewButton->setTriggerMode(TriggerMode::PressTrigger);
     pinButton = new ActionButton("", ":res/icons/common/buttons/panel/pin-panel20.png", 30, this);
-    pinButton->setAccessibleName("ButtonSmall");
+    pinButton->setProperty("styleClass", QStringLiteral("ButtonSmall"));
     pinButton->setTriggerMode(TriggerMode::PressTrigger);
     pinButton->setCheckable(true);
     connect(pinButton, &ActionButton::toggled, this, &MainPanel::onPinClicked);

@@ -188,17 +188,17 @@ SSideBarItem[checked="true"] {
 }
 /*----------------------------------------------------------------------------*/
 
-[accessibleName="ButtonSmall"] {
+[styleClass="ButtonSmall"] {
     border-radius: 1px;
     border: 1px solid transparent;
 }
 
-[accessibleName="ButtonSmall"]:hover {
+[styleClass="ButtonSmall"]:hover {
     background-color: %folderview_hc2%;
     border: 1px solid %folderview_hc2%;
 }
 
-[accessibleName="ButtonSmall"][checked="true"] {
+[styleClass="ButtonSmall"][checked="true"] {
     background-color: %folderview_hc%;
     border: 1px solid %folderview_hc%;
 }
@@ -250,7 +250,7 @@ QComboBox QAbstractItemView {
 /*----------------------------------------------------------------------------*/
 /* panel buttons holder widget */
 
-[accessibleName="panelButtonsWidget"] {
+[styleClass="panelButtonsWidget"] {
     background-color: %folderview%;
 }
 
