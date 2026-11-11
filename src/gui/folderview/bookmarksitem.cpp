@@ -1,6 +1,9 @@
 #include "bookmarksitem.h"
 
+#include "gui/folderview/bookmarkdrag.h"
 #include "gui/folderview/folderdrop.h"
+
+#include <QApplication>
 
 #include <utility>
 
@@ -53,12 +56,27 @@ void BookmarksItem::setHighlighted(bool mode) {
 
 void BookmarksItem::mouseReleaseEvent(QMouseEvent *event) {
     event->accept();
-    if(event->button() == Qt::LeftButton)
+    const bool click = mPressed && !mDragged;
+    mPressed = false;
+    if(event->button() == Qt::LeftButton && click)
         emit clicked(dirPath);
 }
 
 void BookmarksItem::mousePressEvent(QMouseEvent *event) {
     event->accept();
+    mPressed = event->button() == Qt::LeftButton;
+    mDragged = false;
+    mPressPos = event->position().toPoint();
+}
+
+// a click that moves less than the drag distance is still a click
+void BookmarksItem::mouseMoveEvent(QMouseEvent *event) {
+    if(!mPressed || mDragged || isRenaming() || !(event->buttons() & Qt::LeftButton))
+        return;
+    if((event->position().toPoint() - mPressPos).manhattanLength() >= QApplication::startDragDistance()) {
+        mDragged = true;
+        emit reorderDragRequested(dirPath);
+    }
 }
 
 void BookmarksItem::contextMenuEvent(QContextMenuEvent *event) {
@@ -134,6 +152,13 @@ void BookmarksItem::paintEvent(QPaintEvent *event) {
 }
 
 void BookmarksItem::dropEvent(QDropEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+        emit reorderDropped(QString::fromUtf8(event->mimeData()->data(QLatin1String(kBookmarkMime))),
+                            mapToParent(event->position().toPoint()));
+        return;
+    }
     setProperty("hover", false);
     update();
     const QStringList paths = droppedLocalPaths(event->mimeData());
@@ -146,6 +171,12 @@ void BookmarksItem::dropEvent(QDropEvent *event) {
 }
 
 void BookmarksItem::dragEnterEvent(QDragEnterEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+        emit reorderDragMoved(mapToParent(event->position().toPoint()));
+        return;
+    }
     if(event->mimeData()->hasUrls())
         acceptFolderDrop(event);
     setProperty("hover", true);
@@ -154,6 +185,12 @@ void BookmarksItem::dragEnterEvent(QDragEnterEvent *event) {
 
 // Ctrl can be pressed or released while hovering
 void BookmarksItem::dragMoveEvent(QDragMoveEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+        emit reorderDragMoved(mapToParent(event->position().toPoint()));
+        return;
+    }
     if(event->mimeData()->hasUrls())
         acceptFolderDrop(event);
     else
@@ -162,6 +199,7 @@ void BookmarksItem::dragMoveEvent(QDragMoveEvent *event) {
 
 void BookmarksItem::dragLeaveEvent(QDragLeaveEvent *event) {
     Q_UNUSED(event)
+    emit reorderDragLeft();
     setProperty("hover", false);
     update();
 }

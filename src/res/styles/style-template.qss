@@ -1038,6 +1038,11 @@ BookmarksItem[highlighted="true"] {
     border-color: %folderview_hc2%;
 }
 
+/* where a dragged bookmark will land */
+[accessibleName="BookmarkDropIndicator"] {
+    background-color: %accent%;
+}
+
 /*----------------------------------------------------------------------------*/
 /* places panel (bg) */
 /*----------------------------------------------------------------------------*/

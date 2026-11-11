@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <utility>
 
+#include "gui/folderview/bookmarkdrag.h"
+
 namespace {
 
 // Search prefix that matches nothing: dim red text on any theme.
@@ -112,6 +114,10 @@ FolderGridView::FolderGridView(QWidget *parent)
 }
 
 void FolderGridView::dropEvent(QDropEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->ignore();
+        return;
+    }
     event->accept();
     ThumbnailWidget *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(event->position().toPoint()));
     int index = -1;
@@ -122,11 +128,20 @@ void FolderGridView::dropEvent(QDropEvent *event) {
     emit droppedInto(event->mimeData(), event->source(), index);
 }
 
+// a bookmark being reordered is not a file drop
 void FolderGridView::dragEnterEvent(QDragEnterEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->ignore();
+        return;
+    }
     event->accept();
 }
 
 void FolderGridView::dragMoveEvent(QDragMoveEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->ignore();
+        return;
+    }
     event->accept();
     ThumbnailWidget *item = qgraphicsitem_cast<ThumbnailWidget*>(itemAt(event->position().toPoint()));
     int index = -1;

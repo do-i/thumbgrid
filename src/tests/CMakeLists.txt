@@ -874,7 +874,7 @@ thumbgrid_add_behavior_test(thumbgrid_bookmarks_panel_test
     behavior/test_bookmarks_panel.cpp
 )
 add_test(
-    NAME "The bookmarks panel follows the stored list, names the root, bookmarks the current folder and shows paths"
+    NAME "The bookmarks panel follows the stored list, bookmarks the current folder, shows paths and reorders by drag"
     COMMAND thumbgrid_bookmarks_panel_test
 )
 

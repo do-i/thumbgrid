@@ -33,12 +33,19 @@ signals:
     void removeClicked(const QString& dirPath);
     void contextMenuRequested(const QString& dirPath, const QPoint& globalPos);
     void renameCommitted(const QString& dirPath, const QString& label);
+    // the pointer moved past the drag distance with the button down
+    void reorderDragRequested(const QString& dirPath);
+    // a bookmark drag over this row or dropped on it; pos is in the parent's coordinates
+    void reorderDragMoved(const QPoint& pos);
+    void reorderDragLeft();
+    void reorderDropped(const QString& dirPath, const QPoint& pos);
     // copy: Ctrl was held, otherwise the files are to be moved
     void droppedIn(const QStringList& paths, const QString& dirPath, bool copy);
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
 
     void paintEvent(QPaintEvent *event) override;
@@ -62,6 +69,8 @@ private:
     QSpacerItem *spacer;
     QHBoxLayout layout;
     bool mHighlighted;
+    bool mPressed = false, mDragged = false;
+    QPoint mPressPos;
 };
 
 #endif // BOOKMARKSITEM_H

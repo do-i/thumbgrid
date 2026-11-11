@@ -1,5 +1,10 @@
 #include "bookmarkswidget.h"
 
+#include <QDrag>
+#include <QDragMoveEvent>
+
+#include "gui/folderview/bookmarkdrag.h"
+
 BookmarksWidget::BookmarksWidget(QWidget *parent) : QWidget(parent), highlightedPath("") {
     setAcceptDrops(true);
     setContentsMargins(0,0,0,0);
@@ -38,6 +43,10 @@ BookmarksItem *BookmarksWidget::createItem(const QString& dirPath) {
     connect(item, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
     connect(item, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
     connect(item, &BookmarksItem::droppedIn, this, &BookmarksWidget::droppedIn);
+    connect(item, &BookmarksItem::reorderDragRequested, this, &BookmarksWidget::beginReorderDrag);
+    connect(item, &BookmarksItem::reorderDragMoved, this, &BookmarksWidget::showDropIndicator);
+    connect(item, &BookmarksItem::reorderDragLeft, this, &BookmarksWidget::hideDropIndicator);
+    connect(item, &BookmarksItem::reorderDropped, this, &BookmarksWidget::reorderTo);
     connect(item, &BookmarksItem::renameCommitted, this, &BookmarksWidget::renameBookmark);
     connect(item, &BookmarksItem::contextMenuRequested, this, &BookmarksWidget::contextMenuRequested);
     item->setHighlighted(dirPath == highlightedPath);
@@ -140,13 +149,102 @@ void BookmarksWidget::onPathChanged(const QString& path) {
         item->setHighlighted(true);
 }
 
-void BookmarksWidget::dropEvent(QDropEvent *) {
+// the row index a drop at pos would insert before (rows are few: a linear scan)
+static int insertionIndexAt(const QLayout& layout, const QPoint& pos) {
+    for(int i = 0; i < layout.count(); i++) {
+        if(pos.y() < layout.itemAt(i)->geometry().center().y())
+            return i;
+    }
+    return layout.count();
+}
+
+void BookmarksWidget::beginReorderDrag(const QString& dirPath) {
+    auto *item = itemFor(dirPath);
+    if(!item)
+        return;
+    auto *mime = new QMimeData;
+    mime->setData(QLatin1String(kBookmarkMime), dirPath.toUtf8());
+    if(mDragHook && mDragHook(mime)) {
+        delete mime;
+        return;
+    }
+    auto *drag = new QDrag(item);
+    drag->setMimeData(mime);
+    drag->setPixmap(item->grab());
+    drag->exec(Qt::MoveAction);
+}
+
+// a line over the gap the row would drop into
+void BookmarksWidget::showDropIndicator(const QPoint& pos) {
+    if(!mDropIndicator) {
+        mDropIndicator = new QWidget(this);
+        mDropIndicator->setAccessibleName("BookmarkDropIndicator");
+        mDropIndicator->setAttribute(Qt::WA_TransparentForMouseEvents);
+        mDropIndicator->setFixedHeight(2);
+    }
+    const int index = insertionIndexAt(layout, pos);
+    int y = 0;
+    if(index < layout.count())
+        y = layout.itemAt(index)->geometry().top();
+    else if(layout.count())
+        y = layout.itemAt(layout.count() - 1)->geometry().bottom() + 1;
+    mDropIndicator->setGeometry(0, qMax(0, y - 1), width(), 2);
+    mDropIndicator->raise();
+    mDropIndicator->show();
+}
+
+void BookmarksWidget::hideDropIndicator() {
+    if(mDropIndicator)
+        mDropIndicator->hide();
+}
+
+void BookmarksWidget::reorderTo(const QString& dirPath, const QPoint& pos) {
+    hideDropIndicator();
+    BookmarksItem *item = itemFor(dirPath);
+    const int from = paths.indexOf(dirPath);
+    if(!item || from < 0)
+        return;
+    int to = insertionIndexAt(layout, pos);
+    if(to > from)
+        to--;
+    if(to == from)
+        return;
+    paths.move(from, to);
+    layout.removeWidget(item);
+    layout.insertWidget(to, item);
+    saveBookmarks();
+    emit bookmarksChanged();
+}
+
+void BookmarksWidget::dropEvent(QDropEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+        reorderTo(QString::fromUtf8(event->mimeData()->data(QLatin1String(kBookmarkMime))),
+                  event->position().toPoint());
+    }
 }
 
 void BookmarksWidget::dragEnterEvent(QDragEnterEvent *event) {
-    if(event->mimeData()->hasUrls()) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+        showDropIndicator(event->position().toPoint());
+    } else if(event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
     }
+}
+
+void BookmarksWidget::dragMoveEvent(QDragMoveEvent *event) {
+    if(isBookmarkDrag(event->mimeData())) {
+        event->setDropAction(Qt::MoveAction);
+        event->accept();
+        showDropIndicator(event->position().toPoint());
+    }
+}
+
+void BookmarksWidget::dragLeaveEvent(QDragLeaveEvent *) {
+    hideDropIndicator();
 }
 
 void BookmarksWidget::contextMenuEvent(QContextMenuEvent *event) {
