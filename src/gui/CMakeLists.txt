@@ -81,6 +81,7 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
 
     folderview/foldergridview.cpp
     folderview/gridcontextmenu.cpp
+    folderview/bookmarkcontextmenu.cpp
     folderview/treecontextmenu.cpp
     folderview/folderview.cpp
     folderview/folderviewproxy.cpp

@@ -878,6 +878,14 @@ add_test(
     COMMAND thumbgrid_bookmarks_panel_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_bookmarks_menu_and_labels_test
+    behavior/test_bookmarks_menu_and_labels.cpp
+)
+add_test(
+    NAME "The bookmarks context menu acts on the bookmark under the pointer"
+    COMMAND thumbgrid_bookmarks_menu_and_labels_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_folder_tree_folder_operations_test
     behavior/test_folder_tree_creates_renames_and_removes_folders.cpp
 )

@@ -1,4 +1,5 @@
 #include "clickablelabel.h"
+#include <QMouseEvent>
 
 ClickableLabel::ClickableLabel() {
 }
@@ -14,7 +15,8 @@ ClickableLabel::ClickableLabel(const QString &text, QWidget *parent) : QLabel(pa
     this->setText(text);
 }
 
+// the right button belongs to a context menu
 void ClickableLabel::mousePressEvent(QMouseEvent *event) {
-    Q_UNUSED(event)
-    emit clicked();
+    if(event->button() == Qt::LeftButton)
+        emit clicked();
 }

@@ -16,6 +16,7 @@
 #include "gui/customwidgets/actionbutton.h"
 #include "gui/customwidgets/styledcombobox.h"
 #include "gui/folderview/fvoptionspopup.h"
+#include "gui/folderview/bookmarkcontextmenu.h"
 #include "gui/folderview/treecontextmenu.h"
 #include "gui/folderview/treefolderop.h"
 
@@ -108,6 +109,8 @@ private slots:
     void setPlacesPanel(bool mode);
     void onPlacesPanelButtonChecked(bool mode);
     void onBookmarkClicked(QString dirPath);
+    void onBookmarkMenuRequested(const QString &path, const QPoint &globalPos);
+    void copyFolderPath(const QString &path);
     void bookmarkCurrentFolder();
     void updateBookmarkButton();
     void chooseBookmarkFolder();
@@ -133,6 +136,7 @@ private:
     FVOptionsPopup *optionsPopup;
     // built on the first right-click in the tree
     TreeContextMenu *mTreeMenu = nullptr;
+    BookmarkContextMenu *mBookmarkMenu = nullptr;
     QString mCurrentPath;
     // a folder just asked for: its row is selected once the model lists it
     QString mPendingNewFolder;

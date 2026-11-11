@@ -34,6 +34,7 @@ BookmarksItem *BookmarksWidget::createItem(const QString& dirPath) {
     connect(item, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
     connect(item, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
     connect(item, &BookmarksItem::droppedIn, this, &BookmarksWidget::droppedIn);
+    connect(item, &BookmarksItem::contextMenuRequested, this, &BookmarksWidget::contextMenuRequested);
     item->setHighlighted(dirPath == highlightedPath);
     return item;
 }
@@ -118,4 +119,9 @@ void BookmarksWidget::dragEnterEvent(QDragEnterEvent *event) {
     if(event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
     }
+}
+
+void BookmarksWidget::contextMenuEvent(QContextMenuEvent *event) {
+    event->accept();
+    emit contextMenuRequested(QString(), event->globalPos());
 }

@@ -120,6 +120,11 @@ FolderView::FolderView(QWidget *parent) :
 
     connect(ui->newBookmarkButton, &IconButton::clicked, this, &FolderView::bookmarkCurrentFolder);
     connect(ui->bookmarksWidget, &BookmarksWidget::bookmarksChanged, this, &FolderView::updateBookmarkButton);
+    connect(ui->bookmarksWidget, &BookmarksWidget::contextMenuRequested, this, &FolderView::onBookmarkMenuRequested);
+    ui->bookmarksLabel->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->bookmarksLabel, &QWidget::customContextMenuRequested, this, [this](const QPoint &pos) {
+        onBookmarkMenuRequested(QString(), ui->bookmarksLabel->mapToGlobal(pos));
+    });
     updateBookmarkButton();
     connect(ui->homeButton, &IconButton::clicked, this, &FolderView::onHomeBtn);
     connect(ui->rootButton, &IconButton::clicked, this, &FolderView::onRootBtn);
@@ -258,9 +263,7 @@ void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoi
         mTreeMenu = new TreeContextMenu(this);
         connect(mTreeMenu, &TreeContextMenu::openRequested, this, &FolderView::directorySelected);
         connect(mTreeMenu, &TreeContextMenu::newWindowRequested, this, &NewWindow::open);
-        connect(mTreeMenu, &TreeContextMenu::copyPathRequested, this, [this](const QString &path) {
-            emit folderOperationRequested(TreeFolderOp::CopyPath, QDir::toNativeSeparators(path), QString());
-        });
+        connect(mTreeMenu, &TreeContextMenu::copyPathRequested, this, &FolderView::copyFolderPath);
         connect(mTreeMenu, &TreeContextMenu::collapseAllRequested, this, &FolderView::collapseTree);
         connect(mTreeMenu, &TreeContextMenu::newFolderRequested, this, [this](const QString &path) {
             ui->dirTreeView->startNewFolder(dirModel->index(path), tr("New folder"));
@@ -279,6 +282,29 @@ void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoi
     }
     const QString path = dirModel->filePath(index);
     mTreeMenu->openFor({path, ui->bookmarksWidget->hasBookmark(path), isProtectedTreeFolder(path)}, globalPos);
+}
+
+void FolderView::copyFolderPath(const QString &path) {
+    emit folderOperationRequested(TreeFolderOp::CopyPath, QDir::toNativeSeparators(path), QString());
+}
+
+// path is empty for the panel itself; the menu opens on first use
+void FolderView::onBookmarkMenuRequested(const QString &path, const QPoint &globalPos) {
+    if(!mBookmarkMenu) {
+        mBookmarkMenu = new BookmarkContextMenu(this);
+        connect(mBookmarkMenu, &BookmarkContextMenu::openRequested, this, &FolderView::directorySelected);
+        connect(mBookmarkMenu, &BookmarkContextMenu::newWindowRequested, this, &NewWindow::open);
+        connect(mBookmarkMenu, &BookmarkContextMenu::copyPathRequested, this, &FolderView::copyFolderPath);
+        connect(mBookmarkMenu, &BookmarkContextMenu::removeRequested, ui->bookmarksWidget,
+                &BookmarksWidget::removeBookmark);
+        connect(mBookmarkMenu, &BookmarkContextMenu::addFolderRequested, this, &FolderView::chooseBookmarkFolder);
+        connect(mBookmarkMenu, &BookmarkContextMenu::bookmarkHereRequested, this,
+                &FolderView::bookmarkCurrentFolder);
+    }
+    if(path.isEmpty())
+        mBookmarkMenu->openForPanel(ui->newBookmarkButton->isEnabled(), globalPos);
+    else
+        mBookmarkMenu->openForBookmark(path, globalPos);
 }
 
 // the same guards as the menu's Rename and Move to trash: home and the root stay put

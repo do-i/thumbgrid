@@ -30,8 +30,11 @@ signals:
     void bookmarksChanged();
     void bookmarkClicked(const QString& dirPath);
     void droppedIn(const QStringList& paths, const QString& dirPath, bool copy);
+    // dirPath is empty when the pointer was over the panel and not over a row
+    void contextMenuRequested(const QString& dirPath, const QPoint& globalPos);
 
 protected:
+    void contextMenuEvent(QContextMenuEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
 private:

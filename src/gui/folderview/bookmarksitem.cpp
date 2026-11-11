@@ -61,6 +61,11 @@ void BookmarksItem::mousePressEvent(QMouseEvent *event) {
     event->accept();
 }
 
+void BookmarksItem::contextMenuEvent(QContextMenuEvent *event) {
+    event->accept();
+    emit contextMenuRequested(dirPath, event->globalPos());
+}
+
 void BookmarksItem::onRemoveClicked() {
     emit removeClicked(dirPath);
 }
