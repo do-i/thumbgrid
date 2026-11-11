@@ -230,6 +230,8 @@ public:
     // filter used by the Resize dialog; separate from the viewer's zoom filter
     ScalingFilter resizeFilter();
     void setResizeFilter(ScalingFilter mode);
+    // "WIDTHxHEIGHT" shortcuts of the Resize dialog; edited by hand in the config file
+    QStringList resizePresets();
     bool smoothAnimatedImages();
     void setSmoothAnimatedImages(bool mode);
     bool panelFullscreenOnly();

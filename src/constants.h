@@ -130,4 +130,21 @@ inline constexpr int kTextPreviewLimitMinKiB = 64;
 inline constexpr int kTextPreviewLimitMaxKiB = 16384;
 inline constexpr int kTextPreviewLimitDefaultKiB = 1024;
 
+// Resize dialog: largest width or height, and the resolution shortcuts offered
+// when the resizePresets setting is unset or holds nothing valid ("WIDTHxHEIGHT").
+inline constexpr int kResizeDimensionMaxPx = 65535;
+inline constexpr QLatin1StringView kResizePresetsDefault[] = {
+    QLatin1StringView("1366x768"),
+    QLatin1StringView("1440x900"),
+    QLatin1StringView("1440x1050"),
+    QLatin1StringView("1600x1200"),
+    QLatin1StringView("1920x1080"),
+    QLatin1StringView("1920x1200"),
+    QLatin1StringView("2560x1080"),
+    QLatin1StringView("2560x1440"),
+    QLatin1StringView("2560x1600"),
+    QLatin1StringView("3840x1600"),
+    QLatin1StringView("3840x2160"),
+};
+
 } // namespace tg::bounds

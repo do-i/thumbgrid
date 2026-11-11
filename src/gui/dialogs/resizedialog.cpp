@@ -1,6 +1,56 @@
 #include "resizedialog.h"
 #include "ui_resizedialog.h"
 
+#include "constants.h"
+#include "settings.h"
+
+namespace {
+
+// Malformed, non-positive and oversized entries and duplicates are dropped.
+QList<QSize> validPresets(const QStringList &entries) {
+    QList<QSize> sizes;
+    for(const QString &entry : entries) {
+        const qsizetype x = entry.indexOf(QLatin1Char('x'), 0, Qt::CaseInsensitive);
+        if(x < 0)
+            continue;
+        bool wOk = false, hOk = false;
+        const int w = entry.left(x).trimmed().toInt(&wOk);
+        const int h = entry.mid(x + 1).trimmed().toInt(&hOk);
+        const int max = tg::bounds::kResizeDimensionMaxPx;
+        if(!wOk || !hOk || w < 1 || h < 1 || w > max || h > max)
+            continue;
+        if(!sizes.contains(QSize(w, h)))
+            sizes << QSize(w, h);
+    }
+    return sizes;
+}
+
+// Names the well-known resolutions as the dialog always has.
+QString presetLabel(const QSize &size) {
+    QString label = QStringLiteral("%1 x %2").arg(size.width()).arg(size.height());
+    if(size == QSize(1920, 1080) || size == QSize(1920, 1200))
+        label += QStringLiteral(" (FullHD)");
+    else if(size == QSize(3840, 1600))
+        label += QStringLiteral(" (UW 4K)");
+    else if(size == QSize(3840, 2160))
+        label += QStringLiteral(" (UHD-1)");
+    return label;
+}
+
+void fillPresets(QComboBox *combo) {
+    QList<QSize> sizes = validPresets(settings->resizePresets());
+    if(sizes.isEmpty()) {
+        QStringList defaults;
+        for(const QLatin1StringView preset : tg::bounds::kResizePresetsDefault)
+            defaults << QString(preset);
+        sizes = validPresets(defaults);
+    }
+    for(const QSize &size : sizes)
+        combo->addItem(presetLabel(size), size);
+}
+
+} // namespace
+
 ResizeDialog::ResizeDialog(QSize originalSize,  QWidget *parent) :
     QDialog(parent),
     ui(new Ui::ResizeDialog),
@@ -26,7 +76,7 @@ ResizeDialog::ResizeDialog(QSize originalSize,  QWidget *parent) :
     longEdgeLabel = new QLabel(tr("Long edge:"), ui->resFrame);
     longEdge = new QSpinBox(ui->resFrame);
     longEdge->setObjectName("longEdge");
-    longEdge->setRange(1, 65535);
+    longEdge->setRange(1, tg::bounds::kResizeDimensionMaxPx);
     longEdge->setSuffix(" px");
     longEdge->setValue(qMax(originalSize.width(), originalSize.height()));
     longEdge->setEnabled(false);
@@ -42,6 +92,7 @@ ResizeDialog::ResizeDialog(QSize originalSize,  QWidget *parent) :
         w->hide();
 
     setupFilterCombo();
+    fillPresets(ui->resComboBox);
 
     desktopSize = qApp->primaryScreen()->size();
     // toggled fires for the button being switched off as well; react only to
@@ -98,21 +149,8 @@ ScalingFilter ResizeDialog::selectedFilter() const {
 }
 
 void ResizeDialog::setCommonResolution(int index) {
-    QSize res;
-    switch(index) {
-        case 1: res = QSize(1366, 768); break;
-        case 2: res = QSize(1440, 900); break;
-        case 3: res = QSize(1440, 1050); break;
-        case 4: res = QSize(1600, 1200); break;
-        case 5: res = QSize(1920, 1080); break;
-        case 6: res = QSize(1920, 1200); break;
-        case 7: res = QSize(2560, 1080); break;
-        case 8: res = QSize(2560, 1440); break;
-        case 9: res = QSize(2560, 1600); break;
-        case 10: res = QSize(3840, 1600); break;
-        case 11: res = QSize(3840, 2160); break;
-        default: res = originalSize; break;
-    }
+    const QSize preset = ui->resComboBox->itemData(index).toSize();
+    const QSize res = preset.isValid() ? preset : originalSize;
     if(multiImage)
         targetSize = res; // the box itself; each image is fitted into it later
     else if(ui->keepAspectRatio->isChecked())

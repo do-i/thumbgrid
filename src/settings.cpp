@@ -108,7 +108,7 @@ QString settingGroupFor(const QString &key) {
         {"slideshowInterval", "Document"}, {"defaultFitMode", "Document"}, {"keepFitMode", "Document"},
         {"focusPointIn1to1Mode", "Document"}, {"unlockMinZoom", "Document"}, {"zoomStep", "Document"},
         {"useFixedZoomLevels", "Document"}, {"fixedZoomLevels", "Document"}, {"scalingFilter", "Document"}, {"scalingSharpen", "Document"},
-        {"resizeFilter", "Document"},
+        {"resizeFilter", "Document"}, {"resizePresets", "Document"},
         {"imageScrolling", "Document"}, {"mouseScrollingSpeed", "Document"}, {"trackpadDetection", "Document"},
         {"clickableEdges", "Document"}, {"clickableEdgesVisible", "Document"}, {"thumbPanelStyle", "Document"},
         {"panelPosition", "Document"}, {"panelPinned", "Document"}, {"panelPreviewsSize", "Document"},
@@ -1975,6 +1975,13 @@ ScalingFilter Settings::resizeFilter() {
 
 void Settings::setResizeFilter(ScalingFilter mode) {
     settings->writeSetting("resizeFilter", mode);
+}
+//------------------------------------------------------------------------------
+QStringList Settings::resizePresets() {
+    QStringList defaults;
+    for(const QLatin1StringView preset : tg::bounds::kResizePresetsDefault)
+        defaults << QString(preset);
+    return settings->readSetting("resizePresets", defaults).toStringList();
 }
 //------------------------------------------------------------------------------
 bool Settings::smoothAnimatedImages() {

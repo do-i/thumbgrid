@@ -1,7 +1,8 @@
 // The Resize dialog serves two flows: editing the open picture in place, and
 // the grid's "write resized copies" flow, where one choice is applied to every
 // selected image. Each flow must offer only the controls that mean something
-// for it, and report the choice as the right per-image rule.
+// for it, and report the choice as the right per-image rule. Its resolution
+// shortcuts come from the resizePresets setting, falling back to the built-in list.
 #include "support/thumbgrid_test_support.h"
 
 #include <QCheckBox>
@@ -10,6 +11,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QRadioButton>
+#include <QSettings>
 #include <QSignalSpy>
 #include <QSpinBox>
 
@@ -19,6 +21,7 @@ class ResizeDialogModesTest : public QObject {
     Q_OBJECT
 
 private slots:
+    void cleanup();
     // first: runs against a fresh install's unset setting
     void qualityDefaultsToStandardBilinear();
     void pictureViewHidesCopyOnlyControls();
@@ -27,11 +30,35 @@ private slots:
     void longEdgeIsReportedAndOnlyItsSpinBoxIsLive();
     void shrinkOnlyIsOnByDefaultAndCanBeTurnedOff();
     void chosenFilterIsReportedAndRemembered();
+    void resolutionShortcutsDefaultToTheBuiltInList();
+    void resolutionShortcutsFollowTheSetting();
+    void malformedResolutionShortcutsAreSkippedAndAnEmptyResultFallsBack();
     // last: loads the app style sheet, which the slots above run without
     void sizeFieldsShowTheirValuesUnderTheStyleSheet();
 };
 
 namespace {
+
+const QStringList kBuiltIn = {
+    "1366 x 768",           "1440 x 900",  "1440 x 1050",          "1600 x 1200",
+    "1920 x 1080 (FullHD)", "1920 x 1200 (FullHD)", "2560 x 1080", "2560 x 1440",
+    "2560 x 1600",          "3840 x 1600 (UW 4K)",  "3840 x 2160 (UHD-1)",
+};
+
+// Settings shares the default QSettings store on Linux, where the key is grouped.
+void writePresets(const QStringList &presets) {
+    QSettings conf;
+    conf.setValue("Document/resizePresets", presets);
+    conf.sync();
+}
+
+QStringList presetTexts(ResizeDialog &dialog) {
+    auto *combo = dialog.findChild<QComboBox *>("resComboBox");
+    QStringList texts;
+    for(int i = 1; i < combo->count(); ++i)
+        texts << combo->itemText(i);
+    return texts;
+}
 
 template<typename T>
 T *child(ResizeDialog &dialog, const char *name) {
@@ -39,6 +66,12 @@ T *child(ResizeDialog &dialog, const char *name) {
 }
 
 } // namespace
+
+void ResizeDialogModesTest::cleanup() {
+    QSettings conf;
+    conf.remove("Document/resizePresets");
+    conf.sync();
+}
 
 void ResizeDialogModesTest::qualityDefaultsToStandardBilinear() {
     // bilinear is what resize always used before the choice existed
@@ -162,6 +195,35 @@ void ResizeDialogModesTest::chosenFilterIsReportedAndRemembered() {
     QCOMPARE(settings->resizeFilter(), QI_FILTER_NEAREST);
     ResizeDialog reopened(QSize(400, 200));
     QCOMPARE(child<QComboBox>(reopened, "comboBox")->currentData().toInt(), int(QI_FILTER_NEAREST));
+}
+
+void ResizeDialogModesTest::resolutionShortcutsDefaultToTheBuiltInList() {
+    ResizeDialog dialog(QSize(400, 200));
+    QCOMPARE(presetTexts(dialog), kBuiltIn);
+    auto *combo = child<QComboBox>(dialog, "resComboBox");
+    QCOMPARE(combo->itemText(0), QStringLiteral("Select:"));
+    combo->setCurrentIndex(6);
+    QCOMPARE(dialog.newSize(), QSize(1920, 960)); // 1920x1200 fitted into 2:1
+}
+
+void ResizeDialogModesTest::resolutionShortcutsFollowTheSetting() {
+    writePresets({"800x600", "1920x1080"});
+    ResizeDialog dialog(QSize(400, 300));
+    QCOMPARE(presetTexts(dialog), (QStringList{"800 x 600", "1920 x 1080 (FullHD)"}));
+    child<QComboBox>(dialog, "resComboBox")->setCurrentIndex(1);
+    QCOMPARE(dialog.newSize(), QSize(800, 600));
+}
+
+void ResizeDialogModesTest::malformedResolutionShortcutsAreSkippedAndAnEmptyResultFallsBack() {
+    writePresets({"junk", "0x500", "-5x10", "70000x10", "10x", "x10", "1.5x2", "", "640x480", "640X480",
+                  " 320 x 200 "});
+    {
+        ResizeDialog dialog(QSize(400, 300));
+        QCOMPARE(presetTexts(dialog), (QStringList{"640 x 480", "320 x 200"}));
+    }
+    writePresets({"junk", "0x0", "99999x99999"});
+    ResizeDialog fallback(QSize(400, 300));
+    QCOMPARE(presetTexts(fallback), kBuiltIn);
 }
 
 // Under Qt 6.12 a style-sheeted NoButtons spin box got a 1px-wide edit field:
