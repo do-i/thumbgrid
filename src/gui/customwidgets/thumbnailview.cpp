@@ -232,7 +232,6 @@ void ThumbnailView::showEvent(QShowEvent *event) {
 void ThumbnailView::populate(int newCount) {
     // no event pumping: queued handlers must never see half-destroyed widgets
     clearSelection();
-    // reset
     lastScrollDirection = SCROLL_FORWARDS;
     // pause updates until the layout is calculated
     // without this you will see scene moving when scrollbar appears
@@ -271,7 +270,6 @@ void ThumbnailView::addItem() {
     insertItem(thumbnails.count());
 }
 
-// insert at index
 void ThumbnailView::insertItem(int index) {
     ThumbnailWidget *widget = createThumbnailWidget();
     thumbnails.insert(index, widget);
@@ -399,7 +397,6 @@ void ThumbnailView::loadVisibleThumbnails() {
                 }
             }
         }
-        // load
         if(loadList.count())
             emit thumbnailsRequested(loadList, static_cast<int>(qApp->devicePixelRatio() * mThumbnailSize), mCropThumbnails, false);
         // unload offscreen
@@ -461,7 +458,6 @@ void ThumbnailView::updateLayout() {
 
 }
 
-// fit scene to it's contents size
 void ThumbnailView::fitSceneToContents() {
     QPointF center;
     if(this->mOrientation == Qt::Vertical) {

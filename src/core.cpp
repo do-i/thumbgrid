@@ -88,7 +88,6 @@ void Core::showGui() {
     QTimer::singleShot(kSetupFullUiDelayMs, mw, &MW::setupFullUi);
 }
 
-// create MainWindow and all widgets
 void Core::initGui() {
     mw = new MW();
     mw->hide();
@@ -914,7 +913,6 @@ void Core::openFromClipboard() {
 
     qCDebug(logCore) << "TEXT:" << cb->text();
 
-    // try opening url
     if(mimeData->hasUrls()) {
         auto url = mimeData->urls().first();
         QString path = url.toLocalFile();
@@ -952,7 +950,6 @@ void Core::openFromClipboard() {
 }
 
 void Core::onDropIn(const QMimeData *mimeData, QObject* source) {
-    // ignore self
     if(source == this)
         return;
     // check for our needed mime type, here a file or a list of files
@@ -1067,7 +1064,6 @@ void Core::renameCurrentSelection(const QString& newName) {
         if(mw->showConfirmation(tr("File exists"), tr("Overwrite file?"), true)) {
             model->renameEntry(selectedPath(), newName, true, result);
         } else {
-            // show rename dialog again
             mw->toggleRenameOverlay(newName);
         }
     }
@@ -1095,7 +1091,6 @@ FileOpResult Core::removeFile(const QString& filePath, bool trash) {
 }
 
 void Core::onFileRemoved(const QString& filePath, int index) {
-    // no files left
     if(model->isEmpty()) {
         mw->closeImage();
         state.hasActiveImage = false;
@@ -1122,7 +1117,6 @@ void Core::onFileRenamed(const QString& fromPath, int /*indexFrom*/, const QStri
 
 void Core::onFileAdded(const QString& filePath) {
     Q_UNUSED(filePath)
-    // update file count
     updateInfoString();
     if(model->fileCount() == 1 && state.currentFilePath == "")
         loadFileIndex(0, false, settings->usePreloader());
@@ -1583,7 +1577,6 @@ void Core::onScalingFinished(QPixmap *scaled, const ScalerRequest& req) {
     }
 }
 
-// reset state; clear cache; etc
 void Core::reset() {
     state.hasActiveImage = false;
     state.currentFilePath = "";

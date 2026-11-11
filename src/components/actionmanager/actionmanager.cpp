@@ -463,7 +463,6 @@ void ActionManager::adjustFromVersion(const QVersionNumber& lastVer) {
             }
         }
     }
-    // apply
     rebuildShortcutLookup();
     saveShortcuts();
 }

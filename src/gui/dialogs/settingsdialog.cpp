@@ -345,7 +345,6 @@ void SettingsDialog::setupFeatureToggles() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::setupMiscControls() {
-    // setup radioBtn groups
     fitModeGrp.addButton(ui->fitModeWindow);
     fitModeGrp.addButton(ui->fitModeWidth);
     fitModeGrp.addButton(ui->fitMode1to1);
@@ -377,7 +376,6 @@ void SettingsDialog::setupMiscControls() {
     langs.insert("zh_CN", "简体中文");
     // fill langs combobox, sorted by locale
     ui->langComboBox->addItems(langs.values());
-    // insert system language entry manually at the beginning
     langs.insert("system", "System language");
     ui->langComboBox->insertItem(0, "System language");
 
@@ -960,7 +958,6 @@ void SettingsDialog::readSettings() {
     else
         ui->langComboBox->setCurrentText(langName);
 
-    // ##### fit mode #####
     if(settings->imageFitMode() == FIT_WINDOW)
         ui->fitModeWindow->setChecked(true);
     else if(settings->imageFitMode() == FIT_WIDTH)
@@ -970,7 +967,6 @@ void SettingsDialog::readSettings() {
     else
         ui->fitMode1to1->setChecked(true);
 
-    // ##### UI #####
     ui->scalingQualityComboBox->setCurrentIndex(ui->scalingQualityComboBox->findData(settings->scalingFilter()));
     mScalingSharpenCheckBox->setChecked(settings->scalingSharpen());
     ui->fullscreenCheckBox->setChecked(settings->fullscreenMode());
@@ -986,7 +982,6 @@ void SettingsDialog::readSettings() {
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::saveSettings() {
-    // wait for all background stuff to finish
     if(QThreadPool::globalInstance()->activeThreadCount()) {
         QThreadPool::globalInstance()->waitForDone();
     }

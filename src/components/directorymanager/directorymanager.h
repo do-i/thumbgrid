@@ -75,9 +75,7 @@ public:
     void renameFileEntry(const QString &oldFilePath, const QString &newName);
 
     bool insertDirEntry(const QString &dirPath);
-    //bool forceInsertDirEntry(const QString &dirPath);
     void removeDirEntry(const QString &dirPath);
-    //void updateDirEntry(const QString &dirPath);
     void renameDirEntry(const QString &oldDirPath, const QString &newName);
 
     FileListSource source() const;

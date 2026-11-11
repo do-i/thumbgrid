@@ -113,7 +113,6 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
 
         image = ImageLib::exifRotated(std::move(image), imgInfo.exifOrientation());
 
-        // put in image info
         image->setText("originalWidth", QString::number(originalSize.width()));
         image->setText("originalHeight", QString::number(originalSize.height()));
         image->setText("lastModified", time);
@@ -562,7 +561,6 @@ std::pair<std::unique_ptr<QImage>, QSize> ThumbnailerRunnable::createVideoThumbn
     Qt::AspectRatioMode ARMode = squared?
                 (Qt::KeepAspectRatioByExpanding):(Qt::KeepAspectRatio);
 
-    // scale & crop
     QSize scaledSize = reader.size().scaled(size, size, ARMode);
     reader.setScaledSize(scaledSize);
     if(squared) {

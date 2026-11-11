@@ -45,7 +45,6 @@ void DirectoryPresenter::unsetModel() {
     disconnect(model.get(), &DirectoryModel::dirAdded,     this, &DirectoryPresenter::onDirAdded);
     disconnect(model.get(), &DirectoryModel::dirRenamed,   this, &DirectoryPresenter::onDirRenamed);
     model = nullptr;
-    // also empty view?
 }
 
 void DirectoryPresenter::setView(std::shared_ptr<IDirectoryView> _view) {
@@ -464,13 +463,11 @@ void DirectoryPresenter::onDroppedInto(const QMimeData *data, QObject *source, i
         return;
     }
 
-    // convert urls to qstrings
     QStringList pathList;
     QList<QUrl> urlList = data->urls();
     for(int i = 0; i < urlList.size(); ++i)
         pathList.append(urlList.at(i).toLocalFile());
 
-    // get target dir path
     QString destDir;
     if(targetIndex == 0 && offset)
         destDir = parentDirPath();
@@ -480,7 +477,6 @@ void DirectoryPresenter::onDroppedInto(const QMimeData *data, QObject *source, i
         destDir = model->directoryPath();
     pathList.removeAll(destDir); // remove target dir from source list
 
-    // pass to core
     emit droppedInto(pathList, destDir);
 }
 
@@ -546,7 +542,6 @@ int DirectoryPresenter::realObjectCount() const {
 }
 
 std::shared_ptr<Thumbnail> DirectoryPresenter::createParentDirThumbnail(int size) {
-    // QPixmap source(":/res/icons/common/buttons/panel/up16@2x.png");
     QPixmap source(":/res/icons/common/other/go-to-parent-dir.png");
     if(source.isNull())
         source = QPixmap(":/res/icons/common/buttons/panel/up16.png");

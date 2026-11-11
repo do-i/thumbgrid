@@ -68,7 +68,6 @@ void FloatingMessage::setIcon(FloatingMessageIcon icon) {
         case FloatingMessageIcon::NO_ICON:
         case FloatingMessageIcon::ICON_WARNING:
         case FloatingMessageIcon::ICON_ERROR:
-            //ui->iconLabel->setIconPath(":/res/icons/common/notifications/error16.png");
             ui->iconLabel->hide();
             break;
         case FloatingMessageIcon::ICON_DIRECTORY:

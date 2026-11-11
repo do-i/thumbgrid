@@ -337,7 +337,6 @@ void CropOverlay::resizeSelectionAR(QPoint delta) {
 
 //------------------------------------------------------------------------------
 void CropOverlay::resizeSelectionFree(QPoint delta) {
-    // resize
     switch(cursorAction) {
         case DRAG_TOPLEFT:
             selectionRect.setTopLeft(selectionRect.topLeft() + delta);
@@ -398,7 +397,6 @@ void CropOverlay::resizeSelectionFree(QPoint delta) {
         }
         setCursorAction(cursorAction);
     }
-    // crop selection so it's bounded by imageRect
     selectionRect = selectionRect.intersected(imageRect);
 }
 
@@ -423,7 +421,6 @@ QPoint CropOverlay::mapPointToImage(QPoint p) {
     p.setX(p.x() - imageDrawRect.x());
     p.setY(p.y() - imageDrawRect.y());
     p = p / scale;
-    // bound to image size
     if(p.x() > imageRect.width())
         p.setX(imageRect.width() - 1);
     if(p.y() > imageRect.height())
@@ -438,7 +435,6 @@ void CropOverlay::mousePressEvent(QMouseEvent *event) {
         setCursorAction(cursorAction);
         setResizeAnchor(cursorAction);
         moveStartPos = event->pos();
-        // start selection!
         if(!hasSelection()) {
             cursorAction = SELECTION_START; // move to hovertarget??
             QPoint point = mapPointToImage(event->pos() * dpr);
@@ -512,44 +508,28 @@ void CropOverlay::mouseReleaseEvent(QMouseEvent *event) {
 
 //------------------------------------------------------------------------------
 void CropOverlay::updateHandlePositions() {
-    // top left
     handles[0].moveTopLeft(selectionDrawRect.topLeft());
-    // top right
     handles[1].moveTopRight(selectionDrawRect.topRight() + QPoint(1, 0));
-    // bottom left
     handles[2].moveBottomLeft(selectionDrawRect.bottomLeft() + QPoint(0, 1));
-    // bottom right
     handles[3].moveBottomRight(selectionDrawRect.bottomRight() + QPoint(1, 1));
-    // left
     handles[4].moveTopLeft(QPoint(selectionDrawRect.left(),
                                    selectionDrawRect.center().y() - handleSize));
-    // right
     handles[5].moveTopRight(QPoint(selectionDrawRect.right() + 1,
                                     selectionDrawRect.center().y() - handleSize));
-    // top
     handles[6].moveTopLeft(QPoint(selectionDrawRect.center().x() - handleSize,
                                    selectionDrawRect.top()));
-    // bottom
     handles[7].moveBottomLeft(QPoint(selectionDrawRect.center().x() - handleSize,
                                       selectionDrawRect.bottom() + 1));
     for(int i = 0; i < 8; i++) {
         handlesDpi[i] = QRectF(handles[i].topLeft() / dpr, handles[i].size() / dpr);
     }
-    // top left
     handlesDpi[0].moveTopLeft(selectionDrawRectDpi.topLeft());
-    // top right
     handlesDpi[1].moveTopRight(selectionDrawRectDpi.topRight() + QPoint(1, 0));
-    // bottom left
     handlesDpi[2].moveBottomLeft(selectionDrawRectDpi.bottomLeft() + QPoint(0, 1));
-    // bottom right
     handlesDpi[3].moveBottomRight(selectionDrawRectDpi.bottomRight() + QPoint(1, 1));
-    // left
     handlesDpi[4].moveLeft(selectionDrawRectDpi.left());
-    // right
     handlesDpi[5].moveRight(selectionDrawRectDpi.right() + 1);
-    // top
     handlesDpi[6].moveTop(selectionDrawRectDpi.top());
-    // bottom
     handlesDpi[7].moveBottom(selectionDrawRectDpi.bottom() + 1);
 }
 
