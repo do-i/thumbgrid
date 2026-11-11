@@ -83,6 +83,12 @@ frees an object.
   `inline constexpr` in [`src/constants.h`](src/constants.h), in its `tg::` group.
 - Existing names stay; rename only when the value is being moved anyway.
 
+### Style hooks
+
+- A QSS hook shared by several widgets is the dynamic property `styleClass`, matched as `[styleClass="X"]` in `style-template.qss`.
+- Set it before the widget is shown: `setProperty("styleClass", QStringLiteral("X"))`, or in a `.ui` file `<property name="styleClass" stdset="0"><string notr="true">X</string></property>`.
+- Never use `accessibleName` as a hook: screen readers announce it, so it is left for real accessible names.
+
 ### Comments
 
 - Say why, not what; two lines at most, unless documenting a public interface.
