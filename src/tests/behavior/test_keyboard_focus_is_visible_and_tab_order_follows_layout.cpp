@@ -70,7 +70,7 @@ void KeyboardFocusIsVisibleTest::theShortcutDialogTabsFromTheSequenceToTheGestur
     auto *ok = dialog.findChild<QWidget *>("okButton");
     QVERIFY(sequence && ok);
     QWidget *gestures = nextFocusable(sequence);
-    QCOMPARE(gestures->accessibleName(), QStringLiteral("mouseGestureButton"));
+    QCOMPARE(gestures->objectName(), QStringLiteral("mouseGestureButton"));
     QCOMPARE(nextFocusable(gestures), ok);
 }
 

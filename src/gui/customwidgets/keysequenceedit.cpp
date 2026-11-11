@@ -73,7 +73,7 @@ void KeySequenceEdit::record(const QString &sequence) {
 
 QPushButton *KeySequenceEdit::createMouseGestureButton(QWidget *parent) {
     auto *button = new QPushButton(tr("Mouse gestures"), parent);
-    button->setAccessibleName("mouseGestureButton");
+    button->setObjectName("mouseGestureButton");
     button->setAutoDefault(false);
     button->setToolTip(tr("Clicks in the picture's left and right edges (with clickable edges on), "
                           "drags, and double-clicks on a grid thumbnail"));

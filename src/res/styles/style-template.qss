@@ -1277,7 +1277,7 @@ FileReplaceDialog {
     border: 1px solid %widget_border%;
     border-radius: %contextmenu_border_radius%;
 }
-FileReplaceDialog QLabel[accessibleName="DialogTitle"] {
+FileReplaceDialog QLabel[styleClass="DialogTitle"] {
     color: %text_hc%;
     font-size: %font_large%;
     font-weight: bold;
@@ -1292,7 +1292,7 @@ CustomMessageBox {
 CustomMessageBox QLabel {
     color: %text%;
 }
-CustomMessageBox QLabel[accessibleName="DialogTitle"] {
+CustomMessageBox QLabel[styleClass="DialogTitle"] {
     color: %text_hc%;
     font-size: %font_large%;
     font-weight: bold;

@@ -23,10 +23,9 @@ CustomMessageBox::CustomMessageBox(QWidget *parent)
     setAttribute(Qt::WA_TranslucentBackground, true);
     setModal(true);
 
-    titleLabel->setAccessibleName(QStringLiteral("DialogTitle"));
+    titleLabel->setProperty("styleClass", QStringLiteral("DialogTitle"));
     titleLabel->setWordWrap(true);
 
-    textLabel->setAccessibleName(QStringLiteral("DialogText"));
     textLabel->setWordWrap(true);
     textLabel->setMaximumWidth(360);
 

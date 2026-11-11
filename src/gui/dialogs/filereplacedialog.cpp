@@ -16,7 +16,7 @@ FileReplaceDialog::FileReplaceDialog(QWidget *parent) : QDialog(parent), ui(new 
     // Inset the content so it clears the rounded corners drawn in paintEvent.
     if(auto *lay = layout())
         lay->setContentsMargins(20, 18, 20, 16);
-    ui->titleLabel->setAccessibleName(QStringLiteral("DialogTitle"));
+    ui->titleLabel->setProperty("styleClass", QStringLiteral("DialogTitle"));
     ui->yesButton->setDefault(true);
     multi = false;
     connect(ui->yesButton, &QPushButton::clicked, this, &FileReplaceDialog::onYesClicked);

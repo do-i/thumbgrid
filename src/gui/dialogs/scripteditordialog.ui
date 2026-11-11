@@ -105,9 +105,6 @@
          <height>16777215</height>
         </size>
        </property>
-       <property name="accessibleName">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string notr="true">...</string>
        </property>
@@ -135,9 +132,6 @@
      </property>
      <item>
       <widget class="QCheckBox" name="blockingCheckBox">
-       <property name="accessibleName">
-        <string notr="true"/>
-       </property>
        <property name="text">
         <string>Wait to finish</string>
        </property>
@@ -180,9 +174,6 @@
    </item>
    <item>
     <widget class="QLabel" name="messageLabel">
-     <property name="accessibleName">
-      <string notr="true"/>
-     </property>
      <property name="text">
       <string/>
      </property>
