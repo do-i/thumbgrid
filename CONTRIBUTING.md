@@ -83,6 +83,14 @@ frees an object.
   `inline constexpr` in [`src/constants.h`](src/constants.h), in its `tg::` group.
 - Existing names stay; rename only when the value is being moved anyway.
 
+### Comments
+
+- Say why, not what; two lines at most, unless documenting a public interface.
+- Keep invariants (threading, ordering, workarounds with a link) and state them as facts.
+- No history or narrative (that belongs in the commit message) and no commented-out code.
+- Test files open with at most four lines saying what is proven.
+- A TODO/FIXME states an actionable task without naming an owner, or goes to the backlog.
+
 ## Releasing
 
 The git tag is the single source of truth for the version.
