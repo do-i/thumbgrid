@@ -49,6 +49,7 @@ TextViewer::TextViewer(QWidget *parent) : QWidget(parent) {
     setLayout(&layout);
 
     noticeLabel = new QLabel(this);
+    noticeLabel->setObjectName(QStringLiteral("textViewerNotice"));
     noticeLabel->setAlignment(Qt::AlignCenter);
     noticeLabel->setContentsMargins(4, 4, 4, 4);
     noticeLabel->hide();
@@ -80,8 +81,6 @@ void TextViewer::readSettings() {
     pal.setColor(QPalette::Highlight, scheme.accent);
     pal.setColor(QPalette::HighlightedText, scheme.background);
     textEdit->setPalette(pal);
-    noticeLabel->setStyleSheet(QString("color: %1; background-color: %2;")
-                               .arg(scheme.text_lc.name(), scheme.widget.name()));
 }
 
 bool TextViewer::showFile(const QString &filePath) {

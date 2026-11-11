@@ -185,11 +185,7 @@ void TreeViewCustom::beginEdit(EditMode mode, const QModelIndex &index, const QS
     if(!mEditor) {
         mEditor = new QLineEdit(viewport());
         mEditor->setContextMenuPolicy(Qt::NoContextMenu);
-        const auto &cs = settings->colorScheme();
-        mEditor->setStyleSheet(QStringLiteral(
-            "QLineEdit { background: %1; color: %2; border: 1px solid %3;"
-            " border-radius: 2px; padding: 1px 3px; }")
-            .arg(cs.widget.name(), cs.text.name(), cs.accent.name()));
+        mEditor->setObjectName(QStringLiteral("inlineRenameEditor"));
         mEditor->installEventFilter(this);
     }
     mEditMode = mode;

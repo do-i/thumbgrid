@@ -865,6 +865,7 @@ static void replaceStylesheetColors(QString &styleSheet, const ColorScheme &colo
     }
 
     // icon variant follows the app theme's background, not the OS palette
+    styleSheet.replace("%search_nomatch%", QColor(tg::color::kSearchNoMatchRgb).name());
     styleSheet.replace("%icontheme%",  tg::colorutil::isDark(colors.background) ? "dark" : "light");
     styleSheet.replace("%sys_window%",    sys_window.name());
     styleSheet.replace("%sys_window_tinted%",    sys_window_tinted.name());

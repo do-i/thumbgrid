@@ -32,10 +32,6 @@ void InfoBar::setStatusText(const QString& text) {
 
 void InfoBar::readSettings() {
     const ColorScheme &scheme = settings->colorScheme();
-    setStyleSheet(QString("background-color: %1;").arg(scheme.widget.name()));
-
-    const QString labelStyle = QString("color: %1; background-color: transparent;")
-                                   .arg(scheme.text_hc.name());
     QPalette pal = palette();
     pal.setColor(QPalette::Window, scheme.widget);
     pal.setColor(QPalette::WindowText, scheme.text_hc);
@@ -44,9 +40,6 @@ void InfoBar::readSettings() {
     ui->index->setPalette(pal);
     ui->path->setPalette(pal);
     ui->info->setPalette(pal);
-    ui->index->setStyleSheet(labelStyle);
-    ui->path->setStyleSheet(labelStyle);
-    ui->info->setStyleSheet(labelStyle);
 }
 
 void InfoBar::wheelEvent(QWheelEvent *event) {

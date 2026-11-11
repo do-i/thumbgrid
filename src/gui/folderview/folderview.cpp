@@ -27,9 +27,6 @@ FolderView::FolderView(QWidget *parent) :
     ui->setupUi(this);
 
     // ------- filesystem view --------
-    QString style = "font: %1pt;";
-    style = style.arg(QApplication::font().pointSize());
-    ui->dirTreeView->setStyleSheet(style);
 
     optionsPopup = new FVOptionsPopup();
     popupTimerClutch.start();

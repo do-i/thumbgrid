@@ -8,6 +8,7 @@
 #pragma once
 
 #include <QLatin1StringView>
+#include <QRgb>
 
 // Durations, delays, debounces and timeouts (…Ms).
 namespace tg::timing {
@@ -48,7 +49,12 @@ inline constexpr int kTreeExpandedMax = 100;
 } // namespace tg::limit
 
 // Colors as constexpr QRgb (…Rgb); build a QColor at the use site.
-namespace tg::color {}
+namespace tg::color {
+
+// Search prefix that matches nothing: dim red text on any theme.
+inline constexpr QRgb kSearchNoMatchRgb = 0xe05252;
+
+} // namespace tg::color
 
 // Format strings and fixed literals.
 namespace tg::fmt {

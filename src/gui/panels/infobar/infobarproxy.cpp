@@ -40,8 +40,6 @@ void InfoBarProxy::setStatusText(const QString& text) {
 
 void InfoBarProxy::readSettings() {
     const QColor controlBackground = settings->colorScheme().widget;
-    setStyleSheet(QString("background-color: %1;").arg(controlBackground.name()));
-
     QPalette pal = palette();
     pal.setColor(QPalette::Window, controlBackground);
     setPalette(pal);

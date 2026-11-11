@@ -7,9 +7,6 @@
 
 namespace {
 
-// Search prefix that matches nothing: dim red text on any theme.
-constexpr QRgb kSearchNoMatchRgb = 0xe05252;
-
 bool isNavigationAction(const QString &action) {
     static const QStringList actions{"selectPrevious", "selectNext", "selectAbove", "selectBelow",
                                      "selectPageUp", "selectPageDown", "selectFirst", "selectLast"};
@@ -561,11 +558,7 @@ void FolderGridView::startRename(const QString& name) {
     if(!renameEditor) {
         renameEditor = new QLineEdit(viewport());
         renameEditor->setContextMenuPolicy(Qt::NoContextMenu);
-        const auto &cs = settings->colorScheme();
-        renameEditor->setStyleSheet(QStringLiteral(
-            "QLineEdit { background: %1; color: %2; border: 1px solid %3;"
-            " border-radius: 2px; padding: 1px 3px; }")
-            .arg(cs.widget.name(), cs.text.name(), cs.accent.name()));
+        renameEditor->setObjectName(QStringLiteral("inlineRenameEditor"));
         renameEditor->installEventFilter(this);
     }
     renameIndex = idx;
@@ -713,15 +706,15 @@ void FolderGridView::updateSearchIndicator() {
         searchIndicator->setObjectName(QStringLiteral("gridSearchIndicator"));
         searchIndicator->setTextInteractionFlags(Qt::NoTextInteraction);
         searchIndicator->setFocusPolicy(Qt::NoFocus);
+        searchIndicator->ensurePolished();
     }
-    const auto &cs = settings->colorScheme();
     // dim red marks a prefix that matches nothing; the query is kept either way
     // so the next backspace gets back to a matching one
-    QString textColor = mSearchMatched ? cs.text.name() : QColor(kSearchNoMatchRgb).name();
-    searchIndicator->setStyleSheet(QStringLiteral(
-        "QLabel { background: %1; color: %2; border: 1px solid %3;"
-        " border-radius: 2px; padding: 2px 6px; }")
-        .arg(cs.widget.name(), textColor, cs.accent.name()));
+    if(searchIndicator->property("noMatch").toBool() == mSearchMatched) {
+        searchIndicator->setProperty("noMatch", !mSearchMatched);
+        searchIndicator->style()->unpolish(searchIndicator);
+        searchIndicator->style()->polish(searchIndicator);
+    }
     searchIndicator->setText(QStringLiteral("/") + mSearchQuery);
     positionSearchIndicator();
     searchIndicator->show();

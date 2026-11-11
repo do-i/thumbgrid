@@ -695,6 +695,28 @@ FolderGridView {
 FolderView {
     background-color: %folderview%;
 }
+
+/* in-place rename editor (grid, tree, bookmarks) */
+QLineEdit#inlineRenameEditor {
+    background: %widget%;
+    color: %text%;
+    border: 1px solid %accent%;
+    border-radius: 2px;
+    padding: 1px 3px;
+}
+
+/* grid type-ahead search; noMatch is set while the prefix matches nothing */
+QLabel#gridSearchIndicator {
+    background: %widget%;
+    color: %text%;
+    border: 1px solid %accent%;
+    border-radius: 2px;
+    padding: 2px 6px;
+}
+
+QLabel#gridSearchIndicator[noMatch="true"] {
+    color: %search_nomatch%;
+}
 [accessibleName="FolderViewContents"] {
     border-top: 1px solid %topbar_border_rgba%;
 }
@@ -898,6 +920,11 @@ InfoBar QLabel,
 [accessibleName="InfoBar"] QLabel,
 QStatusBar QLabel {
     color: %text_hc%;
+}
+
+QLabel#textViewerNotice {
+    color: %text_lc%;
+    background-color: %widget%;
 }
 
 /* folder view footer status bar */
