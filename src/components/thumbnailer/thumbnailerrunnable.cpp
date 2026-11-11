@@ -124,7 +124,6 @@ std::shared_ptr<Thumbnail> ThumbnailerRunnable::generate(ThumbnailCache* cache, 
 
         if(cache) {
             // save thumbnail if it makes sense
-            // FIXME: avoid too much i/o
             if(originalSize.width() > size || originalSize.height() > size)
                 cache->saveThumbnail(image.get(), thumbnailId);
         }

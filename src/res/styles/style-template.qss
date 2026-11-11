@@ -97,7 +97,7 @@ SSideBarItem[checked="true"] {
     color: %text_hc2%;
 }
 
-/* TODO: fix me */
+/* grouped after a :pressed selector, the [pressed="true"] ones never match (see backlog) */
 [accessibleName="Button"]:pressed,
 [accessibleName="Button"][pressed="true"],
 [accessibleName="ButtonSetLeft"]:pressed,  [accessibleName="ButtonSetLeft"][pressed="true"],

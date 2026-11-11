@@ -1122,7 +1122,7 @@ void Core::onFileAdded(const QString& filePath) {
         loadFileIndex(0, false, settings->usePreloader());
 }
 
-// !! fixme
+// intentionally empty: DirectoryModel reloads cached images and the presenters refresh thumbnails
 void Core::onFileModified(const QString& filePath) {
     Q_UNUSED(filePath)
 }
@@ -1376,7 +1376,6 @@ void Core::syncSaveOverlay(const std::shared_ptr<Image>& img) {
     mw->setSaveOverlayBusy(model->isSaving(img->filePath()));
 }
 
-// todo: remove?
 QString Core::selectedPath() {
     if(!model)
         return "";
@@ -1568,9 +1567,9 @@ void Core::scalingRequest(QSize size, ScalingFilter filter) {
     }
 }
 
-// TODO: don't use connect? otherwise there is no point using unique_ptr
+// takes ownership of scaled
 void Core::onScalingFinished(QPixmap *scaled, const ScalerRequest& req) {
-    if(state.hasActiveImage /* TODO: a better fix > */ && req.path == state.currentFilePath) {
+    if(state.hasActiveImage && req.path == state.currentFilePath) {
         mw->onScalingFinished(std::unique_ptr<QPixmap>(scaled));
     } else {
         delete scaled;

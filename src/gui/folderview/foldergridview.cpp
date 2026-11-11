@@ -40,8 +40,6 @@ QString plainKeyName(const QKeyEvent *event) {
 } // namespace
 
 
-// TODO: create a base class for this and the one on panel
-
 namespace {
     // grid cell width relative to the thumbnail size
     constexpr float kCellAspect = 1.28f;
@@ -426,7 +424,7 @@ ThumbnailWidget* FolderGridView::createThumbnailWidget() {
     widget->setLabelFontPointSize(mLabelFontPointSize);
     widget->setLabelBackgroundColor(mLabelBackgroundColor);
     widget->setCellBackgroundColor(mCellBackgroundColor);
-    widget->setThumbnailSize(this->mThumbnailSize); // TODO: constructor
+    widget->setThumbnailSize(this->mThumbnailSize);
     widget->setThumbnailAreaSize(folderGridThumbnailWidth(this->mThumbnailSize), this->mThumbnailSize);
     return widget;
 }

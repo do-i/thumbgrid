@@ -9,7 +9,7 @@ ThumbnailStripProxy::ThumbnailStripProxy(QWidget *parent)
 void ThumbnailStripProxy::init() {
     if(thumbnailStrip)
         return;
-    // FIXME: re-entrancy hazard (processEvents)
+    // re-entrancy hazard: processEvents (see backlog)
     qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
     QMutexLocker ml(&m);
     thumbnailStrip.reset(new ThumbnailStrip());
@@ -30,7 +30,7 @@ void ThumbnailStripProxy::init() {
     thumbnailStrip->select(stateBuf.selection);
     // wait till layout stuff happens
     // before calling focusOn()
-    // FIXME: re-entrancy hazard (processEvents)
+    // re-entrancy hazard: processEvents (see backlog)
     qApp->processEvents();
     thumbnailStrip->focusOnSelection();
 }

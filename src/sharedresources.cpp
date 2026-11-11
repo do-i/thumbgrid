@@ -1,8 +1,6 @@
 #include "sharedresources.h"
 #include "utils/imagelib.h"
 
-// TODO: is there a point in doing this? qt does implicit sharing for pixmaps? test
-
 SharedResources *shrRes = nullptr;
 
 SharedResources::SharedResources()

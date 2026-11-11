@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     PlatformDesktop::prepareApplicationEnvironment();
 
 
-    // do we still need this?
+    // Qt 6 ignores this variable; it only reaches child processes
     qputenv("QT_AUTO_SCREEN_SCALE_FACTOR","0");
 
 #if (QT_VERSION_MAJOR == 5)

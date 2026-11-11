@@ -12,7 +12,7 @@ FolderViewProxy::FolderViewProxy(QWidget *parent)
 }
 
 void FolderViewProxy::init() {
-    // FIXME: re-entrancy hazard (processEvents)
+    // re-entrancy hazard: processEvents (see backlog)
     qApp->processEvents(); // chew through events in case we have something that alters stateBuf in queue
     QMutexLocker ml(&m);
     if(folderView)
@@ -54,7 +54,7 @@ void FolderViewProxy::init() {
     folderView->select(stateBuf.selection);
     // wait till layout stuff happens
     // before calling focusOn()
-    // FIXME: re-entrancy hazard (processEvents)
+    // re-entrancy hazard: processEvents (see backlog)
     qApp->processEvents();
     folderView->focusOnSelection();
     folderView->onSortingChanged(stateBuf.sortingMode);

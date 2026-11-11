@@ -22,13 +22,11 @@
 #include "watchers/directorywatcher.h"
 #include "sourcecontainers/fsentry.h"
 
-enum FileListSource : std::uint8_t { // rename? wip
+enum FileListSource : std::uint8_t {
     SOURCE_DIRECTORY,
     SOURCE_DIRECTORY_RECURSIVE,
     SOURCE_LIST
 };
-
-//TODO: rename? EntrySomething?
 
 class DirectoryManager : public QObject {
     Q_OBJECT

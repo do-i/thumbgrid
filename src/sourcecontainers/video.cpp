@@ -31,13 +31,11 @@ bool Video::save() {
 
 std::unique_ptr<QPixmap> Video::getPixmap() {
     qCWarning(logVideo) << "[Video] getPixmap() is not implemented.";
-    //TODO: find out some easy way to get frames from video source
     return nullptr;
 }
 
 std::shared_ptr<const QImage> Video::getImage() {
     qCWarning(logVideo) << "[Video] getImage() is not implemented.";
-    //TODO: find out some easy way to get frames from video source
     return nullptr;
 }
 

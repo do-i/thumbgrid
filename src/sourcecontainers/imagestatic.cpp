@@ -54,7 +54,6 @@ void ImageStatic::loadGeneric() {
     mLoaded = true;
 }
 
-// TODO: move this out somewhere to use in other places
 void ImageStatic::loadICO() {
     // Big brain code. It's mostly for small ico files so whatever. I'm not patching Qt for this.
     QIcon icon(mPath);

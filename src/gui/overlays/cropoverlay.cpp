@@ -1,7 +1,5 @@
 #include "cropoverlay.h"
 
-// TODO: this is pretty old. Clean up
-
 namespace {
 constexpr int kShadeAlpha = 160;
 constexpr QRgb kDarkGrayRgb = 0x787878;
@@ -39,7 +37,7 @@ CropOverlay::CropOverlay(FloatingWidgetContainer *parent) : FloatingWidget(paren
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setFocusPolicy(Qt::StrongFocus);
 
-    //tmp for testing
+    // default until the crop panel sets a ratio; must stay non-zero
     ar.setX(16);
     ar.setY(9);
 
@@ -249,7 +247,6 @@ void CropOverlay::setResizeAnchor(CursorAction action) {
 }
 
 //------------------------------------------------------------------------------
-// TODO: flip selection rectangle
 void CropOverlay::resizeSelection(QPoint delta) {
     if(lockAspectRatio)
         resizeSelectionAR(delta);
@@ -260,7 +257,6 @@ void CropOverlay::resizeSelection(QPoint delta) {
 }
 
 //------------------------------------------------------------------------------
-// TODO: split this up
 void CropOverlay::resizeSelectionAR(QPoint delta) {
     QSizeF newSz(selectionRect.size());
     QSizeF maxSz;
@@ -449,7 +445,6 @@ void CropOverlay::mousePressEvent(QMouseEvent *event) {
 }
 
 //------------------------------------------------------------------------------
-// TODO: uneven movement with fractional scaling
 void CropOverlay::mouseMoveEvent(QMouseEvent *event) {
     if(event->buttons() & Qt::LeftButton /*&& hasSelection()*/) {
         if(cursorAction == SELECTION_START) {
@@ -534,7 +529,6 @@ void CropOverlay::updateHandlePositions() {
 }
 
 //------------------------------------------------------------------------------
-// TODO: use aspect ratio
 void CropOverlay::onSelectionOutsideChange(QRect selection) {
     if(selection.width() > 0 && selection.height() > 0) {
         QRect boundedSelection = placeInside(selection, imageRect);

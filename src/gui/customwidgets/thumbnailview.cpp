@@ -83,7 +83,6 @@ void ThumbnailView::setOrientation(Qt::Orientation _orientation) {
             QGraphicsView::centerOn(viewportCenter.x(), value + 1);
         };
     }
-    // todo: layout
 }
 
 void ThumbnailView::hideEvent(QHideEvent *event) {

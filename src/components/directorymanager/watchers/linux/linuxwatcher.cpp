@@ -14,8 +14,7 @@
   * than specified then event will be considered as remove event
   */
 
-// TODO: this may break event order.
-// Implement a proper queue.
+// move/modify events wait out these timeouts, so they can be emitted out of order
 constexpr int EVENT_MOVE_TIMEOUT = 150;   // ms
 constexpr int EVENT_MODIFY_TIMEOUT = 150; // ms
 

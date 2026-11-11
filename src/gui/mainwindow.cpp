@@ -9,8 +9,6 @@
 #include "constants.h"
 #include "utils/bytesize.h"
 
-// TODO: nuke this and rewrite
-
 namespace {
 // coalesces move/resize events into one geometry update
 constexpr int kGeometryChangeDebounceMs = 30;
@@ -317,7 +315,6 @@ QSize MW::windowChromeSize() const {
     return estimate;
 }
 
-// todo: fix flicker; ideally change image and resize in one go
 void MW::preShowResize(QSize sz) {
     auto screens = qApp->screens();
     if(this->windowState() != Qt::WindowNoState || !screens.count() || screens.count() <= currentDisplay)
@@ -651,7 +648,7 @@ void MW::showSaveDialog(QString filePath) {
 QString MW::getSaveFileName(QString filePath) {
     docWidget->hideFloatingPanel();
     QStringList filters;
-    // writable image formats; todo: some may need to be blacklisted
+    // writable image formats
     auto writerFormats = QImageWriter::supportedImageFormats();
     if(writerFormats.contains("jpg"))  filters.append("JPEG (*.jpg *.jpeg *jpe *jfif)");
     if(writerFormats.contains("png"))  filters.append("PNG (*.png)");
@@ -757,7 +754,6 @@ void MW::showFullScreen() {
     if(!isHidden())
         saveWindowGeometry();
     auto screens = qApp->screens();
-    // todo: why check the screen again?
     int _currentDisplay = screens.indexOf(this->window()->screen());
     //move to target screen
     if(screens.count() > currentDisplay && currentDisplay != _currentDisplay) {
@@ -766,7 +762,7 @@ void MW::showFullScreen() {
     }
     QWidget::showFullScreen();
     // try to repaint sooner
-    // FIXME: re-entrancy hazard (processEvents)
+    // re-entrancy hazard: processEvents (see backlog)
     qApp->processEvents();
     emit fullscreenStateChanged(true);
 }
@@ -777,7 +773,7 @@ void MW::showWindowed() {
     restoreWindowGeometry();
     QWidget::show();
     // try to repaint sooner
-    // FIXME: re-entrancy hazard (processEvents)
+    // re-entrancy hazard: processEvents (see backlog)
     qApp->processEvents();
     emit fullscreenStateChanged(false);
 }
@@ -928,7 +924,6 @@ void MW::closeFullScreenOrExit() {
     }
 }
 
-// todo: this is crap, use shared state object
 void MW::setCurrentInfo(int _index, int _fileCount, QString _filePath, QString _fileName, QSize _imageSize, int _imageDepth, qint64 _fileSize, bool slideshow, bool shuffle, bool edited) {
     info.index = _index;
     info.fileCount = _fileCount;
@@ -976,7 +971,6 @@ void MW::updateStatusFooters() {
     }
 }
 
-// todo: nuke and rewrite
 void MW::onInfoUpdated() {
     QString posString;
     if(info.fileCount)
@@ -1100,7 +1094,6 @@ void MW::readSettings() {
     adaptToWindowState();
 }
 
-// todo: remove/rename?
 void MW::applyWindowedBackground() {
 #ifdef USE_KDE_BLUR
     QWindow* window = this->windowHandle();

@@ -324,7 +324,7 @@ QDateTime DirectoryManager::lastModified(const QString& filePath) const {
     return info.lastModified();
 }
 
-// TODO: what about symlinks?
+// isFile() follows symlinks, so a link to a supported file is listed
 inline
 bool DirectoryManager::isSupportedFile(const QString& path) const {
     return ( isFile(path) && (mIncludeOtherFiles || regex.match(path).hasMatch()) );

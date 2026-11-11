@@ -796,7 +796,6 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
     // --- widget sizes ---------------------------------------------
     auto fnt = QGuiApplication::font();
     QFontMetrics fm(fnt);
-    // todo: use precise values for ~9-11 point sizes
     int font_small = qMax((int)(fnt.pointSize() * 0.9f), 8);
     int font_large = (int)(fnt.pointSize() * 1.8f);
     int text_height = fm.height();
@@ -816,7 +815,6 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
     // 32px base size
     int overlay_header_size = qMax(text_height + text_padding * 2, 30);
 
-    // todo
     int button_height = text_height + text_padding_large * 2;
     // tight ~1px margin around the text; the floor keeps descenders from clipping
     int combobox_height = qMax(text_height + 2, 18);

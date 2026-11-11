@@ -7,8 +7,6 @@
 #include "gui/panels/mainpanel/mainpanel.h"
 #include "gui/panels/infobar/infobarproxy.h"
 
-// TODO: use a template here?
-
 class DocumentWidget : public FloatingWidgetContainer {
 public:
     DocumentWidget(std::shared_ptr<ViewerWidget> viewWidget, std::shared_ptr<InfoBarProxy> infoBar, QWidget* parent = nullptr);
