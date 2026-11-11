@@ -3,12 +3,14 @@
 // Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
 //
 // Navigating keeps the folders the user expanded, shows the current folder's row
-// as soon as its parent is listed, and is a no-op for the folder already current.
+// as soon as its parent is listed, is a no-op for the folder already current, and is
+// re-rooted to / for folders outside home and back to home for folders inside it.
 
 #include "support/tree_test_fixture.h"
 
 #include <QScrollBar>
 #include <QSignalSpy>
+#include <QTemporaryDir>
 
 class FolderTreeKeepsExpansionsTest : public QObject {
     Q_OBJECT
@@ -18,6 +20,7 @@ private slots:
     void navigatingKeepsTheFoldersTheUserExpanded();
     void aDeepFolderIsShownOnceItsParentIsListed();
     void openingTheCurrentFolderAgainChangesNothing();
+    void aFolderOutsideHomeReRootsTheTreeAndHomeRestoresIt();
 
 private:
     tgtest::TreeFixture mFixture;
@@ -80,6 +83,25 @@ void FolderTreeKeepsExpansionsTest::openingTheCurrentFolderAgainChangesNothing()
     QCOMPARE(tree->verticalScrollBar()->value(), scroll);
     QCOMPARE(selection.count(), 0);
     QCOMPARE(current.count(), 0);
+}
+
+void FolderTreeKeepsExpansionsTest::aFolderOutsideHomeReRootsTheTreeAndHomeRestoresIt() {
+    // a sibling of the test home, so it is outside it without relying on /tmp
+    QTemporaryDir outside(QDir::cleanPath(mFixture.homePath() + "/../outside"));
+    QVERIFY2(outside.isValid(), "The folder outside home should be created.");
+    const QString target = outside.path() + "/sub";
+    QVERIFY2(QDir().mkpath(target), "The outside subfolder should be created.");
+    TreeViewCustom *tree = mFixture.tree();
+    QCOMPARE(mFixture.model()->filePath(tree->rootIndex()), mFixture.homePath());
+
+    QVERIFY2(mFixture.core()->loadPath(target), "Opening the outside folder should succeed.");
+    QCOMPARE(mFixture.model()->filePath(tree->rootIndex()), QStringLiteral("/"));
+    QCOMPARE(mFixture.currentTreePath(), target);
+    QVERIFY2(tree->selectionModel()->isSelected(mFixture.model()->index(target)), "The row should be selected.");
+
+    QVERIFY2(mFixture.navigate("b"), "Opening b should succeed.");
+    QCOMPARE(mFixture.model()->filePath(tree->rootIndex()), mFixture.homePath());
+    QCOMPARE(mFixture.currentTreePath(), mFixture.path("b"));
 }
 
 TG_BEHAVIOR_TEST_MAIN(FolderTreeKeepsExpansionsTest)

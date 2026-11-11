@@ -52,8 +52,8 @@ QString PlatformDesktop::folderViewInitialRootPath() {
     return QDir::homePath();
 }
 
-QString PlatformDesktop::folderViewRootPathFor(const QString &) {
-    return QString();
+QString PlatformDesktop::folderViewRootPathFor(const QString &path) {
+    return path.startsWith(QDir::homePath()) ? QDir::homePath() : "/";
 }
 
 bool PlatformDesktop::isWaylandPlatform() {
