@@ -871,7 +871,11 @@ PopupMenuBase QLabel {
     padding: 0px 0px;
 }
 /*----------------------------------------------------------------------------*/
-[accessibleName="MenuItem"]:hover,
+[accessibleName="MenuItem"]:hover {
+    background-color: %accent_hover_rgba%;
+}
+
+/* A separate rule: grouped after a :hover selector, Qt never matches this one. */
 [accessibleName="MenuItem"][highlighted="true"] {
     background-color: %accent_hover_rgba%;
 }
@@ -1006,6 +1010,15 @@ FolderView QTreeView::item:selected:!active,
 FolderView QTreeView::item:selected:active {
     background-color: %folderview_hc2%;
     border-color: %folderview_hc2%;
+}
+
+/* the tree has keyboard focus: the current row takes the accent */
+FolderView QTreeView::item:selected:focus {
+    background-color: %accent_hover_rgba%;
+}
+
+FolderView QTreeView::branch:selected:focus {
+    background-color: %accent_hover_rgba%;
 }
 
 FolderView QTreeView::branch {
@@ -1252,6 +1265,11 @@ QDialog#ColorPickerDialog QLineEdit {
     padding: 2px 4px 2px 4px;
 }
 
+QDialog#ColorPickerDialog QSpinBox:focus,
+QDialog#ColorPickerDialog QLineEdit:focus {
+    border-color: %accent%;
+}
+
 /* FileReplaceDialog is frameless (see filereplacedialog.cpp): give it the same
    rounded themed body as CustomMessageBox instead of a flat filled rectangle. */
 FileReplaceDialog {
@@ -1484,6 +1502,22 @@ FileInfoDialog QTabBar::tab:disabled {
     color: %text_secondary_rgba%;
 }
 
+/* keyboard focus on a check box or radio button: brighter label */
+ResizeDialog QCheckBox:focus,
+FileReplaceDialog QCheckBox:focus,
+ScriptEditorDialog QCheckBox:focus,
+PrintDialog QCheckBox:focus,
+QMessageBox QCheckBox:focus,
+ResizeDialog QRadioButton:focus,
+ShortcutCreatorDialog QRadioButton:focus,
+QDialog#ShortcutDetailsDialog QRadioButton:focus,
+SettingsDialog QCheckBox:focus,
+SettingsDialog QRadioButton:focus,
+DuplicateFinderDialog QCheckBox:focus,
+DuplicateFinderDialog QRadioButton:focus {
+    color: %text_hc2%;
+}
+
 ResizeDialog QGroupBox,
 PrintDialog QGroupBox {
     background-color: %widget%;
@@ -1523,6 +1557,14 @@ ShortcutCreatorDialog QComboBox:hover,
 SettingsDialog QComboBox:hover {
     background-color: %button_hover%;
     border-color: %button_hover%;
+}
+
+ResizeDialog QComboBox:focus,
+ShortcutCreatorDialog QComboBox:focus,
+SettingsDialog QComboBox:focus,
+SidePanel QComboBox:focus,
+[accessibleName="PanelComboBox"]:focus {
+    border-color: %accent%;
 }
 
 ResizeDialog QComboBox::drop-down,
@@ -1652,6 +1694,21 @@ QPushButton[accessibleName="SDialogButton"] {
     padding: 2px 14px 2px 14px;
     min-width: 70px;
     min-height: %button_height%;
+}
+
+/* keyboard focus: the hover tone. Before :hover, :pressed and :default so those still win. */
+ResizeDialog QPushButton:focus,
+ScriptEditorDialog QPushButton:focus,
+ShortcutCreatorDialog QPushButton:focus,
+QDialog#ShortcutDetailsDialog QPushButton:focus,
+PrintDialog QPushButton:focus,
+QMessageBox QPushButton:focus,
+QDialog#ColorPickerDialog QPushButton:focus,
+SettingsDialog QPushButton#OK:focus,
+SettingsDialog QPushButton#Cancel:focus,
+SettingsDialog QPushButton#applyButton:focus,
+QPushButton[accessibleName="SDialogButton"]:focus {
+    background-color: %button_hover%;
 }
 
 ResizeDialog QPushButton:hover,
@@ -1865,6 +1922,10 @@ DuplicateFinderDialog QPushButton {
     padding: 2px 14px 2px 14px;
     min-width: 70px;
     min-height: %button_height%;
+}
+
+DuplicateFinderDialog QPushButton:focus {
+    background-color: %button_hover%;
 }
 
 DuplicateFinderDialog QPushButton:hover {

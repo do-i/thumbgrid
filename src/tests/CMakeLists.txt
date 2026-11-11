@@ -917,3 +917,11 @@ add_test(
     NAME "A shortcut moves the keyboard to the folder tree and back, and F2, Delete and Esc act on its row"
     COMMAND thumbgrid_folder_tree_focus_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_keyboard_focus_test
+    behavior/test_keyboard_focus_is_visible_and_tab_order_follows_layout.cpp
+)
+add_test(
+    NAME "Keyboard focus is visible and dialogs tab in reading order"
+    COMMAND thumbgrid_keyboard_focus_test
+)

@@ -12,8 +12,13 @@ ShortcutCreatorDialog::ShortcutCreatorDialog(QWidget *parent) :
     ui->setupUi(this);
     if(auto box = qobject_cast<QBoxLayout *>(ui->sequenceEdit->parentWidget()->layout())) {
         const int at = box->indexOf(ui->sequenceEdit);
-        if(at >= 0)
-            box->insertWidget(at + 1, ui->sequenceEdit->createMouseGestureButton(this));
+        if(at >= 0) {
+            QPushButton *gestures = ui->sequenceEdit->createMouseGestureButton(this);
+            box->insertWidget(at + 1, gestures);
+            // created in code, so it would otherwise tab last, after Cancel
+            setTabOrder(ui->sequenceEdit, gestures);
+            setTabOrder(gestures, ui->okButton);
+        }
     }
 
     // Each shortcut belongs to one context. Global bindings run in every screen;
