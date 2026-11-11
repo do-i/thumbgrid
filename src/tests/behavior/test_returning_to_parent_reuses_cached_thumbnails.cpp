@@ -77,7 +77,6 @@ void ReturningToParentReusesCachedThumbnailsTest::goingUpServesDirThumbsFromCach
 
     QTest::qWait(1100); // make rewrites distinguishable by mtime
 
-    // go up to the parent again
     QVERIFY(QMetaObject::invokeMethod(&core, "loadParentDir", Qt::DirectConnection));
     QTRY_COMPARE(grid->itemCount(), subDirs + 1);
     QTRY_COMPARE(loadedTileCount(grid), subDirs + 1);

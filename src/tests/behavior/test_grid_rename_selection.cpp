@@ -44,7 +44,6 @@ void GridRenameSelectionTest::renameCurrentSelectionRenamesFileAndFolder() {
     QTRY_COMPARE(grid->itemCount(), 3);
     const int previousCount = grid->itemCount();
 
-    // Rename the file.
     grid->select(2);
     bool invoked = QMetaObject::invokeMethod(&core, "renameCurrentSelection",
                                               Q_ARG(QString, QString("renamed.png")));
