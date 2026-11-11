@@ -1393,12 +1393,6 @@ void Settings::setPanelPinned(bool mode) {
     settings->writeSetting("panelPinned", mode);
 }
 //------------------------------------------------------------------------------
-/*
- * 0: fit window
- * 1: fit width
- * 2: orginal size
- * 3: fit window (stretch)
- */
 ImageFitMode Settings::imageFitMode() {
     int mode = settings->readSetting("defaultFitMode", 0).toInt();
     if(mode < 0 || mode > 3) {

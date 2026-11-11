@@ -35,11 +35,11 @@ enum SortingMode : std::uint8_t {
 };
 
 enum ImageFitMode : std::uint8_t {
-    FIT_WINDOW,
-    FIT_WIDTH,
-    FIT_ORIGINAL,
-    FIT_WINDOW_STRETCH,
-    FIT_FREE
+    FIT_WINDOW,         // 0
+    FIT_WIDTH,          // 1
+    FIT_ORIGINAL,       // 2: original size
+    FIT_WINDOW_STRETCH, // 3: fit window, stretched to fill
+    FIT_FREE            // 4: runtime only, never stored (defaultFitMode accepts 0-3)
 };
 
 enum PanelPosition : std::uint8_t {
