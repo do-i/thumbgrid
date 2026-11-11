@@ -838,6 +838,8 @@ static void replaceStylesheetMetrics(QString &styleSheet) {
     styleSheet.replace("%context_menu_button_height%", QString::number(context_menu_button_height)+"px");
     styleSheet.replace("%rename_overlay_width%", QString::number(rename_overlay_width)+"px");
     styleSheet.replace("%contextmenu_border_radius%",  PlatformDesktop::contextMenuBorderRadius());
+    styleSheet.replace("%radius%", QString::number(tg::size::kControlRadiusPx)+"px");
+    styleSheet.replace("%radius_panel%", QString::number(tg::size::kPanelRadiusPx)+"px");
 }
 
 // Fills the color placeholders from the active color scheme.

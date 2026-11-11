@@ -67,7 +67,7 @@ SSideBarItem[checked="true"] {
 [accessibleName="SGroup"] {
     /*border: 1px solid %sys_window_tinted_hc%;*/
     border: 1px solid %sys_window_tinted_lc%;
-    border-radius: 6px;
+    border-radius: %radius_panel%;
     background-color: %sys_window_tinted_lc2%;
 }
 
@@ -87,7 +87,7 @@ SSideBarItem[checked="true"] {
 {
     color: %text_hc%;
     background-color: %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 7px 12px 7px 12px;
 }
 
@@ -124,7 +124,7 @@ SSideBarItem[checked="true"] {
 
 /*----------------------------------------------------------------------------*/
 [accessibleName="CheckableButton"] {
-    border-radius: 3px;
+    border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
     margin-left:   2px;
@@ -133,7 +133,7 @@ SSideBarItem[checked="true"] {
 
 /* extra 2px left margin for fitt's law */
 [accessibleName="CheckableButtonLE"] {
-    border-radius: 3px;
+    border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
     margin-left:   4px;
@@ -158,7 +158,7 @@ SSideBarItem[checked="true"] {
 
 /*----------------------------------------------------------------------------*/
 [accessibleName="PanelButton"] {
-    border-radius: 3px;
+    border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
     margin-left:   2px;
@@ -166,7 +166,7 @@ SSideBarItem[checked="true"] {
 }
 
 [accessibleName="PanelButtonRE"] {
-    border-radius: 3px;
+    border-radius: %radius%;
     margin-top:    4px;
     margin-bottom: 4px;
     margin-left:   2px;
@@ -213,7 +213,7 @@ QComboBox QAbstractItemView {
     background-color: %panel_button%;
     color: %text_hc%;
     border: 2px solid %panel_button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 8px 2px 5px;
     margin-top: 4px;
     margin-bottom: 4px;
@@ -261,7 +261,7 @@ QComboBox QAbstractItemView {
 FloatingWidget {
     background-color: %widget%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 /*----------------------------------------------------------------------------*/
 [accessibleName="OverlayHeaderWidget"] {
@@ -278,7 +278,7 @@ FloatingWidget {
 [accessibleName="OverlayHeaderButton"] {
     background-color: transparent;
     margin: 3px;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 [accessibleName="OverlayHeaderButton"]:hover {
@@ -298,7 +298,7 @@ FloatingWidget QLineEdit {
     background-color: %button%;
     color: %text_hc%;
     border: 2px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 4px 6px 4px 6px;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -317,7 +317,7 @@ RenameOverlay {
 [accessibleName = "RenameOverlayWidget"] {
     background-color: %widget%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
     min-width: %rename_overlay_width%;
 }
 
@@ -327,7 +327,7 @@ RenameOverlay {
 SaveConfirmOverlay {
     background-color: %overlay_rgba%;
     border: 1px solid %widget_border%;
-    border-radius: 6px;
+    border-radius: %radius_panel%;
 }
 
 [accessibleName="SaveOverlayLabel"] {
@@ -341,7 +341,7 @@ SaveConfirmOverlay {
     color: %text_hc%;
     background-color: transparent;
     border: none;
-    border-radius: 4px;
+    border-radius: %radius%;
     padding: 4px 9px 4px 9px;
 }
 
@@ -373,7 +373,7 @@ SaveConfirmOverlay {
     max-width: 24px;
     max-height: 24px;
     background-color: transparent;
-    border-radius: 4px;
+    border-radius: %radius%;
 }
 
 [accessibleName="SaveOverlayToggle"]:hover,
@@ -389,7 +389,7 @@ FullscreenInfoOverlay {
     border-top-left-radius: 0px;
     border-top-right-radius: 0px;
     border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 3px;
+    border-bottom-right-radius: %radius%;
 }
 
 FullscreenInfoOverlay QLabel {
@@ -410,7 +410,7 @@ FloatingMessage QLabel {
 MoveProgressOverlay {
     background-color: %overlay_rgba%;
     border: 1px solid %widget_border%;
-    border-radius: 6px;
+    border-radius: %radius_panel%;
 }
 
 [accessibleName="MoveProgressLabel"] {
@@ -432,7 +432,7 @@ MoveProgressOverlay {
     color: %text_hc2%;
     background-color: %button%;
     border: none;
-    border-radius: 4px;
+    border-radius: %radius%;
     padding: 4px 9px 4px 9px;
 }
 
@@ -460,7 +460,7 @@ SidePanel {
 SidePanel QGroupBox {
     background-color: %widget%;
     border: 1px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 6px 10px 8px 10px;
 }
 /*----------------------------------------------------------------------------*/
@@ -470,7 +470,7 @@ SidePanel QDoubleSpinBox
     color: %text%;
     background-color: %button%;
     border: 2px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2 0 2 0;
     min-height: 20px;
 }
@@ -508,7 +508,7 @@ SidePanel QComboBox {
     color: %text%;
     background-color: %button%;
     border: 1px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 4px 24px 4px 8px;
 }
 
@@ -569,7 +569,7 @@ SidePanel QComboBox QAbstractItemView::item:selected {
 
 VideoControls QLabel {
     color: %text_hc2%;
-    font-size: 11px;
+    font-size: %font_small%;
 }
 
 VideoControls [accessibleName="Button"],
@@ -577,7 +577,7 @@ VideoControls [accessibleName="ButtonSetLeft"],
 VideoControls [accessibleName="ButtonSetRight"] {
     background-color: %button%;
     border: 1px solid %button_hover%;
-    border-radius: 4px;
+    border-radius: %radius%;
     margin: 1px;
     padding: 0px;
 }
@@ -604,10 +604,10 @@ VideoControls QPushButton[accessibleName="VideoControlTextButton"] {
     color: %text_hc%;
     background-color: %button%;
     border: 1px solid %button_hover%;
-    border-radius: 4px;
+    border-radius: %radius%;
     margin: 1px;
     padding: 0px;
-    font-size: 11px;
+    font-size: %font_small%;
 }
 
 VideoControls QPushButton[accessibleName="VideoControlTextButton"]:hover {
@@ -626,21 +626,21 @@ VideoControls QPushButton[accessibleName="VideoControlTextButton"][checked="true
 QFrame[accessibleName="VideoControlPopup"] {
     background-color: %widget%;
     border: 1px solid %text_lc2%;
-    border-radius: 5px;
+    border-radius: %radius_panel%;
 }
 
 QFrame[accessibleName="VideoControlPopup"] QLabel {
     color: %text_hc2%;
-    font-size: 11px;
+    font-size: %font_small%;
 }
 
 QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"] {
     color: %text_hc%;
     background-color: %button%;
     border: 1px solid %button_hover%;
-    border-radius: 4px;
+    border-radius: %radius%;
     padding: 0px;
-    font-size: 11px;
+    font-size: %font_small%;
 }
 
 QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover {
@@ -707,7 +707,7 @@ FolderView {
 
 [accessibleName="PathBar"] {
     background-color: %panel_button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     margin: 4px 2px;
 }
 
@@ -718,8 +718,8 @@ FolderView {
 
 [accessibleName="PathBarButton"] {
     border: 1px solid transparent;
-    border-top-left-radius: 3px;
-    border-bottom-left-radius: 3px;
+    border-top-left-radius: %radius%;
+    border-bottom-left-radius: %radius%;
     margin: 4px 2px;
 }
 
@@ -1022,7 +1022,7 @@ FolderView QTreeView::branch:open:has-children:has-siblings {
 /*----------------------------------------------------------------------------*/
 
 BookmarksItem {
-    /*border-radius: 3px;*/
+    /*border-radius: %radius%;*/
 }
 
 BookmarksItem:hover {
@@ -1067,7 +1067,7 @@ BookmarksItem[highlighted="true"] {
 /*----------------------------------------------------------------------------*/
 
 [accessibleName="PlacesPanelButton"] {
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 [accessibleName="PlacesPanelButton"]:hover {
@@ -1117,7 +1117,7 @@ FileInfoDialog EntryInfoItem QLineEdit {
     color: %text_hc2%;
     background-color: transparent;
     border: 1px solid transparent;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 0px 3px 0px 3px;
     selection-background-color: %accent%;
 }
@@ -1140,7 +1140,7 @@ FileInfoDialog EntryInfoItem QPlainTextEdit {
     color: %text_hc2%;
     background-color: transparent;
     border: 1px solid transparent;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 0px 3px 0px 3px;
     selection-background-color: %accent%;
 }
@@ -1175,7 +1175,7 @@ FileInfoDialog EntryInfoItem QPushButton#removePropertyButton {
     color: %text_hc2%;
     background-color: transparent;
     border: 1px solid transparent;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 FileInfoDialog EntryInfoItem QPushButton#removePropertyButton:hover {
@@ -1221,7 +1221,7 @@ QDialog#ColorPickerDialog QLineEdit {
     color: %text%;
     background-color: %button%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 4px 2px 4px;
 }
 
@@ -1256,7 +1256,7 @@ CustomMessageBox QLineEdit {
     color: %text%;
     background-color: %button%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 5px 8px 5px 8px;
     selection-background-color: %accent%;
 }
@@ -1298,14 +1298,14 @@ QDialog#ShortcutDetailsDialog QLabel:disabled {
 DateTimePickerPopup {
     background-color: %widget%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 DateTimePickerPopup QPushButton {
     color: %text%;
     background-color: %button%;
     border: none;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 4px 12px 4px 12px;
     min-height: %button_height%;
 }
@@ -1327,7 +1327,7 @@ DateTimePickerPopup QTimeEdit {
     color: %text%;
     background-color: %button%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 4px 2px 4px;
 }
 
@@ -1345,7 +1345,7 @@ DateTimePickerPopup QCalendarWidget QToolButton {
     color: %text_hc2%;
     background-color: transparent;
     border: none;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 8px 2px 8px;
 }
 
@@ -1357,7 +1357,7 @@ DateTimePickerPopup QCalendarWidget QSpinBox {
     color: %text%;
     background-color: %button%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 /* The day grid. QCalendarWidget hands its view a palette of its own, so the
@@ -1395,7 +1395,7 @@ FileInfoDialog QPushButton#stripMetadataButton {
     color: %danger_text%;
     background-color: %danger%;
     border: none;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 5px 16px;
 }
 
@@ -1415,7 +1415,7 @@ FileInfoDialog QPushButton#stripMetadataButton:disabled {
 FileInfoDialog QTabWidget::pane {
     background-color: %widget%;
     border: 1px solid %widget_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
     top: -1px;
 }
 
@@ -1428,8 +1428,8 @@ FileInfoDialog QTabBar::tab {
     color: %text%;
     border: 1px solid %widget_border%;
     border-bottom: none;
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
+    border-top-left-radius: %radius%;
+    border-top-right-radius: %radius%;
     padding: 5px 16px;
     margin-right: 2px;
 }
@@ -1461,7 +1461,7 @@ ResizeDialog QGroupBox,
 PrintDialog QGroupBox {
     background-color: %widget%;
     border: 1px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 14px 10px 8px 10px;
 }
 
@@ -1483,7 +1483,7 @@ SettingsDialog QComboBox {
     color: %text%;
     background-color: %button%;
     border: 1px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 24px 2px 8px;
 }
 
@@ -1544,7 +1544,7 @@ SettingsDialog QTreeWidget {
     color: %table_text%;
     gridline-color: %table_border%;
     border: 1px solid %table_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 SettingsDialog QTableWidget::item,
@@ -1579,7 +1579,7 @@ ResizeDialog QDoubleSpinBox {
     color: %text%;
     background-color: %button%;
     border: 2px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2 0 2 0;
     min-height: 20px;
 }
@@ -1596,7 +1596,7 @@ ScriptEditorDialog QLineEdit {
     background-color: %button%;
     color: %text%;
     border: 2px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 4px 6px 4px 6px;
 }
 
@@ -1621,7 +1621,7 @@ SettingsDialog QPushButton#applyButton,
 QPushButton[accessibleName="SDialogButton"] {
     color: %text%;
     background-color: %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 14px 2px 14px;
     min-width: 70px;
     min-height: %button_height%;
@@ -1739,7 +1739,7 @@ QDialog#ShortcutDetailsDialog QToolButton#shortcutKeyRemove {
     color: %danger_text%;
     background-color: %danger%;
     border: none;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 10px 2px 10px;
     min-height: %button_height%;
 }
@@ -1760,7 +1760,7 @@ SettingsDialog QPushButton#storedDataDeleteSelected {
     color: %danger_text%;
     background-color: %danger%;
     border: none;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 14px 2px 14px;
     min-width: 70px;
     min-height: %button_height%;
@@ -1810,7 +1810,7 @@ SettingsDialog #scriptRowLabel {
 SettingsDialog #scriptRowEdit,
 SettingsDialog #scriptRowDelete {
     background-color: transparent;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 SettingsDialog #scriptRowEdit:hover,
@@ -1834,7 +1834,7 @@ DuplicateFinderDialog QRadioButton {
 DuplicateFinderDialog QPushButton {
     color: %text%;
     background-color: %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2px 14px 2px 14px;
     min-width: 70px;
     min-height: %button_height%;
@@ -1886,7 +1886,7 @@ DuplicateFinderDialog QLineEdit {
     background-color: %button%;
     color: %text%;
     border: 2px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 4px 6px 4px 6px;
 }
 
@@ -1900,7 +1900,7 @@ DuplicateFinderDialog QSpinBox {
     color: %text%;
     background-color: %button%;
     border: 2px solid %button%;
-    border-radius: 3px;
+    border-radius: %radius%;
     padding: 2 0 2 0;
     min-height: 20px;
 }
@@ -1917,7 +1917,7 @@ DuplicateFinderDialog QTreeView {
     alternate-background-color: %table_bg_alt%;
     color: %table_text%;
     border: 1px solid %table_border%;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 DuplicateFinderDialog QTreeView::item:selected,
@@ -1939,18 +1939,18 @@ DuplicateFinderDialog QProgressBar {
     background-color: %widget%;
     color: %text%;
     border: none;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 DuplicateFinderDialog QProgressBar::chunk {
     background-color: %accent%;
-    border-radius: 3px;
+    border-radius: %radius%;
 }
 
 DuplicateFinderDialog QGroupBox {
     color: %text%;
     border: 1px solid %sys_window_tinted%;
-    border-radius: 3px;
+    border-radius: %radius%;
     margin-top: 8px;
 }
 

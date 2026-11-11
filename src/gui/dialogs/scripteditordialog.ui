@@ -76,7 +76,6 @@
       <widget class="QLabel" name="label_3">
        <property name="font">
         <font>
-         <pointsize>10</pointsize>
          <italic>true</italic>
         </font>
        </property>
@@ -116,11 +115,6 @@
      </item>
      <item row="2" column="0" colspan="3">
       <widget class="QLabel" name="keywordsLabel">
-       <property name="font">
-        <font>
-         <pointsize>10</pointsize>
-        </font>
-       </property>
        <property name="text">
         <string/>
        </property>

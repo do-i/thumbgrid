@@ -30,6 +30,10 @@ namespace tg::size {
 // Image hash decode target: larger files are decoded reduced to this edge.
 inline constexpr int kHashDecodeSizePx = 256;
 
+// Stylesheet corner radii: standard control, and the larger overlay / panel.
+inline constexpr int kControlRadiusPx = 3;
+inline constexpr int kPanelRadiusPx = 6;
+
 } // namespace tg::size
 
 // Counts, thread pools and other non-setting caps.
