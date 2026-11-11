@@ -399,17 +399,17 @@ QWidget* SettingsDialog::makeSettingsPage(const QString &title, QVBoxLayout **co
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setWidgetResizable(true);
     QWidget *contents = new QWidget(scrollArea);
-    contents->setAccessibleName("SPageContents");
+    contents->setProperty("styleClass", QStringLiteral("SPageContents"));
     QVBoxLayout *layout = new QVBoxLayout(contents);
     layout->setSpacing(9);
     layout->setContentsMargins(18, 9, 18, 9);
 
     QLabel *header = new QLabel(title, contents);
-    header->setAccessibleName("SHeaderText");
+    header->setProperty("styleClass", QStringLiteral("SHeaderText"));
     layout->addWidget(header);
 
     QWidget *line = new QWidget(contents);
-    line->setAccessibleName("SHeaderLine");
+    line->setProperty("styleClass", QStringLiteral("SHeaderLine"));
     layout->addWidget(line);
     layout->addSpacing(6);
 
@@ -421,7 +421,7 @@ QWidget* SettingsDialog::makeSettingsPage(const QString &title, QVBoxLayout **co
 //------------------------------------------------------------------------------
 QWidget* SettingsDialog::makeSettingsGroup(const QString &title) {
     QWidget *group = new QWidget(this);
-    group->setAccessibleName("SGroup");
+    group->setProperty("styleClass", QStringLiteral("SGroup"));
     QVBoxLayout *layout = new QVBoxLayout(group);
     layout->setSpacing(7);
     layout->setContentsMargins(13, 10, 13, 10);

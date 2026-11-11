@@ -25,8 +25,8 @@ SettingsDialog QScrollArea > QWidget {
 }
 
 /* Programmatic settings pages (Grid, Document) have no object name, so we use
-   accessibleName to match them with the UI-based pages. */
-[accessibleName="SPageContents"] {
+   the styleClass property to match them with the UI-based pages. */
+[styleClass="SPageContents"] {
     background-color: %background%;
 }
 
@@ -35,23 +35,23 @@ SettingsDialog QTextBrowser {
     background: transparent;
 }
 
-[accessibleName="SLine"] {
+[styleClass="SLine"] {
     background-color: %sys_window_tinted%;
     min-height: 1px;
     max-height: 1px;
 }
 
-[accessibleName="SHeaderLine"] {
+[styleClass="SHeaderLine"] {
     background-color: %sys_window_tinted_hc%;
     min-height: 1px;
     max-height: 1px;
 }
 
-[accessibleName="SHeaderText"] {
+[styleClass="SHeaderText"] {
     font-size: %font_large%;
 }
 
-[accessibleName="SSideBarContainer"] {
+[styleClass="SSideBarContainer"] {
     background-color: %sys_window_tinted_lc2%;
     border-right: 1px solid %sys_window_tinted_lc%;
 }
@@ -64,19 +64,19 @@ SSideBarItem[checked="true"] {
     background-color: %sys_window_tinted_hc%;
 }
 
-[accessibleName="SGroup"] {
+[styleClass="SGroup"] {
     /*border: 1px solid %sys_window_tinted_hc%;*/
     border: 1px solid %sys_window_tinted_lc%;
     border-radius: %radius_panel%;
     background-color: %sys_window_tinted_lc2%;
 }
 
-[accessibleName="SGroup"]:hover {
+[styleClass="SGroup"]:hover {
     /*border-color: %sys_window_tinted_hc%;*/
     /*background-color: %sys_window_tinted_lc%;*/
 }
 
-[accessibleName="SNoteText"] {
+[styleClass="SNoteText"] {
     color: %sys_text_secondary_rgba%;
 }
 
@@ -1687,7 +1687,7 @@ QDialog#ColorPickerDialog QPushButton,
 SettingsDialog QPushButton#OK,
 SettingsDialog QPushButton#Cancel,
 SettingsDialog QPushButton#applyButton,
-QPushButton[accessibleName="SDialogButton"] {
+QPushButton[styleClass="SDialogButton"] {
     color: %text%;
     background-color: %button%;
     border-radius: %radius%;
@@ -1707,7 +1707,7 @@ QDialog#ColorPickerDialog QPushButton:focus,
 SettingsDialog QPushButton#OK:focus,
 SettingsDialog QPushButton#Cancel:focus,
 SettingsDialog QPushButton#applyButton:focus,
-QPushButton[accessibleName="SDialogButton"]:focus {
+QPushButton[styleClass="SDialogButton"]:focus {
     background-color: %button_hover%;
 }
 
@@ -1723,7 +1723,7 @@ QDialog#ColorPickerDialog QPushButton:hover,
 SettingsDialog QPushButton#OK:hover,
 SettingsDialog QPushButton#Cancel:hover,
 SettingsDialog QPushButton#applyButton:hover,
-QPushButton[accessibleName="SDialogButton"]:hover {
+QPushButton[styleClass="SDialogButton"]:hover {
     background-color: %button_hover%;
 }
 
@@ -1739,7 +1739,7 @@ QDialog#ColorPickerDialog QPushButton:pressed,
 SettingsDialog QPushButton#OK:pressed,
 SettingsDialog QPushButton#Cancel:pressed,
 SettingsDialog QPushButton#applyButton:pressed,
-QPushButton[accessibleName="SDialogButton"]:pressed {
+QPushButton[styleClass="SDialogButton"]:pressed {
     background-color: %button_pressed%;
 }
 

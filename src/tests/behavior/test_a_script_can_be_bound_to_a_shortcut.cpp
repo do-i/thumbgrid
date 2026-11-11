@@ -96,7 +96,7 @@ void AScriptCanBeBoundToAShortcutTest::theShortcutsPageOffersAnEntryPointForNewB
     QVERIFY2(button, "The shortcuts page should offer a 'new shortcut' button.");
     QVERIFY2(!button->isHidden(), "The 'new shortcut' button must be visible.");
     // Carries the shared dialog-button style marker so it is themed, not native.
-    QCOMPARE(button->accessibleName(), QStringLiteral("SDialogButton"));
+    QCOMPARE(button->property("styleClass").toString(), QStringLiteral("SDialogButton"));
 }
 
 void AScriptCanBeBoundToAShortcutTest::theShortcutCreatorCanProduceAScriptAction() {

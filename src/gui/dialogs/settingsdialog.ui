@@ -49,9 +49,6 @@
   <property name="windowOpacity">
    <double>1.000000000000000</double>
   </property>
-  <property name="accessibleName">
-   <string>SettingsDialog</string>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout_3">
    <property name="spacing">
     <number>0</number>
@@ -93,7 +90,7 @@
          <height>0</height>
         </size>
        </property>
-       <property name="accessibleName">
+       <property name="styleClass" stdset="0">
         <string notr="true">SSideBarContainer</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_37">
@@ -301,7 +298,7 @@
                 <height>1272</height>
                </rect>
               </property>
-              <property name="accessibleName">
+              <property name="styleClass" stdset="0">
                 <string notr="true">SPageContents</string>
                </property>
               <layout class="QVBoxLayout" name="verticalLayout_5" stretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0">
@@ -325,7 +322,7 @@
                </property>
                <item>
                 <widget class="QLabel" name="label_20">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
@@ -335,7 +332,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="widget_18" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderLine</string>
                  </property>
                 </widget>
@@ -358,7 +355,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="generalGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -421,7 +418,7 @@
                       </item>
                       <item>
                        <widget class="QLabel" name="label_48">
-                        <property name="accessibleName">
+                        <property name="styleClass" stdset="0">
                          <string notr="true">SNoteText</string>
                         </property>
                         <property name="text">
@@ -449,7 +446,7 @@
                     </item>
                     <item>
                      <widget class="QWidget" name="widget_20" native="true">
-                      <property name="accessibleName">
+                      <property name="styleClass" stdset="0">
                        <string notr="true">SLine</string>
                       </property>
                      </widget>
@@ -553,7 +550,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="UIOptionsGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -793,7 +790,7 @@
                     </item>
                     <item>
                      <widget class="QWidget" name="widget_9" native="true">
-                      <property name="accessibleName">
+                      <property name="styleClass" stdset="0">
                        <string notr="true">SLine</string>
                       </property>
                      </widget>
@@ -933,7 +930,7 @@
                     </item>
                     <item>
                      <widget class="QWidget" name="widget_19" native="true">
-                      <property name="accessibleName">
+                      <property name="styleClass" stdset="0">
                        <string notr="true">SLine</string>
                       </property>
                      </widget>
@@ -958,7 +955,7 @@
                       </item>
                       <item>
                        <widget class="QLabel" name="label_50">
-                        <property name="accessibleName">
+                        <property name="styleClass" stdset="0">
                          <string notr="true">SNoteText</string>
                         </property>
                         <property name="text">
@@ -1108,7 +1105,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="thumbnailPanelGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -1283,7 +1280,7 @@
                          <verstretch>0</verstretch>
                         </sizepolicy>
                        </property>
-                       <property name="accessibleName">
+                       <property name="styleClass" stdset="0">
                         <string notr="true">SLine</string>
                        </property>
                       </widget>
@@ -1314,7 +1311,7 @@
                        </item>
                        <item row="0" column="2">
                         <widget class="QLabel" name="label_8">
-                         <property name="accessibleName">
+                         <property name="styleClass" stdset="0">
                           <string notr="true">SNoteText</string>
                          </property>
                          <property name="text">
@@ -1334,7 +1331,7 @@
                        </item>
                        <item row="1" column="2">
                         <widget class="QLabel" name="label_25">
-                         <property name="accessibleName">
+                         <property name="styleClass" stdset="0">
                           <string notr="true">SNoteText</string>
                          </property>
                          <property name="text">
@@ -1366,7 +1363,7 @@
                      </item>
                      <item>
                       <widget class="QWidget" name="widget_2" native="true">
-                       <property name="accessibleName">
+                       <property name="styleClass" stdset="0">
                         <string notr="true">SLine</string>
                        </property>
                       </widget>
@@ -1524,7 +1521,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="folderNavGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -1653,7 +1650,7 @@
                         <verstretch>0</verstretch>
                        </sizepolicy>
                       </property>
-                      <property name="accessibleName">
+                      <property name="styleClass" stdset="0">
                        <string notr="true">SLine</string>
                       </property>
                      </widget>
@@ -1746,7 +1743,7 @@
                     </item>
                     <item>
                      <widget class="QWidget" name="widget_31" native="true">
-                      <property name="accessibleName">
+                      <property name="styleClass" stdset="0">
                        <string notr="true">SLine</string>
                       </property>
                      </widget>
@@ -1798,7 +1795,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="videoPlaybackGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1941,7 +1938,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="slideshowGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_18">
@@ -2143,7 +2140,7 @@
                 <height>867</height>
                </rect>
               </property>
-              <property name="accessibleName">
+              <property name="styleClass" stdset="0">
                 <string notr="true">SPageContents</string>
                </property>
               <layout class="QVBoxLayout" name="verticalLayout_27">
@@ -2164,7 +2161,7 @@
                </property>
                <item>
                 <widget class="QLabel" name="label_9">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
@@ -2174,7 +2171,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="widget_4" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderLine</string>
                  </property>
                 </widget>
@@ -2197,7 +2194,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="displayGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_13">
@@ -2307,7 +2304,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_3" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -2374,7 +2371,7 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="label_10">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SNoteText</string>
                     </property>
                     <property name="text">
@@ -2384,7 +2381,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_8" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -2407,7 +2404,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_21" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -2542,7 +2539,7 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="label_13">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SNoteText</string>
                     </property>
                     <property name="text">
@@ -2571,7 +2568,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="zoomGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_8">
@@ -2611,7 +2608,7 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="label_44">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SNoteText</string>
                     </property>
                     <property name="text">
@@ -2621,7 +2618,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_11" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -2729,7 +2726,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_22" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -2783,7 +2780,7 @@
                        <property name="text">
                         <string>Load defaults</string>
                        </property>
-                       <property name="accessibleName">
+                       <property name="styleClass" stdset="0">
                         <string notr="true">SDialogButton</string>
                        </property>
                       </widget>
@@ -2825,7 +2822,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="scalingGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_24">
@@ -2938,7 +2935,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_10" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -3037,7 +3034,7 @@
                 <height>694</height>
                </rect>
               </property>
-              <property name="accessibleName">
+              <property name="styleClass" stdset="0">
                 <string notr="true">SPageContents</string>
                </property>
               <layout class="QVBoxLayout" name="verticalLayout_25">
@@ -3058,7 +3055,7 @@
                </property>
                <item>
                 <widget class="QLabel" name="label_45">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
@@ -3068,7 +3065,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="widget_23" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderLine</string>
                  </property>
                 </widget>
@@ -3091,7 +3088,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="colorsPresetGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_38">
@@ -3238,7 +3235,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="colorsGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_23">
@@ -3568,7 +3565,7 @@
                          <height>1</height>
                         </size>
                        </property>
-                       <property name="accessibleName">
+                       <property name="styleClass" stdset="0">
                         <string notr="true">SLine</string>
                        </property>
                       </widget>
@@ -3838,7 +3835,7 @@
                          <height>1</height>
                         </size>
                        </property>
-                       <property name="accessibleName">
+                       <property name="styleClass" stdset="0">
                         <string notr="true">SLine</string>
                        </property>
                       </widget>
@@ -3984,7 +3981,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="windowTweaksGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_39">
@@ -4159,7 +4156,7 @@
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="scrollAreaWidgetContents_6">
-              <property name="accessibleName">
+              <property name="styleClass" stdset="0">
                <string notr="true">SPageContents</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_28">
@@ -4180,7 +4177,7 @@
                </property>
                <item>
                 <widget class="QLabel" name="label_29">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
@@ -4190,7 +4187,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="widget_5" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderLine</string>
                  </property>
                 </widget>
@@ -4241,7 +4238,7 @@
                      <property name="text">
                       <string>+ New shortcut</string>
                      </property>
-                     <property name="accessibleName">
+                     <property name="styleClass" stdset="0">
                       <string notr="true">SDialogButton</string>
                      </property>
                     </widget>
@@ -4366,7 +4363,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="widget_12" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_21">
@@ -4411,7 +4408,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_30" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -4473,7 +4470,7 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="label_52">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SNoteText</string>
                     </property>
                     <property name="text">
@@ -4483,7 +4480,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_29" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -4570,7 +4567,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_trackpad_separator" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -4584,7 +4581,7 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="label_7">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SNoteText</string>
                     </property>
                     <property name="text">
@@ -4624,7 +4621,7 @@
               <bool>true</bool>
              </property>
              <widget class="QWidget" name="scrollAreaWidgetContents_7">
-              <property name="accessibleName">
+              <property name="styleClass" stdset="0">
                <string notr="true">SPageContents</string>
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_29">
@@ -4645,7 +4642,7 @@
                </property>
                <item>
                 <widget class="QLabel" name="label_47">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
@@ -4661,7 +4658,7 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderLine</string>
                  </property>
                 </widget>
@@ -4701,7 +4698,7 @@
                  </property>
                  <item>
                   <widget class="QLabel" name="label_24">
-                   <property name="accessibleName">
+                   <property name="styleClass" stdset="0">
                     <string notr="true">SNoteText</string>
                    </property>
                    <property name="text">
@@ -4711,7 +4708,7 @@
                  </item>
                  <item>
                   <widget class="QLabel" name="label_43">
-                   <property name="accessibleName">
+                   <property name="styleClass" stdset="0">
                     <string notr="true">SNoteText</string>
                    </property>
                    <property name="text">
@@ -4729,7 +4726,7 @@
                      <property name="text">
                       <string>+ New</string>
                      </property>
-                     <property name="accessibleName">
+                     <property name="styleClass" stdset="0">
                       <string notr="true">SDialogButton</string>
                      </property>
                     </widget>
@@ -4795,7 +4792,7 @@
                 <height>615</height>
                </rect>
               </property>
-              <property name="accessibleName">
+              <property name="styleClass" stdset="0">
                 <string notr="true">SPageContents</string>
                </property>
               <layout class="QVBoxLayout" name="verticalLayout_31">
@@ -4816,7 +4813,7 @@
                </property>
                <item>
                 <widget class="QLabel" name="label_49">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
@@ -4826,7 +4823,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="widget_13" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderLine</string>
                  </property>
                 </widget>
@@ -4849,7 +4846,7 @@
                </item>
                <item>
                 <widget class="QWidget" name="advancedGroup" native="true">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SGroup</string>
                  </property>
                  <layout class="QVBoxLayout" name="verticalLayout_34">
@@ -4886,7 +4883,7 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="label_41">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SNoteText</string>
                     </property>
                     <property name="text">
@@ -4896,7 +4893,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_15" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -5074,7 +5071,7 @@
                   </item>
                   <item>
                    <widget class="QLabel" name="label_51">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SNoteText</string>
                     </property>
                     <property name="text">
@@ -5151,7 +5148,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_26" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -5239,7 +5236,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_25" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -5265,7 +5262,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_27" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -5279,7 +5276,7 @@
                   </item>
                   <item>
                    <widget class="QWidget" name="widget_28" native="true">
-                    <property name="accessibleName">
+                    <property name="styleClass" stdset="0">
                      <string notr="true">SLine</string>
                     </property>
                    </widget>
@@ -5472,7 +5469,7 @@
                       <property name="text">
                        <string>…</string>
                       </property>
-                      <property name="accessibleName">
+                      <property name="styleClass" stdset="0">
                        <string notr="true">SDialogButton</string>
                       </property>
                      </widget>
@@ -5545,7 +5542,7 @@
                 <height>274</height>
                </rect>
               </property>
-              <property name="accessibleName">
+              <property name="styleClass" stdset="0">
                 <string notr="true">SPageContents</string>
                </property>
               <layout class="QVBoxLayout" name="verticalLayout_32">
@@ -5566,7 +5563,7 @@
                </property>
                <item>
                 <widget class="QLabel" name="label_53">
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderText</string>
                  </property>
                  <property name="text">
@@ -5582,7 +5579,7 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">SHeaderLine</string>
                  </property>
                 </widget>
