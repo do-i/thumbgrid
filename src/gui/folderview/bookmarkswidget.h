@@ -33,6 +33,11 @@ protected:
     void dropEvent(QDropEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
 private:
+    static QString labelFor(const QString& dirPath);
+    BookmarksItem *itemFor(const QString& dirPath) const;
+    BookmarksItem *createItem(const QString& dirPath);
+    void dropItem(BookmarksItem *item);
+
     QVBoxLayout layout;
     QStringList paths;
     QString highlightedPath;

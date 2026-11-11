@@ -22,7 +22,8 @@ inline void acceptFolderDrop(QDropEvent *event) {
 }
 
 // The app moves the files itself after a prompt; a reported MoveAction would let the source
-// delete its originals first, so the source is always told Copy (TargetMoveAction is Move on xcb).
+// delete its originals first, so the source is always told Copy
+// (TargetMoveAction was not verified to be non-destructive on xcb/Wayland).
 inline void acceptFolderDropped(QDropEvent *event) {
     event->setDropAction(Qt::CopyAction);
     event->accept();

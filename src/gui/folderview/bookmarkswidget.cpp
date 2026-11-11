@@ -13,12 +13,56 @@ BookmarksWidget::BookmarksWidget(QWidget *parent) : QWidget(parent), highlighted
 BookmarksWidget::~BookmarksWidget() {
 }
 
+// the folder's name; the root has none, so it shows its native path ("/", "C:\\")
+QString BookmarksWidget::labelFor(const QString& dirPath) {
+    const QString clean = QDir::cleanPath(dirPath);
+    const QString name = QFileInfo(clean).fileName();
+    return name.isEmpty() ? QDir::toNativeSeparators(clean.isEmpty() ? dirPath : clean) : name;
+}
+
+BookmarksItem *BookmarksWidget::itemFor(const QString& dirPath) const {
+    for(int i = 0; i < layout.count(); i++) {
+        auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(i)->widget());
+        if(w && w->path() == dirPath)
+            return w;
+    }
+    return nullptr;
+}
+
+BookmarksItem *BookmarksWidget::createItem(const QString& dirPath) {
+    auto *item = new BookmarksItem(labelFor(dirPath), dirPath);
+    connect(item, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
+    connect(item, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
+    connect(item, &BookmarksItem::droppedIn, this, &BookmarksWidget::droppedIn);
+    item->setHighlighted(dirPath == highlightedPath);
+    return item;
+}
+
+// makes the rows match the stored list: only rows that differ are added, removed or moved; no save
 void BookmarksWidget::readSettings() {
-    QStringList _paths = settings->bookmarks();
-    for(const auto& path : _paths)
-        addBookmark(path);
-    if(_paths.empty())
-        addBookmark(QDir::homePath());
+    QStringList stored = settings->bookmarks();
+    const bool storedEmpty = stored.isEmpty();
+    if(storedEmpty)
+        stored << QDir::homePath();
+    for(int i = layout.count() - 1; i >= 0; i--) {
+        auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(i)->widget());
+        if(w && !stored.contains(w->path()))
+            dropItem(w);
+    }
+    for(int i = 0; i < stored.count(); i++) {
+        BookmarksItem *item = itemFor(stored.at(i));
+        if(!item)
+            item = createItem(stored.at(i));
+        else if(layout.itemAt(i)->widget() == item)
+            continue;
+        else
+            layout.removeWidget(item);
+        layout.insertWidget(i, item);
+    }
+    paths = stored;
+    // an empty list starts with home, as it always did
+    if(storedEmpty)
+        saveBookmarks();
 }
 
 void BookmarksWidget::saveBookmarks() {
@@ -29,12 +73,7 @@ void BookmarksWidget::addBookmark(const QString& dirPath) {
     if(paths.contains(dirPath))
         return;
     paths.push_back(dirPath);
-    QUrl url(dirPath);
-    BookmarksItem *item = new BookmarksItem(url.fileName(), dirPath);
-    layout.addWidget(item);
-    connect(item, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
-    connect(item, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
-    connect(item, &BookmarksItem::droppedIn, this, &BookmarksWidget::droppedIn);
+    layout.addWidget(createItem(dirPath));
     saveBookmarks();
 }
 
@@ -42,39 +81,29 @@ bool BookmarksWidget::hasBookmark(const QString& dirPath) const {
     return paths.contains(dirPath) || paths.contains(QDir::cleanPath(dirPath));
 }
 
+void BookmarksWidget::dropItem(BookmarksItem *item) {
+    layout.removeWidget(item);
+    item->hide();
+    item->disconnect(this);
+    item->deleteLater();
+}
+
 void BookmarksWidget::removeBookmark(const QString& dirPath) {
-    for(int i = 0; i < layout.count(); i++) {
-        auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(i)->widget());
-        if(w && w->path() == dirPath) {
-            if(highlightedPath == dirPath)
-                highlightedPath = "";
-            layout.removeWidget(w);
-            disconnect(w, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
-            disconnect(w, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
-            disconnect(w, &BookmarksItem::droppedIn, this, &BookmarksWidget::droppedIn);
-            w->deleteLater();
-            paths.removeAll(dirPath);
-            saveBookmarks();
-            break;
-        }
+    if(BookmarksItem *item = itemFor(dirPath)) {
+        dropItem(item);
+        paths.removeAll(dirPath);
+        saveBookmarks();
     }
 }
 
 void BookmarksWidget::onPathChanged(const QString& path) {
     if(highlightedPath == path)
         return;
-    if(paths.contains(highlightedPath)) {
-        int currentIndex = paths.indexOf(highlightedPath);
-        auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(currentIndex)->widget());
-        w->setHighlighted(false);
-        highlightedPath = "";
-    }
-    if(paths.contains(path)) {
-        int newIndex = paths.indexOf(path);
-        auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(newIndex)->widget());
-        w->setHighlighted(true);
-        highlightedPath = path;
-    }
+    if(BookmarksItem *old = itemFor(highlightedPath))
+        old->setHighlighted(false);
+    highlightedPath = path;
+    if(BookmarksItem *item = itemFor(path))
+        item->setHighlighted(true);
 }
 
 void BookmarksWidget::dropEvent(QDropEvent *) {

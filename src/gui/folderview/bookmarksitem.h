@@ -18,6 +18,7 @@ class BookmarksItem : public QWidget {
 public:
     explicit BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent = nullptr);
     QString path();
+    QString label() const { return dirName; }
 
 public slots:
     void setHighlighted(bool mode);

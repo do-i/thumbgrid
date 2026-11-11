@@ -870,6 +870,14 @@ add_test(
     COMMAND thumbgrid_folder_tree_context_menu_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_bookmarks_panel_test
+    behavior/test_bookmarks_panel.cpp
+)
+add_test(
+    NAME "The bookmarks panel names the root and follows the stored list"
+    COMMAND thumbgrid_bookmarks_panel_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_folder_tree_folder_operations_test
     behavior/test_folder_tree_creates_renames_and_removes_folders.cpp
 )
