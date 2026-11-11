@@ -9,12 +9,8 @@
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
 
-// Regression test for the root-folder thumbnail-loading bug: navigating into a
-// folder (the same code path used when a root child is activated) must leave the
-// grid cells loaded, not stuck on the loading icon. The defect was that
-// DirectoryPresenter::generateThumbnails() cleared all pending thumbnail jobs on
-// every visible-thumbnail request, so a freshly opened folder's jobs were
-// cancelled before they could run.
+// Navigating into a folder (as when a root child is activated) must leave the grid cells loaded, not stuck on the
+// loading icon: generateThumbnails() must not cancel all pending jobs on every visible-thumbnail request.
 class OpeningAFolderLoadsItsThumbnailsTest : public QObject {
     Q_OBJECT
 

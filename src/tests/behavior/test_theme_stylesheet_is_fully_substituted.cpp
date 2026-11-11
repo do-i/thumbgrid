@@ -6,16 +6,9 @@
 #include "settings.h"
 #include "themestore.h"
 
-// style-template.qss is a token template: every %token% is replaced with a
-// color or metric before the result reaches qApp->setStyleSheet(). A token with
-// no replacement is not a local defect - Qt fails to parse the *whole* sheet
-// ("Could not parse application stylesheet") and the entire app falls back to
-// unstyled widgets. That is nearly invisible for widgets that also set colors
-// in code, but fatal for the frameless, translucent dialogs (CustomMessageBox,
-// FileReplaceDialog) whose only background comes from the stylesheet: they
-// render as a black rectangle with unreadable text. This guards both halves -
-// no token survives substitution, and a confirmation dialog really does paint
-// the active theme's widget color.
+// Every %token% in style-template.qss must be substituted before setStyleSheet(): one leftover makes Qt reject the whole
+// sheet and turns frameless translucent dialogs (CustomMessageBox, FileReplaceDialog) into black rectangles. Guards both
+// halves: no token survives, and a confirmation dialog paints the active theme's widget color.
 class ThemeStylesheetIsFullySubstitutedTest : public QObject {
     Q_OBJECT
 

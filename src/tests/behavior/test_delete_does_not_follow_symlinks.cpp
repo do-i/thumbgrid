@@ -6,25 +6,9 @@
 #include "components/directorymodel.h"
 #include "utils/fileoperations.h"
 
-// Regression guard for a data-loss bug: deleting a *symlink to a directory*
-// used to be classified as "directory" (QFileInfo::isDir() resolves links) and
-// handed to QDir::removeRecursively(), which walked through the link and erased
-// the contents of its TARGET - data living outside the browsed folder - while
-// leaving the link itself behind.
-//
-// FileOperations::removeDir() guards against that for its own (non-trash)
-// callers. DirectoryModel::removeDir() is the other guard: it branches to
-// FileOperations::moveToTrash() *before* ever reaching FileOperations::
-// removeDir(), so it carries its own isSymLink() check up front, covering
-// both the trash=true and trash=false routes. Most of these tests exercise
-// FileOperations::removeDir() directly; the trash-route test below exercises
-// DirectoryModel::removeDir(), where the trash branch actually lives.
-//
-// Deliberately no assertions about whether a file actually landed in the
-// desktop trash: QFile::moveToTrash refuses files under /tmp and its outcome
-// depends on the desktop environment. The trash-route test below asserts the
-// *gating* - that a symlink is routed to a plain unlink instead of
-// moveToTrash() - not that trashing itself succeeded.
+// Deleting a symlink to a directory must unlink the link and never recurse into its target (QFileInfo::isDir()
+// resolves links, so removeRecursively would erase data outside the folder). QFile::moveToTrash refuses /tmp,
+// so the trash route asserts only the gating: a symlink goes to a plain unlink, never to moveToTrash().
 
 namespace {
 
@@ -214,22 +198,8 @@ void DeleteDoesNotFollowSymlinksTest::directoryModelTrashRouteUnlinksSymlinkInst
         QSKIP("filesystem/platform does not support symlinks");
     QVERIFY2(QFileInfo(link).isDir(), "a link to a directory resolves as a directory");
 
-    // DirectoryModel::removeDir(dirPath, trash, ...) used to branch straight to
-    // FileOperations::moveToTrash() when trash=true, reaching
-    // FileOperations::removeDir()'s own symlink guard only on the trash=false
-    // branch (S3). The fix hoists an isSymLink() check above that branch so a
-    // symlink is always sent to FileOperations::removeSymLink() - a plain
-    // unlink - regardless of trash.
-    //
-    // QFile::moveToTrash() refuses paths under /tmp (where QTemporaryDir
-    // lives), so its outcome cannot be used to assert anything here - per
-    // memory, test the gating, never the trash outcome. This exploits that
-    // refusal as a probe instead: removeSymLink() is a plain unlink and does
-    // not care whether the path is under /tmp, so it deterministically
-    // succeeds - while a moveToTrash() call on the same /tmp path would not.
-    // A SUCCESS result below is therefore evidence the symlink route (not
-    // moveToTrash()) was actually taken, without depending on desktop trash
-    // infrastructure at all.
+    // DirectoryModel::removeDir() checks isSymLink() before its trash branch. removeSymLink() is a plain unlink that
+    // succeeds under /tmp where moveToTrash() would not, so SUCCESS proves the symlink route was taken.
     DirectoryModel model;
     FileOpResult result = FileOpResult::OTHER_ERROR;
     model.removeDir(link, /*trash=*/true, /*recursive=*/true, result);

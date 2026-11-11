@@ -7,22 +7,9 @@
 #include <QtGlobal>
 #include "utils/fileoperations.h"
 
-// Regression guard for a path-traversal bug: FileOperations::rename() built its
-// destination as srcParent + "/" + newName, and newName is free-form text from
-// the rename editors. A newName of "../evil.txt" therefore turned a rename into
-// an out-of-folder MOVE - and with force=true it could reach the overwrite path
-// and clobber a file outside the browsed folder.
-//
-// FileOperations::isValidFileName() now gates rename(), which returns
-// FileOpResult::INVALID_NAME. These tests assert on concrete filesystem state
-// (the source is still there, nothing appeared outside the browsed folder, and
-// the bystander file's CONTENTS are untouched), not only on the return code.
-//
-// Every rejection case is run with force=false and force=true: the traversal
-// must be rejected *before* the overwrite path is reachable.
-//
-// '\' is an ordinary filename character (S5) and cannot itself produce
-// traversal, so a name containing one is accepted and renamed as a leaf file.
+// FileOperations::rename() must reject a newName that is a path ("../evil.txt") with INVALID_NAME, never turn it into
+// a move or reach the overwrite path (checked with force=false and true). Asserts filesystem state: source intact,
+// nothing outside the folder, bystander contents untouched. '\' is an ordinary filename character and is accepted.
 
 namespace {
 

@@ -1,14 +1,6 @@
-// The XMP tab's editing surface: the custom-property grid, the remove toggle,
-// and the one visibility rule the three scoped removal buttons share.
-//
-// The value handling underneath is covered by test_xmp_editing_round_trips.cpp;
-// what is asserted here is the part that only exists as widgets - that there is
-// always somewhere to type, that a delete affordance never appears uninvited,
-// and that a greyed button means something different from an absent one.
-//
-// One long test method rather than several, matching the other File info
-// behaviour tests: the window is built once by a single Core and retargeted
-// through each case, which is also how it is used.
+// The XMP tab's widgets: the custom-property grid always has a row to type in, the remove toggle never appears
+// uninvited, and a greyed scoped-removal button means something different from an absent one.
+// One long test method: a single Core builds the window and it is retargeted through each case.
 
 #include "support/thumbgrid_test_support.h"
 

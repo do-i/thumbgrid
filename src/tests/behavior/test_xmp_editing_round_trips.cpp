@@ -1,21 +1,7 @@
-// XMP writing: the curated typed set, the custom-property grid's backend, and
-// the three scoped removals.
-//
-// These drive DocumentInfo rather than the UI for the same reason
-// test_exif_editing_round_trips.cpp does - the risk is in exiv2's value
-// handling, which no UI assertion would catch. The specific traps, each with a
-// case below:
-//
-//   * assignment replaces a Text or LangAlt value but *appends* to an array, so
-//     a rewritten keyword list has to be erased first or it grows;
-//   * an empty assignment leaves a present-but-blank property rather than
-//     deleting, so "empty means remove" needs an explicit erase;
-//   * the displayed form of an array joins items with ", ", so a keyword that
-//     itself contains a comma is indistinguishable from two keywords unless the
-//     items are kept as items;
-//   * clearing a LangAlt property must not take other languages with it;
-//   * each scoped removal has to leave the other two kinds alone, which is what
-//     lets the three buttons live in three tabs.
+// XMP writing: the curated typed set, the custom-property grid's backend and the three scoped removals. Drives
+// DocumentInfo, not the UI, because the risk is exiv2 value handling: arrays append on assignment (erase first), an
+// empty assignment leaves a blank property (erase explicitly), array items joined by ", " must stay items, clearing a
+// LangAlt keeps other languages, and each scoped removal leaves the other two kinds alone.
 
 #include "support/thumbgrid_test_support.h"
 

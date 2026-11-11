@@ -6,13 +6,8 @@
 #include <QLineEdit>
 #include <QTableWidget>
 
-// The shortcuts page used to show one context at a time behind a Global/Grid/
-// Document dropdown, which hid two thirds of the bindings and made "where does
-// this key work?" a question about a control above the table. Now every context
-// is listed together and each row states its own context with an icon, so the
-// answer is on the row - and everything that acts on a row (the enabled
-// checkbox, the key editor, Move to.../Copy to...) has to take the context from
-// that row rather than from a filter.
+// The shortcuts page lists every context at once, each row stating its context with an icon, so whatever acts on a row
+// (enabled box, key editor, Move to/Copy to) must take the context from that row, not from a filter.
 class TheShortcutsListShowsEveryContextAtOnceTest : public QObject {
     Q_OBJECT
 

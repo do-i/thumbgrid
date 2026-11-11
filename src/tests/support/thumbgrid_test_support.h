@@ -1,13 +1,8 @@
 #pragma once
 
-// Shared helpers and bootstrap for thumbgrid behavior tests.
-//
-// Each behavior test is its own executable (one binary per behavior) so the
-// singletons set up here stay isolated between behaviors. Use the
-// TG_BEHAVIOR_TEST_MAIN macro to provide a main() that:
-//   - redirects config/cache to throwaway locations (no touching real files),
-//   - defaults to the offscreen platform unless THUMBGRID_TEST_VISUAL is set,
-//   - constructs QApplication and initializes the thumbgrid singletons.
+// Shared helpers and bootstrap for behavior tests; one binary per behavior keeps the singletons isolated.
+// TG_BEHAVIOR_TEST_MAIN provides main(): throwaway config/cache, offscreen unless THUMBGRID_TEST_VISUAL is set,
+// QApplication and the thumbgrid singletons.
 
 #include <QtTest>
 

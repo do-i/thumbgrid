@@ -1,9 +1,5 @@
-// Slideshow shipped with no default shortcut and no menu entry, so on a stock
-// install there was no way to start one at all. The grid context menu is now
-// the discoverable route in, which puts two new demands on Core::startSlideshow:
-// it must begin at the file the user highlighted in the grid (not at whatever
-// document happened to be open last), and it must survive being invoked on a
-// folder that holds no viewable images.
+// Slideshow starts from the grid context menu: Core::startSlideshow must begin at the file highlighted in the grid
+// (not the last open document) and survive a folder with no viewable images.
 
 #include "support/thumbgrid_test_support.h"
 

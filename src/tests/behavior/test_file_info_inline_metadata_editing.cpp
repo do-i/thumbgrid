@@ -1,11 +1,5 @@
-// The File info window's EXIF tab is where a file gets written: its four
-// writable Exif tags are in-place fields, committed on Enter or focus-out, with
-// no Save button and no separate edit dialog.
-//
-// Driven through Core rather than the dialog alone, because the interesting
-// part is the round trip - the commit hands off to Core, which writes, reloads
-// and retargets the window, which rebuilds the very row that emitted the
-// signal.
+// The EXIF tab's four writable tags are in-place fields committed on Enter or focus-out, with no Save button.
+// Driven through Core: the commit round-trips through a write and reload that rebuilds the row that emitted it.
 
 #include "support/thumbgrid_test_support.h"
 

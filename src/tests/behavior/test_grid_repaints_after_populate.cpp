@@ -9,15 +9,9 @@
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
 
-// ThumbnailView::populate() turns painting off (setUpdatesEnabled(false)) while
-// it rebuilds the item list, and returns with it still off: the re-enable is
-// deferred to a 0-ms single-shot timer (ThumbnailView::onLayoutSettled), so the
-// scene is not seen shifting as the scrollbar appears. If that deferred
-// re-enable ever stops running - timer never armed, slot disconnected, the
-// setUpdatesEnabled(true) dropped - the grid stays permanently blank while the
-// model looks perfectly healthy. Model-state assertions cannot see that, so
-// this test watches the painting state itself, across two consecutive
-// populates (the second one exercises the re-armed-timer path).
+// populate() returns with painting off and re-enables it from a 0 ms timer (onLayoutSettled); if that stops running
+// the grid stays blank while the model looks healthy, so watch the painting state across two populates (the second
+// exercises the re-armed timer).
 class GridRepaintsAfterPopulateTest : public QObject {
     Q_OBJECT
 

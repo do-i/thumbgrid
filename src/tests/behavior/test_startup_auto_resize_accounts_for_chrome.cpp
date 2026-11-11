@@ -9,21 +9,9 @@
 #include "gui/mainwindow.h"
 #include "gui/panels/infobar/infobarproxy.h"
 
-// Auto-resize has to size the *viewport* to the image and add the window chrome
-// back on top, or the fit mode scales the image down to whatever is left after
-// the status footer and the slack shows up as empty bars either side.
-//
-// That compensation used to be skipped whenever the window was not visible yet -
-// which is exactly the startup path: main.cpp calls Core::loadPath() for a
-// command line argument *before* Core::showGui(), so `thumbgrid img.jpg` always
-// resizes while hidden. And the hidden branch does not call setGeometry(), it
-// writes settings->setWindowGeometry(), which is both what the first show
-// restores and what the next launch starts from - so the wrong geometry stuck.
-//
-// These checks drive that state directly: a main window in the state
-// Core::initGui() leaves it in (constructed, never shown) being handed an image.
-// No Core, no event loop - the defect is entirely in the hidden code path, and
-// keeping the window hidden is the point of the test.
+// Auto-resize must size the viewport to the image and add the window chrome back even while hidden: main.cpp loads a
+// command-line image before showGui(), and the hidden branch writes settings->setWindowGeometry(), which persists.
+// Drives a never-shown main window (as Core::initGui leaves it) directly: no Core, no event loop.
 
 namespace {
 

@@ -327,14 +327,8 @@ void DuplicateFinderDialogTest::deletingCheckedFilesGoesThroughDangerConfirm() {
     QVERIFY(deleteButton);
     QVERIFY(deleteButton->isEnabled());
 
-    // deletePaths() now confirms via the themed CustomMessageBox (danger
-    // accept button) instead of a native QMessageBox::question. Accepting
-    // cannot be exercised end-to-end here: QFile::moveToTrash refuses files
-    // under QDir::tempPath(), where every test fixture lives (which is also
-    // why the other behavior tests never trash). Cover the gating instead:
-    // the box runs a nested exec() loop, so poll from a timer until it is
-    // the active modal, record whether it carries the danger accept button,
-    // and reject it - the checked file must survive untouched.
+    // moveToTrash refuses QDir::tempPath(), so accepting cannot be exercised; test the gating: poll from a timer for the
+    // themed CustomMessageBox (nested exec()), record its danger accept button, reject it; the file must survive.
     bool sawDangerConfirm = false;
     QTimer poll;
     poll.setInterval(50);

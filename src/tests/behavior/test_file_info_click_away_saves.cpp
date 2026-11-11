@@ -1,10 +1,6 @@
-// Clicking away from an EXIF field saves it, the same as pressing Enter.
-//
-// Qt does not do this on its own: most of what surrounds a row - empty tab
-// space, a read-only row, a name label - cannot take focus, so a click there
-// leaves the field focused and its edit uncommitted. Clicking into a different
-// window is the same problem from the other end: focus leaves with
-// ActiveWindowFocusReason, which QLineEdit does not treat as finishing an edit.
+// Clicking away from an EXIF field saves it, the same as pressing Enter. Qt does not do this itself: unfocusable
+// surroundings leave the field focused, and a window switch focuses out with ActiveWindowFocusReason, which
+// QLineEdit does not treat as finishing an edit.
 
 #include "support/thumbgrid_test_support.h"
 

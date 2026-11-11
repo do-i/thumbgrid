@@ -1,13 +1,6 @@
-// Tier-1 metadata editing: the four text-valued Exif tags a person actually
-// retypes, on the two formats exiv2 can safely rewrite.
-//
-// These drive DocumentInfo rather than the UI on purpose - the risk here is
-// entirely in exiv2's value handling, not in the rows. In particular
-// UserComment is an Undefined-typed value carrying a "charset=" header that
-// exiv2 includes in its string form; getting that wrong silently stores the
-// header as part of the comment text, which no UI test would catch. The
-// in-place fields that reach these calls are covered by
-// test_file_info_inline_metadata_editing.cpp.
+// Round-trips the four text Exif tags a person retypes, on the two formats exiv2 can safely rewrite. Drives
+// DocumentInfo, not the UI: the risk is exiv2 value handling (UserComment's "charset=" header must not leak into
+// the text), which no UI test would catch.
 
 #include "support/thumbgrid_test_support.h"
 

@@ -21,12 +21,8 @@ private slots:
 
 namespace {
 
-// Every General/EXIF row is an EntryInfoItem with two QLabel children (name,
-// then value) added in that order by EntryInfoItem's constructor. Rows for
-// both tabs are children of the dialog regardless of which tab is current, so
-// searching the whole dialog and matching on the name label finds any row.
-// The value label elides long text and moves the full string to its tooltip
-// (EntryInfoItem::updateElidedText), so prefer the tooltip when set.
+// Rows are EntryInfoItems (name label, then value label) found by name anywhere in the dialog; long values elide
+// into the tooltip, so prefer it.
 QString rowValueByName(QWidget *root, const QString &rowName) {
     for(EntryInfoItem *item : root->findChildren<EntryInfoItem *>()) {
         const QList<QLabel *> labels = item->findChildren<QLabel *>();

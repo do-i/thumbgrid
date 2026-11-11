@@ -1,11 +1,5 @@
-// Reported annoyance: open a small image from the grid and the window shrinks to
-// fit it (that part is "Automatic window resize" working as intended), but going
-// back to the grid leaves it at that tiny size. Nothing ever grew the window back
-// again, so the grid stayed thumbnail-sized for the rest of the session - and the
-// 30 ms geometry timer persisted the shrunken size, so it survived a restart too.
-//
-// The grid's own geometry is now remembered on the way into the document view and
-// put back on the way out.
+// Opening a small image from the grid shrinks the window (automatic resize); going back must restore the grid's own
+// geometry, remembered on the way in, instead of leaving (and persisting) the shrunken size.
 
 #include "support/thumbgrid_test_support.h"
 

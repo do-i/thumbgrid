@@ -6,19 +6,10 @@
 #include <QTemporaryDir>
 #include "components/fileoperationscontroller.h"
 
-// Regression guard for a recursive copy/move: dropping a folder into itself (or
-// into anything beneath itself) makes the copy walk the tree it is still
-// writing into, filling the disk with an ever-deeper nesting - and as a move it
-// can destroy the source.
-//
-// FileOperationsController::destinationIsInsideSource() is the single central
-// guard used by both copyPathsTo() and movePathsTo(). It canonicalizes both
-// sides, so a destination reached through a symlink cannot sneak past it, while
-// a *source* that is itself a symlink is not treated as a container: links are
-// recreated as links and never recurse.
-//
-// The function is a public static, so these tests exercise the rule directly -
-// no window, no dialogs, no live controller.
+// Dropping a folder into itself or beneath it must be refused by destinationIsInsideSource(), or the copy
+// recurses forever and a move can destroy the source. Both sides are canonicalized, so a destination reached
+// through a symlink is caught; a source that is itself a symlink is not a container (links never recurse).
+// It is a public static: no window, dialogs or controller needed.
 
 namespace {
 
@@ -29,14 +20,8 @@ bool writeFile(const QString &path, const QByteArray &data) {
     return f.write(data) == data.size();
 }
 
-// Shared layout:
-//   <tmp>/source/child/deep/     the source directory and its subtree
-//   <tmp>/sibling/              next to the source
-//   <tmp>/sourceExtra/          shares the source's name as a prefix
-//   <tmp>/unrelated/nested/     nothing to do with the source
-//   <tmp>/linkTarget/inner/     the target of a directory symlink
-//   <tmp>/links/                where symlinks live
-//   <tmp>/loose.txt             a plain file used as a "source"
+// Fixture under <tmp>: source/child/deep, sibling, sourceExtra (name-prefix trap), unrelated/nested,
+// linkTarget/inner (a symlink's target), links/ (the symlinks), loose.txt (a plain-file source).
 struct Fixture {
     QTemporaryDir tmp;
 
@@ -190,12 +175,8 @@ void CopyMoveRejectsContainedDestinationTest::oneOffendingSourceAmongManyIsEnoug
         paths, fx.path(QStringLiteral("linkTarget/inner"))));
 }
 
-// Regression case for S4: canonicalFilePath() returns an empty string for a
-// destination that does not exist, so the containment guard must not fall
-// back to a raw, non-canonical path for the whole destination - it has to
-// canonicalize the existing ancestor chain and only leave the missing tail
-// untouched. Route: source/ is real, links/sourceLink -> source/, and the
-// destination is a not-yet-created subdirectory reached through the link.
+// canonicalFilePath() is empty for a missing destination, so the guard must canonicalize the existing ancestor
+// chain; route: links/sourceLink -> source/, destination a not-yet-created subdirectory beneath the link.
 void CopyMoveRejectsContainedDestinationTest::aNonExistentDestinationUnderASymlinkedRouteToTheSourceIsContained() {
     Fixture fx;
     QVERIFY(fx.build());
@@ -222,15 +203,8 @@ void CopyMoveRejectsContainedDestinationTest::aNonExistentDestinationOutsideEver
              "a non-existent destination that is genuinely outside every source must be accepted");
 }
 
-// Reported freeze: copy a folder, open one of its own subfolders, paste ->
-// infinite recursion, app hangs. Core::pasteFile() calls interactiveCopy()
-// directly (on purpose, so a plain paste raises no confirmation prompt), which
-// skipped copyPathsTo()'s containment guard entirely. Testing only the static
-// destinationIsInsideSource() above is what let this through, so these two
-// drive the executors that every route actually ends up in.
-//
-// Deliberately assert the refusal happens *before* any copying: the whole
-// failure mode is that work starts and never finishes.
+// Core::pasteFile() calls interactiveCopy() directly, bypassing copyPathsTo()'s guard, so these drive the executors
+// every route ends in; the refusal must happen before any copying starts.
 void CopyMoveRejectsContainedDestinationTest::theCopyExecutorRefusesTheSourcesOwnSubfolder() {
     Fixture fx;
     QVERIFY(fx.build());

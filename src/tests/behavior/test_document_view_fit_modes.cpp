@@ -9,14 +9,8 @@
 #include "gui/mainwindow.h"
 #include "gui/viewers/imageviewerv2.h"
 
-// Fit-mode behaviours that were wrong in ways only visible on screen.
-//
-// Most use one square image in a deliberately landscape viewport - the shape
-// that exposes them. A square image is wider-relative-to-the-window than the
-// window itself, so:
-//   - at 1:1 it overflows *both* axes, the case where nothing centered it;
-//   - fit-window is height-limited, so a height-only "stretch" computed the
-//     exact same scale and the mode appeared to do nothing.
+// Fit-mode behaviours only visible on screen, mostly via one square image in a landscape viewport: at 1:1 it
+// overflows both axes, and fit-window is height-limited, so a height-only "stretch" would compute the same scale.
 
 namespace {
 
@@ -351,12 +345,8 @@ void DocumentViewFitModesTest::openingAnImageStillHonoursExpandImageOff() {
                             .arg(shown.height())));
 }
 
-// "Keep fit mode" is meant to carry the fit *mode* to the next image. It used to
-// carry the explicit-fit exemption along with it, because the flag was cleared
-// only inside the branch keepFitMode skips: one click on any fit button and
-// every later image ignored "Expand images, up to: Nx" for the rest of the
-// session. An explicit fit belongs to the image the user clicked on, so the next
-// image is laid out under the expand policy again - in the mode that was kept.
+// "Keep fit mode" carries the mode to the next image but not the explicit-fit exemption: an explicit fit belongs
+// to the image clicked, so the next one is laid out under the expand policy again, in the kept mode.
 void DocumentViewFitModesTest::explicitFitDoesNotOutliveTheImageEvenWithKeepFitModeOn() {
     settings->setImageFitMode(FIT_WINDOW);
     settings->setExpandImage(true);

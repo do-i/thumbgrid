@@ -2,13 +2,8 @@
 // Copyright (C) 2026 do-i and thumbgrid contributors
 // Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
 //
-// Saving an edit used to encode on the GUI thread: heic, avif and large png
-// froze the window for seconds. The write now runs on a worker and replaces
-// the file atomically (QSaveFile), with the save overlay busy meanwhile.
-//
-// The worker's result comes back as a queued call, so anything checked right
-// after clicking Save - before the event loop runs - sees the save in flight,
-// however fast the write itself is.
+// Saving an edit encodes on a worker and replaces the file atomically (QSaveFile), with the save overlay busy
+// meanwhile. The result returns as a queued call, so a check right after clicking Save sees the save in flight.
 #include "support/thumbgrid_test_support.h"
 
 #include <QDir>

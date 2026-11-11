@@ -16,12 +16,8 @@
 #include "components/fileoperationscontroller.h"
 #include "gui/overlays/moveprogressoverlay.h"
 
-// Reported freeze: moving ~100 folders (8k files, 12 GB) to a sibling folder
-// hung the grid for minutes. A move never renamed anything: each folder was
-// recreated and every file was QFile::copy()'d then deleted, on the GUI thread,
-// even within one filesystem. A same-filesystem move must be a rename - the
-// moved entries keep their inodes, which no copy can fake - while a destination
-// that already exists still merges, and a move across filesystems still works.
+// A same-filesystem move must be a rename (moved entries keep their inodes), not a recreate-and-copy on the GUI
+// thread; a destination that already exists still merges and a cross-filesystem move still works.
 
 namespace {
 

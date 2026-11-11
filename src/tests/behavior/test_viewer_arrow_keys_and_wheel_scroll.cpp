@@ -15,16 +15,9 @@
 #include "gui/viewers/textviewer.h"
 #include "gui/viewers/viewerwidget.h"
 
-// Arrow keys scroll text / pan a zoomed image (Ctrl+arrow in fine steps) through
-// the configurable scroll actions, and
-// scrolling stops at the end instead of jumping to the neighbouring file -
-// reaching the bottom of a long file used to silently open the next one. The
-// wheel's text scrolling is a binding too (scrollOrPrevImage/scrollOrNextImage),
-// and Ctrl+wheel runs the zoom actions, which resize the text. With image
-// scrolling set to trackpad and wheel, the same actions pan a tall image. A
-// wheel turned with the right button held is RMB+WheelUp/RMB+WheelDown. What a
-// scroll action does when there is nothing to scroll is its configurable
-// fallback.
+// Arrow keys scroll text / pan a zoomed image (Ctrl: fine steps) through the configurable scroll actions, and scrolling
+// stops at the end instead of jumping to the neighbouring file. Wheel scrolling, Ctrl+wheel zoom and RMB+wheel are
+// bindings too, and a scroll action with nothing to scroll runs its configurable fallback.
 
 class ViewerArrowKeysAndWheelScrollTest : public QObject {
     Q_OBJECT

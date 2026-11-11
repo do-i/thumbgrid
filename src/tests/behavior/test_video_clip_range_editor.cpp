@@ -9,13 +9,9 @@
 #include "gui/overlays/videocontrols.h"
 #include "gui/viewers/videoclip.h"
 
-// The clip button shows two pentagon handles on the seek bar (the start at the
-// playhead, the end halfway from there to the end of the video, at least 1 s
-// later) and playback stays between them; they can be dragged whenever they
-// are shown. Pressing it again hides them and plays the whole video, keeping
-// the range for when they are shown again (its start at the playhead, if that
-// moved). The loop button repeats the clip (or, with no clip, the whole file).
-// The handles never cross, and a dragged handle stands in for the playhead.
+// The clip button shows two handles on the seek bar (start at the playhead, end halfway to the video's end, at least 1 s
+// later) and playback stays between them; pressing it again hides them and keeps the range. The loop button repeats the
+// clip (or the whole file); handles never cross and a dragged handle stands in for the playhead.
 
 class VideoClipRangeEditorTest : public QObject {
     Q_OBJECT

@@ -9,13 +9,8 @@
 #include "shortcutpresetstore.h"
 #include "themestore.h"
 
-// Themes and presets are searched across the XDG base directories rather than a
-// single compiled-in location, so a user can drop their own copy into
-// ~/.config/thumbgrid/<kind>/ and have it win over the packaged/embedded one.
-//
-// These tests resolve the target directory the way the spec says to (writable
-// generic config location + app name + kind) instead of asking AppPaths, so
-// they check the documented contract rather than restating the implementation.
+// Themes and presets are searched across the XDG base directories, so a copy in ~/.config/thumbgrid/<kind>/ wins over
+// the packaged one. Tests resolve the directory per the spec, not via AppPaths, so they check the contract.
 class XdgSearchPathOverridesTest : public QObject {
     Q_OBJECT
 

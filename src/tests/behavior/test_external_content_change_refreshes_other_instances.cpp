@@ -9,19 +9,9 @@
 
 #include "components/directorymanager/directorymanager.h"
 
-// Several instances of this app are expected to run at once, and a file
-// mutation made in one must reach the others immediately. An external change
-// arrives via DirectoryWatcher -> DirectoryManager::onFileModifiedExternal() ->
-// updateFileEntry(), which only re-announces an entry it believes actually
-// changed. That comparison therefore decides whether a sibling instance
-// refreshes or keeps showing a stale image.
-//
-// Comparing modifyTime alone is not enough: a write that preserves the
-// timestamp (cp --preserve=timestamps, a restore-from-backup, two writes inside
-// Qt's millisecond resolution) leaves mtime identical while the content and
-// size differ. size is compared as well so those still refresh - without
-// re-announcing an unchanged entry, which is what the early return is for
-// (a rename changes neither field, and used to cause a spurious reload).
+// An external change reaches sibling instances via updateFileEntry(), which re-announces only an entry it believes
+// changed. size is compared as well as mtime (timestamp-preserving writes keep mtime), while a rename, which
+// changes neither, must not re-announce.
 
 namespace {
 

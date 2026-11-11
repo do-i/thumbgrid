@@ -12,14 +12,8 @@
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
 
-// A symlinked entry looks exactly like the file it points at: same picture, same
-// size, same label. The only thing telling the two apart in the grid is the
-// badge at the bottom-right of the picture area, just above the file name.
-// Nothing else in the cell changes, so a regression here (flag lost between the
-// thumbnailer and the widget, badge not enabled on the grid's tiles, badge drawn
-// outside the visible cell or down on top of the label) is invisible to
-// model-state assertions - it has to be read off the painted pixels, which is
-// what this test does.
+// A symlinked entry looks like its target except for a badge at the bottom-right of the picture area; losing the
+// flag, the badge or its placement is invisible to model assertions, so this reads the painted pixels.
 class GridSymlinkBadgeTest : public QObject {
     Q_OBJECT
 

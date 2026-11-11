@@ -14,13 +14,8 @@
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
 
-// A symlink is invisible in the File info window unless it says so: Path shows
-// the link, while Size, Permissions and the timestamps are all read *through*
-// the link and describe the target. Without a row naming the target, the window
-// reads as a plain file that happens to live at that path. The dangling case is
-// worse - the link resolves to nothing, so the window used to fall through to
-// its "No selection" placeholder and say nothing at all about an entry the user
-// had selected.
+// A symlink must say so in File info: Path shows the link while Size, Permissions and times describe the target.
+// A dangling link must still get rows, not the "No selection" placeholder.
 class FileInfoSymlinkTargetTest : public QObject {
     Q_OBJECT
 

@@ -2,12 +2,8 @@
 
 #include "shortcutpresetstore.h"
 
-// PoC coverage for the shortcuts/keymap redesign:
-//   1. the native scan-code map loads from the per-OS keymap resource,
-//   2. a fresh config is seeded into shortcuts.json from the qimgv preset,
-//   3. the preset catalog is OS-filtered (built from _meta.os),
-//   4. applying a preset overwrites the active mapping and drives the
-//      [Shortcuts]/modified flag (self-correcting on save).
+// Shortcut redesign PoC: the scan-code keymap loads per OS, a fresh config is seeded from the qimgv preset, the preset
+// catalog is OS-filtered (_meta.os), and applying a preset overwrites the mapping and drives [Shortcuts]/modified.
 class ShortcutPresetsAndKeymapsPocTest : public QObject {
     Q_OBJECT
 
@@ -87,15 +83,8 @@ void ShortcutPresetsAndKeymapsPocTest::xnviewmpPresetLoadsRepresentativeBindings
     QVERIFY2(!settings->shortcutsModified(), "Right after applyPreset the mapping equals the preset.");
 }
 
-// (6) SettingsDialog::saveShortcuts() rebuilds the active mapping via
-// removeAllShortcuts() + addShortcut() from its draft on every Apply/OK, even
-// when the Controls tab was untouched. The rebuild loop never touches a
-// context whose draft is empty, so removeAllShortcuts() must re-seed every
-// context key itself; otherwise a preset with an empty or missing section
-// (e.g. one with no "grid") comes back with fewer
-// context keys than `defaults`, the shortcuts != defaults comparison in
-// saveShortcuts() turns spuriously true, and the preset combo shows "Custom"
-// right after a clean preset switch.
+// saveShortcuts() rebuilds the mapping on every Apply/OK, so removeAllShortcuts() must re-seed every context key itself;
+// otherwise a preset with an empty or missing section (e.g. no "grid") makes shortcuts != defaults and shows "Custom".
 void ShortcutPresetsAndKeymapsPocTest::presetWithEmptyContextSurvivesDialogRoundTrip() {
     actionManager->applyPreset("leftie");
     QVERIFY2(!settings->shortcutsModified(), "Right after applyPreset the mapping equals the preset.");
@@ -122,13 +111,8 @@ void ShortcutPresetsAndKeymapsPocTest::presetWithEmptyContextSurvivesDialogRound
              "A no-op dialog round-trip must not spuriously mark the mapping as Custom.");
 }
 
-// (7) Apply a preset, quit, come back. Leftie repeats folderView, nextDirectory,
-// prevDirectory and toggleImageInfo verbatim under both "document" and "grid";
-// shortcuts.json stores that shape canonically by hoisting the duplicate into
-// global. If `defaults` keeps the preset file's per-context copies while the
-// mapping read back from disk has them in global, the two compare unequal on
-// every launch: the preset combo shows "Custom" and the settings table lists
-// those actions as unbound rows under the contexts the preset named.
+// Leftie repeats some actions under "document" and "grid"; shortcuts.json hoists such duplicates into global, so `defaults`
+// must be canonicalized alike or every launch compares unequal ("Custom" shown, actions listed as unbound rows).
 void ShortcutPresetsAndKeymapsPocTest::presetBindingsSurviveRestart() {
     actionManager->applyPreset("leftie");
 

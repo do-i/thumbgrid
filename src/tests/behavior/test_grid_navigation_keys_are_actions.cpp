@@ -9,15 +9,9 @@
 #include "gui/folderview/foldergridview.h"
 #include "gui/mainwindow.h"
 
-// The grid's arrows, PgUp/PgDown and Home/End move the selection (Shift extends
-// it; Alt or Meta change nothing; Ctrl hands the key to the bindings). They
-// used to be hard-coded; they are now the grid actions selectPrevious,
-// selectNext, selectAbove, selectBelow, selectPageUp, selectPageDown,
-// selectFirst and selectLast, and behave exactly as before by default - while
-// another key can take a move, and unbinding a key turns its move off.
-// Ctrl+wheel resizing the thumbnails is a grid binding too (zoomIn/zoomOut), and
-// so are a tile's double-click (LMB_TileDoubleClick: openSelected) and dragging
-// the selection out (the grid's LMB_Drag: dragFileOut).
+// The grid's arrows, PgUp/PgDown and Home/End are actions (selectPrevious ... selectLast) that behave as before by
+// default: Shift extends, Alt/Meta do nothing, Ctrl hands the key to the bindings. Another key can take a move and
+// unbinding turns it off. Ctrl+wheel zoom, tile double-click and the selection drag are bindings too.
 
 class GridNavigationKeysAreActionsTest : public QObject {
     Q_OBJECT

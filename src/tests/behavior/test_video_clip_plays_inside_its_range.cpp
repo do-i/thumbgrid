@@ -17,12 +17,9 @@
 #include "gui/viewers/videoplayerinitproxy.h"
 #include "gui/viewers/viewerwidget.h"
 
-// A real video in mpv: positions are milliseconds, a clip (from the
-// playhead to halfway to the end, to begin with) plays from its start and
-// stops at its end, loop repeats
-// it, and without a clip a video that doesn't loop stops on its last frame and
-// plays again from the start (and reports the end, for the slideshow). While
-// a handle is dragged, the video shows its frame; hiding the clip keeps it.
+// A real video in mpv: positions are ms; a clip plays from its start to its end and loop repeats it; without a clip a
+// non-looping video stops on its last frame and replays from the start (reporting the end for the slideshow).
+// A dragged handle shows its frame; hiding the clip keeps it.
 
 class VideoClipPlaysInsideItsRangeTest : public QObject {
     Q_OBJECT

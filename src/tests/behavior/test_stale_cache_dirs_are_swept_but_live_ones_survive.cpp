@@ -1,22 +1,6 @@
-// Settings::setupCache() sweeps stale "videothumb-*" and "export-*" scratch
-// directories out of the cache root on startup (src/settings.cpp, near the
-// QLockFile-guarded loop right after the writable-cache fallback). Because
-// this app enforces no single instance - a file manager spawns one process
-// per opened image - the sweep must never delete a scratch dir a live
-// sibling instance is still using. It is guarded by two filters:
-//   * an age floor (dirs younger than 5 minutes are left alone), and
-//   * a QLockFile probe on "<dir>/.tg-lock" (a locked dir is left alone).
-//
-// The sweep runs once, inside setupCache(), the first time
-// Settings::getInstance() is called. So this test cannot use the shared
-// TG_BEHAVIOR_TEST_MAIN macro: that macro's main() calls
-// tgtest::initializeThumbgrid(), which calls Settings::getInstance() itself,
-// which would run the sweep before any fixture directory exists. Instead
-// this file writes its own main() - mirroring test_settings_migration_gates.cpp
-// - that redirects HOME/XDG_CONFIG_HOME/XDG_CACHE_HOME exactly as the shared
-// macro does, but defers Settings::getInstance() until after the fixture
-// directories are in place under the real cache root
-// (PlatformDesktop::defaultCacheDirectory()).
+// Settings::setupCache() sweeps stale "videothumb-*" / "export-*" scratch dirs but must spare a live sibling's (no
+// single-instance guard): dirs younger than 5 minutes and dirs whose "<dir>/.tg-lock" QLockFile is held survive.
+// Own main(): the shared macro calls Settings::getInstance(), which runs the sweep before the fixture dirs exist.
 
 #include "appversion.h"
 #include "settings.h"
@@ -104,17 +88,8 @@ bool staleCacheDirsAreSweptButLiveOnesSurvive() {
     const QString liveExportPath = root.filePath(liveExport);
     const QString unrelatedPath = root.filePath(unrelated);
 
-    // Hold the lock on the "live" export dir ourselves, standing in for a
-    // sibling instance that is still using it. QLockFile reclaims a lock
-    // whose owning pid is dead, but this pid (ours) is alive for the whole
-    // test, so the sweep's tryLock(0) must fail and skip the directory.
-    //
-    // This has to happen *before* backdating liveExportPath's mtime below:
-    // acquiring a QLockFile writes a helper file into the target directory
-    // (to stash pid/hostname/appname), which bumps the directory's own
-    // mtime as a side effect. Backdating first and locking second would
-    // silently undo the backdate and let this case pass for the wrong
-    // reason - the age floor, not the lock probe actually under test.
+    // Lock the "live" export dir before backdating it: QLockFile writes a helper file that bumps the dir's mtime and would
+    // undo the backdate, passing on the age floor instead of the lock. Our pid is alive, so tryLock(0) must fail.
     QLockFile liveLock(liveExportPath + QStringLiteral("/.tg-lock"));
     liveLock.setStaleLockTime(0);
     if(!require(liveLock.tryLock(0), "Test process failed to acquire its own simulated live-session lock."))

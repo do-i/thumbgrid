@@ -13,13 +13,8 @@
 #include "gui/panels/infobar/infobarproxy.h"
 #include "gui/viewers/viewerwidget.h"
 
-// The document view's status footer used to carry the grid's line: an object
-// count, a selection count, the file size in brackets, *then* the image, with
-// the size repeated, the bit depth glued onto the resolution and the zoom in
-// parentheses. Almost none of that describes the picture on screen.
-//
-// It shows the current image and nothing else now: file name, file size, WxH,
-// zoom as a plain multiplier (1.00x is 100%).
+// The document status footer shows only the current image: file name, file size, WxH and the zoom as a plain
+// multiplier (1.00x is 100%), none of the grid's counts.
 
 namespace {
 
