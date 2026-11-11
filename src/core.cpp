@@ -1,9 +1,5 @@
-/*
- * This is sort-of a main controller of application.
- * It creates and initializes all components, then sets up gui and actions.
- * Most of communication between components go through here.
- *
- */
+// Main controller: creates the components, sets up gui and actions;
+// most communication between components goes through here.
 
 #include "core.h"
 #include "constants.h"

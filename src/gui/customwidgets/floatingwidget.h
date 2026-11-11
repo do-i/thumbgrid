@@ -1,9 +1,5 @@
-/*
- * Base class for floating panels / overlay widgets.
- * It is not supposed to go into any kind of layout, just set parent & call show().
- * Usage: reimplement recalculateGeometry() method, which sets the new
- * geometry when the parent is resized.
- */
+// Base for floating panels: never put in a layout, just set parent and show().
+// Reimplement recalculateGeometry() to set the geometry when the parent resizes.
 
 #pragma once
 

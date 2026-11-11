@@ -74,14 +74,7 @@ MW::MW(QWidget *parent)
     restoreWindowGeometry();
 }
 
-/*                                                             |--[ImageViewer]
- *                        |--[DocumentWidget]--[ViewerWidget]--|
- * [MW]--[CentralWidget]--|                                    |--[VideoPlayer]
- *                        |--[FolderView]
- *
- *  (not counting floating widgets)
- *  ViewerWidget exists for input handling reasons (correct overlay hover handling)
- */
+// ViewerWidget exists for input handling (correct overlay hover handling).
 void MW::setupUi() {
     viewerWidget.reset(new ViewerWidget(this));
     infoBarWindowed.reset(new InfoBarProxy(this));

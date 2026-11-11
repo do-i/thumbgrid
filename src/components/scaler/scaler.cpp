@@ -7,13 +7,8 @@ namespace {
 constexpr int kScalerThreads = 1;
 }
 
-/* What this should do in theory:
- * 1 request comes
- * 2 we run it
- * 3a if during scaling no new requests came, we return the result and forget about it. end.
- * 3b if some requests did come, by the end of current task we dispose of its result,
- *    start the last task that came and ignore the middle ones.
- */
+// Only the newest pending request is kept: if one arrived while a task ran, that
+// result is discarded and the newest request starts instead (middle ones are dropped).
 
 Scaler::Scaler(Cache *_cache, QObject *parent)
     : QObject(parent),

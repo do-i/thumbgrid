@@ -1,12 +1,7 @@
 #pragma once
 
-/* This class manages QGraphicsScene, ThumbnailWidget list,
- * scrolling, requesting and setting thumbnails.
- * It doesn't do actual positioning of thumbnails within the scene.
- * (But maybe it should?)
- *
- * Usage: subclass, implement layout-related stuff
- */
+// Manages the QGraphicsScene, ThumbnailWidget list, scrolling and thumbnail requests;
+// subclasses do the positioning (layout) of thumbnails.
 
 #include <QGraphicsView>
 #include <QVBoxLayout>

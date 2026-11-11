@@ -264,12 +264,7 @@ void CropOverlay::resizeSelection(QPoint delta) {
 void CropOverlay::resizeSelectionAR(QPoint delta) {
     QSizeF newSz(selectionRect.size());
     QSizeF maxSz;
-    /* ~JustQtThings~
-     * int QRect::bottom() const
-     *   Note that for historical reasons this function returns top() + height() - 1;
-     *   use y() + height() to retrieve the true y-coordinate.
-     * same for QRect::right()
-     */
+    // QRect::bottom()/right() return top()+height()-1 / left()+width()-1; use y()+height() for the true edge.
     switch(cursorAction) {
         case DRAG_TOPLEFT:
             // get max selection size
