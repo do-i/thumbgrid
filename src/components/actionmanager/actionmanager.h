@@ -219,6 +219,7 @@ signals:
     void toggleFolderViewTopBar();
     void toggleStatusFooter();
     void togglePlacesPanel();
+    void focusFolderTree();
     void findDuplicates();
 };
 

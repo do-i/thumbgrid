@@ -50,6 +50,7 @@
     },
     "grid": {
         "createDirectory": ["F7"],
+        "focusFolderTree": ["$Ctrl+$Shift+E"],
         "goUp": ["Backspace"],
         "moveFile": ["M"],
         "toggleImageInfo": ["I"],

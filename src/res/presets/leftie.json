@@ -221,6 +221,9 @@
         "createDirectory": [
             "F7"
         ],
+        "focusFolderTree": [
+            "$Ctrl+$Shift+E"
+        ],
         "folderView": [
             "U"
         ],

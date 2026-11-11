@@ -893,3 +893,11 @@ add_test(
     NAME "Files dropped on a tree folder or bookmark are moved, or copied with Ctrl held"
     COMMAND thumbgrid_folder_tree_drops_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_focus_test
+    behavior/test_folder_tree_focus_action_and_keys.cpp
+)
+add_test(
+    NAME "A shortcut moves the keyboard to the folder tree and back, and F2, Delete and Esc act on its row"
+    COMMAND thumbgrid_folder_tree_focus_test
+)

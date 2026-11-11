@@ -125,4 +125,5 @@ void Actions::init() {
     mActions.insert("setClipStart", QVersionNumber(2026,10,3));
     mActions.insert("setClipEnd", QVersionNumber(2026,10,3));
     mActions.insert("toggleVideoLoop", QVersionNumber(2026,10,3));
+    mActions.insert("focusFolderTree", QVersionNumber(2026,10,6));
 }

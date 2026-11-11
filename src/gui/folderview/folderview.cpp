@@ -136,6 +136,11 @@ FolderView::FolderView(QWidget *parent) :
     connect(ui->dirTreeView, &TreeViewCustom::newFolderCommitted, this, &FolderView::onTreeNewFolderCommitted);
     connect(ui->dirTreeView, &TreeViewCustom::middleClicked, this, &FolderView::onTreeMiddleClicked);
     connect(ui->dirTreeView, &TreeViewCustom::contextMenuRequestedAt, this, &FolderView::onTreeContextMenuRequested);
+    connect(ui->dirTreeView, &TreeViewCustom::renameKeyPressed, this, &FolderView::onTreeRenameKey);
+    connect(ui->dirTreeView, &TreeViewCustom::trashKeyPressed, this, &FolderView::onTreeTrashKey);
+    connect(ui->dirTreeView, &TreeViewCustom::leaveRequested, this, [this]() {
+        ui->thumbnailGrid->setFocus(Qt::ShortcutFocusReason);
+    });
     connect(dirModel, &QFileSystemModel::directoryLoaded, this, &FolderView::onTreeDirectoryLoaded);
     connect(ui->dirTreeView, &QTreeView::expanded, this, &FolderView::onTreeExpanded);
     connect(ui->dirTreeView, &QTreeView::collapsed, this, &FolderView::onTreeCollapsed);
@@ -275,6 +280,39 @@ void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoi
     mTreeMenu->openFor({path, ui->bookmarksWidget->hasBookmark(path), isProtectedTreeFolder(path)}, globalPos);
 }
 
+// the same guards as the menu's Rename and Move to trash: home and the root stay put
+void FolderView::onTreeRenameKey(const QModelIndex &index) {
+    const QString path = dirModel->filePath(index);
+    if(!isProtectedTreeFolder(path))
+        ui->dirTreeView->startRename(index, dirModel->fileName(index));
+}
+
+void FolderView::onTreeTrashKey(const QModelIndex &index) {
+    const QString path = dirModel->filePath(index);
+    if(!isProtectedTreeFolder(path))
+        emit folderOperationRequested(TreeFolderOp::Trash, path, QString());
+}
+
+// shows the places panel and the tree section first, as their own toggles do
+void FolderView::toggleTreeFocus() {
+    TreeViewCustom *tree = ui->dirTreeView;
+    if(tree->hasFocus()) {
+        ui->thumbnailGrid->setFocus(Qt::ShortcutFocusReason);
+        return;
+    }
+    if(!ui->placesPanel->isVisible())
+        ui->togglePlacesPanelButton->setChecked(true);
+    if(!tree->isVisible() && ui->placesPanel->isVisible())
+        toggleFilesystemView();
+    if(!tree->isVisible())
+        return; // too narrow for the panel
+    if(mTreeScrollTarget.isValid() && mTreeScrollTarget != tree->rootIndex()) {
+        tree->setCurrentIndex(mTreeScrollTarget);
+        tree->scrollTo(mTreeScrollTarget);
+    }
+    tree->setFocus(Qt::ShortcutFocusReason);
+}
+
 void FolderView::onTreeMiddleClicked(const QModelIndex &index) {
     NewWindow::open(dirModel->filePath(index));
 }
@@ -396,8 +434,12 @@ void FolderView::onFullscreenModeChanged(bool mode) {
     ui->topBar->layout()->invalidate();
 }
 
+// a click on empty panel space or window activation lands on the grid; Tab passes on into the panel
 void FolderView::focusInEvent(QFocusEvent *event) {
-    Q_UNUSED(event)
+    if(event->reason() == Qt::TabFocusReason || event->reason() == Qt::BacktabFocusReason) {
+        focusNextPrevChild(event->reason() == Qt::TabFocusReason);
+        return;
+    }
     ui->thumbnailGrid->setFocus();
 }
 
@@ -472,8 +514,10 @@ void FolderView::setDirectoryPath(QString path) {
 
     // a tree click already made the row current
     const QString cleanPath = QDir::cleanPath(path);
-    if(dirModel->filePath(ui->dirTreeView->currentIndex()) == cleanPath)
+    if(dirModel->filePath(ui->dirTreeView->currentIndex()) == cleanPath) {
+        mTreeScrollTarget = ui->dirTreeView->currentIndex();
         return;
+    }
 
     const QModelIndex targetIndex = dirModel->index(cleanPath);
     // ancestors not listed yet: rows they add shift the target, so scroll again once each loads

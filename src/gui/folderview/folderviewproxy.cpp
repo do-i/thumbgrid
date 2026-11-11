@@ -221,6 +221,11 @@ void FolderViewProxy::zoomThumbnails(int steps) {
         folderView->zoomThumbnails(steps);
 }
 
+void FolderViewProxy::toggleTreeFocus() {
+    if(folderView)
+        folderView->toggleTreeFocus();
+}
+
 void FolderViewProxy::saveState() {
     // never built this session: the stored state stays as it was
     if(folderView)

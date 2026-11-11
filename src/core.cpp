@@ -310,6 +310,7 @@ void Core::initActions() {
         connect(actionManager, move.first, this, [this, direction]() { navigateGrid(direction); });
     }
     connect(actionManager, &ActionManager::togglePlacesPanel, this, &Core::togglePlacesPanel);
+    connect(actionManager, &ActionManager::focusFolderTree, this, &Core::focusFolderTree);
 }
 
 void Core::loadTranslation() {
@@ -715,6 +716,11 @@ void Core::navigateGrid(GridNavigation direction) {
 void Core::togglePlacesPanel() {
     settings->setPlacesPanel(!settings->placesPanel());
     settings->sendChangeNotification();
+}
+
+void Core::focusFolderTree() {
+    if(mw->currentViewMode() == MODE_FOLDERVIEW)
+        mw->toggleFolderTreeFocus();
 }
 
 void Core::copyFileClipboard() {

@@ -452,6 +452,10 @@ void MW::navigateFolderGrid(GridNavigation direction) {
     folderView->navigate(direction);
 }
 
+void MW::toggleFolderTreeFocus() {
+    folderView->toggleTreeFocus();
+}
+
 void MW::zoomFolderGrid(int steps) {
     folderView->zoomThumbnails(steps);
 }

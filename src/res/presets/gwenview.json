@@ -50,6 +50,7 @@
     },
     "grid": {
         "createDirectory": ["F10"],
+        "focusFolderTree": ["$Ctrl+$Shift+E"],
         "goUp": ["Backspace"],
         "moveFile": ["M"],
         "openSelected": ["Enter", "LMB_TileDoubleClick"],

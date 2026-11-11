@@ -224,6 +224,7 @@ public slots:
     void startSearch();
     void navigateGrid(GridNavigation direction);
     void togglePlacesPanel();
+    void focusFolderTree();
     void toggleSlideshow();
     void onPlaybackFinished();
     void setFoldersDisplay(bool mode);

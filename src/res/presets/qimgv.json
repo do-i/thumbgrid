@@ -236,6 +236,9 @@
         "createDirectory": [
             "F7"
         ],
+        "focusFolderTree": [
+            "$Ctrl+$Shift+E"
+        ],
         "documentView": [
             "U"
         ],

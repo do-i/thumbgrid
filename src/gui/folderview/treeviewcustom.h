@@ -31,6 +31,10 @@ signals:
     void newFolderCommitted(const QModelIndex &parent, const QString &name);
     void middleClicked(const QModelIndex &index);
     void contextMenuRequestedAt(const QModelIndex &index, const QPoint &globalPos);
+    // F2 and Delete on the current row; Esc hands the keyboard back to the grid
+    void renameKeyPressed(const QModelIndex &index);
+    void trashKeyPressed(const QModelIndex &index);
+    void leaveRequested();
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;

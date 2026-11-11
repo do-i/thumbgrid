@@ -277,6 +277,8 @@ public slots:
     void toggleRenameOverlay(QString currentName);
     void startFolderSearch();
     void navigateFolderGrid(GridNavigation direction);
+    // keyboard focus to the folder tree, or back to the grid when the tree has it
+    void toggleFolderTreeFocus();
     void zoomFolderGrid(int steps);
     void setFilterNearest();
     void setFilterBilinear();

@@ -105,6 +105,22 @@ void TreeViewCustom::keyPressEvent(QKeyEvent* event) {
         return;
     }
     QModelIndex currentIndex = this->currentIndex();
+    if(event->key() == Qt::Key_Escape && event->modifiers() == Qt::NoModifier) {
+        event->accept();
+        emit leaveRequested();
+        return;
+    }
+    // accepted even when unused: the app's own F2 / Delete would act on the grid's selection
+    if(event->key() == Qt::Key_F2 || event->key() == Qt::Key_Delete) {
+        event->accept();
+        if(currentIndex.isValid() && event->modifiers() == Qt::NoModifier) {
+            if(event->key() == Qt::Key_F2)
+                emit renameKeyPressed(currentIndex);
+            else
+                emit trashKeyPressed(currentIndex);
+        }
+        return;
+    }
     if( (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return ) && currentIndex.isValid() ) {
         emit clicked(currentIndex);
     } else {

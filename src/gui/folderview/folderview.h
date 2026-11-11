@@ -55,6 +55,8 @@ public slots:
     // bigger (steps > 0) or smaller thumbnails
     void zoomThumbnails(int steps);
     void setSearchMatched(bool matched);
+    // keyboard focus to the tree on the current folder row, or back to the grid
+    void toggleTreeFocus();
     // stores the expanded tree folders for the next session
     void saveTreeState();
 
@@ -99,6 +101,8 @@ private slots:
     void onTreeRowsInserted(const QModelIndex &parent, int first, int last);
     void showNewFolder();
     void onTreeContextMenuRequested(const QModelIndex &index, const QPoint &globalPos);
+    void onTreeRenameKey(const QModelIndex &index);
+    void onTreeTrashKey(const QModelIndex &index);
     void toggleBookmarks();
     void toggleFilesystemView();
     void setPlacesPanel(bool mode);

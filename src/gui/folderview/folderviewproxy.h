@@ -41,6 +41,7 @@ public slots:
     void startRename(const QString& name);
     void startSearch();
     void navigate(GridNavigation direction);
+    void toggleTreeFocus();
     void zoomThumbnails(int steps);
     void setSearchMatched(bool matched);
     // stores the panel state that is only saved on close
