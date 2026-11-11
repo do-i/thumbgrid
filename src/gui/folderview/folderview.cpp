@@ -354,17 +354,30 @@ void FolderView::collapseTree() {
         ui->dirTreeView->scrollTo(current);
 }
 
+// a refused name brings the editor back with the rejected text, as in the grid
 void FolderView::onTreeRenameCommitted(const QModelIndex &index, const QString &name) {
-    emit folderOperationRequested(TreeFolderOp::Rename, dirModel->filePath(index), name);
+    const QString path = dirModel->filePath(index);
+    emit folderOperationRequested(TreeFolderOp::Rename, path, name);
+    // exact-name listing, not exists(): a case-only rename on a case-insensitive disk leaves exists() true
+    const QFileInfo old(path);
+    if(name != old.fileName() &&
+       old.dir().entryList(QDir::AllDirs | QDir::NoDotAndDotDot | QDir::Hidden | QDir::System).contains(old.fileName()))
+        ui->dirTreeView->startRename(dirModel->index(path), name);
 }
 
 // Core creates the folder; the row is picked once the watcher has made the model list it
 void FolderView::onTreeNewFolderCommitted(const QModelIndex &parent, const QString &name) {
     const QString parentPath = dirModel->filePath(parent);
-    mPendingNewFolder = QDir::cleanPath(parentPath + QLatin1Char('/') + name);
+    const QString target = QDir::cleanPath(parentPath + QLatin1Char('/') + name);
+    const bool existed = QFileInfo::exists(target);
+    mPendingNewFolder = target;
     if(!mPendingConnection)
         mPendingConnection = connect(dirModel, &QAbstractItemModel::rowsInserted, this, &FolderView::onTreeRowsInserted);
     emit folderOperationRequested(TreeFolderOp::NewFolder, parentPath, name);
+    if(existed || !QFileInfo(target).isDir()) {
+        mPendingNewFolder.clear();
+        ui->dirTreeView->startNewFolder(dirModel->index(parentPath), name);
+    }
 }
 
 void FolderView::onTreeRowsInserted(const QModelIndex &parent, int first, int last) {

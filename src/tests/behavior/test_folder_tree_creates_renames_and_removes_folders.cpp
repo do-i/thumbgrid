@@ -61,6 +61,16 @@ private:
         QTest::keyClick(editor(), Qt::Key_Return);
         QVERIFY(!editor()->isVisible());
     }
+    // a refused name: the editor comes back holding it, and Esc leaves it
+    void commitRefused(const QString &text) {
+        QVERIFY2(editor() && editor()->isVisible(), "The inline editor should be shown.");
+        editor()->setText(text);
+        QTest::keyClick(editor(), Qt::Key_Return);
+        QVERIFY2(editor()->isVisible(), qPrintable(text));
+        QCOMPARE(editor()->text(), text);
+        QTest::keyClick(editor(), Qt::Key_Escape);
+        QVERIFY(!editor()->isVisible());
+    }
     tgtest::TreeFixture mFixture;
 };
 
@@ -109,7 +119,7 @@ void FolderTreeOperationsTest::rejectedNamesLeaveTheFolderUntouched() {
     for(const QString &bad : {QString("../x"), QString("a/b"), QString("b")}) { // traversal, separator, existing sibling
         openMenuOn("keep");
         choose("menuRename");
-        commitEditor(bad);
+        commitRefused(bad);
         QVERIFY2(QDir(mFixture.path("keep")).exists(), qPrintable(bad));
         QVERIFY2(!QFileInfo::exists(outside), qPrintable(bad));
         QVERIFY2(!QDir(mFixture.path("a/b")).exists(), qPrintable(bad));
@@ -125,11 +135,14 @@ void FolderTreeOperationsTest::rejectedNamesLeaveTheFolderUntouched() {
     // new folder: a separator and an existing name create nothing
     openMenuOn("keep");
     choose("menuNewFolder");
-    commitEditor("../y");
+    commitRefused("../y");
     QVERIFY(!QFileInfo::exists(QDir(mFixture.path()).absoluteFilePath("../y")));
     openMenuOn("keep");
     choose("menuNewFolder");
-    commitEditor("a1/..");
+    commitRefused("a1/..");
+    openMenuOn("a");
+    choose("menuNewFolder");
+    commitRefused("a1");
     QVERIFY(QDir(mFixture.path("keep")).entryList(QDir::AllDirs | QDir::NoDotAndDotDot).isEmpty());
 }
 
