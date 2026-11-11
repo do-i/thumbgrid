@@ -89,7 +89,6 @@ FolderView::FolderView(QWidget *parent) :
     ui->optionsPopupButton->setToolTip(tr("Change view options"));
     ui->sortingComboBox->setToolTip(tr("Change sort order"));
     ui->zoomSlider->setToolTip(tr("Change thumbnail size"));
-    ui->newBookmarkButton->setToolTip(tr("Add bookmark"));
     ui->homeButton->setToolTip(tr("Go to home folder"));
     ui->rootButton->setToolTip(tr("Go to root folder"));
     ui->bookmarksLabel->setToolTip(tr("Show / hide bookmarks"));
@@ -119,7 +118,9 @@ FolderView::FolderView(QWidget *parent) :
 
     connect(ui->bookmarksWidget, &BookmarksWidget::bookmarkClicked, this, &FolderView::onBookmarkClicked);
 
-    connect(ui->newBookmarkButton, &IconButton::clicked, this, &FolderView::newBookmark);
+    connect(ui->newBookmarkButton, &IconButton::clicked, this, &FolderView::bookmarkCurrentFolder);
+    connect(ui->bookmarksWidget, &BookmarksWidget::bookmarksChanged, this, &FolderView::updateBookmarkButton);
+    updateBookmarkButton();
     connect(ui->homeButton, &IconButton::clicked, this, &FolderView::onHomeBtn);
     connect(ui->rootButton, &IconButton::clicked, this, &FolderView::onRootBtn);
 
@@ -511,6 +512,8 @@ void FolderView::setDirectoryPath(QString path) {
     }
     ui->pathLabel->setText(path);
     ui->bookmarksWidget->onPathChanged(path);
+    mCurrentPath = path;
+    updateBookmarkButton();
 
     // a tree click already made the row current
     const QString cleanPath = QDir::cleanPath(path);
@@ -633,7 +636,20 @@ void FolderView::onBookmarkClicked(QString dirPath) {
     emit directorySelected(std::move(dirPath));
 }
 
-void FolderView::newBookmark() {
+void FolderView::bookmarkCurrentFolder() {
+    if(!mCurrentPath.isEmpty())
+        ui->bookmarksWidget->addBookmark(QDir::cleanPath(mCurrentPath));
+}
+
+// the button bookmarks the folder you are in, so it rests once that is done
+void FolderView::updateBookmarkButton() {
+    const bool bookmarked = ui->bookmarksWidget->hasBookmark(mCurrentPath);
+    ui->newBookmarkButton->setEnabled(!mCurrentPath.isEmpty() && !bookmarked);
+    ui->newBookmarkButton->setToolTip(bookmarked ? tr("This folder is already bookmarked")
+                                                 : tr("Bookmark this folder"));
+}
+
+void FolderView::chooseBookmarkFolder() {
     QFileDialog dialog;
     dialog.setDirectory(QDir::homePath());
     dialog.setWindowTitle(tr("Select folder"));

@@ -11,6 +11,7 @@ BookmarksItem::BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent
     layout.setContentsMargins(10,6,10,6);
     setAcceptDrops(true);
     dirNameLabel.setText(dirName);
+    setToolTip(QDir::toNativeSeparators(dirPath));
 
     spacer = new QSpacerItem(16, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
 

@@ -2,7 +2,7 @@
 // Copyright (C) 2026 do-i and thumbgrid contributors
 // Part of thumbgrid, a fork of easymodo/qimgv (GPLv3).
 //
-// The bookmarks panel: labels and following the stored list.
+// The bookmarks panel: labels, following the stored list, the current-folder button, tooltips.
 
 #include "support/tree_test_fixture.h"
 
@@ -18,6 +18,8 @@ private slots:
     void theRootBookmarkHasANameAndTrailingSlashesAreIgnored();
     void bookmarksRemovedFromTheStoredListLeaveThePanel();
     void theRowOrderFollowsTheStoredListWithoutRebuildingRows();
+    void everyRowShowsItsFullPathAsTooltip();
+    void theAddButtonBookmarksTheCurrentFolderOnce();
 
 private:
     BookmarksWidget *panel() const { return mFixture.folderView()->findChild<BookmarksWidget *>(); }
@@ -81,6 +83,30 @@ void BookmarksPanelTest::theRowOrderFollowsTheStoredListWithoutRebuildingRows() 
     QCOMPARE(rows().at(1), keptA.data());
     QCOMPARE(rows().at(1), before.at(0));
     QCOMPARE(settings->bookmarks(), (QStringList{mFixture.path("c"), mFixture.path("a"), mFixture.path("b")}));
+}
+
+void BookmarksPanelTest::everyRowShowsItsFullPathAsTooltip() {
+    storeAndNotify({mFixture.path("a"), "/"});
+    for(auto *row : rows())
+        QCOMPARE(row->toolTip(), QDir::toNativeSeparators(row->path()));
+}
+
+void BookmarksPanelTest::theAddButtonBookmarksTheCurrentFolderOnce() {
+    auto *button = mFixture.folderView()->findChild<QWidget *>("newBookmarkButton");
+    QVERIFY(button != nullptr);
+    QVERIFY(mFixture.navigate("a"));
+    QTRY_VERIFY(button->isEnabled());
+    storeAndNotify({mFixture.path("b")});
+    QTRY_VERIFY(button->isEnabled());
+
+    QTest::mouseClick(button, Qt::LeftButton);
+
+    QCOMPARE(settings->bookmarks(), (QStringList{mFixture.path("b"), mFixture.path("a")}));
+    QCOMPARE(rowPaths(), settings->bookmarks());
+    QVERIFY2(!button->isEnabled(), "A bookmarked folder cannot be added again.");
+    QTest::mouseClick(button, Qt::LeftButton);
+    QCOMPARE(settings->bookmarks().count(), 2);
+    QCOMPARE(button->toolTip(), QObject::tr("This folder is already bookmarked"));
 }
 
 TG_BEHAVIOR_TEST_MAIN(BookmarksPanelTest)

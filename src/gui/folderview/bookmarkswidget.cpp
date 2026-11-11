@@ -59,10 +59,13 @@ void BookmarksWidget::readSettings() {
             layout.removeWidget(item);
         layout.insertWidget(i, item);
     }
+    const bool changed = paths != stored;
     paths = stored;
     // an empty list starts with home, as it always did
     if(storedEmpty)
         saveBookmarks();
+    if(changed)
+        emit bookmarksChanged();
 }
 
 void BookmarksWidget::saveBookmarks() {
@@ -75,6 +78,7 @@ void BookmarksWidget::addBookmark(const QString& dirPath) {
     paths.push_back(dirPath);
     layout.addWidget(createItem(dirPath));
     saveBookmarks();
+    emit bookmarksChanged();
 }
 
 bool BookmarksWidget::hasBookmark(const QString& dirPath) const {
@@ -93,6 +97,7 @@ void BookmarksWidget::removeBookmark(const QString& dirPath) {
         dropItem(item);
         paths.removeAll(dirPath);
         saveBookmarks();
+        emit bookmarksChanged();
     }
 }
 

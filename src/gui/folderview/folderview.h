@@ -108,7 +108,9 @@ private slots:
     void setPlacesPanel(bool mode);
     void onPlacesPanelButtonChecked(bool mode);
     void onBookmarkClicked(QString dirPath);
-    void newBookmark();
+    void bookmarkCurrentFolder();
+    void updateBookmarkButton();
+    void chooseBookmarkFolder();
     void fsTreeScrollToCurrent();
     void onTreeDirectoryLoaded(const QString &dirPath);
     void onTreeExpanded(const QModelIndex &index);
@@ -131,6 +133,7 @@ private:
     FVOptionsPopup *optionsPopup;
     // built on the first right-click in the tree
     TreeContextMenu *mTreeMenu = nullptr;
+    QString mCurrentPath;
     // a folder just asked for: its row is selected once the model lists it
     QString mPendingNewFolder;
     QMetaObject::Connection mPendingConnection;

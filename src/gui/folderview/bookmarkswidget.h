@@ -26,6 +26,8 @@ private slots:
 
     void saveBookmarks();
 signals:
+    // the list gained, lost or reordered rows
+    void bookmarksChanged();
     void bookmarkClicked(const QString& dirPath);
     void droppedIn(const QStringList& paths, const QString& dirPath, bool copy);
 
