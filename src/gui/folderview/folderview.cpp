@@ -294,6 +294,8 @@ void FolderView::onBookmarkMenuRequested(const QString &path, const QPoint &glob
         mBookmarkMenu = new BookmarkContextMenu(this);
         connect(mBookmarkMenu, &BookmarkContextMenu::openRequested, this, &FolderView::directorySelected);
         connect(mBookmarkMenu, &BookmarkContextMenu::newWindowRequested, this, &NewWindow::open);
+        connect(mBookmarkMenu, &BookmarkContextMenu::renameRequested, ui->bookmarksWidget,
+                &BookmarksWidget::startRename);
         connect(mBookmarkMenu, &BookmarkContextMenu::copyPathRequested, this, &FolderView::copyFolderPath);
         connect(mBookmarkMenu, &BookmarkContextMenu::removeRequested, ui->bookmarksWidget,
                 &BookmarksWidget::removeBookmark);

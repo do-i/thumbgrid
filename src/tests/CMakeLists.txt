@@ -882,7 +882,7 @@ thumbgrid_add_behavior_test(thumbgrid_bookmarks_menu_and_labels_test
     behavior/test_bookmarks_menu_and_labels.cpp
 )
 add_test(
-    NAME "The bookmarks context menu acts on the bookmark under the pointer"
+    NAME "The bookmarks context menu acts on the bookmark under the pointer and labels can be renamed"
     COMMAND thumbgrid_bookmarks_menu_and_labels_test
 )
 

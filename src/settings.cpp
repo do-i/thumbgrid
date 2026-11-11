@@ -124,7 +124,7 @@ QString settingGroupFor(const QString &key) {
         {"preset", "Shortcuts"}, {"modified", "Shortcuts"},
         // State (runtime state persisted between sessions; not part of the settings dialog)
         {"volume", "State"}, {"maximizedWindow", "State"}, {"lastDisplay", "State"},
-        {"windowGeometry", "State"}, {"savedPaths", "State"}, {"bookmarks", "State"},
+        {"windowGeometry", "State"}, {"savedPaths", "State"}, {"bookmarks", "State"}, {"bookmarkLabels", "State"},
         {"placesPanel", "State"}, {"placesPanelBookmarksExpanded", "State"},
         {"placesPanelTreeExpanded", "State"}, {"placesPanelWidth", "State"}, {"treeExpandedPaths", "State"},
         {"duplicateFinderGeometry", "State"}, {"duplicateFinderHeader", "State"},
@@ -1653,8 +1653,29 @@ void Settings::setBookmarks(const QStringList& paths) {
     settings->writeSetting("bookmarks", paths);
 }
 
+// stored as path, label, path, label, ...
+QHash<QString, QString> Settings::bookmarkLabels() {
+    const QStringList flat = settings->readSetting("bookmarkLabels").toStringList();
+    QHash<QString, QString> labels;
+    for(int i = 0; i + 1 < flat.count(); i += 2)
+        labels.insert(flat.at(i), flat.at(i + 1));
+    return labels;
+}
+
+void Settings::setBookmarkLabels(const QHash<QString, QString>& labels) {
+    if(labels.isEmpty()) {
+        settings->settingsConf->remove(groupedKey("bookmarkLabels"));
+        return;
+    }
+    QStringList flat;
+    for(auto it = labels.constBegin(); it != labels.constEnd(); ++it)
+        flat << it.key() << it.value();
+    settings->writeSetting("bookmarkLabels", flat);
+}
+
 void Settings::clearBookmarks() {
     settings->settingsConf->remove(groupedKey("bookmarks"));
+    settings->settingsConf->remove(groupedKey("bookmarkLabels"));
 }
 //------------------------------------------------------------------------------
 QStringList Settings::clearOnExitStores() {

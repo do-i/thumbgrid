@@ -38,6 +38,7 @@ StoredDataStore StoredDataCleanupTest::storeById(const QString &id) {
 void StoredDataCleanupTest::seedAllStores() {
     settings->setSavedPaths({"/photos/a", "/photos/b"});
     settings->setBookmarks({"/photos/keep"});
+    settings->setBookmarkLabels({{"/photos/keep", "Keeper"}});
     settings->setDuplicateFinderTargets({"/photos/dupes"});
     QVERIFY(tgtest::writeImage(thumbDir() + "thumb1.png", Qt::red));
     QVERIFY(tgtest::writeImage(thumbDir() + "thumb2.png", Qt::blue));
@@ -62,6 +63,7 @@ void StoredDataCleanupTest::registryClearsEachStoreExactly() {
 
     storeById("bookmarks").clear();
     QVERIFY(settings->bookmarks().isEmpty());
+    QVERIFY2(settings->bookmarkLabels().isEmpty(), "Clearing bookmarks clears their labels too.");
 
     storeById("dupeHistory").clear();
     QVERIFY(settings->duplicateFinderTargets().isEmpty());

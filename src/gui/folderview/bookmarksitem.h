@@ -8,6 +8,7 @@
 #include <QSpacerItem>
 #include <QMimeData>
 #include <QLabel>
+#include <QLineEdit>
 #include "gui/customwidgets/iconbutton.h"
 #include "gui/customwidgets/clickablelabel.h"
 #include "settings.h"
@@ -19,6 +20,10 @@ public:
     explicit BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent = nullptr);
     QString path();
     QString label() const { return dirName; }
+    void setLabel(const QString& name);
+    // inline label editor: Enter commits (empty resets the label), Esc or losing focus cancels
+    void startRename();
+    bool isRenaming() const { return mEditor && !mEditor->isHidden(); }
 
 public slots:
     void setHighlighted(bool mode);
@@ -27,6 +32,7 @@ signals:
     void clicked(const QString& dirPath);
     void removeClicked(const QString& dirPath);
     void contextMenuRequested(const QString& dirPath, const QPoint& globalPos);
+    void renameCommitted(const QString& dirPath, const QString& label);
     // copy: Ctrl was held, otherwise the files are to be moved
     void droppedIn(const QStringList& paths, const QString& dirPath, bool copy);
 
@@ -40,16 +46,19 @@ protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
     void onRemoveClicked();
 
 private:
+    void endRename(bool commit);
     QString dirName, dirPath;
 
     IconWidget folderIconWidget;
     IconButton removeItemButton;
     QLabel dirNameLabel;
+    QLineEdit *mEditor = nullptr; // built on the first rename
     QSpacerItem *spacer;
     QHBoxLayout layout;
     bool mHighlighted;

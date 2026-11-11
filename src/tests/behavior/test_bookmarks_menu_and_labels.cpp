@@ -14,6 +14,7 @@
 #include <QClipboard>
 #include <QContextMenuEvent>
 #include <QLabel>
+#include <QLineEdit>
 #include <QSignalSpy>
 
 class BookmarksMenuAndLabelsTest : public QObject {
@@ -28,6 +29,11 @@ private slots:
     void copyPathPutsTheNativePathOnTheClipboard();
     void openInNewWindowLaunchesTheBookmarkedFolder();
     void rightClickingTheHeaderOffersAddFolderAndBookmarkThisFolder();
+    void renamingFromTheMenuStoresALabelAndLeavesTheFolderAlone();
+    void aStoredLabelSurvivesARestartAndAnOldListLoadsWithDefaultLabels();
+    void escapeAndLosingFocusKeepTheOldLabelAndEmptyResetsIt();
+    void sameNamedFoldersCanBeToldApartAfterRelabelling();
+    void removingOrClearingBookmarksDropsTheirLabels();
 
 private:
     BookmarksWidget *panel() const { return mFixture.folderView()->findChild<BookmarksWidget *>(); }
@@ -60,6 +66,18 @@ private:
         QVERIFY2(entry && entry->isVisible() && entry->isEnabled(), qPrintable(itemName));
         entry->trigger();
     }
+    // starts the rename of rel through the menu; returns the open editor
+    QLineEdit *openEditor(const QString &rel) {
+        triggerOn(rel, "menuRename");
+        BookmarksItem *item = row(mFixture.path(rel));
+        return item && item->isRenaming() ? item->findChild<QLineEdit *>() : nullptr;
+    }
+    static QStringList labelsOf(BookmarksWidget *widget) {
+        QStringList list;
+        for(int i = 0; i < widget->QWidget::layout()->count(); ++i)
+            list << qobject_cast<BookmarksItem *>(widget->QWidget::layout()->itemAt(i)->widget())->label();
+        return list;
+    }
     tgtest::TreeFixture mFixture;
 };
 
@@ -73,6 +91,7 @@ void BookmarksMenuAndLabelsTest::initTestCase() {
 void BookmarksMenuAndLabelsTest::init() {
     if(menu())
         menu()->hide();
+    settings->setBookmarkLabels({});
     storeAndNotify({mFixture.path(), mFixture.path("a"), mFixture.path("b")});
 }
 
@@ -139,6 +158,79 @@ void BookmarksMenuAndLabelsTest::rightClickingTheHeaderOffersAddFolderAndBookmar
     rightClick(header);
     QVERIFY2(!menu()->findChild<ContextMenuItem *>("menuBookmarkHere")->isEnabled(),
              "A bookmarked folder cannot be added again.");
+}
+
+void BookmarksMenuAndLabelsTest::renamingFromTheMenuStoresALabelAndLeavesTheFolderAlone() {
+    QLineEdit *editor = openEditor("b");
+    QVERIFY2(editor, "Rename should open the inline editor.");
+    QCOMPARE(editor->text(), QStringLiteral("b"));
+    editor->setText("  Holiday  ");
+
+    QTest::keyClick(editor, Qt::Key_Return);
+
+    BookmarksItem *item = row(mFixture.path("b"));
+    QVERIFY(!item->isRenaming());
+    QCOMPARE(item->label(), QStringLiteral("Holiday"));
+    QCOMPARE(item->toolTip(), QDir::toNativeSeparators(mFixture.path("b")));
+    QCOMPARE(settings->bookmarkLabels().value(mFixture.path("b")), QStringLiteral("Holiday"));
+    QCOMPARE(settings->bookmarks(), (QStringList{mFixture.path(), mFixture.path("a"), mFixture.path("b")}));
+    QVERIFY2(QDir(mFixture.path("b")).exists(), "Renaming a label never touches the folder.");
+}
+
+void BookmarksMenuAndLabelsTest::aStoredLabelSurvivesARestartAndAnOldListLoadsWithDefaultLabels() {
+    QCOMPARE(labelsOf(panel()), (QStringList{QFileInfo(mFixture.path()).fileName(), "a", "b"}));
+    settings->setBookmarkLabels({{mFixture.path("a"), "Pictures"}});
+    BookmarksWidget restarted;
+    QCOMPARE(labelsOf(&restarted), (QStringList{QFileInfo(mFixture.path()).fileName(), "Pictures", "b"}));
+
+    // the path list is untouched, so an older version reads the same paths
+    QCOMPARE(settings->bookmarks(), (QStringList{mFixture.path(), mFixture.path("a"), mFixture.path("b")}));
+    settings->setBookmarkLabels({});
+    BookmarksWidget old;
+    QCOMPARE(labelsOf(&old), (QStringList{QFileInfo(mFixture.path()).fileName(), "a", "b"}));
+}
+
+void BookmarksMenuAndLabelsTest::escapeAndLosingFocusKeepTheOldLabelAndEmptyResetsIt() {
+    panel()->renameBookmark(mFixture.path("a"), "Custom");
+    QLineEdit *editor = openEditor("a");
+    QVERIFY(editor);
+    editor->setText("Changed");
+    QTest::keyClick(editor, Qt::Key_Escape);
+    QCOMPARE(row(mFixture.path("a"))->label(), QStringLiteral("Custom"));
+    QVERIFY(!row(mFixture.path("a"))->isRenaming());
+
+    editor = openEditor("a");
+    QVERIFY(editor);
+    editor->setText("Changed");
+    QFocusEvent out(QEvent::FocusOut, Qt::OtherFocusReason);
+    QApplication::sendEvent(editor, &out);
+    QCOMPARE(row(mFixture.path("a"))->label(), QStringLiteral("Custom"));
+    QVERIFY(!row(mFixture.path("a"))->isRenaming());
+
+    editor = openEditor("a");
+    QVERIFY(editor);
+    editor->clear();
+    QTest::keyClick(editor, Qt::Key_Return);
+    QCOMPARE(row(mFixture.path("a"))->label(), QStringLiteral("a"));
+    QVERIFY(settings->bookmarkLabels().isEmpty());
+}
+
+void BookmarksMenuAndLabelsTest::sameNamedFoldersCanBeToldApartAfterRelabelling() {
+    storeAndNotify({"/photos/2023/trip", "/photos/2024/trip"});
+    QCOMPARE(labelsOf(panel()), (QStringList{"trip", "trip"}));
+    panel()->renameBookmark("/photos/2024/trip", "Trip 2024");
+    QCOMPARE(labelsOf(panel()), (QStringList{"trip", "Trip 2024"}));
+}
+
+void BookmarksMenuAndLabelsTest::removingOrClearingBookmarksDropsTheirLabels() {
+    panel()->renameBookmark(mFixture.path("a"), "One");
+    panel()->renameBookmark(mFixture.path("b"), "Two");
+    panel()->removeBookmark(mFixture.path("a"));
+    QCOMPARE(settings->bookmarkLabels(), (QHash<QString, QString>{{mFixture.path("b"), "Two"}}));
+
+    settings->clearBookmarks();
+    QVERIFY(settings->bookmarks().isEmpty());
+    QVERIFY(settings->bookmarkLabels().isEmpty());
 }
 
 TG_BEHAVIOR_TEST_MAIN(BookmarksMenuAndLabelsTest)

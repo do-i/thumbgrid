@@ -17,6 +17,8 @@ BookmarkContextMenu::BookmarkContextMenu(QWidget *parent) : PopupMenuBase(parent
     addEntry(items, "menuNewWindow", tr("Open in new window"), QString(),
              [this](const QString &path) { emit newWindowRequested(path); });
     addSeparator(items);
+    addEntry(items, "menuRename", tr("Rename…"), ":/res/icons/common/overlay/edit16.png",
+             [this](const QString &path) { emit renameRequested(path); });
     addEntry(items, "menuCopyPath", tr("Copy path"), ":/res/icons/common/menuitem/copy16.png",
              [this](const QString &path) { emit copyPathRequested(path); });
     addEntry(items, "menuRemove", tr("Remove"), QString(),

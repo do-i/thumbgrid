@@ -14,10 +14,14 @@ BookmarksWidget::~BookmarksWidget() {
 }
 
 // the folder's name; the root has none, so it shows its native path ("/", "C:\\")
-QString BookmarksWidget::labelFor(const QString& dirPath) {
+QString BookmarksWidget::defaultLabel(const QString& dirPath) {
     const QString clean = QDir::cleanPath(dirPath);
     const QString name = QFileInfo(clean).fileName();
     return name.isEmpty() ? QDir::toNativeSeparators(clean.isEmpty() ? dirPath : clean) : name;
+}
+
+QString BookmarksWidget::labelFor(const QString& dirPath) const {
+    return labels.value(dirPath, defaultLabel(dirPath));
 }
 
 BookmarksItem *BookmarksWidget::itemFor(const QString& dirPath) const {
@@ -34,6 +38,7 @@ BookmarksItem *BookmarksWidget::createItem(const QString& dirPath) {
     connect(item, &BookmarksItem::clicked, this, &BookmarksWidget::bookmarkClicked);
     connect(item, &BookmarksItem::removeClicked, this, &BookmarksWidget::removeBookmark);
     connect(item, &BookmarksItem::droppedIn, this, &BookmarksWidget::droppedIn);
+    connect(item, &BookmarksItem::renameCommitted, this, &BookmarksWidget::renameBookmark);
     connect(item, &BookmarksItem::contextMenuRequested, this, &BookmarksWidget::contextMenuRequested);
     item->setHighlighted(dirPath == highlightedPath);
     return item;
@@ -45,10 +50,13 @@ void BookmarksWidget::readSettings() {
     const bool storedEmpty = stored.isEmpty();
     if(storedEmpty)
         stored << QDir::homePath();
+    labels = settings->bookmarkLabels();
     for(int i = layout.count() - 1; i >= 0; i--) {
         auto w = dynamic_cast<BookmarksItem*>(layout.itemAt(i)->widget());
         if(w && !stored.contains(w->path()))
             dropItem(w);
+        else if(w)
+            w->setLabel(labelFor(w->path()));
     }
     for(int i = 0; i < stored.count(); i++) {
         BookmarksItem *item = itemFor(stored.at(i));
@@ -97,9 +105,29 @@ void BookmarksWidget::removeBookmark(const QString& dirPath) {
     if(BookmarksItem *item = itemFor(dirPath)) {
         dropItem(item);
         paths.removeAll(dirPath);
+        if(labels.remove(dirPath))
+            settings->setBookmarkLabels(labels);
         saveBookmarks();
         emit bookmarksChanged();
     }
+}
+
+void BookmarksWidget::renameBookmark(const QString& dirPath, const QString& label) {
+    BookmarksItem *item = itemFor(dirPath);
+    if(!item)
+        return;
+    const QString text = label.trimmed();
+    if(text.isEmpty() || text == defaultLabel(dirPath))
+        labels.remove(dirPath);
+    else
+        labels.insert(dirPath, text);
+    settings->setBookmarkLabels(labels);
+    item->setLabel(labelFor(dirPath));
+}
+
+void BookmarksWidget::startRename(const QString& dirPath) {
+    if(BookmarksItem *item = itemFor(dirPath))
+        item->startRename();
 }
 
 void BookmarksWidget::onPathChanged(const QString& path) {

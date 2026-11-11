@@ -24,6 +24,7 @@ signals:
     // sent after the menu has closed
     void openRequested(const QString &path);
     void newWindowRequested(const QString &path);
+    void renameRequested(const QString &path);
     void copyPathRequested(const QString &path);
     void removeRequested(const QString &path);
     void addFolderRequested();

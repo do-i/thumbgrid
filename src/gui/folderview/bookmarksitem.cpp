@@ -66,6 +66,61 @@ void BookmarksItem::contextMenuEvent(QContextMenuEvent *event) {
     emit contextMenuRequested(dirPath, event->globalPos());
 }
 
+void BookmarksItem::setLabel(const QString& name) {
+    if(name == dirName)
+        return;
+    dirName = name;
+    dirNameLabel.setText(dirName);
+}
+
+void BookmarksItem::startRename() {
+    if(!mEditor) {
+        mEditor = new QLineEdit(this);
+        mEditor->setContextMenuPolicy(Qt::NoContextMenu);
+        const auto &cs = settings->colorScheme();
+        mEditor->setStyleSheet(QStringLiteral(
+            "QLineEdit { background: %1; color: %2; border: 1px solid %3;"
+            " border-radius: 2px; padding: 1px 3px; }")
+            .arg(cs.widget.name(), cs.text.name(), cs.accent.name()));
+        mEditor->installEventFilter(this);
+        layout.insertWidget(1, mEditor);
+    }
+    mEditor->setText(dirName);
+    mEditor->selectAll();
+    dirNameLabel.hide();
+    mEditor->show();
+    mEditor->setFocus(Qt::OtherFocusReason);
+}
+
+void BookmarksItem::endRename(bool commit) {
+    if(!isRenaming())
+        return;
+    const QString text = mEditor->text().trimmed();
+    mEditor->hide(); // after this the focus-out filter does nothing
+    dirNameLabel.show();
+    if(commit)
+        emit renameCommitted(dirPath, text);
+}
+
+bool BookmarksItem::eventFilter(QObject *watched, QEvent *event) {
+    if(mEditor && watched == mEditor) {
+        if(event->type() == QEvent::KeyPress) {
+            const int key = static_cast<QKeyEvent *>(event)->key();
+            if(key == Qt::Key_Escape) {
+                endRename(false);
+                return true;
+            }
+            if(key == Qt::Key_Return || key == Qt::Key_Enter) {
+                endRename(true);
+                return true;
+            }
+        } else if(event->type() == QEvent::FocusOut) {
+            endRename(false);
+        }
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
 void BookmarksItem::onRemoveClicked() {
     emit removeClicked(dirPath);
 }

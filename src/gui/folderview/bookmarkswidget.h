@@ -19,6 +19,9 @@ public slots:
     void addBookmark(const QString& directoryPath);
 
     void removeBookmark(const QString& dirPath);
+    // an empty label, or the folder's own name, resets to the default
+    void renameBookmark(const QString& dirPath, const QString& label);
+    void startRename(const QString& dirPath);
     bool hasBookmark(const QString& dirPath) const;
     void onPathChanged(const QString& path);
 private slots:
@@ -38,13 +41,15 @@ protected:
     void dropEvent(QDropEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
 private:
-    static QString labelFor(const QString& dirPath);
+    static QString defaultLabel(const QString& dirPath);
+    QString labelFor(const QString& dirPath) const;
     BookmarksItem *itemFor(const QString& dirPath) const;
     BookmarksItem *createItem(const QString& dirPath);
     void dropItem(BookmarksItem *item);
 
     QVBoxLayout layout;
     QStringList paths;
+    QHash<QString, QString> labels; // custom labels by path
     QString highlightedPath;
 };
 

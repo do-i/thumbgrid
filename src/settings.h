@@ -299,6 +299,9 @@ public:
 
     QStringList bookmarks();
     void setBookmarks(const QStringList& paths);
+    // custom labels by bookmark path; stored apart from the path list so older versions still read the paths
+    QHash<QString, QString> bookmarkLabels();
+    void setBookmarkLabels(const QHash<QString, QString>& labels);
     bool placesPanelBookmarksExpanded();
     void setPlacesPanelBookmarksExpanded(bool mode);
     bool placesPanelTreeExpanded();
