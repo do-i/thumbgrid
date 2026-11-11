@@ -114,42 +114,42 @@
            </property>
            <item>
             <widget class="ActionButton" name="fitWindow" native="true">
-             <property name="accessibleName">
+             <property name="styleClass" stdset="0">
               <string notr="true">ContextMenuButton</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="ActionButton" name="fitWidth" native="true">
-             <property name="accessibleName">
+             <property name="styleClass" stdset="0">
               <string notr="true">ContextMenuButton</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="ActionButton" name="fitWindowStretch" native="true">
-             <property name="accessibleName">
+             <property name="styleClass" stdset="0">
               <string notr="true">ContextMenuButton</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="ActionButton" name="zoomOriginal" native="true">
-             <property name="accessibleName">
+             <property name="styleClass" stdset="0">
               <string notr="true">ContextMenuButton</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="ActionButton" name="zoomIn" native="true">
-             <property name="accessibleName">
+             <property name="styleClass" stdset="0">
               <string notr="true">ContextMenuButton</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="ActionButton" name="zoomOut" native="true">
-             <property name="accessibleName">
+             <property name="styleClass" stdset="0">
               <string notr="true">ContextMenuButton</string>
              </property>
             </widget>
@@ -212,7 +212,7 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">HLineSeparator</string>
                  </property>
                 </widget>
@@ -264,7 +264,7 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
-                 <property name="accessibleName">
+                 <property name="styleClass" stdset="0">
                   <string notr="true">HLineSeparator</string>
                  </property>
                 </widget>
@@ -298,7 +298,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="accessibleName">
+               <property name="styleClass" stdset="0">
                 <string notr="true">ContextMenuButton</string>
                </property>
               </widget>
@@ -311,7 +311,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="accessibleName">
+               <property name="styleClass" stdset="0">
                 <string notr="true">ContextMenuButton</string>
                </property>
               </widget>
@@ -324,7 +324,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="accessibleName">
+               <property name="styleClass" stdset="0">
                 <string notr="true">ContextMenuButton</string>
                </property>
               </widget>
@@ -337,7 +337,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="accessibleName">
+               <property name="styleClass" stdset="0">
                 <string notr="true">ContextMenuButton</string>
                </property>
               </widget>
@@ -350,7 +350,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="accessibleName">
+               <property name="styleClass" stdset="0">
                 <string notr="true">ContextMenuButton</string>
                </property>
               </widget>
@@ -363,7 +363,7 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
-               <property name="accessibleName">
+               <property name="styleClass" stdset="0">
                 <string notr="true">ContextMenuButton</string>
                </property>
               </widget>
@@ -404,7 +404,7 @@
                  <height>1</height>
                 </size>
                </property>
-               <property name="accessibleName">
+               <property name="styleClass" stdset="0">
                 <string notr="true">HLineSeparator</string>
                </property>
               </widget>

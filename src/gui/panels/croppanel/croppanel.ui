@@ -209,7 +209,7 @@
           <height>1</height>
          </size>
         </property>
-        <property name="accessibleName">
+        <property name="styleClass" stdset="0">
          <string notr="true">HLineSeparator</string>
         </property>
         <property name="layoutDirection">

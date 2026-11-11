@@ -8,7 +8,7 @@ MenuItem::MenuItem(QWidget *parent)
     mLayout.setContentsMargins(6,0,8,0);
     mLayout.setSpacing(2);
 
-    setAccessibleName("MenuItem");
+    setProperty("styleClass", QStringLiteral("MenuItem"));
     this->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
     mTextLabel.setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     mShortcutLabel.setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -18,9 +18,9 @@ MenuItem::MenuItem(QWidget *parent)
 
     spacer = new QSpacerItem(3, 1, QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     mIconWidget.setAttribute(Qt::WA_TransparentForMouseEvents, true);
-    mIconWidget.setAccessibleName("MenuItemIcon");
-    mTextLabel.setAccessibleName("MenuItemText");
-    mShortcutLabel.setAccessibleName("MenuItemShortcutLabel");
+    mIconWidget.setProperty("styleClass", QStringLiteral("MenuItemIcon"));
+    mTextLabel.setProperty("styleClass", QStringLiteral("MenuItemText"));
+    mShortcutLabel.setProperty("styleClass", QStringLiteral("MenuItemShortcutLabel"));
     mLayout.addWidget(&mIconWidget);
     mLayout.addWidget(&mTextLabel);
     mLayout.addSpacerItem(spacer);

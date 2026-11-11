@@ -544,7 +544,7 @@ SidePanel QComboBox QAbstractItemView::item:selected {
     background-color: %accent_hover_rgba%;
 }
 
-[accessibleName="HLineSeparator"] {
+[styleClass="HLineSeparator"] {
     border-bottom: 1px solid %button%;
 }
 
@@ -654,11 +654,11 @@ QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoCont
 /* File copy - move window */
 /*----------------------------------------------------------------------------*/
 
-PathSelectorMenuItem [accessibleName="MenuItemIcon"] {
+PathSelectorMenuItem [styleClass="MenuItemIcon"] {
     padding: 5px;
 }
 
-PathSelectorMenuItem [accessibleName="MenuItemIcon"]:hover {
+PathSelectorMenuItem [styleClass="MenuItemIcon"]:hover {
     background-color: %accent_hover_rgba%;
 }
 
@@ -871,36 +871,36 @@ PopupMenuBase QLabel {
     padding: 0px 0px;
 }
 /*----------------------------------------------------------------------------*/
-[accessibleName="MenuItem"]:hover {
+[styleClass="MenuItem"]:hover {
     background-color: %accent_hover_rgba%;
 }
 
 /* A separate rule: grouped after a :hover selector, Qt never matches this one. */
-[accessibleName="MenuItem"][highlighted="true"] {
+[styleClass="MenuItem"][highlighted="true"] {
     background-color: %accent_hover_rgba%;
 }
 
-[accessibleName="MenuItem"] QLabel {
+[styleClass="MenuItem"] QLabel {
     padding: 6 0 7 0;
 }
 
-[accessibleName="MenuItem"] QLabel:disabled {
+[styleClass="MenuItem"] QLabel:disabled {
     color: %text_secondary_rgba%;
 }
 
-[accessibleName="MenuItemText"] {
+[styleClass="MenuItemText"] {
     color: %text_hc%;
 }
 
-[accessibleName="MenuItemShortcutLabel"] {
+[styleClass="MenuItemShortcutLabel"] {
     color: %text_secondary_rgba%;
 }
 
-[accessibleName="ContextMenuButton"] {
+[styleClass="ContextMenuButton"] {
     min-height: %context_menu_button_height%;
 }
 
-[accessibleName="ContextMenuButton"]:hover {
+[styleClass="ContextMenuButton"]:hover {
     background-color: %accent_hover_rgba%;
 }
 
@@ -1322,7 +1322,7 @@ QMessageBox QLabel {
 
 /* The "default" badge next to a system-default key in the shortcut details
    popup is a disabled QLabel - give it the same muted disabled text used for
-   other disabled labels (see [accessibleName="MenuItem"] QLabel:disabled)
+   other disabled labels (see [styleClass="MenuItem"] QLabel:disabled)
    instead of falling back to unreadable native gray. */
 QDialog#ShortcutDetailsDialog QLabel:disabled {
     color: %text_secondary_rgba%;

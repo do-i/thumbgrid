@@ -36,7 +36,7 @@ QVBoxLayout *PopupMenuBase::makeItemLayout(QWidget *page) {
 
 void PopupMenuBase::addSeparator(QVBoxLayout *layout) {
     auto *separator = new QWidget(layout->parentWidget());
-    separator->setAccessibleName("HLineSeparator");
+    separator->setProperty("styleClass", QStringLiteral("HLineSeparator"));
     separator->setFixedHeight(1);
     separator->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     auto *sepLayout = new QVBoxLayout();
