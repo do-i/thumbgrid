@@ -2,151 +2,205 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
-    <name>ChangelogWindow</name>
+    <name>BookmarkContextMenu</name>
     <message>
-        <location filename="../../gui/overlays/changelogwindow.ui" line="154"/>
-        <source>Close, never show changelogs</source>
-        <translation>关闭,从不显示更新日志</translation>
+        <location filename="../../gui/folderview/bookmarkcontextmenu.cpp" line="15"/>
+        <source>Open</source>
+        <translation type="unfinished">打开</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/changelogwindow.ui" line="170"/>
+        <location filename="../../gui/folderview/bookmarkcontextmenu.cpp" line="17"/>
+        <source>Open in new window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/bookmarkcontextmenu.cpp" line="20"/>
+        <source>Rename…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/bookmarkcontextmenu.cpp" line="22"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/bookmarkcontextmenu.cpp" line="24"/>
+        <source>Remove</source>
+        <translation type="unfinished">删除</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/bookmarkcontextmenu.cpp" line="31"/>
+        <source>Add folder…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/bookmarkcontextmenu.cpp" line="32"/>
+        <source>Bookmark this folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>ChangelogWindow</name>
+    <message>
+        <source>Close, never show changelogs</source>
+        <translation type="vanished">关闭,从不显示更新日志</translation>
+    </message>
+    <message>
         <source>Close</source>
-        <translation>关闭</translation>
+        <translation type="vanished">关闭</translation>
     </message>
 </context>
 <context>
     <name>ColorSelectorButton</name>
     <message>
-        <location filename="../../gui/customwidgets/colorselectorbutton.cpp" line="49"/>
         <source>OK</source>
-        <translation type="unfinished">确认</translation>
+        <translation type="obsolete">确认</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/colorselectorbutton.cpp" line="50"/>
         <source>Cancel</source>
-        <translation type="unfinished">取消</translation>
+        <translation type="obsolete">取消</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/colorselectorbutton.cpp" line="51"/>
         <source>Apply</source>
-        <translation type="unfinished">应用</translation>
+        <translation type="obsolete">应用</translation>
     </message>
 </context>
 <context>
     <name>ContextMenu</name>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="58"/>
+        <location filename="../../gui/contextmenu.cpp" line="53"/>
         <source>Print</source>
         <translation>打印</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="62"/>
         <source>Quick copy</source>
-        <translation>快速拷贝</translation>
+        <translation type="vanished">快速拷贝</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="66"/>
         <source>Quick move</source>
-        <translation>快速移动</translation>
+        <translation type="vanished">快速移动</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="70"/>
+        <location filename="../../gui/contextmenu.cpp" line="65"/>
         <source>Move to trash</source>
         <translation>移到回收站</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="75"/>
+        <location filename="../../gui/contextmenu.cpp" line="70"/>
         <source>Open</source>
         <translation>打开</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="80"/>
         <source>Folder View</source>
-        <translation>文件夹视图</translation>
+        <translation type="vanished">文件夹视图</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="85"/>
+        <location filename="../../gui/contextmenu.cpp" line="80"/>
         <source>Settings</source>
         <translation>设置</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="88"/>
         <source>Open with...</source>
-        <translation>打开方式...</translation>
+        <translation type="vanished">打开方式...</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="94"/>
+        <location filename="../../gui/contextmenu.cpp" line="57"/>
+        <source>Copy to…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="61"/>
+        <source>Move to…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="75"/>
+        <source>Grid</source>
+        <translation type="unfinished">网格</translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="83"/>
+        <source>Open with</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="89"/>
         <source>Show in folder</source>
         <translation>在文件管理器中显示</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="98"/>
+        <location filename="../../gui/contextmenu.cpp" line="93"/>
         <source>Copy path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="102"/>
+        <location filename="../../gui/contextmenu.cpp" line="97"/>
         <source>File info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="175"/>
+        <location filename="../../gui/contextmenu.cpp" line="102"/>
+        <source>Find duplicates…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/contextmenu.cpp" line="170"/>
         <source>Zoom in</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="176"/>
+        <location filename="../../gui/contextmenu.cpp" line="171"/>
         <source>Zoom out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="177"/>
+        <location filename="../../gui/contextmenu.cpp" line="172"/>
         <source>Original size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="178"/>
+        <location filename="../../gui/contextmenu.cpp" line="173"/>
         <source>Fit width</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="179"/>
+        <location filename="../../gui/contextmenu.cpp" line="174"/>
         <source>Fit window</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="180"/>
+        <location filename="../../gui/contextmenu.cpp" line="175"/>
         <source>Fit window (stretch)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="181"/>
+        <location filename="../../gui/contextmenu.cpp" line="176"/>
         <source>Rotate left</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="182"/>
+        <location filename="../../gui/contextmenu.cpp" line="177"/>
         <source>Rotate right</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="183"/>
+        <location filename="../../gui/contextmenu.cpp" line="178"/>
         <source>Flip horizontally</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="184"/>
+        <location filename="../../gui/contextmenu.cpp" line="179"/>
         <source>Flip vertically</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="185"/>
+        <location filename="../../gui/contextmenu.cpp" line="180"/>
         <source>Crop</source>
         <translation type="unfinished">裁剪</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="186"/>
-        <source>Resize...</source>
+        <location filename="../../gui/contextmenu.cpp" line="181"/>
+        <source>Resize…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -158,17 +212,12 @@
         <translation type="vanished">移除元数据</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="109"/>
-        <source>Find duplicates...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/contextmenu.cpp" line="117"/>
+        <location filename="../../gui/contextmenu.cpp" line="110"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
     <message>
-        <location filename="../../gui/contextmenu.cpp" line="120"/>
+        <location filename="../../gui/contextmenu.cpp" line="113"/>
         <source>Configure menu</source>
         <translation>配置菜单</translation>
     </message>
@@ -181,61 +230,57 @@
 <context>
     <name>CopyOverlay</name>
     <message>
-        <location filename="../../gui/overlays/copyoverlay.cpp" line="14"/>
-        <location filename="../../gui/overlays/copyoverlay.cpp" line="50"/>
         <source>Copy to...</source>
-        <translation>拷贝到...</translation>
+        <translation type="vanished">拷贝到...</translation>
+    </message>
+    <message>
+        <source>Move to...</source>
+        <translation type="vanished">移动到...</translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/copyoverlay.cpp" line="15"/>
+        <location filename="../../gui/overlays/copyoverlay.cpp" line="50"/>
+        <source>Copy to</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/overlays/copyoverlay.cpp" line="53"/>
-        <source>Move to...</source>
-        <translation>移动到...</translation>
+        <source>Move to</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>Core</name>
     <message>
-        <location filename="../../core.cpp" line="297"/>
         <source>Updated: </source>
-        <translation>更新到: </translation>
+        <translation type="vanished">更新到: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="302"/>
         <source>Welcome to </source>
-        <translation>欢迎使用 </translation>
+        <translation type="vanished">欢迎使用 </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="302"/>
         <source> version </source>
-        <translation> 版本 </translation>
+        <translation type="vanished"> 版本 </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="309"/>
         <source>Shuffle mode: OFF</source>
-        <translation>随机模式: 关闭</translation>
+        <translation type="vanished">随机模式: 关闭</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="312"/>
         <source>Shuffle mode: ON</source>
-        <translation>随机模式: 启用</translation>
+        <translation type="vanished">随机模式: 启用</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="321"/>
         <source>Slideshow: OFF</source>
-        <translation>幻灯片播放：关闭</translation>
+        <translation type="vanished">幻灯片播放：关闭</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="327"/>
         <source>Slideshow: ON</source>
-        <translation>幻灯片播放：启用</translation>
+        <translation type="vanished">幻灯片播放：启用</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="344"/>
-        <source>Directory is empty.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../core.cpp" line="403"/>
+        <location filename="../../core.cpp" line="448"/>
         <source>Cannot display this file type</source>
         <translation>无法显示此文件类型</translation>
     </message>
@@ -300,175 +345,266 @@
         <translation type="vanished">无法删除</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="462"/>
+        <location filename="../../core.cpp" line="352"/>
+        <source>Updated: %1 &gt; %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="357"/>
+        <source>Welcome to ThumbGrid %1!</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="364"/>
+        <source>Shuffle mode: off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="367"/>
+        <source>Shuffle mode: on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="376"/>
+        <source>Slideshow: off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="382"/>
+        <source>Slideshow: on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="392"/>
+        <source>Folder is empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="501"/>
         <source>Cannot strip metadata from this file type</source>
         <translation>无法从此文件类型中移除元数据</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="467"/>
+        <location filename="../../core.cpp" line="505"/>
         <source>Clear metadata</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="468"/>
+        <location filename="../../core.cpp" line="506"/>
         <source>Permanently remove all metadata from &quot;%1&quot;?
 This rewrites the file and cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="480"/>
+        <location filename="../../core.cpp" line="515"/>
         <source>Metadata removed</source>
         <translation>元数据已移除</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="482"/>
+        <location filename="../../core.cpp" line="517"/>
         <source>Could not remove metadata</source>
         <translation>无法移除元数据</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="493"/>
+        <location filename="../../core.cpp" line="524"/>
         <source>Remove all Exif</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="494"/>
+        <location filename="../../core.cpp" line="525"/>
         <source>Permanently remove every Exif tag from &quot;%1&quot;?
 XMP and the colour profile are not affected.
 This rewrites the file and cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="497"/>
+        <location filename="../../core.cpp" line="528"/>
         <source>Exif removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="497"/>
+        <location filename="../../core.cpp" line="528"/>
         <source>Could not remove Exif</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="502"/>
+        <location filename="../../core.cpp" line="533"/>
         <source>Remove all XMP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="503"/>
+        <location filename="../../core.cpp" line="534"/>
         <source>Permanently remove every XMP property from &quot;%1&quot;?
 Exif and the colour profile are not affected.
 This rewrites the file and cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="506"/>
+        <location filename="../../core.cpp" line="537"/>
         <source>XMP removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="506"/>
+        <location filename="../../core.cpp" line="537"/>
         <source>Could not remove XMP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="511"/>
+        <location filename="../../core.cpp" line="542"/>
         <source>Remove colour profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="512"/>
+        <location filename="../../core.cpp" line="543"/>
         <source>Permanently remove the embedded colour profile from &quot;%1&quot;?
 Exif and XMP are not affected, but the image may be displayed with different colours afterwards.
 This rewrites the file and cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="516"/>
+        <location filename="../../core.cpp" line="547"/>
         <source>Colour profile removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="517"/>
+        <location filename="../../core.cpp" line="548"/>
         <source>Could not remove the colour profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="534"/>
+        <location filename="../../core.cpp" line="561"/>
         <source>Cannot remove metadata from this file type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="559"/>
+        <location filename="../../core.cpp" line="583"/>
         <source>Could not save XMP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="565"/>
+        <location filename="../../core.cpp" line="589"/>
         <source>XMP saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="592"/>
+        <location filename="../../core.cpp" line="613"/>
         <source>Could not save property</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="598"/>
+        <location filename="../../core.cpp" line="619"/>
         <source>Property saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="608"/>
+        <location filename="../../core.cpp" line="628"/>
         <source>Could not remove property</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="614"/>
+        <location filename="../../core.cpp" line="634"/>
         <source>Property removed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="626"/>
+        <location filename="../../core.cpp" line="643"/>
         <source>Could not save metadata</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="637"/>
+        <location filename="../../core.cpp" line="651"/>
         <source>Metadata saved</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="700"/>
+        <location filename="../../core.cpp" line="738"/>
         <source>File copied</source>
         <translation>文件已拷贝</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="731"/>
+        <location filename="../../core.cpp" line="767"/>
         <source>%1 items cut</source>
         <translation>已剪切 %1 个项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="731"/>
+        <location filename="../../core.cpp" line="767"/>
         <source>Item cut</source>
         <translation>已剪切项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="733"/>
+        <location filename="../../core.cpp" line="769"/>
         <source>%1 items copied</source>
         <translation>已复制 %1 个项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="733"/>
+        <location filename="../../core.cpp" line="769"/>
         <source>Item copied</source>
         <translation>已复制项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="789"/>
+        <location filename="../../core.cpp" line="819"/>
         <source>Nothing to paste</source>
         <translation>没有可粘贴的内容</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1196"/>
+        <location filename="../../core.cpp" line="1180"/>
+        <source>Move to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1240"/>
         <source>Nothing to resize</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1493"/>
+        <location filename="../../core.cpp" line="1494"/>
+        <source>New folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1506"/>
+        <source>Folder name cannot contain path separators</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1532"/>
+        <source>Set wallpaper: file not supported</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1598"/>
+        <source>Cannot view root folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1606"/>
+        <source>Could not open path: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1645"/>
+        <source>Could not load folder: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1697"/>
+        <source>Already at root folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1867"/>
+        <source>End of folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1913"/>
+        <source>Cannot display file: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../core.cpp" line="1956"/>
+        <source>Could not load image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -476,42 +612,42 @@ This rewrites the file and cannot be undone.</source>
         <translation type="vanished">移动</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="799"/>
+        <location filename="../../core.cpp" line="829"/>
         <source>%1 items moved</source>
         <translation>已移动 %1 个项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="799"/>
+        <location filename="../../core.cpp" line="829"/>
         <source>Item moved</source>
         <translation>已移动项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="807"/>
+        <location filename="../../core.cpp" line="834"/>
         <source>%1 items pasted</source>
         <translation>已粘贴 %1 个项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="807"/>
+        <location filename="../../core.cpp" line="834"/>
         <source>Item pasted</source>
         <translation>已粘贴项目</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="823"/>
+        <location filename="../../core.cpp" line="849"/>
         <source>Path copied</source>
         <translation>目录已拷贝</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="823"/>
+        <location filename="../../core.cpp" line="849"/>
         <source>%1 paths copied</source>
         <translation>已复制 %1 个路径</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1009"/>
+        <location filename="../../core.cpp" line="1064"/>
         <source>File exists</source>
         <translation>文件已经存在</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1009"/>
+        <location filename="../../core.cpp" line="1064"/>
         <source>Overwrite file?</source>
         <translation>覆盖文件吗?</translation>
     </message>
@@ -572,9 +708,8 @@ Continue?</source>
         <translation type="vanished">文件已拷贝.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1131"/>
         <source>Move to...</source>
-        <translation type="unfinished">移动到...</translation>
+        <translation type="obsolete">移动到...</translation>
     </message>
     <message>
         <source>Perform action &quot;</source>
@@ -605,90 +740,80 @@ Continue?</source>
         <translation type="vanished">裁剪</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1293"/>
+        <location filename="../../core.cpp" line="1343"/>
         <source>File saved</source>
         <translation>文件已保存</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1296"/>
+        <location filename="../../core.cpp" line="1333"/>
         <source>Could not save file</source>
         <translation>不能保存文件</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1432"/>
-        <location filename="../../core.cpp" line="1433"/>
         <source>New Folder</source>
-        <translation>新建文件夹</translation>
+        <translation type="vanished">新建文件夹</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1432"/>
+        <location filename="../../core.cpp" line="1493"/>
         <source>Folder name:</source>
         <translation>文件夹名称：</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1440"/>
         <source>Folder name cannot contain path separators.</source>
-        <translation>文件夹名称不能包含路径分隔符。</translation>
+        <translation type="vanished">文件夹名称不能包含路径分隔符。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1474"/>
+        <location filename="../../core.cpp" line="1547"/>
         <source>Could not open image</source>
         <translation>不能打开图片</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1478"/>
+        <location filename="../../core.cpp" line="1551"/>
         <source>Can only print static images</source>
         <translation>只能打印静态图片</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1526"/>
         <source>Cannot view root folder.</source>
-        <translation>无法查看根文件夹。</translation>
+        <translation type="vanished">无法查看根文件夹。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1534"/>
         <source>Could not open path: </source>
-        <translation>不能打开的路径: </translation>
+        <translation type="vanished">不能打开的路径: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1574"/>
         <source>Could not load folder: </source>
-        <translation>不能载入的目录: </translation>
+        <translation type="vanished">不能载入的目录: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1632"/>
         <source>Already at root folder.</source>
-        <translation>已在根文件夹。</translation>
+        <translation type="vanished">已在根文件夹。</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1799"/>
         <source>End of directory.</source>
-        <translation>目录末尾.</translation>
+        <translation type="vanished">目录末尾.</translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1849"/>
         <source>Cannot display file: </source>
-        <translation>无法显示文件：</translation>
+        <translation type="vanished">无法显示文件：</translation>
     </message>
     <message>
         <source>Load failed: </source>
         <translation type="vanished">加载失败: </translation>
     </message>
     <message>
-        <location filename="../../core.cpp" line="1892"/>
         <source>Error: could not load image.</source>
-        <translation>错误: 不能载入图片.</translation>
+        <translation type="vanished">错误: 不能载入图片.</translation>
     </message>
 </context>
 <context>
     <name>CropPanel</name>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="107"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="104"/>
         <source>Selection</source>
         <translation>选择</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="125"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="122"/>
         <source>Width</source>
         <translation>宽度</translation>
     </message>
@@ -698,52 +823,64 @@ Continue?</source>
         <translation>高度</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="322"/>
         <source>Aspect Ratio</source>
-        <translation>纵横比例</translation>
+        <translation type="vanished">纵横比例</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="336"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="339"/>
         <source>Free</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="341"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="344"/>
         <source>Custom</source>
         <translation>定制比例</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="346"/>
         <source>Current Image</source>
-        <translation>当前图片</translation>
+        <translation type="vanished">当前图片</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="351"/>
         <source>This Screen</source>
-        <translation>此屏幕</translation>
+        <translation type="vanished">此屏幕</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="356"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="325"/>
+        <source>Aspect ratio</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="349"/>
+        <source>Current image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="354"/>
+        <source>This screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="359"/>
         <source>1:1</source>
         <translation>1:1</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="361"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="364"/>
         <source>4:3</source>
         <translation>4:3</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="366"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="369"/>
         <source>16:9</source>
         <translation>16:9</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="371"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="374"/>
         <source>16:10</source>
         <translation>16:10</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="499"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="505"/>
         <source>Crop</source>
         <translation>裁剪</translation>
     </message>
@@ -752,7 +889,7 @@ Continue?</source>
         <translation type="vanished">裁剪并保存</translation>
     </message>
     <message>
-        <location filename="../../gui/panels/croppanel/croppanel.ui" line="514"/>
+        <location filename="../../gui/panels/croppanel/croppanel.ui" line="520"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -760,12 +897,12 @@ Continue?</source>
 <context>
     <name>CustomMessageBox</name>
     <message>
-        <location filename="../../gui/dialogs/custommessagebox.cpp" line="111"/>
+        <location filename="../../gui/dialogs/custommessagebox.cpp" line="110"/>
         <source>OK</source>
         <translation type="unfinished">确认</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/custommessagebox.cpp" line="112"/>
+        <location filename="../../gui/dialogs/custommessagebox.cpp" line="111"/>
         <source>Cancel</source>
         <translation type="unfinished">取消</translation>
     </message>
@@ -786,293 +923,325 @@ Continue?</source>
 <context>
     <name>DuplicateFinderDialog</name>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="91"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="470"/>
-        <source>Find Duplicates</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="147"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="154"/>
         <source>Mode:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="148"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="155"/>
         <source>One image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="150"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="157"/>
         <source>Compare folders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="152"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="159"/>
         <source>Within folders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="177"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="184"/>
         <source>Image:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="180"/>
-        <source>Browse...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="183"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="190"/>
         <source>Select image</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="193"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="200"/>
         <source>Source folders (reference):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="198"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="377"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="205"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="423"/>
         <source>Search in:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="205"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="212"/>
         <source>Include subfolders</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="209"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="216"/>
         <source>Similarity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="225"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="232"/>
         <source>Match rotated</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="226"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="233"/>
         <source>Match mirrored</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="236"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="511"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="243"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="574"/>
         <source>Start</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="240"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="247"/>
         <source>Clear</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="247"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="258"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="254"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="265"/>
         <source>Idle</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="267"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="274"/>
         <source>Filter:</source>
         <translation type="unfinished">过滤器:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="269"/>
-        <source>name or path...</source>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="540"/>
+        <source>Scanning…</source>
         <translation type="unfinished"></translation>
     </message>
+    <message numerus="yes">
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="634"/>
+        <source>Could not move %n file(s) to trash:</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="271"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="279"/>
         <source>Min similarity:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="316"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="325"/>
         <source>Preview</source>
         <translation type="unfinished">预览</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="330"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="339"/>
         <source>Reference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="331"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="340"/>
         <source>Match</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="337"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="346"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="441"/>
         <source>Smart select</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="342"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="392"/>
+        <source>Move selected…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="395"/>
+        <source>Move selected to trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="414"/>
+        <source>Select all in target folders</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="415"/>
         <source>Select all matches</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="343"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="372"/>
         <source>Keep largest resolution</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="344"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="97"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="533"/>
+        <source>Find duplicates</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="187"/>
+        <source>Browse…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="277"/>
+        <source>Name or path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="373"/>
         <source>Keep largest file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="345"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="374"/>
         <source>Keep newest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="346"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="375"/>
         <source>Keep oldest</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="348"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="377"/>
         <source>Clear selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="352"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="389"/>
         <source>0 selected</source>
         <translation type="unfinished"></translation>
     </message>
-    <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="355"/>
-        <source>Move selected...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="358"/>
-        <source>Delete selected...</source>
-        <translation type="unfinished"></translation>
-    </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="367"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="405"/>
         <source>%n selected</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="381"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="416"/>
+        <source>Select all in source folders</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="417"/>
+        <source>Select all references</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="427"/>
         <source>Target folders (searched for copies of the sources):</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="384"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="430"/>
         <source>Folders to dedupe:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="446"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="509"/>
         <source>Select an image to search for.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="448"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="511"/>
         <source>Add at least one source folder.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="450"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="513"/>
         <source>Add at least one folder to search in.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="477"/>
-        <source>Scanning...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="478"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="541"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="651"/>
         <source>Cancel</source>
         <translation type="unfinished">取消</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="486"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="549"/>
         <source>%1 files · %2 hashed · %3 matches</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="517"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="580"/>
         <source>Cancelled</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="519"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="582"/>
         <source>Done · %n match(es)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="546"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="607"/>
+        <source>Every copy is selected in %n group(s); no copy of those images will remain.</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="617"/>
         <source>Move %n file(s) to trash?</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="548"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="560"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="636"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="621"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="633"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="716"/>
         <source>Move to trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="558"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="631"/>
         <source>Moved %n file(s) to trash</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
-    <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="561"/>
-        <source>Could not trash %n file(s):</source>
-        <translation type="unfinished">
-            <numerusform></numerusform>
-        </translation>
-    </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="575"/>
-        <source>Move duplicates to...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="589"/>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="623"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="650"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="667"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="673"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="704"/>
         <source>Move duplicates</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="589"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="651"/>
+        <source>Move…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="653"/>
+        <source>Move duplicates to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="667"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="673"/>
         <source>Could not create %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="621"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="702"/>
         <source>Moved %n file(s) to %1</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="624"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="705"/>
         <source>Could not move %n file(s):</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="634"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="715"/>
         <source>Open</source>
         <translation type="unfinished">打开</translation>
     </message>
@@ -1080,39 +1249,39 @@ Continue?</source>
 <context>
     <name>DuplicateResultsModel</name>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="233"/>
+        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="235"/>
         <source>%n match(es)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="266"/>
+        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="268"/>
         <source>100% (exact)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="322"/>
+        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="314"/>
         <source>Similarity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="323"/>
+        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="315"/>
         <source>Dimensions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="324"/>
+        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="316"/>
         <source>File size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="325"/>
+        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="317"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="326"/>
+        <location filename="../../gui/dialogs/duplicateresultsmodel.cpp" line="318"/>
         <source>Path</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1120,7 +1289,7 @@ Continue?</source>
 <context>
     <name>EntryInfoItem</name>
     <message>
-        <location filename="../../gui/customwidgets/entryinfoitem.cpp" line="248"/>
+        <location filename="../../gui/customwidgets/entryinfoitem.cpp" line="242"/>
         <source>Copy</source>
         <translation type="unfinished">复制</translation>
     </message>
@@ -1141,28 +1310,33 @@ Continue?</source>
 <context>
     <name>FileInfoDialog</name>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="86"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="76"/>
         <source>File info</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="98"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="86"/>
         <source>No selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="108"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="96"/>
         <source>General</source>
         <translation type="unfinished">常规</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="121"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="116"/>
         <source>No metadata</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="133"/>
-        <source>EXIF</source>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="127"/>
+        <source>Show all tags</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="137"/>
+        <source>Exif</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1171,199 +1345,199 @@ Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="160"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="159"/>
         <source>XMP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="172"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="170"/>
         <source>No ICC profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="177"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="175"/>
         <source>ICC</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="197"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="191"/>
         <source>Remove all Exif</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="198"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="192"/>
         <source>Permanently remove every Exif tag from this file. XMP and the colour profile are not affected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="200"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="194"/>
         <source>Remove all XMP</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="201"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="195"/>
         <source>Permanently remove every XMP property from this file. Exif and the colour profile are not affected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="203"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="197"/>
         <source>Remove colour profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="204"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="198"/>
         <source>Permanently remove the embedded ICC colour profile. Exif and XMP are not affected.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="221"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="213"/>
         <source>Remove properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="414"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="375"/>
         <source>Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="416"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="377"/>
         <source>Symlink to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="425"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="445"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="384"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="401"/>
         <source>Permissions</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="427"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="447"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="386"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="403"/>
         <source>Owner</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="435"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="393"/>
         <source>Contains</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="436"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="394"/>
         <source>%n file(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="437"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="395"/>
         <source>%n folder(s)</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="438"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="449"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="396"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="405"/>
         <source>Modified</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="444"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="400"/>
         <source>Size</source>
         <translation type="unfinished">大小</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="448"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="404"/>
         <source>Created</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="513"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="450"/>
         <source>Showing %1 of %2 tags</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="574"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="518"/>
         <source>Pick a date and time</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="614"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="551"/>
         <source>Date/Time must look like 2026:07:26 10:30:00.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="683"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="609"/>
         <source>Standard properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="696"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="621"/>
         <source>Custom properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="710"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="633"/>
         <source>This file already holds the maximum of %1 custom properties.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="715"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="638"/>
         <source>Showing %1 of %2 properties.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="717"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="640"/>
         <source>%1 metadata is shown read-only; ThumbGrid does not write XMP into %1 files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="720"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="643"/>
         <source>This file is read-only, so its XMP cannot be edited.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="750"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="670"/>
         <source>One per line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="774"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="691"/>
         <source>Namespace URI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="821"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="732"/>
         <source>A property needs a key, for example Xmp.dc.title.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="836"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="743"/>
         <source>&quot;%1&quot; is a standard property - edit it in the field above.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="837"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="744"/>
         <source>&quot;%1&quot; belongs to a standard schema, so it cannot be edited here.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="849"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="754"/>
         <source>A key looks like Xmp.prefix.Name.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="855"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="760"/>
         <source>&quot;%1&quot; is a new namespace prefix, so it needs a namespace URI.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="967"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="864"/>
         <source>(unknown)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="968"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="865"/>
         <source>%1 (broken link)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1371,138 +1545,201 @@ Continue?</source>
 <context>
     <name>FileOperationsController</name>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="109"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="95"/>
         <source>Copy</source>
         <translation type="unfinished">复制</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="120"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="108"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="312"/>
+        <source>A move is already running</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="111"/>
         <source>Move</source>
         <translation type="unfinished">移动</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="137"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="128"/>
         <source>%1 &quot;%2&quot; to &quot;%3&quot;?</source>
         <translation type="unfinished">将 &quot;%2&quot; %1 到 &quot;%3&quot;？</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="139"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="130"/>
         <source>%1 %2 items to &quot;%3&quot;?</source>
         <translation type="unfinished">将 %2 个项目 %1 到 &quot;%3&quot;？</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="246"/>
         <source>Could not create directory </source>
-        <translation type="unfinished">不能建立该目录 </translation>
+        <translation type="obsolete">不能建立该目录 </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="275"/>
         <source>File moved.</source>
-        <translation type="unfinished">文件已移动.</translation>
+        <translation type="obsolete">文件已移动.</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="275"/>
         <source>File copied.</source>
-        <translation type="unfinished">文件已拷贝.</translation>
+        <translation type="obsolete">文件已拷贝.</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="277"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="472"/>
         <source>File exists</source>
         <translation type="unfinished">文件已经存在</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="277"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="472"/>
         <source>Destination file exists. Overwrite?</source>
         <translation type="unfinished">目标文件已经存在. 覆盖吗?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="290"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="485"/>
         <source>Cannot move to trash</source>
         <translation type="unfinished">无法移动到回收站</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="290"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="485"/>
         <source>Cannot delete</source>
         <translation type="unfinished">无法删除</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="307"/>
         <source>Move </source>
-        <translation type="unfinished">移动 </translation>
+        <translation type="obsolete">移动 </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="307"/>
         <source> items to trash?</source>
-        <translation type="unfinished"> 个项目到回收站?</translation>
+        <translation type="obsolete"> 个项目到回收站?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="308"/>
         <source>Move item to trash?</source>
-        <translation type="unfinished">确认删除到回收站?</translation>
+        <translation type="obsolete">确认删除到回收站?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="310"/>
         <source>Delete </source>
-        <translation type="unfinished">永久删除 </translation>
+        <translation type="obsolete">永久删除 </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="310"/>
         <source> items permanently?</source>
-        <translation type="unfinished"> 个项目?</translation>
+        <translation type="obsolete"> 个项目?</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="311"/>
         <source>Delete item permanently?</source>
-        <translation type="unfinished">是否永久删除它们？</translation>
+        <translation type="obsolete">是否永久删除它们？</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="312"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="505"/>
         <source>Move to trash</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="312"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="505"/>
         <source>Delete permanently</source>
         <translation type="unfinished">永久删除</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="331"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="522"/>
         <source>Moved to trash</source>
         <translation type="unfinished">删除到回收站</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="331"/>
         <source>File removed</source>
-        <translation type="unfinished">文件已删除</translation>
+        <translation type="obsolete">文件已删除</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="336"/>
         <source>Moved to trash: </source>
-        <translation type="unfinished">移动到回收站： </translation>
+        <translation type="obsolete">移动到回收站： </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="336"/>
-        <location filename="../../components/fileoperationscontroller.cpp" line="338"/>
         <source> files</source>
-        <translation type="unfinished"> 个文件</translation>
+        <translation type="obsolete"> 个文件</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="338"/>
         <source>Removed: </source>
-        <translation type="unfinished">成功删除: </translation>
+        <translation type="obsolete">成功删除: </translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="397"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="282"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="403"/>
+        <source>Could not create folder %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="449"/>
+        <source>Move cancelled - what was not moved yet is still in the source</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="451"/>
+        <source>Moved %1 of %2 item(s), %3 error(s)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="453"/>
+        <source>Moved %1 of %2 item(s), skipped files left in place</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../components/fileoperationscontroller.cpp" line="455"/>
+        <source>Moved %n item(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="470"/>
+        <source>File moved</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="470"/>
+        <source>File copied</source>
+        <translation type="unfinished">文件已拷贝</translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../components/fileoperationscontroller.cpp" line="502"/>
+        <source>Move %n item(s) to trash?</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../components/fileoperationscontroller.cpp" line="504"/>
+        <source>Delete %n item(s) permanently?</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="522"/>
+        <source>Deleted</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../components/fileoperationscontroller.cpp" line="527"/>
+        <source>Moved %n file(s) to trash</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location filename="../../components/fileoperationscontroller.cpp" line="529"/>
+        <source>Deleted %n file(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location filename="../../components/fileoperationscontroller.cpp" line="582"/>
         <source>Nothing to convert</source>
         <translation type="unfinished">没有可转换的内容</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="400"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="585"/>
         <source>Convert</source>
         <translation type="unfinished">转换</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="401"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="586"/>
         <source>Some files already exist and will be overwritten.
 
 Continue?</source>
@@ -1511,52 +1748,52 @@ Continue?</source>
 是否继续？</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="424"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="607"/>
         <source>Converted %1 file(s)</source>
         <translation type="unfinished">已转换 %1 个文件</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="426"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="609"/>
         <source>Converted %1, failed %2</source>
         <translation type="unfinished">已转换 %1 个，失败 %2 个</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="428"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="611"/>
         <source>Could not convert file(s)</source>
         <translation type="unfinished">无法转换文件</translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="457"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="638"/>
         <source>A resize is already running</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="462"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="643"/>
         <source>Nothing to resize</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="479"/>
-        <source>Resizing %1 images...</source>
+        <location filename="../../components/fileoperationscontroller.cpp" line="660"/>
+        <source>Resizing %1 images…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="500"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="681"/>
         <source>Resized %1 file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="502"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="683"/>
         <source>Resized %1, skipped %2, failed %3</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="504"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="685"/>
         <source>Could not resize file(s)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/fileoperationscontroller.cpp" line="506"/>
+        <location filename="../../components/fileoperationscontroller.cpp" line="687"/>
         <source>Nothing to resize - images are not larger than the target</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1605,18 +1842,70 @@ Continue?</source>
     </message>
     <message>
         <location filename="../../gui/dialogs/filereplacedialog.ui" line="118"/>
-        <source>Yes</source>
-        <translation>是</translation>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="43"/>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="51"/>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="55"/>
+        <source>Replace</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/filereplacedialog.ui" line="125"/>
+        <source>Skip</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Yes</source>
+        <translation type="vanished">是</translation>
+    </message>
+    <message>
         <source>No</source>
-        <translation>否</translation>
+        <translation type="vanished">否</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/filereplacedialog.ui" line="132"/>
         <source>Cancel</source>
         <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="41"/>
+        <source>File already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="42"/>
+        <source>Replace destination file?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="45"/>
+        <source>Folder already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="46"/>
+        <source>Merge folders?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="47"/>
+        <source>Merge</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="49"/>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="53"/>
+        <source>Destination already exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="50"/>
+        <source>There is a file with that name. Replace?</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/filereplacedialog.cpp" line="54"/>
+        <source>There is a folder with that name. Replace?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1632,65 +1921,82 @@ Continue?</source>
         <translation>[路径]</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/folderview.ui" line="195"/>
-        <source>FolderViewSlider</source>
-        <translation>FolderViewSlider</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/folderview.ui" line="242"/>
-        <source>CheckableButton</source>
-        <translation>CheckableButton</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/folderview.ui" line="274"/>
-        <source>PanelComboBox</source>
-        <translation>PanelComboBox</translation>
-    </message>
-    <message>
         <location filename="../../gui/folderview/folderview.ui" line="281"/>
-        <source>A - Z</source>
-        <translation>A - Z</translation>
+        <source>Name A–Z</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/folderview/folderview.ui" line="286"/>
-        <source>Z - A</source>
-        <translation>Z - A</translation>
+        <source>Name Z–A</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/folderview/folderview.ui" line="291"/>
-        <source>Size</source>
-        <translation>大小</translation>
+        <source>Smallest first</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/folderview/folderview.ui" line="296"/>
-        <source>Size (desc)</source>
-        <translation>大小 (降序)</translation>
+        <source>Largest first</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/folderview/folderview.ui" line="301"/>
-        <source>Oldest</source>
-        <translation>最旧</translation>
+        <source>Oldest first</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/folderview/folderview.ui" line="306"/>
+        <source>Newest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>FolderViewSlider</source>
+        <translation type="vanished">FolderViewSlider</translation>
+    </message>
+    <message>
+        <source>CheckableButton</source>
+        <translation type="vanished">CheckableButton</translation>
+    </message>
+    <message>
+        <source>PanelComboBox</source>
+        <translation type="vanished">PanelComboBox</translation>
+    </message>
+    <message>
+        <source>A - Z</source>
+        <translation type="vanished">A - Z</translation>
+    </message>
+    <message>
+        <source>Z - A</source>
+        <translation type="vanished">Z - A</translation>
+    </message>
+    <message>
+        <source>Size</source>
+        <translation type="vanished">大小</translation>
+    </message>
+    <message>
+        <source>Size (desc)</source>
+        <translation type="vanished">大小 (降序)</translation>
+    </message>
+    <message>
+        <source>Oldest</source>
+        <translation type="vanished">最旧</translation>
+    </message>
+    <message>
         <source>Newest</source>
-        <translation>最新</translation>
+        <translation type="vanished">最新</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/folderview.ui" line="348"/>
-        <location filename="../../gui/folderview/folderview.ui" line="373"/>
         <source>PanelButton</source>
-        <translation>PanelButton</translation>
+        <translation type="vanished">PanelButton</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/folderview.ui" line="414"/>
         <source>PanelButtonRE</source>
-        <translation>PanelButtonRE</translation>
+        <translation type="vanished">PanelButtonRE</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/folderview.ui" line="476"/>
         <source>PlacesPanel</source>
-        <translation>PlacesPanel</translation>
+        <translation type="vanished">PlacesPanel</translation>
     </message>
     <message>
         <location filename="../../gui/folderview/folderview.ui" line="532"/>
@@ -1698,92 +2004,185 @@ Continue?</source>
         <translation>书签</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/folderview.ui" line="551"/>
-        <location filename="../../gui/folderview/folderview.ui" line="638"/>
-        <location filename="../../gui/folderview/folderview.ui" line="657"/>
         <source>PlacesPanelButton</source>
-        <translation>PlacesPanelButton</translation>
+        <translation type="vanished">PlacesPanelButton</translation>
     </message>
     <message>
         <location filename="../../gui/folderview/folderview.ui" line="611"/>
         <source>FILESYSTEM</source>
         <translation>文件系统</translation>
     </message>
-</context>
-<context>
-    <name>GridContextMenu</name>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="30"/>
-        <source>Convert to...</source>
-        <translation>转换为...</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="37"/>
-        <source>Resize...</source>
+        <location filename="../../gui/folderview/folderview.cpp" line="81"/>
+        <source>Go to parent folder</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="42"/>
-        <source>Rename...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="47"/>
-        <source>Copy path</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="52"/>
-        <source>File info</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="57"/>
-        <source>Move to...</source>
-        <translation type="unfinished">移动到...</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="62"/>
-        <source>Move to trash</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="67"/>
-        <source>Find duplicates...</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="75"/>
-        <source>Delete permanently</source>
-        <translation type="unfinished">永久删除</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="87"/>
-        <source>Start slideshow</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="93"/>
-        <source>Header title bar</source>
-        <translation>标题栏</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="97"/>
-        <source>Left side panel</source>
-        <translation>左侧面板</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="101"/>
-        <source>Bottom status bar</source>
-        <translation>底部状态栏</translation>
-    </message>
-    <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="108"/>
+        <location filename="../../gui/folderview/folderview.cpp" line="82"/>
         <source>Settings</source>
         <translation type="unfinished">设置</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="120"/>
+        <location filename="../../gui/folderview/folderview.cpp" line="83"/>
+        <source>Exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="84"/>
+        <source>Show document view</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="85"/>
+        <source>Show / hide places panel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="86"/>
+        <source>Change view options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="87"/>
+        <source>Change sort order</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="88"/>
+        <source>Change thumbnail size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="89"/>
+        <source>Go to home folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="90"/>
+        <source>Go to root folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="91"/>
+        <source>Show / hide bookmarks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="92"/>
+        <source>Show / hide folder tree</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="266"/>
+        <source>New folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="686"/>
+        <source>This folder is already bookmarked</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="687"/>
+        <source>Bookmark this folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/folderview.cpp" line="693"/>
+        <source>Select folder</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>FullscreenInfoOverlay</name>
+    <message>
+        <location filename="../../gui/overlays/fullscreeninfooverlay.cpp" line="12"/>
+        <source>No file opened</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>GridContextMenu</name>
+    <message>
+        <source>Convert to...</source>
+        <translation type="vanished">转换为...</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="36"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="41"/>
+        <source>File info</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Move to...</source>
+        <translation type="obsolete">移动到...</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="51"/>
+        <source>Move to trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="19"/>
+        <source>Convert to</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="26"/>
+        <source>Resize…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="31"/>
+        <source>Rename…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="46"/>
+        <source>Move to…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="56"/>
+        <source>Find duplicates…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="64"/>
+        <source>Delete permanently</source>
+        <translation type="unfinished">永久删除</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="73"/>
+        <source>Start slideshow</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="79"/>
+        <source>Header title bar</source>
+        <translation>标题栏</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="83"/>
+        <source>Left side panel</source>
+        <translation>左侧面板</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="87"/>
+        <source>Bottom status bar</source>
+        <translation>底部状态栏</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="94"/>
+        <source>Settings</source>
+        <translation type="unfinished">设置</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/gridcontextmenu.cpp" line="104"/>
         <source>Back</source>
         <translation>返回</translation>
     </message>
@@ -1800,52 +2199,268 @@ Continue?</source>
     </message>
 </context>
 <context>
+    <name>InfoBar</name>
+    <message>
+        <location filename="../../gui/panels/infobar/infobar.cpp" line="12"/>
+        <source>No file opened.</source>
+        <translation type="unfinished">没有文件被打开.</translation>
+    </message>
+</context>
+<context>
     <name>KeySequenceEdit</name>
     <message>
-        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="4"/>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="6"/>
         <source>[Enter sequence]</source>
         <translation>[输入序列]</translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="75"/>
+        <source>Mouse gestures</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="78"/>
+        <source>Clicks in the picture&apos;s left and right edges (with clickable edges on), drags, and double-clicks on a grid thumbnail</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="81"/>
+        <source>Left edge click</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="82"/>
+        <source>Right edge click</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="84"/>
+        <source>Left drag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="85"/>
+        <source>Right drag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="86"/>
+        <source>Middle drag</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/customwidgets/keysequenceedit.cpp" line="88"/>
+        <source>Thumbnail double-click</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>MW</name>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="683"/>
         <source>Save File as...</source>
-        <translation>文件另存为...</translation>
+        <translation type="vanished">文件另存为...</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="1009"/>
         <source>Folder view</source>
-        <translation>文件夹视图</translation>
+        <translation type="vanished">文件夹视图</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="966"/>
-        <location filename="../../gui/mainwindow.cpp" line="1010"/>
-        <location filename="../../gui/mainwindow.cpp" line="1014"/>
-        <location filename="../../gui/mainwindow.cpp" line="1015"/>
+        <location filename="../../gui/mainwindow.cpp" line="222"/>
+        <location filename="../../gui/mainwindow.cpp" line="232"/>
+        <location filename="../../gui/mainwindow.cpp" line="242"/>
+        <location filename="../../gui/mainwindow.cpp" line="252"/>
+        <source>Zoom temporarily disabled</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="386"/>
+        <source>Sorting: Name A–Z</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="387"/>
+        <source>Sorting: Name Z–A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="388"/>
+        <source>Sorting: Oldest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="389"/>
+        <source>Sorting: Newest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="390"/>
+        <source>Sorting: Smallest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="391"/>
+        <source>Sorting: Largest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="406"/>
+        <source>Zoom lock: on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="408"/>
+        <source>Zoom lock: off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="415"/>
+        <source>View lock: on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="417"/>
+        <source>View lock: off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="480"/>
+        <source>Filter: nearest</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="485"/>
+        <source>Filter: bilinear</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="493"/>
+        <source>nearest</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="496"/>
+        <source>smooth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="499"/>
+        <source>high quality</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="502"/>
+        <source>configured %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="505"/>
+        <source>Filter: %1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="685"/>
+        <source>Save as</source>
+        <translation type="unfinished">另存为</translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="695"/>
+        <source>All files (*)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="698"/>
+        <source>Open image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="947"/>
+        <location filename="../../gui/mainwindow.cpp" line="990"/>
+        <location filename="../../gui/mainwindow.cpp" line="993"/>
+        <location filename="../../gui/mainwindow.cpp" line="994"/>
         <source>No file opened.</source>
         <translation>没有文件被打开.</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="83"/>
+        <location filename="../../gui/mainwindow.cpp" line="989"/>
+        <source>Grid</source>
+        <translation type="unfinished">网格</translation>
+    </message>
+    <message>
+        <location filename="../../gui/mainwindow.cpp" line="95"/>
         <source>Crop</source>
         <translation type="unfinished">裁剪</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="1073"/>
         <source>Fit Window</source>
-        <translation>适配窗口</translation>
+        <translation type="vanished">适配窗口</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="1077"/>
         <source>Fit Width</source>
-        <translation>适应宽度</translation>
+        <translation type="vanished">适应宽度</translation>
     </message>
     <message>
-        <location filename="../../gui/mainwindow.cpp" line="1081"/>
         <source>Fit 1:1</source>
-        <translation>适应 1:1</translation>
+        <translation type="vanished">适应 1:1</translation>
+    </message>
+</context>
+<context>
+    <name>MainPanel</name>
+    <message>
+        <location filename="../../gui/panels/mainpanel/mainpanel.cpp" line="23"/>
+        <source>Open file…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/panels/mainpanel/mainpanel.cpp" line="24"/>
+        <source>Settings</source>
+        <translation type="unfinished">设置</translation>
+    </message>
+    <message>
+        <location filename="../../gui/panels/mainpanel/mainpanel.cpp" line="25"/>
+        <source>Exit</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/panels/mainpanel/mainpanel.cpp" line="26"/>
+        <source>Show grid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/panels/mainpanel/mainpanel.cpp" line="27"/>
+        <source>Pin panel</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>MoveProgressOverlay</name>
+    <message>
+        <location filename="../../gui/overlays/moveprogressoverlay.cpp" line="10"/>
+        <location filename="../../gui/overlays/moveprogressoverlay.cpp" line="45"/>
+        <source>Cancel</source>
+        <translation type="unfinished">取消</translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/moveprogressoverlay.cpp" line="54"/>
+        <source>Moving…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/moveprogressoverlay.cpp" line="57"/>
+        <source>Moving %1 / %2 files</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/moveprogressoverlay.cpp" line="67"/>
+        <source>Cancelling after the current file…</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>PathSelectorMenuItem</name>
+    <message>
+        <location filename="../../gui/customwidgets/pathselectormenuitem.cpp" line="14"/>
+        <source>Select folder</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1887,18 +2502,30 @@ Continue?</source>
     </message>
     <message>
         <location filename="../../gui/dialogs/printdialog.ui" line="348"/>
-        <source>Color mode:</source>
-        <translation>颜色:</translation>
+        <source>Colour mode:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/printdialog.ui" line="374"/>
-        <source>Grayscale</source>
-        <translation>黑白</translation>
+        <source>Greyscale</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/printdialog.ui" line="384"/>
+        <source>Colour</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Color mode:</source>
+        <translation type="vanished">颜色:</translation>
+    </message>
+    <message>
+        <source>Grayscale</source>
+        <translation type="vanished">黑白</translation>
+    </message>
+    <message>
         <source>Color</source>
-        <translation>参数</translation>
+        <translation type="vanished">参数</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/printdialog.ui" line="409"/>
@@ -1921,7 +2548,7 @@ Continue?</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/printdialog.cpp" line="72"/>
+        <location filename="../../gui/dialogs/printdialog.cpp" line="73"/>
         <source>Choose pdf location</source>
         <translation>选择pdf文件所在位置</translation>
     </message>
@@ -1929,277 +2556,276 @@ Continue?</source>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="13"/>
+        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="14"/>
         <source>Simple</source>
         <translation>简易</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="14"/>
+        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="15"/>
         <source>Extended</source>
         <translation>扩展</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="15"/>
         <source>Extended + Folders</source>
-        <translation>扩展 + 文件夹</translation>
+        <translation type="vanished">扩展 + 文件夹</translation>
     </message>
     <message>
         <location filename="../../gui/folderview/fvoptionspopup.cpp" line="16"/>
+        <source>Extended + folders</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="17"/>
         <source>Show descriptions</source>
         <translation>显示描述</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="17"/>
+        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="18"/>
         <source>Fit folder previews</source>
         <translation>适应文件夹预览</translation>
     </message>
     <message>
-        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="18"/>
+        <location filename="../../gui/folderview/fvoptionspopup.cpp" line="19"/>
         <source>Show other file types</source>
         <translation>显示其他文件类型</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="289"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="555"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="501"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="266"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="517"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="441"/>
         <source>Make</source>
         <translation>相机制造商</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="293"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="557"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="501"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="270"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="519"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="441"/>
         <source>Model</source>
         <translation>相机型号</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="297"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="559"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="502"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="274"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="521"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="442"/>
         <source>Date/Time</source>
         <translation>拍摄日期</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="304"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="307"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="281"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="284"/>
         <source>ExposureTime</source>
         <translation>曝光时间</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="304"/>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="307"/>
         <source> sec</source>
-        <translation> 秒</translation>
+        <translation type="vanished"> 秒</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="315"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="292"/>
         <source>F Number</source>
         <translation>光圈值</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="320"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="297"/>
         <source>ISO Speed ratings</source>
         <translation>ISO速度</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="324"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="301"/>
         <source>Flash</source>
         <translation>闪光灯</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="330"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="307"/>
         <source>Focal Length</source>
         <translation>焦距</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="330"/>
         <source> mm</source>
-        <translation> 毫米</translation>
+        <translation type="vanished"> 毫米</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="339"/>
-        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="502"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="281"/>
+        <source>1/%1 sec</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="284"/>
+        <source>%1 sec</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="307"/>
+        <source>%1 mm</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="316"/>
+        <location filename="../../gui/dialogs/fileinfodialog.cpp" line="442"/>
         <source>UserComment</source>
         <translation>注释</translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="505"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="467"/>
         <source>Profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="506"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="468"/>
         <source>Primaries</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="507"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="469"/>
         <source>Transfer function</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="508"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="470"/>
         <source>Profile size</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="509"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="471"/>
         <source>%1 bytes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="561"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="523"/>
         <source>Comment</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="684"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="639"/>
         <source>Title</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="685"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="640"/>
         <source>Description</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="686"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="641"/>
         <source>Author</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="687"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="642"/>
         <source>Copyright</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="688"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="643"/>
         <source>Keywords</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="689"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="644"/>
         <source>Rating</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../sourcecontainers/documentinfo.cpp" line="690"/>
+        <location filename="../../sourcecontainers/documentinfo.cpp" line="645"/>
         <source>Label</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="90"/>
-        <source>Operation completed succesfully.</source>
-        <translatorcomment>操作成功完成.</translatorcomment>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../../utils/fileoperations.cpp" line="92"/>
         <source>Destination file exists.</source>
-        <translation>目标文件已经存在.</translation>
+        <translation type="vanished">目标文件已经存在.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="94"/>
         <source>Destination directory exists.</source>
-        <translation>目标目录已经存在.</translation>
+        <translation type="vanished">目标目录已经存在.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="96"/>
         <source>Source file is not writable.</source>
-        <translation>源文件不可写.</translation>
+        <translation type="vanished">源文件不可写.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="98"/>
         <source>Destination is not writable.</source>
-        <translation>目标位置不可写.</translation>
+        <translation type="vanished">目标位置不可写.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="100"/>
         <source>Source file does not exist.</source>
-        <translation>源文件不存在.</translation>
+        <translation type="vanished">源文件不存在.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="102"/>
         <source>Destination does not exist.</source>
-        <translation>目标位置不存在.</translation>
+        <translation type="vanished">目标位置不存在.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="104"/>
         <source>Directory is not empty.</source>
-        <translation>目录不为空.</translation>
+        <translation type="vanished">目录不为空.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="106"/>
         <source>Containing directory is not writable.</source>
-        <translation>所在目录不可写。</translation>
+        <translation type="vanished">所在目录不可写。</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="108"/>
         <source>Nothing to do.</source>
-        <translation>没什么可做的.</translation>
+        <translation type="vanished">没什么可做的.</translation>
     </message>
     <message>
-        <location filename="../../utils/fileoperations.cpp" line="110"/>
-        <source>Invalid name. Enter a file name without slashes, and not &quot;.&quot; or &quot;..&quot;.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../utils/fileoperations.cpp" line="112"/>
-        <source>Cannot copy or move a folder into itself.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../utils/fileoperations.cpp" line="114"/>
         <source>Other error.</source>
-        <translation>其它错误.</translation>
+        <translation type="vanished">其它错误.</translation>
     </message>
     <message>
-        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="393"/>
+        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="394"/>
         <source>Text file</source>
         <translation>文本文件</translation>
     </message>
     <message>
-        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="393"/>
-        <source> file</source>
-        <translation> 个文件</translation>
+        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="394"/>
+        <source>%1 file</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="395"/>
+        <source> file</source>
+        <translation type="vanished"> 个文件</translation>
+    </message>
+    <message>
+        <location filename="../../components/thumbnailer/thumbnailerrunnable.cpp" line="396"/>
         <source>Unknown format</source>
         <translation>未知格式</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1203"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1248"/>
         <source>Global</source>
         <translation type="unfinished">全局</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1204"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1250"/>
+        <source>Copy / Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1251"/>
         <source>Grid</source>
         <translation type="unfinished">网格</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1204"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1251"/>
         <source>Document</source>
         <translation type="unfinished">文档</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1209"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1256"/>
         <source>%1  (script)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="71"/>
-        <source>Add...</source>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="77"/>
+        <source>Add…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="72"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="78"/>
         <source>Remove</source>
         <translation type="unfinished">删除</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="78"/>
+        <location filename="../../gui/dialogs/duplicatefinderdialog.cpp" line="84"/>
         <source>Select folder</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2212,20 +2838,96 @@ Continue?</source>
         <translation type="obsolete">否</translation>
     </message>
     <message>
+        <location filename="../../gui/dialogs/dialogbuttonrow.cpp" line="23"/>
         <source>OK</source>
-        <translation type="obsolete">确认</translation>
+        <translation type="unfinished">确认</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/dialogbuttonrow.cpp" line="24"/>
+        <source>Cancel</source>
+        <translation type="unfinished">取消</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/dialogbuttonrow.cpp" line="25"/>
+        <source>Apply</source>
+        <translation type="unfinished">应用</translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="85"/>
+        <source>Done</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="87"/>
+        <source>Destination file exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="89"/>
+        <source>Destination folder exists</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="91"/>
+        <source>Source file is not writable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="93"/>
+        <source>Destination is not writable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="95"/>
+        <source>Source file does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="97"/>
+        <source>Destination does not exist</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="99"/>
+        <source>Folder is not empty</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="101"/>
+        <source>Containing folder is not writable</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="103"/>
+        <source>Nothing to do</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="105"/>
+        <source>Invalid name. Enter a file name without slashes, and not &quot;.&quot; or &quot;..&quot;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="107"/>
+        <source>Cannot copy or move a folder into itself</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../utils/fileoperations.cpp" line="109"/>
+        <source>Other error</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>RenameOverlay</name>
     <message>
         <location filename="../../gui/overlays/renameoverlay.ui" line="171"/>
-        <location filename="../../gui/overlays/renameoverlay.ui" line="260"/>
+        <location filename="../../gui/overlays/renameoverlay.ui" line="257"/>
         <source>Rename</source>
         <translation>重命名</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/renameoverlay.ui" line="273"/>
+        <location filename="../../gui/overlays/renameoverlay.ui" line="270"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
@@ -2238,14 +2940,12 @@ Continue?</source>
         <translation>调整大小</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="63"/>
         <source>By Percent:</source>
-        <translation>按百分比:</translation>
+        <translation type="vanished">按百分比:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="79"/>
         <source>By Absolute Size:</source>
-        <translation>按绝对尺寸：</translation>
+        <translation type="vanished">按绝对尺寸：</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/resizedialog.ui" line="98"/>
@@ -2258,12 +2958,12 @@ Continue?</source>
         <translation>宽度:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="205"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="211"/>
         <source>Height:</source>
         <translation>高度:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="275"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="284"/>
         <source>Keep aspect ratio</source>
         <translation>保持纵横比例</translation>
     </message>
@@ -2272,182 +2972,180 @@ Continue?</source>
         <translation type="vanished">过滤器:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="304"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="63"/>
+        <source>By percent:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="79"/>
+        <source>By absolute size:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="313"/>
         <source>Quality:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="330"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="339"/>
         <source>Nearest</source>
         <translation>Nearest</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="335"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="344"/>
         <source>Bilinear</source>
         <translation>Bilinear</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="340"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="349"/>
         <source>Bicubic</source>
         <translation>Bicubic</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="345"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="354"/>
         <source>Lanczos3</source>
         <translation>Lanczos3</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="358"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="367"/>
         <source>Common sizes:</source>
         <translation>正常尺寸:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="392"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="401"/>
         <source>Select:</source>
         <translation>选择:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="397"/>
         <source>1366 x 768</source>
-        <translation>1366 x 768</translation>
+        <translation type="vanished">1366 x 768</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="402"/>
         <source>1440 x 900</source>
-        <translation>1440 x 900</translation>
+        <translation type="vanished">1440 x 900</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="407"/>
         <source>1440 x 1050</source>
-        <translation>1440 x 1050</translation>
+        <translation type="vanished">1440 x 1050</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="412"/>
         <source>1600 x 1200</source>
-        <translation>1600 x 1200</translation>
+        <translation type="vanished">1600 x 1200</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="417"/>
         <source>1920 x 1080 (FullHD)</source>
-        <translation>1920 x 1080 (FullHD)</translation>
+        <translation type="vanished">1920 x 1080 (FullHD)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="422"/>
         <source>1920 x 1200 (FullHD)</source>
-        <translation>1920 x 1200 (FullHD)</translation>
+        <translation type="vanished">1920 x 1200 (FullHD)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="427"/>
         <source>2560 x 1080</source>
-        <translation>2560 x 1080</translation>
+        <translation type="vanished">2560 x 1080</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="432"/>
         <source>2560 x 1440</source>
-        <translation>2560 x 1440</translation>
+        <translation type="vanished">2560 x 1440</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="437"/>
         <source>2560 x 1600</source>
-        <translation>2560 x 1600</translation>
+        <translation type="vanished">2560 x 1600</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="442"/>
         <source>3840 x 1600 (UW 4K)</source>
-        <translation>3840 x 1600 (UW 4K)</translation>
+        <translation type="vanished">3840 x 1600 (UW 4K)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="447"/>
         <source>3840 x 2160 (UHD-1)</source>
-        <translation>3840 x 2160 (UHD-1)</translation>
+        <translation type="vanished">3840 x 2160 (UHD-1)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="470"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="424"/>
         <source>Fit to desktop</source>
         <translation>适合桌面</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="489"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="443"/>
         <source>Fill desktop (expanding)</source>
         <translation>填充桌面（扩展）</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="508"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="462"/>
         <source>Reset</source>
         <translation>重置</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="575"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="529"/>
         <source>OK</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.ui" line="594"/>
+        <location filename="../../gui/dialogs/resizedialog.ui" line="548"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="19"/>
         <source>Reset:</source>
-        <translation>重置:</translation>
+        <translation type="vanished">重置:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="26"/>
-        <source>By Long Edge:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="29"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="76"/>
         <source>Long edge:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="39"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="86"/>
         <source>Only shrink (skip images already smaller)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="87"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="135"/>
         <source>Fastest (nearest)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="88"/>
-        <source>Standard (bilinear)</source>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="69"/>
+        <source>Reset: %1 x %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="90"/>
-        <source>Standard, sharpened (bilinear)</source>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="73"/>
+        <source>By long edge:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="91"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="136"/>
+        <source>Standard (smooth)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="137"/>
         <source>High (bicubic)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="92"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="138"/>
         <source>High, sharpened (bicubic)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="94"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="139"/>
         <source>How pixels are resampled. Higher quality is slower; sharpened keeps fine detail crisp when shrinking.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="159"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="191"/>
         <source>Resize %1 images (saves copies)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="160"/>
-        <source>Fit Within:</source>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="192"/>
+        <source>Fit within:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/resizedialog.cpp" line="169"/>
+        <location filename="../../gui/dialogs/resizedialog.cpp" line="201"/>
         <source>Resize (saves a copy)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2455,12 +3153,12 @@ Continue?</source>
 <context>
     <name>SSideBar</name>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="11"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="12"/>
         <source>General</source>
         <translation>常规</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="12"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="13"/>
         <source>Theme</source>
         <translation>主题</translation>
     </message>
@@ -2469,37 +3167,37 @@ Continue?</source>
         <translation type="obsolete">控制中心</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="13"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="14"/>
         <source>Shortcuts</source>
         <translation>快捷键</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="14"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="15"/>
         <source>Grid</source>
         <translation>网格</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="15"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="16"/>
         <source>Document</source>
         <translation>文档</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="16"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="17"/>
         <source>Scripts</source>
         <translation>脚本</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="17"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="18"/>
         <source>Advanced</source>
         <translation>高级</translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="18"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="19"/>
         <source>Stored data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/customwidgets/ssidebar.cpp" line="19"/>
+        <location filename="../../gui/customwidgets/ssidebar.cpp" line="20"/>
         <source>About</source>
         <translation>关于</translation>
     </message>
@@ -2507,91 +3205,140 @@ Continue?</source>
 <context>
     <name>SaveConfirmOverlay</name>
     <message>
-        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="81"/>
         <source>Unsaved edits</source>
-        <translation>未保存的编辑</translation>
+        <translation type="vanished">未保存的编辑</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="127"/>
+        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="48"/>
+        <source>Saving…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="64"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="140"/>
-        <source>Save as</source>
-        <translation>另存为</translation>
+        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="77"/>
+        <source>Save as…</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="169"/>
+        <location filename="../../gui/overlays/saveconfirmoverlay.ui" line="90"/>
+        <source>Undo all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Save as</source>
+        <translation type="vanished">另存为</translation>
+    </message>
+    <message>
         <source>Discard</source>
-        <translation>放弃</translation>
+        <translation type="vanished">放弃</translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/saveconfirmoverlay.cpp" line="24"/>
+        <source>Fold back to the icon</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/saveconfirmoverlay.cpp" line="63"/>
+        <source>Overwrite the file with the edits</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/saveconfirmoverlay.cpp" line="64"/>
+        <source>Save the edits to a new file</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/saveconfirmoverlay.cpp" line="65"/>
+        <source>Undo every edit: back to the file on disk</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/saveconfirmoverlay.cpp" line="95"/>
+        <source>Hide save options</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/saveconfirmoverlay.cpp" line="96"/>
+        <source>Unsaved edits: click for save options</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>ScriptEditorDialog</name>
+    <message>
+        <location filename="../../gui/dialogs/scripteditordialog.ui" line="14"/>
+        <source>New script</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <location filename="../../gui/dialogs/scripteditordialog.ui" line="48"/>
         <source>Command:</source>
         <translation>命令:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.ui" line="84"/>
+        <location filename="../../gui/dialogs/scripteditordialog.ui" line="83"/>
         <source>NOTE: make sure your .sh script has execute flag.</source>
         <translation>注意: 确认你的 .sh 脚本具有可执行权限.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.ui" line="91"/>
+        <location filename="../../gui/dialogs/scripteditordialog.ui" line="90"/>
         <source>Name:</source>
         <translation>名称:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.ui" line="148"/>
+        <location filename="../../gui/dialogs/scripteditordialog.ui" line="136"/>
         <source>Wait to finish</source>
         <translation>等待完成</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.ui" line="218"/>
+        <location filename="../../gui/dialogs/scripteditordialog.ui" line="203"/>
         <source>Create</source>
         <translation>创建</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.ui" line="225"/>
+        <location filename="../../gui/dialogs/scripteditordialog.ui" line="210"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="14"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="13"/>
         <source>Keywords:</source>
         <translation>关键字:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="13"/>
         <source>New application/script</source>
-        <translation>新建应用程序/脚本</translation>
+        <translation type="vanished">新建应用程序/脚本</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="34"/>
         <source>Edit</source>
-        <translation>编辑</translation>
+        <translation type="vanished">编辑</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="67"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="29"/>
+        <source>Edit script</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="58"/>
         <source>Enter script name</source>
         <translation>输入脚本名</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="79"/>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="86"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="70"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="77"/>
         <source>A script with this same name exists</source>
         <translation>存在同名的脚本</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="99"/>
         <source>Select an executable/script</source>
-        <translation>选择可执行文件/脚本</translation>
+        <translation type="vanished">选择可执行文件/脚本</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="101"/>
+        <location filename="../../gui/dialogs/scripteditordialog.cpp" line="89"/>
         <source>Select a script file</source>
         <translation>选择一个脚本文件</translation>
     </message>
@@ -2599,245 +3346,235 @@ Continue?</source>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="47"/>
         <source>Preferences</source>
-        <translation>首选项</translation>
+        <translation type="vanished">首选项</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="53"/>
         <source>SettingsDialog</source>
-        <translation>SettingsDialog</translation>
+        <translation type="vanished">SettingsDialog</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="342"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="329"/>
         <source>General</source>
         <translation>常规</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4016"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4184"/>
         <source>Controls</source>
         <translation>控制中心</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4452"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4649"/>
         <source>Scripts</source>
         <translation>脚本</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4619"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4820"/>
         <source>Advanced</source>
         <translation>高级</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="418"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="405"/>
         <source>Language:</source>
         <translation>语言：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="476"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="463"/>
         <source>Open in fullscreen</source>
         <translation>打开时全屏</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="483"/>
         <source>Start in folder view by default</source>
-        <translation>默认在文件夹视图中启动</translation>
+        <translation type="vanished">默认在文件夹视图中启动</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="695"/>
         <source>Auto-hide cursor</source>
-        <translation>自动隐藏鼠标</translation>
+        <translation type="vanished">自动隐藏鼠标</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2105"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2248"/>
         <source>Image fit:</source>
         <translation>图像匹配:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2122"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2265"/>
         <source>Stretch to width</source>
         <translation>拉伸到宽度</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2129"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2272"/>
         <source>1:1</source>
         <translation>1:1</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2112"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2255"/>
         <source>Fit in window</source>
         <translation>自适应窗口</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1335"/>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2196"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1465"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2339"/>
         <source>Top</source>
         <translation>顶部</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2203"/>
         <source>Center</source>
-        <translation>中间</translation>
+        <translation type="vanished">中间</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2210"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2353"/>
         <source>At cursor</source>
         <translation>光标处</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2189"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2332"/>
         <source>Focus in 1:1 mode:</source>
         <translation>以1:1模式聚焦:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="933"/>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2372"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1063"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2515"/>
         <source>xx</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1709"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1839"/>
         <source>Video playback</source>
         <translation>视频播放</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1751"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1881"/>
         <source>Play sounds</source>
         <translation>播放声音</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1031"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1161"/>
         <source>Thumbnail panel</source>
         <translation>缩略图面板</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1327"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1457"/>
         <source>Position:</source>
         <translation>位置:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1340"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1470"/>
         <source>Bottom</source>
         <translation>底部</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1195"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1325"/>
         <source>Display style:</source>
         <translation>显示样式:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1228"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1358"/>
         <source>Simple</source>
         <translation>简易</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1178"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1308"/>
         <source>Extended</source>
         <translation>扩展</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1443"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1573"/>
         <source>Folder navigation</source>
         <translation>文件夹导航</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1562"/>
         <source>A - Z</source>
-        <translation>A - Z</translation>
+        <translation type="vanished">A - Z</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1567"/>
         <source>Z - A</source>
-        <translation>Z - A</translation>
+        <translation type="vanished">Z - A</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1572"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="472"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="526"/>
         <source>Size</source>
         <translation>大小</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1577"/>
         <source>Size (desc)</source>
-        <translation>大小 (降序)</translation>
+        <translation type="vanished">大小 (降序)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1582"/>
         <source>Oldest</source>
-        <translation>最旧</translation>
+        <translation type="vanished">最旧</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1587"/>
         <source>Newest</source>
-        <translation>最新</translation>
+        <translation type="vanished">最新</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1545"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1675"/>
         <source>Default sorting mode:</source>
         <translation>标准排序模式:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1842"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1982"/>
         <source>Slideshow</source>
         <translation>幻灯片</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1925"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2068"/>
         <source>Loop slideshow</source>
         <translation>循环幻灯片放映</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1862"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2002"/>
         <source>Switch interval:</source>
         <translation>切换间隔:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1893"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="741"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2036"/>
         <source>ms</source>
         <translation>毫秒</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="665"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="652"/>
         <source>Image info in window title</source>
         <translation>窗口标题上显示图像信息</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="712"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="772"/>
         <source>Fullscreen info bar</source>
         <translation>全屏信息栏</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="725"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="785"/>
         <source>Status bar</source>
         <translation>状态栏</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="782"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="842"/>
         <source>Auto</source>
         <translation>自动</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="758"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="818"/>
         <source>Zoom indicator:</source>
         <translation>放大指示器:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1479"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1609"/>
         <source>Loop folder</source>
         <translation>循环播放文件夹</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1486"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1616"/>
         <source>Go to the next folder</source>
         <translation>转到下一个文件夹</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1469"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1599"/>
         <source>Stop</source>
         <translation>停止</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="438"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="425"/>
         <source>Requires application restart</source>
         <translation>需要重启应用程序</translation>
     </message>
@@ -2846,224 +3583,210 @@ Continue?</source>
         <translation type="vanished">使用系统颜色</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3052"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3195"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;modify&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; text-decoration: underline;&quot;&gt;修改&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2978"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3121"/>
         <source>Load preset:</source>
         <translation>加载预设:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="490"/>
         <source>Show folder view top bar</source>
-        <translation>显示文件夹视图顶部栏</translation>
+        <translation type="vanished">显示文件夹视图顶部栏</translation>
+    </message>
+    <message>
+        <source>Folder view filename font size:</source>
+        <translation type="vanished">文件夹视图文件名字体大小：</translation>
     </message>
     <message>
         <location filename="../../gui/dialogs/settingsdialog.ui" line="511"/>
-        <source>Folder view filename font size:</source>
-        <translation>文件夹视图文件名字体大小：</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="524"/>
         <source> pt</source>
         <translation> 磅</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="610"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="597"/>
         <source>User interface</source>
         <translation>用户界面</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="672"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="659"/>
         <source>Show all Exif/Iptc/Xmp tags in the info panel instead of a short summary.</source>
         <translation>在信息面板中显示所有 Exif/Iptc/Xmp 标签，而非简短摘要。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="675"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="662"/>
         <source>Show full metadata in info panel</source>
         <translation>在信息面板中显示完整元数据</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="768"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="687"/>
+        <source>Auto-hide cursor:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="694"/>
+        <source>Hide the mouse pointer over the image or video after a short delay without moving it.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="698"/>
+        <source>Never</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="703"/>
+        <source>In full screen</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="708"/>
+        <source>Always</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="716"/>
+        <source>after</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="735"/>
+        <source>How long the pointer must stay still before it is hidden.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="828"/>
         <source>On</source>
         <translation>开</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="775"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="835"/>
         <source>Off</source>
         <translation>关</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="822"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="875"/>
+        <source>Message duration:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="894"/>
+        <source>How long on-screen messages stay visible, as a percentage of their normal time.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="952"/>
         <source>Automatic window resize</source>
         <translation>自动调整窗口大小</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="832"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="962"/>
         <source>Match displayed content</source>
         <translation>匹配显示内容</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="868"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="998"/>
         <source>Screen area limit for auto resize:</source>
         <translation>自动调整大小的屏幕区域限制：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1100"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1230"/>
         <source>Pinned</source>
         <translation>已固定</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1188"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1256"/>
+        <source>Centre selected image</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1318"/>
         <source>Previews only</source>
         <translation>仅预览</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1208"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1338"/>
         <source>Show filename and resolution</source>
         <translation>显示文件名和分辨率</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1493"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1623"/>
         <source>After reaching the end:</source>
         <translation>到达末尾后：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1610"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1692"/>
+        <source>Name A–Z</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1697"/>
+        <source>Name Z–A</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1702"/>
+        <source>Smallest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1707"/>
+        <source>Largest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1712"/>
+        <source>Oldest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1717"/>
+        <source>Newest first</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1740"/>
         <source>Apply sorting to folders</source>
         <translation>对文件夹应用排序</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1624"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1754"/>
         <source>Show hidden files</source>
         <translation>显示隐藏文件</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1631"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1761"/>
         <source>Show other file types (text, configs, etc.)</source>
         <translation>显示其他文件类型（文本、配置文件等）</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1634"/>
-        <source>List non-media files in the folder view. Text files open in a built-in viewer; other files are shown but cannot be opened.</source>
-        <translation>在文件夹视图中列出非媒体文件。文本文件将在内置查看器中打开；其他文件会显示但无法打开。</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1641"/>
-        <source>Allow browsing the root folder (/)</source>
-        <translation>允许浏览根文件夹（/）</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1773"/>
-        <source>Show playback controls</source>
-        <translation>显示播放控件</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2025"/>
-        <source>View</source>
-        <translation>视图</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2081"/>
-        <source>Display options</source>
-        <translation>显示选项</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2136"/>
-        <source>Fit in window (stretch)</source>
-        <translation>自适应窗口 (拉伸)</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2158"/>
-        <source>Keep fit mode when switching images</source>
-        <translation>切换图片时保持适应模式</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2258"/>
-        <source>Grid background on images with transparency</source>
-        <translation>透明图片显示网格背景</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2295"/>
-        <source>Expand images, up to:</source>
-        <translation>放大图片，最大至：</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2403"/>
-        <source>Images smaller than window will be zoomed in</source>
-        <translation>小于窗口的图片将被放大</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2462"/>
-        <source>Unlock minimum zoom</source>
-        <translation>解锁最小缩放限制</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2472"/>
-        <source>Always allow zooming below 100%</source>
-        <translation>始终允许缩小到 100% 以下</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2594"/>
-        <source>Use fixed zoom levels:</source>
-        <translation>使用固定缩放级别：</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2638"/>
-        <source>Load defaults</source>
-        <translation>加载默认值</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2919"/>
-        <source>Theme</source>
-        <translation>主题</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2991"/>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2995"/>
-        <source>Black</source>
-        <translation>黑色</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3000"/>
-        <source>Dark</source>
-        <translation>深黑</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3005"/>
-        <source>Dark Blue</source>
-        <translation>深蓝色</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3010"/>
-        <source>Light</source>
-        <translation>光亮</translation>
-    </message>
-    <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4071"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="613"/>
-        <source>+ New shortcut</source>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5365"/>
+        <source>Text preview size limit, KiB:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4530"/>
-        <source>+ New</source>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5384"/>
+        <source>Larger text files are cut off after this many KiB in the viewer.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4791"/>
-        <source>Duplicate search thread count:</source>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5429"/>
+        <source>mpv binary:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5302"/>
-        <source>About thumbgrid</source>
-        <translation>关于 thumbgrid</translation>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5470"/>
+        <source>…</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5353"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5570"/>
+        <source>About ThumbGrid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5621"/>
         <source>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
@@ -3079,12 +3802,124 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:600; font-style:italic;&quot;&gt;Original author:&lt;/span&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-style:italic;&quot;&gt; easymodo (easymodofrf@gmail.com)&lt;/span&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;a href=&quot;https://github.com/easymodo/qimgv/graphs/contributors&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:600; font-style:italic; text-decoration: underline; color:#007af4;&quot;&gt;Contributors&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:600; font-style:italic; text-decoration: underline; color:#007af4;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;OpenCV enabled builds use &lt;/span&gt;&lt;a href=&quot;https://github.com/dbzhang800/QtOpenCV&quot;&gt;&lt;span style=&quot; font-family:&apos;Ubuntu&apos;; font-size:10pt; text-decoration: underline; color:#007af4;&quot;&gt;QtOpenCV&lt;/span&gt;&lt;/a&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt; by dbzhang800&lt;/span&gt;&lt;/p&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt; font-weight:600; font-style:italic; text-decoration: underline; color:#007af4;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;thumbgrid is licensed under &lt;/span&gt;&lt;a href=&quot;https://www.gnu.org/licenses/gpl-3.0.en.html&quot;&gt;&lt;span style=&quot; font-family:&apos;Droid Sans&apos;; font-size:10pt; text-decoration: underline; color:#007af4;&quot;&gt;GNU GPL Version 3&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;
 &lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:&apos;MS Shell Dlg 2&apos;; font-size:10pt;&quot;&gt;Report any issues / request features &lt;/span&gt;&lt;a href=&quot;https://github.com/do-i/thumbgrid/issues&quot;&gt;&lt;span style=&quot; font-family:&apos;Droid Sans&apos;; font-size:10pt; text-decoration: underline; color:#007af4;&quot;&gt;here&lt;/span&gt;&lt;/a&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>List non-media files in the folder view. Text files open in a built-in viewer; other files are shown but cannot be opened.</source>
+        <translation type="vanished">在文件夹视图中列出非媒体文件。文本文件将在内置查看器中打开；其他文件会显示但无法打开。</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1771"/>
+        <source>Allow browsing the root folder (/)</source>
+        <translation>允许浏览根文件夹（/）</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1903"/>
+        <source>Show playback controls</source>
+        <translation>显示播放控件</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2168"/>
+        <source>View</source>
+        <translation>视图</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2224"/>
+        <source>Display options</source>
+        <translation>显示选项</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2279"/>
+        <source>Fit in window (stretch)</source>
+        <translation>自适应窗口 (拉伸)</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2301"/>
+        <source>Keep fit mode when switching images</source>
+        <translation>切换图片时保持适应模式</translation>
+    </message>
+    <message>
+        <source>Grid background on images with transparency</source>
+        <translation type="vanished">透明图片显示网格背景</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2438"/>
+        <source>Expand images, up to:</source>
+        <translation>放大图片，最大至：</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2546"/>
+        <source>Images smaller than window will be zoomed in</source>
+        <translation>小于窗口的图片将被放大</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2605"/>
+        <source>Unlock minimum zoom</source>
+        <translation>解锁最小缩放限制</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2615"/>
+        <source>Always allow zooming below 100%</source>
+        <translation>始终允许缩小到 100% 以下</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2737"/>
+        <source>Use fixed zoom levels:</source>
+        <translation>使用固定缩放级别：</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2781"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="301"/>
+        <source>Load defaults</source>
+        <translation>加载默认值</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3062"/>
+        <source>Theme</source>
+        <translation>主题</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3134"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3138"/>
+        <source>Black</source>
+        <translation>黑色</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3143"/>
+        <source>Dark</source>
+        <translation>深黑</translation>
+    </message>
+    <message>
+        <source>Dark Blue</source>
+        <translation type="vanished">深蓝色</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3153"/>
+        <source>Light</source>
+        <translation>光亮</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4239"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="666"/>
+        <source>+ New shortcut</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4727"/>
+        <source>+ New</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4992"/>
+        <source>Duplicate search thread count:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About thumbgrid</source>
+        <translation type="vanished">关于 thumbgrid</translation>
     </message>
     <message>
         <source>Widget border</source>
@@ -3099,26 +3934,26 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">背景色</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3778"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="255"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3921"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="238"/>
         <source>Overlay background</source>
         <translation>叠加背景色</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3813"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="256"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3956"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="239"/>
         <source>Overlay text</source>
         <translation>覆盖文本</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3184"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="238"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3327"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="221"/>
         <source>Accent</source>
         <translation>点缀</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3225"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="239"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3368"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="222"/>
         <source>Text</source>
         <translation>文本</translation>
     </message>
@@ -3131,8 +3966,8 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">文件夹视图背景色</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3273"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="240"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3416"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="223"/>
         <source>Icons</source>
         <translation>图标</translation>
     </message>
@@ -3141,203 +3976,206 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">滚动条</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3964"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4107"/>
         <source>Background blur (KDE)</source>
         <translation>背景防蓝光 (KDE)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3886"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4029"/>
         <source>Window opacity:</source>
         <translation>窗口不透明度:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3939"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="47"/>
+        <source>Settings</source>
+        <translation type="unfinished">设置</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="900"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4082"/>
         <source>%</source>
         <translation>%</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2709"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2852"/>
         <source>Scaling quality</source>
         <translation>缩放质量</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2815"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2958"/>
         <source>When unchecked, nearest neighbor algorithm will be used for upscaling.</source>
         <translation>取消选中时, 使用nearest neighbo算法进行放大.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2818"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2961"/>
         <source>Smooth upscaling</source>
         <translation>平滑放大</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2837"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2980"/>
         <source>Smooth animated images</source>
         <translation>平滑动画图像</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2736"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2879"/>
         <source>Scaling filter:</source>
         <translation>缩放过滤器:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2768"/>
         <source>Nearest neighbor</source>
-        <translation>Nearest neighbor</translation>
+        <translation type="vanished">Nearest neighbor</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2773"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2916"/>
         <source>Bilinear</source>
         <translation>Bilinear</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2455"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2598"/>
         <source>Zoom options</source>
         <translation>放大功能</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2497"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2640"/>
         <source>Zoom step:</source>
         <translation>缩放倍数:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2565"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2708"/>
         <source>[step]</source>
         <translation>[step]</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4273"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4441"/>
         <source>None</source>
         <translation>无</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4278"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4446"/>
         <source>Touchpad</source>
         <translation>触摸板</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4283"/>
         <source>Touchpad &amp; Mouse Wheel</source>
-        <translation>触摸板与鼠标中键</translation>
+        <translation type="vanished">触摸板与鼠标中键</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4093"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4261"/>
         <source>Add</source>
         <translation>添加</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3015"/>
         <source>Light Blue</source>
-        <translation>浅蓝色</translation>
+        <translation type="vanished">浅蓝色</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3020"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="760"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3163"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="800"/>
         <source>Custom</source>
         <translation>自定义</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3025"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3168"/>
         <source>System</source>
         <translation>系统</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3143"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3286"/>
         <source>App-wide</source>
         <translation>全应用</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3308"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="241"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3451"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="224"/>
         <source>Window background</source>
         <translation>窗口背景</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3343"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="242"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3486"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="225"/>
         <source>Control background</source>
         <translation>控件背景</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3378"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="243"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3521"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="226"/>
         <source>Control border</source>
         <translation>控件边框</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3413"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="244"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3556"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="227"/>
         <source>Scrollbar</source>
         <translation>滚动条</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3438"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="392"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3581"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="448"/>
         <source>Grid</source>
         <translation>网格</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3473"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="246"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3616"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="229"/>
         <source>Grid background</source>
         <translation>网格背景</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3508"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="247"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3651"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="230"/>
         <source>Grid top bar</source>
         <translation>网格顶部栏</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3543"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="248"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3686"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="231"/>
         <source>Thumbnail cell</source>
         <translation>缩略图单元格</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3578"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="249"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3721"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="232"/>
         <source>Filename label</source>
         <translation>文件名标签</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3613"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="250"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3756"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="233"/>
         <source>Selected filename label</source>
         <translation>已选文件名标签</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3648"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="251"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3791"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="234"/>
         <source>Selection highlight</source>
         <translation>选中高亮</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3683"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="252"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3826"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="235"/>
         <source>Folder-icon tint</source>
         <translation>文件夹图标色调</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3708"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3851"/>
         <source>Content view</source>
         <translation>内容视图</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3743"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="254"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3886"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="237"/>
         <source>Fullscreen background</source>
         <translation>全屏背景</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4100"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1856"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4268"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1928"/>
         <source>Edit</source>
         <translation>编辑</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4113"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1569"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4281"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1629"/>
         <source>Remove</source>
         <translation>删除</translation>
     </message>
@@ -3346,215 +4184,258 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">重置为标准</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4163"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4331"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="713"/>
         <source>Action</source>
         <translation>行为</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4168"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4336"/>
         <source>Shortcut</source>
         <translation>快捷键</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4173"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4341"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="713"/>
         <source>Context</source>
         <translation>上下文</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4228"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4396"/>
         <source>Switch image by clicking window edges</source>
         <translation>点击窗口边缘切换图片</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4235"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4403"/>
         <source>Visible edges</source>
         <translation>可见边缘</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4337"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4505"/>
         <source>Mouse scrolling speed:</source>
         <translation>鼠标滚动速度：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4381"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4549"/>
         <source>[x]</source>
         <translation>[x]</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4410"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4578"/>
         <source>Trackpad detection</source>
         <translation>触控板检测</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4420"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4588"/>
         <source>Disable if you have issues with mouse scrolling</source>
         <translation>如果鼠标滚动有问题，请禁用</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4676"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4877"/>
         <source>Preload the next/previous image. Results in a much faster image switching (at the expense of wasting more RAM).</source>
         <translation>预加载下一个/上一个图像.更快的图像切换 (以浪费内存为代价).</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4679"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4880"/>
         <source>Use preloader (recommended)</source>
         <translation>使用预加载程序 (推荐)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4689"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4890"/>
         <source>Load adjacent images in background</source>
         <translation>后台加载相邻图片</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4898"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5099"/>
         <source>Keeps recently shown thumbnails in RAM so revisiting a folder does not re-read them from disk. 0 disables the memory cache.</source>
         <translation>将最近显示的缩略图保留在内存中，以便重新访问文件夹时无需从磁盘重新读取。设为 0 可禁用内存缓存。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4901"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5102"/>
         <source>In-memory thumbnail cache limit, MB:</source>
         <translation>内存缩略图缓存限制（MB）：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4973"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5174"/>
         <source>JPEG save quality:</source>
         <translation>JPEG 保存质量:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5017"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5218"/>
         <source>q</source>
         <translation>q</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4877"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5078"/>
         <source>Dynamically unload items to save memory</source>
         <translation>动态卸载项目以节省内存</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4717"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4918"/>
         <source>Thumbnailer thread count:</source>
         <translation>创建略缩图的线程数:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1119"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1249"/>
         <source>Disable in windowed mode</source>
         <translation>在窗口模式下禁用</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1087"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1217"/>
         <source>Crop previews</source>
         <translation>裁剪预览</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1126"/>
         <source>Center selected image</source>
-        <translation>居中显示选中图片</translation>
+        <translation type="vanished">居中显示选中图片</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1345"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1475"/>
         <source>Left</source>
         <translation>左</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1350"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1480"/>
         <source>Right</source>
         <translation>右</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="1252"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1382"/>
         <source>Preview size:</source>
         <translation>预览大小：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4755"/>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4829"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4956"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5030"/>
         <source>2</source>
         <translation>2</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4867"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5068"/>
         <source>Unload off-screen thumbnails</source>
         <translation>卸载屏幕外的缩略图</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4958"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5159"/>
         <source>Show save overlay when editing images</source>
         <translation>在编辑图像时显示保存覆盖</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4860"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5061"/>
         <source>Use thumbnail cache (recommended)</source>
         <translation>使用缩略图缓存 (推荐)</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5100"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5301"/>
         <source>Memory allocation limit per image, MB:</source>
         <translation>每张图片内存分配限制（MB）：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5161"/>
         <source>Mpv binary:</source>
-        <translation>Mpv播放器路径:</translation>
+        <translation type="vanished">Mpv播放器路径:</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5202"/>
         <source>...</source>
-        <translation>...</translation>
+        <translation type="vanished">...</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="702"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="762"/>
         <source>Turn this off if you are using a touchpad with libinput driver.</source>
         <translation>如果使用带libinput驱动程序的触摸板,请关闭此选项.</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="705"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="765"/>
         <source>Enable smooth scrolling</source>
         <translation>开启平滑滚动</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="2235"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1764"/>
+        <source>List non-media files in the grid. Text files open in a built-in viewer; other files are shown but cannot be opened.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1910"/>
+        <source>Uses the GPU to decode video, which lowers CPU use. Turn it off again if videos (e.g. WebM) freeze the app or show no picture</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="1913"/>
+        <source>Hardware decoding</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2346"/>
+        <source>Centre</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2378"/>
         <source>Part of image that&apos;s focused after switching to 1:1</source>
         <translation>切换到 1:1 后聚焦的图片区域</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="3871"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2401"/>
+        <source>Checkerboard behind transparent images</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="2911"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="260"/>
+        <source>Nearest neighbour</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3148"/>
+        <source>Dark blue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="3158"/>
+        <source>Light blue</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4014"/>
         <source>Other window tweaks</source>
         <translation>其他窗口调整</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4265"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4433"/>
         <source>Scroll image with:</source>
         <translation>图片滚动方式：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4309"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4451"/>
+        <source>Touchpad &amp; mouse wheel</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4477"/>
         <source>Note: you can also zoom by holding RMB and moving the mouse</source>
         <translation>注意：按住鼠标右键并移动也可以缩放</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4508"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4705"/>
         <source>Note: these will appear in &quot;Open with&quot; menu.</source>
         <translation>注意：这些将显示在&quot;打开方式&quot;菜单中。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="4518"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="4715"/>
         <source>Also, you can assign shortcuts to scripts (in &quot;Controls&quot; section).</source>
         <translation>此外，您可以为脚本分配快捷键（在&quot;控件&quot;部分）。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5046"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5247"/>
         <source>Confirm moving to trash</source>
         <translation>删除到回收站时需确认</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5058"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5259"/>
         <source>Confirm file delete (!)</source>
         <translation>确认删除文件（！）</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5072"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5273"/>
         <source>JXL animation support (experimental)</source>
         <translation>JXL 动画支持 (实验)</translation>
     </message>
@@ -3563,44 +4444,40 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">关于 qimgv</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5448"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1616"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5714"/>
         <source>OK</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5462"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5728"/>
         <source>Apply</source>
         <translation>应用</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.ui" line="5455"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1617"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="5721"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="157"/>
         <source>Preferences — </source>
-        <translation>首选项 — </translation>
+        <translation type="vanished">首选项 — </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="186"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="174"/>
         <source>Show full version</source>
         <translation>显示完整版本号</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="192"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="180"/>
         <source>Version</source>
         <translation>版本</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="193"/>
         <source>&lt;b&gt;thumbgrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Build: %2</source>
-        <translation>&lt;b&gt;thumbgrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;构建：%2</translation>
+        <translation type="vanished">&lt;b&gt;thumbgrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;构建：%2</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="384"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="440"/>
         <source>Shortcuts</source>
         <translation>快捷键</translation>
     </message>
@@ -3609,32 +4486,35 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">此外，您可以在&quot;快捷键&quot;中为脚本分配快捷键。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="386"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="470"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="442"/>
         <source>Start in grid view by default</source>
         <translation>默认以网格视图启动</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="387"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="477"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="443"/>
         <source>Show grid top bar</source>
         <translation>显示网格顶部栏</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="388"/>
+        <location filename="../../gui/dialogs/settingsdialog.ui" line="498"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="444"/>
         <source>Grid filename font size:</source>
         <translation>网格文件名字体大小：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="389"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="445"/>
         <source>Grid navigation</source>
         <translation>网格导航</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="393"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="449"/>
         <source>Grid display</source>
         <translation>网格显示</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="408"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="464"/>
         <source>Document</source>
         <translation>文档</translation>
     </message>
@@ -3643,84 +4523,84 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">重置当前上下文</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="385"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="441"/>
         <source>Every script is also listed on the Shortcuts page, where you can assign it a key.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="455"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="509"/>
         <source>Stored data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="456"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="510"/>
         <source>Data stored on this computer</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="459"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="513"/>
         <source>Everything the app remembers about your files and folders. Delete a row with its ✕ button, or check rows to delete them together — right away or on every exit.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="465"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="519"/>
         <source>Select all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="472"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="526"/>
         <source>Store</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="472"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="526"/>
         <source>Path</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="498"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="552"/>
         <source>Delete %1 now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="510"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="564"/>
         <source>Delete selected now</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="516"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="570"/>
         <source>Delete selected every time the app exits</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="576"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="630"/>
         <source>Delete %1? This cannot be undone.</source>
         <translation type="unfinished"></translation>
     </message>
     <message numerus="yes">
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="577"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="631"/>
         <source>Delete %n selected data store(s)? This cannot be undone.</source>
         <translation type="unfinished">
             <numerusform></numerusform>
         </translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="578"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="632"/>
         <source>Delete stored data</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="620"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="671"/>
         <source>Shortcut preset:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="642"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="690"/>
         <source>Switch shortcut preset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="643"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="691"/>
         <source>Switching to &quot;%1&quot; replaces all current keyboard/mouse shortcuts with that preset&apos;s bindings. This cannot be undone from this dialog. Continue?</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3733,143 +4613,218 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">搜索</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="660"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="147"/>
+        <source>Settings — ThumbGrid</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="181"/>
+        <source>&lt;b&gt;ThumbGrid %1&lt;/b&gt;&lt;br&gt;&lt;br&gt;Build: %2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="261"/>
+        <source>Smooth</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="262"/>
+        <source>High quality</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="263"/>
+        <source>High quality: bicubic, and sharpened when an image is shrunk below half size.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="264"/>
+        <source>Sharpen images shrunk below 50%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="276"/>
+        <source>Checkerboard colours:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="277"/>
+        <source>Pattern behind transparent images, in the viewer and in grid thumbnails</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="295"/>
+        <source>Checkerboard colour 1</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="297"/>
+        <source>Checkerboard colour 2</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="705"/>
         <source>Search actions, keys and contexts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="713"/>
         <source>Key</source>
         <translation>按键</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="713"/>
         <source>Count</source>
         <translation>数量</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="668"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="713"/>
         <source>Enabled</source>
         <translation>已启用</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="748"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="792"/>
         <source>%1 (unavailable)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1429"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1497"/>
         <source>User script &quot;%1&quot;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1507"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1570"/>
         <source>Select the primary key. Add or remove keys below; system defaults are marked.</source>
         <translation>选择主按键。可在下方添加或移除按键；系统默认项已标记。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1546"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1607"/>
         <source>No keys assigned.</source>
         <translation>未分配按键。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1562"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1622"/>
         <source>default</source>
         <translation>默认</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1584"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1644"/>
         <source>Add key:</source>
         <translation>添加按键：</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1598"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1662"/>
+        <source>%1 (default)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1664"/>
+        <source>Nothing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1680"/>
+        <source>When there is nothing to scroll:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1686"/>
+        <source>In a video:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1695"/>
         <source>&quot;%1&quot; is already assigned to this action.</source>
         <translation>&quot;%1&quot; 已分配给此操作。</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1604"/>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1739"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1701"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1823"/>
         <source>&quot;%1&quot; is also used by: %2</source>
         <translation>&quot;%1&quot; 还被用于：%2</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1715"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1801"/>
         <source>Move &quot;%1&quot; from %2 to %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1715"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1801"/>
         <source>Copy &quot;%1&quot; from %2 to %3.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1722"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1806"/>
         <source>This widens its reach: it will run in every screen, not only in the %1 view (a view-specific binding for the same key still overrides it).</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1726"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1810"/>
         <source>This narrows its reach: it runs in every screen today, and afterwards it will run only in the %1 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1729"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1813"/>
         <source>The global binding stays as it is; the %1 copy simply overrides it while that view is active.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1732"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1816"/>
         <source>It will run only in the %1 view instead of the %2 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1734"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1818"/>
         <source>It will run in the %1 view as well as the %2 view.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1741"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1825"/>
         <source>Continuing takes those keys over in the %1 context.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1743"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1827"/>
         <source>Continue?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1744"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1828"/>
         <source>Move shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1744"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1828"/>
         <source>Copy shortcut</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1772"/>
-        <source>Edit keys...</source>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1853"/>
+        <source>Edit keys…</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1777"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1858"/>
         <source>Move to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1778"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1859"/>
         <source>Copy to</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1782"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1862"/>
+        <source>Only used in the Copy / Move overlay</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1863"/>
         <source>No keys bound in %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1865"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1937"/>
         <source>Delete</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3906,7 +4861,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="vanished">编辑快捷键</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/settingsdialog.cpp" line="1999"/>
+        <location filename="../../gui/dialogs/settingsdialog.cpp" line="2068"/>
         <source>Navigate to mpv binary</source>
         <translation>定位mpv文件路径</translation>
     </message>
@@ -3954,90 +4909,171 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <translation type="unfinished">取消</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="16"/>
+        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="26"/>
         <source>Global</source>
         <translation>全局</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="17"/>
+        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="27"/>
         <source>Document</source>
         <translation>文档</translation>
     </message>
     <message>
-        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="18"/>
+        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="28"/>
         <source>Grid</source>
         <translation>网格</translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="29"/>
+        <source>Copy / Move</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/dialogs/shortcutcreatordialog.cpp" line="70"/>
+        <source>This shortcut is used for action: %1. Replace?</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>TextViewer</name>
     <message>
-        <location filename="../../gui/viewers/textviewer.cpp" line="65"/>
+        <location filename="../../gui/viewers/textviewer.cpp" line="89"/>
         <source>Could not open file</source>
         <translation>无法打开文件</translation>
     </message>
     <message>
-        <location filename="../../gui/viewers/textviewer.cpp" line="94"/>
+        <location filename="../../gui/viewers/textviewer.cpp" line="118"/>
         <source>Preview of the first %1 KiB (file is %2 KiB)</source>
         <translation>前 %1 KiB 预览（文件大小 %2 KiB）</translation>
     </message>
 </context>
 <context>
-    <name>VideoControls</name>
+    <name>TreeContextMenu</name>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="25"/>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="257"/>
-        <source>Mute</source>
-        <translation>静音</translation>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="10"/>
+        <source>Open</source>
+        <translation type="unfinished">打开</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="26"/>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="12"/>
+        <source>Open in new window</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="14"/>
+        <source>New folder…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="15"/>
+        <source>Rename…</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="17"/>
+        <source>Move to trash</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="21"/>
+        <source>Delete permanently</source>
+        <translation type="unfinished">永久删除</translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="24"/>
+        <source>Copy path</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="26"/>
+        <source>Add to bookmarks</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/folderview/treecontextmenu.cpp" line="29"/>
+        <source>Collapse all</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>VideoControls</name>
+    <message>
+        <source>Mute</source>
+        <translation type="vanished">静音</translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="41"/>
         <source>Reset 1.00x</source>
         <translation>重置为 1.00x</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="58"/>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="65"/>
         <source>Play / pause</source>
         <translation>播放/暂停</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="61"/>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="68"/>
         <source>Previous frame</source>
         <translation>上一帧</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="64"/>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="71"/>
         <source>Next frame</source>
         <translation>下一帧</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="67"/>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="97"/>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="105"/>
-        <source>Volume</source>
-        <translation>音量</translation>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="74"/>
+        <source>Mute / unmute</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="73"/>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="270"/>
+        <source>Loop: on</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="270"/>
+        <source>Loop: off</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="275"/>
+        <source>Clip: play the whole video again (the range is kept; right-click clears it)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="277"/>
+        <source>Clip: play only the part between two handles</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="310"/>
+        <source>Volume: %1%</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Volume</source>
+        <translation type="vanished">音量</translation>
+    </message>
+    <message>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="79"/>
         <source>Seek</source>
         <translation>快进/快退</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="89"/>
         <source>Loop A-B</source>
-        <translation>A-B 循环</translation>
+        <translation type="vanished">A-B 循环</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="118"/>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="124"/>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="136"/>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="128"/>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="133"/>
+        <location filename="../../gui/overlays/videocontrols.cpp" line="145"/>
         <source>Playback speed</source>
         <translation>播放速度</translation>
     </message>
     <message>
-        <location filename="../../gui/overlays/videocontrols.cpp" line="254"/>
         <source>Unmute</source>
-        <translation>取消静音</translation>
+        <translation type="vanished">取消静音</translation>
     </message>
 </context>
 <context>
