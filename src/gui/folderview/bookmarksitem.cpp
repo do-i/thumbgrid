@@ -80,7 +80,7 @@ void BookmarksItem::dropEvent(QDropEvent *event) {
         event->ignore();
         return;
     }
-    acceptFolderDrop(event);
+    acceptFolderDropped(event);
     emit droppedIn(paths, dirPath, folderDropCopies(event));
 }
 

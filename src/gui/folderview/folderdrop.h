@@ -15,9 +15,16 @@ inline bool folderDropCopies(const QDropEvent *event) {
     return event->modifiers().testFlag(Qt::ControlModifier);
 }
 
-// on enter, move and drop, so the source shows the matching cursor
+// on drag enter and move, so the pointer shows what a drop will do
 inline void acceptFolderDrop(QDropEvent *event) {
     event->setDropAction(folderDropCopies(event) ? Qt::CopyAction : Qt::MoveAction);
+    event->accept();
+}
+
+// The app moves the files itself after a prompt; a reported MoveAction would let the source
+// delete its originals first, so the source is always told Copy (TargetMoveAction is Move on xcb).
+inline void acceptFolderDropped(QDropEvent *event) {
+    event->setDropAction(Qt::CopyAction);
     event->accept();
 }
 

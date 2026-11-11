@@ -23,9 +23,11 @@ private slots:
     void aDropOnABookmarkFollowsCtrlToo();
     void aFolderDroppedIntoItselfIsRefusedWithoutAPrompt();
     void emptySpaceAndForeignDataAreNotAccepted();
+    void aCancelledMoveLeavesTheFilesAndTellsTheSourceCopy();
 
 private:
-    // drags mime over target (a viewport or a bookmark) and drops it; true when the drop was accepted
+    // drags mime over target (a viewport or a bookmark) and drops it; true when the drop was accepted,
+    // the pointer showed `expected` and the source was told Copy, so it never deletes its originals
     bool dragAndDrop(QWidget *target, QPoint pos, const QMimeData &mime, Qt::KeyboardModifiers mods,
                      Qt::DropAction expected) {
         const Qt::DropActions offered = Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
@@ -36,8 +38,8 @@ private:
         QDropEvent drop(QPointF(pos), offered, &mime, Qt::LeftButton, mods);
         QApplication::sendEvent(target, &drop);
         if(enter.isAccepted() && move.isAccepted() && drop.isAccepted()) {
-            const bool cursorsMatch = move.dropAction() == expected && drop.dropAction() == expected;
-            return cursorsMatch;
+            mLastDropAction = drop.dropAction();
+            return move.dropAction() == expected && drop.dropAction() == Qt::CopyAction;
         }
         return false;
     }
@@ -58,6 +60,7 @@ private:
     tgtest::TreeFixture mFixture;
     QTimer mPoll;
     bool mPrompted = false;
+    Qt::DropAction mLastDropAction = Qt::IgnoreAction;
 };
 
 void FolderTreeDropsTest::initTestCase() {
@@ -176,6 +179,18 @@ void FolderTreeDropsTest::emptySpaceAndForeignDataAreNotAccepted() {
     QApplication::sendEvent(viewport, &textDrop);
     QVERIFY(!textDrop.isAccepted());
     QCOMPARE(copies.count() + moves.count(), 0);
+}
+
+void FolderTreeDropsTest::aCancelledMoveLeavesTheFilesAndTellsTheSourceCopy() {
+    QSignalSpy moves(mFixture.folderView(), &FolderView::moveUrlsRequested);
+    std::unique_ptr<QMimeData> mime(urls({mFixture.path("a/one.png")}));
+    declinePrompts();
+    QVERIFY(dragAndDrop(mFixture.tree()->viewport(), rowCenter("c"), *mime, Qt::NoModifier, Qt::MoveAction));
+    QVERIFY2(mPrompted, "The move should be confirmed first.");
+    QCOMPARE(moves.count(), 1); // the request reaches the prompt, which is cancelled
+    QVERIFY(mLastDropAction != Qt::MoveAction);
+    QVERIFY2(QFileInfo::exists(mFixture.path("a/one.png")) && !QFileInfo::exists(mFixture.path("c/one.png")),
+             "Cancelling moves nothing.");
 }
 
 TG_BEHAVIOR_TEST_MAIN(FolderTreeDropsTest)
