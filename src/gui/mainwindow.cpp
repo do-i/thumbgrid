@@ -1053,6 +1053,10 @@ void MW::showWarning(QString text) {
     floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_WARNING, tg::timing::kMessageNormalMs);
 }
 
+void MW::showWarning(QString text, int duration) {
+    floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_WARNING, duration);
+}
+
 void MW::showError(QString text) {
     floatingMessage->showMessage(std::move(text),  FloatingMessageIcon::ICON_ERROR, tg::timing::kMessageLongMs);
 }

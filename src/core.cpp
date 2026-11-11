@@ -53,10 +53,24 @@ Core::Core()
     connect(settings, &Settings::settingsChanged, this, &Core::readSettings);
 
     QVersionNumber lastVersion = settings->lastVersion();
+    bool startupMessage = true;
     if(settings->firstRun())
         onFirstRun();
     else if(appVersion > lastVersion)
         onUpdate();
+    else
+        startupMessage = false;
+    actionManager->restoreMissingPresetBindings();
+    showUnboundShortcutsNotice(startupMessage ? tg::timing::kMessageLongMs * settings->messageDurationScale() / 100 : 0);
+}
+
+// one floating message at a time: wait out the welcome/update message instead of replacing it
+void Core::showUnboundShortcutsNotice(int delayMs) {
+    const int count = actionManager->unboundActionCount();
+    if(count == 0)
+        return;
+    const QString text = tr("%n shortcut(s) unbound: see Settings > Controls", nullptr, count);
+    QTimer::singleShot(delayMs, mw, [this, text] { mw->showWarning(text, tg::timing::kMessageLongMs); });
 }
 
 void Core::readSettings() {

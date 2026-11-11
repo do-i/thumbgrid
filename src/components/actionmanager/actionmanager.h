@@ -65,6 +65,13 @@ public:
     static QList<PresetInfo> availablePresets();
     static QString selectedPreset();
     void applyPreset(const QString &id);
+    // startup: give back preset bindings missing from shortcuts.json unless the user unbound or disabled
+    // them; a binding whose preset keys are all taken is recorded as unbound. Returns "ctx: action [keys]".
+    QStringList restoreMissingPresetBindings();
+    // after a settings save: every preset action left without keys (and not disabled) is unbound
+    void recordUnboundPresetActions(const QMap<ViewMode, QStringList> &disabled);
+    const QMap<ViewMode, QStringList> &unboundActions() const;
+    int unboundActionCount() const;
     // scroll actions run a fallback when there is nothing to scroll (prev/next, fine: seek); overrides map action -> fallback or "none"
     static bool hasScrollFallback(const QString &action);
     static QString defaultScrollFallback(const QString &action);
@@ -82,6 +89,9 @@ public slots:
 private:
     explicit ActionManager(QObject *parent = nullptr);
     ShortcutMap defaults, shortcuts;
+    QMap<ViewMode, QStringList> unbound;   // "_unbound": preset actions the user removed on purpose
+    QMap<ViewMode, QStringList> missingPresetActions() const;
+    bool pruneUnbound();
     QMap<ViewMode, QHash<QString, QString>> shortcutLookup;
     ViewMode context = MODE_DOCUMENT;
     // set by a wheel turned with the right button held (RMB+WheelUp/Down)

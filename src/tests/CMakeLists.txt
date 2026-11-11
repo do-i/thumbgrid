@@ -122,6 +122,14 @@ add_test(
     COMMAND thumbgrid_shortcut_context_persistence_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_missing_preset_bindings_test
+    behavior/test_missing_preset_bindings_are_restored_unless_unbound.cpp
+)
+add_test(
+    NAME "Missing preset bindings are restored unless unbound, and unbound ones are announced"
+    COMMAND thumbgrid_missing_preset_bindings_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_shortcut_presets_keymaps_poc
     behavior/test_shortcut_presets_and_keymaps_poc.cpp
 )

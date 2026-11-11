@@ -58,6 +58,7 @@ private:
     void initActions();
     void loadTranslation();
     void onUpdate();
+    void showUnboundShortcutsNotice(int delayMs);
     void onFirstRun();
 
     // ui stuff

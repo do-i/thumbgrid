@@ -60,6 +60,27 @@ QList<ViewMode> shortcutContexts() {
     return {MODE_GLOBAL, MODE_DOCUMENT, MODE_FOLDERVIEW, MODE_COPYMOVE};
 }
 
+// Bound in ctx: a key there, or (document/grid) in global; a global preset binding the user moved
+// into document or grid is still bound.
+bool actionBound(const ActionManager::ShortcutMap &map, ViewMode ctx, const QString &action) {
+    const auto has = [&](ViewMode c) { return !map.value(c).key(action).isEmpty(); };
+    if(ctx == MODE_GLOBAL)
+        return has(MODE_GLOBAL) || has(MODE_DOCUMENT) || has(MODE_FOLDERVIEW);
+    if(ActionManager::isOverlayContext(ctx))
+        return has(ctx);
+    return has(ctx) || has(MODE_GLOBAL);
+}
+
+// a restored key must not shadow or be shadowed by another action's binding
+bool keyFree(const ActionManager::ShortcutMap &map, ViewMode ctx, const QString &key) {
+    const auto used = [&](ViewMode c) { return map.value(c).contains(key); };
+    if(ctx == MODE_GLOBAL)
+        return !used(MODE_GLOBAL) && !used(MODE_DOCUMENT) && !used(MODE_FOLDERVIEW);
+    if(ActionManager::isOverlayContext(ctx))
+        return !used(ctx);
+    return !used(ctx) && !used(MODE_GLOBAL);
+}
+
 QStringList shortcutKeysFromJson(const QJsonValue &value) {
     QStringList keys;
     const QJsonArray arr = value.isArray()
@@ -480,12 +501,102 @@ void ActionManager::applyPreset(const QString &id) {
     actionManager->shortcuts = actionManager->defaults;
     actionManager->rebuildShortcutLookup();
     settings->saveDisabledShortcuts(QMap<ViewMode, QStringList>());
+    actionManager->unbound.clear();
+    settings->saveUnboundShortcuts(actionManager->unbound);
     settings->saveShortcutPrimary(QMap<ViewMode, QMap<QString, QString>>());
     actionManager->setScrollFallbackOverrides(QMap<QString, QString>());
     actionManager->setVideoScrollFallbackOverrides(QMap<QString, QString>());
     actionManager->saveShortcuts();
     // a preset selection is never modified; don't rely on the JSON round-trip comparison
     settings->setShortcutsModified(false);
+}
+
+// preset actions (per preset context) with no key in the current mapping
+QMap<ViewMode, QStringList> ActionManager::missingPresetActions() const {
+    QMap<ViewMode, QStringList> missing;
+    for(ViewMode ctx : shortcutContexts()) {
+        for(const QString &action : defaults.value(ctx)) {
+            if(missing.value(ctx).contains(action) || actionBound(shortcuts, ctx, action))
+                continue;
+            if(actionManager->validateAction(action) != ActionType::ACTION_INVALID)
+                missing[ctx].append(action);
+        }
+    }
+    return missing;
+}
+
+// drop unbound entries that are bound again, or that the preset no longer binds there
+bool ActionManager::pruneUnbound() {
+    bool changed = false;
+    for(auto ctx = unbound.begin(); ctx != unbound.end(); ++ctx) {
+        const QStringList presetActions = defaults.value(ctx.key()).values();
+        changed |= ctx.value().removeIf([&](const QString &action) {
+            return !presetActions.contains(action) || actionBound(shortcuts, ctx.key(), action);
+        }) > 0;
+    }
+    unbound.removeIf([](const auto &ctx) { return ctx.value().isEmpty(); });
+    return changed;
+}
+
+QStringList ActionManager::restoreMissingPresetBindings() {
+    QMap<ViewMode, QStringList> disabled;
+    settings->readDisabledShortcuts(disabled);
+    bool unboundChanged = pruneUnbound();
+    QStringList restored;
+    const QMap<ViewMode, QStringList> missing = missingPresetActions();
+    for(auto ctx = missing.cbegin(); ctx != missing.cend(); ++ctx) {
+        for(const QString &action : ctx.value()) {
+            if(disabled.value(ctx.key()).contains(action) || unbound.value(ctx.key()).contains(action))
+                continue;
+            QStringList added;
+            for(const QString &key : defaults.value(ctx.key()).keys(action)) {
+                if(keyFree(shortcuts, ctx.key(), key)) {
+                    shortcuts[ctx.key()].insert(key, action);
+                    added.append(key);
+                }
+            }
+            if(added.isEmpty()) {
+                unbound[ctx.key()].append(action);
+                unboundChanged = true;
+                qCInfo(logSettings) << "[ActionManager] missing" << action << "in" << contextToString(ctx.key())
+                                    << "has no free preset key; recorded as unbound";
+            } else {
+                restored.append(contextToString(ctx.key()) + QStringLiteral(": ") + action +
+                                QStringLiteral(" [") + added.join(QStringLiteral(", ")) + QLatin1Char(']'));
+                qCInfo(logSettings) << "[ActionManager] restored missing binding" << restored.constLast();
+            }
+        }
+    }
+    if(!restored.isEmpty()) {
+        rebuildShortcutLookup();
+        saveShortcuts();
+    }
+    if(unboundChanged)
+        settings->saveUnboundShortcuts(unbound);
+    return restored;
+}
+
+void ActionManager::recordUnboundPresetActions(const QMap<ViewMode, QStringList> &disabled) {
+    unbound.clear();
+    const QMap<ViewMode, QStringList> missing = missingPresetActions();
+    for(auto ctx = missing.cbegin(); ctx != missing.cend(); ++ctx) {
+        for(const QString &action : ctx.value()) {
+            if(!disabled.value(ctx.key()).contains(action))
+                unbound[ctx.key()].append(action);
+        }
+    }
+    settings->saveUnboundShortcuts(unbound);
+}
+
+const QMap<ViewMode, QStringList> &ActionManager::unboundActions() const {
+    return unbound;
+}
+
+int ActionManager::unboundActionCount() const {
+    int count = 0;
+    for(const QStringList &actions : unbound)
+        count += actions.size();
+    return count;
 }
 
 QList<PresetInfo> ActionManager::availablePresets() {
@@ -673,6 +784,7 @@ void ActionManager::readShortcuts() {
     // seed contexts missing from an older shortcuts.json
     for(ViewMode ctx : shortcutContexts())
         shortcuts[ctx];
+    settings->readUnboundShortcuts(unbound);
     QMap<ViewMode, QStringList> disabled;
     settings->readDisabledShortcuts(disabled);
     for(auto ctx = shortcuts.begin(); ctx != shortcuts.end(); ++ctx) {

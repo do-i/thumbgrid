@@ -250,6 +250,7 @@ public slots:
     void showMessage(QString text, int duration);
     void showMessageSuccess(QString text);
     void showWarning(QString text);
+    void showWarning(QString text, int duration);
     void showError(QString text);
     // background move across filesystems: begin shows a fresh overlay; total < 0 while still counting
     void beginMoveProgress();

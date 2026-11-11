@@ -1508,6 +1508,15 @@ void Settings::readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled) {
 void Settings::saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled) {
     writeShortcutStringListJson(settings->mShortcutsJsonPath, "_disabled", disabled);
 }
+
+// "_unbound", shaped like "_disabled": preset actions the user left without keys on purpose
+void Settings::readUnboundShortcuts(QMap<ViewMode, QStringList> &unbound) {
+    readShortcutStringListJson(settings->mShortcutsJsonPath, "_unbound", unbound);
+}
+
+void Settings::saveUnboundShortcuts(const QMap<ViewMode, QStringList> &unbound) {
+    writeShortcutStringListJson(settings->mShortcutsJsonPath, "_unbound", unbound);
+}
 //------------------------------------------------------------------------------
 void Settings::readScripts(QMap<QString, Script> &scripts) {
     scripts.clear();

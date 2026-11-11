@@ -153,6 +153,7 @@ public:
     void readShortcutPrimary(QMap<ViewMode, QMap<QString, QString>> &primary);
     void saveShortcutPrimary(const QMap<ViewMode, QMap<QString, QString>> &primary);
     void readDisabledShortcuts(QMap<ViewMode, QStringList> &disabled);
+    void readUnboundShortcuts(QMap<ViewMode, QStringList> &unbound);
     // overrides of the scroll actions' fallbacks: action -> action, "none" for none
     void readShortcutFallbacks(QMap<QString, QString> &fallbacks);
     void saveShortcutFallbacks(const QMap<QString, QString> &fallbacks);
@@ -160,6 +161,7 @@ public:
     void readShortcutVideoFallbacks(QMap<QString, QString> &fallbacks);
     void saveShortcutVideoFallbacks(const QMap<QString, QString> &fallbacks);
     void saveDisabledShortcuts(const QMap<ViewMode, QStringList> &disabled);
+    void saveUnboundShortcuts(const QMap<ViewMode, QStringList> &unbound);
     // [Shortcuts] pointers: selected preset and whether the mapping diverged (mapping is in shortcuts.json)
     QString selectedPreset();
     void setSelectedPreset(const QString &id);

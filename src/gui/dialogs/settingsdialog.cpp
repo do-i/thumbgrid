@@ -2056,6 +2056,8 @@ void SettingsDialog::saveShortcuts() {
     actionManager->setScrollFallbackOverrides(mShortcutFallback);
     actionManager->setVideoScrollFallbackOverrides(mShortcutVideoFallback);
     settings->saveDisabledShortcuts(mShortcutDisabled);
+    // a removed binding is unbound on purpose, so startup does not give it back
+    actionManager->recordUnboundPresetActions(mShortcutDisabled);
 }
 //------------------------------------------------------------------------------
 void SettingsDialog::resetZoomLevels() {
