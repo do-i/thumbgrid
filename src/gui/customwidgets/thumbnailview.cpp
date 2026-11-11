@@ -564,7 +564,21 @@ void ThumbnailView::scrollToItem(int index) {
     QRectF sceneRect = mapToScene(viewport()->rect()).boundingRect();
     QRectF itemRect = item->mapRectToScene(item->rect());
     bool visible = sceneRect.contains(itemRect);
-    if(!visible) {
+    if(visible) {
+        // a scroll still running towards an earlier target must not carry this item out of view
+        if(scrollTimeLine->state() != QTimeLine::NotRunning) {
+            QRectF endRect = sceneRect;
+            if(mOrientation == Qt::Vertical)
+                endRect.moveCenter(QPointF(sceneRect.center().x(), scrollTimeLine->endFrame()));
+            else
+                endRect.moveCenter(QPointF(scrollTimeLine->endFrame(), sceneRect.center().y()));
+            if(!endRect.contains(itemRect)) {
+                scrollTimeLine->stop();
+                blockThumbnailLoading = false;
+                loadVisibleThumbnails();
+            }
+        }
+    } else {
         int delta = 0;
         if(mOrientation == Qt::Vertical) {
             if(itemRect.top() >= sceneRect.top()) // UP

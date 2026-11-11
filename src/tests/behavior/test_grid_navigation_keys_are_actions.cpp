@@ -1,6 +1,7 @@
 #include "support/thumbgrid_test_support.h"
 
 #include <QDir>
+#include <QScrollBar>
 #include <QSignalSpy>
 #include <QTemporaryDir>
 
@@ -119,6 +120,9 @@ void GridNavigationKeysAreActionsTest::navigationKeysMoveTheSelectionAsBefore() 
     const int first = gGrid->lastSelected();
     QVERIFY(first <= 1);
     QCOMPARE(gGrid->selection().count(), 1);
+    // Home straight after End cancels End's scroll, so the view settles on the selection
+    QTest::qWait(400);
+    QCOMPARE(gGrid->verticalScrollBar()->value(), 0);
 
     // Shift extends the selection - even over a grid binding on Shift+Right
     actionManager->addShortcut(MODE_FOLDERVIEW, "Shift+Right", "nextDirectory");
