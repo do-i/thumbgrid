@@ -46,7 +46,7 @@ struct Bar {
 
     Bar() : controls(new VideoControls(&row)) {
         settings->loadStylesheet();
-        row.setAccessibleName("VideoControlsRow");
+        row.setProperty("styleClass", QStringLiteral("VideoControlsRow"));
         auto *layout = new QHBoxLayout(&row);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->addWidget(controls);

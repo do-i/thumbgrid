@@ -20,7 +20,6 @@ FloatingMessage::FloatingMessage(FloatingWidgetContainer *parent) :
 
     setIcon(FloatingMessageIcon::NO_ICON);
 
-    this->setAccessibleName("FloatingMessage");
     connect(&visibilityTimer, &QTimer::timeout, this, &FloatingMessage::hideAnimated);
 
     readSettings();

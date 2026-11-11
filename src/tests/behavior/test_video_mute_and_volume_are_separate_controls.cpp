@@ -26,7 +26,7 @@ struct Bar {
 
     Bar() : controls(new VideoControls(&row)) {
         settings->loadStylesheet();
-        row.setAccessibleName("VideoControlsRow");
+        row.setProperty("styleClass", QStringLiteral("VideoControlsRow"));
         auto *layout = new QHBoxLayout(&row);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->addWidget(controls);
@@ -35,10 +35,7 @@ struct Bar {
         row.resize(640, 26);
         row.show();
         speaker = dynamic_cast<ActionButton *>(controls->findChild<QWidget *>("muteButton"));
-        for(QSlider *slider : controls->findChildren<QSlider *>()) {
-            if(slider->accessibleName() == "VideoControlVolumeSlider")
-                volume = slider;
-        }
+        volume = controls->findChild<QSlider *>("volumeSlider");
     }
 };
 }

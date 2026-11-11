@@ -1,7 +1,6 @@
 #include "floatingwidget.h"
 
 FloatingWidget::FloatingWidget(FloatingWidgetContainer *parent) : QWidget(parent), mAcceptKeyboardFocus(false) {
-    this->setAccessibleName("OverlayWidget");
     connect(parent, &FloatingWidgetContainer::resized, this, &FloatingWidget::onContainerResized);
     hide();
 }

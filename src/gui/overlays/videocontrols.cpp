@@ -12,7 +12,7 @@
 namespace {
 QWidget *createVideoControlSeparator(QWidget *parent) {
     QWidget *separator = new QWidget(parent);
-    separator->setAccessibleName("VideoControlSeparator");
+    separator->setProperty("styleClass", QStringLiteral("VideoControlSeparator"));
     separator->setFixedSize(1, 14);
     return separator;
 }
@@ -55,7 +55,7 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->horizontalLayout_2->setSpacing(2);
     ui->horizontalSpacer->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
     ui->horizontalSpacer_2->changeSize(4, 0, QSizePolicy::Fixed, QSizePolicy::Minimum);
-    speedPopup->setAccessibleName("VideoControlPopup");
+    speedPopup->setProperty("styleClass", QStringLiteral("VideoControlPopup"));
     auto *speedPopupLayout = new QVBoxLayout(speedPopup);
     speedPopupLayout->setContentsMargins(8, 8, 8, 8);
     speedPopupLayout->setSpacing(6);
@@ -76,7 +76,6 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->prevFrameButton->setFixedSize(24, 24);
     ui->nextFrameButton->setFixedSize(24, 24);
     ui->muteButton->setFixedSize(24, 24);
-    ui->seekBar->setAccessibleName("VideoControlSeekSlider");
     ui->seekBar->setToolTip(tr("Seek"));
     ui->seekBar->setMinimumSize(81, 24);
     ui->seekBar->setMaximumWidth(QWIDGETSIZE_MAX);
@@ -92,13 +91,13 @@ VideoControls::VideoControls(QWidget *parent) :
     ui->durationLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
 
     clipButton->setObjectName("clipButton");
-    clipButton->setAccessibleName("Button");
+    clipButton->setProperty("styleClass", QStringLiteral("Button"));
     clipButton->setAction("toggleClip");
     clipButton->setFixedSize(24, 24);
     // right-click clears the clip
     clipButton->installEventFilter(this);
     loopButton->setObjectName("loopButton");
-    loopButton->setAccessibleName("Button");
+    loopButton->setProperty("styleClass", QStringLiteral("Button"));
     loopButton->setIconPath(":res/icons/common/buttons/videocontrols/loop24.png");
     loopButton->setAction("toggleVideoLoop");
     loopButton->setFixedSize(24, 24);
@@ -112,7 +111,7 @@ VideoControls::VideoControls(QWidget *parent) :
 
     ui->horizontalLayout->insertWidget(1, createVideoControlSeparator(this));
 
-    volumeSlider->setAccessibleName("VideoControlVolumeSlider");
+    volumeSlider->setObjectName("volumeSlider");
     volumeSlider->setFocusPolicy(Qt::NoFocus);
     volumeSlider->setRange(0, 100);
     volumeSlider->setSingleStep(5);
@@ -124,13 +123,12 @@ VideoControls::VideoControls(QWidget *parent) :
 
     ui->horizontalLayout->insertWidget(4, createVideoControlSeparator(this));
 
-    speedButton->setAccessibleName("VideoControlTextButton");
+    speedButton->setProperty("styleClass", QStringLiteral("VideoControlTextButton"));
     speedButton->setFocusPolicy(Qt::NoFocus);
     speedButton->setToolTip(tr("Playback speed"));
     speedButton->setFixedSize(44, 24);
     ui->horizontalLayout->insertWidget(5, speedButton);
 
-    speedSlider->setAccessibleName("VideoControlSpeedSlider");
     speedSlider->setFocusPolicy(Qt::NoFocus);
     speedSlider->setToolTip(tr("Playback speed"));
     speedSlider->setRange(25, 400);
@@ -140,7 +138,7 @@ VideoControls::VideoControls(QWidget *parent) :
     speedSlider->setTickInterval(25);
     speedSlider->setFixedSize(180, 28);
     speedSlider->setValue(100);
-    resetSpeedButton->setAccessibleName("VideoControlPopupButton");
+    resetSpeedButton->setProperty("styleClass", QStringLiteral("VideoControlPopupButton"));
     resetSpeedButton->setFocusPolicy(Qt::NoFocus);
     resetSpeedButton->setFixedSize(180, 24);
     speedPopupLabel->setAlignment(Qt::AlignCenter);

@@ -4,7 +4,7 @@ VideoControlsProxyWrapper::VideoControlsProxyWrapper(QWidget *parent)
     : QWidget(parent),
       videoControls(nullptr)
 {
-    setAccessibleName("VideoControlsRow");
+    setProperty("styleClass", QStringLiteral("VideoControlsRow"));
     setAttribute(Qt::WA_StyledBackground, true);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     layout.setContentsMargins(0, 0, 0, 0);

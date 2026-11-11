@@ -13,9 +13,6 @@
   <property name="windowTitle">
    <string notr="true"/>
   </property>
-  <property name="accessibleName">
-   <string notr="true"/>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>2</number>
@@ -37,14 +34,14 @@
    </property>
    <item>
     <widget class="IconButton" name="toggleButton" native="true">
-     <property name="accessibleName">
+     <property name="styleClass" stdset="0">
       <string notr="true">SaveOverlayToggle</string>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QLabel" name="label">
-     <property name="accessibleName">
+     <property name="styleClass" stdset="0">
       <string notr="true">SaveOverlayLabel</string>
      </property>
      <property name="text">
@@ -60,7 +57,7 @@
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
      </property>
-     <property name="accessibleName">
+     <property name="styleClass" stdset="0">
       <string notr="true">SaveOverlayButton</string>
      </property>
      <property name="text">
@@ -73,7 +70,7 @@
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
      </property>
-     <property name="accessibleName">
+     <property name="styleClass" stdset="0">
       <string notr="true">SaveOverlayPrimary</string>
      </property>
      <property name="text">
@@ -86,7 +83,7 @@
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
      </property>
-     <property name="accessibleName">
+     <property name="styleClass" stdset="0">
       <string notr="true">SaveOverlayButton</string>
      </property>
      <property name="text">
@@ -96,7 +93,7 @@
    </item>
    <item>
     <widget class="IconButton" name="collapseButton" native="true">
-     <property name="accessibleName">
+     <property name="styleClass" stdset="0">
       <string notr="true">SaveOverlayToggle</string>
      </property>
     </widget>

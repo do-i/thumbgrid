@@ -31,9 +31,6 @@
   <property name="windowTitle">
    <string notr="true"/>
   </property>
-  <property name="accessibleName">
-   <string notr="true"/>
-  </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
    <property name="spacing">
     <number>7</number>
@@ -81,7 +78,7 @@
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
-       <property name="accessibleName">
+       <property name="styleClass" stdset="0">
         <string notr="true">Button</string>
        </property>
       </widget>
@@ -125,7 +122,7 @@
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
-       <property name="accessibleName">
+       <property name="styleClass" stdset="0">
         <string notr="true">ButtonSetLeft</string>
        </property>
       </widget>
@@ -153,7 +150,7 @@
        <property name="focusPolicy">
         <enum>Qt::NoFocus</enum>
        </property>
-       <property name="accessibleName">
+       <property name="styleClass" stdset="0">
         <string notr="true">ButtonSetRight</string>
        </property>
       </widget>
@@ -180,7 +177,7 @@
        <height>36</height>
       </size>
      </property>
-     <property name="accessibleName">
+     <property name="styleClass" stdset="0">
       <string notr="true">Button</string>
      </property>
     </widget>
@@ -223,9 +220,6 @@
      </property>
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
-     </property>
-     <property name="accessibleName">
-      <string notr="true"/>
      </property>
      <property name="orientation">
       <enum>Qt::Horizontal</enum>

@@ -11,7 +11,7 @@ VideoPlayerInitProxy::VideoPlayerInitProxy(QWidget *parent)
     : VideoPlayer(parent),
       player(nullptr)
 {
-    setAccessibleName("VideoPlayerInitProxy");
+    setProperty("styleClass", QStringLiteral("VideoPlayerInitProxy"));
     setMouseTracking(true);
     layout.setContentsMargins(0,0,0,0);
     setLayout(&layout);

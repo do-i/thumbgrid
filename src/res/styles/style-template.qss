@@ -83,7 +83,7 @@ SSideBarItem[checked="true"] {
 /*----------------------------------------------------------------------------*/
 /* Buttons */
 
-[accessibleName="Button"], [accessibleName="ButtonSetLeft"], [accessibleName="ButtonSetRight"]
+[styleClass="Button"], [styleClass="ButtonSetLeft"], [styleClass="ButtonSetRight"]
 {
     color: %text_hc%;
     background-color: %button%;
@@ -91,34 +91,34 @@ SSideBarItem[checked="true"] {
     padding: 7px 12px 7px 12px;
 }
 
-[accessibleName="Button"]:hover, [accessibleName="ButtonSetLeft"]:hover, [accessibleName="ButtonSetRight"]:hover
+[styleClass="Button"]:hover, [styleClass="ButtonSetLeft"]:hover, [styleClass="ButtonSetRight"]:hover
 {
     background-color: %button_hover%;
     color: %text_hc2%;
 }
 
 /* grouped after a :pressed selector, the [pressed="true"] ones never match (see backlog) */
-[accessibleName="Button"]:pressed,
-[accessibleName="Button"][pressed="true"],
-[accessibleName="ButtonSetLeft"]:pressed,  [accessibleName="ButtonSetLeft"][pressed="true"],
-[accessibleName="ButtonSetRight"]:pressed, [accessibleName="ButtonSetRight"][pressed="true"]
+[styleClass="Button"]:pressed,
+[styleClass="Button"][pressed="true"],
+[styleClass="ButtonSetLeft"]:pressed,  [styleClass="ButtonSetLeft"][pressed="true"],
+[styleClass="ButtonSetRight"]:pressed, [styleClass="ButtonSetRight"][pressed="true"]
 {
     background-color: %button_pressed%;
     color: %text%;
 }
 
-[accessibleName="ButtonSetLeft"] {
+[styleClass="ButtonSetLeft"] {
     border-top-right-radius: 0px;
     border-bottom-right-radius: 0px;
 }
 
-[accessibleName="ButtonSetRight"] {
+[styleClass="ButtonSetRight"] {
     border-left: 1px solid %button_pressed%;
     border-top-left-radius: 0px;
     border-bottom-left-radius: 0px;
 }
 
-[accessibleName="ButtonSetRight"]:hover {
+[styleClass="ButtonSetRight"]:hover {
     border-left: 1px solid %button_pressed%;
 }
 
@@ -264,33 +264,33 @@ FloatingWidget {
     border-radius: %radius%;
 }
 /*----------------------------------------------------------------------------*/
-[accessibleName="OverlayHeaderWidget"] {
+[styleClass="OverlayHeaderWidget"] {
     border-top-left-radius: 1px;
     border-top-right-radius: 1px;
 }
 /*----------------------------------------------------------------------------*/
-[accessibleName="OverlayHeaderButton"],
-[accessibleName="OverlayHeaderIcon"] {
+[styleClass="OverlayHeaderButton"],
+[styleClass="OverlayHeaderIcon"] {
     min-height: %overlay_header_size%;
     min-width: %overlay_header_size%;
 }
 
-[accessibleName="OverlayHeaderButton"] {
+[styleClass="OverlayHeaderButton"] {
     background-color: transparent;
     margin: 3px;
     border-radius: %radius%;
 }
 
-[accessibleName="OverlayHeaderButton"]:hover {
+[styleClass="OverlayHeaderButton"]:hover {
     background-color: %button_hover%;
 }
 
-[accessibleName="OverlayHeaderButton"][pressed="true"] {
+[styleClass="OverlayHeaderButton"][pressed="true"] {
     background-color: %button_pressed%;
     color: %text%;
 }
 
-[accessibleName="OverlayHeaderLabel"] {
+[styleClass="OverlayHeaderLabel"] {
     color: %text_hc%;
 }
 
@@ -314,7 +314,7 @@ RenameOverlay {
     background-color: %fv_backdrop_rgba%;
 }
 
-[accessibleName = "RenameOverlayWidget"] {
+[styleClass = "RenameOverlayWidget"] {
     background-color: %widget%;
     border: 1px solid %widget_border%;
     border-radius: %radius%;
@@ -330,14 +330,14 @@ SaveConfirmOverlay {
     border-radius: %radius_panel%;
 }
 
-[accessibleName="SaveOverlayLabel"] {
+[styleClass="SaveOverlayLabel"] {
     color: %text_lc%;
     padding-left: 4px;
     padding-right: 6px;
 }
 
-[accessibleName="SaveOverlayPrimary"],
-[accessibleName="SaveOverlayButton"] {
+[styleClass="SaveOverlayPrimary"],
+[styleClass="SaveOverlayButton"] {
     color: %text_hc%;
     background-color: transparent;
     border: none;
@@ -345,29 +345,29 @@ SaveConfirmOverlay {
     padding: 4px 9px 4px 9px;
 }
 
-[accessibleName="SaveOverlayPrimary"] {
+[styleClass="SaveOverlayPrimary"] {
     color: %text_hc2%;
     background-color: %button%;
 }
 
-[accessibleName="SaveOverlayPrimary"]:hover,
-[accessibleName="SaveOverlayButton"]:hover {
+[styleClass="SaveOverlayPrimary"]:hover,
+[styleClass="SaveOverlayButton"]:hover {
     background-color: %button_hover%;
     color: %text_hc2%;
 }
 
-[accessibleName="SaveOverlayPrimary"]:pressed,
-[accessibleName="SaveOverlayButton"]:pressed {
+[styleClass="SaveOverlayPrimary"]:pressed,
+[styleClass="SaveOverlayButton"]:pressed {
     background-color: %button_pressed%;
 }
 
-[accessibleName="SaveOverlayPrimary"]:disabled,
-[accessibleName="SaveOverlayButton"]:disabled {
+[styleClass="SaveOverlayPrimary"]:disabled,
+[styleClass="SaveOverlayButton"]:disabled {
     color: %text_lc2%;
     background-color: transparent;
 }
 
-[accessibleName="SaveOverlayToggle"] {
+[styleClass="SaveOverlayToggle"] {
     min-width: 24px;
     min-height: 24px;
     max-width: 24px;
@@ -376,8 +376,8 @@ SaveConfirmOverlay {
     border-radius: %radius%;
 }
 
-[accessibleName="SaveOverlayToggle"]:hover,
-[accessibleName="SaveOverlayToggle"][pressed="true"] {
+[styleClass="SaveOverlayToggle"]:hover,
+[styleClass="SaveOverlayToggle"][pressed="true"] {
     background-color: %button_hover%;
 }
 
@@ -413,22 +413,22 @@ MoveProgressOverlay {
     border-radius: %radius_panel%;
 }
 
-[accessibleName="MoveProgressLabel"] {
+[styleClass="MoveProgressLabel"] {
     color: %text_hc%;
 }
 
-[accessibleName="MoveProgressBar"] {
+[styleClass="MoveProgressBar"] {
     background-color: %button%;
     border: none;
     border-radius: 2px;
 }
 
-[accessibleName="MoveProgressBar"]::chunk {
+[styleClass="MoveProgressBar"]::chunk {
     background-color: %accent%;
     border-radius: 2px;
 }
 
-[accessibleName="MoveProgressCancel"] {
+[styleClass="MoveProgressCancel"] {
     color: %text_hc2%;
     background-color: %button%;
     border: none;
@@ -436,15 +436,15 @@ MoveProgressOverlay {
     padding: 4px 9px 4px 9px;
 }
 
-[accessibleName="MoveProgressCancel"]:hover {
+[styleClass="MoveProgressCancel"]:hover {
     background-color: %button_hover%;
 }
 
-[accessibleName="MoveProgressCancel"]:pressed {
+[styleClass="MoveProgressCancel"]:pressed {
     background-color: %button_pressed%;
 }
 
-[accessibleName="MoveProgressCancel"]:disabled {
+[styleClass="MoveProgressCancel"]:disabled {
     color: %text_lc2%;
     background-color: transparent;
 }
@@ -552,14 +552,14 @@ SidePanel QComboBox QAbstractItemView::item:selected {
 /* Video controls */
 /*----------------------------------------------------------------------------*/
 
-[accessibleName="VideoControlsRow"] {
+[styleClass="VideoControlsRow"] {
     background-color: %widget%;
     border-top: 1px solid %text_lc2%;
     min-height: 26px;
     max-height: 26px;
 }
 
-[accessibleName="VideoControlSeparator"] {
+[styleClass="VideoControlSeparator"] {
     background-color: %text_lc2%;
     min-width: 1px;
     max-width: 1px;
@@ -572,9 +572,9 @@ VideoControls QLabel {
     font-size: %font_small%;
 }
 
-VideoControls [accessibleName="Button"],
-VideoControls [accessibleName="ButtonSetLeft"],
-VideoControls [accessibleName="ButtonSetRight"] {
+VideoControls [styleClass="Button"],
+VideoControls [styleClass="ButtonSetLeft"],
+VideoControls [styleClass="ButtonSetRight"] {
     background-color: %button%;
     border: 1px solid %button_hover%;
     border-radius: %radius%;
@@ -582,25 +582,25 @@ VideoControls [accessibleName="ButtonSetRight"] {
     padding: 0px;
 }
 
-VideoControls [accessibleName="Button"]:hover,
-VideoControls [accessibleName="ButtonSetLeft"]:hover,
-VideoControls [accessibleName="ButtonSetRight"]:hover {
+VideoControls [styleClass="Button"]:hover,
+VideoControls [styleClass="ButtonSetLeft"]:hover,
+VideoControls [styleClass="ButtonSetRight"]:hover {
     background-color: %button_hover%;
     border-color: %text_lc2%;
 }
 
-VideoControls [accessibleName="Button"]:pressed,
-VideoControls [accessibleName="Button"][pressed="true"],
-VideoControls [accessibleName="Button"][checked="true"],
-VideoControls [accessibleName="ButtonSetLeft"]:pressed,
-VideoControls [accessibleName="ButtonSetLeft"][pressed="true"],
-VideoControls [accessibleName="ButtonSetRight"]:pressed,
-VideoControls [accessibleName="ButtonSetRight"][pressed="true"] {
+VideoControls [styleClass="Button"]:pressed,
+VideoControls [styleClass="Button"][pressed="true"],
+VideoControls [styleClass="Button"][checked="true"],
+VideoControls [styleClass="ButtonSetLeft"]:pressed,
+VideoControls [styleClass="ButtonSetLeft"][pressed="true"],
+VideoControls [styleClass="ButtonSetRight"]:pressed,
+VideoControls [styleClass="ButtonSetRight"][pressed="true"] {
     background-color: %button_pressed%;
     border-color: %button_pressed%;
 }
 
-VideoControls QPushButton[accessibleName="VideoControlTextButton"] {
+VideoControls QPushButton[styleClass="VideoControlTextButton"] {
     color: %text_hc%;
     background-color: %button%;
     border: 1px solid %button_hover%;
@@ -610,31 +610,31 @@ VideoControls QPushButton[accessibleName="VideoControlTextButton"] {
     font-size: %font_small%;
 }
 
-VideoControls QPushButton[accessibleName="VideoControlTextButton"]:hover {
+VideoControls QPushButton[styleClass="VideoControlTextButton"]:hover {
     background-color: %button_hover%;
     border-color: %text_lc2%;
     color: %text_hc2%;
 }
 
-VideoControls QPushButton[accessibleName="VideoControlTextButton"]:pressed,
-VideoControls QPushButton[accessibleName="VideoControlTextButton"][checked="true"] {
+VideoControls QPushButton[styleClass="VideoControlTextButton"]:pressed,
+VideoControls QPushButton[styleClass="VideoControlTextButton"][checked="true"] {
     background-color: %button_pressed%;
     border-color: %button_pressed%;
     color: %text%;
 }
 
-QFrame[accessibleName="VideoControlPopup"] {
+QFrame[styleClass="VideoControlPopup"] {
     background-color: %widget%;
     border: 1px solid %text_lc2%;
     border-radius: %radius_panel%;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QLabel {
+QFrame[styleClass="VideoControlPopup"] QLabel {
     color: %text_hc2%;
     font-size: %font_small%;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"] {
+QFrame[styleClass="VideoControlPopup"] QPushButton[styleClass="VideoControlPopupButton"] {
     color: %text_hc%;
     background-color: %button%;
     border: 1px solid %button_hover%;
@@ -643,7 +643,7 @@ QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoCont
     font-size: %font_small%;
 }
 
-QFrame[accessibleName="VideoControlPopup"] QPushButton[accessibleName="VideoControlPopupButton"]:hover {
+QFrame[styleClass="VideoControlPopup"] QPushButton[styleClass="VideoControlPopupButton"]:hover {
     background-color: %button_hover%;
     border-color: %text_lc2%;
 }
@@ -667,7 +667,7 @@ PathSelectorMenuItem [styleClass="MenuItemIcon"]:hover {
 /* Video background. Pretty sure this doesn't work.. */
 /*----------------------------------------------------------------------------*/
 
-[accessibleName="mpvContainer"] {
+[styleClass="mpvContainer"] {
     background-color: black;
 }
 
@@ -1124,7 +1124,7 @@ BookmarksItem[highlighted="true"] {
     background-color: %folderview%;
 }
 /*----------------------------------------------------------------------------*/
-[accessibleName="VideoPlayerInitProxy"] QLabel {
+[styleClass="VideoPlayerInitProxy"] QLabel {
     color: #BB0000;
     font: bold;
 }

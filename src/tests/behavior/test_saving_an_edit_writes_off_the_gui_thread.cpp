@@ -318,7 +318,7 @@ void SavingAnEditWritesOffTheGuiThreadTest::thePencilTogglesTheSaveOptions() {
     QVERIFY(overlay->isExpanded());
     QVERIFY(saveAs->isVisible() && undo->isVisible() && collapse->isVisible());
     QCOMPARE(undo->text(), QStringLiteral("Undo all"));
-    QCOMPARE(saveAs->accessibleName(), QStringLiteral("SaveOverlayPrimary"));
+    QCOMPARE(saveAs->property("styleClass").toString(), QStringLiteral("SaveOverlayPrimary"));
     QVERIFY2(overlay->width() > iconRect.width(), "Expanded should be wider than the icon.");
     QCOMPARE(overlay->geometry().right(), iconRect.right());
     QCOMPARE(overlay->geometry().bottom(), iconRect.bottom());

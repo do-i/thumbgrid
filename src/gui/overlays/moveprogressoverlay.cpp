@@ -9,10 +9,9 @@ MoveProgressOverlay::MoveProgressOverlay(FloatingWidgetContainer *parent)
       bar(new QProgressBar(this)),
       cancelButton(new QPushButton(tr("Cancel"), this))
 {
-    setAccessibleName(QStringLiteral("MoveProgressOverlay"));
-    label->setAccessibleName(QStringLiteral("MoveProgressLabel"));
-    bar->setAccessibleName(QStringLiteral("MoveProgressBar"));
-    cancelButton->setAccessibleName(QStringLiteral("MoveProgressCancel"));
+    label->setProperty("styleClass", QStringLiteral("MoveProgressLabel"));
+    bar->setProperty("styleClass", QStringLiteral("MoveProgressBar"));
+    cancelButton->setProperty("styleClass", QStringLiteral("MoveProgressCancel"));
     bar->setTextVisible(false);
     bar->setFixedSize(120, 4);
     setFocusPolicy(Qt::NoFocus);
