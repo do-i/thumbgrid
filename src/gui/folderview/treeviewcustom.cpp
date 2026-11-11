@@ -1,9 +1,10 @@
 #include "treeviewcustom.h"
 
+#include "gui/folderview/folderdrop.h"
+
 TreeViewCustom::TreeViewCustom(QWidget *parent) : QTreeView(parent) {
     setAcceptDrops(true);
     setDropIndicatorShown(true);
-    setDragEnabled(true);
 
     // proxy scrollbar
     this->verticalScrollBar()->setStyleSheet("max-width: 0px;");
@@ -29,21 +30,36 @@ void TreeViewCustom::readSettings() {
     mAppliedHandleColor = QColor(); // rebuild on the next update
 }
 
+// the model's own drop handling would move files itself; the app's file operations do it instead
 void TreeViewCustom::dropEvent(QDropEvent *event) {
-    QModelIndex dropIndex = indexAt(event->position().toPoint());
-    if(dropIndex.isValid()) {
-        QStringList paths;
-        // TODO: QUrl gave me some issues previosly, test
-        for(const auto& url : event->mimeData()->urls())
-            paths << url.toLocalFile();
-        emit droppedIn(paths, dropIndex);
+    stopAutoScroll();
+    setState(NoState);
+    viewport()->update();
+    const QModelIndex dropIndex = indexAt(event->position().toPoint());
+    const QStringList paths = droppedLocalPaths(event->mimeData());
+    if(!dropIndex.isValid() || paths.isEmpty()) {
+        event->ignore();
+        return;
     }
+    acceptFolderDrop(event);
+    emit droppedIn(paths, dropIndex, folderDropCopies(event));
 }
 
 void TreeViewCustom::dragEnterEvent(QDragEnterEvent *event) {
-    if(event->mimeData()->hasUrls()) {
-        event->acceptProposedAction();
-    }
+    QTreeView::dragEnterEvent(event);
+    if(event->mimeData()->hasUrls())
+        acceptFolderDrop(event);
+    else
+        event->ignore();
+}
+
+// over a row only; the base class draws the indicator and scrolls near the edges
+void TreeViewCustom::dragMoveEvent(QDragMoveEvent *event) {
+    QTreeView::dragMoveEvent(event);
+    if(event->mimeData()->hasUrls() && indexAt(event->position().toPoint()).isValid())
+        acceptFolderDrop(event);
+    else
+        event->ignore();
 }
 
 void TreeViewCustom::showEvent(QShowEvent *event) {

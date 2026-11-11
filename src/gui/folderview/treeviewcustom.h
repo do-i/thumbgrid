@@ -24,7 +24,8 @@ public:
     bool isEditing() const { return mEditMode != EditMode::None; }
 
 signals:
-    void droppedIn(QStringList, QModelIndex);
+    // copy: Ctrl was held, otherwise the files are to be moved
+    void droppedIn(const QStringList &paths, const QModelIndex &index, bool copy);
     // right-click on a row, or the menu key on the current row; the row is not selected
     void renameCommitted(const QModelIndex &index, const QString &name);
     void newFolderCommitted(const QModelIndex &parent, const QString &name);
@@ -33,6 +34,7 @@ signals:
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 

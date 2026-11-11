@@ -885,3 +885,11 @@ add_test(
     NAME "The folder tree remembers expanded folders and restores them as they are listed"
     COMMAND thumbgrid_folder_tree_remembers_expanded_test
 )
+
+thumbgrid_add_behavior_test(thumbgrid_folder_tree_drops_test
+    behavior/test_folder_tree_drops_move_or_copy_with_ctrl.cpp
+)
+add_test(
+    NAME "Files dropped on a tree folder or bookmark are moved, or copied with Ctrl held"
+    COMMAND thumbgrid_folder_tree_drops_test
+)

@@ -141,7 +141,13 @@ FolderView::FolderView(QWidget *parent) :
     connect(ui->dirTreeView, &QTreeView::collapsed, this, &FolderView::onTreeCollapsed);
     connect(dirModel, &FileSystemModelCustom::folderIconChanged, ui->dirTreeView->viewport(),
             qOverload<>(&QWidget::update));
-    connect(ui->bookmarksWidget, &BookmarksWidget::droppedIn, this, &FolderView::moveUrlsRequested); // ask what to do via popup? copy or move
+    connect(ui->bookmarksWidget, &BookmarksWidget::droppedIn, this,
+            [this](const QStringList &paths, const QString &dirPath, bool copy) {
+        if(copy)
+            emit copyUrlsRequested(paths, dirPath);
+        else
+            emit moveUrlsRequested(paths, dirPath);
+    });
 
     ui->sortingComboBox->setItemDelegate(new QStyledItemDelegate(ui->sortingComboBox));
     ui->sortingComboBox->view()->setTextElideMode(Qt::ElideNone);
@@ -233,9 +239,12 @@ void FolderView::toggleFilesystemView() {
     settings->setPlacesPanelTreeExpanded(mTreeExpanded);
 }
 
-// TODO: ask what to do
-void FolderView::onDroppedInByIndex(QStringList paths, QModelIndex index) {
-    emit moveUrlsRequested(std::move(paths), dirModel->filePath(index));
+// both ask for confirmation in FileOperationsController, like Copy to / Move to
+void FolderView::onDroppedInByIndex(const QStringList &paths, const QModelIndex &index, bool copy) {
+    if(copy)
+        emit copyUrlsRequested(paths, dirModel->filePath(index));
+    else
+        emit moveUrlsRequested(paths, dirModel->filePath(index));
 }
 
 void FolderView::onTreeContextMenuRequested(const QModelIndex &index, const QPoint &globalPos) {

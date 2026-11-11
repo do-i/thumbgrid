@@ -91,7 +91,7 @@ private slots:
     void readSettings();
 
     void onTreeViewClicked(QModelIndex index);
-    void onDroppedInByIndex(QStringList, QModelIndex index);
+    void onDroppedInByIndex(const QStringList &paths, const QModelIndex &index, bool copy);
     void onTreeMiddleClicked(const QModelIndex &index);
     void collapseTree();
     void onTreeRenameCommitted(const QModelIndex &index, const QString &name);

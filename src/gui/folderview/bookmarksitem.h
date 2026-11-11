@@ -25,7 +25,8 @@ public slots:
 signals:
     void clicked(const QString& dirPath);
     void removeClicked(const QString& dirPath);
-    void droppedIn(const QStringList& paths, const QString& dirPath);
+    // copy: Ctrl was held, otherwise the files are to be moved
+    void droppedIn(const QStringList& paths, const QString& dirPath, bool copy);
 
 protected:
     void mouseReleaseEvent(QMouseEvent *event) override;
@@ -34,6 +35,7 @@ protected:
     void paintEvent(QPaintEvent *event) override;
     void dropEvent(QDropEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
+    void dragMoveEvent(QDragMoveEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
 
 private slots:

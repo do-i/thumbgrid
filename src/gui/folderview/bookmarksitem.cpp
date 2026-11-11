@@ -1,5 +1,7 @@
 #include "bookmarksitem.h"
 
+#include "gui/folderview/folderdrop.h"
+
 #include <utility>
 
 BookmarksItem::BookmarksItem(QString _dirName, QString _dirPath, QWidget *parent)
@@ -71,19 +73,30 @@ void BookmarksItem::paintEvent(QPaintEvent *event) {
 }
 
 void BookmarksItem::dropEvent(QDropEvent *event) {
-    QStringList paths;
-    // TODO: QUrl gave me some issues previosly, test
-    for(const auto& url : event->mimeData()->urls())
-        paths << url.toLocalFile();
-    emit droppedIn(paths, dirPath);
+    setProperty("hover", false);
+    update();
+    const QStringList paths = droppedLocalPaths(event->mimeData());
+    if(paths.isEmpty()) {
+        event->ignore();
+        return;
+    }
+    acceptFolderDrop(event);
+    emit droppedIn(paths, dirPath, folderDropCopies(event));
 }
 
 void BookmarksItem::dragEnterEvent(QDragEnterEvent *event) {
-    if(event->mimeData()->hasUrls()) {
-        event->acceptProposedAction();
-    }
+    if(event->mimeData()->hasUrls())
+        acceptFolderDrop(event);
     setProperty("hover", true);
     update();
+}
+
+// Ctrl can be pressed or released while hovering
+void BookmarksItem::dragMoveEvent(QDragMoveEvent *event) {
+    if(event->mimeData()->hasUrls())
+        acceptFolderDrop(event);
+    else
+        event->ignore();
 }
 
 void BookmarksItem::dragLeaveEvent(QDragLeaveEvent *event) {
