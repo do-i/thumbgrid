@@ -4,6 +4,16 @@
 #include <QFileInfo>
 #include <QtGlobal>
 
+#ifndef Q_OS_MACOS
+FileOperationsPlatform::RenameResult FileOperationsPlatform::renameNoReplace(const QString &, const QString &) {
+    return RenameResult::Unsupported;
+}
+
+FileOperationsPlatform::FilesystemRelation FileOperationsPlatform::filesystemRelation(const QString &, const QString &) {
+    return FilesystemRelation::Unknown;
+}
+#endif
+
 bool FileOperationsPlatform::canRemoveSource(const QFileInfo &) {
     return true;
 }

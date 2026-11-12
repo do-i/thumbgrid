@@ -11,7 +11,43 @@
 #include <QtGlobal>
 
 #include <cstdlib>
+#include <cerrno>
+#include <cstdio>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include "utils/logging.h"
+
+FileOperationsPlatform::RenameResult FileOperationsPlatform::renameNoReplace(const QString &srcPath, const QString &dstPath) {
+    if(::renameat2(AT_FDCWD, QFile::encodeName(srcPath).constData(),
+                   AT_FDCWD, QFile::encodeName(dstPath).constData(), RENAME_NOREPLACE) == 0)
+        return RenameResult::Success;
+    switch(errno) {
+    case EEXIST:
+    case ENOTEMPTY:
+        return RenameResult::DestinationExists;
+    case EXDEV:
+        return RenameResult::CrossDevice;
+    case ENOSYS:
+    case EINVAL: // A kernel/filesystem without support for RENAME_NOREPLACE.
+    case EOPNOTSUPP:
+        return RenameResult::Unsupported;
+    default:
+        return RenameResult::Error;
+    }
+}
+
+FileOperationsPlatform::FilesystemRelation FileOperationsPlatform::filesystemRelation(const QString &path, const QString &dirPath) {
+    struct statx src {}, dst {};
+    if(::statx(AT_FDCWD, QFile::encodeName(path).constData(), AT_SYMLINK_NOFOLLOW, STATX_MNT_ID, &src) != 0 ||
+       ::statx(AT_FDCWD, QFile::encodeName(dirPath).constData(), 0, STATX_MNT_ID, &dst) != 0)
+        return FilesystemRelation::Unknown;
+    if(src.stx_dev_major != dst.stx_dev_major || src.stx_dev_minor != dst.stx_dev_minor)
+        return FilesystemRelation::Different;
+    // A bind mount keeps the device but rename still fails with EXDEV across its boundary.
+    if((src.stx_mask & STATX_MNT_ID) && (dst.stx_mask & STATX_MNT_ID))
+        return src.stx_mnt_id == dst.stx_mnt_id ? FilesystemRelation::Same : FilesystemRelation::Different;
+    return FilesystemRelation::Unknown;
+}
 
 bool FileOperationsPlatform::canRemoveSource(const QFileInfo &) {
     return true;

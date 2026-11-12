@@ -18,6 +18,8 @@ target_sources(${THUMBGRID_APP_TARGET} PRIVATE
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(FILEOPERATIONS_PLATFORM_SOURCE fileoperations_linux.cpp)
+elseif(APPLE)
+    set(FILEOPERATIONS_PLATFORM_SOURCE fileoperations_macos.cpp fileoperations_fallback.cpp)
 else()
     set(FILEOPERATIONS_PLATFORM_SOURCE fileoperations_fallback.cpp)
 endif()

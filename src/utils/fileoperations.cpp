@@ -1,8 +1,6 @@
 #include "fileoperations.h"
 #include "fileoperations_platform.h"
-#include <cstdio>
-#include <fcntl.h>
-#include <sys/stat.h>
+#include <QUuid>
 
 QString FileOperations::generateHash(const QString &str) {
     return QString(QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Md5).toHex());
@@ -105,6 +103,7 @@ QString FileOperations::decodeResult(const FileOpResult &result) {
         return QObject::tr("Invalid name. Enter a file name without slashes, and not \".\" or \"..\"");
     case FileOpResult::DESTINATION_INSIDE_SOURCE:
         return QObject::tr("Cannot copy or move a folder into itself");
+    case FileOpResult::MOVE_REQUIRES_COPY:
     case FileOpResult::OTHER_ERROR:
         return QObject::tr("Other error");
     }
@@ -120,43 +119,55 @@ static FileOpResult checkDestinationDir(const QString &destDirPath) {
     return FileOpResult::SUCCESS;
 }
 
-// RENAME_NOREPLACE makes the no-clobber check atomic: a plain rename() silently replaces a file or an
-// empty directory that appeared at the destination after our exists() check.
-bool FileOperations::renameNoReplace(const QString &srcPath, const QString &dstPath) {
-    return ::renameat2(AT_FDCWD, QFile::encodeName(srcPath).constData(),
-                       AT_FDCWD, QFile::encodeName(dstPath).constData(), RENAME_NOREPLACE) == 0;
+static FileOpResult destinationCollision(const QString &path) {
+    const QFileInfo entry(path);
+    return entry.isDir() && !entry.isSymLink() ? FileOpResult::DESTINATION_DIR_EXISTS
+                                              : FileOpResult::DESTINATION_FILE_EXISTS;
+}
+
+static bool restoreDestinationBackup(const QString &backupPath, const QString &destinationPath) {
+    if(FileOperationsPlatform::renameNoReplace(backupPath, destinationPath) == FileOperationsPlatform::RenameResult::Success)
+        return true;
+    // Keep the backup if another entry now occupies the destination or restoration fails.
+    qWarning() << "Could not restore destination; original is preserved at" << backupPath;
+    return false;
 }
 
 // If destFile exists, check it may be replaced and (with force) move it aside so a failed copy/move
 // can restore it. SUCCESS means proceed.
 FileOpResult FileOperations::backupExistingDestination(const QFileInfo &destFile, bool force, QString &tmpPath, bool &backedUp) {
     backedUp = false;
-    if(!destFile.exists())
+    if(!destFile.exists() && !destFile.isSymLink())
         return FileOpResult::SUCCESS;
     if(!FileOperationsPlatform::canReplaceExistingDestination(destFile))
         return FileOpResult::DESTINATION_NOT_WRITABLE;
-    if(destFile.isDir())
+    if(destFile.isDir() && !destFile.isSymLink())
         return FileOpResult::DESTINATION_DIR_EXISTS;
     if(!force)
         return FileOpResult::DESTINATION_FILE_EXISTS;
-    // remove just in case it exists
-    tmpPath = destFile.absoluteFilePath() + "_" + generateHash(destFile.absoluteFilePath());
-    QFile::remove(tmpPath);
-    // move backup
-    QFile::rename(destFile.absoluteFilePath(), tmpPath);
-    backedUp = true;
-    return FileOpResult::SUCCESS;
+    // Never remove a predictable temporary name or claim a backup before the rename succeeds.
+    for(int attempt = 0; attempt < 8; ++attempt) {
+        tmpPath = QDir(destFile.absolutePath()).filePath(".thumbgrid-backup-" + QUuid::createUuid().toString(QUuid::WithoutBraces));
+        const auto renamed = FileOperationsPlatform::renameNoReplace(destFile.absoluteFilePath(), tmpPath);
+        if(renamed == FileOperationsPlatform::RenameResult::Success) {
+            backedUp = true;
+            return FileOpResult::SUCCESS;
+        }
+        if(renamed != FileOperationsPlatform::RenameResult::DestinationExists)
+            return FileOpResult::OTHER_ERROR;
+    }
+    return FileOpResult::OTHER_ERROR;
 }
 
-// QFile::copy() doesn't preserve mtime/atime; false if the file could not be reopened
+// QFile::copy() doesn't preserve mtime/atime; require both timestamp updates to succeed.
 bool FileOperations::restoreFileTimestamps(const QString &filePath, const QDateTime &modTime, const QDateTime &readTime) {
     QFile dstF(filePath);
-    if(!dstF.open(QIODevice::ReadWrite))
+    if(!dstF.open(QIODevice::ReadOnly))
         return false;
-    dstF.setFileTime(modTime, QFileDevice::FileModificationTime);
-    dstF.setFileTime(readTime, QFileDevice::FileAccessTime);
+    const bool restored = dstF.setFileTime(modTime, QFileDevice::FileModificationTime)
+                       && dstF.setFileTime(readTime, QFileDevice::FileAccessTime);
     dstF.close();
-    return true;
+    return restored;
 }
 
 void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destDirPath, bool force, FileOpResult &result) {
@@ -186,6 +197,8 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
         result = FileOpResult::SUCCESS;
         if(!restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime)) {
             result = FileOpResult::OTHER_ERROR;
+            if(QFile::remove(destFile.absoluteFilePath()) && exists)
+                restoreDestinationBackup(tmpPath, destFile.absoluteFilePath());
             return;
         }
         // ok; remove the backup
@@ -194,7 +207,8 @@ void FileOperations::copyFileTo(const QString &srcFilePath, const QString &destD
     } else {
         result = FileOpResult::OTHER_ERROR;
         // fail; revert
-        QFile::rename(tmpPath, destFile.absoluteFilePath());
+        if(exists)
+            restoreDestinationBackup(tmpPath, destFile.absoluteFilePath());
     }
     return;
 }
@@ -224,41 +238,54 @@ void FileOperations::moveFileTo(const QString &srcFilePath, const QString &destD
     if(result != FileOpResult::SUCCESS)
         return;
     // same filesystem: a rename moves no data and keeps the inode, timestamps and hard links
-    if(renameNoReplace(srcFile.absoluteFilePath(), destFile.absoluteFilePath())) {
+    const auto renamed = FileOperationsPlatform::renameNoReplace(srcFile.absoluteFilePath(), destFile.absoluteFilePath());
+    if(renamed == FileOperationsPlatform::RenameResult::Success) {
         result = FileOpResult::SUCCESS;
         if(exists)
             QFile::remove(tmpPath);
         return;
     }
-    // otherwise (e.g. EXDEV) copy, then remove the original
+    if(renamed != FileOperationsPlatform::RenameResult::CrossDevice &&
+       renamed != FileOperationsPlatform::RenameResult::Unsupported) {
+        result = renamed == FileOperationsPlatform::RenameResult::DestinationExists
+                   ? destinationCollision(destFile.absoluteFilePath()) : FileOpResult::OTHER_ERROR;
+        if(exists && !restoreDestinationBackup(tmpPath, destFile.absoluteFilePath()))
+            result = FileOpResult::OTHER_ERROR;
+        return;
+    }
+    // Only a cross-device or unsupported native rename may use copy-and-remove.
     auto srcModTime = srcFile.lastModified();
     auto srcReadTime = srcFile.lastRead();
     if(QFile::copy(srcFile.absoluteFilePath(), destFile.absoluteFilePath())) {
-        // remove original file
+        // All transfer steps must succeed before deleting the source.
+        if(!restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime)) {
+            result = FileOpResult::OTHER_ERROR;
+            if(QFile::remove(destFile.absoluteFilePath()) && exists)
+                restoreDestinationBackup(tmpPath, destFile.absoluteFilePath());
+            return;
+        }
         FileOpResult removeResult;
         removeFile(srcFile.absoluteFilePath(), removeResult);
         if(removeResult == FileOpResult::SUCCESS) {
             // OK
             result = FileOpResult::SUCCESS;
-            if(!restoreFileTimestamps(destFile.absoluteFilePath(), srcModTime, srcReadTime)) {
-                result = FileOpResult::OTHER_ERROR;
-                return;
-            }
             // remove backup
             if(exists)
                 QFile::remove(tmpPath);
             return;
         }
         // revert on failure
-        result = FileOpResult::SOURCE_NOT_WRITABLE;
-        if(QFile::remove(destFile.absoluteFilePath()))
+        result = removeResult;
+        if(!QFile::remove(destFile.absoluteFilePath()))
             result = FileOpResult::OTHER_ERROR;
     } else {
         // could not COPY
-        result = FileOpResult::OTHER_ERROR;
+        const QFileInfo destination(destFile.absoluteFilePath());
+        result = destination.exists() || destination.isSymLink()
+                   ? destinationCollision(destFile.absoluteFilePath()) : FileOpResult::OTHER_ERROR;
     }
-    if(exists) // failed; revert backup
-        QFile::rename(tmpPath, destFile.absoluteFilePath());
+    if(exists && !restoreDestinationBackup(tmpPath, destFile.absoluteFilePath()))
+        result = FileOpResult::OTHER_ERROR;
     return;
 }
 
@@ -324,16 +351,7 @@ void FileOperations::moveSymLinkTo(const QString &srcLinkPath, const QString &de
 }
 
 bool FileOperations::onSameFilesystem(const QString &path, const QString &dirPath) {
-    struct statx src {}, dst {};
-    if(::statx(AT_FDCWD, QFile::encodeName(path).constData(), AT_SYMLINK_NOFOLLOW, STATX_MNT_ID, &src) != 0 ||
-       ::statx(AT_FDCWD, QFile::encodeName(dirPath).constData(), 0, STATX_MNT_ID, &dst) != 0)
-        return true;
-    if(src.stx_dev_major != dst.stx_dev_major || src.stx_dev_minor != dst.stx_dev_minor)
-        return false;
-    // a bind mount keeps the device but is a different mount: rename(2) refuses it (EXDEV)
-    if((src.stx_mask & STATX_MNT_ID) && (dst.stx_mask & STATX_MNT_ID))
-        return src.stx_mnt_id == dst.stx_mnt_id;
-    return true;
+    return FileOperationsPlatform::filesystemRelation(path, dirPath) == FileOperationsPlatform::FilesystemRelation::Same;
 }
 
 void FileOperations::moveDirTo(const QString &srcDirPath, const QString &destDirPath, FileOpResult &result) {
@@ -350,11 +368,25 @@ void FileOperations::moveDirTo(const QString &srcDirPath, const QString &destDir
         return;
     QFileInfo destDir(destDirPath + "/" + srcDir.fileName());
     if(destDir.exists() || destDir.isSymLink()) {
-        result = destDir.isDir() ? FileOpResult::DESTINATION_DIR_EXISTS : FileOpResult::DESTINATION_FILE_EXISTS;
+        result = destinationCollision(destDir.absoluteFilePath());
         return;
     }
-    result = renameNoReplace(srcDir.absoluteFilePath(), destDir.absoluteFilePath()) ? FileOpResult::SUCCESS
-                                                                                       : FileOpResult::OTHER_ERROR;
+    const auto renamed = FileOperationsPlatform::renameNoReplace(srcDir.absoluteFilePath(), destDir.absoluteFilePath());
+    switch(renamed) {
+    case FileOperationsPlatform::RenameResult::Success:
+        result = FileOpResult::SUCCESS;
+        break;
+    case FileOperationsPlatform::RenameResult::DestinationExists:
+        result = destinationCollision(destDir.absoluteFilePath());
+        break;
+    case FileOperationsPlatform::RenameResult::CrossDevice:
+    case FileOperationsPlatform::RenameResult::Unsupported:
+        result = FileOpResult::MOVE_REQUIRES_COPY;
+        break;
+    case FileOperationsPlatform::RenameResult::Error:
+        result = FileOpResult::OTHER_ERROR;
+        break;
+    }
 }
 
 bool FileOperations::isValidFileName(const QString &name) {

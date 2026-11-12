@@ -1,6 +1,6 @@
 name: Tests
 
-# Build with testing enabled and run the CTest behavior suite on Linux.
+# Run the behavior suite on Linux and the move tests on macOS.
 on:
   push:
     branches:
@@ -54,3 +54,55 @@ jobs:
       # survive into the test run; pass it through explicitly.
       - name: Run tests
         run: sudo -u builder -H env QT_QPA_PLATFORM=offscreen ctest --test-dir build --output-on-failure
+
+  macos-move:
+    runs-on: macos-latest
+    env:
+      QT_QPA_PLATFORM: offscreen
+    steps:
+      - name: Install build tooling
+        run: brew install cmake ninja qt exiv2 mpv pkg-config extra-cmake-modules libheif
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Mark workspace as a safe git directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
+      - name: Export Homebrew build paths
+        run: |
+          qt_prefix="$(brew --prefix qt)"
+          echo "$qt_prefix/bin" >> "$GITHUB_PATH"
+          echo "CMAKE_PREFIX_PATH=$qt_prefix" >> "$GITHUB_ENV"
+          echo "PKG_CONFIG_PATH=$(brew --prefix exiv2)/lib/pkgconfig:$(brew --prefix mpv)/lib/pkgconfig:$PKG_CONFIG_PATH" >> "$GITHUB_ENV"
+
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$CMAKE_PREFIX_PATH" -DBUILD_TESTING=ON
+
+      - name: Build app and move tests
+        run: cmake --build build --target thumbgrid player_mpv thumbgrid_moving_a_folder_renames_it_test thumbgrid_file_move_safety_test
+
+      - name: Create a separate filesystem for move tests
+        run: |
+          image="$RUNNER_TEMP/thumbgrid-move-tests.dmg"
+          mountpoint="$RUNNER_TEMP/thumbgrid-cross-fs"
+          mkdir -p "$mountpoint"
+          hdiutil create -size 256m -fs APFS -volname ThumbgridMoveTests "$image"
+          hdiutil attach -nobrowse -mountpoint "$mountpoint" "$image"
+          echo "THUMBGRID_TEST_CROSS_FS_DIR=$mountpoint" >> "$GITHUB_ENV"
+
+      - name: Run folder move test
+        run: ctest --test-dir build --output-on-failure --verbose --no-tests=error -R '^Moving a folder within one filesystem renames it instead of copying$'
+
+      - name: Run file move safety test
+        run: ctest --test-dir build --output-on-failure --verbose --no-tests=error -R '^File moves preserve data and never clobber destinations$'
+
+      - name: Detach move test filesystem
+        if: always()
+        run: |
+          mountpoint="$RUNNER_TEMP/thumbgrid-cross-fs"
+          if mount | grep -F " on $mountpoint (" >/dev/null; then
+            hdiutil detach "$mountpoint"
+          fi

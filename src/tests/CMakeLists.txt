@@ -658,6 +658,14 @@ add_test(
     COMMAND thumbgrid_moving_a_folder_renames_it_test
 )
 
+thumbgrid_add_behavior_test(thumbgrid_file_move_safety_test
+    behavior/test_file_moves_preserve_data.cpp
+)
+add_test(
+    NAME "File moves preserve data and never clobber destinations"
+    COMMAND thumbgrid_file_move_safety_test
+)
+
 thumbgrid_add_behavior_test(thumbgrid_document_view_fit_modes_test
     behavior/test_document_view_fit_modes.cpp
 )

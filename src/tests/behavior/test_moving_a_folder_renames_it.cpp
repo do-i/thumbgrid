@@ -15,6 +15,7 @@
 #include "components/directorymodel.h"
 #include "components/fileoperationscontroller.h"
 #include "gui/overlays/moveprogressoverlay.h"
+#include "utils/fileoperations.h"
 
 // A same-filesystem move must be a rename (moved entries keep their inodes), not a recreate-and-copy on the GUI
 // thread; a destination that already exists still merges and a cross-filesystem move still works.
@@ -27,6 +28,18 @@ bool writeFile(const QString &path, const QByteArray &data) {
         return false;
     return f.write(data) == data.size();
 }
+
+QByteArray readFile(const QString &path) {
+    QFile file(path);
+    return file.open(QIODevice::ReadOnly) ? file.readAll() : QByteArray("<unreadable>");
+}
+
+struct RestorePermissions {
+    QString path;
+    QFile::Permissions permissions;
+    explicit RestorePermissions(const QString &value) : path(value), permissions(QFile::permissions(value)) {}
+    ~RestorePermissions() { QFile::setPermissions(path, permissions); }
+};
 
 struct stat statOf(const QString &path) {
     struct stat st {};
@@ -48,6 +61,7 @@ bool buildAlbum(const QDir &root) {
 class MovingAFolderRenamesItTest : public QObject {
     Q_OBJECT
 private slots:
+    void initTestCase();
     void aFolderMovedWithinOneFilesystemIsRenamedNotCopied();
     void aFileMovedWithinOneFilesystemIsRenamedNotCopied();
     void theMovedFolderLeavesTheListing();
@@ -60,6 +74,11 @@ private slots:
     void theProgressOverlayCancelButtonStopsTheMove();
     void theProgressOverlayHidesWhenTheMoveEnds();
     void noToAllNeverReplacesAFileWithAFolder();
+    void noToAllPreservesDestinationLinksAndTheirTargets_data();
+    void noToAllPreservesDestinationLinksAndTheirTargets();
+    void aFolderReplacesDestinationLinksWithoutTouchingTheirTargets_data();
+    void aFolderReplacesDestinationLinksWithoutTouchingTheirTargets();
+    void aFailedFolderRenameDoesNotStartMovingItsChildren();
     void aMoveStartedWhileTheOverlayFadesStillShowsIt();
 };
 
@@ -70,7 +89,7 @@ void MovingAFolderRenamesItTest::aFolderMovedWithinOneFilesystemIsRenamedNotCopi
     QVERIFY(buildAlbum(root));
     const ino_t dirInode = inodeOf(root.filePath("album"));
     const ino_t deepInode = inodeOf(root.filePath("album/sub/deep.txt"));
-    const auto subMtime = statOf(root.filePath("album/sub")).st_mtim.tv_sec;
+    const auto subMtime = QFileInfo(root.filePath("album/sub")).lastModified();
 
     MW *window = new MW();
     FileOperationsController ops(window);
@@ -81,7 +100,7 @@ void MovingAFolderRenamesItTest::aFolderMovedWithinOneFilesystemIsRenamedNotCopi
     QVERIFY2(QFileInfo(root.filePath("dest/album/sub/deep.txt")).isFile(), "nested content must arrive");
     QCOMPARE(inodeOf(root.filePath("dest/album")), dirInode);
     QCOMPARE(inodeOf(root.filePath("dest/album/sub/deep.txt")), deepInode);
-    QVERIFY2(statOf(root.filePath("dest/album/sub")).st_mtim.tv_sec == subMtime,
+    QVERIFY2(QFileInfo(root.filePath("dest/album/sub")).lastModified() == subMtime,
              "a rename keeps nested folder timestamps that a recreate would reset");
 }
 
@@ -145,11 +164,20 @@ void MovingAFolderRenamesItTest::aFolderMovedOntoAnExistingFolderStillMerges() {
 // call returns at once instead of freezing the GUI.
 struct CrossFs {
     QTemporaryDir src;
-    QTemporaryDir dst{QStringLiteral("/dev/shm/thumbgrid-move-XXXXXX")};
+    // Set this to a writable directory on a separate volume on macOS.
+    QTemporaryDir dst{QDir(qEnvironmentVariable("THUMBGRID_TEST_CROSS_FS_DIR", "/dev/shm"))
+                          .filePath(QStringLiteral("thumbgrid-move-XXXXXX"))};
     bool usable() const {
         return src.isValid() && dst.isValid() && statOf(src.path()).st_dev != statOf(dst.path()).st_dev;
     }
 };
+
+void MovingAFolderRenamesItTest::initTestCase() {
+    if(qEnvironmentVariableIsSet("THUMBGRID_TEST_CROSS_FS_DIR")) {
+        CrossFs fs;
+        QVERIFY2(fs.usable(), "THUMBGRID_TEST_CROSS_FS_DIR must be writable and on a separate filesystem");
+    }
+}
 
 // <root>/<name>/f<i>.txt and <root>/<name>/nested/g<i>.txt
 bool buildBigFolder(const QDir &root, const QString &name, int files) {
@@ -189,7 +217,7 @@ void verifyEachFileInExactlyOnePlace(const QString &srcFolder, const QString &ds
 void MovingAFolderRenamesItTest::aFolderMovedToAnotherFilesystemStillArrives() {
     CrossFs fs;
     if(!fs.usable())
-        QSKIP("needs two filesystems (temp dir and /dev/shm)");
+        QSKIP("needs a writable separate filesystem; set THUMBGRID_TEST_CROSS_FS_DIR (default /dev/shm)");
     QDir root(fs.src.path());
     QVERIFY(buildAlbum(root));
 
@@ -213,7 +241,7 @@ void MovingAFolderRenamesItTest::aFolderMovedToAnotherFilesystemStillArrives() {
 void MovingAFolderRenamesItTest::aMixedSelectionRenamesLocalItemsAtOnce() {
     CrossFs fs;
     if(!fs.usable())
-        QSKIP("needs two filesystems (temp dir and /dev/shm)");
+        QSKIP("needs a writable separate filesystem; set THUMBGRID_TEST_CROSS_FS_DIR (default /dev/shm)");
     // "remote" sits on dest's filesystem, "album" does not
     QDir dst(fs.dst.path());
     QVERIFY(dst.mkpath("remote/inner") && dst.mkpath("target"));
@@ -236,7 +264,7 @@ void MovingAFolderRenamesItTest::aMixedSelectionRenamesLocalItemsAtOnce() {
 void MovingAFolderRenamesItTest::aSecondMoveWaitsForTheRunningOne() {
     CrossFs fs;
     if(!fs.usable())
-        QSKIP("needs two filesystems (temp dir and /dev/shm)");
+        QSKIP("needs a writable separate filesystem; set THUMBGRID_TEST_CROSS_FS_DIR (default /dev/shm)");
     QDir root(fs.src.path());
     QVERIFY(buildBigFolder(root, "big", 200));
     QVERIFY(buildAlbum(root));
@@ -255,7 +283,7 @@ void MovingAFolderRenamesItTest::aSecondMoveWaitsForTheRunningOne() {
 void MovingAFolderRenamesItTest::aCancelledMoveLosesNothing() {
     CrossFs fs;
     if(!fs.usable())
-        QSKIP("needs two filesystems (temp dir and /dev/shm)");
+        QSKIP("needs a writable separate filesystem; set THUMBGRID_TEST_CROSS_FS_DIR (default /dev/shm)");
     QDir root(fs.src.path());
     QVERIFY(buildBigFolder(root, "big", 3000));
 
@@ -279,7 +307,7 @@ void MovingAFolderRenamesItTest::aCancelledMoveLosesNothing() {
 void MovingAFolderRenamesItTest::destroyingTheControllerMidMoveLosesNothing() {
     CrossFs fs;
     if(!fs.usable())
-        QSKIP("needs two filesystems (temp dir and /dev/shm)");
+        QSKIP("needs a writable separate filesystem; set THUMBGRID_TEST_CROSS_FS_DIR (default /dev/shm)");
     QDir root(fs.src.path());
     QVERIFY(buildBigFolder(root, "big", 3000));
 
@@ -298,7 +326,7 @@ void MovingAFolderRenamesItTest::destroyingTheControllerMidMoveLosesNothing() {
 void MovingAFolderRenamesItTest::theProgressOverlayCancelButtonStopsTheMove() {
     CrossFs fs;
     if(!fs.usable())
-        QSKIP("needs two filesystems (temp dir and /dev/shm)");
+        QSKIP("needs a writable separate filesystem; set THUMBGRID_TEST_CROSS_FS_DIR (default /dev/shm)");
     QDir root(fs.src.path());
     QVERIFY(buildBigFolder(root, "big", 3000));
 
@@ -326,7 +354,7 @@ void MovingAFolderRenamesItTest::theProgressOverlayCancelButtonStopsTheMove() {
 void MovingAFolderRenamesItTest::theProgressOverlayHidesWhenTheMoveEnds() {
     CrossFs fs;
     if(!fs.usable())
-        QSKIP("needs two filesystems (temp dir and /dev/shm)");
+        QSKIP("needs a writable separate filesystem; set THUMBGRID_TEST_CROSS_FS_DIR (default /dev/shm)");
     QDir root(fs.src.path());
     QVERIFY(buildAlbum(root));
 
@@ -390,6 +418,122 @@ void MovingAFolderRenamesItTest::noToAllNeverReplacesAFileWithAFolder() {
     QVERIFY(kept.open(QIODevice::ReadOnly));
     QCOMPARE(kept.readAll(), QByteArray("precious file"));
     QVERIFY2(QFileInfo(root.filePath("src/folder/inner.txt")).isFile(), "the skipped folder stays in the source");
+}
+
+void MovingAFolderRenamesItTest::noToAllPreservesDestinationLinksAndTheirTargets_data() {
+    QTest::addColumn<bool>("dangling");
+    QTest::newRow("symlink to directory") << false;
+    QTest::newRow("dangling symlink") << true;
+}
+
+void MovingAFolderRenamesItTest::noToAllPreservesDestinationLinksAndTheirTargets() {
+    QFETCH(bool, dangling);
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    QDir root(tmp.path());
+    QVERIFY(root.mkpath("src/folder") && root.mkpath("dest"));
+    QVERIFY(writeFile(root.filePath("src/a.txt"), "new a"));
+    QVERIFY(writeFile(root.filePath("src/folder/inner.txt"), "inner"));
+    QVERIFY(writeFile(root.filePath("dest/a.txt"), "old a"));
+    const QString target = root.filePath("target");
+    if(!dangling) {
+        QVERIFY(root.mkdir("target"));
+        QVERIFY(writeFile(target + "/kept.txt", "precious target data"));
+    }
+    const QString link = root.filePath("dest/folder");
+    QVERIFY(QFile::link(target, link));
+    const auto linkInode = inodeOf(link);
+    MW *window = new MW();
+    FileOperationsController ops(window);
+    ops.setModel(std::make_shared<DirectoryModel>());
+    QObject answerer;
+    answerReplaceDialogsWithNoToAll(&answerer);
+    QVERIFY(ops.interactiveMove({root.filePath("src/a.txt"), root.filePath("src/folder")}, root.filePath("dest")));
+    QVERIFY(QFileInfo(link).isSymLink());
+    QCOMPARE(inodeOf(link), linkInode);
+    QCOMPARE(QFileInfo(link).symLinkTarget(), target);
+    QCOMPARE(readFile(root.filePath("src/folder/inner.txt")), QByteArray("inner"));
+    QCOMPARE(readFile(root.filePath("src/a.txt")), QByteArray("new a"));
+    QCOMPARE(readFile(root.filePath("dest/a.txt")), QByteArray("old a"));
+    if(dangling) {
+        QVERIFY(!QFileInfo::exists(target));
+    } else {
+        QCOMPARE(readFile(target + "/kept.txt"), QByteArray("precious target data"));
+        QVERIFY(!QFileInfo::exists(target + "/inner.txt"));
+    }
+}
+
+void MovingAFolderRenamesItTest::aFolderReplacesDestinationLinksWithoutTouchingTheirTargets_data() {
+    QTest::addColumn<bool>("dangling");
+    QTest::newRow("symlink to directory") << false;
+    QTest::newRow("dangling symlink") << true;
+}
+
+void MovingAFolderRenamesItTest::aFolderReplacesDestinationLinksWithoutTouchingTheirTargets() {
+    QFETCH(bool, dangling);
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    QDir root(tmp.path());
+    QVERIFY(root.mkpath("src/folder") && root.mkpath("dest"));
+    QVERIFY(writeFile(root.filePath("src/folder/inner.txt"), "inner"));
+    const QString target = root.filePath("target");
+    if(!dangling) {
+        QVERIFY(root.mkdir("target"));
+        QVERIFY(writeFile(target + "/kept.txt", "precious target data"));
+    }
+    const QString link = root.filePath("dest/folder");
+    QVERIFY(QFile::link(target, link));
+    MW *window = new MW();
+    FileOperationsController ops(window);
+    ops.setModel(std::make_shared<DirectoryModel>());
+    QObject answerer;
+    QTimer poll(&answerer);
+    int prompts = 0;
+    QObject::connect(&poll, &QTimer::timeout, &answerer, [&prompts]() {
+        QWidget *modal = QApplication::activeModalWidget();
+        if(!modal)
+            return;
+        if(auto *yes = modal->findChild<QPushButton *>(QStringLiteral("yesButton"))) {
+            ++prompts;
+            yes->click();
+        }
+    });
+    poll.start(20);
+    QVERIFY(ops.interactiveMove({root.filePath("src/folder")}, root.filePath("dest")));
+    QCOMPARE(prompts, 1);
+    QVERIFY(!QFileInfo(link).isSymLink());
+    QVERIFY(QFileInfo(link).isDir());
+    QCOMPARE(readFile(link + "/inner.txt"), QByteArray("inner"));
+    QVERIFY(!QFileInfo::exists(root.filePath("src/folder")));
+    if(dangling) {
+        QVERIFY(!QFileInfo::exists(target));
+    } else {
+        QCOMPARE(readFile(target + "/kept.txt"), QByteArray("precious target data"));
+        QVERIFY(!QFileInfo::exists(target + "/inner.txt"));
+    }
+}
+
+void MovingAFolderRenamesItTest::aFailedFolderRenameDoesNotStartMovingItsChildren() {
+    QTemporaryDir tmp;
+    QVERIFY(tmp.isValid());
+    QDir root(tmp.path());
+    QVERIFY(root.mkpath("src/folder/nested") && root.mkpath("dest"));
+    QVERIFY(writeFile(root.filePath("src/folder/inner.txt"), "inner"));
+    QVERIFY(writeFile(root.filePath("src/folder/nested/deep.txt"), "deep"));
+    const auto sourceInode = inodeOf(root.filePath("src/folder"));
+    RestorePermissions restore(root.filePath("src"));
+    QVERIFY(QFile::setPermissions(restore.path, QFile::ReadOwner | QFile::ExeOwner));
+    if(QFileInfo(restore.path).isWritable())
+        QSKIP("requires an unprivileged user whose source directory permissions are enforced");
+    MW *window = new MW();
+    FileOperationsController ops(window);
+    ops.setModel(std::make_shared<DirectoryModel>());
+    QVERIFY(ops.interactiveMove({root.filePath("src/folder")}, root.filePath("dest")));
+    QVERIFY(!ops.isMoveRunning());
+    QCOMPARE(inodeOf(root.filePath("src/folder")), sourceInode);
+    QCOMPARE(readFile(root.filePath("src/folder/inner.txt")), QByteArray("inner"));
+    QCOMPARE(readFile(root.filePath("src/folder/nested/deep.txt")), QByteArray("deep"));
+    QVERIFY(!QFileInfo::exists(root.filePath("dest/folder")));
 }
 
 // The overlay fades out briefly after a move; a move started in that window must still show it,

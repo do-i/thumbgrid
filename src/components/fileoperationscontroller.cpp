@@ -198,15 +198,22 @@ void copyMoveEntry(const CopyMoveEnv &env, const QString &path, const QString &d
     QFileInfo dstFi(dstPath);
     QDir dstDir(dstFi.absoluteFilePath());
     // a move to a free name is one rename on the same filesystem; walking the tree below instead copies
-    // every byte (a ~100-folder, 12 GB move froze the app for minutes). Any failure (different
-    // filesystem, permissions) falls through to the walk, which reports errors per entry.
+    // every byte (a ~100-folder, 12 GB move froze the app for minutes). Cross-device and unsupported
+    // renames fall through to the walk; other failures leave the source tree untouched.
     if(env.move && !dstFi.exists() && !dstFi.isSymLink()) {
         FileOpResult renameRes;
         env.dirRename(srcFi.absoluteFilePath(), destDirectory, renameRes);
         if(renameRes == FileOpResult::SUCCESS)
             return;
+        if(renameRes != FileOpResult::MOVE_REQUIRES_COPY &&
+           renameRes != FileOpResult::DESTINATION_DIR_EXISTS &&
+           renameRes != FileOpResult::DESTINATION_FILE_EXISTS) {
+            env.reportError(renameRes);
+            return;
+        }
+        dstFi.refresh(); // A destination may have appeared after the preliminary check.
     }
-    if(dstFi.exists() && !dstFi.isDir()) { // overwriting file with a folder
+    if(dstFi.isSymLink() || (dstFi.exists() && !dstFi.isDir())) { // replacing an entry with a folder
         if(overwriteFiles.all) {
             if(!overwriteFiles.yes) // "No to all": keep the file, leave the folder in the source
                 return;
