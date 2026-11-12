@@ -41,8 +41,23 @@
 #   scripts/release.sh --dry-run ...       # show what would happen, change nothing
 #   scripts/release.sh --skip-ci-check ... # bypass the gh CI status gate
 #   scripts/release.sh --yes ...           # skip the confirmation prompt
+#
+# gh token: when neither GH_TOKEN nor GITHUB_TOKEN is set, the script sources
+# $THUMBGRID_ENV_FILE (default ~/.env) if it exists, so a menu or desktop
+# launcher that never ran the login shell's env setup can still reach gh.
 
 set -euo pipefail
+
+if [[ -z "${GH_TOKEN:-}${GITHUB_TOKEN:-}" ]]; then
+    env_file="${THUMBGRID_ENV_FILE:-$HOME/.env}"
+    if [[ -r "$env_file" ]]; then
+        set +u
+        # shellcheck disable=SC1090
+        source "$env_file"
+        set -u
+    fi
+    unset env_file
+fi
 
 DEFAULT_BRANCH="main"
 DEV_BRANCH="develop"
